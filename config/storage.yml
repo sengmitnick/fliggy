@@ -1,0 +1,10 @@
+# This project uses LOCAL DISK storage for all environments (including production)
+# DO NOT enable cloud storage services unless explicitly required
+
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>

@@ -1,0 +1,222 @@
+<div class="min-h-screen bg-white">
+  <!-- Header -->
+  <div class="sticky top-0 z-50" style="background: linear-gradient(180deg, #FFD93D 0%, #FFE066 40%, #FFFFFF 80%, #FFFFFF 100%);">
+    <div class="px-4 py-2">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-3">
+        <!-- Avatar -->
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-base font-bold" style="color: #FFD700;">
+            飞
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center gap-5">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium whitespace-nowrap">问一问</span>
+          </div>
+          <span class="text-sm font-medium border-b-2 border-black pb-0.5 whitespace-nowrap">推荐</span>
+          <div class="flex items-center gap-0.5">
+            <span class="text-sm font-medium whitespace-nowrap">去旅行</span>
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Cart Icon -->
+        <div class="flex flex-col items-center gap-0">
+          <%= image_tag "home/购物车.png", class: "w-5 h-5", alt: "购物车" %>
+          <span class="text-[9px] whitespace-nowrap">我的收藏</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="relative">
+        <div class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+          <div class="flex items-center gap-2 flex-1">
+            <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
+            <span class="text-base text-gray-700 font-medium">泰国签证</span>
+          </div>
+          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;">
+            搜索
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="flex gap-2 mt-2.5 overflow-x-auto pb-1 no-scrollbar">
+        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">汉庭</span>
+        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">深圳的酒店</span>
+        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">玉龙雪山</span>
+        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">郑州</span>
+        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">乐高乐园</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="pt-4">
+    <!-- Service Grid -->
+    <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4">
+      <!-- Row 1 -->
+      <div class="grid grid-cols-5 mb-6">
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/酒店.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "酒店" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/旅游.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "旅游" %>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid grid-cols-5 mb-6">
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/民宿.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "民宿/公寓" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/接送机.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "接送机" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/跟团游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "跟团游" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/汽车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "汽车票" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/门票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "门票" %>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="grid grid-cols-5">
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/酒店套餐.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "酒店套餐" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/保险.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "保险服务" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/借钱.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "借钱/分期" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/出境游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "出境游/签证" %>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+          <%= image_tag "home/里程签到.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "里程签到" %>
+        </div>
+      </div>
+
+      <!-- Pagination Dots -->
+      <div class="flex justify-center gap-2 mt-4">
+        <div class="w-6 h-1 rounded-full" style="background: #FFD700;"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+      </div>
+    </div>
+
+    <!-- Newcomer Zone -->
+    <div class="mb-4">
+      
+
+      <div class="mx-1 relative mb-4">
+        <%= image_tag "home/新人.png", class: "w-full h-auto rounded-2xl", alt: "新人专区" %>
+      </div>
+    </div>
+
+    <!-- Promotional Cards - 2x2 Grid -->
+    <div class="mx-4 flex gap-2 mb-4">
+      <!-- Card 1 - Daily Special -->
+      <div class="relative overflow-hidden rounded-4">
+        <%= image_tag "home/天天特惠.png", class: "w-full h-auto", alt: "天天特惠" %>
+      </div>
+
+      <!-- Card 2 - Special Flights -->
+      <div class="relative overflow-hidden rounded-4">
+        <%= image_tag "home/特别机票.png", class: "w-full h-auto", alt: "特价机票" %>
+      </div>
+
+      <!-- Card 3 - Flight List -->
+      <div class="relative overflow-hidden rounded-4">
+        <%= image_tag "home/飞猪榜单.png", class: "w-full h-auto", alt: "飞猪榜单" %>
+      </div>
+
+      <!-- Card 4 - Performance -->
+      <div class="flex flex-col gap-2 relative overflow-hidden">
+        <div class="relative overflow-hidden rounded-4">
+          <%= image_tag "home/演出.png", class: "w-full h-auto", alt: "演出·赛事" %>
+        </div>
+         <!-- Live Stream Card -->
+        <div class="relative overflow-hidden rounded-4">
+          <%= image_tag "home/直播.png", class: "w-full h-auto", alt: "爆款直播" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="mx-3 relative mb-4 overflow-hidden rounded-2xl">
+      <%= image_tag "home/活动.png", class: "w-full h-auto", alt: "活动" %>
+    </div>
+
+    <div class="py-12"></div>
+
+    <!-- Category Pills -->
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+    <div class="grid grid-cols-5 gap-2 px-4 py-2">
+      <button class="flex flex-col items-center justify-center">
+        <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center relative">
+        <%= image_tag "home/Tab 会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center relative">
+        <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
+        <span class="absolute top-0 right-6 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center">
+        <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center">
+        <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

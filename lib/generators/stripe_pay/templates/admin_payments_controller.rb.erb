@@ -1,0 +1,32 @@
+module Admin
+  class PaymentsController < BaseController
+    before_action :set_payment, only: [:show]
+
+    def index
+      @payments = Payment.includes(:payable<% if @auth %>, :user<% end %>)
+                         .order(created_at: :desc)
+                         .page(params[:page])
+
+      # Filter by status
+      @payments = @payments.where(status: params[:status]) if params[:status].present?
+
+      # Filter by payable type
+      @payments = @payments.where(payable_type: params[:payable_type]) if params[:payable_type].present?
+
+      # Search by ID
+      if params[:q].present?
+        @payments = @payments.where("payments.id::text LIKE ?", "%#{params[:q]}%")
+      end
+    end
+
+    def show
+      # View-only - payments should not be manually modified
+    end
+
+    private
+
+    def set_payment
+      @payment = Payment.find(params[:id])
+    end
+  end
+end
