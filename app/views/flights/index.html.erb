@@ -1,0 +1,334 @@
+<div class="min-h-screen bg-white">
+  <!-- Header with Banner -->
+  <div class="relative" style="background: linear-gradient(180deg, #FFE4F0 0%, #FFF 100%);">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between px-4 py-3">
+      <button onclick="history.back()" class="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      
+      <div class="flex items-center gap-3">
+        <button class="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <button class="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="px-4 pb-4">
+      <div class="text-center">
+        <div class="inline-flex items-center gap-2 mb-2">
+          <span class="text-sm" style="color: #FFD700;">🪙 飞猪旅行</span>
+        </div>
+        <h1 class="text-2xl font-bold mb-1" style="color: #333;">请3休8去跨年!</h1>
+        <p class="text-sm text-gray-600">最高领255元出行礼</p>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex gap-4 px-4 border-b border-gray-200 bg-white overflow-x-auto no-scrollbar">
+      <button class="pb-3 px-2 text-sm font-bold border-b-2 border-black whitespace-nowrap">机票</button>
+      <button class="pb-3 px-2 text-sm text-gray-600 whitespace-nowrap">特价机票</button>
+      <button class="pb-3 px-2 text-sm text-gray-600 whitespace-nowrap">火车票</button>
+      <button class="pb-3 px-2 text-sm text-gray-600 whitespace-nowrap">租车/接送</button>
+      <button class="pb-3 px-2 text-sm text-gray-600 whitespace-nowrap">汽车票</button>
+    </div>
+  </div>
+
+  <!-- Flight Search Form -->
+  <div class="bg-white">
+    <!-- Trip Type Tabs -->
+    <div class="flex items-center justify-center gap-8 py-4 border-b border-gray-100">
+      <button class="text-base font-bold border-b-2 border-black pb-1">单程</button>
+      <button class="text-base text-gray-500 relative">
+        往返
+        <span class="absolute -top-1 -right-3 bg-red-500 text-white text-xs px-1 rounded">低价值</span>
+      </button>
+      <button class="text-base text-gray-500">多程</button>
+    </div>
+
+    <!-- Promotion Banner -->
+    <div class="mx-4 my-3 px-3 py-2 rounded-lg flex items-center justify-between" style="background: linear-gradient(90deg, #FFF4E6 0%, #FFE8CC 100%);">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold" style="color: #FF6B35;">机酒联订更优惠</span>
+        <span class="text-xs text-gray-600">购买国内机票立减<span class="font-bold text-red-500">20~30元</span></span>
+      </div>
+      <button class="text-gray-400">×</button>
+    </div>
+
+    <!-- From/To Selection -->
+    <div class="mx-4 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex-1">
+          <div class="text-2xl font-bold">北京</div>
+        </div>
+        
+        <button class="mx-4 w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center">
+          <svg class="w-6 h-6" style="color: #FFD700;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+        </button>
+        
+        <div class="flex-1 text-right">
+          <div class="text-2xl font-bold">杭州</div>
+        </div>
+      </div>
+
+      <!-- Date Selection -->
+      <div class="mb-4">
+        <div class="text-3xl font-bold">
+          12<span class="text-base text-gray-600">月</span>17<span class="text-base text-gray-600">日 后天</span>
+        </div>
+      </div>
+
+      <!-- Passenger Selection -->
+      <div class="flex items-center justify-between py-3 border-b border-gray-100">
+        <div>
+          <div class="text-base text-gray-800">选择乘机人</div>
+          <div class="text-sm" style="color: #00A0E9;">快速找到低价票</div>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+
+      <!-- Cabin Class Selection -->
+      <div class="flex gap-2 py-3">
+        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">全部舱位</button>
+        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">公务/头等舱</button>
+      </div>
+
+      <!-- Search Button -->
+      <button class="w-full py-4 rounded-full text-lg font-bold text-white mt-2" style="background: #FFD700;">
+        搜索机票
+      </button>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="border-t border-gray-100 py-4">
+      <div class="flex justify-around items-center px-4">
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-1">
+            <span class="text-2xl">✈️</span>
+          </div>
+          <div class="text-xs text-gray-700">特价机票</div>
+        </div>
+
+        <div class="flex flex-col items-center relative">
+          <span class="absolute -top-1 right-0 bg-red-500 text-white text-xs px-1 rounded">低价值</span>
+          <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-1">
+            <span class="text-2xl">💳</span>
+          </div>
+          <div class="text-xs text-gray-700">机票次卡</div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-1">
+            <span class="text-2xl">🔖</span>
+          </div>
+          <div class="text-xs text-gray-700">低价提醒</div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-1">
+            <span class="text-2xl">👨‍👩‍👧</span>
+          </div>
+          <div class="text-xs text-gray-700">家庭认证</div>
+        </div>
+
+        <div class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-1">
+            <span class="text-2xl">📋</span>
+          </div>
+          <div class="text-xs text-gray-700">展开全部</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promotion Section -->
+  <div class="bg-gray-50 py-4">
+    <div class="mx-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded">新人专享</span>
+          <span class="text-base font-bold">找优惠 省钱专区</span>
+        </div>
+        <button class="text-sm text-gray-500">更多优惠 ›</button>
+      </div>
+
+      <!-- Offer Cards -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-lg p-3">
+          <div class="text-sm font-bold mb-1">机票卡低价团</div>
+          <div class="text-xs text-gray-600 mb-2">66元飞全球</div>
+          <button class="w-full py-1.5 text-xs font-bold rounded" style="background: #FFF4E6; color: #FF8C00;">立即抢购</button>
+        </div>
+
+        <div class="bg-white rounded-lg p-3">
+          <div class="text-sm font-bold mb-1">请3休8过元旦</div>
+          <div class="text-xs text-gray-600 mb-2">领至高255元券包</div>
+          <button class="w-full py-1.5 text-xs font-bold rounded" style="background: #FFF4E6; color: #FF8C00;">立即领取</button>
+        </div>
+
+        <div class="bg-white rounded-lg p-3">
+          <div class="text-sm font-bold mb-1">飞送礼</div>
+          <div class="text-xs text-gray-600 mb-2">满5单兑换</div>
+          <button class="w-full py-1.5 text-xs font-bold rounded" style="background: #FFF4E6; color: #FF8C00;">立即参与</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Special Offers Section -->
+  <div class="bg-white py-4">
+    <div class="mx-4">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-base font-bold">特价机票</span>
+        <button class="text-sm text-gray-500">更多 ›</button>
+      </div>
+
+      <!-- Offer Tabs -->
+      <div class="flex gap-3 mb-4 overflow-x-auto no-scrollbar">
+        <button class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap" style="background: #FFF4E6; color: #FF8C00;">
+          👍 精选特价推荐
+        </button>
+        <button class="px-4 py-2 rounded-full text-sm text-gray-600 whitespace-nowrap bg-gray-100">
+          💯 百元任意飞
+        </button>
+        <button class="px-4 py-2 rounded-full text-sm text-gray-600 whitespace-nowrap bg-gray-100">
+          ✈️ 航司特价
+        </button>
+      </div>
+
+      <!-- Flight Deals List -->
+      <div class="space-y-3">
+        <!-- Deal 1 -->
+        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div class="flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1564221710304-0b37c8b9d729?w=100&h=100&fit=crop" class="w-16 h-16 rounded-lg object-cover" alt="北京">
+            <div>
+              <div class="font-bold text-base mb-1">北京→杭州</div>
+              <div class="text-xs text-gray-500">12.23 周二</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-red-500 font-bold text-xl">¥256</div>
+            <div class="text-xs text-red-400">超低1.1折</div>
+          </div>
+        </div>
+
+        <!-- Deal 2 -->
+        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div class="flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1559564484-e48bb92e6e83?w=100&h=100&fit=crop" class="w-16 h-16 rounded-lg object-cover" alt="北京">
+            <div>
+              <div class="font-bold text-base mb-1">北京→上海</div>
+              <div class="text-xs text-gray-500">12.17 周二</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-red-500 font-bold text-xl">¥300</div>
+            <div class="text-xs text-red-400">超低1.7折</div>
+          </div>
+        </div>
+
+        <!-- Deal 3 -->
+        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+          <div class="flex items-center gap-3">
+            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=100&h=100&fit=crop" class="w-16 h-16 rounded-lg object-cover" alt="深圳">
+            <div>
+              <div class="font-bold text-base mb-1">深圳→杭州</div>
+              <div class="text-xs text-gray-500">12.15 周一</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-red-500 font-bold text-xl">¥230</div>
+            <div class="text-xs text-red-400">超低1.4折</div>
+          </div>
+        </div>
+
+        <!-- Deal 4 - Multi-city Pass -->
+        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg relative overflow-hidden">
+          <div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">机票卡</div>
+          <div class="flex items-center gap-3 pt-4">
+            <img src="https://images.unsplash.com/photo-1503423571797-2d2bb372094a?w=100&h=100&fit=crop" class="w-16 h-16 rounded-lg object-cover" alt="深圳出发">
+            <div>
+              <div class="font-bold text-base mb-1">深圳出发 可飞2城</div>
+              <div class="text-xs text-gray-500">10.10~03.28可选</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-500 line-through mb-1">入场券仅¥398</div>
+            <div class="text-red-500 font-bold text-xl">总价¥2388</div>
+          </div>
+        </div>
+
+        <!-- Deal 5 - Domestic Pass -->
+        <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg relative overflow-hidden">
+          <div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">机票卡</div>
+          <div class="flex items-center gap-3 pt-4">
+            <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100&h=100&fit=crop" class="w-16 h-16 rounded-lg object-cover" alt="国内首套卡">
+            <div>
+              <div class="font-bold text-base mb-1">特价机票国内首套卡</div>
+              <div class="text-xs text-gray-500">日期灵活 不约可退</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-red-500 font-bold text-xl">¥199</div>
+            <div class="text-xs text-red-400">单次低至9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Spacing -->
+  <div class="h-20"></div>
+
+  <!-- Bottom Navigation -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+    <div class="grid grid-cols-5 gap-2 px-4 py-2">
+      <button class="flex flex-col items-center justify-center" onclick="window.location.href='/'">
+        <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center relative">
+        <%= image_tag "home/Tab 会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center relative">
+        <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
+        <span class="absolute top-1 right-3 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center">
+        <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center">
+        <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
