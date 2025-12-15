@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-white">
   <!-- Header -->
-  <div class="sticky top-0 z-50" style="background: linear-gradient(180deg, #FFD93D 0%, #FFE066 40%, #FFFFFF 80%, #FFFFFF 100%);">
+  <div class="sticky top-0 z-50" style="background: linear-gradient(180deg, #FFD93D 0%, #FFE066 70%, #FFFFFF 100%);">
     <div class="px-4 py-2">
       <!-- Top Bar -->
       <div class="flex items-center justify-between mb-3">
@@ -34,32 +34,32 @@
 
       <!-- Search Bar -->
       <div class="relative">
-        <div class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+        <form class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
           <div class="flex items-center gap-2 flex-1">
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
-            <span class="text-base text-gray-700 font-medium">泰国签证</span>
+            <input type="text" placeholder="泰国签证" class="flex-1 outline-none text-base" style="border: none; background: transparent;">
           </div>
-          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;">
+          <button type="submit" class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;">
             搜索
           </button>
-        </div>
+        </form>
       </div>
 
       <!-- Quick Links -->
       <div class="flex gap-2 mt-2.5 overflow-x-auto pb-1 no-scrollbar">
-        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">汉庭</span>
-        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">深圳的酒店</span>
-        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">玉龙雪山</span>
-        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">郑州</span>
-        <span class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;">乐高乐园</span>
+        <span class="px-3 py-1 rounded-full bg-white/80 text-xs font-medium whitespace-nowrap">汉庭</span>
+        <span class="px-3 py-1 rounded-full bg-white/80 text-xs font-medium whitespace-nowrap">深圳的酒店</span>
+        <span class="px-3 py-1 rounded-full bg-white/80 text-xs font-medium whitespace-nowrap">玉龙雪山</span>
+        <span class="px-3 py-1 rounded-full bg-white/80 text-xs font-medium whitespace-nowrap">郑州</span>
+        <span class="px-3 py-1 rounded-full bg-white/80 text-xs font-medium whitespace-nowrap">乐高乐园</span>
       </div>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="pt-4">
+  <div class="px-4 pt-4">
     <!-- Service Grid -->
-    <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4">
+    <div class="bg-white rounded-3xl border border-gray-200 p-2 mb-4">
       <!-- Row 1 -->
       <div class="grid grid-cols-5 mb-6">
         <div class="flex flex-col items-center justify-center">
@@ -140,64 +140,75 @@
     <div class="mb-4">
       
 
-      <div class="mx-1 relative mb-4">
+      <div class="relative mb-4">
         <%= image_tag "home/新人.png", class: "w-full h-auto rounded-2xl", alt: "新人专区" %>
       </div>
     </div>
 
-    <!-- Promotional Cards - 2x2 Grid -->
-    <div class="mx-4 flex gap-2 mb-4">
+    <!-- Promotional Cards -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
       <!-- Card 1 - Daily Special -->
-      <div class="relative overflow-hidden rounded-4">
+      <div class="promo-card relative overflow-hidden rounded-2xl">
         <%= image_tag "home/天天特惠.png", class: "w-full h-auto", alt: "天天特惠" %>
       </div>
 
       <!-- Card 2 - Special Flights -->
-      <div class="relative overflow-hidden rounded-4">
+      <div class="promo-card relative overflow-hidden rounded-2xl">
         <%= image_tag "home/特价机票.png", class: "w-full h-auto", alt: "特价机票" %>
       </div>
+    </div>
 
+    <!-- More Promotional Cards -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
       <!-- Card 3 - Flight List -->
-      <div class="relative overflow-hidden rounded-4">
+      <div class="promo-card relative overflow-hidden rounded-2xl">
         <%= image_tag "home/飞猪榜单.png", class: "w-full h-auto", alt: "飞猪榜单" %>
       </div>
 
       <!-- Card 4 - Performance -->
-      <div class="flex flex-col gap-2 relative overflow-hidden">
-        <div class="relative overflow-hidden rounded-4">
-          <%= image_tag "home/演出.png", class: "w-full h-auto", alt: "演出·赛事" %>
-        </div>
-         <!-- Live Stream Card -->
-        <div class="relative overflow-hidden rounded-4">
-          <%= image_tag "home/直播.png", class: "w-full h-auto", alt: "爆款直播" %>
-        </div>
+      <div class="promo-card relative overflow-hidden rounded-2xl">
+        <%= image_tag "home/演出.png", class: "w-full h-auto", alt: "演出·赛事" %>
       </div>
     </div>
 
+    <!-- Live Stream Card -->
+    <div class="promo-card relative mb-4 overflow-hidden rounded-2xl">
+      <%= image_tag "home/直播.png", class: "w-full h-auto", alt: "爆款直播" %>
+    </div>
+
     <!-- Banner -->
-    <div class="mx-3 relative mb-4 overflow-hidden rounded-2xl">
+    <div class="promo-card relative mb-4 overflow-hidden rounded-2xl">
       <%= image_tag "home/活动.png", class: "w-full h-auto", alt: "活动" %>
     </div>
 
-    <div class="py-12"></div>
-
     <!-- Category Pills -->
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+      <button class="px-6 py-2.5 rounded-full font-bold text-sm whitespace-nowrap" style="background: #FFD700; color: #333;">猜你喜欢</button>
+      <button class="px-6 py-2.5 rounded-full bg-white text-sm font-medium whitespace-nowrap">燃冬滑雪</button>
+      <button class="px-6 py-2.5 rounded-full bg-white text-sm font-medium whitespace-nowrap">交通次卡</button>
+      <button class="px-6 py-2.5 rounded-full bg-white text-sm font-medium whitespace-nowrap">首住特惠</button>
+    </div>
+
+    <!-- Bottom Spacing -->
+    <div class="h-20"></div>
   </div>
 
   <!-- Bottom Navigation -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-    <div class="grid grid-cols-5 gap-2 px-4 py-2">
+    <div class="grid grid-cols-5 px-4 py-2">
       <button class="flex flex-col items-center justify-center">
         <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
       </button>
 
       <button class="flex flex-col items-center justify-center relative">
-        <%= image_tag "home/Tab 会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
+        <%= image_tag "home/Tab会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
       </button>
 
       <button class="flex flex-col items-center justify-center relative">
         <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
-        <span class="absolute top-1 right-4 w-2 h-2 bg-red-500 rounded-full"></span>
+        <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div class="ml-[24px] w-2 h-2 bg-red-500 rounded-full"></div>
+        </div>
       </button>
 
       <button class="flex flex-col items-center justify-center">
