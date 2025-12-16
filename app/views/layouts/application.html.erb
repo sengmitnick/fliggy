@@ -26,16 +26,18 @@
     <!-- Generate new favicon at `images/app-favicon.svg` at the first time, remove this line after generated  -->
     <%= favicon_link_tag asset_path("app-favicon.svg") unless Rails.env.test? %>
   </head>
-  <body class="flex flex-col min-h-screen text-foreground <%= body_class %>">
-    <main class="flex-1 flex flex-col bg-surface">
-      <%= render 'shared/navbar' unless @full_render %>
-      <%= render 'shared/flash_messages' %>
-      <%= yield %>
-    </main>
-    <% if Rails.env.development? %>
-      <div id="system-monitor-stream" data-turbo-permanent>
-        <%= turbo_stream_from "system_monitor" %>
-      </div>
-    <% end %>
+  <body class="flex justify-center bg-surface-elevated">
+    <div class="w-full max-w-md min-h-screen flex flex-col text-foreground <%= body_class %> bg-surface relative">
+      <main class="flex-1 flex flex-col">
+        <%= render 'shared/navbar' unless @full_render %>
+        <%= render 'shared/flash_messages' %>
+        <%= yield %>
+      </main>
+      <% if Rails.env.development? %>
+        <div id="system-monitor-stream" data-turbo-permanent>
+          <%= turbo_stream_from "system_monitor" %>
+        </div>
+      <% end %>
+    </div>
   </body>
 </html>

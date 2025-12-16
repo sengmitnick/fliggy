@@ -63,7 +63,7 @@ export default class extends Controller<HTMLElement> {
     this.setInsuranceValues(insuranceType, insurancePrice)
     
     // 更新视觉指示器（边框和对号）
-    const allCards = document.querySelectorAll('[data-insurance-card]') as NodeListOf<HTMLElement>
+    const allCards = document.querySelectorAll('[data-insurance-card]')
     allCards.forEach(card => {
       card.classList.remove('border-yellow-400', 'border-blue-400', 'border-gray-400')
       card.classList.add('border-2', 'border-gray-300')
@@ -151,9 +151,9 @@ export default class extends Controller<HTMLElement> {
   showConfirmModal(): void {
     this.confirmModalTarget.classList.remove('hidden')
     
-    // 如果是第二次等待（会员确认后），等待15-25秒后提交
+    // 如果是第二次等待（会员确认后），等待5-10秒后提交
     if (this.isSecondWait) {
-      const waitTime = Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000
+      const waitTime = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000
       setTimeout(() => {
         this.submitForm()
       }, waitTime)
@@ -167,9 +167,9 @@ export default class extends Controller<HTMLElement> {
         this.closeConfirmModal()
         this.showMemberModal()
       } else {
-        // 如果已是会员，保持等待弹窗显示，等待15-25秒后提交
+        // 如果已是会员，保持等待弹窗显示，等待5-10秒后提交
         this.memberCheckCompleted = true
-        const waitTime = Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000
+        const waitTime = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000
         setTimeout(() => {
           this.submitForm()
         }, waitTime)
