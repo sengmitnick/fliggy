@@ -1,0 +1,166 @@
+<% content_for :title, "Edit Booking" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_booking_path(@booking.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Booking
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Booking</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @booking], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @booking %>
+
+        <!-- Passenger name -->
+        <div class="mb-4">
+          <%= form.label :passenger_name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Passenger name<% if field_required?(@booking, :passenger_name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :passenger_name, {
+            placeholder: "Enter passenger name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :passenger_name) ? { required: true } : {}) %>
+          <% if @booking.errors[:passenger_name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:passenger_name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Passenger id number -->
+        <div class="mb-4">
+          <%= form.label :passenger_id_number, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Passenger id number<% if field_required?(@booking, :passenger_id_number) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :passenger_id_number, {
+            placeholder: "Enter passenger id number...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :passenger_id_number) ? { required: true } : {}) %>
+          <% if @booking.errors[:passenger_id_number].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:passenger_id_number].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Contact phone -->
+        <div class="mb-4">
+          <%= form.label :contact_phone, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Contact phone<% if field_required?(@booking, :contact_phone) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :contact_phone, {
+            placeholder: "Enter contact phone...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :contact_phone) ? { required: true } : {}) %>
+          <% if @booking.errors[:contact_phone].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:contact_phone].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Total price -->
+        <div class="mb-4">
+          <%= form.label :total_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Total price<% if field_required?(@booking, :total_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :total_price, {
+            placeholder: "Enter total price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :total_price) ? { required: true } : {}) %>
+          <% if @booking.errors[:total_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:total_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Accept terms -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :accept_terms,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Accept terms</span>
+          </label>
+        </div>
+
+        <!-- Insurance type -->
+        <div class="mb-4">
+          <%= form.label :insurance_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Insurance type<% if field_required?(@booking, :insurance_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :insurance_type, {
+            placeholder: "Enter insurance type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :insurance_type) ? { required: true } : {}) %>
+          <% if @booking.errors[:insurance_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:insurance_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Insurance price -->
+        <div class="mb-4">
+          <%= form.label :insurance_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Insurance price<% if field_required?(@booking, :insurance_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :insurance_price, {
+            placeholder: "Enter insurance price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@booking, :insurance_price) ? { required: true } : {}) %>
+          <% if @booking.errors[:insurance_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:insurance_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-4">
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Status<% if field_required?(@booking, :status) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :status, 
+              options_for_select([['Select Status', '']] + [["Pending", "pending"], ["Paid", "paid"], ["Cancelled", "cancelled"], ["Completed", "completed"]], @booking.status),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @booking.errors[:status].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:status].first %></p>
+          <% end %>
+        </div>
+
+        <!-- User -->
+        <div class="mb-4">
+          <%= form.label :user_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            User<% if field_required?(@booking, :user) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :user_id, 
+              options_for_select([['Select User', '']] + User.all.map { |item| [item.name, item.id] }, @booking.user_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @booking.errors[:user_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:user_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Flight -->
+        <div class="mb-4">
+          <%= form.label :flight_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Flight<% if field_required?(@booking, :flight) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :flight_id, 
+              options_for_select([['Select Flight', '']] + Flight.all.map { |item| [item.id, item.id] }, @booking.flight_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @booking.errors[:flight_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @booking.errors[:flight_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_booking_path(@booking.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Booking", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

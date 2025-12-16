@@ -9,7 +9,7 @@ class Booking < ApplicationRecord
   validates :insurance_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   # 订单状态
-  enum status: {
+  enum :status, {
     pending: 'pending',      # 待支付
     paid: 'paid',           # 已支付
     cancelled: 'cancelled',  # 已取消

@@ -91,6 +91,10 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
+    resources :flight_offers
+    resources :passengers
+    resources :bookings
+    resources :flights
     resources :users
     resources :admin_oplogs, only: [:index, :show]
     resources :administrators

@@ -1,6 +1,8 @@
 # 大模型视觉训练任务 - 航班预订
 
-> 💡 **推荐使用命令行工具**：查看 [CLI_VALIDATION_GUIDE.md](CLI_VALIDATION_GUIDE.md) 了解如何在终端直接验证任务。
+> 💡 **验证工具**：
+> - 命令行：[CLI_VALIDATION_GUIDE.md](CLI_VALIDATION_GUIDE.md)
+> - REST API：[API_GUIDE.md](API_GUIDE.md)
 
 本文档定义了用于训练大模型视觉理解和操作能力的航班预订任务。大模型需要像人类一样，通过观察屏幕、理解界面元素、点击按钮来完成预订任务。
 

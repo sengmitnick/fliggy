@@ -4,8 +4,16 @@
 
 ## 📚 文档
 
+### 验证工具
 - [**快速开始示例**](QUICK_START_EXAMPLE.md) - 🎉 新手必看！真实场景演示
 - [**命令行验证工具**](CLI_VALIDATION_GUIDE.md) - ⭐ 推荐！直接在终端执行验证的完整指南
+- [**REST API 指南**](API_GUIDE.md) - 📡 远程调用 API，适合大模型训练
+- [**API 快速参考**](API_README.md) - API 常用命令速查
+
+### 后台管理
+- [**后台管理指南**](ADMIN_GUIDE.md) - 🛡️ 完整的后台管理系统说明
+
+### 任务定义
 - [**视觉训练任务指南**](vision_model_training_tasks.md) - 详细的任务定义、使用示例和验证规则
 - [**任务表格汇总**](tasks_table_for_vision_training.md) - 参考AndroidWorld论文格式的任务定义表格
 

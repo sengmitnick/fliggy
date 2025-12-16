@@ -1,0 +1,227 @@
+<% content_for :title, "Edit Flight" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_flight_path(@flight.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Flight
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Flight</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @flight], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @flight %>
+
+        <!-- Departure city -->
+        <div class="mb-4">
+          <%= form.label :departure_city, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure city<% if field_required?(@flight, :departure_city) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :departure_city, {
+            placeholder: "Enter departure city...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :departure_city) ? { required: true } : {}) %>
+          <% if @flight.errors[:departure_city].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:departure_city].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Destination city -->
+        <div class="mb-4">
+          <%= form.label :destination_city, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Destination city<% if field_required?(@flight, :destination_city) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :destination_city, {
+            placeholder: "Enter destination city...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :destination_city) ? { required: true } : {}) %>
+          <% if @flight.errors[:destination_city].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:destination_city].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Departure time -->
+        <div class="mb-4">
+          <%= form.label :departure_time, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure time<% if field_required?(@flight, :departure_time) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.datetime_local_field :departure_time, {
+            placeholder: "Enter departure time...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :departure_time) ? { required: true } : {}) %>
+          <% if @flight.errors[:departure_time].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:departure_time].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Arrival time -->
+        <div class="mb-4">
+          <%= form.label :arrival_time, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Arrival time<% if field_required?(@flight, :arrival_time) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.datetime_local_field :arrival_time, {
+            placeholder: "Enter arrival time...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :arrival_time) ? { required: true } : {}) %>
+          <% if @flight.errors[:arrival_time].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:arrival_time].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Departure airport -->
+        <div class="mb-4">
+          <%= form.label :departure_airport, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure airport<% if field_required?(@flight, :departure_airport) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :departure_airport, {
+            placeholder: "Enter departure airport...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :departure_airport) ? { required: true } : {}) %>
+          <% if @flight.errors[:departure_airport].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:departure_airport].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Arrival airport -->
+        <div class="mb-4">
+          <%= form.label :arrival_airport, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Arrival airport<% if field_required?(@flight, :arrival_airport) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :arrival_airport, {
+            placeholder: "Enter arrival airport...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :arrival_airport) ? { required: true } : {}) %>
+          <% if @flight.errors[:arrival_airport].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:arrival_airport].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Airline -->
+        <div class="mb-4">
+          <%= form.label :airline, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Airline<% if field_required?(@flight, :airline) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :airline, {
+            placeholder: "Enter airline...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :airline) ? { required: true } : {}) %>
+          <% if @flight.errors[:airline].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:airline].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Flight number -->
+        <div class="mb-4">
+          <%= form.label :flight_number, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Flight number<% if field_required?(@flight, :flight_number) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :flight_number, {
+            placeholder: "Enter flight number...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :flight_number) ? { required: true } : {}) %>
+          <% if @flight.errors[:flight_number].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:flight_number].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Aircraft type -->
+        <div class="mb-4">
+          <%= form.label :aircraft_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Aircraft type<% if field_required?(@flight, :aircraft_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :aircraft_type, {
+            placeholder: "Enter aircraft type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :aircraft_type) ? { required: true } : {}) %>
+          <% if @flight.errors[:aircraft_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:aircraft_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+          <%= form.label :price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price<% if field_required?(@flight, :price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price, {
+            placeholder: "Enter price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :price) ? { required: true } : {}) %>
+          <% if @flight.errors[:price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Discount price -->
+        <div class="mb-4">
+          <%= form.label :discount_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Discount price<% if field_required?(@flight, :discount_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :discount_price, {
+            placeholder: "Enter discount price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :discount_price) ? { required: true } : {}) %>
+          <% if @flight.errors[:discount_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:discount_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Seat class -->
+        <div class="mb-4">
+          <%= form.label :seat_class, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Seat class<% if field_required?(@flight, :seat_class) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :seat_class, {
+            placeholder: "Enter seat class...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :seat_class) ? { required: true } : {}) %>
+          <% if @flight.errors[:seat_class].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:seat_class].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Available seats -->
+        <div class="mb-4">
+          <%= form.label :available_seats, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Available seats<% if field_required?(@flight, :available_seats) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :available_seats, {
+            placeholder: "Enter available seats...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :available_seats) ? { required: true } : {}) %>
+          <% if @flight.errors[:available_seats].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:available_seats].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Flight date -->
+        <div class="mb-4">
+          <%= form.label :flight_date, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Flight date<% if field_required?(@flight, :flight_date) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.date_field :flight_date, {
+            placeholder: "Enter flight date...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@flight, :flight_date) ? { required: true } : {}) %>
+          <% if @flight.errors[:flight_date].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @flight.errors[:flight_date].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_flight_path(@flight.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Flight", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
