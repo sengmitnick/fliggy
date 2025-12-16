@@ -65,6 +65,13 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
+    # 验证任务 API
+    resources :validation_tasks, only: [ :create, :show, :destroy ] do
+      member do
+        post :verify
+      end
+    end
+    
     # Check membership status (no version namespace needed for internal API)
     get 'check_membership', to: 'memberships#check'
     

@@ -6,6 +6,7 @@
 
 > 🎉 **新手必看**：查看 [docs/QUICK_START_EXAMPLE.md](docs/QUICK_START_EXAMPLE.md) 了解真实使用场景！
 > ⚠️ **重要**：查看 [docs/USAGE_WORKFLOW.md](docs/USAGE_WORKFLOW.md) 了解正确的使用流程！
+> 📡 **API 调用**：查看 [docs/API_GUIDE.md](docs/API_GUIDE.md) 了解如何远程调用 API！
 
 ---
 
