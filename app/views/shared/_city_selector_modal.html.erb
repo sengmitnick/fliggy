@@ -1,0 +1,195 @@
+<!-- City Selector Modal -->
+<div data-city-selector-target="modal" class="hidden fixed inset-0 z-50 overflow-hidden">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black bg-opacity-50" data-action="click->city-selector#closeModal"></div>
+  
+  <!-- Modal Content -->
+  <div class="absolute inset-0 flex items-end justify-center">
+    <div class="bg-white w-full h-[90vh] rounded-t-3xl flex flex-col">
+      <!-- Header -->
+      <div class="flex-shrink-0 relative border-b border-gray-200">
+        <!-- Tabs -->
+        <div class="flex items-center justify-center pt-4">
+          <button 
+            data-city-selector-target="tabDeparture"
+            data-action="click->city-selector#showDomestic"
+            class="px-6 py-3 text-base font-medium border-b-2 border-transparent active-tab">
+            <span data-modal-title>单选出发地</span>
+          </button>
+          <button 
+            data-city-selector-target="tabDestination"
+            data-action="click->city-selector#showInternational"
+            class="px-6 py-3 text-base font-medium text-gray-500 border-b-2 border-transparent">
+            多选出发地
+          </button>
+        </div>
+        
+        <!-- Close Button -->
+        <button 
+          data-action="click->city-selector#closeModal"
+          class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Search Bar -->
+      <div class="flex-shrink-0 px-4 py-3 border-b border-gray-100">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input 
+            type="text"
+            data-city-selector-target="searchInput"
+            data-action="input->city-selector#search"
+            placeholder="搜索机场/城市/国家中英文或拼音"
+            class="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+      
+      <!-- Tab Content Container -->
+      <div class="flex-1 overflow-y-auto">
+        <!-- Domestic Tab -->
+        <div data-city-selector-target="domesticList">
+          <!-- Tabs for Domestic/International -->
+          <div class="flex border-b border-gray-200 sticky top-0 bg-white z-10">
+            <button class="flex-1 py-3 text-sm font-medium border-b-2 border-gray-900">国内</button>
+            <button class="flex-1 py-3 text-sm font-medium text-gray-500">国际/中国港澳台</button>
+          </div>
+          
+          <!-- Current/History Section -->
+          <div data-city-selector-target="historySection" class="px-4 py-4 border-b border-gray-100">
+            <div class="text-sm font-medium text-gray-500 mb-3">当前/历史</div>
+            <div class="flex items-center text-gray-400">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span class="text-sm">定位未开启</span>
+            </div>
+          </div>
+          
+          <!-- Hot Cities -->
+          <div class="px-4 py-4 border-b border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-sm font-medium text-gray-900">热门城市</div>
+              <div class="flex gap-2 text-xs text-gray-500">
+                <button class="px-2 py-1">定位</button>
+                <button class="px-2 py-1">热门</button>
+                <button class="px-2 py-1">地区</button>
+                <button class="px-2 py-1">主题</button>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-3">
+              <% hot_cities = [
+                {name: "北京", pinyin: "beijing"},
+                {name: "上海", pinyin: "shanghai"},
+                {name: "广州", pinyin: "guangzhou"},
+                {name: "杭州", pinyin: "hangzhou"},
+                {name: "成都", pinyin: "chengdu"},
+                {name: "深圳", pinyin: "shenzhen"},
+                {name: "重庆", pinyin: "chongqing"},
+                {name: "西安", pinyin: "xian"},
+                {name: "郑州", pinyin: "zhengzhou"},
+                {name: "昆明", pinyin: "kunming"},
+                {name: "哈尔滨", pinyin: "haerbin"},
+                {name: "南京", pinyin: "nanjing"},
+                {name: "武汉", pinyin: "wuhan"},
+                {name: "沈阳", pinyin: "shenyang"},
+                {name: "海口", pinyin: "haikou"},
+                {name: "长沙", pinyin: "changsha"}
+              ] %>
+              
+              <% hot_cities.each do |city| %>
+                <button 
+                  data-action="click->city-selector#selectCity"
+                  data-city-name="<%= city[:name] %>"
+                  data-city-pinyin="<%= city[:pinyin] %>"
+                  class="py-2 text-center text-sm rounded hover:bg-gray-100 transition-colors">
+                  <%= city[:name] %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Letter Index -->
+          <div class="px-4 py-3 border-b border-gray-100">
+            <div class="text-sm font-medium text-gray-900 mb-3">字母索引</div>
+            <div class="grid grid-cols-7 gap-2">
+              <% ('A'..'Z').each do |letter| %>
+                <button 
+                  data-action="click->city-selector#jumpToLetter"
+                  data-letter="<%= letter %>"
+                  class="py-2 text-center text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                  <%= letter %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Cities by Letter -->
+          <div class="px-4 py-4">
+            <% cities_by_letter = {
+              'A' => [{name: "阿克苏", pinyin: "akesu"}, {name: "安庆", pinyin: "anqing"}, {name: "阿勒泰", pinyin: "aletai"}],
+              'B' => [{name: "北京", pinyin: "beijing"}, {name: "包头", pinyin: "baotou"}],
+              'C' => [{name: "成都", pinyin: "chengdu"}, {name: "重庆", pinyin: "chongqing"}, {name: "长沙", pinyin: "changsha"}, {name: "长春", pinyin: "changchun"}],
+              'D' => [{name: "大连", pinyin: "dalian"}, {name: "大同", pinyin: "datong"}],
+              'F' => [{name: "福州", pinyin: "fuzhou"}],
+              'G' => [{name: "广州", pinyin: "guangzhou"}, {name: "贵阳", pinyin: "guiyang"}],
+              'H' => [{name: "杭州", pinyin: "hangzhou"}, {name: "哈尔滨", pinyin: "haerbin"}, {name: "海口", pinyin: "haikou"}, {name: "呼和浩特", pinyin: "huhehaote"}],
+              'J' => [{name: "济南", pinyin: "jinan"}],
+              'K' => [{name: "昆明", pinyin: "kunming"}],
+              'L' => [{name: "兰州", pinyin: "lanzhou"}, {name: "拉萨", pinyin: "lasa"}],
+              'N' => [{name: "南京", pinyin: "nanjing"}, {name: "南宁", pinyin: "nanning"}, {name: "南昌", pinyin: "nanchang"}],
+              'Q' => [{name: "青岛", pinyin: "qingdao"}],
+              'S' => [{name: "上海", pinyin: "shanghai"}, {name: "深圳", pinyin: "shenzhen"}, {name: "沈阳", pinyin: "shenyang"}, {name: "石家庄", pinyin: "shijiazhuang"}],
+              'T' => [{name: "太原", pinyin: "taiyuan"}, {name: "天津", pinyin: "tianjin"}],
+              'W' => [{name: "武汉", pinyin: "wuhan"}, {name: "乌鲁木齐", pinyin: "wulumuqi"}],
+              'X' => [{name: "西安", pinyin: "xian"}, {name: "厦门", pinyin: "xiamen"}, {name: "西宁", pinyin: "xining"}],
+              'Y' => [{name: "银川", pinyin: "yinchuan"}],
+              'Z' => [{name: "郑州", pinyin: "zhengzhou"}]
+            } %>
+            
+            <% cities_by_letter.each do |letter, cities| %>
+              <div data-letter-section="<%= letter %>" class="mb-4">
+                <div class="text-lg font-bold text-gray-900 mb-2"><%= letter %></div>
+                <div class="space-y-1">
+                  <% cities.each do |city| %>
+                    <button 
+                      data-action="click->city-selector#selectCity"
+                      data-city-name="<%= city[:name] %>"
+                      data-city-pinyin="<%= city[:pinyin] %>"
+                      class="block w-full text-left py-3 px-2 text-sm hover:bg-gray-100 rounded transition-colors">
+                      <%= city[:name] %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- International Tab (hidden by default) -->
+        <div data-city-selector-target="internationalList" class="hidden">
+          <div class="px-4 py-8 text-center text-gray-500">
+            <p>国际/港澳台城市列表</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .active-tab {
+    border-bottom-color: #000;
+    color: #000;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 0px;
+  }
+</style>

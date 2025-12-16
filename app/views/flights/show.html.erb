@@ -1,0 +1,227 @@
+<div class="min-h-screen bg-gray-50" data-controller="flight-search" 
+     data-flight-search-departure-value="<%= @flight.departure_city %>" 
+     data-flight-search-destination-value="<%= @flight.destination_city %>" 
+     data-flight-search-date-value="<%= @flight.flight_date %>">
+  
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <%= link_to search_flights_path(departure_city: @flight.departure_city, destination_city: @flight.destination_city, date: @flight.flight_date), 
+          data: { turbo: false },
+          class: "text-gray-700" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-bold flex-1 text-center">航班详情</h1>
+      <button class="text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Flight Summary Card -->
+  <div class="bg-white mx-4 mt-4 rounded-xl p-4 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex-1">
+        <div class="text-3xl font-bold mb-1"><%= @flight.departure_time_formatted %></div>
+        <div class="text-sm text-gray-600"><%= @flight.departure_city %></div>
+        <div class="text-xs text-gray-500"><%= @flight.departure_airport %></div>
+      </div>
+
+      <div class="flex-1 flex flex-col items-center px-4">
+        <div class="text-xs text-gray-500 mb-1"><%= @flight.duration_formatted %></div>
+        <div class="w-full border-t-2 border-gray-300 relative">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="text-xs text-green-600 mt-1">直飞</div>
+      </div>
+
+      <div class="flex-1 text-right">
+        <div class="text-3xl font-bold mb-1"><%= @flight.arrival_time_formatted %></div>
+        <div class="text-sm text-gray-600"><%= @flight.destination_city %></div>
+        <div class="text-xs text-gray-500"><%= @flight.arrival_airport %></div>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-gray-100">
+      <div class="flex items-center justify-between text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-red-500">
+            <% if @flight.airline == '东航' %>
+              ✈️
+            <% elsif @flight.airline == '海航' %>
+              🛫
+            <% elsif @flight.airline == '川航' %>
+              🛩️
+            <% elsif @flight.airline == '南航' %>
+              🛬
+            <% else %>
+              ✈️
+            <% end %>
+            <%= @flight.airline %><%= @flight.flight_number %>
+          </span>
+          <span class="text-gray-600"><%= @flight.aircraft_type %></span>
+        </div>
+        <div class="text-gray-600">
+          <%= I18n.l(@flight.flight_date, format: "%m月%d日") %>
+          <%= I18n.l(@flight.flight_date, format: "%A") %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offers Section -->
+  <div class="px-4 mt-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-bold">选择订票供应商</h2>
+      <div class="text-xs text-gray-500"><%= @offers.count %>个供应商报价</div>
+    </div>
+
+    <div class="space-y-3">
+      <% @offers.each do |offer| %>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          <!-- Provider Header -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                <%= offer.provider_name[0..1] %>
+              </div>
+              <div>
+                <div class="font-bold text-base"><%= offer.provider_name %></div>
+                <% if offer.is_featured %>
+                  <div class="text-xs text-yellow-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <%= FlightOffer::OFFER_TYPES[offer.offer_type] %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="text-right">
+              <% if offer.original_price > offer.price %>
+                <div class="text-xs text-gray-400 line-through">¥<%= offer.original_price.to_i %></div>
+              <% end %>
+              <div class="text-2xl font-bold text-red-500">¥<%= offer.price.to_i %></div>
+              <% if offer.cashback_amount > 0 %>
+                <div class="text-xs text-green-600">返¥<%= offer.cashback_amount.to_i %></div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Discount Items -->
+          <% if offer.discount_items.any? %>
+            <div class="mb-3 flex flex-wrap gap-2">
+              <% offer.discount_items.each do |item| %>
+                <span class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded"><%= item %></span>
+              <% end %>
+            </div>
+          <% end %>
+
+          <!-- Tags -->
+          <% if offer.tags.any? %>
+            <div class="mb-3 space-y-2">
+              <% offer.tags.each_slice(2) do |tag_pair| %>
+                <div class="flex gap-2">
+                  <% tag_pair.each do |tag| %>
+                    <span class="flex-1 px-2 py-1.5 bg-blue-50 text-blue-700 text-xs rounded text-center border border-blue-200">
+                      <%= tag %>
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <!-- Services -->
+          <div class="pt-3 border-t border-gray-100">
+            <div class="space-y-2 mb-3">
+              <% offer.services.each do |service| %>
+                <div class="flex items-start gap-2 text-sm">
+                  <svg class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="text-gray-700"><%= service %></span>
+                </div>
+              <% end %>
+              
+              <!-- Baggage Info -->
+              <% if offer.baggage_info.present? %>
+                <div class="flex items-start gap-2 text-sm">
+                  <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/>
+                  </svg>
+                  <span class="text-gray-700"><%= offer.baggage_info %></span>
+                </div>
+              <% end %>
+
+              <!-- Meal Info -->
+              <% if offer.meal_included %>
+                <div class="flex items-start gap-2 text-sm">
+                  <svg class="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                  </svg>
+                  <span class="text-gray-700">含餐食</span>
+                </div>
+              <% end %>
+
+              <!-- Refund Policy -->
+              <% if offer.refund_policy.present? %>
+                <div class="flex items-start gap-2 text-sm">
+                  <svg class="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="text-gray-700"><%= offer.refund_policy %></span>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Book Button -->
+            <%= link_to new_booking_path(flight_id: @flight.id, offer_id: offer.id), class: "block w-full py-3 rounded-lg font-bold text-white transition-colors text-center", style: "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" do %>
+              预订 ¥<%= offer.final_price.to_i %>
+              <% if offer.cashback_amount > 0 %>
+                <span class="text-xs font-normal">(到手¥<%= offer.final_price.to_i %>)</span>
+              <% end %>
+            <% end %>
+          </div>
+
+          <!-- Bottom Info -->
+          <% if offer.discount_percentage > 10 %>
+            <div class="mt-3 pt-3 border-t border-gray-100">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-500">比平均价低<%= offer.discount_percentage %>%</span>
+                <span class="text-green-600 flex items-center gap-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+                  </svg>
+                  超值推荐
+                </span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Bottom Safe Space -->
+  <div class="h-20"></div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

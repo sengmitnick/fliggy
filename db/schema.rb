@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_15_092350) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_15_133239) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,63 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_092350) do
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_administrators_on_name", unique: true
     t.index ["role"], name: "index_administrators_on_role"
+  end
+
+  create_table "bookings", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "flight_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.boolean "accept_terms", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.index ["flight_id"], name: "index_bookings_on_flight_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "flight_offers", force: :cascade do |t|
+    t.bigint "flight_id"
+    t.string "provider_name"
+    t.string "offer_type", default: "standard"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.decimal "cashback_amount", default: "0.0"
+    t.text "discount_items"
+    t.string "seat_class", default: "economy"
+    t.text "services"
+    t.text "tags"
+    t.string "baggage_info"
+    t.boolean "meal_included", default: false
+    t.string "refund_policy"
+    t.boolean "is_featured", default: false
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flight_id"], name: "index_flight_offers_on_flight_id"
+  end
+
+  create_table "flights", force: :cascade do |t|
+    t.string "departure_city"
+    t.string "destination_city"
+    t.datetime "departure_time"
+    t.datetime "arrival_time"
+    t.string "departure_airport"
+    t.string "arrival_airport"
+    t.string "airline"
+    t.string "flight_number"
+    t.string "aircraft_type"
+    t.decimal "price"
+    t.decimal "discount_price", default: "0.0"
+    t.string "seat_class", default: "economy"
+    t.integer "available_seats", default: 100
+    t.date "flight_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -170,6 +227,17 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_092350) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "passengers", force: :cascade do |t|
+    t.string "name"
+    t.string "id_type", default: "身份证"
+    t.string "id_number"
+    t.string "phone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_passengers_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "user_agent"
@@ -188,11 +256,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_092350) do
     t.string "uid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "airline_member", default: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
+  add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
 end

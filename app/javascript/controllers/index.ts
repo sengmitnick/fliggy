@@ -4,6 +4,12 @@ import ThemeController from "./theme_controller"
 import DropdownController from "./dropdown_controller"
 import SdkIntegrationController from "./sdk_integration_controller"
 import ClipboardController from "./clipboard_controller"
+import CitySelectorController from "./city_selector_controller"
+import FlightSearchController from "./flight_search_controller"
+import DatePickerController from "./date_picker_controller"
+import BookingController from "./booking_controller"
+import PaymentController from "./payment_controller"
+import CouponController from "./coupon_controller"
 
 const application = Application.start()
 
@@ -11,5 +17,11 @@ application.register("theme", ThemeController)
 application.register("dropdown", DropdownController)
 application.register("sdk-integration", SdkIntegrationController)
 application.register("clipboard", ClipboardController)
+application.register("city-selector", CitySelectorController)
+application.register("flight-search", FlightSearchController)
+application.register("date-picker", DatePickerController)
+application.register("booking", BookingController)
+application.register("payment", PaymentController)
+application.register("coupon", CouponController)
 
 window.Stimulus = application

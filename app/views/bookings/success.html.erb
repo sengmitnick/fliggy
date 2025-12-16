@@ -1,0 +1,184 @@
+<div class="min-h-screen bg-gray-100" data-controller="coupon">
+  <!-- Header -->
+  <div class="bg-white border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <%= link_to flights_path, class: "text-2xl" do %>
+        ←
+      <% end %>
+      <h1 class="text-lg font-bold">支付成功</h1>
+      <button type="button" class="text-2xl">
+        ⋮
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="container mx-auto px-4 py-6">
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+      <div class="text-green-500 text-6xl mb-4">✓</div>
+      <h2 class="text-2xl font-bold mb-2">支付成功</h2>
+      <p class="text-gray-600 mb-2">将尽快为您出票，出票成功后会短信通知</p>
+      <p class="text-sm text-gray-500">起飞7天后可领41飞猪里程 🔍</p>
+    </div>
+  </div>
+
+  <!-- Flight Info Card -->
+  <div class="container mx-auto px-4 mb-4">
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg font-bold"><%= @flight.departure_time.strftime('%-m月%-d日') %> 周<%= @flight.departure_time.strftime('%u') %> <%= @flight.departure_time.strftime('%H:%M') %></span>
+        </div>
+        <button type="button" class="text-blue-500 text-sm">
+          📋 分享航班
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="text-2xl font-bold"><%= @flight.departure_time.strftime('%H:%M') %></div>
+          <div class="text-sm text-gray-600"><%= @flight.departure_city %></div>
+          <div class="text-xs text-gray-500"><%= @flight.departure_airport %></div>
+        </div>
+        <div class="flex-1 text-center px-4">
+          <div class="text-xs text-gray-500"><%= @flight.duration_formatted %></div>
+          <div class="border-t border-gray-300 my-1"></div>
+          <div class="text-xs text-green-600">直飞</div>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold"><%= @flight.arrival_time.strftime('%H:%M') %></div>
+          <div class="text-sm text-gray-600"><%= @flight.destination_city %></div>
+          <div class="text-xs text-gray-500"><%= @flight.arrival_airport %></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 rounded p-3">
+        <div class="flex items-center text-sm text-gray-700">
+          <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>已成功出票</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="container mx-auto px-4 mb-4">
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center py-2">
+        <svg class="w-5 h-5 text-orange-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-sm text-gray-700">机票、车票购后权益包</span>
+      </div>
+
+      <div class="flex items-center py-2">
+        <svg class="w-5 h-5 text-orange-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-sm text-gray-700">台湾往返每¥49</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coupon Modal -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-coupon-target="modal">
+    <div class="bg-white rounded-2xl mx-4 max-w-md w-full animate-scale-in">
+      <!-- Header with Logo -->
+      <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-t-2xl py-4 text-center relative">
+        <div class="text-white font-bold text-lg">🛫 飞猪旅行</div>
+      </div>
+
+      <!-- Coupons -->
+      <div class="p-6">
+        <h3 class="text-center text-xl font-bold mb-4">飞猪特惠券 已到账</h3>
+        <p class="text-center text-sm text-gray-600 mb-4">机票火车票购后权益</p>
+
+        <!-- Coupon 1 - 888元飞猪惊喜券包 -->
+        <div class="border-2 border-red-500 rounded-lg p-4 mb-3 bg-gradient-to-r from-red-50 to-orange-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-gray-600 mb-1">通用券</div>
+              <div class="flex items-baseline">
+                <span class="text-red-500 text-lg font-bold mr-1">¥</span>
+                <span class="text-red-500 text-4xl font-bold">888</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-lg font-bold mb-1">飞猪惊喜券包</div>
+              <div class="text-xs text-gray-500">领取后7日内有效</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coupon 2 - 100元租车/接送机大礼包 -->
+        <div class="border-2 border-orange-400 rounded-lg p-4 mb-3 bg-gradient-to-r from-orange-50 to-yellow-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-gray-600 mb-1">打车券</div>
+              <div class="flex items-baseline">
+                <span class="text-red-500 text-lg font-bold mr-1">¥</span>
+                <span class="text-red-500 text-4xl font-bold">100</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-base font-bold mb-1">租车/接送机大礼包</div>
+              <div class="text-xs text-gray-500">领取后7天内有效</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coupon 3 - 30元酒店特惠券 -->
+        <div class="border-2 border-yellow-400 rounded-lg p-4 mb-4 bg-gradient-to-r from-yellow-50 to-amber-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-gray-600 mb-1">酒店券</div>
+              <div class="flex items-baseline">
+                <span class="text-red-500 text-lg font-bold mr-1">¥</span>
+                <span class="text-red-500 text-4xl font-bold">30</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-base font-bold mb-1">酒店特惠券</div>
+              <div class="text-xs text-gray-500">领取后14天内有效</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Claim Button -->
+        <button type="button" 
+                data-action="click->coupon#claimCoupons"
+                class="w-full bg-red-500 text-white py-4 rounded-full text-lg font-bold mb-4">
+          立即领取
+        </button>
+      </div>
+
+      <!-- Close Button -->
+      <button type="button" 
+              data-action="click->coupon#closeModal"
+              class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-white bg-opacity-30 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+</style>

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <!-- Background Image Container -->
@@ -6,7 +6,7 @@
       <%= image_tag "活动.png", class: "w-full h-auto object-cover object-center", alt: "背景" %>
 
       <!-- Top Bar -->
-      <div class="absolute top-8 left-0 w-full flex items-center justify-between px-4 py-3">
+      <div class="absolute top-4 left-0 w-full flex items-center justify-between px-4 py-3">
         <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center">
           <%= image_tag "返回.png", class: "w-10 h-10", alt: "返回" %>
         </button>
@@ -63,24 +63,34 @@
     <!-- From/To Selection -->
     <div class="mx-4 mb-4">
       <div class="flex items-center justify-between mb-4">
-        <div class="flex-1">
-          <div class="text-2xl font-bold">北京</div>
-        </div>
+        <button 
+          data-action="click->city-selector#openDeparture"
+          class="flex-1 text-left">
+          <div class="text-2xl font-bold" data-city-selector-target="departure">北京</div>
+        </button>
         
-        <button class="mx-4 flex items-center justify-center">
+        <button 
+          data-action="click->city-selector#switchCities"
+          class="mx-4 flex items-center justify-center">
           <%= image_tag "airfare/切换.png", class: "w-12 h-12", alt: "切换" %>
         </button>
         
-        <div class="flex-1 text-right">
-          <div class="text-2xl font-bold">杭州</div>
-        </div>
+        <button 
+          data-action="click->city-selector#openDestination"
+          class="flex-1 text-right">
+          <div class="text-2xl font-bold" data-city-selector-target="destination">杭州</div>
+        </button>
       </div>
 
       <!-- Date Selection -->
       <div class="mb-4">
-        <div class="text-3xl font-bold">
-          12<span class="text-base text-gray-600">月</span>17<span class="text-base text-gray-600">日 后天</span>
-        </div>
+        <button 
+          data-action="click->date-picker#openModal"
+          class="text-left">
+          <div class="text-3xl font-bold" data-date-picker-target="selectedDate">
+            <%= Date.today.month %><span class="text-base text-gray-600">月</span><%= Date.today.day %><span class="text-base text-gray-600">日 今天</span>
+          </div>
+        </button>
       </div>
 
       <!-- Passenger Selection -->
@@ -101,9 +111,14 @@
       </div>
 
       <!-- Search Button -->
-      <button class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
-        搜索机票
-      </button>
+      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
+        <%= f.hidden_field :departure_city, value: '', data: { 'city-selector-target': 'departureCityInput' } %>
+        <%= f.hidden_field :destination_city, value: '', data: { 'city-selector-target': 'destinationCityInput' } %>
+        <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
+        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
+          搜索机票
+        </button>
+      <% end %>
     </div>
 
     </div>
@@ -305,6 +320,12 @@
       </button>
     </div>
   </div>
+
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Date Picker Modal -->
+  <%= render 'shared/date_picker_modal' %>
 </div>
 
 <style>

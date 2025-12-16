@@ -1,0 +1,205 @@
+<!-- Date Picker Modal -->
+<div data-date-picker-target="modal" class="fixed inset-0 bg-white z-50 hidden">
+  <!-- Header -->
+  <div class="sticky top-0 bg-white border-b border-gray-200 z-10">
+    <div class="flex items-center justify-between px-4 py-4">
+      <button 
+        data-action="click->date-picker#closeModal" 
+        class="text-2xl text-gray-600">
+        ×
+      </button>
+      <div class="flex gap-8">
+        <button class="text-base font-bold border-b-2 border-black pb-1">精确日期</button>
+        <button class="text-base text-gray-500">模糊日期</button>
+      </div>
+      <div class="w-8"></div>
+    </div>
+    
+    <!-- Weekday Headers -->
+    <div class="flex text-center text-sm text-gray-600 py-2 border-b border-gray-100">
+      <div class="flex-1">日</div>
+      <div class="flex-1">一</div>
+      <div class="flex-1">二</div>
+      <div class="flex-1">三</div>
+      <div class="flex-1">四</div>
+      <div class="flex-1">五</div>
+      <div class="flex-1">六</div>
+    </div>
+  </div>
+
+  <!-- Calendar Content -->
+  <div class="overflow-y-auto pb-20" style="height: calc(100vh - 120px);">
+    <%
+      start_date = Date.today
+      end_date = start_date + 60.days
+      
+      current_month_year = nil
+      calendar_weeks = []
+      current_week = []
+      
+      # Get prices for dates from database
+      date_prices = {}
+      departure_city = params[:departure_city] || '北京'
+      destination_city = params[:destination_city] || '杭州'
+      
+      # Query or generate flight data for each date
+      (start_date..end_date).each do |date|
+        # Check if flights exist for this route and date
+        flights = Flight.by_route(departure_city, destination_city).by_date(date)
+        
+        # If no flights exist, generate them
+        if flights.empty?
+          flights = Flight.generate_for_route(departure_city, destination_city, date)
+        end
+        
+        # Get minimum price
+        min_price = flights.minimum(:price)
+        date_prices[date] = min_price || 0
+      end
+      
+      # Build calendar grid
+      current_date = start_date
+      
+      # Add empty cells for days before the first day of the month
+      first_day_of_month = Date.new(current_date.year, current_date.month, 1)
+      (0...first_day_of_month.wday).each do
+        current_week << nil
+      end
+      
+      while current_date <= end_date
+        # Check if we need to start a new month section
+        month_year = "#{current_date.year}年#{current_date.month.to_s.rjust(2, '0')}月"
+        if month_year != current_month_year
+          # Save previous week if exists
+          if current_week.any?
+            calendar_weeks << { month_year: current_month_year, week: current_week } if current_month_year
+            current_week = []
+          end
+          
+          current_month_year = month_year
+        end
+        
+        # Add current date to week
+        current_week << current_date
+        
+        # If week is complete (7 days) or it's the last day of month, save it
+        if current_week.length == 7 || current_date == current_date.end_of_month
+          calendar_weeks << { month_year: current_month_year, week: current_week.dup }
+          current_week = []
+          
+          # If next day is a new month and not Sunday, add empty cells
+          if current_date != end_date && current_date == current_date.end_of_month
+            next_date = current_date + 1.day
+            if next_date.wday != 0
+              (0...next_date.wday).each do
+                current_week << nil
+              end
+            end
+          end
+        end
+        
+        current_date += 1.day
+      end
+      
+      # Save last week if exists
+      if current_week.any?
+        calendar_weeks << { month_year: current_month_year, week: current_week }
+      end
+      
+      # Group weeks by month
+      months = calendar_weeks.group_by { |w| w[:month_year] }
+    %>
+    
+    <% months.each do |month_year, weeks| %>
+      <!-- Month Header -->
+      <div class="text-center py-4 text-lg font-bold text-gray-800">
+        <%= month_year %>
+      </div>
+      
+      <!-- Calendar Grid for this month -->
+      <% weeks.each do |week_data| %>
+        <div class="flex">
+          <% week_data[:week].each do |date| %>
+            <% if date.nil? %>
+              <!-- Empty cell -->
+              <div class="flex-1 py-3"></div>
+            <% else %>
+              <%
+                is_today = date == Date.today
+                is_selected = date.to_s == (params[:date] || Date.today.to_s)
+                price = date_prices[date]
+                
+                # Check for special days
+                special_label = nil
+                special_class = ''
+                
+                if date.month == 12 && date.day == 24
+                  special_label = '平安夜'
+                  special_class = 'text-red-500'
+                elsif date.month == 12 && date.day == 25
+                  special_label = '圣诞节'
+                  special_class = 'text-red-500'
+                elsif date.month == 1 && date.day == 1
+                  special_label = '元旦'
+                  special_class = 'text-orange-500'
+                end
+                
+                # Determine if it's a holiday (weekend or special day)
+                is_holiday = date.wday == 0 || date.wday == 6 || special_label
+                
+                # Price color based on value
+                price_class = if price < 250
+                  'text-red-500'
+                elsif price < 350
+                  'text-orange-500'
+                else
+                  'text-gray-600'
+                end
+              %>
+              
+              <button 
+                data-action="click->date-picker#selectDate"
+                data-date="<%= date.to_s %>"
+                class="flex-1 py-2 flex flex-col items-center relative <%= is_selected ? 'bg-yellow-400 rounded-lg' : '' %>">
+                
+                <!-- Today marker -->
+                <% if is_today %>
+                  <div class="absolute top-1 text-xs text-gray-600">今日</div>
+                <% end %>
+                
+                <!-- Selected marker -->
+                <% if is_selected %>
+                  <div class="absolute top-1 text-xs font-bold" style="color: #FF8C00;">出发</div>
+                <% end %>
+                
+                <!-- Date number -->
+                <div class="text-2xl font-bold mt-3 <%= is_selected ? 'text-gray-900' : 'text-gray-800' %>">
+                  <%= date.day %>
+                </div>
+                
+                <!-- Price -->
+                <div class="text-xs <%= is_selected ? 'text-red-600 font-bold' : price_class %> mt-1">
+                  ¥<%= price %>
+                </div>
+                
+                <!-- Special day label -->
+                <% if special_label %>
+                  <div class="text-xs <%= special_class %> mt-1 font-bold">
+                    <%= special_label %>
+                  </div>
+                <% end %>
+                
+                <!-- Holiday badge -->
+                <% if is_holiday && date.day <= 5 %>
+                  <div class="absolute top-0 right-0 bg-gray-200 text-gray-600 text-xs px-1 rounded">
+                    休
+                  </div>
+                <% end %>
+              </button>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

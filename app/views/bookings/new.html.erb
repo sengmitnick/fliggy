@@ -1,0 +1,536 @@
+<div class="min-h-screen bg-gray-100 pb-20" data-controller="booking">
+  <!-- Header -->
+  <div class="bg-white border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center">
+      <%= link_to flight_path(@flight), class: "text-2xl mr-4" do %>
+        ←
+      <% end %>
+      <div class="flex-1 flex items-center space-x-4">
+        <span class="text-lg font-bold">填订单</span>
+        <span class="text-gray-400">—</span>
+        <span class="text-gray-400">选服务</span>
+        <span class="text-gray-400">—</span>
+        <span class="text-gray-400">去支付</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示信息 -->
+  <div class="container mx-auto px-4 py-3">
+    <div class="bg-blue-50 text-blue-600 text-sm px-3 py-2 rounded flex items-center">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span>余票紧张 当前价格仅剩6张，建议尽快预订</span>
+    </div>
+  </div>
+
+  <%= form_with(model: @booking, url: bookings_path(flight_id: @flight.id), 
+                data: { action: "submit->booking#handleSubmit" },
+                class: "container mx-auto px-4 py-4") do |form| %>
+    <%= render 'shared/form_error_message', model: @booking %>
+
+    <!-- 航班信息卡片 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+          <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded text-sm font-bold">直飞</span>
+          <span class="text-lg"><%= @flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
+          <span class="text-lg"><%= @flight.departure_city %>—<%= @flight.destination_city %></span>
+        </div>
+        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="text-gray-600">
+            成人 ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
+            机建燃油 ¥<%= @flight.discount_price.to_i %>
+            <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
+            </svg>
+          </div>
+          <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
+          <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
+        <div class="flex items-center space-x-2">
+          <span class="text-red-500">退改 ¥21起</span>
+          <span class="text-gray-400">|</span>
+          <span class="text-gray-600">托运行李共20公斤</span>
+        </div>
+        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+      </div>
+
+      <div class="flex items-center justify-between mt-2 text-sm">
+        <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
+        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+      </div>
+    </div>
+
+    <!-- 已选择人数 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold">已选择: 1成人</h3>
+        <%= link_to '邀请好友填写', '#', class: "text-blue-500 text-sm" %>
+      </div>
+
+      <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
+        会员价商品限本人陆旅客使用身份证或户口簿购买｜仅限1位以下(含1位)
+        乘客购买｜当前价格剩余6张
+      </div>
+    </div>
+
+    <!-- 乘机人选择 -->
+    <div class="bg-white rounded-lg shadow mb-4">
+      <% if @passengers.any? %>
+        <% @passengers.each_with_index do |passenger, index| %>
+          <label class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center flex-1">
+              <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+              </svg>
+              <div class="flex-1">
+                <div class="flex items-center">
+                  <span class="font-bold text-lg"><%= passenger.name %></span>
+                  <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">本人</span>
+                </div>
+                <div class="text-sm text-gray-600 mt-1">
+                  <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
+                  <span class="ml-2 text-gray-400">其他证件 ></span>
+                </div>
+              </div>
+            </div>
+            <%= form.radio_button :passenger_name, passenger.name, 
+                id: "passenger_#{passenger.id}", 
+                class: "w-5 h-5",
+                checked: index == 0,
+                data: { 
+                  action: "change->booking#selectPassenger",
+                  id_number: passenger.id_number,
+                  phone: passenger.phone
+                } %>
+          </label>
+        <% end %>
+      <% else %>
+        <div class="p-4 text-center text-gray-500">
+          暂无常用乘机人
+        </div>
+      <% end %>
+
+      <!-- 添加乘机人按钮 -->
+      <button type="button" class="w-full py-4 border-t flex items-center justify-center text-gray-700">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        更多乘机人
+      </button>
+    </div>
+
+    <!-- 隐藏字段 -->
+    <%= form.hidden_field :passenger_id_number, id: "passenger_id_number", value: @passengers.first&.id_number %>
+    <%= form.hidden_field :offer_id, value: @selected_offer&.id %>
+    <%= form.hidden_field :insurance_type, id: "booking_insurance_type", value: "none" %>
+    <%= form.hidden_field :insurance_price, id: "booking_insurance_price", value: 0 %>
+
+    <!-- 联系电话 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center">
+        <label class="text-gray-700 font-medium w-24">联系电话</label>
+        <div class="flex items-center flex-1">
+          <span class="text-gray-600 mr-2">+86</span>
+          <%= form.text_field :contact_phone, 
+              placeholder: "180 2712 8600",
+              value: @passengers.first&.phone,
+              class: "flex-1 border-0 focus:ring-0 text-gray-700" %>
+          <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="mt-3 flex items-center">
+        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded" id="sms_notification" checked>
+        <label for="sms_notification" class="ml-2 text-sm text-gray-600">
+          所有乘机人接收航班变短信
+        </label>
+      </div>
+    </div>
+
+    <!-- 保险提示 -->
+    <div class="bg-orange-50 px-4 py-3 mb-4 flex items-center">
+      <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-red-500 font-medium text-sm">出门在外，有保障让家人更安心</span>
+      <div class="ml-auto">
+        <img src="https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=100&h=60&fit=crop" alt="" class="h-12 w-auto rounded">
+      </div>
+    </div>
+
+    <!-- 国内航空意外险 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="font-bold">国内航空意外险 
+          <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
+          </svg>
+        </h4>
+      </div>
+
+      <!-- 保险选项卡 -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <!-- 无保障 -->
+        <label class="relative border-2 rounded-lg p-3 cursor-pointer transition-all hover:border-gray-400" data-insurance-card>
+          <input type="radio" name="insurance_selection" value="none" class="hidden" 
+                 data-action="change->booking#selectInsuranceOption"
+                 data-insurance-type="none"
+                 data-insurance-price="0"
+                 checked>
+          <div class="text-center">
+            <div class="text-3xl mb-2">🛡️</div>
+            <div class="font-bold text-sm mb-1">无保障</div>
+            <div class="text-xs text-gray-500">(放弃保障)</div>
+            <div class="mt-2">
+              <div class="text-red-500 text-lg">×</div>
+              <div class="text-red-500 text-lg">×</div>
+            </div>
+          </div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
+
+        <!-- 优享保障 -->
+        <label class="relative border-2 rounded-lg p-3 cursor-pointer transition-all hover:border-yellow-400" data-insurance-card>
+          <input type="radio" name="insurance_selection" value="standard" class="hidden"
+                 data-action="change->booking#selectInsuranceOption"
+                 data-insurance-type="standard"
+                 data-insurance-price="50">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <span class="bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs px-2 py-0.5 rounded-full">达人之选</span>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">👑</div>
+            <div class="font-bold text-sm mb-1">优享保障</div>
+            <div class="text-xs text-gray-500 mb-2">(达人之选)</div>
+            <div class="text-xs text-gray-600 mb-1">意外保障¥700万</div>
+            <div class="text-xs text-gray-600 mb-2">意外医疗¥5万</div>
+            <div class="text-red-500 font-bold text-lg">¥50/人</div>
+          </div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
+
+        <!-- 至尊保障 -->
+        <label class="relative border-2 rounded-lg p-3 cursor-pointer transition-all hover:border-blue-400" data-insurance-card>
+          <input type="radio" name="insurance_selection" value="premium" class="hidden"
+                 data-action="change->booking#selectInsuranceOption"
+                 data-insurance-type="premium"
+                 data-insurance-price="66">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <span class="bg-gradient-to-r from-blue-400 to-blue-600 text-white text-xs px-2 py-0.5 rounded-full">尊享之选</span>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">💎</div>
+            <div class="font-bold text-sm mb-1">至尊保障</div>
+            <div class="text-xs text-gray-500 mb-2">(尊享之选)</div>
+            <div class="text-xs text-gray-600 mb-1">意外保障¥1000万</div>
+            <div class="text-xs text-gray-600 mb-2">意外医疗¥10万</div>
+            <div class="text-red-500 font-bold text-lg">¥66/人</div>
+          </div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
+      </div>
+
+      <div class="text-center">
+        <button type="button" class="text-orange-500 text-sm font-medium bg-orange-50 px-4 py-1 rounded-full">更高性价比up</button>
+      </div>
+    </div>
+
+    <!-- 其他附加服务提示 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <h4 class="font-bold mb-3">附加服务 
+        <span class="text-orange-500 text-sm font-normal ml-2">出行更舒适</span>
+      </h4>
+      <div class="text-xs text-gray-500">
+        还有更多服务可选：出行服务、机场休息室、快速安检等
+      </div>
+    </div>
+
+    <!-- 协议确认 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-20">
+      <div class="text-xs text-gray-500 leading-relaxed">
+        我已阅读并同意以下协议 
+        <span class="text-blue-500">东方航空</span>、
+        <span class="text-blue-500">上海航空运输总条件</span>、
+        <span class="text-blue-500">行李规定</span>、
+        <span class="text-blue-500">航班超售服务方案</span>、
+        <span class="text-blue-500">东方航空购票须知</span>、
+        <span class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</span>、
+        <span class="text-blue-500">关于禁止携带部分物品乘坐民航...</span>
+      </div>
+    </div>
+
+    <!-- 协议确认(隐藏) -->
+    <%= form.check_box :accept_terms, class: "hidden", id: "booking_accept_terms", checked: false %>
+
+    <!-- 底部提交按钮 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+      <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div>
+          <div class="text-xs text-gray-500">共1人 已优惠¥<%= rand(10..50) %></div>
+          <div class="text-2xl font-bold text-red-500">
+            ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
+          </div>
+        </div>
+        <%= form.submit '去支付 去选服务', class: "btn-primary px-6 py-3 text-lg rounded-lg" %>
+      </div>
+    </div>
+
+    <!-- 协议确认模态框 -->
+    <div data-booking-target="termsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div class="bg-white rounded-t-3xl w-full max-w-2xl mx-auto p-6 pb-8 animate-slide-up">
+        <button type="button" data-action="click->booking#closeTermsModal" class="absolute top-4 right-4 text-gray-400 text-2xl">
+          ×
+        </button>
+        
+        <h3 class="text-xl font-bold text-center mb-6">请阅读并同意以下内容</h3>
+        
+        <div class="text-sm text-gray-600 space-y-2 mb-6 max-h-60 overflow-y-auto">
+          <p>我已阅读并同意 
+            <span class="text-blue-500">东方航空</span>、
+            <span class="text-blue-500">上海航空运输总条件</span>、
+            <span class="text-blue-500">行李规定</span>、
+            <span class="text-blue-500">航班超售服务方案</span>、
+            <span class="text-blue-500">东方航空购票须知</span>、
+            <span class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</span>、
+            <span class="text-blue-500">关于禁止携带部分物品乘坐民航...</span>
+          </p>
+        </div>
+        
+        <button type="button" data-action="click->booking#acceptTerms" 
+                class="w-full py-4 rounded-full text-white font-bold text-lg"
+                style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+          同意并继续
+        </button>
+      </div>
+    </div>
+
+    <!-- 保险推荐模态框 -->
+    <div data-booking-target="insuranceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+      <div class="bg-white rounded-t-3xl w-full max-w-2xl mx-auto pb-8 animate-slide-up">
+        <button type="button" data-action="click->booking#skipInsurance" class="absolute top-4 right-4 text-gray-400 text-2xl">
+          ×
+        </button>
+        
+        <!-- 飞机插画 -->
+        <div class="relative h-48 bg-gradient-to-b from-blue-400 to-blue-600 rounded-t-3xl overflow-hidden">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg class="w-64 h-64" viewBox="0 0 200 200" fill="none">
+              <ellipse cx="100" cy="140" rx="80" ry="20" fill="rgba(255,255,255,0.2)"/>
+              <!-- 飞机 -->
+              <path d="M100 80 L120 100 L180 110 L120 115 L100 140 L80 115 L20 110 L80 100 Z" fill="white" opacity="0.9"/>
+              <circle cx="100" cy="100" r="8" fill="#4299e1"/>
+            </svg>
+          </div>
+          <div class="absolute bottom-4 right-4 bg-orange-500 text-white px-4 py-2 rounded-full font-bold">
+            最高保700万
+          </div>
+        </div>
+        
+        <div class="px-6 pt-6">
+          <h3 class="text-xl font-bold text-center mb-2">
+            <span class="text-red-500">注意！</span>你未添加航空保障
+          </h3>
+          
+          <div class="text-center text-gray-600 mb-6">
+            <p class="mb-2">建议添加：航空意外险 <span class="text-orange-500">¥50/程</span> 
+              <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+                <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
+              </svg>
+            </p>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 inline-flex items-center">
+              <span class="text-yellow-600 mr-2">✓</span>
+              <span class="text-sm">保障升级</span>
+              <span class="mx-2">|</span>
+              <span class="text-sm text-orange-500">意外+医疗双重保障</span>
+            </div>
+          </div>
+          
+          <p class="text-xs text-gray-400 text-center mb-6">
+            本模块为保险按保页面，由浙江鼎宏保险代理有限公司展示
+            <svg class="inline w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12l-6 6h12l-6-6z"/>
+            </svg>
+          </p>
+          
+          <div class="flex gap-3">
+            <button type="button" data-action="click->booking#skipInsurance" 
+                    class="flex-1 py-4 border-2 border-gray-300 rounded-full text-gray-700 font-bold">
+              放弃
+            </button>
+            <button type="button" 
+                    data-action="click->booking#selectInsurance"
+                    data-insurance-type="standard"
+                    data-insurance-price="50"
+                    class="flex-1 py-4 rounded-full text-white font-bold"
+                    style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+              立即支付
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 会员确认模态框 -->
+    <div data-booking-target="memberModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl w-11/12 max-w-md mx-auto p-6 animate-scale-in">
+        <button type="button" data-action="click->booking#closeMemberModal" class="absolute top-4 right-4 text-gray-400 text-2xl">
+          ×
+        </button>
+        
+        <div class="text-center">
+          <h3 class="text-lg font-bold mb-4">
+            该商品是会员专享商品，请确认已获得<br>
+            <span class="text-blue-600">【<%= @passengers.first&.name %>】</span>的授权，注册成为东航会员
+          </h3>
+          
+          <div class="flex gap-3 mt-6">
+            <button type="button" data-action="click->booking#closeMemberModal" 
+                    class="flex-1 py-3 border-2 border-gray-300 rounded-full text-gray-700 font-bold">
+              再想想
+            </button>
+            <button type="button" data-action="click->booking#closeMemberModal"
+                    class="flex-1 py-3 rounded-full text-white font-bold"
+                    style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+              同意并继续
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支付确认模态框 -->
+    <div data-booking-target="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="bg-white rounded-2xl w-11/12 max-w-md mx-auto p-6 animate-scale-in">
+        <h3 class="text-lg font-bold text-center mb-6">付款后信息无法更改，请仔细核对</h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold text-lg"><%= @flight.flight_number %> <%= @flight.departure_city %>—<%= @flight.destination_city %></div>
+              <div class="text-green-600 flex items-center mt-1">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-gray-600"><%= @flight.departure_time.strftime('%-m-%d 周%u %H:%M') %> 出发</div>
+              <div class="text-green-600 flex items-center mt-1">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold"><%= @passengers.first&.name %> <%= @passengers.first&.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || @passengers.first&.id_number %> 身份证</div>
+              <div class="text-green-600 flex items-center mt-1">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-gray-600">托运行李20KG</div>
+              <div class="text-green-600 flex items-center mt-1">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-gray-600">免费手提行李1件，8公斤/件</div>
+              <div class="text-green-600 flex items-center mt-1">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+          <div class="text-gray-500 mb-2">请耐心等待...</div>
+          <div class="flex justify-center">
+            <!-- 飞机动画 -->
+            <svg class="w-16 h-16 animate-bounce" viewBox="0 0 64 64" fill="none">
+              <path d="M32 16 L40 28 L56 32 L40 36 L32 48 L24 36 L8 32 L24 28 Z" fill="#4299e1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+</style>
