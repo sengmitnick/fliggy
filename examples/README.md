@@ -50,11 +50,23 @@ python3 examples/python_example.py cancel
 **运行示例**：
 
 ```bash
-# 添加执行权限
-chmod +x examples/bash_example.sh
+# 方式 1: 直接用 bash 执行（推荐）
+bash examples/bash_example.sh basic
 
-# 运行示例
-./examples/bash_example.sh
+# 方式 2: 添加执行权限后运行
+chmod +x examples/bash_example.sh
+./examples/bash_example.sh basic
+
+# ⚠️ 注意：必须使用 bash，不要用 sh
+# ❌ 错误：sh examples/bash_example.sh basic
+# ✅ 正确：bash examples/bash_example.sh basic
+```
+
+**可用示例**：
+```bash
+bash examples/bash_example.sh basic  # 基础流程
+bash examples/bash_example.sh batch  # 批量测试
+bash examples/bash_example.sh full   # 完整流程演示
 ```
 
 ---
@@ -189,7 +201,24 @@ sudo apt-get install python3-requests
 2. 检查端口号（默认 3000）
 3. 修改示例代码中的 `API_BASE` 变量
 
-### Q4: 权限错误 `Permission denied`
+### Q4: `Syntax error: "(" unexpected` 或 `Syntax error: "(" unexpected (expecting "}"))`
+
+**原因**：使用 `sh` 执行了 Bash 脚本，`sh` 不支持 Bash 特有语法（如数组）
+
+**解决**：
+```bash
+# ❌ 错误：
+sh examples/bash_example.sh basic
+
+# ✅ 正确：使用 bash 执行
+bash examples/bash_example.sh basic
+
+# 或者给脚本添加执行权限后直接运行
+chmod +x examples/bash_example.sh
+./examples/bash_example.sh basic
+```
+
+### Q5: 权限错误 `Permission denied`
 
 **原因**：脚本没有执行权限
 
