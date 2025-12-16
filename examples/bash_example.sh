@@ -4,7 +4,7 @@
 # 演示如何使用 curl 调用验证任务 API
 
 # 配置
-API_BASE="http://localhost:3000/api"
+API_BASE="https://3000-ec82d74f5a03-web.clackypaas.com/api"
 
 # 颜色输出
 RED='\033[0;31m'

@@ -46,7 +46,7 @@ class Api::ValidationTasksController < ApplicationController
     
     # 保存任务信息到 session 或缓存
     task_id = SecureRandom.uuid
-    Rails.cache.write("validation_task:#{task_id}", {
+    task_cache.write("validation_task:#{task_id}", {
       params: task_params,
       initial_booking_count: validator.instance_variable_get(:@initial_booking_count),
       created_at: Time.current
@@ -74,7 +74,7 @@ class Api::ValidationTasksController < ApplicationController
     task_id = params[:id]
     
     # 获取任务信息
-    task_data = Rails.cache.read("validation_task:#{task_id}")
+    task_data = task_cache.read("validation_task:#{task_id}")
     unless task_data
       return render json: {
         success: false,
@@ -103,7 +103,7 @@ class Api::ValidationTasksController < ApplicationController
     end
     
     # 清除任务缓存
-    Rails.cache.delete("validation_task:#{task_id}")
+    task_cache.delete("validation_task:#{task_id}")
     
     render json: {
       success: result[:valid],
@@ -122,7 +122,7 @@ class Api::ValidationTasksController < ApplicationController
   def show
     task_id = params[:id]
     
-    task_data = Rails.cache.read("validation_task:#{task_id}")
+    task_data = task_cache.read("validation_task:#{task_id}")
     unless task_data
       return render json: {
         success: false,
@@ -153,7 +153,7 @@ class Api::ValidationTasksController < ApplicationController
   def destroy
     task_id = params[:id]
     
-    if Rails.cache.delete("validation_task:#{task_id}")
+    if task_cache.delete("validation_task:#{task_id}")
       render json: {
         success: true,
         task_id: task_id,
@@ -169,6 +169,19 @@ class Api::ValidationTasksController < ApplicationController
   end
   
   private
+
+  # 在开发环境里，如果 Rails 缓存未开启，Rails.cache 可能是 NullStore（写入不会持久化）。
+  # 这会导致 create 成功但 verify 立刻找不到任务数据。
+  # 为了让 API 开箱即用，这里对 NullStore 做一个 MemoryStore 回退。
+  def task_cache
+    @task_cache ||= begin
+      if defined?(ActiveSupport::Cache::NullStore) && Rails.cache.is_a?(ActiveSupport::Cache::NullStore)
+        ActiveSupport::Cache::MemoryStore.new
+      else
+        Rails.cache
+      end
+    end
+  end
   
   def parse_task_params
     {
