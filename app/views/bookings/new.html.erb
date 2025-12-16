@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100 pb-20" data-controller="booking">
+<div class="min-h-screen bg-gray-100 pb-20" data-controller="booking coming-soon">
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
@@ -38,7 +38,7 @@
           <span class="text-lg"><%= @flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
           <span class="text-lg"><%= @flight.departure_city %>—<%= @flight.destination_city %></span>
         </div>
-        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
       </div>
 
       <div class="space-y-2">
@@ -46,17 +46,19 @@
           <div class="text-gray-600">
             成人 ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
             机建燃油 ¥<%= @flight.discount_price.to_i %>
-            <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+              <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
               <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
               <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
-            </svg>
+              </svg>
+            </button>
           </div>
-          <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+          <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
         </div>
 
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
-          <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+          <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
         </div>
       </div>
 
@@ -66,12 +68,12 @@
           <span class="text-gray-400">|</span>
           <span class="text-gray-600">托运行李共20公斤</span>
         </div>
-        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
       </div>
 
       <div class="flex items-center justify-between mt-2 text-sm">
         <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
-        <%= link_to '>', flight_path(@flight), class: "text-2xl text-gray-400" %>
+        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
       </div>
     </div>
 
@@ -79,7 +81,7 @@
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between">
         <h3 class="font-bold">已选择: 1成人</h3>
-        <%= link_to '邀请好友填写', '#', class: "text-blue-500 text-sm" %>
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500 text-sm">邀请好友填写</button>
       </div>
 
       <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
@@ -126,7 +128,7 @@
       <% end %>
 
       <!-- 添加乘机人按钮 -->
-      <button type="button" class="w-full py-4 border-t flex items-center justify-center text-gray-700">
+      <button type="button" data-action="click->coming-soon#show" class="w-full py-4 border-t flex items-center justify-center text-gray-700">
         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
         </svg>
@@ -179,10 +181,12 @@
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between mb-4">
         <h4 class="font-bold">国内航空意外险 
-          <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+            <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
             <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
-          </svg>
+            </svg>
+          </button>
         </h4>
       </div>
 
@@ -261,7 +265,7 @@
       </div>
 
       <div class="text-center">
-        <button type="button" class="text-orange-500 text-sm font-medium bg-orange-50 px-4 py-1 rounded-full">更高性价比up</button>
+        <button type="button" data-action="click->coming-soon#show" class="text-orange-500 text-sm font-medium bg-orange-50 px-4 py-1 rounded-full">更高性价比up</button>
       </div>
     </div>
 
@@ -279,13 +283,13 @@
     <div class="bg-white rounded-lg shadow p-4 mb-20">
       <div class="text-xs text-gray-500 leading-relaxed">
         我已阅读并同意以下协议 
-        <span class="text-blue-500">东方航空</span>、
-        <span class="text-blue-500">上海航空运输总条件</span>、
-        <span class="text-blue-500">行李规定</span>、
-        <span class="text-blue-500">航班超售服务方案</span>、
-        <span class="text-blue-500">东方航空购票须知</span>、
-        <span class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</span>、
-        <span class="text-blue-500">关于禁止携带部分物品乘坐民航...</span>
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">东方航空</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">上海航空运输总条件</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">行李规定</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">航班超售服务方案</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">东方航空购票须知</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</button>、
+        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">关于禁止携带部分物品乘坐民航...</button>
       </div>
     </div>
 
@@ -532,5 +536,35 @@
 
 .animate-scale-in {
   animation: scale-in 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-out;
 }
 </style>

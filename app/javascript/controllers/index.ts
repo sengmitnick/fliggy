@@ -10,6 +10,7 @@ import DatePickerController from "./date_picker_controller"
 import BookingController from "./booking_controller"
 import PaymentController from "./payment_controller"
 import CouponController from "./coupon_controller"
+import ComingSoonController from "./coming_soon_controller"
 
 const application = Application.start()
 
@@ -23,5 +24,6 @@ application.register("date-picker", DatePickerController)
 application.register("booking", BookingController)
 application.register("payment", PaymentController)
 application.register("coupon", CouponController)
+application.register("coming-soon", ComingSoonController)
 
 window.Stimulus = application
