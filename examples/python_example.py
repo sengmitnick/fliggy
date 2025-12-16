@@ -205,7 +205,7 @@ def example_basic():
     task = create_validation_task(
         departure_city="深圳",
         arrival_city="武汉",
-        departure_date="2025-01-15"
+        departure_date="2026-01-15"
     )
     
     if not task:
@@ -236,7 +236,7 @@ def example_with_params():
     task = create_validation_task(
         departure_city="北京",
         arrival_city="上海",
-        departure_date="2025-01-20",
+        departure_date="2026-01-20",
         passenger_name="张三",
         contact_phone="13800138000",
         insurance_required=True
@@ -269,9 +269,9 @@ def example_batch():
     print("=" * 60)
     
     test_cases = [
-        {"departure_city": "深圳", "arrival_city": "武汉", "departure_date": "2025-01-15"},
-        {"departure_city": "北京", "arrival_city": "上海", "departure_date": "2025-01-20"},
-        {"departure_city": "广州", "arrival_city": "深圳", "departure_date": "2025-01-25"},
+        {"departure_city": "深圳", "arrival_city": "武汉", "departure_date": "2026-01-15"},
+        {"departure_city": "北京", "arrival_city": "上海", "departure_date": "2026-01-20"},
+        {"departure_city": "广州", "arrival_city": "深圳", "departure_date": "2026-01-25"},
     ]
     
     results = []
@@ -324,7 +324,7 @@ def example_cancel():
     task = create_validation_task(
         departure_city="杭州",
         arrival_city="成都",
-        departure_date="2025-01-30"
+        departure_date="2026-01-30"
     )
     
     if not task:
