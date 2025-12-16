@@ -3,6 +3,20 @@
 验证任务 API - Python 示例
 
 演示如何使用 Python 调用验证任务 API
+
+依赖安装：
+    pip3 install requests
+    
+    或者使用系统包管理器（Ubuntu/Debian）：
+    sudo apt-get install python3-requests
+    
+使用方法：
+    python3 examples/python_example.py basic
+    python3 examples/python_example.py params
+    python3 examples/python_example.py batch
+    python3 examples/python_example.py cancel
+    
+注意：此示例需要 Rails 应用正在运行（bin/dev）
 """
 
 import requests
@@ -10,7 +24,7 @@ import time
 import json
 
 # 配置
-API_BASE = "http://localhost:3000/api"
+API_BASE = "https://3000-ec82d74f5a03-web.clackypaas.com/api"
 
 
 def create_validation_task(departure_city, arrival_city, departure_date, **kwargs):
