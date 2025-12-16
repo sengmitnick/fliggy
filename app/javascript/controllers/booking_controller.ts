@@ -151,9 +151,9 @@ export default class extends Controller<HTMLElement> {
   showConfirmModal(): void {
     this.confirmModalTarget.classList.remove('hidden')
     
-    // 如果是第二次等待（会员确认后），等待30-90秒后提交
+    // 如果是第二次等待（会员确认后），等待15-25秒后提交
     if (this.isSecondWait) {
-      const waitTime = Math.floor(Math.random() * (90000 - 30000 + 1)) + 30000
+      const waitTime = Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000
       setTimeout(() => {
         this.submitForm()
       }, waitTime)
@@ -167,9 +167,9 @@ export default class extends Controller<HTMLElement> {
         this.closeConfirmModal()
         this.showMemberModal()
       } else {
-        // 如果已是会员，保持等待弹窗显示，等待30-90秒后提交
+        // 如果已是会员，保持等待弹窗显示，等待15-25秒后提交
         this.memberCheckCompleted = true
-        const waitTime = Math.floor(Math.random() * (90000 - 30000 + 1)) + 30000
+        const waitTime = Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000
         setTimeout(() => {
           this.submitForm()
         }, waitTime)
