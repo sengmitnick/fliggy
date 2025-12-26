@@ -13,6 +13,7 @@ import CouponController from "./coupon_controller"
 import ComingSoonController from "./coming_soon_controller"
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
+import ServiceGridController from "./service_grid_controller"
 
 const application = Application.start()
 
@@ -29,5 +30,6 @@ application.register("coupon", CouponController)
 application.register("coming-soon", ComingSoonController)
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
+application.register("service-grid", ServiceGridController)
 
 window.Stimulus = application
