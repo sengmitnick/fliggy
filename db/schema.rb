@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_15_133239) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -84,6 +84,32 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_133239) do
     t.decimal "insurance_price"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "cities", force: :cascade do |t|
+    t.string "name"
+    t.string "pinyin"
+    t.string "airport_code"
+    t.string "region"
+    t.boolean "is_hot", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "themes"
+    t.index ["is_hot"], name: "index_cities_on_is_hot"
+    t.index ["name"], name: "index_cities_on_name", unique: true
+    t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "destinations", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.text "description"
+    t.string "image_url"
+    t.boolean "is_hot", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "slug"
+    t.index ["slug"], name: "index_destinations_on_slug", unique: true
   end
 
   create_table "flight_offers", force: :cascade do |t|
@@ -245,6 +271,25 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_133239) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "tour_products", force: :cascade do |t|
+    t.bigint "destination_id"
+    t.string "name"
+    t.string "product_type", default: "attraction"
+    t.string "category", default: "local"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price", default: "0.0"
+    t.integer "sales_count", default: 0
+    t.decimal "rating", default: "5.0"
+    t.text "tags"
+    t.text "description"
+    t.string "image_url"
+    t.integer "rank", default: 0
+    t.boolean "is_featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["destination_id"], name: "index_tour_products_on_destination_id"
   end
 
   create_table "users", force: :cascade do |t|

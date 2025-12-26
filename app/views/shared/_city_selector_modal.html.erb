@@ -83,33 +83,45 @@
             </div>
             
             <div class="grid grid-cols-4 gap-3">
-              <% hot_cities = [
-                {name: "北京", pinyin: "beijing"},
-                {name: "上海", pinyin: "shanghai"},
-                {name: "广州", pinyin: "guangzhou"},
-                {name: "杭州", pinyin: "hangzhou"},
-                {name: "成都", pinyin: "chengdu"},
-                {name: "深圳", pinyin: "shenzhen"},
-                {name: "重庆", pinyin: "chongqing"},
-                {name: "西安", pinyin: "xian"},
-                {name: "郑州", pinyin: "zhengzhou"},
-                {name: "昆明", pinyin: "kunming"},
-                {name: "哈尔滨", pinyin: "haerbin"},
-                {name: "南京", pinyin: "nanjing"},
-                {name: "武汉", pinyin: "wuhan"},
-                {name: "沈阳", pinyin: "shenyang"},
-                {name: "海口", pinyin: "haikou"},
-                {name: "长沙", pinyin: "changsha"}
-              ] %>
-              
-              <% hot_cities.each do |city| %>
-                <button 
-                  data-action="click->city-selector#selectCity"
-                  data-city-name="<%= city[:name] %>"
-                  data-city-pinyin="<%= city[:pinyin] %>"
-                  class="py-2 text-center text-sm rounded hover:bg-gray-100 transition-colors">
-                  <%= city[:name] %>
-                </button>
+              <% if defined?(@hot_cities) && @hot_cities.present? %>
+                <% @hot_cities.each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city.name %>"
+                    data-city-pinyin="<%= city.pinyin %>"
+                    class="py-2 text-center text-sm rounded hover:bg-gray-100 transition-colors">
+                    <%= city.name %>
+                  </button>
+                <% end %>
+              <% else %>
+                <% hot_cities = [
+                  {name: "北京", pinyin: "beijing"},
+                  {name: "上海", pinyin: "shanghai"},
+                  {name: "广州", pinyin: "guangzhou"},
+                  {name: "杭州", pinyin: "hangzhou"},
+                  {name: "成都", pinyin: "chengdu"},
+                  {name: "深圳", pinyin: "shenzhen"},
+                  {name: "重庆", pinyin: "chongqing"},
+                  {name: "西安", pinyin: "xian"},
+                  {name: "郑州", pinyin: "zhengzhou"},
+                  {name: "昆明", pinyin: "kunming"},
+                  {name: "哈尔滨", pinyin: "haerbin"},
+                  {name: "南京", pinyin: "nanjing"},
+                  {name: "武汉", pinyin: "wuhan"},
+                  {name: "沈阳", pinyin: "shenyang"},
+                  {name: "海口", pinyin: "haikou"},
+                  {name: "长沙", pinyin: "changsha"}
+                ] %>
+                
+                <% hot_cities.each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:pinyin] %>"
+                    class="py-2 text-center text-sm rounded hover:bg-gray-100 transition-colors">
+                    <%= city[:name] %>
+                  </button>
+                <% end %>
               <% end %>
             </div>
           </div>
@@ -131,42 +143,62 @@
           
           <!-- Cities by Letter -->
           <div class="px-4 py-4">
-            <% cities_by_letter = {
-              'A' => [{name: "阿克苏", pinyin: "akesu"}, {name: "安庆", pinyin: "anqing"}, {name: "阿勒泰", pinyin: "aletai"}],
-              'B' => [{name: "北京", pinyin: "beijing"}, {name: "包头", pinyin: "baotou"}],
-              'C' => [{name: "成都", pinyin: "chengdu"}, {name: "重庆", pinyin: "chongqing"}, {name: "长沙", pinyin: "changsha"}, {name: "长春", pinyin: "changchun"}],
-              'D' => [{name: "大连", pinyin: "dalian"}, {name: "大同", pinyin: "datong"}],
-              'F' => [{name: "福州", pinyin: "fuzhou"}],
-              'G' => [{name: "广州", pinyin: "guangzhou"}, {name: "贵阳", pinyin: "guiyang"}],
-              'H' => [{name: "杭州", pinyin: "hangzhou"}, {name: "哈尔滨", pinyin: "haerbin"}, {name: "海口", pinyin: "haikou"}, {name: "呼和浩特", pinyin: "huhehaote"}],
-              'J' => [{name: "济南", pinyin: "jinan"}],
-              'K' => [{name: "昆明", pinyin: "kunming"}],
-              'L' => [{name: "兰州", pinyin: "lanzhou"}, {name: "拉萨", pinyin: "lasa"}],
-              'N' => [{name: "南京", pinyin: "nanjing"}, {name: "南宁", pinyin: "nanning"}, {name: "南昌", pinyin: "nanchang"}],
-              'Q' => [{name: "青岛", pinyin: "qingdao"}],
-              'S' => [{name: "上海", pinyin: "shanghai"}, {name: "深圳", pinyin: "shenzhen"}, {name: "沈阳", pinyin: "shenyang"}, {name: "石家庄", pinyin: "shijiazhuang"}],
-              'T' => [{name: "太原", pinyin: "taiyuan"}, {name: "天津", pinyin: "tianjin"}],
-              'W' => [{name: "武汉", pinyin: "wuhan"}, {name: "乌鲁木齐", pinyin: "wulumuqi"}],
-              'X' => [{name: "西安", pinyin: "xian"}, {name: "厦门", pinyin: "xiamen"}, {name: "西宁", pinyin: "xining"}],
-              'Y' => [{name: "银川", pinyin: "yinchuan"}],
-              'Z' => [{name: "郑州", pinyin: "zhengzhou"}]
-            } %>
-            
-            <% cities_by_letter.each do |letter, cities| %>
-              <div data-letter-section="<%= letter %>" class="mb-4">
-                <div class="text-lg font-bold text-gray-900 mb-2"><%= letter %></div>
-                <div class="space-y-1">
-                  <% cities.each do |city| %>
-                    <button 
-                      data-action="click->city-selector#selectCity"
-                      data-city-name="<%= city[:name] %>"
-                      data-city-pinyin="<%= city[:pinyin] %>"
-                      class="block w-full text-left py-3 px-2 text-sm hover:bg-gray-100 rounded transition-colors">
-                      <%= city[:name] %>
-                    </button>
-                  <% end %>
+            <% if defined?(@all_cities) && @all_cities.present? %>
+              <% cities_by_letter = @all_cities.group_by { |city| city.pinyin[0].upcase } %>
+              <% cities_by_letter.sort.each do |letter, cities| %>
+                <div data-letter-section="<%= letter %>" class="mb-4">
+                  <div class="text-lg font-bold text-gray-900 mb-2"><%= letter %></div>
+                  <div class="space-y-1">
+                    <% cities.each do |city| %>
+                      <button 
+                        data-action="click->city-selector#selectCity"
+                        data-city-name="<%= city.name %>"
+                        data-city-pinyin="<%= city.pinyin %>"
+                        class="block w-full text-left py-3 px-2 text-sm hover:bg-gray-100 rounded transition-colors">
+                        <%= city.name %>
+                      </button>
+                    <% end %>
+                  </div>
                 </div>
-              </div>
+              <% end %>
+            <% else %>
+              <% cities_by_letter = {
+                'A' => [{name: "阿克苏", pinyin: "akesu"}, {name: "安庆", pinyin: "anqing"}, {name: "阿勒泰", pinyin: "aletai"}],
+                'B' => [{name: "北京", pinyin: "beijing"}, {name: "包头", pinyin: "baotou"}],
+                'C' => [{name: "成都", pinyin: "chengdu"}, {name: "重庆", pinyin: "chongqing"}, {name: "长沙", pinyin: "changsha"}, {name: "长春", pinyin: "changchun"}],
+                'D' => [{name: "大连", pinyin: "dalian"}, {name: "大同", pinyin: "datong"}],
+                'F' => [{name: "福州", pinyin: "fuzhou"}],
+                'G' => [{name: "广州", pinyin: "guangzhou"}, {name: "贵阳", pinyin: "guiyang"}],
+                'H' => [{name: "杭州", pinyin: "hangzhou"}, {name: "哈尔滨", pinyin: "haerbin"}, {name: "海口", pinyin: "haikou"}, {name: "呼和浩特", pinyin: "huhehaote"}],
+                'J' => [{name: "济南", pinyin: "jinan"}],
+                'K' => [{name: "昆明", pinyin: "kunming"}],
+                'L' => [{name: "兰州", pinyin: "lanzhou"}, {name: "拉萨", pinyin: "lasa"}],
+                'N' => [{name: "南京", pinyin: "nanjing"}, {name: "南宁", pinyin: "nanning"}, {name: "南昌", pinyin: "nanchang"}],
+                'Q' => [{name: "青岛", pinyin: "qingdao"}],
+                'S' => [{name: "上海", pinyin: "shanghai"}, {name: "深圳", pinyin: "shenzhen"}, {name: "沈阳", pinyin: "shenyang"}, {name: "石家庄", pinyin: "shijiazhuang"}],
+                'T' => [{name: "太原", pinyin: "taiyuan"}, {name: "天津", pinyin: "tianjin"}],
+                'W' => [{name: "武汉", pinyin: "wuhan"}, {name: "乌鲁木齐", pinyin: "wulumuqi"}],
+                'X' => [{name: "西安", pinyin: "xian"}, {name: "厦门", pinyin: "xiamen"}, {name: "西宁", pinyin: "xining"}],
+                'Y' => [{name: "银川", pinyin: "yinchuan"}],
+                'Z' => [{name: "郑州", pinyin: "zhengzhou"}]
+              } %>
+              
+              <% cities_by_letter.each do |letter, cities| %>
+                <div data-letter-section="<%= letter %>" class="mb-4">
+                  <div class="text-lg font-bold text-gray-900 mb-2"><%= letter %></div>
+                  <div class="space-y-1">
+                    <% cities.each do |city| %>
+                      <button 
+                        data-action="click->city-selector#selectCity"
+                        data-city-name="<%= city[:name] %>"
+                        data-city-pinyin="<%= city[:pinyin] %>"
+                        class="block w-full text-left py-3 px-2 text-sm hover:bg-gray-100 rounded transition-colors">
+                        <%= city[:name] %>
+                      </button>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
             <% end %>
           </div>
         </div>

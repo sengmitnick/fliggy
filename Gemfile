@@ -15,6 +15,7 @@ gem "bcrypt"
 gem "kaminari"
 gem "good_job", "~> 4.6"
 gem "friendly_id", "~> 5.5"
+gem "ruby-pinyin", "~> 0.5.0"
 gem "rails-i18n", "~> 7.0.10"
 gem 'image_processing', '~> 1.2'
 gem 'ostruct', '~> 0.6.3'

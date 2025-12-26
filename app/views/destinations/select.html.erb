@@ -1,0 +1,206 @@
+<div class="min-h-screen bg-background">
+  <!-- 目的地选择模态框 -->
+  <div class="fixed inset-0 bg-white z-50 flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-4 border-b border-border">
+      <h1 class="text-xl font-bold text-foreground">目的地</h1>
+      <%= link_to root_path, class: "w-8 h-8 rounded-full bg-surface flex items-center justify-center" do %>
+        <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      <% end %>
+    </div>
+
+    <!-- 全球好去处横幅 -->
+    <div class="px-4 py-3 bg-surface/50 flex items-center justify-between border-b border-border">
+      <div class="flex items-center gap-2">
+        <span class="text-foreground">发现旅行灵感，探索</span>
+        <span class="text-primary font-medium">全球</span>
+        <span class="text-foreground">好去处</span>
+      </div>
+      <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-border bg-white">
+      <button class="flex-1 py-3 text-center font-medium text-foreground border-b-2 border-foreground">
+        国内 (含港澳台)
+      </button>
+      <button class="flex-1 py-3 text-center font-medium text-muted">
+        国际
+      </button>
+    </div>
+
+    <!-- Controller Scope Container -->
+    <div class="flex-1 flex flex-col overflow-hidden"
+         data-controller="region-selector" 
+         data-region-selector-available-destinations-value="<%= @destinations.pluck(:name).to_json %>"
+         data-region-selector-all-cities-value="<%= @all_cities.map { |c| { name: c.name, pinyin: c.pinyin, slug: Destination.find_by(name: c.name)&.slug } }.to_json %>">
+    <!-- Search Bar -->
+    <div class="px-4 py-3 bg-surface/30">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" 
+               placeholder="搜索城市/国家中文或拼音" 
+               class="w-full pl-10 pr-4 py-2.5 bg-white border border-border rounded-lg text-sm"
+               data-region-selector-target="searchInput"
+               data-action="input->region-selector#search">
+      </div>
+    </div>
+
+    <!-- Tabs: 热门目的地 / 当前位置 -->
+    <div class="flex gap-6 px-4 py-2 border-b border-border bg-white">
+      <button class="text-sm font-medium text-foreground border-b-2 border-foreground pb-2">热门目的地</button>
+      <button class="text-sm font-medium text-muted pb-2">当前位置</button>
+    </div>
+
+    <!-- Main Content - Scrollable -->
+    <div class="flex-1 overflow-y-auto" >
+      <!-- 搜索结果区域 -->
+      <div data-region-selector-target="searchResults" class="w-full hidden">
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-foreground">搜索结果</h3>
+            <button class="text-sm text-primary" data-action="click->region-selector#clearSearch">清除搜索</button>
+          </div>
+          <div data-region-selector-target="searchResultsList" class="grid grid-cols-3 gap-3">
+            <!-- 搜索结果将动态插入这里 -->
+          </div>
+          <div data-region-selector-target="noResults" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="text-4xl mb-2">🔍</div>
+            <p class="text-sm text-muted">未找到相关城市</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 正常视图：左侧分类和右侧内容 -->
+      <div class="flex h-full" data-region-selector-target="normalView">
+        <!-- Left Sidebar - 省份导航 -->
+        <div class="w-24 bg-surface/50 border-r border-border overflow-y-auto flex-shrink-0">
+          <div class="py-2">
+            <!-- 主题分类 -->
+            <button 
+              data-region-selector-target="regionButton" 
+              data-region="热门目的地"
+              data-action="click->region-selector#selectRegion"
+              class="w-full py-3 text-sm text-foreground bg-white border-l-2 border-primary font-medium">
+              热门目的地
+            </button>
+            
+            <button 
+              data-region-selector-target="regionButton" 
+              data-region="海边度假"
+              data-action="click->region-selector#selectRegion"
+              class="w-full py-3 text-sm text-muted">
+              海边度假
+            </button>
+            
+            <button 
+              data-region-selector-target="regionButton" 
+              data-region="亲子必去"
+              data-action="click->region-selector#selectRegion"
+              class="w-full py-3 text-sm text-muted">
+              亲子必去
+            </button>
+            
+            <!-- 省份列表 -->
+            <% @regions.each do |region| %>
+              <button 
+                data-region-selector-target="regionButton" 
+                data-region="<%= region %>"
+                data-action="click->region-selector#selectRegion"
+                class="w-full py-3 text-sm text-muted">
+                <%= region %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Right Content Area - 城市展示 -->
+        <div class="flex-1 overflow-y-auto pb-20 bg-white">
+          <!-- 热门目的地 -->
+          <div data-region-selector-target="cityList" data-region="热门目的地" class="p-4">
+            <h3 class="text-base font-bold text-foreground mb-3 flex items-center gap-2">
+              <span>🌸</span>
+              <span>热门目的地</span>
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-3 mb-6">
+              <% @destinations.first(9).each do |destination| %>
+                <%= link_to destination_path(destination), class: "relative rounded-xl overflow-hidden aspect-[3/4] group" do %>
+                  <img src="https://images.unsplash.com/photo-1549813069-f95e44d7f498?w=400" alt="<%= destination.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div class="absolute bottom-2 left-2 right-2 text-white">
+                    <div class="font-bold text-sm"><%= destination.name %></div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 海边度假 -->
+          <div data-region-selector-target="cityList" data-region="海边度假" class="p-4 hidden">
+            <h3 class="text-base font-bold text-foreground mb-3">海边度假</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <% @beach_cities.each do |city| %>
+                <% destination = @destinations.find { |d| d.name == city.name } %>
+                <div class="text-center py-3 px-2 bg-surface rounded-lg border border-border hover:border-primary hover:shadow-sm transition-all cursor-pointer"
+                     data-action="click->region-selector#selectCity"
+                     data-city-name="<%= city.name %>"
+                     data-city-slug="<%= destination&.slug %>">
+                  <div class="text-sm font-medium text-foreground"><%= city.name %></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 亲子必去 -->
+          <div data-region-selector-target="cityList" data-region="亲子必去" class="p-4 hidden">
+            <h3 class="text-base font-bold text-foreground mb-3">亲子必去</h3>
+            <div class="grid grid-cols-3 gap-3">
+              <% @family_cities.each do |city| %>
+                <% destination = @destinations.find { |d| d.name == city.name } %>
+                <div class="text-center py-3 px-2 bg-surface rounded-lg border border-border hover:border-primary hover:shadow-sm transition-all cursor-pointer"
+                     data-action="click->region-selector#selectCity"
+                     data-city-name="<%= city.name %>"
+                     data-city-slug="<%= destination&.slug %>">
+                  <div class="text-sm font-medium text-foreground"><%= city.name %></div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 各省份城市 -->
+          <% @regions.each do |region| %>
+            <% cities = @cities_by_region[region] %>
+            <div data-region-selector-target="cityList" data-region="<%= region %>" class="p-4 hidden">
+              <!-- 省份名称标题 -->
+              <div class="flex items-center gap-2 mb-3">
+                <span class="inline-block px-3 py-1 bg-surface text-xs text-muted rounded">省份</span>
+                <h3 class="text-base font-bold text-foreground"><%= region %></h3>
+              </div>
+              
+              <!-- 该省份的城市列表 -->
+              <div class="grid grid-cols-3 gap-3">
+                <% cities.sort_by(&:pinyin).each do |city| %>
+                  <% destination = @destinations.find { |d| d.name == city.name } %>
+                  <div class="text-center py-3 px-2 bg-surface rounded-lg border border-border hover:border-primary hover:shadow-sm transition-all cursor-pointer"
+                       data-action="click->region-selector#selectCity"
+                       data-city-name="<%= city.name %>"
+                       data-city-slug="<%= destination&.slug %>">
+                    <div class="text-sm font-medium text-foreground"><%= city.name %></div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    </div><!-- Close controller scope container -->
+  </div>
+</div>

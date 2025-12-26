@@ -348,6 +348,7 @@ GEM
     reline (0.6.1)
       io-console (~> 0.5)
     rexml (3.4.1)
+    rmmseg-cpp-new (0.3.1)
     rspec-core (3.13.5)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -392,6 +393,8 @@ GEM
       rubocop (>= 1.72)
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
+    ruby-pinyin (0.5.0)
+      rmmseg-cpp-new (~> 0.3.1)
     ruby-progressbar (1.13.0)
     ruby-vips (2.2.5)
       ffi (~> 1.12)
@@ -478,6 +481,7 @@ DEPENDENCIES
   rails-i18n (~> 7.0.10)
   rspec-rails
   rubocop-rails-omakase
+  ruby-pinyin (~> 0.5.0)
   selenium-webdriver
   solid_cable (~> 3.0)
   turbo-rails (~> 2.0)

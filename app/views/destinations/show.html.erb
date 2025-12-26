@@ -1,0 +1,393 @@
+<div class="min-h-screen bg-white" data-controller="destination">
+  <!-- Header - 复用首页样式 -->
+  <div class="sticky top-0 z-50" style="background: linear-gradient(180deg, #FFD93D 0%, #FFE066 40%, #FFFFFF 80%, #FFFFFF 100%);">
+    <div class="px-4 py-2">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-3">
+        <!-- Avatar -->
+        <div class="flex items-center gap-2">
+          <%= link_to root_path, class: "w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-base font-bold", style: "color: #FFD700;" do %>
+            飞
+          <% end %>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center gap-5">
+          <button class="flex items-center gap-2" onclick="alert('功能开发中')">
+            <span class="text-sm font-medium whitespace-nowrap">问一问</span>
+          </button>
+          <%= link_to root_path, class: "text-sm font-medium border-b-2 border-transparent pb-0.5 whitespace-nowrap" do %>
+            推荐
+          <% end %>
+          <%= link_to select_destinations_path, class: "flex items-center gap-0.5 text-sm font-medium border-b-2 border-black pb-0.5" do %>
+            <span class="whitespace-nowrap"><%= @destination.name %></span>
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          <% end %>
+        </div>
+
+        <!-- Cart Icon -->
+        <button class="flex flex-col items-center gap-0" onclick="alert('功能开发中')">
+          <%= image_tag "home/购物车.png", class: "w-5 h-5", alt: "购物车" %>
+          <span class="text-[9px] whitespace-nowrap">我的收藏</span>
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="relative">
+        <div class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+          <div class="flex items-center gap-2 flex-1">
+            <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
+            <span class="text-base text-gray-700 font-medium"><%= @destination.name %>的酒店</span>
+          </div>
+          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;" onclick="alert('功能开发中')">
+            搜索
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="flex gap-2 mt-2.5 overflow-x-auto pb-1 no-scrollbar">
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>酒店</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>景点</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>美食</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>攻略</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Grid - 使用去旅行文件夹中的图标 -->
+  <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4 mt-4">
+    <!-- Row 1 -->
+    <div class="grid grid-cols-5 mb-6">
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/酒店.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "酒店" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/玩乐体验.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "玩乐体验" %>
+      </button>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="grid grid-cols-5">
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/跟团游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "跟团游" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/景点门票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "景点门票" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/景酒套票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "景酒套票" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/包车游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "包车游" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "travel-services/一日游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "一日游" %>
+      </button>
+    </div>
+
+    <!-- Pagination Dots -->
+    <div class="flex justify-center gap-2 mt-4">
+      <div class="w-6 h-1 rounded-full" style="background: #FFD700;"></div>
+      <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="mt-2 bg-white">
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200 sticky top-[180px] bg-white z-40" data-destination-target="tabs">
+      <button class="tab-btn px-6 py-3 text-sm font-medium text-gray-900 border-b-2 border-gray-900" data-action="click->destination#switchTab" data-tab="local">
+        本地榜
+      </button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent" data-action="click->destination#switchTab" data-tab="nearby">
+        周边榜
+      </button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent" data-action="click->destination#switchTab" data-tab="seasonal">
+        时令榜
+      </button>
+    </div>
+
+    <!-- 本地榜 Content -->
+    <div class="tab-content" data-destination-target="tabContent" data-tab="local">
+      <% if @local_attractions.empty? && @local_hotels.empty? && @experiences.empty? && @local_tours.empty? %>
+        <!-- 空状态提示 -->
+        <div class="flex flex-col items-center justify-center py-20 px-4">
+          <div class="text-6xl mb-4">✈️</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2"><%= @destination.name %>的精彩即将呈现</h3>
+          <p class="text-sm text-gray-500 text-center mb-6">我们正在为您精心准备<%= @destination.name %>的旅游攻略和优质产品</p>
+          <div class="flex gap-3">
+            <%= link_to "返回首页", root_path, class: "px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium" %>
+            <%= link_to "选择其他城市", select_destinations_path, class: "px-6 py-2 text-white rounded-lg font-medium", style: "background: #6B7FFF;" %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- 必去景点榜 -->
+      <% if @local_attractions.any? %>
+        <div class="px-4 py-4">
+          <h3 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <span>🌸</span>
+            <span>必去景点榜</span>
+            <svg class="w-4 h-4 text-gray-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </h3>
+          
+          <div class="grid grid-cols-3 gap-3">
+            <% @local_attractions.each_with_index do |product, index| %>
+              <div class="relative">
+                <div class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-0.5 rounded z-10" style="background: #6B7FFF;">
+                  TOP<br><%= index + 1 %>
+                </div>
+                <div class="relative rounded-xl overflow-hidden aspect-[3/4] mb-2">
+                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div class="absolute bottom-2 left-2 right-2 text-white">
+                    <div class="font-bold text-xs line-clamp-2"><%= product.name %></div>
+                  </div>
+                </div>
+                <div class="text-xs text-gray-500 line-clamp-1"><%= product.description %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- 必住酒店榜 -->
+      <% if @local_hotels.any? %>
+        <div class="px-4 py-4 bg-gray-50">
+          <h3 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <span>🏨</span>
+            <span>必住酒店榜</span>
+            <svg class="w-4 h-4 text-gray-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </h3>
+          
+          <div class="grid grid-cols-3 gap-3">
+            <% @local_hotels.each_with_index do |product, index| %>
+              <div class="relative">
+                <div class="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded z-10">
+                  TOP<br><%= index + 1 %>
+                </div>
+                <div class="relative rounded-xl overflow-hidden aspect-[3/4] mb-2">
+                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                </div>
+                <div class="text-xs font-medium text-gray-900 line-clamp-1"><%= product.name %></div>
+                <div class="flex items-center gap-1 mt-1">
+                  <span class="font-bold text-sm" style="color: #6B7FFF;">¥<%= product.price %></span>
+                  <span class="text-xs text-gray-500">起</span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- 当地体验 -->
+      <% if @experiences.any? %>
+        <div class="px-4 py-4">
+          <h3 class="text-base font-bold text-gray-900 mb-3">当地体验</h3>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <% @experiences.first(2).each do |product| %>
+              <div class="bg-white rounded-xl overflow-hidden border border-gray-200">
+                <div class="relative aspect-video">
+                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                </div>
+                <div class="p-3">
+                  <h4 class="font-medium text-sm text-gray-900 line-clamp-2 mb-2"><%= product.name %></h4>
+                  <% if product.tags.present? %>
+                    <div class="flex gap-1 mb-2">
+                      <% product.tags.first(2).each do |tag| %>
+                        <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"><%= tag %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  <div class="flex items-center gap-1">
+                    <span class="font-bold text-base" style="color: #6B7FFF;">¥<%= product.price %></span>
+                    <span class="text-xs text-gray-500">起</span>
+                    <span class="text-xs text-gray-500 ml-auto">已售<%= product.sales_count %>件</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- 一日游推荐 -->
+      <% if @local_tours.any? %>
+        <div class="px-4 py-4 bg-gray-50">
+          <h3 class="text-base font-bold text-gray-900 mb-3">一日游推荐</h3>
+          
+          <% @local_tours.first(3).each do |product| %>
+            <div class="bg-white rounded-xl overflow-hidden mb-3 border border-gray-200 flex">
+              <div class="relative w-32 flex-shrink-0">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                <div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">
+                  一日游
+                </div>
+              </div>
+              <div class="flex-1 p-3 flex flex-col justify-between">
+                <div>
+                  <h4 class="font-medium text-sm text-gray-900 line-clamp-2 mb-1"><%= product.name %></h4>
+                  <p class="text-xs text-gray-500 line-clamp-1"><%= product.description %></p>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                  <div class="flex items-center gap-1">
+                    <span class="font-bold text-base" style="color: #6B7FFF;">¥<%= product.price %></span>
+                    <span class="text-xs text-gray-500">起</span>
+                  </div>
+                  <span class="text-xs text-gray-500">已售<%= product.sales_count %></span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 周边榜 Content -->
+    <div class="tab-content hidden" data-destination-target="tabContent" data-tab="nearby">
+      <% if @nearby_tours.empty? %>
+        <!-- 空状态提示 -->
+        <div class="flex flex-col items-center justify-center py-20 px-4">
+          <div class="text-6xl mb-4">🗺️</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">周边游线路筹备中</h3>
+          <p class="text-sm text-gray-500 text-center mb-6">我们正在为<%= @destination.name %>周边精选优质旅游线路</p>
+        </div>
+      <% elsif @nearby_tours.any? %>
+        <div class="px-4 py-4">
+          <h3 class="text-base font-bold text-gray-900 mb-3">周边热门推荐</h3>
+          
+          <% @nearby_tours.each do |product| %>
+            <div class="bg-white rounded-xl overflow-hidden mb-3 border border-gray-200 flex">
+              <div class="relative w-32 flex-shrink-0">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+              </div>
+              <div class="flex-1 p-3 flex flex-col justify-between">
+                <div>
+                  <h4 class="font-medium text-sm text-gray-900 line-clamp-2 mb-1"><%= product.name %></h4>
+                  <p class="text-xs text-gray-500 line-clamp-1"><%= product.description %></p>
+                  <% if product.tags.present? %>
+                    <div class="flex gap-1 mt-2">
+                      <% product.tags.first(3).each do |tag| %>
+                        <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"><%= tag %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                  <div class="flex items-center gap-1">
+                    <span class="font-bold text-base" style="color: #6B7FFF;">¥<%= product.price %></span>
+                    <span class="text-xs text-gray-500">起</span>
+                  </div>
+                  <span class="text-xs text-gray-500">⭐ <%= product.rating %></span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 时令榜 Content -->
+    <div class="tab-content hidden" data-destination-target="tabContent" data-tab="seasonal">
+      <% if @seasonal_products.empty? %>
+        <!-- 空状态提示 -->
+        <div class="flex flex-col items-center justify-center py-20 px-4">
+          <div class="text-6xl mb-4">🌸</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">时令产品即将上线</h3>
+          <p class="text-sm text-gray-500 text-center mb-6">我们正在根据季节为<%= @destination.name %>准备特色体验</p>
+        </div>
+      <% elsif @seasonal_products.any? %>
+        <div class="px-4 py-4">
+          <h3 class="text-base font-bold text-gray-900 mb-3">12月温泉榜</h3>
+          
+          <% @seasonal_products.each do |product| %>
+            <div class="bg-white rounded-xl overflow-hidden mb-3 border border-gray-200">
+              <div class="relative aspect-video">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+              </div>
+              <div class="p-3">
+                <h4 class="font-medium text-sm text-gray-900 line-clamp-2 mb-2"><%= product.name %></h4>
+                <p class="text-xs text-gray-500 line-clamp-2 mb-2"><%= product.description %></p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1">
+                    <span class="font-bold text-base" style="color: #6B7FFF;">¥<%= product.price %></span>
+                    <span class="text-xs text-gray-500">起</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">⭐ <%= product.rating %></span>
+                    <span class="text-xs text-gray-500">已售<%= product.sales_count %></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="py-20"></div>
+
+  <!-- Bottom Navigation - 复用首页样式 -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200">
+    <div class="grid grid-cols-5 gap-2 px-4 py-2">
+      <%= link_to root_path, class: "flex flex-col items-center justify-center" do %>
+        <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
+      <% end %>
+
+      <button class="flex flex-col items-center justify-center relative" onclick="alert('功能开发中')">
+        <%= image_tag "home/Tab会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center relative" onclick="alert('功能开发中')">
+        <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
+        <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
+          <div class="ml-[24px] w-2 h-2 bg-red-500 rounded-full"></div>
+        </div>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
+      </button>
+
+      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+        <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
