@@ -7,9 +7,46 @@ export default class extends Controller<HTMLElement> {
   declare readonly dotTargets: HTMLElement[]
 
   private currentPage: number = 0
+  private touchStartX: number = 0
+  private touchEndX: number = 0
+  private minSwipeDistance: number = 50 // 最小滑动距离（像素）
 
   connect(): void {
     this.showPage(0)
+    // 添加触摸事件监听
+    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true })
+    this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true })
+  }
+
+  disconnect(): void {
+    // 清理事件监听
+    this.element.removeEventListener('touchstart', this.handleTouchStart.bind(this))
+    this.element.removeEventListener('touchend', this.handleTouchEnd.bind(this))
+  }
+
+  // 处理触摸开始
+  private handleTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].screenX
+  }
+
+  // 处理触摸结束
+  private handleTouchEnd(event: TouchEvent): void {
+    this.touchEndX = event.changedTouches[0].screenX
+    this.handleSwipe()
+  }
+
+  // 处理滑动逻辑
+  private handleSwipe(): void {
+    const swipeDistance = this.touchEndX - this.touchStartX
+    
+    // 向左滑动（下一页）
+    if (swipeDistance < -this.minSwipeDistance) {
+      this.nextPage()
+    }
+    // 向右滑动（上一页）
+    else if (swipeDistance > this.minSwipeDistance) {
+      this.prevPage()
+    }
   }
 
   goToPage(event: Event): void {
