@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_26_115234) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -290,6 +290,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
+  end
+
+  create_table "trains", force: :cascade do |t|
+    t.string "departure_city"
+    t.string "arrival_city"
+    t.datetime "departure_time"
+    t.datetime "arrival_time"
+    t.integer "duration"
+    t.string "train_number"
+    t.text "seat_types"
+    t.decimal "price_second_class"
+    t.decimal "price_first_class"
+    t.decimal "price_business_class"
+    t.integer "available_seats"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|

@@ -70,9 +70,9 @@
           <%= image_tag "home/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
         <% end %>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
+        <%= link_to trains_path, class: "flex flex-col items-center justify-center" do %>
           <%= image_tag "home/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
-        </button>
+        <% end %>
 
         <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
           <%= image_tag "home/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>

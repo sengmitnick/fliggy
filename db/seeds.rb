@@ -467,3 +467,31 @@ if shenzhen
 end
 
 puts "数据初始化完成！"
+
+# ==================== 火车票数据 ====================
+puts "正在初始化火车票数据..."
+Train.destroy_all
+
+# 使用自动生成功能为热门线路预生成今天和明天的数据
+# 其他日期和路线将在搜索时自动生成
+popular_routes = [
+  ['北京', '杭州'],
+  ['杭州', '北京'],
+  ['北京', '上海'],
+  ['上海', '北京'],
+  ['深圳', '广州'],
+  ['广州', '深圳']
+]
+
+trains_created = 0
+(0..1).each do |day_offset|
+  target_date = Date.today + day_offset.days
+  popular_routes.each do |departure, arrival|
+    generated = Train.generate_for_route(departure, arrival, target_date)
+    trains_created += generated.count
+  end
+end
+
+puts "预生成了 #{trains_created} 条火车票记录 (热门线路今明两天)"
+puts "其他线路和日期将在搜索时自动生成"
+puts "火车票数据初始化完成！"

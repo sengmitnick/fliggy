@@ -13,6 +13,9 @@ import CouponController from "./coupon_controller"
 import ComingSoonController from "./coming_soon_controller"
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
+import TrainSearchController from "./train_search_controller"
+import TrainListController from "./train_list_controller"
+import TrainCitySelectorController from "./train_city_selector_controller"
 
 const application = Application.start()
 
@@ -29,5 +32,8 @@ application.register("coupon", CouponController)
 application.register("coming-soon", ComingSoonController)
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
+application.register("train-search", TrainSearchController)
+application.register("train-list", TrainListController)
+application.register("train-city-selector", TrainCitySelectorController)
 
 window.Stimulus = application
