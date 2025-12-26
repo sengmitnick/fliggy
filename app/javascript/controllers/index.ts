@@ -14,6 +14,7 @@ import ComingSoonController from "./coming_soon_controller"
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
 import PassengerSelectorController from "./passenger_selector_controller"
+import CabinSelectorController from "./cabin_selector_controller"
 
 const application = Application.start()
 
@@ -31,5 +32,6 @@ application.register("coming-soon", ComingSoonController)
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
 application.register("passenger-selector", PassengerSelectorController)
+application.register("cabin-selector", CabinSelectorController)
 
 window.Stimulus = application

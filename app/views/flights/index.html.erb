@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker coming-soon passenger-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <!-- Background Image Container -->
@@ -110,8 +110,22 @@
 
       <!-- Cabin Class Selection -->
       <div class="flex gap-2 py-3">
-        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">全部舱位</button>
-        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">公务/头等舱</button>
+        <button 
+          type="button"
+          data-cabin-selector-target="button"
+          data-cabin-type="all"
+          data-action="click->cabin-selector#select"
+          class="px-4 py-2 rounded-full border text-sm transition-colors">
+          全部舱位
+        </button>
+        <button 
+          type="button"
+          data-cabin-selector-target="button"
+          data-cabin-type="business"
+          data-action="click->cabin-selector#select"
+          class="px-4 py-2 rounded-full border text-sm transition-colors">
+          公务/头等舱
+        </button>
       </div>
 
       <!-- Search Button -->
@@ -119,6 +133,7 @@
         <%= f.hidden_field :departure_city, value: '', data: { 'city-selector-target': 'departureCityInput' } %>
         <%= f.hidden_field :destination_city, value: '', data: { 'city-selector-target': 'destinationCityInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
           搜索机票
         </button>
