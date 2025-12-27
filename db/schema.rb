@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_26_122500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -82,7 +82,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.datetime "updated_at", null: false
     t.string "insurance_type"
     t.decimal "insurance_price"
+    t.string "trip_type", default: "one_way"
+    t.integer "return_flight_id"
+    t.date "return_date"
+    t.integer "return_offer_id"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
+    t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
   end
 

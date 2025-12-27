@@ -32,49 +32,105 @@
 
     <!-- 航班信息卡片 -->
     <div class="bg-white rounded-lg shadow p-4 mb-4">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center space-x-2">
-          <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded text-sm font-bold">直飞</span>
-          <span class="text-lg"><%= @flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
-          <span class="text-lg"><%= @flight.departure_city %>—<%= @flight.destination_city %></span>
-        </div>
-        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
-      </div>
-
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="text-gray-600">
-            成人 ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
-            机建燃油 ¥<%= @flight.discount_price.to_i %>
-            <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
-              <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
-              <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
-              </svg>
-            </button>
+      <!-- 去程航班 -->
+      <div class="<%= 'mb-4 pb-4 border-b border-gray-200' if @trip_type == 'round_trip' %>">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2">
+            <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded text-sm font-bold">直飞</span>
+            <span class="text-lg"><%= @flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
+            <span class="text-lg"><%= @flight.departure_city %>—<%= @flight.destination_city %></span>
+            <% if @trip_type == 'round_trip' %>
+              <span class="text-sm text-yellow-600 font-bold ml-2">去程</span>
+            <% end %>
           </div>
           <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
         </div>
 
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="text-gray-600">
+              成人 ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
+              机建燃油 ¥<%= @flight.discount_price.to_i %>
+              <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+                <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+                <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
+                </svg>
+              </button>
+            </div>
+            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
+            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
+          <div class="flex items-center space-x-2">
+            <span class="text-red-500">退改 ¥21起</span>
+            <span class="text-gray-400">|</span>
+            <span class="text-gray-600">托运行李共20公斤</span>
+          </div>
+          <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+        </div>
+
+        <div class="flex items-center justify-between mt-2 text-sm">
+          <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
           <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
         </div>
       </div>
 
-      <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
-        <div class="flex items-center space-x-2">
-          <span class="text-red-500">退改 ¥21起</span>
-          <span class="text-gray-400">|</span>
-          <span class="text-gray-600">托运行李共20公斤</span>
-        </div>
-        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
-      </div>
+      <!-- 返程航班 -->
+      <% if @trip_type == 'round_trip' && @return_flight %>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <span class="bg-blue-400 text-white px-2 py-1 rounded text-sm font-bold">直飞</span>
+              <span class="text-lg"><%= @return_flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
+              <span class="text-lg"><%= @return_flight.departure_city %>—<%= @return_flight.destination_city %></span>
+              <span class="text-sm text-blue-600 font-bold ml-2">返程</span>
+            </div>
+            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+          </div>
 
-      <div class="flex items-center justify-between mt-2 text-sm">
-        <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
-        <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
-      </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="text-gray-600">
+                成人 ¥<%= (@return_offer&.price || @return_flight.final_price).to_i %>
+                机建燃油 ¥<%= @return_flight.discount_price.to_i %>
+                <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+                  <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
+                  </svg>
+                </button>
+              </div>
+              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
+              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
+            <div class="flex items-center space-x-2">
+              <span class="text-red-500">退改 ¥21起</span>
+              <span class="text-gray-400">|</span>
+              <span class="text-gray-600">托运行李共20公斤</span>
+            </div>
+            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+          </div>
+
+          <div class="flex items-center justify-between mt-2 text-sm">
+            <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
+            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+          </div>
+        </div>
+      <% end %>
     </div>
 
     <!-- 已选择人数 -->
@@ -141,6 +197,9 @@
     <%= form.hidden_field :offer_id, value: @selected_offer&.id %>
     <%= form.hidden_field :insurance_type, id: "booking_insurance_type", value: "none" %>
     <%= form.hidden_field :insurance_price, id: "booking_insurance_price", value: 0 %>
+    <%= form.hidden_field :trip_type, value: @trip_type %>
+    <%= form.hidden_field :return_flight_id, value: @return_flight&.id %>
+    <%= form.hidden_field :return_offer_id, value: @return_offer&.id %>
 
     <!-- 联系电话 -->
     <div class="bg-white rounded-lg shadow p-4 mb-4">

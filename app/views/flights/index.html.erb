@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <!-- Background Image Container -->
@@ -38,16 +38,35 @@
     <!-- Trip Type Tabs -->
     <div class="flex items-center justify-center gap-8 py-4 border-b border-gray-100">
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base font-bold border-b-2 border-black pb-1">单程</button>
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="one_way"
+          data-action="click->trip-type#selectType"
+          class="text-base font-bold border-b-2 border-black pb-1">
+          单程
+        </button>
       </div>
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base text-gray-500 relative" data-action="click->coming-soon#show">
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="round_trip"
+          data-action="click->trip-type#selectType"
+          class="text-base text-gray-500 relative">
           往返
           <span class="absolute -top-3 -right-6 bg-red-500 text-white text-xs px-1 rounded">更优惠</span>
         </button>
       </div>
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base text-gray-500" data-action="click->coming-soon#show">多程</button>
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="multi_city"
+          data-action="click->trip-type#selectType"
+          class="text-base text-gray-500">
+          多程
+        </button>
       </div>
     </div>
 
@@ -85,11 +104,26 @@
       <!-- Date Selection -->
       <div class="mb-4">
         <button 
+          type="button"
           data-action="click->date-picker#openModal"
           class="text-left">
           <div class="text-[32px] font-bold flex items-baseline leading-none" data-date-picker-target="selectedDate">
             <%= Date.today.month %><span class="text-lg font-medium mx-0.5">月</span><%= Date.today.day %><span class="text-lg font-medium ml-0.5 mr-2">日</span>
             <span class="text-base text-gray-500 font-medium">今天</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Return Date Selection (hidden by default) -->
+      <div class="mb-4 hidden" data-trip-type-target="returnDateSection">
+        <button 
+          type="button"
+          data-action="click->return-date-picker#openModal"
+          class="text-left">
+          <div class="text-sm text-gray-500 mb-1">返程日期</div>
+          <div class="text-[32px] font-bold flex items-baseline leading-none" data-return-date-picker-target="selectedDate">
+            <%= (Date.today + 197.days).month %><span class="text-lg font-medium mx-0.5">月</span><%= (Date.today + 197.days).day %><span class="text-lg font-medium ml-0.5 mr-2">日</span>
+            <span class="text-base text-gray-500 font-medium">周六</span>
           </div>
         </button>
       </div>
@@ -133,6 +167,8 @@
         <%= f.hidden_field :departure_city, value: '', data: { 'city-selector-target': 'departureCityInput' } %>
         <%= f.hidden_field :destination_city, value: '', data: { 'city-selector-target': 'destinationCityInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
+        <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
+        <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
         <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
           搜索机票
@@ -365,6 +401,9 @@
   
   <!-- Date Picker Modal -->
   <%= render 'shared/date_picker_modal' %>
+  
+  <!-- Return Date Picker Modal -->
+  <%= render 'shared/return_date_picker_modal' %>
   
   <!-- Passenger Selector Modal -->
   <%= render 'shared/passenger_selector_modal' %>
