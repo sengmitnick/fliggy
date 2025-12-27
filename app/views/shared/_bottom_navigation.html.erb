@@ -14,9 +14,9 @@
     <!-- 首页 Tab -->
     <%= link_to root_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
       <% if active_tab == :home %>
-        <%= image_tag "home/Tab首页-激活.png", class: "w-[40%] h-auto object-contain", style: "max-height: 48px;", alt: "首页" %>
+        <%= image_tag "bottom_navigation/Tab首页-激活.png", class: "w-[40%] h-auto object-contain", style: "max-height: 48px;", alt: "首页" %>
       <% else %>
-        <%= image_tag "home/Tab首页.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "首页" %>
+        <%= image_tag "bottom_navigation/Tab首页.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "首页" %>
         <span>首页</span>
       <% end %>
     <% end %>
@@ -24,12 +24,12 @@
     <!-- 会员 Tab -->
     <% if active_tab == :member %>
       <%= link_to "#", class: "flex flex-col items-center justify-center gap-1 py-1" do %>
-        <%= image_tag "home/Tab会员.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
+        <%= image_tag "bottom_navigation/Tab会员-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
         <span>会员</span>
       <% end %>
     <% else %>
       <button class="flex flex-col items-center justify-center gap-1 py-1" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab会员.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
+        <%= image_tag "bottom_navigation/Tab会员.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
         <span>会员</span>
       </button>
     <% end %>
@@ -37,7 +37,7 @@
     <!-- 消息 Tab -->
     <% if active_tab == :message %>
       <%= link_to "#", class: "flex flex-col items-center justify-center py-1 relative" do %>
-        <%= image_tag "home/Tab消息.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
+        <%= image_tag "bottom_navigation/Tab消息-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
         <span>消息</span>
         <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
           <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
@@ -45,7 +45,7 @@
       <% end %>
     <% else %>
       <button class="flex flex-col items-center justify-center py-1 relative" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab消息.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
+        <%= image_tag "bottom_navigation/Tab消息.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
         <span>消息</span>
         <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
           <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
@@ -56,12 +56,12 @@
     <!-- 行程 Tab -->
     <% if active_tab == :trip %>
       <%= link_to "#", class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "home/Tab行程.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
+        <%= image_tag "bottom_navigation/Tab行程-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
         <span>行程</span>
       <% end %>
     <% else %>
       <button class="flex flex-col items-center justify-center py-1" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab行程.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
+        <%= image_tag "bottom_navigation/Tab行程.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
         <span>行程</span>
       </button>
     <% end %>
@@ -69,12 +69,12 @@
     <!-- 我的 Tab -->
     <% if active_tab == :profile %>
       <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "home/Tab我的-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
+        <%= image_tag "bottom_navigation/Tab我的-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
         <span>我的</span>
       <% end %>
     <% else %>
       <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "home/Tab我的.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
+        <%= image_tag "bottom_navigation/Tab我的.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
         <span>我的</span>
       <% end %>
     <% end %>
