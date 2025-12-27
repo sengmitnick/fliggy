@@ -3,24 +3,47 @@ class Api::MembershipsController < ApplicationController
 
   def check
     flight_id = params[:flight_id]
+    return_flight_id = params[:return_flight_id]
     
     if flight_id.blank?
-      render json: { is_member: false }, status: :ok
+      render json: { is_member: false, missing_airlines: [] }, status: :ok
       return
     end
     
+    # 收集需要检查的所有航空公司
+    airlines_to_check = []
+    
+    # 检查去程航班
     flight = Flight.find_by(id: flight_id)
+    if flight.present?
+      airlines_to_check << flight.airline
+    end
     
-    if flight.nil?
-      render json: { is_member: false }, status: :ok
+    # 检查回程航班（如果是往返机票）
+    if return_flight_id.present?
+      return_flight = Flight.find_by(id: return_flight_id)
+      if return_flight.present?
+        airlines_to_check << return_flight.airline
+      end
+    end
+    
+    # 去重
+    airlines_to_check.uniq!
+    
+    # 如果没有找到有效的航班，返回非会员
+    if airlines_to_check.empty?
+      render json: { is_member: false, missing_airlines: [] }, status: :ok
       return
     end
     
-    # 检查当前用户是否为该航空公司的会员
-    # 这里使用 User 模型中的 airline_member 字段
-    # 实际项目中，可能需要根据具体的航空公司来检查会员状态
-    is_member = current_user.airline_member || false
+    # 检查用户是否是所有相关航空公司的会员
+    missing_airlines = current_user.missing_memberships(airlines_to_check)
+    is_member = missing_airlines.empty?
     
-    render json: { is_member: is_member }, status: :ok
+    render json: { 
+      is_member: is_member, 
+      missing_airlines: missing_airlines,
+      checked_airlines: airlines_to_check
+    }, status: :ok
   end
 end

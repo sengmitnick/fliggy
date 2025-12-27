@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_26_122500) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_27_033443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -306,7 +306,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_26_122500) do
     t.string "uid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "airline_member", default: false
+    t.jsonb "airline_memberships", default: {}
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
