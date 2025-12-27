@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   # End routes for destinations
 
   # Routes for bookings
-  resources :bookings, only: [:new, :create, :show] do
+  resources :bookings, only: [:index, :new, :create, :show] do
     member do
       patch :cancel
       patch :pay

@@ -2,6 +2,17 @@ class BookingsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_flight, only: [:new, :create]
 
+  def index
+    @bookings = current_user.bookings.includes(:flight).order(created_at: :desc)
+    
+    # 根据状态筛选
+    if params[:status].present?
+      @bookings = @bookings.where(status: params[:status])
+    end
+    
+    @bookings = @bookings.page(params[:page]).per(10)
+  end
+
   def new
     @booking = Booking.new
     @passengers = current_user.passengers
