@@ -1,4 +1,4 @@
-# ClackyAI Rails7 starter
+#s'ye ClackyAI Rails7 starter
 
 The template for ClackyAI
 
