@@ -8,5 +8,7 @@ class HomeController < ApplicationController
     else
       @current_destination = Destination.friendly.find('shen-zhen')
     end
+
+    @full_render = true
   end
 end

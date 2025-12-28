@@ -1,0 +1,211 @@
+<div class="min-h-screen bg-gray-50 pb-20" data-controller="coming-soon">
+  <!-- Header Tabs -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-200">
+    <div class="flex items-center justify-center max-w-md mx-auto">
+      <button class="flex-1 py-4 text-lg font-semibold border-b-2 border-black">会员</button>
+      <button class="flex-1 py-4 text-lg text-gray-500" data-action="click->coming-soon#show">里程</button>
+    </div>
+  </div>
+
+  <!-- Member Profile Card -->
+  <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+    <div class="max-w-md mx-auto bg-white rounded-2xl p-6 shadow-sm">
+      <!-- User Info -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+          <%= @membership.level %>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400 text-sm"><%= @membership.experience %>/<%= @membership.experience_to_next_level + @membership.experience %> ›</span>
+          </div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-lg font-semibold">里程 <%= @membership.points %></span>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="w-24 h-24 opacity-20">
+            <svg viewBox="0 0 100 100" class="text-gray-400">
+              <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="text-5xl font-bold fill-current"><%= @membership.level %></text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Benefits -->
+      <div class="grid grid-cols-4 gap-4 py-4 border-t border-gray-100">
+        <% @available_benefits.take(2).each_with_index do |benefit, index| %>
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-12 h-12 bg-<%= ['yellow', 'purple'][index % 2] %>-50 rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 bg-<%= ['yellow', 'purple'][index % 2] %>-400 rounded<%= index % 2 == 0 ? '-full' : '' %>"></div>
+            </div>
+            <span class="text-xs text-gray-600"><%= benefit.name %></span>
+          </div>
+        <% end %>
+        <% @locked_benefits.take(2).each_with_index do |benefit, index| %>
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-12 h-12 bg-<%= ['red', 'orange'][index % 2] %>-50 rounded-full flex items-center justify-center relative">
+              <div class="w-8 h-8 bg-<%= ['red', 'orange'][index % 2] %>-400 rounded<%= index % 2 == 0 ? '-full' : '' %>"></div>
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-gray-300 rounded flex items-center justify-center text-[10px]">🔒</div>
+            </div>
+            <span class="text-xs text-gray-600"><%= benefit.name %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Level Up Prompt -->
+      <% if @membership.can_level_up? %>
+        <div class="bg-green-50 rounded-xl p-4 mt-4">
+          <p class="text-sm text-green-700">🎉 您已达到升级条件！</p>
+        </div>
+      <% else %>
+        <div class="bg-amber-50 rounded-xl p-4 mt-4">
+          <p class="text-sm text-gray-700 mb-3">还差<%= @membership.experience_to_next_level %>等级分升级，预估还需：</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-white rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-gray-800">1<span class="text-sm text-gray-600">晚</span></div>
+              <p class="text-xs text-gray-500 mt-1">总金额100元</p>
+              <button class="mt-2 text-xs text-orange-500 bg-orange-50 px-3 py-1 rounded-full" data-action="click->coming-soon#show">
+                或
+              </button>
+            </div>
+            <div class="bg-white rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-gray-800">1<span class="text-sm text-gray-600">张</span></div>
+              <p class="text-xs text-gray-500 mt-1">总金额500元</p>
+              <button class="mt-2 text-xs text-orange-500 bg-orange-50 px-3 py-1 rounded-full" data-action="click->coming-soon#show">
+                或
+              </button>
+            </div>
+            <div class="bg-white rounded-lg p-3 text-center">
+              <div class="text-2xl font-bold text-gray-800">1<span class="text-sm text-gray-600">次</span></div>
+              <p class="text-xs text-gray-500 mt-1">总金额100元</p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Brand Memberships Section -->
+  <div class="max-w-md mx-auto p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">直通40+品牌会员 <span class="text-sm text-gray-500">双重权益 双重积分</span></h2>
+      <button class="text-sm text-gray-500" data-action="click->coming-soon#show">更多 ›</button>
+    </div>
+
+    <!-- Brand Cards Grid -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <!-- Marriott Card -->
+      <div class="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-4 text-white">
+        <div class="text-xs mb-2 opacity-90">MARRIOTT<br/>BONVOY</div>
+        <div class="text-sm font-medium mb-4">万豪会员</div>
+        <button class="w-full bg-white/20 backdrop-blur-sm rounded-full py-2 text-xs font-medium" data-action="click->coming-soon#show">
+          开通
+        </button>
+      </div>
+
+      <!-- Hilton Card -->
+      <div class="bg-gradient-to-br from-blue-900 to-blue-950 rounded-xl p-4 text-white">
+        <div class="text-xs mb-2 opacity-90">Hilton<br/>HONORS</div>
+        <div class="text-sm font-medium mb-4">希尔顿会员</div>
+        <button class="w-full bg-white/20 backdrop-blur-sm rounded-full py-2 text-xs font-medium" data-action="click->coming-soon#show">
+          开通
+        </button>
+      </div>
+
+      <!-- All Accor Live Card -->
+      <div class="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-xl p-4 text-white">
+        <div class="text-xs mb-2 opacity-90">All<br/>Accor Live</div>
+        <div class="text-sm font-medium mb-4">雅高经典卡会员</div>
+        <button class="w-full bg-white/20 backdrop-blur-sm rounded-full py-2 text-xs font-medium" data-action="click->coming-soon#show">
+          开通
+        </button>
+      </div>
+    </div>
+
+    <!-- Promotional Banners -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="bg-gradient-to-r from-amber-900 to-orange-900 rounded-xl p-4 text-white relative overflow-hidden">
+        <div class="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded">满5送1</div>
+        <div class="mt-6">
+          <div class="text-lg font-bold">享100元立减券</div>
+          <div class="text-xs opacity-90 mt-1">酒店机票满50可 ›</div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-400 to-blue-500 rounded-xl p-4 text-white relative overflow-hidden">
+        <div class="text-lg font-bold mb-1">航司会员挑战</div>
+        <div class="text-xs opacity-90">东航金银卡挑战开启 ›</div>
+        <div class="absolute -right-4 -bottom-4 text-6xl opacity-20">✈️</div>
+      </div>
+    </div>
+
+    <!-- Member Benefits Tabs -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div class="flex border-b border-gray-200">
+        <button class="flex-1 py-3 text-sm font-medium border-b-2 border-black">会员价</button>
+        <button class="flex-1 py-3 text-sm text-gray-500" data-action="click->coming-soon#show">里程多倍花</button>
+      </div>
+
+      <!-- Hotel Benefits Preview -->
+      <div class="p-4">
+        <div class="flex gap-2 mb-4">
+          <button class="px-4 py-1.5 bg-gray-100 rounded-full text-sm">酒店</button>
+          <button class="px-4 py-1.5 text-gray-600 text-sm" data-action="click->coming-soon#show">度假</button>
+        </div>
+
+        <!-- Date Selector -->
+        <div class="flex items-center gap-2 mb-4">
+          <button class="flex items-center gap-2 text-sm" data-action="click->coming-soon#show">
+            <span>深圳 ▼</span>
+          </button>
+          <div class="flex items-center gap-2 flex-1">
+            <button class="flex items-center gap-1 text-sm" data-action="click->coming-soon#show">
+              <span>📅</span>
+              <span><%= Date.today.strftime('%Y-%m-%d') %></span>
+              <span class="text-gray-500"><%= Date::DAYNAMES[Date.today.wday] == 'Saturday' ? '周六' : '周日' %></span>
+            </button>
+            <span class="text-gray-400">—</span>
+            <button class="flex items-center gap-1 text-sm" data-action="click->coming-soon#show">
+              <span><%= (Date.today + 1).strftime('%Y-%m-%d') %></span>
+              <span class="text-gray-500"><%= Date::DAYNAMES[(Date.today + 1).wday] == 'Sunday' ? '周日' : '周一' %></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample Hotel Card -->
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="p-4">
+            <div class="flex gap-3">
+              <div class="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0"></div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-1">
+                  <span class="inline-block bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded">优住会</span>
+                </div>
+                <h3 class="font-medium text-sm mb-1">深圳湾科技园丽雅查尔顿酒店</h3>
+                <div class="flex items-center gap-1 mb-1">
+                  <div class="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded">4.8</div>
+                  <span class="text-xs text-gray-600">很好</span>
+                  <span class="text-xs text-gray-400">2000+评价</span>
+                </div>
+                <p class="text-xs text-gray-500">近万象天地</p>
+              </div>
+            </div>
+            <div class="flex items-end justify-between mt-3">
+              <div>
+                <div class="text-xs text-gray-400 line-through">¥589</div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-red-500 text-xl font-bold">¥475</span>
+                  <span class="text-xs text-gray-500">起</span>
+                </div>
+              </div>
+              <div class="text-xs text-red-500">2项优惠¥114</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render 'shared/bottom_navigation', active_tab: :member %>

@@ -33,7 +33,25 @@
       </p>
     </div>
 
-    <!-- CLACKY_TODO: Add your application-specific menu items here (e.g., Dashboard, Settings, Orders, etc.) -->
+    <!-- Application menu items -->
+    <div class="py-1">
+      <%= link_to members_path, class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <span class="mr-3">👑</span>
+        会员中心
+      <% end %>
+      <%= link_to trips_path, class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <span class="mr-3">✈️</span>
+        我的行程
+      <% end %>
+      <%= link_to messages_path, class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <span class="mr-3">📬</span>
+        消息通知
+      <% end %>
+      <%= link_to bookings_path, class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <span class="mr-3">📋</span>
+        我的订单
+      <% end %>
+    </div>
 
     <!-- Divider -->
     <div class="border-t border-gray-200 dark:border-gray-700"></div>

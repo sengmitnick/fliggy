@@ -94,84 +94,87 @@ class Flight < ApplicationRecord
     flights
   end
 
-  # Generate multiple offers from different providers for this flight
+  # Generate multiple pricing packages for this flight
   def generate_offers
     return if flight_offers.any? # Already generated
 
-    providers = [
-      { name: '飞猪旅行', type: 'featured' },
-      { name: '携程旅行', type: 'cashback' },
-      { name: '去哪儿旅行', type: 'standard' },
-      { name: '同程旅行', type: 'family' }
-    ]
-
     base_price = price.to_f
 
-    providers.each_with_index do |provider, index|
-      # Vary prices slightly between providers
-      offer_price = base_price + rand(-30..30)
-      original = offer_price + rand(10..50)
-      cashback = [0, 0, 20, 34, 90, 95].sample
-      
-      # Generate discount items
-      discount_items = []
-      if cashback > 0
-        discount_items << "#{rand(1..3)}项至高减¥#{cashback}"
-      end
-      if rand < 0.3
-        discount_items << "返现¥#{rand(10..30)}"
-      end
+    # Package 1: 超值精选 (Best Value)
+    flight_offers.create!(
+      provider_name: '超值精选',
+      offer_type: 'featured',
+      price: base_price,
+      original_price: base_price + 42,
+      cashback_amount: 0,
+      discount_items: ['无免费托运行李'],
+      services: ['退改MU92起', '经济舱', '仅全额电子发票'],
+      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
+      baggage_info: '手提行李7KG/尺寸20',
+      meal_included: false,
+      refund_policy: '退改¥92起',
+      is_featured: true,
+      display_order: 0
+    )
 
-      # Generate services
-      services_list = ['经济舱', '仅全额电子发票']
-      services_list << '无餐食' if rand < 0.5
-      services_list << '到达准点率100%' if rand < 0.3
+    # Package 2: 选座无忧 (Seat Selection)
+    flight_offers.create!(
+      provider_name: '选座无忧',
+      offer_type: 'standard',
+      price: base_price + 8,
+      original_price: base_price + 50,
+      cashback_amount: 24,
+      discount_items: ['无免费托运行李'],
+      services: ['退改MU92起', '经济舱', '仅全额电子发票'],
+      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
+      baggage_info: '含合餐权益',
+      meal_included: false,
+      refund_policy: '手提行李7KG/尺寸20',
+      is_featured: false,
+      display_order: 1
+    )
 
-      # Generate tags
-      tags_list = []
-      case provider[:type]
-      when 'featured'
-        tags_list << '超值低价'
-        tags_list << '出行无忧'
-      when 'cashback'
-        tags_list << "认证企业会员加享#{rand(5..10)}元"
-        tags_list << "可返#{rand(50..100)}元"
-      when 'family'
-        tags_list << '专享属服务'
-        tags_list << '出行更安心'
-      end
+    # Package 3: 返现礼遇 (Cashback Package)
+    flight_offers.create!(
+      provider_name: '返现礼遇',
+      offer_type: 'cashback',
+      price: base_price + 120,
+      original_price: base_price + 220,
+      cashback_amount: 90,
+      discount_items: ['无免费托运行李'],
+      services: ['经济舱', '全额电子发票'],
+      tags: [
+        '返¥520里程礼包',
+        '手提行李7KG/尺寸20',
+        '成人可订返现',
+        '仅限预定电子票'
+      ],
+      baggage_info: '返¥520里程礼包',
+      meal_included: false,
+      refund_policy: '手提行李7KG/尺寸20',
+      is_featured: false,
+      display_order: 2
+    )
 
-      # Additional feature tags
-      if rand < 0.4
-        tags_list << '旅行套餐'
-        tags_list << "含#{rand(300..700)}元旅行券包"
-        tags_list << '手提行李7KG/尺寸20'
-      end
-
-      if rand < 0.3
-        tags_list << '延误无忧'
-        tags_list << '+¥49/程'
-      end
-
-      # Baggage info
-      baggage = ['手提行李7KG/尺寸20', '托运行李20KG', '无免费行李'].sample
-
-      flight_offers.create!(
-        provider_name: provider[:name],
-        offer_type: provider[:type],
-        price: offer_price,
-        original_price: original,
-        cashback_amount: cashback,
-        discount_items: discount_items,
-        services: services_list,
-        tags: tags_list,
-        baggage_info: baggage,
-        meal_included: rand < 0.3,
-        refund_policy: ['退改¥96起', '退改¥95起', '购买返￥188用车券 延误2小时返'].sample,
-        is_featured: provider[:type] == 'featured',
-        display_order: index
-      )
-    end
+    # Package 4: 家庭好选 (Family Choice)
+    flight_offers.create!(
+      provider_name: '家庭好选',
+      offer_type: 'family',
+      price: base_price + 5,
+      original_price: base_price + 40,
+      cashback_amount: 20,
+      discount_items: ['结果送出票'],
+      services: ['经济舱', '1.7折'],
+      tags: [
+        '结果送出票',
+        '结果提交'
+      ],
+      baggage_info: '结果送出票',
+      meal_included: false,
+      refund_policy: '结果提交',
+      is_featured: false,
+      display_order: 3
+    )
   end
 
   # Get offers sorted by price
