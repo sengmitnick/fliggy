@@ -82,7 +82,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.datetime "updated_at", null: false
     t.string "insurance_type"
     t.decimal "insurance_price"
+    t.string "trip_type", default: "one_way"
+    t.integer "return_flight_id"
+    t.date "return_date"
+    t.integer "return_offer_id"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
+    t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
   end
 
@@ -399,7 +404,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.string "uid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "airline_member", default: false
+    t.jsonb "airline_memberships", default: {}
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

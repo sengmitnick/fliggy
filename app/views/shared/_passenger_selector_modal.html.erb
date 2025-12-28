@@ -1,0 +1,196 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" data-passenger-selector-target="modal" data-action="click->passenger-selector#closeModal">
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl animate-slide-up" data-action="click->passenger-selector#stopPropagation" style="max-height: 80vh; display: flex; flex-direction: column;">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+      <h2 class="text-base font-medium" data-passenger-selector-target="modalTitle">当前已选: 1成人 0儿童 0婴儿</h2>
+      <button type="button" data-action="click->passenger-selector#closeModal" class="w-10 h-10 flex items-center justify-center text-2xl text-gray-500">×</button>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex items-center border-b border-gray-200">
+      <button 
+        data-action="click->passenger-selector#switchToPassengerTab"
+        data-passenger-selector-target="passengerTab"
+        class="flex-1 py-3 text-center text-sm border-b-2 border-transparent">
+        <div class="font-medium">选乘机人</div>
+        <div class="text-xs text-gray-400">匹配最高优惠金额</div>
+      </button>
+      <button 
+        data-action="click->passenger-selector#switchToCountTab"
+        data-passenger-selector-target="countTab"
+        class="flex-1 py-3 text-center text-sm border-b-2 border-transparent">
+        <div class="font-medium">选人数</div>
+        <div class="text-xs text-gray-400">多人出行 保障票量充足</div>
+      </button>
+    </div>
+
+    <!-- Passenger List Container (Scrollable) -->
+    <div class="flex-1 overflow-y-auto hidden" data-passenger-selector-target="passengerListPanel">
+      <% if current_user&.passengers&.any? %>
+        <% current_user.passengers.each do |passenger| %>
+          <label class="flex items-center justify-between px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center flex-1">
+              <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+              </svg>
+              <div class="flex-1">
+                <div class="flex items-center">
+                  <span class="font-bold text-base"><%= passenger.name %></span>
+                  <span class="ml-2 px-2 py-0.5 text-xs rounded" style="background: #F0F0F0; color: #666;">本人</span>
+                </div>
+                <div class="text-sm text-gray-500 mt-1">
+                  <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
+                </div>
+              </div>
+            </div>
+            <input 
+              type="checkbox" 
+              value="<%= passenger.id %>"
+              data-action="change->passenger-selector#togglePassenger"
+              class="w-6 h-6 rounded-full border-2 border-gray-300 text-primary focus:ring-0 focus:ring-offset-0">
+          </label>
+        <% end %>
+      <% else %>
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+          <svg class="w-16 h-16 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+          </svg>
+          <div class="text-gray-500 mb-2">暂无常用乘机人</div>
+          <div class="text-sm text-gray-400">请先登录或添加乘机人信息</div>
+        </div>
+      <% end %>
+
+      <!-- Add Passenger Button -->
+      <div class="px-4 py-4 border-t border-gray-100">
+        <button type="button" class="w-full py-3 flex items-center justify-center rounded-full font-medium" style="background: #FFF9E6; color: #333;">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+          </svg>
+          添加乘机人
+        </button>
+      </div>
+    </div>
+
+    <!-- Passenger Count Panel -->
+    <div class="flex-1 overflow-y-auto hidden" data-passenger-selector-target="countPanel">
+      <div class="px-4 py-6">
+        <div class="flex items-center justify-center mb-6">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='50' fill='%23E8F5FF'/%3E%3Cpath d='M60 35c-8.284 0-15 6.716-15 15s6.716 15 15 15 15-6.716 15-15-6.716-15-15-15zm0 45c-16.569 0-30 7.462-30 16.667V100h60v-3.333C90 87.462 76.569 80 60 80z' fill='%2300A0E9'/%3E%3C/svg%3E" alt="Passenger" class="w-24 h-24">
+        </div>
+
+        <!-- Adults Counter -->
+        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+          <div>
+            <div class="text-base font-medium text-gray-900">成人</div>
+            <div class="text-xs text-gray-400 mt-1">≥12周岁(含)</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              data-action="click->passenger-selector#decrementAdults"
+              class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-xl font-medium w-8 text-center" data-passenger-selector-target="adultsCount">1</span>
+            <button
+              type="button"
+              data-action="click->passenger-selector#incrementAdults"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background: #00A0E9;">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Children Counter -->
+        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+          <div>
+            <div class="text-base font-medium text-gray-900">儿童</div>
+            <div class="text-xs text-gray-400 mt-1">2周岁(含)-12周岁(不含)</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              data-action="click->passenger-selector#decrementChildren"
+              class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-xl font-medium w-8 text-center" data-passenger-selector-target="childrenCount">0</span>
+            <button
+              type="button"
+              data-action="click->passenger-selector#incrementChildren"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background: #00A0E9;">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Infants Counter -->
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-base font-medium text-gray-900">婴儿</div>
+            <div class="text-xs text-gray-400 mt-1">14天(含)-2周岁(不含)</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              data-action="click->passenger-selector#decrementInfants"
+              class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-xl font-medium w-8 text-center" data-passenger-selector-target="infantsCount">0</span>
+            <button
+              type="button"
+              data-action="click->passenger-selector#incrementInfants"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background: #00A0E9;">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-3 px-4 py-4 bg-white border-t border-gray-200">
+      <button 
+        type="button"
+        data-action="click->passenger-selector#reset"
+        class="flex-1 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition-colors">
+        重置
+      </button>
+      <button 
+        type="button"
+        data-action="click->passenger-selector#confirm"
+        class="flex-1 py-3 rounded-full font-bold text-black transition-colors"
+        style="background: #FFD700;">
+        确定
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+</style>

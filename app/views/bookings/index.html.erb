@@ -1,231 +1,149 @@
 <div class="min-h-screen bg-surface">
-  <!-- 顶部导航栏 -->
+  <!-- Header -->
   <div class="bg-surface border-b border-border sticky top-0 z-10">
-    <div class="container-xl mx-auto px-4 py-4 flex items-center">
-      <%= link_to profile_path, class: "mr-4" do %>
-        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-      <% end %>
-      <h1 class="text-xl font-bold text-primary">我的订单</h1>
-      <div class="ml-auto flex gap-2">
-        <%= link_to "#", class: "p-2" do %>
-          <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center space-x-3">
+        <%= link_to root_path, class: "text-text-primary" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         <% end %>
-        <%= link_to "#", class: "p-2" do %>
-          <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-          </svg>
-        <% end %>
+        <h1 class="text-lg font-semibold text-text-primary">我的订单</h1>
       </div>
-    </div>
-
-    <!-- 状态筛选标签 -->
-    <div class="container-xl mx-auto px-4">
-      <div class="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
-        <%= link_to bookings_path, 
-            class: "px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors #{params[:status].blank? ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'}" do %>
-          全部
-        <% end %>
-        <%= link_to bookings_path(status: :pending), 
-            class: "px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors #{params[:status] == 'pending' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'}" do %>
-          待付款
-        <% end %>
-        <%= link_to bookings_path(status: :paid), 
-            class: "px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors #{params[:status] == 'paid' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'}" do %>
-          未出行
-        <% end %>
-        <%= link_to bookings_path(status: :completed), 
-            class: "px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors #{params[:status] == 'completed' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'}" do %>
-          待评价
-        <% end %>
-        <%= link_to bookings_path(status: :cancelled), 
-            class: "px-6 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors #{params[:status] == 'cancelled' ? 'text-primary border-b-2 border-primary' : 'text-secondary hover:text-primary'}" do %>
-          退款/售后
-        <% end %>
+      <div class="flex items-center space-x-4">
+        <button type="button" class="text-text-primary">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        <button type="button" class="text-text-primary">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 提示消息 -->
-  <% if params[:status].blank? %>
-    <div class="container-xl mx-auto px-4 py-3">
-      <div class="bg-info-bg border-l-4 border-info p-3 rounded flex items-start">
-        <svg class="w-5 h-5 text-info mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-        </svg>
-        <div>
-          <p class="text-sm text-primary">开启微信通知，订单信息实时推送</p>
-          <button class="text-sm text-info font-medium mt-1">开启</button>
-          <button class="text-sm text-muted ml-3">×</button>
-        </div>
-      </div>
+  <!-- Status Filter Tabs -->
+  <div class="bg-surface border-b border-border sticky top-[56px] z-10">
+    <div class="flex justify-around px-4 py-3">
+      <%= link_to bookings_path, class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if @status_filter == 'all'} #{'text-text-secondary' unless @status_filter == 'all'}" do %>
+        <span>全部</span>
+      <% end %>
+      <%= link_to bookings_path(status: 'pending'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if @status_filter == 'pending'} #{'text-text-secondary' unless @status_filter == 'pending'}" do %>
+        <span>待付款</span>
+      <% end %>
+      <%= link_to bookings_path(status: 'upcoming'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if @status_filter == 'upcoming'} #{'text-text-secondary' unless @status_filter == 'upcoming'}" do %>
+        <span>未出行</span>
+      <% end %>
+      <%= link_to bookings_path(status: 'review'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if @status_filter == 'review'} #{'text-text-secondary' unless @status_filter == 'review'}" do %>
+        <span>待评价</span>
+      <% end %>
+      <%= link_to bookings_path(status: 'refund'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if @status_filter == 'refund'} #{'text-text-secondary' unless @status_filter == 'refund'}" do %>
+        <span>退款/售后</span>
+      <% end %>
     </div>
-  <% end %>
+  </div>
 
-  <!-- 预约订单提示 (可选) -->
-  <% if false %>
-    <div class="container-xl mx-auto px-4 py-2">
-      <div class="bg-surface-elevated rounded-lg p-3 flex items-center justify-between">
-        <span class="text-sm text-secondary">预约订单</span>
-        <%= link_to "预约商品11单 >", "#", class: "text-sm text-info" %>
-      </div>
+  <!-- Notice Bar -->
+  <div class="bg-warning-bg border-b border-warning/20 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg class="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+      </svg>
+      <span class="text-sm text-warning">开启做信通知，订单信息变时推送</span>
     </div>
-  <% end %>
+    <button type="button" class="px-3 py-1 bg-warning text-surface text-sm rounded-full font-medium">开启</button>
+    <button type="button" class="text-text-muted">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
 
-  <!-- 订单列表 -->
-  <div class="container-xl mx-auto px-4 py-4">
-    <% if @bookings.empty? %>
-      <!-- 空状态 -->
-      <div class="flex flex-col items-center justify-center py-20">
-        <svg class="w-32 h-32 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+  <!-- Bookings Section -->
+  <div class="px-4 py-3">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-text-secondary">预约订单</h2>
+      <button type="button" class="text-xs text-text-muted flex items-center space-x-1">
+        <span>预约管理设置</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-        <p class="text-secondary text-lg mb-2">暂无订单</p>
-        <p class="text-muted text-sm">快去预订您的旅程吧</p>
-        <%= link_to "去首页", root_path, class: "btn-primary mt-6" %>
-      </div>
-    <% else %>
-      <div class="space-y-4">
+      </button>
+    </div>
+
+    <!-- Booking Cards -->
+    <div class="space-y-3">
+      <% if @bookings.any? %>
         <% @bookings.each do |booking| %>
-          <%= link_to booking_path(booking), class: "block" do %>
-            <div class="card hover:shadow-md transition-shadow">
-              <div class="card-body p-4">
-                <!-- 订单头部 -->
-                <div class="flex items-center justify-between mb-3 pb-3 border-b border-border">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
-                      <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                      </svg>
-                    </div>
-                    <span class="text-sm font-medium text-primary">中国东方航空旗舰店</span>
-                  </div>
-                  <% if booking.pending? %>
-                    <span class="badge-warning">出票成功</span>
-                  <% elsif booking.paid? %>
-                    <span class="badge-success">已付款</span>
-                  <% elsif booking.completed? %>
-                    <span class="badge-info">交易成功</span>
-                  <% elsif booking.cancelled? %>
-                    <span class="badge-danger">已取消</span>
-                  <% end %>
-                </div>
+          <%= render partial: 'bookings/booking_card', locals: { booking: booking } %>
+        <% end %>
+        
+        <!-- Pagination -->
+        <div class="py-4">
+          <%= paginate @bookings, theme: 'twitter-bootstrap-4' %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-12">
+          <svg class="w-24 h-24 text-text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-text-muted text-base mb-2">暂无订单</p>
+          <p class="text-text-muted text-sm">去预订您的第一张机票吧</p>
+          <%= link_to '搜索航班', search_flights_path, class: 'mt-4 btn-primary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 
-                <!-- 航班信息 -->
-                <div class="mb-3">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex-1">
-                      <p class="text-lg font-bold text-primary"><%= booking.flight.departure_city %></p>
-                    </div>
-                    <div class="px-4 flex-shrink-0">
-                      <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                      </svg>
-                    </div>
-                    <div class="flex-1 text-right">
-                      <p class="text-lg font-bold text-primary"><%= booking.flight.destination_city %></p>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between text-sm text-secondary">
-                    <span><%= booking.flight.departure_time.strftime('%Y-%m-%d(周%w) %H:%M') %></span>
-                    <span class="text-xs text-muted">至</span>
-                    <span><%= booking.flight.arrival_time.strftime('%H:%M') %></span>
-                  </div>
-                  <div class="mt-2 text-xs text-muted">
-                    <%= booking.flight.airline %><%= booking.flight.flight_number %> | 
-                    <%= booking.flight.seat_class == 'economy' ? '经济舱' : '商务舱' %> | 
-                    出发
-                  </div>
-                  <% if booking.insurance_type.present? %>
-                    <div class="mt-1 text-xs text-secondary">
-                      已购/赠送服务 · 退改签 · 低价提醒
-                    </div>
-                  <% end %>
+  <!-- Recommendations Section -->
+  <div class="mt-6 px-4 pb-20">
+    <div class="border-t border-border pt-6">
+      <h3 class="text-sm font-semibold text-text-primary mb-4">01月10日前往武汉，为你推荐</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Hotel Recommendation -->
+        <div class="bg-surface border border-border rounded-xl overflow-hidden">
+          <div class="aspect-[4/3] bg-gradient-to-br from-blue-400 to-blue-600 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <svg class="w-6 h-6 text-surface" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                  </svg>
                 </div>
-
-                <!-- 订单金额 -->
-                <div class="flex items-center justify-between pt-3 border-t border-border">
-                  <div class="flex items-center gap-4">
-                    <% if booking.pending? %>
-                      <button class="btn-ghost btn-sm">退改签</button>
-                      <button class="btn-ghost btn-sm">报销</button>
-                    <% elsif booking.paid? || booking.completed? %>
-                      <button class="btn-ghost btn-sm">退改签</button>
-                      <button class="btn-ghost btn-sm">报销</button>
-                    <% end %>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-xs text-muted">实付款</p>
-                    <p class="text-lg font-bold text-primary">¥<%= '%.2f' % booking.total_price %></p>
-                  </div>
-                </div>
+                <div class="text-surface text-sm font-medium">武汉精选酒店</div>
+                <div class="text-surface/80 text-xs">订酒店折扣多</div>
               </div>
             </div>
-          <% end %>
-        <% end %>
-      </div>
-
-      <!-- 分页 -->
-      <div class="mt-6">
-        <%= paginate @bookings %>
-      </div>
-    <% end %>
-  </div>
-
-  <!-- 底部推荐 -->
-  <% if @bookings.any? && @bookings.first&.paid? %>
-    <div class="container-xl mx-auto px-4 py-4">
-      <div class="bg-surface-elevated rounded-xl p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-base font-bold text-primary">
-            <%= @bookings.first.flight.arrival_time.strftime('%m月%d日') %>前往<%= @bookings.first.flight.destination_city %>，为你推荐
-          </h3>
-          <span class="text-sm text-info">酒店订单</span>
-        </div>
-        <div class="flex gap-3">
-          <div class="flex-1 bg-surface rounded-lg p-3 flex items-center">
-            <div class="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center mr-3">
-              <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-primary"><%= @bookings.first.flight.destination_city %>精选酒店</p>
-              <p class="text-xs text-info mt-1">1万店铺商家</p>
-            </div>
-            <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </div>
-          <div class="flex-1 bg-surface rounded-lg p-3 flex items-center">
-            <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center mr-3">
-              <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
-              </svg>
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium text-primary"><%= @bookings.first.flight.destination_city %>门票</p>
-              <p class="text-xs text-success mt-1">武汉三生园</p>
-            </div>
-            <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
           </div>
         </div>
+
+        <!-- Attraction Recommendation -->
+        <div class="bg-surface border border-border rounded-xl overflow-hidden">
+          <div class="aspect-[4/3] bg-gradient-to-br from-green-400 to-green-600 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <svg class="w-6 h-6 text-surface" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="text-surface text-sm font-medium">武汉门1景点</div>
+                <div class="text-surface/80 text-xs">在三生原版购买</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 text-center">
+        <button type="button" class="text-xs text-text-muted">
+          已经提退居尽
+        </button>
       </div>
     </div>
-  <% end %>
+  </div>
 </div>
-
-<style>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>

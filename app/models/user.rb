@@ -44,6 +44,23 @@ class User < ApplicationRecord
   
   after_create :create_default_membership
 
+  # airline_memberships is a jsonb field: { "东航" => true, "海航" => false, ... }
+  # Check if user is member of specific airline(s)
+  def is_airline_member?(airline_name)
+    return false if airline_memberships.blank?
+    airline_memberships[airline_name] == true
+  end
+
+  # Check if user is member of all specified airlines
+  def is_member_of_all?(airline_names)
+    airline_names.all? { |name| is_airline_member?(name) }
+  end
+
+  # Get list of airlines user is NOT a member of
+  def missing_memberships(airline_names)
+    airline_names.reject { |name| is_airline_member?(name) }
+  end
+
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
   validates :password, allow_nil: true, length: { minimum: MIN_PASSWORD }, if: :password_required?
