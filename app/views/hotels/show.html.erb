@@ -1,0 +1,317 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- 顶部导航栏 -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-50">
+    <div class="flex items-center justify-between p-4">
+      <div class="flex items-center space-x-4">
+        <%= link_to hotels_path, class: "text-white p-2" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+      </div>
+      <div class="flex items-center space-x-4 text-white">
+        <button class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </button>
+        <button class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+        </button>
+        <button class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </button>
+        <button class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+        </button>
+        <button class="p-2">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+            <circle cx="12" cy="5" r="1"/>
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="12" cy="19" r="1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 视频/图片轮播区域 -->
+  <div class="relative h-64">
+    <% if @hotel.image.attached? %>
+      <%= image_tag @hotel.image, class: "w-full h-full object-cover" %>
+    <% else %>
+      <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+        <div class="text-white text-center">
+          <div class="w-16 h-16 mx-auto mb-2 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14,6L10.25,11L13.1,14.8L11.5,16C9.81,13.75 7,10 7,10L1,18H23L14,6Z"/>
+            </svg>
+          </div>
+          <p class="text-sm">酒店图片</p>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- 播放按钮 -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <button class="w-16 h-16 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white">
+        <svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 主内容区域 - 垂直滚动 -->
+  <div class="pb-20">
+    <!-- 封面内容 -->
+    <%= render 'cover_content' %>
+
+    <!-- 客房信息 -->
+    <%= render 'rooms_content' %>
+
+    <!-- 希尔顿酒店集团旗舰店 -->
+    <div class="bg-white p-4 mb-2">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-400 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-lg">H</span>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-900">希尔顿酒店集团旗舰店</h3>
+            <p class="text-xs text-gray-500">Hilton Hotels & Resorts</p>
+          </div>
+        </div>
+        <button class="px-4 py-1.5 border border-gray-300 rounded-full text-sm text-gray-700">
+          进店
+        </button>
+      </div>
+      <p class="text-sm text-gray-600 mb-3">希尔顿是全球最大的酒店集团之一，拥有超过百年的历史。我们致力于为每一位宾客提供卓越的住宿体验。</p>
+      <div class="flex items-center space-x-4 text-xs text-gray-500">
+        <span>粉丝 12.8万</span>
+        <span>商品 156</span>
+      </div>
+    </div>
+
+    <!-- 用户评价 -->
+    <div class="bg-white p-4 mb-2">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-gray-900">用户评价</h2>
+        <button class="flex items-center space-x-1 text-sm text-gray-600">
+          <span>查看全部<%= @hotel.hotel_reviews.count %>条</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 评分统计 -->
+      <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 mb-4">
+        <div class="flex items-start space-x-4">
+          <div class="flex-shrink-0">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+              <div class="text-center text-white">
+                <div class="text-3xl font-bold"><%= number_with_precision(@hotel.average_rating, precision: 1) %></div>
+                <div class="text-xs">位置十分好</div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600 w-16">位置便利</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: 94%"></div>
+              </div>
+              <span class="text-sm font-medium text-gray-900 w-8">4.7</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600 w-16">清洁程度</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: 92%"></div>
+              </div>
+              <span class="text-sm font-medium text-gray-900 w-8">4.6</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600 w-16">服务态度</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: 94%"></div>
+              </div>
+              <span class="text-sm font-medium text-gray-900 w-8">4.7</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600 w-16">设施体验</span>
+              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width: 90%"></div>
+              </div>
+              <span class="text-sm font-medium text-gray-900 w-8">4.5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 用户评论列表 -->
+      <% @hotel.hotel_reviews.limit(2).each do |review| %>
+        <div class="mb-4 pb-4 border-b border-gray-100 last:border-0">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <% if review.user_avatar.present? %>
+                <img src="<%= review.user_avatar %>" alt="<%= review.user_name %>" class="w-10 h-10 rounded-full object-cover">
+              <% else %>
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                  <span class="text-white text-sm font-medium"><%= review.user_name[0] %></span>
+                </div>
+              <% end %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center space-x-2 mb-1">
+                <span class="font-medium text-gray-900"><%= review.user_name %></span>
+                <% if review.level.present? %>
+                  <span class="px-2 py-0.5 bg-gradient-to-r from-orange-400 to-red-500 rounded text-white text-xs font-bold"><%= review.level %></span>
+                <% end %>
+              </div>
+              <div class="text-xs text-gray-500 mb-2"><%= review.check_in_date.strftime('%Y年%m月%d日入住') %></div>
+              <p class="text-sm text-gray-700 leading-relaxed"><%= review.content %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 大家都在问 -->
+    <div class="bg-white p-4 mb-2">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-gray-900">大家都在问</h2>
+        <button class="flex items-center space-x-1 text-sm text-gray-600">
+          <span>查看全部1条</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm text-gray-900 font-medium mb-1">要押金吗</p>
+          <p class="text-xs text-gray-500">4个回答</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 宝藏笔记 -->
+    <div class="bg-white p-4 mb-2">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-gray-900">宝藏笔记</h2>
+        </div>
+        <button class="flex items-center space-x-1 text-sm text-gray-600">
+          <span>更多笔记</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 笔记图片网格 -->
+      <div class="grid grid-cols-3 gap-2">
+        <% 6.times do |i| %>
+          <div class="relative aspect-square rounded-lg overflow-hidden">
+            <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14,6L10.25,11L13.1,14.8L11.5,16C9.81,13.75 7,10 7,10L1,18H23L14,6Z"/>
+              </svg>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent">
+              <div class="flex items-center space-x-1">
+                <div class="w-5 h-5 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                  </svg>
+                </div>
+                <span class="text-white text-xs">问一问</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 其他内容 -->
+    <%= render 'highlights_content' %>
+
+    <%= render 'booking_policy_content' %>
+
+    <%= render 'hotel_policy_content' %>
+
+    <%= render 'recommendations_content' %>
+
+    <!-- 价格说明 -->
+    <div class="bg-white p-4 mb-2">
+      <h2 class="text-lg font-bold mb-4">价格说明</h2>
+      <div class="space-y-4">
+        <div>
+          <div class="font-medium text-gray-900 mb-2">1.划线价格</div>
+          <div class="text-sm text-gray-600 leading-relaxed">
+            指商品的门市价、零售价、服务提供商指导价或该商品的曾经展示过的销售价等，并非原价，仅供参考。
+          </div>
+        </div>
+        <div>
+          <div class="font-medium text-gray-900 mb-2">2.未划线价格</div>
+          <div class="text-sm text-gray-600 leading-relaxed">
+            指商品在飞猪上的实时售价，不因表述的差异改变性质。具体成交价格根据商品参加活动，或会员使用优惠券、积分、里程等发生变化，最终以订单结算页价格为准。
+          </div>
+          <div class="text-sm text-gray-600 leading-relaxed mt-2">
+            商家详情页（含主图）以图片或文字形式标注的一口价、促销价、优惠价等价格可能是在使用优惠券、满减或特定优惠活动和时段等情形下的价格，具体请以结算页面的标价、优惠条件或活动规则为准。
+          </div>
+        </div>
+        <div>
+          <div class="font-medium text-gray-900 mb-2">3.折扣</div>
+          <div class="text-sm text-gray-600 leading-relaxed">
+            指未划线价格与商品门市价、零售价、指导价等的对比。如有疑问，可在购买前联系商家咨询。此说明仅当出现价格比较时有效，具体请参见《淘宝价格发布规范》。若商家单独对划线价格、折扣进行说明的，以商家的表述为准。
+          </div>
+        </div>
+        <div>
+          <div class="font-medium text-gray-900 mb-2">4.特定用户专享品</div>
+          <div class="text-sm text-gray-600 leading-relaxed">
+            基于境外酒店行业及商品的特殊性，部分商品可能仅供符合特定条件的用户选购，此类商品将基于用户的身份/会员等级展示相应的提示说明。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部浮动按钮 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <span class="text-sm text-gray-600">最近有67人看过这酒店</span>
+      </div>
+      <button class="bg-orange-500 text-white px-6 py-2 rounded-full font-medium flex items-center space-x-2">
+        <span>查看房型</span>
+        <span class="text-sm">¥<%= @hotel.price %> 起</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

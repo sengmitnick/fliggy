@@ -1,0 +1,321 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- 顶部导航 -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to @hotel, class: "mr-3 p-2 text-gray-600" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-medium">订房必读</h1>
+    </div>
+  </div>
+
+  <!-- 酒店通知 -->
+  <div class="bg-white p-4 mb-4">
+    <h2 class="text-lg font-bold mb-3">酒店通知</h2>
+    <p class="text-sm text-gray-700 leading-relaxed">
+      其他政策说明:根据深圳经济特区吸烟管控条例第三十六条违反本条例规定，在禁止吸烟场所吸烟的，由卫生健康主管部门、本条例第三十二条规定的有关部门按照职责范围责令改正，处五十元罚款并当场收缴;拒不改正的，处二百元罚款;有妨碍执法等情形的，处五百元罚款。
+    </p>
+  </div>
+
+  <!-- 可接待人群 -->
+  <div class="bg-white p-4 mb-4">
+    <h2 class="text-lg font-bold mb-3">可接待人群</h2>
+    <p class="text-sm text-gray-700">全球客人</p>
+  </div>
+
+  <!-- 酒店政策 -->
+  <div class="bg-white p-4 mb-4">
+    <h2 class="text-lg font-bold mb-4">酒店政策</h2>
+
+    <!-- 入离政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <h3 class="font-medium">入离政策</h3>
+      </div>
+      <div class="space-y-2 text-sm text-gray-700">
+        <div>入住时间:<%= @hotel_policy.check_in_time %></div>
+        <div>退房时间:<%= @hotel_policy.check_out_time %></div>
+      </div>
+    </div>
+
+    <!-- 儿童政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2M21 9V7L15 7V9C15 10.1 14.1 11 13 11V22H15V16H17V22H19V11C17.9 11 17 10.1 17 9M5 9C5 10.1 4.1 11 3 11V22H5V16H7V22H9V11C7.9 11 7 10.1 7 9V7L1 7V9H5Z"/>
+        </svg>
+        <h3 class="font-medium">儿童政策</h3>
+      </div>
+      <div class="text-sm text-gray-700">
+        <p class="mb-2">欢迎携带儿童入住</p>
+      </div>
+    </div>
+
+    <!-- 加婴儿床费用表格 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19,7H22V9H19V12H21V14H19V17H22V19H19V20A1,1 0 0,1 18,21H4A1,1 0 0,1 3,20V4A1,1 0 0,1 4,3H18A1,1 0 0,1 19,4V7M5,5V7H17V5H5M5,9V11H11V9H5M5,13V15H15V13H5M5,17V19H13V17H5Z"/>
+        </svg>
+        <h3 class="font-medium">加婴儿床费用</h3>
+      </div>
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-medium">年龄</th>
+              <th class="px-4 py-3 text-left font-medium">价格</th>
+              <th class="px-4 py-3 text-left font-medium">收费频次</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-gray-200">
+              <td class="px-4 py-3">0-4岁</td>
+              <td class="px-4 py-3">免费</td>
+              <td class="px-4 py-3">无</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 早餐政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M18,3H6V2A1,1 0 0,0 5,1H4A1,1 0 0,0 3,2V22A1,1 0 0,0 4,23H5A1,1 0 0,0 6,22V21H18V22A1,1 0 0,0 19,23H20A1,1 0 0,0 21,22V2A1,1 0 0,0 20,1H19A1,1 0 0,0 18,2V3M18,19H6V5H18V19Z"/>
+        </svg>
+        <h3 class="font-medium">早餐政策</h3>
+      </div>
+      <div class="space-y-2 text-sm text-gray-700">
+        <div>类型:<%= @hotel_policy.breakfast_type %></div>
+        <div>形式:自助餐，费用请详询酒店</div>
+        <div>开放时间:<%= @hotel_policy.breakfast_hours %></div>
+      </div>
+      
+      <!-- 早餐价格表格 -->
+      <div class="mt-3 border border-gray-200 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-medium">身高</th>
+              <th class="px-4 py-3 text-left font-medium">价格</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-gray-200">
+              <td class="px-4 py-3">1.2-不限</td>
+              <td class="px-4 py-3"><%= @hotel_policy.breakfast_price %>元</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 宠物政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M4.5,12.5C4.5,13.88 5.62,15 7,15C8.38,15 9.5,13.88 9.5,12.5C9.5,11.12 8.38,10 7,10C5.62,10 4.5,11.12 4.5,12.5M14.5,12.5C14.5,13.88 15.62,15 17,15C18.38,15 19.5,13.88 19.5,12.5C19.5,11.12 18.38,10 17,10C15.62,10 14.5,11.12 14.5,12.5M12,14L13.25,17.75L12,20L10.75,17.75L12,14M12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22Z"/>
+        </svg>
+        <h3 class="font-medium">宠物政策</h3>
+      </div>
+      <p class="text-sm text-gray-700"><%= @hotel_policy.pet_policy %></p>
+    </div>
+
+    <!-- 洗漱用品政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19,6.5C19,8.43 15.86,10 12,10C8.14,10 5,8.43 5,6.5C5,4.57 8.14,3 12,3C15.86,3 19,4.57 19,6.5M12,12C15.86,12 19,13.57 19,15.5V17.5C19,19.43 15.86,21 12,21C8.14,21 5,19.43 5,17.5V15.5C5,13.57 8.14,12 12,12Z"/>
+        </svg>
+        <h3 class="font-medium">洗漱用品政策</h3>
+      </div>
+      <p class="text-sm text-gray-700">提供免费洗漱用品</p>
+    </div>
+
+    <!-- 支付政策 -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-2 mb-3">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"/>
+        </svg>
+        <h3 class="font-medium">支付政策</h3>
+      </div>
+      <div class="text-sm text-gray-700">
+        <p class="mb-2">酒店前台可用的支付方式</p>
+        <div class="flex items-center space-x-3">
+          <% @hotel_policy.payment_methods.each do |method| %>
+            <div class="flex items-center space-x-1">
+              <% if method == "银联" %>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwODVDMyIvPgo8dGV4dCB4PSIxMiIgeT0iMTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VW5pb25QYXk8L3RleHQ+Cjwvc3ZnPgo=" alt="银联" class="w-6 h-6"/>
+              <% elsif method == "支付宝" %>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iIzAwOUNEQiIvPgo8dGV4dCB4PSIxMiIgeT0iMTUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QWxpcGF5PC90ZXh0Pgo8L3N2Zz4K" alt="支付宝" class="w-6 h-6"/>
+              <% end %>
+              <span><%= method %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 为你推荐 -->
+  <div class="bg-white p-4 mb-4">
+    <h2 class="text-lg font-bold mb-4">为你推荐</h2>
+    
+    <div class="space-y-4">
+      <!-- 推荐酒店1 -->
+      <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0 relative">
+          <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-20 h-20 rounded-lg object-cover"/>
+          <div class="absolute top-1 left-1 bg-amber-600 text-white text-xs px-2 py-1 rounded">优住会</div>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-medium text-gray-900">愉舍·云端影音Service Apartment(深圳南山科技园海岸...</h3>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">4.8</span>
+            <span class="text-xs text-gray-600">房间都有配置超大落地窗</span>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">距当前酒店直线400米·近南山(地铁站)</div>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">信用住</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">设计酒店</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">花园</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">洗衣服务</span>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div class="text-xs text-gray-500">1小时前有人预订</div>
+            <div class="text-right">
+              <div class="text-xs text-gray-400 line-through">¥761</div>
+              <div class="text-lg font-bold text-red-600">¥333 起</div>
+              <div class="text-xs text-red-500">首住特惠: 4项优惠¥428 ></div>
+            </div>
+          </div>
+          <div class="text-sm text-gray-600">1.8万+预订</div>
+        </div>
+      </div>
+
+      <!-- 推荐酒店2 -->
+      <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0 relative">
+          <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-20 h-20 rounded-lg object-cover"/>
+          <div class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">万豪</div>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-medium text-gray-900">深圳湾万丽酒店 <span class="px-1 py-1 bg-gray-100 text-gray-600 text-xs rounded">豪华</span></h3>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">4.7</span>
+            <span class="text-xs text-gray-600">早上还能看到日出</span>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">距当前酒店直线3.5公里·近万象天地</div>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">信用住</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">海港景色</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">健身房</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">高空酒吧</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">1小时前有人预订</div>
+          <div class="text-right">
+            <div class="text-lg font-bold text-red-600">¥1600</div>
+            <div class="text-xs text-red-500">新客特惠: 优惠¥59 ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 推荐酒店3 -->
+      <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0">
+          <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-20 h-20 rounded-lg object-cover"/>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-medium text-gray-900">深圳G公寓 <span class="px-1 py-1 bg-gray-100 text-gray-600 text-xs rounded">豪华</span></h3>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">4.4</span>
+            <span class="text-xs text-gray-600">晚上比较安静</span>
+          </div>
+          <div class="text-xs text-gray-600 mt-1">距当前酒店直线950米·近南山(地铁站)</div>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="px-2 py-1 bg-red-100 text-red-600 text-xs rounded">热卖!</span>
+            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">低价房仅剩1间</span>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div class="text-sm text-gray-600">400+预订</div>
+            <div class="text-right">
+              <div class="text-xs text-gray-400 line-through">¥1169</div>
+              <div class="text-lg font-bold text-red-600">¥1161 起</div>
+              <div class="text-xs text-red-500">优惠¥8 ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 价格说明 -->
+  <div class="bg-white p-4 mb-4">
+    <h2 class="text-lg font-bold mb-4">价格说明</h2>
+    
+    <div class="space-y-4 text-sm text-gray-700">
+      <div>
+        <h3 class="font-medium mb-2">1.划线价格</h3>
+        <p>指商品的门市价、零售价、服务提供商指导价或该商品的曾经展示过的销售价等，并非原价，仅供参考。</p>
+      </div>
+      
+      <div>
+        <h3 class="font-medium mb-2">2.未划线价格</h3>
+        <p>指商品在飞猪上的实时售价，不因表述的差异改变其性质。具体成交价格根据商品参加活动，或会员使用优惠券、积分、里程等发生变化，最终以订单结算页价格为准。</p>
+        <p class="mt-2">商家详情页（含主图）以图片或文字形式标注的一口价、促销价、优惠价等价格可能是在使用优惠券、满减或特定优惠活动和时段等情形下的价格，具体请以结算页面的标价、优惠条件或活动规则为准。</p>
+      </div>
+      
+      <div>
+        <h3 class="font-medium mb-2">3.折扣</h3>
+        <p>指未划线价格与商品门市价、零售价、指导价等的对比。如有疑问，可在购买前联系商家咨询。此说明仅当出现价格比较时有效，具体请参见《淘宝价格发布规范》。若商家单独对划线价格、折扣进行说明的，以商家的表述为准。</p>
+      </div>
+      
+      <div>
+        <h3 class="font-medium mb-2">4.特定用户专享品</h3>
+        <p>基于境外酒店行业及商品的特殊性，部分商品可能仅供符合特定条件的用户选购，此类商品将基于用户的身份/会员等级展示相应的提示说明。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 客服浮窗 -->
+  <div class="fixed bottom-20 right-4">
+    <button class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+      <span class="text-white text-xs">💬</span>
+    </button>
+    <div class="text-xs text-center mt-1">问一问</div>
+  </div>
+
+  <!-- 底部固定栏 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-black text-white p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <span class="text-sm">最近有67人看过该酒店</span>
+      </div>
+      <button class="bg-yellow-500 text-black px-6 py-2 rounded-full font-medium flex items-center space-x-2">
+        <span>查看房型</span>
+        <span class="text-sm">¥<%= @hotel.price %> 起</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="text-center mt-2 text-xs">
+      <span class="text-orange-400">飞猪酒店·</span>
+      <span>信用住</span>
+    </div>
+  </div>
+</div>

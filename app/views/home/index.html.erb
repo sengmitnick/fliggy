@@ -62,9 +62,9 @@
     <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4">
       <!-- Row 1 -->
       <div class="grid grid-cols-5 mb-6">
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
+        <%= link_to hotels_path, class: "flex flex-col items-center justify-center" do %>
           <%= image_tag "home/酒店.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "酒店" %>
-        </button>
+        <% end %>
 
         <%= link_to flights_path, class: "flex flex-col items-center justify-center" do %>
           <%= image_tag "home/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>

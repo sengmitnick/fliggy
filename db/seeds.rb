@@ -467,3 +467,174 @@ if shenzhen
 end
 
 puts "数据初始化完成！"
+
+# ==================== 酒店数据 ====================
+puts "正在创建酒店数据..."
+Hotel.destroy_all
+
+# 深圳酒店数据
+shenzhen_hotels = [
+  {
+    name: "深圳南山大道希尔顿花园酒店",
+    city: "深圳市",
+    address: "南山区前海路",
+    rating: 4.6,
+    price: 701,
+    original_price: 716,
+    distance: "距您直线3千米",
+    features: ["豪华", "高端", "商务"],
+    star_level: 5,
+    image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+    is_featured: true,
+    display_order: 1
+  },
+  {
+    name: "深圳湾科技园丽雅尔酒店",
+    city: "深圳市",
+    address: "南山区科苑路",
+    rating: 4.8,
+    price: 542,
+    original_price: 658,
+    distance: "距您直线269米",
+    features: ["豪华", "交通特别方便"],
+    star_level: 4,
+    image_url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+    is_featured: true,
+    display_order: 2
+  },
+  {
+    name: "深圳福田区威斯汀酒店",
+    city: "深圳市",
+    address: "福田区福华路",
+    rating: 4.5,
+    price: 386,
+    original_price: 480,
+    distance: "距福田高铁站1.5千米",
+    features: ["精选", "干净卫生"],
+    star_level: 4,
+    image_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=80",
+    is_featured: false,
+    display_order: 3
+  },
+  {
+    name: "深圳罗湖区维也纳国际酒店",
+    city: "深圳市",
+    address: "罗湖区人民南路",
+    rating: 4.4,
+    price: 298,
+    original_price: 350,
+    distance: "距罗湖口岸1千米",
+    features: ["经济型", "交通便利"],
+    star_level: 3,
+    image_url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80",
+    is_featured: false,
+    display_order: 4
+  },
+  {
+    name: "深圳宝安机场凯悦酒店",
+    city: "深圳市",
+    address: "宝安区机场路",
+    rating: 4.7,
+    price: 458,
+    original_price: 580,
+    distance: "距宝安机场500米",
+    features: ["机场附近", "接送机服务"],
+    star_level: 4,
+    image_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
+    is_featured: false,
+    display_order: 5
+  },
+  {
+    name: "深圳欢乐港湾度假酒店",
+    city: "深圳市",
+    address: "宝安区海滨路",
+    rating: 4.6,
+    price: 520,
+    original_price: 650,
+    distance: "距欢乐港湾200米",
+    features: ["海景房", "度假休闲"],
+    star_level: 4,
+    image_url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80",
+    is_featured: false,
+    display_order: 6
+  },
+  {
+    name: "深圳东门商务酒店",
+    city: "深圳市",
+    address: "罗湖区东门老街",
+    rating: 4.3,
+    price: 256,
+    original_price: 320,
+    distance: "距东门老街100米",
+    features: ["经济型", "老街附近"],
+    star_level: 3,
+    image_url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
+    is_featured: false,
+    display_order: 7
+  },
+  {
+    name: "深圳北站希尔顿酒店",
+    city: "深圳市",
+    address: "龙华区民治街道",
+    rating: 4.7,
+    price: 680,
+    original_price: 800,
+    distance: "距深圳北站300米",
+    features: ["高铁站附近", "国际品牌"],
+    star_level: 5,
+    image_url: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80",
+    is_featured: false,
+    display_order: 8
+  },
+  {
+    name: "深圳西乡塑望酽酒店",
+    city: "深圳市",
+    address: "南山区深南大道",
+    rating: 4.5,
+    price: 428,
+    original_price: 520,
+    distance: "距西乡塔千米",
+    features: ["商务酒店", "景观房"],
+    star_level: 4,
+    image_url: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80",
+    is_featured: false,
+    display_order: 9
+  },
+  {
+    name: "深圳大棅湾海滨度假村",
+    city: "深圳市",
+    address: "龙岗区大棅湾",
+    rating: 4.8,
+    price: 880,
+    original_price: 1200,
+    distance: "距深圳市中心30千米",
+    features: ["海边度假", "别墅酒店"],
+    star_level: 5,
+    image_url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80",
+    is_featured: true,
+    display_order: 10
+  }
+]
+
+shenzhen_hotels.each do |hotel_data|
+  hotel = Hotel.create!(hotel_data)
+  
+  # 为每个酒店创建几个房型
+  [
+    { room_type: "豪华大床房", bed_type: "大床", price: hotel.price, original_price: hotel.original_price, area: "35㎡", max_guests: 2, has_window: true, available_rooms: 5 },
+    { room_type: "高级双人房", bed_type: "双床", price: hotel.price + 50, original_price: hotel.original_price + 80, area: "38㎡", max_guests: 2, has_window: true, available_rooms: 8 },
+    { room_type: "商务套房", bed_type: "大床+沙发床", price: hotel.price + 200, original_price: hotel.original_price + 300, area: "65㎡", max_guests: 3, has_window: true, available_rooms: 3 }
+  ].each do |room_data|
+    hotel.hotel_rooms.create!(room_data)
+  end
+end
+
+puts "创建了 #{Hotel.count} 个酒店和 #{HotelRoom.count} 个房型"
+
+puts "
+\n✅ 所有数据初始化完成！"
+puts "🏛  城市: #{City.count} 个"
+puts "🌍 目的地: #{Destination.count} 个"
+puts "🏞  旅游产品: #{TourProduct.count} 个"
+puts "🏨 酒店: #{Hotel.count} 个"
+puts "🚪 房型: #{HotelRoom.count} 个"

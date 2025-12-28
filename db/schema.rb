@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_26_091158) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -253,6 +253,74 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "hotel_facilities", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.string "name"
+    t.string "icon"
+    t.string "description"
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_id"], name: "index_hotel_facilities_on_hotel_id"
+  end
+
+  create_table "hotel_policies", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.string "check_in_time"
+    t.string "check_out_time"
+    t.string "pet_policy"
+    t.string "breakfast_type"
+    t.string "breakfast_hours"
+    t.decimal "breakfast_price", default: "0.0"
+    t.text "payment_methods"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_id"], name: "index_hotel_policies_on_hotel_id"
+  end
+
+  create_table "hotel_reviews", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.bigint "user_id"
+    t.decimal "rating", default: "5.0"
+    t.text "comment"
+    t.integer "helpful_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_id"], name: "index_hotel_reviews_on_hotel_id"
+    t.index ["user_id"], name: "index_hotel_reviews_on_user_id"
+  end
+
+  create_table "hotel_rooms", force: :cascade do |t|
+    t.integer "hotel_id"
+    t.string "room_type", default: "标准间"
+    t.string "bed_type"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.string "area"
+    t.integer "max_guests", default: 2
+    t.boolean "has_window", default: true
+    t.integer "available_rooms", default: 10
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "hotels", force: :cascade do |t|
+    t.string "name"
+    t.string "city", default: "深圳市"
+    t.text "address"
+    t.decimal "rating", default: "4.5"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.string "distance"
+    t.text "features"
+    t.integer "star_level", default: 4
+    t.string "image_url"
+    t.boolean "is_featured", default: false
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "passengers", force: :cascade do |t|
     t.string "name"
     t.string "id_type", default: "身份证"
@@ -262,6 +330,21 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_passengers_on_user_id"
+  end
+
+  create_table "rooms", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.string "name"
+    t.string "size"
+    t.string "bed_type"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price", default: "0.0"
+    t.text "amenities"
+    t.boolean "breakfast_included", default: false
+    t.string "cancellation_policy"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_id"], name: "index_rooms_on_hotel_id"
   end
 
   create_table "sessions", force: :cascade do |t|
