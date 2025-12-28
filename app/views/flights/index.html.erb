@@ -389,10 +389,10 @@
         <span class="text-[11px] text-gray-700">发票报销</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+      <%= link_to bookings_path, class: "flex flex-col items-center justify-center gap-1.5" do %>
         <%= image_tag "airfare/我的订单.png", class: "w-6 h-6", alt: "我的订单" %>
         <span class="text-[11px] text-gray-700">我的订单</span>
-      </button>
+      <% end %>
     </div>
   </div>
 

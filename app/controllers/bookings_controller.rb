@@ -2,6 +2,29 @@ class BookingsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_flight, only: [:new, :create]
 
+  def index
+    @status_filter = params[:status] || 'all'
+    
+    @bookings = current_user.bookings.includes(:flight, :return_flight)
+                           .order(created_at: :desc)
+    
+    # Filter by status
+    case @status_filter
+    when 'pending'
+      @bookings = @bookings.where(status: 'pending')
+    when 'upcoming'
+      @bookings = @bookings.where(status: ['paid', 'completed'])
+                           .where('bookings.created_at >= ?', Date.today)
+    when 'review'
+      # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
+      @bookings = @bookings.none
+    when 'refund'
+      @bookings = @bookings.where(status: 'cancelled')
+    end
+    
+    @bookings = @bookings.page(params[:page]).per(10)
+  end
+
   def new
     @booking = Booking.new
     @passengers = current_user.passengers
