@@ -184,10 +184,10 @@
             <span class="text-[12px] text-gray-700">邮轮</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+          <%= link_to deep_travels_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/深度旅行.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "深度游+" %>
             <span class="text-[12px] text-gray-700">深度游+</span>
-          </button>
+          <% end %>
 
           <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
             <%= image_tag "home/包车游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "包车" %>

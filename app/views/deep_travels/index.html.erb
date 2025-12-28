@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-[#FFF9E6]">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-4 py-3 bg-[#FFF9E6]">
+    <%= link_to root_path, class: "text-gray-800" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    <h1 class="text-lg font-bold text-gray-800">深度旅行+</h1>
+    <button class="text-gray-800">
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="19" cy="12" r="2"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="px-6 py-8 text-center">
+    <h2 class="text-4xl font-bold text-gray-900 mb-2">
+      深度旅行<span class="inline-block px-3 py-1 ml-2 text-xl bg-gray-800 text-yellow-400 rounded-lg">向导</span>
+    </h2>
+    <p class="text-gray-700 text-sm">一起成为深度旅行家</p>
+  </div>
+
+  <!-- Guide Categories (Horizontal scroll) -->
+  <div class="px-4 pb-6" data-controller="deep-travel">
+    <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <!-- Guide - Instructor -->
+      <div class="flex-shrink-0 text-center">
+        <div class="w-24 h-24 rounded-full bg-yellow-400 flex items-center justify-center mb-2 relative">
+          <%= image_tag "deep_travel/讲解.png", class: "w-20 h-20 object-cover rounded-full" %>
+        </div>
+        <p class="text-sm font-medium">讲解</p>
+      </div>
+
+      <!-- Guide - Ski Teaching (敬请期待) -->
+      <div class="flex-shrink-0 text-center relative">
+        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
+          <%= image_tag "deep_travel/滑雪教学.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
+          </div>
+        </div>
+        <p class="text-sm font-medium text-gray-600">滑雪教学</p>
+      </div>
+
+      <!-- Guide - Diving Teaching (敬请期待) -->
+      <div class="flex-shrink-0 text-center relative">
+        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
+          <%= image_tag "deep_travel/潜水教学.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
+          </div>
+        </div>
+        <p class="text-sm font-medium text-gray-600">潜水教学</p>
+      </div>
+
+      <!-- Guide - Local Driver (敬请期待) -->
+      <div class="flex-shrink-0 text-center relative">
+        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
+          <%= image_tag "deep_travel/当地司导.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
+          </div>
+        </div>
+        <p class="text-sm font-medium text-gray-600">当地司导</p>
+      </div>
+
+      <!-- Guide - Photographer (敬请期待) -->
+      <div class="flex-shrink-0 text-center relative">
+        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
+          <div class="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center opacity-70">
+            <span class="text-white text-2xl">📷</span>
+          </div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
+          </div>
+        </div>
+        <p class="text-sm font-medium text-gray-600">跟拍人</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Tabs -->
+  <div class="bg-white border-t border-b border-gray-200">
+    <div class="flex overflow-x-auto scrollbar-hide" data-controller="deep-travel">
+      <% ['境内精选', '境外精选', '北京', '华东', '华中', '陕西'].each do |loc| %>
+        <%= link_to deep_travels_path(location: loc), 
+            class: "flex-shrink-0 px-6 py-3 text-sm font-medium whitespace-nowrap #{@location == loc ? 'text-gray-900 border-b-2 border-yellow-400 bg-yellow-50' : 'text-gray-600'}", 
+            data: { turbo_frame: "products" } do %>
+          <%= loc %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <turbo-frame id="products" class="block">
+    <div class="px-4 py-6">
+      <% @products.group_by { |p| p.deep_travel_guide }.each do |guide, products| %>
+        <% next unless guide %>
+        
+        <!-- Guide Card Section -->
+        <div class="bg-white rounded-2xl shadow-sm mb-6 overflow-hidden">
+          <!-- Guide Header -->
+          <div class="p-4 bg-gradient-to-r from-gray-50 to-white">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="relative">
+                  <% if guide.avatar.attached? %>
+                    <%= image_tag guide.avatar, class: "w-16 h-16 rounded-full object-cover border-2 border-yellow-400" %>
+                  <% else %>
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white text-xl font-bold">
+                      <%= guide.name[0] %>
+                    </div>
+                  <% end %>
+                  <div class="absolute -bottom-1 -right-1 bg-yellow-400 rounded-full p-1">
+                    <svg class="w-4 h-4 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                <div class="flex-1">
+                  <h3 class="text-lg font-bold text-gray-900"><%= guide.name %></h3>
+                  <p class="text-xs text-gray-500 mt-1">
+                    <%= "粉丝#{guide.follower_count}万+" if guide.follower_count > 0 %>
+                    <%= " · 从业#{guide.experience_years}年+" if guide.experience_years > 0 %>
+                  </p>
+                </div>
+              </div>
+              
+              <div class="text-right">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                  🏆 <%= "第#{guide.rank}名" if guide.rank %>
+                </span>
+              </div>
+            </div>
+
+            <!-- Guide Description -->
+            <div class="mb-3">
+              <p class="text-sm text-gray-700 line-clamp-2">
+                <%= guide.description || guide.title %>
+              </p>
+            </div>
+
+            <!-- Video Preview -->
+            <% if guide.video.attached? %>
+              <div class="relative rounded-xl overflow-hidden bg-black" data-controller="deep-travel" data-deep-travel-target="videoContainer">
+                <video 
+                  class="w-full h-48 object-cover"
+                  poster="<%= url_for(guide.avatar) if guide.avatar.attached? %>"
+                  controls
+                  data-deep-travel-target="video">
+                  <%= video_tag guide.video, class: "w-full h-48 object-cover" %>
+                </video>
+                <div class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                  <%= "#{(Time.now.year - 2012)}年发掘达几年边哪一年的发掘水平更好一些" %>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Price and Booking -->
+            <div class="flex items-center justify-between mt-4">
+              <div class="flex items-baseline gap-1">
+                <span class="text-red-500 text-2xl font-bold">¥<%= guide.price.to_i %></span>
+                <span class="text-red-500 text-sm">起</span>
+              </div>
+              <div class="text-xs text-gray-500">
+                已服务<%= guide.served_count %>+人
+              </div>
+              <button class="px-6 py-2 bg-yellow-400 text-gray-900 rounded-full text-sm font-bold hover:bg-yellow-500 transition">
+                去预约
+              </button>
+            </div>
+          </div>
+
+          <!-- More Guides -->
+          <div class="px-4 py-3 border-t border-gray-100">
+            <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <% @guides.first(5).each do |other_guide| %>
+                <div class="flex-shrink-0">
+                  <% if other_guide.avatar.attached? %>
+                    <%= image_tag other_guide.avatar, class: "w-12 h-12 rounded-full object-cover border-2 #{other_guide == guide ? 'border-yellow-400' : 'border-gray-200'}" %>
+                  <% else %>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold border-2 #{other_guide == guide ? 'border-yellow-400' : 'border-gray-200'}">
+                      <%= other_guide.name[0] %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+              <button class="flex-shrink-0 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-full hover:border-yellow-400 transition">
+                更多 →
+              </button>
+            </div>
+          </div>
+
+          <!-- Hot Products Section -->
+          <div class="px-4 pb-4">
+            <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span class="inline-block w-1 h-4 bg-yellow-400 rounded"></span>
+              热销讲解商品
+            </h4>
+            <div class="space-y-3">
+              <% products.first(2).each do |product| %>
+                <div class="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                  <div class="flex-1">
+                    <h5 class="text-sm font-medium text-gray-900 mb-1 line-clamp-1">
+                      <%= product.title %>
+                    </h5>
+                    <p class="text-xs text-gray-500 mb-2">
+                      已售<%= product.sales_count %>+
+                    </p>
+                    <div class="flex items-center justify-between">
+                      <span class="text-red-500 text-lg font-bold">¥<%= product.price.to_i %><span class="text-xs">起</span></span>
+                    </div>
+                  </div>
+                  <% if product.images.attached? %>
+                    <%= image_tag product.images.first, class: "w-20 h-20 rounded-lg object-cover flex-shrink-0" %>
+                  <% else %>
+                    <div class="w-20 h-20 rounded-lg bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-400">
+                      <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 5h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zm11.5 4.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM5 16l3-4 2 3 3-4 4 5H5z"/>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Empty State -->
+      <% if @products.empty? %>
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">🗺️</div>
+          <p class="text-gray-500 text-sm">该地区暂无深度旅行产品</p>
+          <p class="text-gray-400 text-xs mt-2">敬请期待更多精彩内容</p>
+        </div>
+      <% end %>
+    </div>
+  </turbo-frame>
+</div>
+
+<style>
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

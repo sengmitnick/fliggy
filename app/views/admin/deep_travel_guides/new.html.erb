@@ -1,0 +1,208 @@
+<% content_for :title, "New Deep travel guide" %>
+
+<div class="container-md">
+  <div class="flex items-center space-x-4">
+    <%= link_to admin_deep_travel_guides_path, class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Deep travel guides
+    <% end %>
+  </div>
+
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4 mb-8">Create New Deep travel guide</h1>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @deep_travel_guide], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @deep_travel_guide %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@deep_travel_guide, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :name) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Title -->
+        <div class="mb-4">
+          <%= form.label :title, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Title<% if field_required?(@deep_travel_guide, :title) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :title, {
+            placeholder: "Enter title...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :title) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:title].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:title].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Description<% if field_required?(@deep_travel_guide, :description) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :description, {
+            rows: 5,
+            placeholder: "Enter description...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :description) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:description].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:description].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Follower count -->
+        <div class="mb-4">
+          <%= form.label :follower_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Follower count<% if field_required?(@deep_travel_guide, :follower_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :follower_count, {
+            placeholder: "Enter follower count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :follower_count) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:follower_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:follower_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Experience years -->
+        <div class="mb-4">
+          <%= form.label :experience_years, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Experience years<% if field_required?(@deep_travel_guide, :experience_years) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :experience_years, {
+            placeholder: "Enter experience years...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :experience_years) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:experience_years].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:experience_years].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Specialties -->
+        <div class="mb-4">
+          <%= form.label :specialties, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Specialties<% if field_required?(@deep_travel_guide, :specialties) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :specialties, {
+            rows: 5,
+            placeholder: "Enter specialties...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :specialties) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:specialties].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:specialties].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+          <%= form.label :price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price<% if field_required?(@deep_travel_guide, :price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price, {
+            placeholder: "Enter price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :price) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Served count -->
+        <div class="mb-4">
+          <%= form.label :served_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Served count<% if field_required?(@deep_travel_guide, :served_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :served_count, {
+            placeholder: "Enter served count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :served_count) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:served_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:served_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rank -->
+        <div class="mb-4">
+          <%= form.label :rank, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rank<% if field_required?(@deep_travel_guide, :rank) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :rank, {
+            placeholder: "Enter rank...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :rank) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:rank].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:rank].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-4">
+          <%= form.label :rating, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rating<% if field_required?(@deep_travel_guide, :rating) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :rating, {
+            placeholder: "Enter rating...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@deep_travel_guide, :rating) ? { required: true } : {}) %>
+          <% if @deep_travel_guide.errors[:rating].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:rating].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Featured -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :featured, 
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
+          </label>
+        </div>
+
+        <!-- Avatar -->
+        <div class="mb-4">
+          <%= form.label :avatar, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Avatar
+          <% end %>
+          <%= form.file_field :avatar, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <% if @deep_travel_guide.errors[:avatar].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:avatar].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Video -->
+        <div class="mb-4">
+          <%= form.label :video, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Video
+          <% end %>
+          <%= form.file_field :video, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <% if @deep_travel_guide.errors[:video].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:video].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_deep_travel_guides_path, class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Create Deep travel guide", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
