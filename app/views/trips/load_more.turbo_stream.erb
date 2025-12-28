@@ -1,0 +1,89 @@
+<% 
+  # 按日期分组
+  bookings_by_date = @bookings.group_by { |b| b.flight.flight_date }
+  bookings_by_date.each do |date, date_bookings|
+%>
+  <!-- Date Group -->
+  <turbo-stream action="append" target="trips-list">
+    <template>
+      <div class="mb-8">
+        <!-- Date Header with Timeline Dot -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span class="text-lg font-semibold"><%= date.strftime('%m月%d号') %></span>
+          </div>
+          <span class="text-gray-500">前往</span>
+          <div class="flex items-center gap-1">
+            <span class="font-medium">📍<%= date_bookings.first.flight.destination_city %> ›</span>
+          </div>
+        </div>
+
+        <!-- Flight Cards for this date -->
+        <% date_bookings.each do |booking| %>
+          <%= render partial: 'flight_card', formats: [:html], locals: { booking: booking } %>
+        <% end %>
+
+        <!-- Hotel Section with Timeline (只在每个日期组的最后显示一次) -->
+        <div class="relative pl-5 mb-6">
+          <!-- Timeline Line -->
+          <div class="absolute left-1 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+          
+          <!-- Timeline Dot -->
+          <div class="absolute left-0 top-2 w-2 h-2 bg-gray-300 rounded-full"></div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-base font-medium">距<%= date_bookings.first.flight.arrival_airport %>·附近酒店</div>
+              <button class="text-sm text-blue-500 font-medium" data-action="click->coming-soon#show">
+                <%= date_bookings.first.flight.destination_city %>酒店提前订
+              </button>
+            </div>
+
+            <div class="space-y-2 mb-4">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <span>🚇</span>
+                <span>公交/地铁约1小时4分钟 ›</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <span>🚗</span>
+                <span>驾车约1小时2分钟 ›</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                预约送接机
+              </button>
+              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                预订酒店
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Benefits Section (只在每个日期组的最后显示一次) -->
+        <div class="bg-green-50 rounded-xl p-4 flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-green-600">✓</span>
+            <span class="text-sm text-gray-700">免费取消</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-green-600">✓</span>
+            <span class="text-sm text-gray-700">延迟退房</span>
+          </div>
+        </div>
+      </div>
+    </template>
+  </turbo-stream>
+<% end %>
+
+<% unless @has_more %>
+  <turbo-stream action="update" target="loading-indicator">
+    <template>
+      <div class="text-center py-4 text-gray-500">
+        已显示全部行程
+      </div>
+    </template>
+  </turbo-stream>
+<% end %>

@@ -1,12 +1,26 @@
 class ProfilesController < ApplicationController
-  before_action :authenticate
+  before_action :authenticate_user!
 
   def show
+    @full_render = true
     @user = current_user
+    # 统计信息
+    @bookings_count = {
+      pending: @user.bookings.pending.count,
+      paid: @user.bookings.paid.count,
+      completed: @user.bookings.completed.count,
+      cancelled: @user.bookings.cancelled.count
+    }
   end
 
   def edit
     @user = current_user
+  end
+
+  private
+
+  def authenticate
+    authenticate_user!
   end
 
   def update

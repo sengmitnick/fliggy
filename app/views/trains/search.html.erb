@@ -1,0 +1,289 @@
+<div class="min-h-screen bg-surface" data-controller="train-list">
+  <!-- Header with Route Info -->
+  <div class="bg-white border-b border-border sticky top-0 z-10">
+    <!-- Back Button and Actions -->
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to trains_path, class: "text-foreground" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      
+      <div class="flex items-center gap-2 text-lg font-medium">
+        <span><%= @departure_city %></span>
+        <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span><%= @arrival_city %></span>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Date Selector -->
+    <div class="flex overflow-x-auto gap-2 px-4 pb-3 no-scrollbar">
+      <% (-1..3).each do |offset| %>
+        <% target_date = Date.today + offset.days %>
+        <% is_selected = target_date == @date %>
+        <%= link_to search_trains_path(
+          departure_city: @departure_city,
+          arrival_city: @arrival_city,
+          date: target_date,
+          sort_by: @sort_by,
+          only_high_speed: @only_high_speed
+        ), class: "flex flex-col items-center justify-center px-4 py-2 rounded-lg whitespace-nowrap transition-colors #{is_selected ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground'}" do %>
+          <div class="text-xs text-muted-foreground <%= 'text-primary-foreground' if is_selected %>">
+            <%= offset == -1 ? '今天' : offset == 0 ? '明天' : target_date.strftime('%m-%d') %>
+          </div>
+          <div class="text-base font-medium">
+            <%= target_date.strftime('%d') %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="bg-white border-b border-border sticky top-[120px] z-10">
+    <div class="flex items-center px-4 py-3 gap-6">
+      <button class="text-sm font-medium text-primary border-b-2 border-primary pb-1">
+        火车票
+      </button>
+      <button class="text-sm text-muted-foreground">
+        智能中转
+      </button>
+      <button class="text-sm text-muted-foreground">
+        机票
+      </button>
+    </div>
+  </div>
+
+  <!-- Flight Promo Banner -->
+  <div class="bg-gradient-to-r from-orange-50 to-red-50 mx-4 mt-3 rounded-lg p-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 rounded">机票</span>
+      <span class="text-sm"><%= @departure_city %></span>
+      <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+      </svg>
+      <span class="text-sm"><%= @arrival_city %></span>
+      <span class="text-xs text-muted-foreground">2时15分</span>
+      <span class="text-xs px-2 py-0.5 border border-red-300 text-red-600 rounded">比高铁便宜¥163</span>
+      <span class="text-xs px-2 py-0.5 border border-red-300 text-red-600 rounded">超值特惠</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <span class="text-red-500 text-lg font-bold">¥400</span>
+      <span class="text-xs text-muted-foreground">起</span>
+    </div>
+  </div>
+
+  <!-- Coupon Banner -->
+  <div class="bg-white mx-4 mt-2 rounded-lg p-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
+      </svg>
+      <span class="text-sm"><span class="text-red-500 font-medium">新客专享</span> 可享<span class="text-red-500 font-medium">2元优惠券</span>，下单更优惠</span>
+    </div>
+    <button class="text-sm text-primary px-3 py-1 border border-primary rounded-full">
+      查看
+    </button>
+  </div>
+
+  <!-- Filter Tags -->
+  <div class="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
+    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap <%= @only_high_speed ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground' %>"
+            data-action="click->train-list#toggleFilter"
+            data-filter="only-tickets">
+      只看有票
+    </button>
+    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
+            data-action="click->train-list#toggleStation"
+            data-station="departure">
+      北京站
+    </button>
+    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
+            data-action="click->train-list#toggleStation"
+            data-station="arrival">
+      杭州站
+    </button>
+    <%= link_to search_trains_path(
+      departure_city: @departure_city,
+      arrival_city: @arrival_city,
+      date: @date,
+      sort_by: @sort_by,
+      only_high_speed: !@only_high_speed
+    ), class: "px-3 py-1 rounded-full text-sm whitespace-nowrap #{@only_high_speed ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground'}" do %>
+      高铁动车
+    <% end %>
+    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
+            data-action="click->train-list#toggleFilter"
+            data-filter="can-split">
+      可积分兑换
+    </button>
+  </div>
+
+  <!-- Train List -->
+  <div class="pb-20">
+    <% if @trains.any? %>
+      <% @trains.each do |train| %>
+        <div class="bg-white mb-2 p-4" data-train-list-target="trainItem">
+          <div class="flex items-center justify-between">
+            <!-- Departure Time & Station -->
+            <div class="flex-1">
+              <div class="text-2xl font-bold text-foreground">
+                <%= train.departure_time.strftime('%H:%M') %>
+              </div>
+              <div class="text-sm text-muted-foreground mt-1">
+                <%= train.departure_city %>
+                <span class="text-xs ml-1 px-1.5 py-0.5 bg-surface-elevated rounded">始</span>
+              </div>
+            </div>
+            
+            <!-- Duration & Train Number -->
+            <div class="flex-1 flex flex-col items-center px-4">
+              <div class="text-xs text-muted-foreground mb-1">
+                <%= (train.duration / 60).to_i %>时<%= train.duration % 60 %>分
+              </div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-primary px-2 py-0.5 border border-primary rounded">
+                  <%= train.train_number %>
+                </span>
+                <% if train.train_number.start_with?('G') %>
+                  <span class="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">兑</span>
+                  <span class="text-xs px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded">复兴号</span>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Arrival Time & Station -->
+            <div class="flex-1 text-right">
+              <div class="text-2xl font-bold text-foreground">
+                <%= train.arrival_time.strftime('%H:%M') %>
+              </div>
+              <div class="text-sm text-muted-foreground mt-1">
+                <% if train.arrival_time.to_date > train.departure_time.to_date %>
+                  <span class="text-xs px-1.5 py-0.5 bg-surface-elevated rounded mr-1">终</span>
+                <% end %>
+                <%= train.arrival_city %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Seat Types & Price -->
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-border">
+            <div class="flex items-center gap-4 text-sm">
+              <% if train.price_second_class && train.price_second_class > 0 %>
+                <div>
+                  <span class="text-muted-foreground">二等</span>
+                  <span class="<%= train.available_seats > 0 ? 'text-green-600' : 'text-red-600' %> ml-1">
+                    <%= train.available_seats > 0 ? '有票' : '抢' %>
+                  </span>
+                </div>
+              <% end %>
+              <% if train.price_first_class && train.price_first_class > 0 %>
+                <div>
+                  <span class="text-muted-foreground">一等</span>
+                  <span class="text-green-600 ml-1">有票</span>
+                </div>
+              <% end %>
+              <% if train.price_business_class && train.price_business_class > 0 %>
+                <div>
+                  <span class="text-muted-foreground">商务</span>
+                  <span class="text-foreground ml-1"><%= (rand(100) + 10).to_s %>张</span>
+                </div>
+              <% end %>
+              <% if train.available_seats == 0 %>
+                <div>
+                  <span class="text-muted-foreground">无座</span>
+                  <span class="text-red-600 ml-1">抢</span>
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="text-right">
+              <div class="text-red-500 text-xl font-bold">
+                ¥<%= train.price_second_class.to_i %>
+              </div>
+              <% if rand(10) > 5 %>
+                <div class="text-xs text-red-500">
+                  限时优惠¥<%= rand(20) + 5 %>
+                </div>
+              <% end %>
+              <% if train.price_business_class && train.price_business_class > 0 %>
+                <div class="text-xs text-muted-foreground">
+                  <%= (train.price_second_class / train.price_business_class * 10).round(1) %>折
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="bg-white p-12 text-center">
+        <svg class="w-20 h-20 mx-auto text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-muted-foreground">暂无符合条件的车次</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Bottom Filter Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-border shadow-lg z-20">
+    <div class="flex max-w-md mx-auto">
+      <button class="flex-1 flex flex-col items-center justify-center py-3 text-foreground hover:bg-surface-elevated transition-colors"
+              data-action="click->train-list#showAdvancedFilters">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+        </svg>
+        <span class="text-xs">高级筛选</span>
+      </button>
+      
+      <%= link_to search_trains_path(
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        date: @date,
+        sort_by: 'price',
+        only_high_speed: @only_high_speed
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'price' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-xs">价格最低</span>
+      <% end %>
+      
+      <%= link_to search_trains_path(
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        date: @date,
+        sort_by: 'duration',
+        only_high_speed: @only_high_speed
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'duration' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="text-xs">耗时最短</span>
+      <% end %>
+      
+      <%= link_to search_trains_path(
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        date: @date,
+        sort_by: 'departure_time',
+        only_high_speed: @only_high_speed
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'departure_time' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <span class="text-xs">出发早-晚</span>
+      <% end %>
+    </div>
+  </div>
+</div>

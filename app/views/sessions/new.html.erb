@@ -1,0 +1,17 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="text-center text-3xl font-extrabold text-gray-900">
+      登录到 <%= Rails.application.config.x.appname %>
+    </h2>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      还没有账户？
+      <%= link_to "立即注册", sign_up_path, class: "font-medium text-primary hover:text-primary-dark" %>
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <%= render 'sessions/login_form_with_oauth' %>
+    </div>
+  </div>
+</div>
