@@ -93,6 +93,9 @@ Rails.application.routes.draw do
   end
   # End routes for flights
 
+  # Routes for passengers (常用信息)
+  resources :passengers, only: [:index, :new, :create, :edit, :update, :destroy]
+
   # write your business logic routes here
 
   # API routes

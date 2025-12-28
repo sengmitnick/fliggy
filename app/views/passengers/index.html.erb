@@ -1,0 +1,108 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to profile_path, class: "flex items-center gap-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-medium flex-1 text-center">常用信息</h1>
+      <div class="w-6"></div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200">
+      <button class="flex-1 py-3 text-center text-base font-medium border-b-2 border-blue-500 text-blue-500">
+        <% case @traveler_type %>
+        <% when 'train', 'bus' %>
+          乘车人
+        <% else %>
+          乘机人
+        <% end %>
+      </button>
+      <button class="flex-1 py-3 text-center text-base text-gray-500">
+        联系人
+      </button>
+      <button class="flex-1 py-3 text-center text-base text-gray-500">
+        发票抬头
+      </button>
+      <button class="flex-1 py-3 text-center text-base text-gray-500">
+        收货地址
+      </button>
+      <button class="flex-1 py-3 text-center text-base text-gray-500">
+        信用卡
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="pb-24">
+    <% if @passengers.any? %>
+      <!-- Passenger List -->
+      <div class="bg-white">
+        <% @passengers.each_with_index do |passenger, index| %>
+          <div class="px-4 py-4 <%= 'border-b border-gray-100' unless index == @passengers.length - 1 %>">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center mb-2">
+                  <span class="text-lg font-bold"><%= passenger.name %></span>
+                  <% if index == 0 %>
+                    <span class="ml-2 px-2 py-0.5 text-xs rounded" style="background: #FFE8CC; color: #FF6B35;">本人</span>
+                  <% end %>
+                </div>
+                <div class="text-sm text-gray-600 mb-1">
+                  +86 <%= passenger.phone&.gsub(/(\d{3})\d{4}(\d{4})/, '\1****\2') || '未设置' %>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-3 flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-gray-600 mb-1"><%= passenger.id_type %></div>
+                    <div class="text-base font-medium">
+                      <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <%= link_to edit_passenger_path(passenger, source: @traveler_type), class: "ml-3 mt-1" do %>
+                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="bg-white mt-4 mx-4 rounded-2xl py-16 text-center">
+        <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+        </svg>
+        <div class="text-gray-500 text-base mb-2">
+          暂无常用<%= case @traveler_type when 'train', 'bus' then '乘车人' when 'flight' then '乘机人' else '出行人' end %>
+        </div>
+        <div class="text-sm text-gray-400">
+          请添加<%= case @traveler_type when 'train', 'bus' then '乘车人' when 'flight' then '乘机人' else '出行人' end %>信息以便快速购票
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-30">
+    <div class="flex gap-3">
+      <%= link_to new_passenger_path(source: @traveler_type), class: "flex-1 py-3 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 font-medium" do %>
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        手动新增
+      <% end %>
+      <button class="flex-1 py-3 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+        </svg>
+        照片录入
+      </button>
+    </div>
+  </div>
+</div>

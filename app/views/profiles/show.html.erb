@@ -16,7 +16,7 @@
       <div class="flex items-center gap-4 mb-6">
         <div class="relative">
           <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold border-2 border-white/50">
-            <%= @user.name.first %>
+            <%= @user.name.present? ? @user.name.first : '胜' %>
           </div>
           <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
             <span class="text-xs text-blue-600 font-bold">会员</span>
@@ -248,7 +248,7 @@
       <!-- 我的服务 -->
       <div class="p-4">
         <div class="grid grid-cols-4 gap-4 text-center mb-4">
-          <%= link_to "#", class: "block" do %>
+          <%= link_to passengers_path, class: "block" do %>
             <div>
               <%= image_tag 'airfare/我的订单.png', class: 'w-10 h-10 mx-auto mb-2', alt: '常用信息' %>
               <p class="text-xs text-secondary">常用信息</p>

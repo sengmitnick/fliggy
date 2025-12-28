@@ -7,9 +7,9 @@
 
       <!-- Top Bar -->
       <div class="absolute top-4 left-0 w-full flex items-center justify-between px-4 py-3">
-        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center">
+        <%= link_to root_path, class: "w-10 h-10 flex items-center justify-center" do %>
           <%= image_tag "返回.png", class: "w-10 h-10", alt: "返回" %>
-        </button>
+        <% end %>
         
         <div class="flex items-center gap-3">
           <button class="w-10 h-10 flex items-center justify-center" data-action="click->coming-soon#show">
@@ -164,8 +164,8 @@
 
       <!-- Search Button -->
       <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
-        <%= f.hidden_field :departure_city, value: '', data: { 'city-selector-target': 'departureCityInput' } %>
-        <%= f.hidden_field :destination_city, value: '', data: { 'city-selector-target': 'destinationCityInput' } %>
+        <%= f.hidden_field :departure_city, value: '北京', data: { 'city-selector-target': 'departureCityInput' } %>
+        <%= f.hidden_field :destination_city, value: '杭州', data: { 'city-selector-target': 'destinationCityInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
         <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
         <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
