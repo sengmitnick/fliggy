@@ -13,6 +13,7 @@ import CouponController from "./coupon_controller"
 import ComingSoonController from "./coming_soon_controller"
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
+import ServiceGridController from "./service_grid_controller"
 import PassengerSelectorController from "./passenger_selector_controller"
 import CabinSelectorController from "./cabin_selector_controller"
 import TripTypeController from "./trip_type_controller"
@@ -38,6 +39,7 @@ application.register("coupon", CouponController)
 application.register("coming-soon", ComingSoonController)
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
+application.register("service-grid", ServiceGridController)
 application.register("passenger-selector", PassengerSelectorController)
 application.register("cabin-selector", CabinSelectorController)
 application.register("trip-type", TripTypeController)
