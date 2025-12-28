@@ -18,7 +18,7 @@
           </button>
           <button class="text-sm font-medium border-b-2 border-black pb-0.5 whitespace-nowrap" data-action="click->coming-soon#show">推荐</button>
           <%= link_to destinations_path, class: "flex items-center gap-0.5" do %>
-            <span class="text-sm font-medium whitespace-nowrap">去旅行</span>
+            <span class="text-sm font-medium whitespace-nowrap"><%= @current_destination&.name || '深圳' %></span>
             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
             </svg>
@@ -59,80 +59,185 @@
   <!-- Main Content -->
   <div class="pt-4" data-controller="coming-soon">
     <!-- Service Grid -->
-    <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4">
-      <!-- Row 1 -->
-      <div class="grid grid-cols-5 mb-6">
-        <%= link_to hotels_path, class: "flex flex-col items-center justify-center" do %>
-          <%= image_tag "home/酒店.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "酒店" %>
-        <% end %>
+    <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4" data-controller="service-grid">
+      <!-- Page 1 -->
+      <div data-service-grid-target="page">
+        <!-- Row 1 -->
+        <div class="grid grid-cols-5 mb-2 h-[80px]">
+          <%= link_to hotels_path, class: "flex flex-col items-center justify-end h-full" do %>
+            <%= image_tag "home/酒店.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "酒店" %>
+            <span class="text-[12px] text-gray-700">酒店</span>
+          <% end %>
 
-        <%= link_to flights_path, class: "flex flex-col items-center justify-center" do %>
-          <%= image_tag "home/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
-        <% end %>
+          <%= link_to flights_path, class: "flex flex-col items-center justify-end h-full" do %>
+            <%= image_tag "home/机票.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "机票" %>
+            <span class="text-[12px] text-gray-700">机票</span>
+          <% end %>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
-        </button>
+          <%= link_to trains_path, class: "flex flex-col items-center justify-end h-full" do %>
+            <%= image_tag "home/火车票.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "火车票" %>
+            <span class="text-[12px] text-gray-700">火车票</span>
+          <% end %>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/租车.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "租车" %>
+            <span class="text-[12px] text-gray-700">租车</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/旅游.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "旅游" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/旅游.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "旅游" %>
+            <span class="text-[12px] text-gray-700">旅游</span>
+          </button>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="grid grid-cols-5 mb-2 h-[60px]">
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/民宿公寓.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "民宿/公寓" %>
+            <span class="text-[12px] text-gray-700">民宿/公寓</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/接送机.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "接送机" %>
+            <span class="text-[12px] text-gray-700">接送机</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/跟团游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "跟团游" %>
+            <span class="text-[12px] text-gray-700">跟团游</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/汽车票.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "汽车票" %>
+            <span class="text-[12px] text-gray-700">汽车票</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/门票.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "门票" %>
+            <span class="text-[12px] text-gray-700">门票</span>
+          </button>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="grid grid-cols-5 mb-2  h-[60px]">
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/酒店套餐.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "酒店套餐" %>
+            <span class="text-[12px] text-gray-700">酒店套餐</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/保险服务.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "保险服务" %>
+            <span class="text-[12px] text-gray-700">保险服务</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/借钱分期.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "借钱/分期" %>
+            <span class="text-[12px] text-gray-700">借钱/分期</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/出境游签证.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "出境游/签证" %>
+            <span class="text-[12px] text-gray-700">出境游/签证</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/里程签到.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "里程签到" %>
+            <span class="text-[12px] text-gray-700">里程签到</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Row 2 -->
-      <div class="grid grid-cols-5 mb-6">
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/民宿.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "民宿/公寓" %>
-        </button>
+      <!-- Page 2 -->
+      <div data-service-grid-target="page" class="hidden">
+        <!-- Row 1 -->
+        <div class="grid grid-cols-5 mb-2 h-[80px]">
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/国际酒店.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "国际酒店" %>
+            <span class="text-[12px] text-gray-700">国际酒店</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/接送机.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "接送机" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/签证.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "签证" %>
+            <span class="text-[12px] text-gray-700">签证</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/跟团游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "跟团游" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/境外上网.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "境外上网" %>
+            <span class="text-[12px] text-gray-700">境外上网</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/汽车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "汽车票" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/旅行购物.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "旅行购物" %>
+            <span class="text-[12px] text-gray-700">旅行购物</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/门票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "门票" %>
-        </button>
-      </div>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/境外当地交通.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "境外当地交通" %>
+            <span class="text-[12px] text-gray-700">境外当地交通</span>
+          </button>
+        </div>
 
-      <!-- Row 3 -->
-      <div class="grid grid-cols-5">
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/酒店套餐.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "酒店套餐" %>
-        </button>
+        <!-- Row 2 -->
+        <div class="grid grid-cols-5 mb-2  h-[60px]">
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/邮轮.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "邮轮" %>
+            <span class="text-[12px] text-gray-700">邮轮</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/保险.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "保险服务" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/深度旅行.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "深度游+" %>
+            <span class="text-[12px] text-gray-700">深度游+</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/借钱.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "借钱/分期" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/包车游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "包车" %>
+            <span class="text-[12px] text-gray-700">包车</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/出境游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "出境游/签证" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/路线宝库.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "路线宝箱" %>
+            <span class="text-[12px] text-gray-700">路线宝箱</span>
+          </button>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-          <%= image_tag "home/里程签到.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "里程签到" %>
-        </button>
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/打车.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "打车" %>
+            <span class="text-[12px] text-gray-700">打车</span>
+          </button>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="grid grid-cols-5 mb-2  h-[60px]">
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/政府补贴.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "政府补贴" %>
+            <span class="text-[12px] text-gray-700">政府补贴</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/阿里商旅.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "阿里商旅" %>
+            <span class="text-[12px] text-gray-700">阿里商旅</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/飞猪省钱卡.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "飞猪省钱卡" %>
+            <span class="text-[12px] text-gray-700">飞猪省钱卡</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/能量红包.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "能量红包" %>
+            <span class="text-[12px] text-gray-700">能量红包</span>
+          </button>
+
+          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+            <%= image_tag "home/会员商城.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "会员商城" %>
+            <span class="text-[12px] text-gray-700">会员商城</span>
+          </button>
+        </div>
       </div>
 
       <!-- Pagination Dots -->
       <div class="flex justify-center gap-2 mt-4">
-        <div class="w-6 h-1 rounded-full" style="background: #FFD700;"></div>
-        <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+        <button data-service-grid-target="dot" data-action="click->service-grid#goToPage" data-page="0" class="w-6 h-1 rounded-full transition-all cursor-pointer" style="background: #FFD700;"></button>
+        <button data-service-grid-target="dot" data-action="click->service-grid#goToPage" data-page="1" class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all cursor-pointer"></button>
       </div>
     </div>
 
@@ -185,32 +290,7 @@
   </div>
 
   <!-- Bottom Navigation -->
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200" data-controller="coming-soon">
-    <div class="grid grid-cols-5 gap-2 px-4 py-2">
-      <button class="flex flex-col items-center justify-center">
-        <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center relative" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center relative" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
-        <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
-          <div class="ml-[24px] w-2 h-2 bg-red-500 rounded-full"></div>
-        </div>
-      </button>
-
-      <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
-      </button>
-    </div>
-  </div>
+  <%= render 'shared/bottom_navigation', active_tab: :home %>
 </div>
 
 <style>

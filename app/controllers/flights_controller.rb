@@ -10,12 +10,20 @@ class FlightsController < ApplicationController
     @departure_city = params[:departure_city] || '北京'
     @destination_city = params[:destination_city] || '杭州'
     @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
+    @trip_type = params[:trip_type] || 'one_way'
+    @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
 
-    # Get or generate flights for the route and date
+    # Get or generate flights for the outbound route and date
     @flights = Flight.search(@departure_city, @destination_city, @date)
 
     # Get prices for nearby dates (5 days)
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+
+    # For round trip, also get return flights
+    if @trip_type == 'round_trip' && @return_date
+      @return_flights = Flight.search(@destination_city, @departure_city, @return_date)
+      @return_date_prices = get_date_prices(@destination_city, @departure_city, @return_date)
+    end
   end
 
   def show

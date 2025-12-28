@@ -638,3 +638,93 @@ puts "🌍 目的地: #{Destination.count} 个"
 puts "🏞  旅游产品: #{TourProduct.count} 个"
 puts "🏨 酒店: #{Hotel.count} 个"
 puts "🚪 房型: #{HotelRoom.count} 个"
+# ==================== 火车票数据 ====================
+puts "正在初始化火车票数据..."
+Train.destroy_all
+
+# 使用自动生成功能为热门线路预生成今天和明天的数据
+# 其他日期和路线将在搜索时自动生成
+popular_routes = [
+  ['北京', '杭州'],
+  ['杭州', '北京'],
+  ['北京', '上海'],
+  ['上海', '北京'],
+  ['深圳', '广州'],
+  ['广州', '深圳']
+]
+
+trains_created = 0
+(0..1).each do |day_offset|
+  target_date = Date.today + day_offset.days
+  popular_routes.each do |departure, arrival|
+    generated = Train.generate_for_route(departure, arrival, target_date)
+    trains_created += generated.count
+  end
+end
+
+puts "预生成了 #{trains_created} 条火车票记录 (热门线路今明两天)"
+puts "其他线路和日期将在搜索时自动生成"
+puts "火车票数据初始化完成！"
+
+# ==================== 会员权益数据 ====================
+puts "正在初始化会员权益数据..."
+MembershipBenefit.destroy_all
+
+benefits_data = [
+  { name: "专属折扣", level_required: "F1", icon: "💰", description: "享受会员专属优惠价格" },
+  { name: "优先客服", level_required: "F1", icon: "🎧", description: "专属客服优先响应" },
+  { name: "积分翻倍", level_required: "F2", icon: "🎁", description: "订单积分双倍返还" },
+  { name: "免费升舱", level_required: "F3", icon: "✈️", description: "机票自动升舱机会" },
+  { name: "贵宾休息室", level_required: "F4", icon: "☕", description: "机场贵宾室免费使用" },
+  { name: "专属管家", level_required: "F5", icon: "👔", description: "7x24小时专属管家服务" }
+]
+
+benefits_data.each do |data|
+  MembershipBenefit.create!(data)
+end
+
+puts "创建了 #{MembershipBenefit.count} 个会员权益"
+puts "会员权益数据初始化完成！"
+
+# ==================== 示例用户和行程数据 ====================
+# 注：仅用于开发测试,生产环境请删除
+if Rails.env.development?
+  puts "正在创建示例用户和行程数据..."
+  
+  # 创建测试用户（如果不存在）
+  demo_user = User.find_or_create_by!(email: 'demo@example.com') do |u|
+    u.password = 'password123'
+    u.password_confirmation = 'password123'
+    u.email_verified = true
+  end
+  
+  # 确保用户有会员资格
+  unless demo_user.membership
+    demo_user.create_membership!(level: 'F2', points: 150, experience: 80)
+  end
+  
+  # 清理旧行程
+  demo_user.itineraries.destroy_all
+  
+  # 创建即将到来的行程
+  itinerary = demo_user.itineraries.create!(
+    title: '武汉之行',
+    start_date: Date.today + 10.days,
+    end_date: Date.today + 13.days,
+    destination: '武汉',
+    status: 'upcoming'
+  )
+  
+  # 创建航班项目
+  flight = itinerary.itinerary_items.create!(
+    item_type: 'flight',
+    item_date: Date.today + 10.days,
+    sequence: 1
+  )
+  
+  puts "创建了示例用户 (#{demo_user.email}) 和 1 条行程"
+  puts "示例数据初始化完成！"
+end
+
+puts "🚄 火车票: #{Train.count} 条"
+puts "💎 会员权益: #{MembershipBenefit.count} 个"

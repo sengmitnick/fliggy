@@ -12,6 +12,8 @@ export default class extends Controller<HTMLElement> {
   private memberCheckCompleted: boolean = false
   // 追踪是否为会员确认后的第二次等待
   private isSecondWait: boolean = false
+  // 存储需要注册的航空公司列表
+  private missingAirlines: string[] = []
 
   selectPassenger(event: Event): void {
     const radio = event.currentTarget as HTMLInputElement
@@ -135,12 +137,23 @@ export default class extends Controller<HTMLElement> {
   }
 
   showMemberModal(): void {
+    // 更新弹窗中的航空公司列表显示
+    this.updateMemberModalContent()
     this.memberModalTarget.classList.remove('hidden')
+  }
+
+  updateMemberModalContent(): void {
+    // 更新会员弹窗中显示的航空公司名称
+    const airlineTextElement = this.memberModalTarget.querySelector('[data-airline-names]') as HTMLElement
+    if (airlineTextElement && this.missingAirlines.length > 0) {
+      const airlinesText = this.missingAirlines.join('、')
+      airlineTextElement.textContent = airlinesText
+    }
   }
 
   closeMemberModal(): void {
     this.memberModalTarget.classList.add('hidden')
-    // 标记会员检查已完成
+    // 标记会员检查已完成（用户同意注册会员）
     this.memberCheckCompleted = true
     // 标记为第二次等待
     this.isSecondWait = true
@@ -178,10 +191,19 @@ export default class extends Controller<HTMLElement> {
   }
 
   async checkMembershipStatusFromDB(): Promise<boolean> {
-    // 从数据库检查当前用户是否为航空公司会员
+    // 从数据库检查当前用户是否为所有相关航空公司的会员
     try {
-      const flightId = new URLSearchParams(window.location.search).get('flight_id')
-      const response = await fetch(`/api/check_membership?flight_id=${flightId}`, {
+      const urlParams = new URLSearchParams(window.location.search)
+      const flightId = urlParams.get('flight_id')
+      const returnFlightId = urlParams.get('return_flight_id')
+      
+      // 构建请求 URL，包含去程和回程航班 ID
+      let url = `/api/check_membership?flight_id=${flightId}`
+      if (returnFlightId) {
+        url += `&return_flight_id=${returnFlightId}`
+      }
+      
+      const response = await fetch(url, {
         headers: {
           'Accept': 'application/json'
         }
@@ -189,14 +211,19 @@ export default class extends Controller<HTMLElement> {
       
       if (!response.ok) {
         // 如果请求失败，默认假设需要注册会员
+        this.missingAirlines = []
         return true
       }
       
       const data = await response.json()
+      // 存储缺失的航空公司会员身份
+      this.missingAirlines = data.missing_airlines || []
+      
       return !data.is_member // 返回true表示需要注册会员
     } catch (error) {
       console.error('检查会员状态失败:', error)
       // 发生错误时，默认假设需要注册会员
+      this.missingAirlines = []
       return true
     }
   }

@@ -36,6 +36,30 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :passengers, dependent: :destroy
   has_many :bookings, dependent: :destroy
+  has_one :membership, dependent: :destroy
+  has_many :brand_memberships, dependent: :destroy
+  has_many :notifications, dependent: :destroy
+  has_many :notification_settings, dependent: :destroy
+  has_many :itineraries, dependent: :destroy
+  
+  after_create :create_default_membership
+
+  # airline_memberships is a jsonb field: { "东航" => true, "海航" => false, ... }
+  # Check if user is member of specific airline(s)
+  def is_airline_member?(airline_name)
+    return false if airline_memberships.blank?
+    airline_memberships[airline_name] == true
+  end
+
+  # Check if user is member of all specified airlines
+  def is_member_of_all?(airline_names)
+    airline_names.all? { |name| is_airline_member?(name) }
+  end
+
+  # Get list of airlines user is NOT a member of
+  def missing_memberships(airline_names)
+    airline_names.reject { |name| is_airline_member?(name) }
+  end
 
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
@@ -94,12 +118,21 @@ class User < ApplicationRecord
   def email_was_generated?
     email.end_with?(GENERATED_EMAIL_SUFFIX)
   end
+  
+  # 获取未读消息数
+  def unread_notifications_count
+    notifications.where(read: false).count
+  end
 
   private
 
   def password_required?
     return false if oauth_user?
     password_digest.blank? || password.present?
+  end
+  
+  def create_default_membership
+    create_membership!(level: 'F1', points: 0, experience: 0) unless membership
   end
 
 end

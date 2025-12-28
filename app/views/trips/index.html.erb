@@ -1,0 +1,138 @@
+<div class="min-h-screen bg-gray-50 pb-20" data-controller="coming-soon infinite-scroll" data-infinite-scroll-page-value="1" data-infinite-scroll-has-more-value="<%= @has_more %>">
+  <!-- Header -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-100">
+    <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-semibold">行程</h1>
+        <button class="px-3 py-1 bg-gray-100 rounded-full text-xs" data-action="click->coming-soon#show">
+          我的路线
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="text-2xl" data-action="click->coming-soon#show">📤</button>
+        <button class="text-2xl" data-action="click->coming-soon#show">➕</button>
+        <button class="text-2xl" data-action="click->coming-soon#show">⋯</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-md mx-auto px-4 py-4">
+    <!-- AI Assistant Card -->
+    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center relative">
+          <span class="text-2xl">😊</span>
+          <div class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+            AI
+          </div>
+        </div>
+        <div class="text-sm text-gray-600">"Hi, 我是AI行程助手"</div>
+      </div>
+      <button class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium" data-action="click->coming-soon#show">
+        问一问
+      </button>
+    </div>
+
+    <% if @has_upcoming_trips && @bookings.any? %>
+      <!-- Trips List Container -->
+      <div id="trips-list" data-infinite-scroll-target="container">
+        <% 
+          # 按日期分组
+          bookings_by_date = @bookings.group_by { |b| b.flight.flight_date }
+          bookings_by_date.each do |date, date_bookings|
+        %>
+          <!-- Date Group -->
+          <div class="mb-8">
+            <!-- Date Header with Timeline Dot -->
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="text-lg font-semibold"><%= date.strftime('%m月%d号') %></span>
+              </div>
+              <span class="text-gray-500">前往</span>
+              <div class="flex items-center gap-1">
+                <span class="font-medium">📍<%= date_bookings.first.flight.destination_city %> ›</span>
+              </div>
+            </div>
+
+            <!-- Flight Cards for this date -->
+            <% date_bookings.each do |booking| %>
+              <%= render 'flight_card', booking: booking %>
+            <% end %>
+
+            <!-- Hotel Section with Timeline (只在每个日期组的最后显示一次) -->
+            <div class="relative pl-5 mb-6">
+              <!-- Timeline Line -->
+              <div class="absolute left-1 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+              
+              <!-- Timeline Dot -->
+              <div class="absolute left-0 top-2 w-2 h-2 bg-gray-300 rounded-full"></div>
+
+              <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-base font-medium">距<%= date_bookings.first.flight.arrival_airport %>·附近酒店</div>
+                  <button class="text-sm text-blue-500 font-medium" data-action="click->coming-soon#show">
+                    <%= date_bookings.first.flight.destination_city %>酒店提前订
+                  </button>
+                </div>
+
+                <div class="space-y-2 mb-4">
+                  <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span>🚇</span>
+                    <span>公交/地铁约1小时4分钟 ›</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span>🚗</span>
+                    <span>驾车约1小时2分钟 ›</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                    预约送接机
+                  </button>
+                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                    预订酒店
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Benefits Section (只在每个日期组的最后显示一次) -->
+            <div class="bg-green-50 rounded-xl p-4 flex items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="text-green-600">✓</span>
+                <span class="text-sm text-gray-700">免费取消</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-green-600">✓</span>
+                <span class="text-sm text-gray-700">延迟退房</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="loading-indicator" data-infinite-scroll-target="loading" class="hidden text-center py-4">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <p class="text-gray-500 mt-2">加载中...</p>
+      </div>
+
+      <!-- Load More Trigger Point (invisible) -->
+      <div data-infinite-scroll-target="trigger" class="h-4"></div>
+    <% else %>
+      <!-- No trips message -->
+      <div class="bg-white rounded-2xl p-8 text-center">
+        <div class="text-6xl mb-4">✈️</div>
+        <h3 class="text-lg font-medium mb-2">暂无行程</h3>
+        <p class="text-gray-500 mb-4">预订机票或酒店后，行程会自动添加到这里</p>
+        <button class="px-6 py-2 bg-blue-500 text-white rounded-full font-medium" data-action="click->coming-soon#show">
+          去预订
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= render 'shared/bottom_navigation', active_tab: :trip %>

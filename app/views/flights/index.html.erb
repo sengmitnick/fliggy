@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker coming-soon" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <!-- Background Image Container -->
@@ -38,16 +38,35 @@
     <!-- Trip Type Tabs -->
     <div class="flex items-center justify-center gap-8 py-4 border-b border-gray-100">
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base font-bold border-b-2 border-black pb-1">单程</button>
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="one_way"
+          data-action="click->trip-type#selectType"
+          class="text-base font-bold border-b-2 border-black pb-1">
+          单程
+        </button>
       </div>
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base text-gray-500 relative" data-action="click->coming-soon#show">
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="round_trip"
+          data-action="click->trip-type#selectType"
+          class="text-base text-gray-500 relative">
           往返
           <span class="absolute -top-3 -right-6 bg-red-500 text-white text-xs px-1 rounded">更优惠</span>
         </button>
       </div>
       <div class="flex-1 flex items-center justify-center">
-        <button class="text-base text-gray-500" data-action="click->coming-soon#show">多程</button>
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="multi_city"
+          data-action="click->trip-type#selectType"
+          class="text-base text-gray-500">
+          多程
+        </button>
       </div>
     </div>
 
@@ -85,6 +104,7 @@
       <!-- Date Selection -->
       <div class="mb-4">
         <button 
+          type="button"
           data-action="click->date-picker#openModal"
           class="text-left">
           <div class="text-[32px] font-bold flex items-baseline leading-none" data-date-picker-target="selectedDate">
@@ -94,21 +114,52 @@
         </button>
       </div>
 
+      <!-- Return Date Selection (hidden by default) -->
+      <div class="mb-4 hidden" data-trip-type-target="returnDateSection">
+        <button 
+          type="button"
+          data-action="click->return-date-picker#openModal"
+          class="text-left">
+          <div class="text-sm text-gray-500 mb-1">返程日期</div>
+          <div class="text-[32px] font-bold flex items-baseline leading-none" data-return-date-picker-target="selectedDate">
+            <%= (Date.today + 197.days).month %><span class="text-lg font-medium mx-0.5">月</span><%= (Date.today + 197.days).day %><span class="text-lg font-medium ml-0.5 mr-2">日</span>
+            <span class="text-base text-gray-500 font-medium">周六</span>
+          </div>
+        </button>
+      </div>
+
       <!-- Passenger Selection -->
-      <div class="flex items-center justify-between py-3 border-b border-gray-100">
-        <div>
+      <button 
+        type="button"
+        data-action="click->passenger-selector#openModal"
+        class="w-full flex items-center justify-between py-3 border-b border-gray-100">
+        <div data-passenger-selector-target="selectedDisplay">
           <div class="text-base text-gray-800">选择乘机人</div>
           <div class="text-sm" style="color: #00A0E9;">快速找到低价票</div>
         </div>
         <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
         </svg>
-      </div>
+      </button>
 
       <!-- Cabin Class Selection -->
       <div class="flex gap-2 py-3">
-        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">全部舱位</button>
-        <button class="px-4 py-2 rounded-full border border-gray-300 text-sm">公务/头等舱</button>
+        <button 
+          type="button"
+          data-cabin-selector-target="button"
+          data-cabin-type="all"
+          data-action="click->cabin-selector#select"
+          class="px-4 py-2 rounded-full border text-sm transition-colors">
+          全部舱位
+        </button>
+        <button 
+          type="button"
+          data-cabin-selector-target="button"
+          data-cabin-type="business"
+          data-action="click->cabin-selector#select"
+          class="px-4 py-2 rounded-full border text-sm transition-colors">
+          公务/头等舱
+        </button>
       </div>
 
       <!-- Search Button -->
@@ -116,6 +167,9 @@
         <%= f.hidden_field :departure_city, value: '', data: { 'city-selector-target': 'departureCityInput' } %>
         <%= f.hidden_field :destination_city, value: '', data: { 'city-selector-target': 'destinationCityInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
+        <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
+        <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
           搜索机票
         </button>
@@ -127,38 +181,32 @@
 
   
   <!-- Quick Links -->
-  <div class="mx-4 mt-4 bg-white rounded-2xl py-4 shadow-sm">
+  <div class="mx-4 mt-4 bg-white rounded-2xl pt-[3px] pb-[18px] shadow-sm">
     <div class="grid grid-cols-5 items-center">
-      <div class="flex flex-col items-center gap-1.5">
-        <%= image_tag "airfare/特价机票.png", class: "w-10 h-10", alt: "特价机票" %>
-        <span class="text-[11px] text-gray-700">特价机票</span>
+      <div class="flex flex-1 flex-col items-center gap-1.5">
+        <%= image_tag "airfare/特价机票.png", class: "w-full h-auto", alt: "特价机票" %>
       </div>
 
-      <div class="flex flex-col items-center gap-1.5 relative">
-        <span class="absolute -top-2 -right-1 bg-[#FF4D4F] text-white text-[9px] px-1 rounded-full leading-none py-0.5 border border-white">低价团</span>
-        <%= image_tag "airfare/机票次卡.png", class: "w-10 h-10", alt: "机票次卡" %>
-        <span class="text-[11px] text-gray-700">机票次卡</span>
+      <div class="flex flex-1 flex-col items-center gap-1.5 relative">
+        <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
       </div>
 
-      <div class="flex flex-col items-center gap-1.5">
-        <%= image_tag "airfare/低价提醒.png", class: "w-10 h-10", alt: "低价提醒" %>
-        <span class="text-[11px] text-gray-700">低价提醒</span>
+      <div class="flex flex-1 flex-col items-center gap-1.5">
+        <%= image_tag "airfare/低价提醒.png", class: "w-full h-auto", alt: "低价提醒" %>
       </div>
 
-      <div class="flex flex-col items-center gap-1.5">
-        <%= image_tag "airfare/家庭认证.png", class: "w-10 h-10", alt: "家庭认证" %>
-        <span class="text-[11px] text-gray-700">家庭认证</span>
+      <div class="flex flex-1 flex-col items-center gap-1.5">
+        <%= image_tag "airfare/家庭认证.png", class: "w-full h-auto", alt: "家庭认证" %>
       </div>
 
-      <div class="flex flex-col items-center gap-1.5">
-        <%= image_tag "airfare/展开全部.png", class: "w-10 h-10", alt: "展开全部" %>
-        <span class="text-[11px] text-gray-700">展开全部</span>
+      <div class="flex flex-1 flex-col items-center gap-1.5">
+        <%= image_tag "airfare/展开全部.png", class: "w-full h-auto", alt: "展开全部" %>
       </div>
     </div>
   </div>
 
   <!-- Promotion Section -->
-  <div class="bg-[#F8F9FA] py-4">
+  <div class="bg-[#F8F9FA] py-4 mt-4">
     <div class="mx-4">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-1">
@@ -341,10 +389,10 @@
         <span class="text-[11px] text-gray-700">发票报销</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+      <%= link_to bookings_path, class: "flex flex-col items-center justify-center gap-1.5" do %>
         <%= image_tag "airfare/我的订单.png", class: "w-6 h-6", alt: "我的订单" %>
         <span class="text-[11px] text-gray-700">我的订单</span>
-      </button>
+      <% end %>
     </div>
   </div>
 
@@ -353,6 +401,12 @@
   
   <!-- Date Picker Modal -->
   <%= render 'shared/date_picker_modal' %>
+  
+  <!-- Return Date Picker Modal -->
+  <%= render 'shared/return_date_picker_modal' %>
+  
+  <!-- Passenger Selector Modal -->
+  <%= render 'shared/passenger_selector_modal' %>
 </div>
 
 <style>

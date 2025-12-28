@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="overflow-x-hidden">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -26,7 +26,7 @@
     <!-- Generate new favicon at `images/app-favicon.svg` at the first time, remove this line after generated  -->
     <%= favicon_link_tag asset_path("app-favicon.svg") unless Rails.env.test? %>
   </head>
-  <body class="w-full max-w-md mx-auto min-h-screen flex flex-col text-foreground <%= body_class %> bg-surface relative" style="box-shadow: 0 0 0 100vw hsl(var(--color-surface-elevated)); clip-path: inset(0 -100vw);">
+  <body class="w-full max-w-md mx-auto min-h-screen flex flex-col text-foreground <%= body_class %> bg-surface relative overflow-x-hidden" style="box-shadow: 0 0 0 100vw hsl(var(--color-surface-elevated)); clip-path: inset(0 -100vw);">
     <main class="flex-1 flex flex-col">
       <%= render 'shared/navbar' unless @full_render %>
       <%= render 'shared/flash_messages' %>
