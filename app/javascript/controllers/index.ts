@@ -16,6 +16,7 @@ import RegionSelectorController from "./region_selector_controller"
 import TrainSearchController from "./train_search_controller"
 import TrainListController from "./train_list_controller"
 import TrainCitySelectorController from "./train_city_selector_controller"
+import InfiniteScrollController from "./infinite_scroll_controller"
 
 const application = Application.start()
 
@@ -35,5 +36,6 @@ application.register("region-selector", RegionSelectorController)
 application.register("train-search", TrainSearchController)
 application.register("train-list", TrainListController)
 application.register("train-city-selector", TrainCitySelectorController)
+application.register("infinite-scroll", InfiniteScrollController)
 
 window.Stimulus = application

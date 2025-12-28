@@ -23,54 +23,58 @@
 
     <!-- 会员 Tab -->
     <% if active_tab == :member %>
-      <%= link_to "#", class: "flex flex-col items-center justify-center gap-1 py-1" do %>
+      <%= link_to members_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
         <%= image_tag "bottom_navigation/Tab会员-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
-        <span>会员</span>
+        <span class="text-[#7D7DE9]">会员</span>
       <% end %>
     <% else %>
-      <button class="flex flex-col items-center justify-center gap-1 py-1" data-action="click->coming-soon#show">
+      <%= link_to members_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
         <%= image_tag "bottom_navigation/Tab会员.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
         <span>会员</span>
-      </button>
+      <% end %>
     <% end %>
 
     <!-- 消息 Tab -->
     <% if active_tab == :message %>
-      <%= link_to "#", class: "flex flex-col items-center justify-center py-1 relative" do %>
+      <%= link_to messages_path, class: "flex flex-col items-center justify-center py-1 relative" do %>
         <%= image_tag "bottom_navigation/Tab消息-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
-        <span>消息</span>
-        <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
-          <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
-        </div>
+        <span class="text-[#7D7DE9]">消息</span>
+        <% if unread_notifications_count > 0 %>
+          <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
+            <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
+          </div>
+        <% end %>
       <% end %>
     <% else %>
-      <button class="flex flex-col items-center justify-center py-1 relative" data-action="click->coming-soon#show">
+      <%= link_to messages_path, class: "flex flex-col items-center justify-center py-1 relative" do %>
         <%= image_tag "bottom_navigation/Tab消息.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
         <span>消息</span>
-        <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
-          <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
-        </div>
-      </button>
+        <% if unread_notifications_count > 0 %>
+          <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
+            <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
+          </div>
+        <% end %>
+      <% end %>
     <% end %>
 
     <!-- 行程 Tab -->
     <% if active_tab == :trip %>
-      <%= link_to "#", class: "flex flex-col items-center justify-center py-1" do %>
+      <%= link_to trips_path, class: "flex flex-col items-center justify-center py-1" do %>
         <%= image_tag "bottom_navigation/Tab行程-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
-        <span>行程</span>
+        <span class="text-[#7D7DE9]">行程</span>
       <% end %>
     <% else %>
-      <button class="flex flex-col items-center justify-center py-1" data-action="click->coming-soon#show">
+      <%= link_to trips_path, class: "flex flex-col items-center justify-center py-1" do %>
         <%= image_tag "bottom_navigation/Tab行程.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
         <span>行程</span>
-      </button>
+      <% end %>
     <% end %>
 
     <!-- 我的 Tab -->
     <% if active_tab == :profile %>
       <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>
         <%= image_tag "bottom_navigation/Tab我的-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
-        <span>我的</span>
+        <span class="text-[#7D7DE9]">我的</span>
       <% end %>
     <% else %>
       <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>

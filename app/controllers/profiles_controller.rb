@@ -2,6 +2,7 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
 
   def show
+    @full_render = true
     @user = current_user
     # 统计信息
     @bookings_count = {
