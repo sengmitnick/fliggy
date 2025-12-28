@@ -1,0 +1,113 @@
+<div class="min-h-screen bg-gray-50 pb-20" data-controller="coming-soon">
+  <!-- Header -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-100">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-semibold">群聊广场</h1>
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-medium">消息</h2>
+          <% if @total_unread > 0 %>
+            <span class="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center"><%= @total_unread %></span>
+          <% end %>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="text-2xl" data-action="click->coming-soon#show">⚙️</button>
+        <button class="text-2xl" data-action="click->coming-soon#show">🛍️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Banner -->
+  <div class="bg-amber-50 border-b border-amber-100">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3 flex-1">
+        <span class="text-sm text-gray-700">打开消息通知，别错过订单、资产等变更提醒。</span>
+      </div>
+      <button class="px-4 py-1.5 border border-gray-300 rounded-full text-sm bg-white" data-action="click->coming-soon#show">
+        开启
+      </button>
+      <button class="ml-2 text-gray-400" data-action="click->coming-soon#show">✕</button>
+    </div>
+  </div>
+
+  <div class="max-w-md mx-auto">
+    <% @notifications_by_category.each do |category_data| %>
+      <% category = category_data[:category] %>
+      <% display_name = category_data[:display_name] %>
+      <% latest = category_data[:latest_notification] %>
+      <% unread_count = category_data[:unread_count] %>
+      <% has_messages = category_data[:has_messages] %>
+
+      <% if category == 'group' %>
+        <!-- Group Chat Invitation (Special handling) -->
+        <div class="bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full grid grid-cols-2 gap-0.5 p-1.5">
+              <div class="bg-white/30 rounded-sm"></div>
+              <div class="bg-white/30 rounded-sm"></div>
+              <div class="bg-white/30 rounded-sm"></div>
+              <div class="bg-white/30 rounded-sm"></div>
+            </div>
+            <div>
+              <div class="font-medium text-base mb-0.5">1月·武汉出游群</div>
+              <div class="text-sm text-gray-500">有人一起玩吗？可以拼车。</div>
+            </div>
+          </div>
+          <button class="px-5 py-1.5 bg-yellow-400 text-gray-800 rounded-full text-sm font-medium" data-action="click->coming-soon#show">
+            加入群聊
+          </button>
+        </div>
+      <% else %>
+        <!-- Regular notification categories -->
+        <div class="bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3 flex-1">
+            <!-- Category icon -->
+            <div class="w-12 h-12 <%= category_icon_bg_class(category) %> rounded-full flex items-center justify-center <%= 'relative' if category == 'interactive' %>">
+              <% if category == 'folded' %>
+                <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
+                  <div class="bg-amber-400 rounded-sm"></div>
+                  <div class="bg-amber-400 rounded-sm"></div>
+                  <div class="bg-amber-400 rounded-sm"></div>
+                  <div class="bg-amber-400 rounded-sm"></div>
+                </div>
+              <% elsif category == 'interactive' %>
+                <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center text-white">
+                  💬
+                </div>
+              <% else %>
+                <span class="text-2xl"><%= category_icon(category) %></span>
+              <% end %>
+            </div>
+
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-0.5">
+                <span class="font-medium text-base"><%= display_name %></span>
+                <% if latest && latest.created_at %>
+                  <span class="text-sm text-gray-400"><%= format_notification_time(latest.created_at) %></span>
+                <% end %>
+              </div>
+              
+              <% if latest %>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-gray-600"><%= latest.respond_to?(:content) ? latest.content : latest.title %></span>
+                  <% if unread_count > 0 %>
+                    <% if category == 'folded' %>
+                      <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <% else %>
+                      <span class="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[16px] text-center"><%= unread_count %></span>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="text-sm text-gray-600">暂无消息</div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<%= render 'shared/bottom_navigation', active_tab: :message %>

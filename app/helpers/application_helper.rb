@@ -109,4 +109,47 @@ module ApplicationHelper
       super
     end
   end
+
+  # Notification helpers for messages page
+  def category_icon(category)
+    icons = {
+      'interactive' => '💬',
+      'member' => '👑',
+      'itinerary' => '🔔',
+      'account' => '📢',
+      'hotel' => '🏨',
+      'subscription' => '📋',
+      'folded' => '',
+      'group' => ''
+    }
+    icons[category] || '🔔'
+  end
+
+  def category_icon_bg_class(category)
+    classes = {
+      'interactive' => 'bg-pink-100',
+      'member' => 'bg-gradient-to-br from-yellow-300 to-yellow-500',
+      'itinerary' => 'bg-amber-100',
+      'account' => 'bg-orange-100',
+      'hotel' => 'bg-blue-100',
+      'subscription' => 'bg-purple-100',
+      'folded' => 'bg-amber-100',
+      'group' => 'bg-gradient-to-br from-orange-400 to-pink-500'
+    }
+    classes[category] || 'bg-gray-100'
+  end
+
+  def format_notification_time(time)
+    return '' unless time
+    
+    if time.to_date == Date.today
+      time.strftime('%H:%M')
+    elsif time.to_date == Date.yesterday
+      '昨天'
+    elsif time.to_date.year == Date.today.year
+      time.strftime('%m/%d')
+    else
+      time.strftime('%y/%m/%d')
+    end
+  end
 end

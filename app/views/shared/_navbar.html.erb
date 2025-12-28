@@ -1,2 +1,22 @@
-<!-- Write your own navbar here. Will be rendered by every view -->
-<!-- Generate new logo svg at `images/app-logo.svg` at the first time, remove this line after generated -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <%= link_to root_path, class: "flex items-center gap-2" do %>
+          <span class="text-2xl font-bold text-primary"><%= Rails.application.config.x.appname %></span>
+        <% end %>
+      </div>
+
+      <!-- User Area -->
+      <div class="flex items-center gap-4">
+        <% if user_signed_in? %>
+          <%= render 'shared/user_dropdown' %>
+        <% else %>
+          <%= link_to "登录", sign_in_path, class: "btn-secondary" %>
+          <%= link_to "注册", sign_up_path, class: "btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

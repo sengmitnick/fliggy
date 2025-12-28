@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -82,8 +82,24 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.datetime "updated_at", null: false
     t.string "insurance_type"
     t.decimal "insurance_price"
+    t.string "trip_type", default: "one_way"
+    t.integer "return_flight_id"
+    t.date "return_date"
+    t.integer "return_offer_id"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
+    t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "brand_memberships", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "brand_name"
+    t.string "member_number"
+    t.string "member_level"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_brand_memberships_on_user_id"
   end
 
   create_table "cities", force: :cascade do |t|
@@ -253,6 +269,77 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "itineraries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title"
+    t.date "start_date"
+    t.date "end_date"
+    t.string "destination"
+    t.string "status", default: "upcoming"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "start_date"], name: "index_itineraries_on_user_id_and_start_date"
+    t.index ["user_id", "status"], name: "index_itineraries_on_user_id_and_status"
+    t.index ["user_id"], name: "index_itineraries_on_user_id"
+  end
+
+  create_table "itinerary_items", force: :cascade do |t|
+    t.bigint "itinerary_id", null: false
+    t.string "item_type"
+    t.string "bookable_type"
+    t.integer "bookable_id"
+    t.date "item_date"
+    t.integer "sequence", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bookable_type", "bookable_id"], name: "index_itinerary_items_on_bookable_type_and_bookable_id"
+    t.index ["itinerary_id", "sequence"], name: "index_itinerary_items_on_itinerary_id_and_sequence"
+    t.index ["itinerary_id"], name: "index_itinerary_items_on_itinerary_id"
+  end
+
+  create_table "membership_benefits", force: :cascade do |t|
+    t.string "name"
+    t.string "level_required", default: "F1"
+    t.string "icon"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "level", default: "F1"
+    t.integer "points", default: 0
+    t.integer "experience", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "notification_settings", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "category"
+    t.boolean "enabled", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "category"], name: "index_notification_settings_on_user_id_and_category", unique: true
+    t.index ["user_id"], name: "index_notification_settings_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "category"
+    t.string "title"
+    t.text "content"
+    t.boolean "read", default: false
+    t.integer "badge_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
+    t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
   create_table "passengers", force: :cascade do |t|
     t.string "name"
     t.string "id_type", default: "身份证"
@@ -292,6 +379,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
   end
 
+  create_table "trains", force: :cascade do |t|
+    t.string "departure_city"
+    t.string "arrival_city"
+    t.datetime "departure_time"
+    t.datetime "arrival_time"
+    t.integer "duration"
+    t.string "train_number"
+    t.text "seat_types"
+    t.decimal "price_second_class"
+    t.decimal "price_first_class"
+    t.decimal "price_business_class"
+    t.integer "available_seats"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email", null: false
@@ -301,13 +404,19 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_25_113647) do
     t.string "uid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "airline_member", default: false
+    t.jsonb "airline_memberships", default: {}
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
+  add_foreign_key "brand_memberships", "users"
+  add_foreign_key "itineraries", "users"
+  add_foreign_key "itinerary_items", "itineraries"
+  add_foreign_key "memberships", "users"
+  add_foreign_key "notification_settings", "users"
+  add_foreign_key "notifications", "users"
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
 end
