@@ -1,39 +1,14 @@
 <div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
-    <!-- Background Image Container -->
-    <div class="relative w-full z-1">
-      <%= image_tag "活动.png", class: "w-full h-auto object-cover object-center", alt: "背景" %>
+    <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 
-      <!-- Top Bar -->
-      <div class="absolute top-4 left-0 w-full flex items-center justify-between px-4 py-3">
-        <%= link_to root_path, class: "w-10 h-10 flex items-center justify-center" do %>
-          <%= image_tag "返回.png", class: "w-10 h-10", alt: "返回" %>
-        <% end %>
-        
-        <div class="flex items-center gap-3">
-          <button class="w-10 h-10 flex items-center justify-center" data-action="click->coming-soon#show">
-            <%= image_tag "红包.png", class: "w-10 h-10", alt: "红包" %>
-          </button>
-          <button class="w-10 h-10 flex items-center justify-center" data-action="click->coming-soon#show">
-            <%= image_tag "更多.png", class: "w-10 h-10", alt: "更多" %>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- White Card Container with Tabs and Form -->
-    <div class="relative mx-4 -mt-1 bg-white rounded-2xl overflow-hidden z-50">
-      <!-- Tab Navigation -->
-      <div class="flex gap-1 pt-3 px-4 border-b border-gray-200 overflow-x-auto no-scrollbar">
-        <button class="pb-3 px-3 text-sm font-bold border-b-2 border-black whitespace-nowrap">机票</button>
-        <button class="pb-3 px-3 text-sm text-gray-600 whitespace-nowrap" data-action="click->coming-soon#show">特价机票</button>
-        <button class="pb-3 px-3 text-sm text-gray-600 whitespace-nowrap" data-action="click->coming-soon#show">火车票</button>
-        <button class="pb-3 px-3 text-sm text-gray-600 whitespace-nowrap" data-action="click->coming-soon#show">租车/接送</button>
-        <button class="pb-3 px-3 text-sm text-gray-600 whitespace-nowrap" data-action="click->coming-soon#show">汽车票</button>
-      </div>
-
-      <!-- Flight Search Form -->
+    <!-- Tabs Container with Gray Background -->
+    <div class="relative mx-4 -mt-3 overflow-hidden z-50">
+      <%= render 'shared/transport_tabs', active_tab: :flight %>
+  
+      <!-- White Card Container with Form -->
+      <div class="bg-white rounded-b-[24px] shadow-sm">
       <div>
     <!-- Trip Type Tabs -->
     <div class="flex items-center justify-center gap-8 py-4 border-b border-gray-100">
@@ -143,23 +118,25 @@
       </button>
 
       <!-- Cabin Class Selection -->
-      <div class="flex gap-2 py-3">
-        <button 
-          type="button"
-          data-cabin-selector-target="button"
-          data-cabin-type="all"
-          data-action="click->cabin-selector#select"
-          class="px-4 py-2 rounded-full border text-sm transition-colors">
-          全部舱位
-        </button>
-        <button 
-          type="button"
-          data-cabin-selector-target="button"
-          data-cabin-type="business"
-          data-action="click->cabin-selector#select"
-          class="px-4 py-2 rounded-full border text-sm transition-colors">
-          公务/头等舱
-        </button>
+      <div class="w-full flex">
+        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1">
+          <button 
+            type="button"
+            data-cabin-selector-target="button"
+            data-cabin-type="all"
+            data-action="click->cabin-selector#select"
+            class="flex-1 px-4 py-2 rounded-sm text-sm font-medium transition-colors">
+            全部舱位
+          </button>
+          <button 
+            type="button"
+            data-cabin-selector-target="button"
+            data-cabin-type="business"
+            data-action="click->cabin-selector#select"
+            class="flex-1 px-4 py-2 rounded-sm text-sm font-medium transition-colors whitespace-nowrap">
+            公务/头等舱
+          </button>
+        </div>
       </div>
 
       <!-- Search Button -->
