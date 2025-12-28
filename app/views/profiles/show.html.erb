@@ -16,7 +16,7 @@
       <div class="flex items-center gap-4 mb-6">
         <div class="relative">
           <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold border-2 border-white/50">
-            <%= @user.name.first %>
+            <%= (@user.name.present? ? @user.name.first : '是').upcase %>
           </div>
           <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
             <span class="text-xs text-blue-600 font-bold">会员</span>
