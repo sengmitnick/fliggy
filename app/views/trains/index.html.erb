@@ -1,0 +1,349 @@
+<div class="min-h-screen bg-white" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+  <!-- Header with VIP Banner -->
+  <div class="relative">
+    <!-- VIP Banner with gradient background -->
+    <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #2E4A8B 0%, #4A6FA5 50%, #7B9FC9 100%);">
+      <!-- Background pattern/image -->
+      <div class="absolute inset-0 opacity-30">
+        <div class="h-full w-full" style="background-image: url('https://images.unsplash.com/photo-1519817914152-22d216bb9170?w=800'); background-size: cover; background-position: center;"></div>
+      </div>
+      
+      <!-- Content overlay -->
+      <div class="relative z-10 px-4 pt-3">
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between mb-4">
+          <%= link_to root_path, class: "text-white" do %>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          <% end %>
+          
+          <div class="flex-1 text-center">
+            <div class="text-white text-lg font-bold">飞猪超级VIP</div>
+          </div>
+          
+          <div class="flex gap-4">
+            <button class="text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+              </svg>
+            </button>
+            <button class="text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIP Promo Text -->
+        <div class="mb-6">
+          <div class="text-yellow-300 text-2xl font-bold mb-1">5折起住火车客栈款酒店</div>
+          <div class="text-white text-sm">爆款酒店春节不加价!立即抢!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="bg-white px-4 py-3 shadow-sm">
+      <div class="flex items-center justify-between gap-2">
+        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">机票</button>
+        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">特价机票</button>
+        <button class="flex-1 text-center py-2.5 font-bold text-base relative" style="color: #000;">
+          火车票
+          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-yellow-400 rounded-full"></div>
+        </button>
+        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">租车/接送</button>
+        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">汽车票</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="bg-white">
+    <!-- Trip Type Toggle -->
+    <div class="px-4 pt-4 pb-3 border-b border-gray-100">
+      <div class="flex gap-8">
+        <button class="relative pb-2">
+          <span class="text-base font-medium">单程</span>
+          <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
+        </button>
+        <button class="text-base text-gray-400">往返</button>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <%= form_with url: search_trains_path, method: :get, class: "px-4 py-4" do |f| %>
+      <!-- Cities Section -->
+      <div class="flex items-center gap-3">
+        <!-- Departure City -->
+        <div class="flex-1">
+          <button 
+            data-action="click->train-city-selector#openDeparture"
+            class="text-left w-full">
+            <div class="text-2xl font-bold" data-train-city-selector-target="departure">北京</div>
+          </button>
+          <%= f.hidden_field :departure_city, value: "北京", data: { train_city_selector_target: "departureCityInput" } %>
+        </div>
+
+        <!-- Switch Button -->
+        <button 
+          type="button"
+          data-action="click->train-city-selector#switchCities"
+          class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+          </svg>
+        </button>
+
+        <!-- Arrival City -->
+        <div class="flex-1 text-right">
+          <button 
+            data-action="click->train-city-selector#openDestination"
+            class="text-right w-full">
+            <div class="text-2xl font-bold" data-train-city-selector-target="destination">杭州</div>
+          </button>
+          <%= f.hidden_field :arrival_city, value: "杭州", data: { train_city_selector_target: "destinationCityInput" } %>
+        </div>
+      </div>
+
+      <!-- Date Section -->
+      <div class="mb-4 py-3 border-t border-gray-100">
+        <button 
+          data-action="click->date-picker#openModal"
+          type="button"
+          class="text-left">
+          <div class="text-3xl font-bold flex items-baseline leading-none" data-date-picker-target="selectedDate">
+            <%= Date.today.month %><span class="text-sm">月</span><%= Date.today.day %><span class="text-sm">日</span> <span class="text-sm">后天</span>
+          </div>
+        </button>
+        <%= f.hidden_field :date, value: Date.today.strftime("%Y-%m-%d"), data: { date_picker_target: "dateInput" } %>
+      </div>
+
+      <!-- Filters -->
+      <div class="mb-6 flex items-center gap-6">
+        <label class="flex items-center gap-2">
+          <%= f.check_box :student_ticket, class: "w-5 h-5 rounded border-gray-300 text-blue-600" %>
+          <span class="text-sm text-gray-700">学生票</span>
+        </label>
+        
+        <label class="flex items-center gap-2">
+          <%= f.check_box :only_high_speed, class: "w-5 h-5 rounded border-gray-300 text-blue-600" %>
+          <span class="text-sm text-gray-700">只看高铁动车</span>
+        </label>
+      </div>
+
+      <!-- Search Button -->
+      <button type="submit" class="w-full py-4 text-white text-lg font-bold rounded-xl shadow-lg" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+        <div class="flex items-center justify-center gap-2">
+          <span>搜索火车票</span>
+          <div class="px-3 py-1 text-xs rounded-full" style="background: rgba(255, 69, 0, 0.9);">购票赚双积分</div>
+        </div>
+      </button>
+    <% end %>
+
+    <!-- Quick Links -->
+    <div class="px-4 py-3 border-t border-gray-100">
+      <div class="flex items-center justify-between">
+        <button class="text-sm text-gray-600">北京市-杭州市</button>
+        <button class="text-sm text-gray-600">深圳站-广州市</button>
+        <button class="text-sm text-gray-600">武汉市->深圳市</button>
+        <button class="text-sm text-blue-600">清除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="px-4 py-6 bg-gray-50">
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <!-- Feature 1 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-blue-100">
+          <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">有票神器</div>
+        <div class="text-xs text-gray-400">解决无票难题</div>
+      </button>
+
+      <!-- Feature 2 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-green-100">
+          <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">在线换座</div>
+        <div class="text-xs text-gray-400">全网票都能换</div>
+      </button>
+
+      <!-- Feature 3 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-purple-100">
+          <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">学生核验</div>
+        <div class="text-xs text-gray-400"></div>
+      </button>
+
+      <!-- Feature 4 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-orange-100">
+          <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">车站大屏</div>
+        <div class="text-xs text-gray-400"></div>
+      </button>
+
+      <!-- Feature 5 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-red-100">
+          <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">购票攻略</div>
+        <div class="text-xs text-gray-400"></div>
+      </button>
+
+      <!-- Feature 6 -->
+      <button class="flex flex-col items-center">
+        <div class="w-12 h-12 mb-2 flex items-center justify-center rounded-full bg-pink-100">
+          <svg class="w-6 h-6 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-xs text-gray-700">抢票加速</div>
+        <div class="text-xs text-gray-400">更早出票不落空</div>
+      </button>
+    </div>
+
+    <!-- Sales Notice -->
+    <div class="bg-orange-50 rounded-2xl px-4 py-3 mb-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-base font-bold text-gray-800 mb-1">今日开售 农历十一月廿一</div>
+          <div class="text-2xl font-bold text-gray-900">01月09日</div>
+        </div>
+        <button class="bg-red-500 text-white px-6 py-3 rounded-xl font-bold text-base">
+          去抢票
+        </button>
+      </div>
+    </div>
+
+    <!-- Free Ticket Promo -->
+    <div class="bg-pink-50 rounded-2xl px-4 py-3 mb-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-base font-bold text-gray-800 mb-1">元旦免费抢票</div>
+          <div class="text-sm text-gray-600">请3休8去跨年 27号就出发</div>
+        </div>
+        <button class="bg-white text-red-500 border-2 border-red-500 px-6 py-3 rounded-xl font-bold text-base">
+          立即出游
+        </button>
+      </div>
+    </div>
+
+    <!-- Offers Section -->
+    <div class="mb-6">
+      <div class="text-lg font-bold text-gray-800 mb-3">找优惠 帮你省钱</div>
+      <div class="grid grid-cols-3 gap-3">
+        <!-- Offer 1 -->
+        <div class="bg-orange-50 rounded-2xl p-3 text-center">
+          <div class="w-10 h-10 mx-auto mb-2 bg-orange-200 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="text-xs font-bold text-gray-800">最高10元红包</div>
+          <div class="text-xs text-gray-500 mb-2">里程兑换</div>
+          <button class="text-xs text-orange-600 font-medium">去兑换</button>
+        </div>
+
+        <!-- Offer 2 -->
+        <div class="bg-yellow-50 rounded-2xl p-3 text-center">
+          <div class="w-10 h-10 mx-auto mb-2 bg-yellow-200 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="text-xs font-bold text-gray-800">购票赠双积分</div>
+          <div class="text-xs text-gray-500 mb-2">积分兑车票</div>
+          <button class="text-xs text-yellow-600 font-medium">兑换</button>
+        </div>
+
+        <!-- Offer 3 -->
+        <div class="bg-blue-50 rounded-2xl p-3 text-center">
+          <div class="w-10 h-10 mx-auto mb-2 bg-blue-200 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="text-xs font-bold text-gray-800">最高赚100元</div>
+          <div class="text-xs text-gray-500 mb-2">退票免费</div>
+          <button class="text-xs text-blue-600 font-medium">查看</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spacer for bottom navigation -->
+  <div class="h-20"></div>
+
+  <!-- Bottom Navigation -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 z-50" data-controller="coming-soon">
+    <div class="grid grid-cols-5 gap-2 px-2 py-2">
+      <button class="flex flex-col items-center justify-center gap-1" data-action="click->coming-soon#show">
+        <%= image_tag "train/12306Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "12306" %>
+        <span class="text-[10px] text-gray-700 whitespace-nowrap">12306(未登录)</span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center gap-1" data-action="click->coming-soon#show">
+        <%= image_tag "train/抢票Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "抢票" %>
+        <span class="text-[10px] text-gray-700 whitespace-nowrap">抢票</span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center gap-1" data-action="click->coming-soon#show">
+        <%= image_tag "train/学生核验Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "学生核验" %>
+        <span class="text-[10px] text-gray-700 whitespace-nowrap">学生核验</span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center gap-1" data-action="click->coming-soon#show">
+        <%= image_tag "train/在线换座Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "在线换座" %>
+        <span class="text-[10px] text-gray-700 whitespace-nowrap">在线换座</span>
+      </button>
+
+      <button class="flex flex-col items-center justify-center gap-1" data-action="click->coming-soon#show">
+        <%= image_tag "train/我的订单Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的订单" %>
+        <span class="text-[10px] text-gray-700 whitespace-nowrap">我的订单</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- City Selector Modal (reuse the shared partial, but replace controller name) -->
+  <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Date Picker Modal -->
+  <%= render 'shared/date_picker_modal' %>
+</div>
+
+<script>
+  // Replace city-selector with train-city-selector in the rendered modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.querySelector('[data-city-selector-target="modal"]');
+    if (modal && document.querySelector('[data-controller~="train-city-selector"]')) {
+      // Replace all city-selector references with train-city-selector
+      modal.innerHTML = modal.innerHTML
+        .replace(/data-city-selector-target=/g, 'data-train-city-selector-target=')
+        .replace(/data-action="([^"]*)->city-selector#/g, 'data-action="$1->train-city-selector#');
+    }
+  });
+</script>

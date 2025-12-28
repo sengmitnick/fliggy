@@ -36,6 +36,13 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :passengers, dependent: :destroy
   has_many :bookings, dependent: :destroy
+  has_one :membership, dependent: :destroy
+  has_many :brand_memberships, dependent: :destroy
+  has_many :notifications, dependent: :destroy
+  has_many :notification_settings, dependent: :destroy
+  has_many :itineraries, dependent: :destroy
+  
+  after_create :create_default_membership
 
   # airline_memberships is a jsonb field: { "东航" => true, "海航" => false, ... }
   # Check if user is member of specific airline(s)
@@ -111,12 +118,21 @@ class User < ApplicationRecord
   def email_was_generated?
     email.end_with?(GENERATED_EMAIL_SUFFIX)
   end
+  
+  # 获取未读消息数
+  def unread_notifications_count
+    notifications.where(read: false).count
+  end
 
   private
 
   def password_required?
     return false if oauth_user?
     password_digest.blank? || password.present?
+  end
+  
+  def create_default_membership
+    create_membership!(level: 'F1', points: 0, experience: 0) unless membership
   end
 
 end

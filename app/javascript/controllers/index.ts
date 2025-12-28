@@ -18,6 +18,10 @@ import CabinSelectorController from "./cabin_selector_controller"
 import TripTypeController from "./trip_type_controller"
 import ReturnDatePickerController from "./return_date_picker_controller"
 import RoundTripSelectorController from "./round_trip_selector_controller"
+import TrainSearchController from "./train_search_controller"
+import TrainListController from "./train_list_controller"
+import TrainCitySelectorController from "./train_city_selector_controller"
+import InfiniteScrollController from "./infinite_scroll_controller"
 
 const application = Application.start()
 
@@ -39,5 +43,9 @@ application.register("cabin-selector", CabinSelectorController)
 application.register("trip-type", TripTypeController)
 application.register("return-date-picker", ReturnDatePickerController)
 application.register("round-trip-selector", RoundTripSelectorController)
+application.register("train-search", TrainSearchController)
+application.register("train-list", TrainListController)
+application.register("train-city-selector", TrainCitySelectorController)
+application.register("infinite-scroll", InfiniteScrollController)
 
 window.Stimulus = application

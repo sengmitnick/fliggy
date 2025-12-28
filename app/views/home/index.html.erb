@@ -70,9 +70,9 @@
           <%= image_tag "home/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
         <% end %>
 
-        <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
+        <%= link_to trains_path, class: "flex flex-col items-center justify-center" do %>
           <%= image_tag "home/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
-        </button>
+        <% end %>
 
         <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
           <%= image_tag "home/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>
@@ -185,32 +185,7 @@
   </div>
 
   <!-- Bottom Navigation -->
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200" data-controller="coming-soon">
-    <div class="grid grid-cols-5 gap-2 px-4 py-2">
-      <button class="flex flex-col items-center justify-center">
-        <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center relative" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center relative" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
-        <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
-          <div class="ml-[24px] w-2 h-2 bg-red-500 rounded-full"></div>
-        </div>
-      </button>
-
-      <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
-      </button>
-
-      <button class="flex flex-col items-center justify-center" data-action="click->coming-soon#show">
-        <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
-      </button>
-    </div>
-  </div>
+  <%= render 'shared/bottom_navigation', active_tab: :home %>
 </div>
 
 <style>
