@@ -33,20 +33,40 @@ export default class extends Controller<HTMLElement> {
       console.log("MultiCity controller: segmentsContainer not available yet, skipping initialization")
       
       // Listen for the event when multi-city form becomes visible
-      document.addEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as EventListener)
+      // eslint-disable-next-line no-undef
+      document.addEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as unknown as EventListener)
       return
     }
     
     this.initializeSegments()
     
     // Listen for city selection events on document for better event capture
-    document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as EventListener)
+    // eslint-disable-next-line no-undef
+    document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
     console.log('Multi-city: Added event listener for city-selector:city-selected')
+    
+    // Listen for date selection events
+    // eslint-disable-next-line no-undef
+    document.addEventListener('date-picker:date-selected', this.handleDateSelected.bind(this) as unknown as EventListener)
+    console.log('Multi-city: Added event listener for date-picker:date-selected')
   }
 
   disconnect(): void {
-    document.removeEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as EventListener)
-    document.removeEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as EventListener)
+    // eslint-disable-next-line no-undef
+    document.removeEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
+    // eslint-disable-next-line no-undef
+    document.removeEventListener('date-picker:date-selected', this.handleDateSelected.bind(this) as unknown as EventListener)
+    // eslint-disable-next-line no-undef
+    document.removeEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as unknown as EventListener)
+  }
+
+  // Stimulus value changed callback - automatically called when segmentsValue changes
+  segmentsValueChanged(): void {
+    console.log('Multi-city: segmentsValueChanged triggered')
+    // Only render if the container is available
+    if (this.hasSegmentsContainerTarget) {
+      this.render()
+    }
   }
 
   // Handle when multi-city form is shown
@@ -58,8 +78,14 @@ export default class extends Controller<HTMLElement> {
       this.initializeSegments()
       
       // Listen for city selection events
-      document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as EventListener)
+      // eslint-disable-next-line no-undef
+      document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
       console.log('Multi-city: Added event listener for city-selector:city-selected')
+      
+      // Listen for date selection events
+      // eslint-disable-next-line no-undef
+      document.addEventListener('date-picker:date-selected', this.handleDateSelected.bind(this) as unknown as EventListener)
+      console.log('Multi-city: Added event listener for date-picker:date-selected')
     }
   }
 
@@ -93,17 +119,58 @@ export default class extends Controller<HTMLElement> {
   private handleCitySelected(event: CustomEvent): void {
     console.log('Multi-city: Received city-selector:city-selected event', event.detail)
     const { segmentId, cityType, cityName } = event.detail
-    const segment = this.segmentsValue.find(seg => seg.id === segmentId)
     
-    if (segment) {
-      console.log(`Multi-city: Updating segment ${segmentId} ${cityType} to ${cityName}`)
-      if (cityType === 'departure') {
-        segment.departureCity = cityName
-      } else if (cityType === 'destination') {
-        segment.destinationCity = cityName
-      }
-      this.render()
-      console.log('Multi-city: Segment updated and re-rendered')
+    console.log('Multi-city: Current segments before update:', JSON.stringify(this.segmentsValue))
+    
+    const segmentIndex = this.segmentsValue.findIndex(seg => seg.id === segmentId)
+    
+    if (segmentIndex !== -1) {
+      console.log(`Multi-city: Found segment ${segmentId}, updating ${cityType} to ${cityName}`)
+      
+      // Create a new array with updated segment to trigger Stimulus reactivity
+      this.segmentsValue = this.segmentsValue.map((seg, index) => {
+        if (index === segmentIndex) {
+          console.log('Multi-city: Segment before update:', JSON.stringify(seg))
+          
+          const updatedSegment = {
+            ...seg,
+            departureCity: cityType === 'departure' ? cityName : seg.departureCity,
+            destinationCity: cityType === 'destination' ? cityName : seg.destinationCity
+          }
+          
+          console.log('Multi-city: Segment after update:', JSON.stringify(updatedSegment))
+          return updatedSegment
+        }
+        return seg
+      })
+      
+      console.log('Multi-city: All segments after update:', JSON.stringify(this.segmentsValue))
+      console.log('Multi-city: Segment updated, render will be triggered by valueChanged')
+    } else {
+      console.warn('Multi-city: Segment not found:', segmentId)
+      console.warn('Multi-city: Available segment IDs:', this.segmentsValue.map(s => s.id))
+    }
+  }
+
+  // Handle date selection from date picker
+  private handleDateSelected(event: CustomEvent): void {
+    console.log('Multi-city: Received date-picker:date-selected event', event.detail)
+    const { segmentId, date } = event.detail
+    
+    const segmentIndex = this.segmentsValue.findIndex(seg => seg.id === segmentId)
+    
+    if (segmentIndex !== -1) {
+      console.log(`Multi-city: Updating segment ${segmentId} date to ${date}`)
+      
+      // Create a new array with updated segment to trigger Stimulus reactivity
+      this.segmentsValue = this.segmentsValue.map((seg, index) => {
+        if (index === segmentIndex) {
+          return { ...seg, date }
+        }
+        return seg
+      })
+      
+      console.log('Multi-city: Segment date updated')
     } else {
       console.warn('Multi-city: Segment not found:', segmentId)
     }
@@ -215,9 +282,12 @@ export default class extends Controller<HTMLElement> {
       return
     }
     
+    console.log('Multi-city: render() called with segments:', JSON.stringify(this.segmentsValue))
+    
     this.segmentsContainerTarget.innerHTML = ""
 
     this.segmentsValue.forEach((segment, index) => {
+      console.log(`Multi-city: Creating element for segment ${index}:`, JSON.stringify(segment))
       const segmentElement = this.createSegmentElement(segment, index)
       this.segmentsContainerTarget.appendChild(segmentElement)
     })
@@ -227,6 +297,12 @@ export default class extends Controller<HTMLElement> {
 
   // 创建单个行程段元素
   private createSegmentElement(segment: Segment, index: number): HTMLElement {
+    console.log(`Multi-city: createSegmentElement called for segment ${segment.id}:`, {
+      departureCity: segment.departureCity,
+      destinationCity: segment.destinationCity,
+      date: segment.date
+    })
+    
     const div = document.createElement("div")
     div.className = "border-b border-gray-100 py-4"
     div.dataset.multiCityTarget = "segment"
@@ -249,7 +325,11 @@ export default class extends Controller<HTMLElement> {
             data-segment-id="${segment.id}"
             class="text-gray-400 hover:text-red-500">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd" 
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 
+                10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 
+                10 4.293 5.707a1 1 0 010-1.414z" 
+                clip-rule="evenodd"/>
             </svg>
           </button>
         ` : ''}
@@ -289,6 +369,8 @@ export default class extends Controller<HTMLElement> {
         </div>
       </button>
     `
+    
+    console.log(`Multi-city: Created HTML for segment ${segment.id}, departure: ${segment.departureCity}, destination: ${segment.destinationCity}`)
 
     return div
   }

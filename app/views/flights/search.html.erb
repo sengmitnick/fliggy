@@ -215,7 +215,7 @@
 
 <% else %>
   <!-- Original Single-Way Layout -->
-  <div class="min-h-screen bg-white" data-controller="flight-search coming-soon" data-flight-search-departure-value="<%= @departure_city %>" data-flight-search-destination-value="<%= @destination_city %>" data-flight-search-date-value="<%= @date.to_s %>">
+  <div class="min-h-screen bg-white" data-controller="flight-search coming-soon flight-filter flight-sort" data-flight-search-departure-value="<%= @departure_city %>" data-flight-search-destination-value="<%= @destination_city %>" data-flight-search-date-value="<%= @date.to_s %>">
     <!-- Header -->
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
@@ -291,26 +291,23 @@
 
       <!-- Filter Tags -->
       <div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm flex items-center gap-1" data-action="click->coming-soon#show">
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm flex items-center gap-1 relative" data-action="click->flight-filter#openModal">
           筛选
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"/>
           </svg>
+          <span data-flight-filter-target="filterBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
         </button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-action="click->coming-soon#show">只看直飞</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-action="click->coming-soon#show">下午出发</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm flex items-center gap-1" data-action="click->coming-soon#show">
-          机场
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-action="click->coming-soon#show">大型机</button>
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDirectFlight" data-action="click->flight-filter#toggleQuickDirectFlight">只看直飞</button>
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoSharedFlight" data-action="click->flight-filter#toggleQuickNoSharedFlight">不看共享航班</button>
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickCheckedLuggage" data-action="click->flight-filter#toggleQuickCheckedLuggage">含托运行李额</button>
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoTransit" data-action="click->flight-filter#toggleQuickNoTransit">无需过境签</button>
+        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDiscountPrice" data-action="click->flight-filter#toggleQuickDiscountPrice">看优惠前价格</button>
       </div>
     </div>
 
     <!-- Flight List -->
-    <div class="px-4 py-3 space-y-3">
+    <div class="px-4 py-3 space-y-3" data-flight-sort-target="flightList">
       <% @flights.each do |flight| %>
         <%= link_to flight_path(flight), data: { turbo: false }, class: "block" do %>
           <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-shadow">
@@ -423,30 +420,42 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 px-4 py-3" data-controller="coming-soon">
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 px-4 py-3">
       <div class="flex items-center justify-around">
-        <button class="flex flex-col items-center gap-1" data-action="click->coming-soon#show">
+        <button class="flex flex-col items-center gap-1" 
+                data-flight-sort-target="directPriorityButton"
+                data-action="click->flight-sort#toggleDirectPriority">
           <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z"/>
           </svg>
-          <span class="text-xs text-gray-600">起飞早一晚</span>
+          <span class="text-xs text-gray-600">直飞优先</span>
         </button>
         
-        <button class="flex flex-col items-center gap-1 border-b-2 border-black" data-action="click->coming-soon#show">
+        <button class="flex flex-col items-center gap-1"
+                data-flight-sort-target="pricePriorityButton"
+                data-action="click->flight-sort#togglePricePriority">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
           </svg>
-          <span class="text-xs font-bold">价格排序</span>
+          <span class="text-xs text-gray-600">低价优先</span>
         </button>
         
-        <button class="flex flex-col items-center gap-1" data-action="click->coming-soon#show">
+        <button class="flex flex-col items-center gap-1"
+                data-flight-sort-target="timeSortButton"
+                data-action="click->flight-sort#openTimeSortModal">
           <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
           </svg>
-          <span class="text-xs text-gray-600">惠后价</span>
+          <span class="text-xs text-gray-600">时间排序</span>
         </button>
       </div>
     </div>
+
+    <!-- Filter Modal -->
+    <%= render 'flights/filter_modal' %>
+    
+    <!-- Sort Modal -->
+    <%= render 'flights/sort_modal' %>
   </div>
 <% end %>
