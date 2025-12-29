@@ -6,9 +6,9 @@
       <div class="flex items-center justify-between mb-3">
         <!-- Avatar -->
         <div class="flex items-center gap-2">
-          <button class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-base font-bold" style="color: #FFD700;" data-action="click->coming-soon#show">
-            飞
-          </button>
+          <%= link_to profile_path, class: "w-8 h-8 rounded-full bg-gray-300 shadow-sm flex items-center justify-center text-base font-bold text-white" do %>
+            <%= (current_user.name.presence&.first || current_user.email&.first || 'U').upcase %>
+          <% end %>
         </div>
 
         <!-- Navigation -->
