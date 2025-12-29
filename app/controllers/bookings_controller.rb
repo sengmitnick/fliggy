@@ -1,6 +1,6 @@
 class BookingsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_flight, only: [:new, :create]
+  before_action :set_flight, only: [:new, :create], unless: -> { params[:trip_type] == 'multi_city' }
 
   def index
     @status_filter = params[:status] || 'all'
@@ -28,22 +28,102 @@ class BookingsController < ApplicationController
   def new
     @booking = Booking.new
     @passengers = current_user.passengers
-    @selected_offer = @flight.flight_offers.find_by(id: params[:offer_id]) if params[:offer_id]
     @trip_type = params[:trip_type] || 'one_way'
-    @return_flight = Flight.find_by(id: params[:return_flight_id]) if params[:return_flight_id]
-    @return_offer = @return_flight.flight_offers.find_by(id: params[:return_offer_id]) if @return_flight && params[:return_offer_id]
+    
+    # 多城市预订：从 selected_flights 参数中解析航班
+    if @trip_type == 'multi_city'
+      if params[:selected_flights].present?
+        begin
+          @selected_flights = JSON.parse(params[:selected_flights])
+          # 加载所有选中的航班
+          @multi_city_flights = @selected_flights.map do |selected|
+            flight = Flight.find_by(id: selected['flight_id'])
+            offer_id = selected['offer_id']
+            offer = flight&.flight_offers&.find_by(id: offer_id) if offer_id.present?
+            {
+              flight: flight,
+              offer: offer,
+              segment_index: selected['segment_index']
+            }
+          end.compact
+          
+          if @multi_city_flights.empty?
+            redirect_to flights_path, alert: '请选择航班'
+            return
+          end
+        rescue JSON::ParserError
+          redirect_to flights_path, alert: '航班数据格式错误'
+          return
+        end
+      else
+        redirect_to flights_path, alert: '请选择航班'
+        return
+      end
+    else
+      # 单程/往返预订
+      @selected_offer = @flight.flight_offers.find_by(id: params[:offer_id]) if params[:offer_id]
+      @return_flight = Flight.find_by(id: params[:return_flight_id]) if params[:return_flight_id]
+      @return_offer = @return_flight.flight_offers.find_by(id: params[:return_offer_id]) if @return_flight && params[:return_offer_id]
+    end
   end
 
   def create
-    @booking = current_user.bookings.build(booking_params)
-    @booking.flight = @flight
+    @trip_type = params[:booking][:trip_type] || 'one_way'
     
-    # 计算去程价格
-    offer = @flight.flight_offers.find_by(id: params[:booking][:offer_id])
-    @booking.total_price = offer&.price || @flight.price
-    
-    # Handle round-trip booking
-    if params[:booking][:trip_type] == 'round_trip' && params[:booking][:return_flight_id].present?
+    # Handle multi-city booking
+    if @trip_type == 'multi_city'
+      @booking = current_user.bookings.build(booking_params.except(:multi_city_flights_json))
+      if params[:booking][:multi_city_flights_json].present?
+        begin
+          multi_city_data = JSON.parse(params[:booking][:multi_city_flights_json])
+          @booking.trip_type = 'multi_city'
+          @booking.multi_city_flights = multi_city_data
+          
+          # 使用第一个航班作为主航班
+          first_flight_id = multi_city_data.first['flight_id']
+          @booking.flight = Flight.find_by(id: first_flight_id)
+          
+          # 计算总价
+          total_price = 0
+          multi_city_data.each do |flight_data|
+            flight = Flight.find_by(id: flight_data['flight_id'])
+            if flight
+              if flight_data['offer_id'].present?
+                offer = flight.flight_offers.find_by(id: flight_data['offer_id'])
+                total_price += offer&.price || flight.price
+              else
+                total_price += flight.price
+              end
+            end
+          end
+          @booking.total_price = total_price
+          
+          # 多程保险（按程数计算）
+          if params[:booking][:insurance_price].present?
+            insurance_price = params[:booking][:insurance_price].to_f
+            @booking.insurance_price = insurance_price * multi_city_data.length
+          end
+        rescue JSON::ParserError => e
+          flash.now[:alert] = '航班数据格式错误'
+          @passengers = current_user.passengers
+          render :new, status: :unprocessable_entity
+          return
+        end
+      else
+        flash.now[:alert] = '请选择航班'
+        @passengers = current_user.passengers
+        render :new, status: :unprocessable_entity
+        return
+      end
+    elsif @trip_type == 'round_trip' && params[:booking][:return_flight_id].present?
+      # Handle round-trip booking
+      @booking = current_user.bookings.build(booking_params.except(:multi_city_flights_json))
+      @booking.flight = @flight
+      
+      # 计算去程价格
+      offer = @flight.flight_offers.find_by(id: params[:booking][:offer_id])
+      @booking.total_price = offer&.price || @flight.price
+      
       @booking.trip_type = 'round_trip'
       @booking.return_flight_id = params[:booking][:return_flight_id]
       @booking.return_date = Flight.find_by(id: params[:booking][:return_flight_id])&.flight_date
@@ -63,6 +143,14 @@ class BookingsController < ApplicationController
         @booking.insurance_price = insurance_price * 2  # 往返双倍保险
       end
     else
+      # Handle one-way booking
+      @booking = current_user.bookings.build(booking_params.except(:multi_city_flights_json))
+      @booking.flight = @flight
+      
+      # 计算去程价格
+      offer = @flight.flight_offers.find_by(id: params[:booking][:offer_id])
+      @booking.total_price = offer&.price || @flight.price
+      
       # 单程保险
       @booking.insurance_price = params[:booking][:insurance_price].to_f if params[:booking][:insurance_price].present?
     end
@@ -71,10 +159,29 @@ class BookingsController < ApplicationController
       redirect_to booking_path(@booking), notice: '订单创建成功'
     else
       @passengers = current_user.passengers
-      @selected_offer = offer
-      @trip_type = params[:booking][:trip_type] || 'one_way'
-      @return_flight = Flight.find_by(id: params[:booking][:return_flight_id]) if params[:booking][:return_flight_id]
-      @return_offer = @return_flight.flight_offers.find_by(id: params[:booking][:return_offer_id]) if @return_flight && params[:booking][:return_offer_id]
+      
+      if @trip_type == 'multi_city' && params[:booking][:multi_city_flights_json].present?
+        # Reload multi-city flights for re-rendering
+        begin
+          multi_city_data = JSON.parse(params[:booking][:multi_city_flights_json])
+          @multi_city_flights = multi_city_data.map do |flight_data|
+            flight = Flight.find_by(id: flight_data['flight_id'])
+            offer = flight&.flight_offers&.find_by(id: flight_data['offer_id']) if flight_data['offer_id'].present?
+            {
+              flight: flight,
+              offer: offer,
+              segment_index: flight_data['segment_index']
+            }
+          end.compact
+        rescue JSON::ParserError
+          # Handle error silently, form will show validation errors
+        end
+      else
+        @selected_offer = @flight&.flight_offers&.find_by(id: params[:booking][:offer_id])
+        @return_flight = Flight.find_by(id: params[:booking][:return_flight_id]) if params[:booking][:return_flight_id]
+        @return_offer = @return_flight&.flight_offers&.find_by(id: params[:booking][:return_offer_id]) if @return_flight && params[:booking][:return_offer_id]
+      end
+      
       render :new, status: :unprocessable_entity
     end
   end
@@ -104,10 +211,16 @@ class BookingsController < ApplicationController
   private
 
   def set_flight
+    if params[:flight_id].blank?
+      redirect_to flights_path, alert: '请先选择航班'
+      return
+    end
     @flight = Flight.find(params[:flight_id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to flights_path, alert: '航班不存在'
   end
 
   def booking_params
-    params.require(:booking).permit(:passenger_name, :passenger_id_number, :contact_phone, :accept_terms, :insurance_type, :insurance_price, :trip_type, :return_flight_id, :return_date, :return_offer_id)
+    params.require(:booking).permit(:passenger_name, :passenger_id_number, :contact_phone, :accept_terms, :insurance_type, :insurance_price, :trip_type, :return_flight_id, :return_date, :return_offer_id, :multi_city_flights_json)
   end
 end
