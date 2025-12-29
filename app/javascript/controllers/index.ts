@@ -23,6 +23,7 @@ import TrainSearchController from "./train_search_controller"
 import TrainListController from "./train_list_controller"
 import TrainCitySelectorController from "./train_city_selector_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
+import DeepTravelController from "./deep_travel_controller"
 
 const application = Application.start()
 
@@ -49,5 +50,6 @@ application.register("train-search", TrainSearchController)
 application.register("train-list", TrainListController)
 application.register("train-city-selector", TrainCitySelectorController)
 application.register("infinite-scroll", InfiniteScrollController)
+application.register("deep-travel", DeepTravelController)
 
 window.Stimulus = application

@@ -1,29 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Connects to data-controller="deep-travel"
 export default class extends Controller {
   static targets = ["video", "videoContainer", "tab", "content"]
 
+  declare readonly videoTarget: HTMLVideoElement
+  declare readonly videoContainerTarget: HTMLElement
+  declare readonly tabTargets: HTMLElement[]
+  declare readonly contentTargets: HTMLElement[]
+
   connect() {
-    console.log("Deep Travel controller connected")
+    console.log("Deep travel controller connected")
   }
 
-  // Handle tab switching
-  switchTab(event: Event) {
-    event.preventDefault()
-    const target = event.currentTarget as HTMLElement
-    const location = target.dataset.location
-
-    // Update active tab styling
-    this.tabTargets.forEach(tab => {
-      tab.classList.remove('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
-      tab.classList.add('text-gray-600')
-    })
-
-    target.classList.remove('text-gray-600')
-    target.classList.add('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
-  }
-
-  // Play video
   playVideo(event: Event) {
     const video = event.currentTarget as HTMLVideoElement
     if (video.paused) {
@@ -33,44 +22,37 @@ export default class extends Controller {
     }
   }
 
-  // Handle video fullscreen
   toggleFullscreen(event: Event) {
-    const container = (event.currentTarget as HTMLElement).closest('[data-deep-travel-target="videoContainer"]')
-    if (!container) return
-
+    const container = (event.currentTarget as HTMLElement).closest('[data-deep-travel-target="videoContainer"]') as HTMLElement
     if (!document.fullscreenElement) {
-      container.requestFullscreen().catch(err => {
-        console.log(`Error attempting to enable fullscreen: ${err.message}`)
-      })
+      container.requestFullscreen()
     } else {
       document.exitFullscreen()
     }
   }
 
-  // Scroll to guide section
-  scrollToGuide(event: Event) {
-    event.preventDefault()
-    const guideId = (event.currentTarget as HTMLElement).dataset.guideId
-    const guideElement = document.querySelector(`[data-guide-id="${guideId}"]`)
-    
-    if (guideElement) {
-      guideElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
+  switchTab(event: Event) {
+    const clickedTab = event.currentTarget as HTMLElement
+    const tabName = clickedTab.dataset.tab
 
-  // Handle "More" button click
-  showMore(event: Event) {
-    event.preventDefault()
-    console.log("Show more guides clicked")
-    // TODO: Implement modal or navigation to full guide list
-  }
+    // Update tab styles
+    this.tabTargets.forEach(tab => {
+      if (tab === clickedTab) {
+        tab.classList.add('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
+        tab.classList.remove('text-gray-600')
+      } else {
+        tab.classList.remove('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
+        tab.classList.add('text-gray-600')
+      }
+    })
 
-  // Handle booking button click
-  bookGuide(event: Event) {
-    event.preventDefault()
-    const guideId = (event.currentTarget as HTMLElement).dataset.guideId
-    console.log(`Book guide: ${guideId}`)
-    // TODO: Implement booking flow
-    alert('预约功能即将上线，敬请期待！')
+    // Show/hide content
+    this.contentTargets.forEach(content => {
+      if (content.dataset.content === tabName) {
+        content.classList.remove('hidden')
+      } else {
+        content.classList.add('hidden')
+      }
+    })
   }
 }

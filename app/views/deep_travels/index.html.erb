@@ -25,71 +25,41 @@
   </div>
 
   <!-- Guide Categories (Horizontal scroll) -->
-  <div class="px-4 pb-6" data-controller="deep-travel">
+  <div class="px-4 pb-2" data-controller="deep-travel">
     <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       <!-- Guide - Instructor -->
       <div class="flex-shrink-0 text-center">
-        <div class="w-24 h-24 rounded-full bg-yellow-400 flex items-center justify-center mb-2 relative">
-          <%= image_tag "deep_travel/讲解.png", class: "w-20 h-20 object-cover rounded-full" %>
-        </div>
-        <p class="text-sm font-medium">讲解</p>
+        <%= image_tag "deep_travel/讲解.png", class: "w-[84px] h-auto object-cover rounded-full" %>
       </div>
 
       <!-- Guide - Ski Teaching (敬请期待) -->
       <div class="flex-shrink-0 text-center relative">
-        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
-          <%= image_tag "deep_travel/滑雪教学.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
-          </div>
-        </div>
-        <p class="text-sm font-medium text-gray-600">滑雪教学</p>
+        <%= image_tag "deep_travel/滑雪教学.png", class: "w-20 h-auto object-cover rounded-full opacity-70" %>
       </div>
 
       <!-- Guide - Diving Teaching (敬请期待) -->
       <div class="flex-shrink-0 text-center relative">
-        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
-          <%= image_tag "deep_travel/潜水教学.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
-          </div>
-        </div>
-        <p class="text-sm font-medium text-gray-600">潜水教学</p>
+        <%= image_tag "deep_travel/潜水教学.png", class: "w-20 h-auto object-cover rounded-full opacity-70" %>
       </div>
 
       <!-- Guide - Local Driver (敬请期待) -->
       <div class="flex-shrink-0 text-center relative">
-        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
-          <%= image_tag "deep_travel/当地司导.png", class: "w-20 h-20 object-cover rounded-full opacity-70" %>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
-          </div>
-        </div>
-        <p class="text-sm font-medium text-gray-600">当地司导</p>
+          <%= image_tag "deep_travel/当地司导.png", class: "w-20 h-auto object-cover rounded-full opacity-70" %>
       </div>
 
       <!-- Guide - Photographer (敬请期待) -->
       <div class="flex-shrink-0 text-center relative">
-        <div class="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mb-2 relative">
-          <div class="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center opacity-70">
-            <span class="text-white text-2xl">📷</span>
-          </div>
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-white text-xs bg-black bg-opacity-60 px-2 py-1 rounded">敬请期待</span>
-          </div>
-        </div>
-        <p class="text-sm font-medium text-gray-600">跟拍人</p>
+          <%= image_tag "deep_travel/跟拍人像.png", class: "w-20 h-auto object-cover rounded-full opacity-70" %>
       </div>
     </div>
   </div>
 
   <!-- Location Tabs -->
   <div class="bg-white border-t border-b border-gray-200">
-    <div class="flex overflow-x-auto scrollbar-hide" data-controller="deep-travel">
+    <div class="flex overflow-x-auto scrollbar-hide">
       <% ['境内精选', '境外精选', '北京', '华东', '华中', '陕西'].each do |loc| %>
         <%= link_to deep_travels_path(location: loc), 
-            class: "flex-shrink-0 px-6 py-3 text-sm font-medium whitespace-nowrap #{@location == loc ? 'text-gray-900 border-b-2 border-yellow-400 bg-yellow-50' : 'text-gray-600'}", 
-            data: { turbo_frame: "products" } do %>
+            class: "flex-shrink-0 px-6 py-3 text-sm font-medium whitespace-nowrap #{@location == loc ? 'text-gray-900 border-b-2 border-yellow-400 bg-yellow-50' : 'text-gray-600'}" do %>
           <%= loc %>
         <% end %>
       <% end %>
@@ -97,8 +67,7 @@
   </div>
 
   <!-- Main Content -->
-  <turbo-frame id="products" class="block">
-    <div class="px-4 py-6">
+  <div class="px-4 py-6">
       <% @products.group_by { |p| p.deep_travel_guide }.each do |guide, products| %>
         <% next unless guide %>
         
@@ -242,7 +211,7 @@
         </div>
       <% end %>
     </div>
-  </turbo-frame>
+  </div>
 </div>
 
 <style>
