@@ -33,16 +33,14 @@ export default class extends Controller<HTMLElement> {
       console.log("MultiCity controller: segmentsContainer not available yet, skipping initialization")
       
       // Listen for the event when multi-city form becomes visible
-      // eslint-disable-next-line no-undef
-      document.addEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as unknown as EventListener)
+      document.addEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this))
       return
     }
     
     this.initializeSegments()
     
     // Listen for city selection events on document for better event capture
-    // eslint-disable-next-line no-undef
-    document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
+    document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this))
     console.log('Multi-city: Added event listener for city-selector:city-selected')
     
     // Listen for date selection events
@@ -52,12 +50,9 @@ export default class extends Controller<HTMLElement> {
   }
 
   disconnect(): void {
-    // eslint-disable-next-line no-undef
-    document.removeEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
-    // eslint-disable-next-line no-undef
-    document.removeEventListener('date-picker:date-selected', this.handleDateSelected.bind(this) as unknown as EventListener)
-    // eslint-disable-next-line no-undef
-    document.removeEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this) as unknown as EventListener)
+    document.removeEventListener('city-selector:city-selected', this.handleCitySelected.bind(this))
+    document.removeEventListener('date-picker:date-selected', this.handleDateSelected.bind(this))
+    document.removeEventListener('trip-type:multi-city-shown', this.handleMultiCityShown.bind(this))
   }
 
   // Stimulus value changed callback - automatically called when segmentsValue changes
@@ -78,8 +73,7 @@ export default class extends Controller<HTMLElement> {
       this.initializeSegments()
       
       // Listen for city selection events
-      // eslint-disable-next-line no-undef
-      document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this) as unknown as EventListener)
+      document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this))
       console.log('Multi-city: Added event listener for city-selector:city-selected')
       
       // Listen for date selection events
@@ -116,9 +110,10 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Handle city selection from city selector
-  private handleCitySelected(event: CustomEvent): void {
-    console.log('Multi-city: Received city-selector:city-selected event', event.detail)
-    const { segmentId, cityType, cityName } = event.detail
+  private handleCitySelected(event: Event): void {
+    const customEvent = event as CustomEvent
+    console.log('Multi-city: Received city-selector:city-selected event', customEvent.detail)
+    const { segmentId, cityType, cityName } = customEvent.detail
     
     console.log('Multi-city: Current segments before update:', JSON.stringify(this.segmentsValue))
     
@@ -326,9 +321,7 @@ export default class extends Controller<HTMLElement> {
             class="text-gray-400 hover:text-red-500">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" 
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 
-                10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 
-                10 4.293 5.707a1 1 0 010-1.414z" 
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
                 clip-rule="evenodd"/>
             </svg>
           </button>

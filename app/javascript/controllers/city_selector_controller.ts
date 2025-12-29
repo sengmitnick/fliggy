@@ -68,18 +68,17 @@ export default class extends Controller<HTMLElement> {
     this.destinationCityInputTarget.value = this.destinationCityValue
     
     // Listen for multi-city events
-    // eslint-disable-next-line no-undef
-    this.element.addEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this) as unknown as EventListener)
+    this.element.addEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this))
   }
 
   disconnect(): void {
-    // eslint-disable-next-line no-undef
-    this.element.removeEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this) as unknown as EventListener)
+    this.element.removeEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this))
   }
 
   // Handle multi-city city selector request
-  private handleMultiCityOpen(event: CustomEvent): void {
-    const { segmentId, cityType } = event.detail
+  private handleMultiCityOpen(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { segmentId, cityType } = customEvent.detail
     console.log('City selector: Received multi-city open request', { segmentId, cityType })
     this.currentMultiCitySegmentId = segmentId
     this.currentMultiCityCityType = cityType

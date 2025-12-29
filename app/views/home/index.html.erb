@@ -6,9 +6,9 @@
       <div class="flex items-center justify-between mb-3">
         <!-- Avatar -->
         <div class="flex items-center gap-2">
-          <button class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-base font-bold" style="color: #FFD700;" data-action="click->coming-soon#show">
-            飞
-          </button>
+          <%= link_to profile_path, class: "w-8 h-8 rounded-full bg-gray-300 shadow-sm flex items-center justify-center text-base font-bold text-white" do %>
+            <%= (current_user.name.presence&.first || current_user.email&.first || 'U').upcase %>
+          <% end %>
         </div>
 
         <!-- Navigation -->
@@ -84,10 +84,10 @@
             <span class="text-[12px] text-gray-700">租车</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+          <%= link_to tourism_index_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/旅游.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "旅游" %>
             <span class="text-[12px] text-gray-700">旅游</span>
-          </button>
+          <% end %>
         </div>
 
         <!-- Row 2 -->
@@ -184,10 +184,10 @@
             <span class="text-[12px] text-gray-700">邮轮</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+          <%= link_to deep_travels_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/深度旅行.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "深度游+" %>
             <span class="text-[12px] text-gray-700">深度游+</span>
-          </button>
+          <% end %>
 
           <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
             <%= image_tag "home/包车游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "包车" %>
@@ -245,9 +245,7 @@
     <div class="mb-4">
       
 
-      <button class="mx-1 relative mb-4 w-full" data-action="click->coming-soon#show">
-        <%= image_tag "home/新人.png", class: "w-full h-auto rounded-2xl", alt: "新人专区" %>
-      </button>
+      
     </div>
 
     <!-- Promotional Cards - 2x2 Grid -->

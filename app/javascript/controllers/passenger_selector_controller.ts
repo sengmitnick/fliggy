@@ -67,8 +67,7 @@ export default class extends Controller<HTMLElement> {
       
       // Clean up URL parameter
       urlParams.delete('open_passenger_modal')
-      const paramsString = urlParams.toString()
-      const newUrl = paramsString ? `${window.location.pathname}?${paramsString}` : window.location.pathname
+      const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ''}`
       window.history.replaceState({}, '', newUrl)
     }
   }
