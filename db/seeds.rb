@@ -555,3 +555,253 @@ if Rails.env.development?
   puts "创建了示例用户 (#{demo_user.email}) 和 1 条行程"
   puts "示例数据初始化完成！"
 end
+
+# ==================== 深度旅游讲解员数据 ====================
+puts "正在初始化深度旅游讲解员数据..."
+
+video_path = Rails.root.join('app', 'assets', 'videos', '深度旅游-讲师-叶强.mov')
+
+# 清理旧数据
+DeepTravelProduct.destroy_all
+DeepTravelGuide.destroy_all
+
+# 创建讲解员数据
+guides_data = [
+  {
+    name: "叶强",
+    title: "北京导游协会金牌导游 故宫认证讲解员 北京卫视《紫禁城》嘉宾",
+    description: "北京导游协会金牌导游，故宫认证讲解员，北京卫视《紫禁城》栏目特邀嘉宾。从事导游行业12年，专注故宫、颐和园、长城等北京经典景点深度讲解，对北京历史文化有独到见解。",
+    follower_count: 100,
+    experience_years: 10,
+    specialties: "故宫深度讲解、明清历史、皇家园林、北京文化",
+    price: 192.06,
+    served_count: 10000,
+    rank: 1,
+    rating: 4.9,
+    featured: true
+  },
+  {
+    name: "惟真",
+    title: "西安市金牌导游&高级导游",
+    description: "西安市金牌导游，高级导游员。从事导游行业10年+，专注陕西历史文化景点讲解，对秦始皇兵马俑、华清池、西安城墙等景点有深入研究。",
+    follower_count: 10,
+    experience_years: 10,
+    specialties: "兵马俑讲解、唐代历史、陕西文化、古代文明",
+    price: 183.00,
+    served_count: 6000,
+    rank: 2,
+    rating: 4.8,
+    featured: true
+  },
+  {
+    name: "贾建宇",
+    title: "中国国家博物馆资深讲解员 历史考古学硕士",
+    description: "中国国家博物馆资深讲解员，历史考古学硕士。专注于中国古代历史、考古文物的深度讲解。",
+    follower_count: 10,
+    experience_years: 8,
+    specialties: "国家博物馆讲解、考古文物、中国历史、文物鉴赏",
+    price: 156.88,
+    served_count: 600,
+    rank: 3,
+    rating: 4.7,
+    featured: true
+  },
+  {
+    name: "蒋宏波",
+    title: "北京文旅局重点团队领军人",
+    description: "北京人，北京文旅局重点团队领军人物，毕业于北京旅游学院。对北京的历史文化有着深厚的理解和热爱。",
+    follower_count: 1,
+    experience_years: 10,
+    specialties: "恭王府讲解、清代历史、北京文化、古建筑",
+    price: 138.00,
+    served_count: 300,
+    rank: 4,
+    rating: 4.6,
+    featured: true
+  },
+  {
+    name: "李文超",
+    title: "上海资深导游 东方明珠讲解员",
+    description: "上海资深导游，东方明珠特约讲解员。专注上海近现代史、外滩建筑、上海文化讲解，让游客深度了解上海的历史变迁。",
+    follower_count: 8,
+    experience_years: 8,
+    specialties: "上海历史、外滩建筑、近代史、海派文化",
+    price: 168.00,
+    served_count: 5000,
+    rank: 5,
+    rating: 4.7,
+    featured: true
+  }
+]
+
+puts "正在创建讲解员..."
+guides = guides_data.map do |data|
+  guide = DeepTravelGuide.create!(data)
+  
+  # 为第一个讲解员附加视频
+  if guide.name == "叶强" && File.exist?(video_path)
+    guide.video.attach(
+      io: File.open(video_path),
+      filename: '深度旅游-讲师-叶强.mov',
+      content_type: 'video/quicktime'
+    )
+    puts "  - 已为 #{guide.name} 附加视频"
+  end
+  
+  guide
+end
+
+puts "创建了 #{guides.count} 个讲解员"
+
+# ==================== 深度旅游产品数据 ====================
+puts "正在创建深度旅游产品..."
+
+ye_qiang = guides.find { |g| g.name == "叶强" }
+wei_zhen = guides.find { |g| g.name == "惟真" }
+jia_jianyu = guides.find { |g| g.name == "贾建宇" }
+jiang_hongbo = guides.find { |g| g.name == "蒋宏波" }
+li_wenchao = guides.find { |g| g.name == "李文超" }
+
+products_data = [
+  # 叶强 - 北京故宫相关产品
+  {
+    title: "北京故宫博物院讲解半日游【金牌资深讲师】",
+    subtitle: "明清皇宫禁紫城",
+    location: "北京",
+    guide: ye_qiang,
+    price: 28.00,
+    sales_count: 200,
+    description: "跟随金牌讲解员叶强，深度游览故宫博物院。了解明清两代皇家历史，探索紫禁城的建筑艺术与文化内涵。",
+    itinerary: "午门集合 → 太和殿 → 中和殿 → 保和殿 → 乾清宫 → 坤宁宫 → 御花园",
+    featured: true
+  },
+  {
+    title: "北京故宫导游讲解私家团深度精讲私家团北京旅游私人定制",
+    subtitle: "私家团 深度讲解",
+    location: "北京",
+    guide: ye_qiang,
+    price: 80.00,
+    sales_count: 44,
+    description: "私家定制团，深度讲解故宫历史文化，专属导游服务，灵活安排行程。",
+    itinerary: "根据客户需求定制行程",
+    featured: false
+  },
+  {
+    title: "北京颐和园深度讲解半日游",
+    subtitle: "皇家园林 世界文化遗产",
+    location: "北京",
+    guide: ye_qiang,
+    price: 158.00,
+    sales_count: 120,
+    description: "游览中国现存规模最大、保存最完整的皇家园林，了解清代皇家园林文化。",
+    itinerary: "东宫门 → 仁寿殿 → 德和园 → 文昌院 → 玉澜堂 → 乐寿堂 → 长廊 → 排云殿 → 佛香阁 → 石舫 → 苏州街",
+    featured: true
+  },
+  
+  # 惟真 - 西安兵马俑相关产品
+  {
+    title: "盛迹说 西安秦始皇陵兵马俑金牌导游深度讲解",
+    subtitle: "世界第八大奇迹",
+    location: "陕西",
+    guide: wei_zhen,
+    price: 138.00,
+    sales_count: 8,
+    description: "金牌导游惟真带您深度探索秦始皇陵兵马俑，了解秦代历史文化，探寻两千年前的帝国辉煌。",
+    itinerary: "秦始皇帝陵博物院 → 一号坑 → 二号坑 → 三号坑 → 铜车马展厅",
+    featured: true
+  },
+  {
+    title: "西安兵马俑+丽山园一日游含门票5H深度讲解",
+    subtitle: "一日游 含门票 专车接送",
+    location: "陕西",
+    guide: wei_zhen,
+    price: 118.00,
+    sales_count: 300,
+    description: "含门票、专车接送、5小时深度讲解，纯玩无购物，全方位了解秦始皇陵和兵马俑的历史文化。",
+    itinerary: "酒店接 → 秦始皇陵 → 兵马俑博物馆 → 丽山园 → 返回酒店",
+    featured: true
+  },
+  
+  # 贾建宇 - 中国国家博物馆相关产品
+  {
+    title: "中国国家博物馆古代中国人工讲解含门票耳麦深度游",
+    subtitle: "探索中华五千年文明",
+    location: "北京",
+    guide: jia_jianyu,
+    price: 156.88,
+    sales_count: 200,
+    description: "资深讲解员贾建宇带您深度游览国家博物馆，从远古到明清，全面了解中国五千年文明史。",
+    itinerary: "远古中国 → 夏商西周 → 春秋战国 → 秦汉 → 魏晋南北朝 → 隋唐 → 宋元明清",
+    featured: true
+  },
+  
+  # 蒋宏波 - 北京国博相关产品
+  {
+    title: "北京国博讲解【10人小团 含入馆】一日游国博深度讲解北京旅游",
+    subtitle: "小团深度游 含门票",
+    location: "北京",
+    guide: jiang_hongbo,
+    price: 118.00,
+    sales_count: 200,
+    description: "10人小团，深度讲解国家博物馆精华展品，含入馆服务，专业讲解员带您了解中国历史文化。",
+    itinerary: "国家博物馆精华展品讲解",
+    featured: false
+  },
+  {
+    title: "恭王府深度讲解一日游",
+    subtitle: "清代王府 和珅府邸",
+    location: "北京",
+    guide: jiang_hongbo,
+    price: 98.00,
+    sales_count: 150,
+    description: "游览清代规模最大的王府，了解和珅的传奇故事，欣赏精美的王府建筑和园林。",
+    itinerary: "府邸建筑 → 花园景观 → 和珅传奇故事",
+    featured: false
+  },
+  
+  # 李文超 - 上海相关产品
+  {
+    title: "上海外滩+东方明珠深度讲解半日游",
+    subtitle: "魔都地标 近代史探索",
+    location: "华东",
+    guide: li_wenchao,
+    price: 168.00,
+    sales_count: 180,
+    description: "资深导游李文超带您游览外滩万国建筑群，登顶东方明珠，了解上海近现代发展史。",
+    itinerary: "外滩 → 南京路 → 东方明珠 → 浦东新区",
+    featured: true
+  },
+  {
+    title: "上海博物馆深度讲解游",
+    subtitle: "中国古代艺术宝库",
+    location: "华东",
+    guide: li_wenchao,
+    price: 128.00,
+    sales_count: 90,
+    description: "深度游览上海博物馆，欣赏青铜器、陶瓷、书画等珍贵文物，了解中国古代艺术。",
+    itinerary: "青铜馆 → 陶瓷馆 → 书画馆 → 玉器馆",
+    featured: false
+  },
+  
+  # 添加华中地区产品
+  {
+    title: "武汉黄鹤楼+东湖深度讲解一日游",
+    subtitle: "江南三大名楼之一",
+    location: "华中",
+    guide: ye_qiang,
+    price: 188.00,
+    sales_count: 65,
+    description: "游览江南三大名楼之一的黄鹤楼，欣赏东湖美景，了解武汉的历史文化。",
+    itinerary: "黄鹤楼 → 长江大桥 → 东湖风景区",
+    featured: false
+  }
+]
+
+products = products_data.map do |data|
+  guide = data.delete(:guide)
+  DeepTravelProduct.create!(data.merge(deep_travel_guide: guide))
+end
+
+puts "创建了 #{products.count} 个深度旅游产品"
+
+puts "✅ 深度旅游数据加载完成！"

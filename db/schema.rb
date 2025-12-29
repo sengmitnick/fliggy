@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_28_102505) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -114,6 +114,37 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "deep_travel_guides", force: :cascade do |t|
+    t.string "name"
+    t.string "title"
+    t.text "description"
+    t.integer "follower_count", default: 0
+    t.integer "experience_years", default: 0
+    t.text "specialties"
+    t.decimal "price", precision: 10, scale: 2
+    t.integer "served_count", default: 0
+    t.integer "rank"
+    t.decimal "rating", precision: 3, scale: 2
+    t.boolean "featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "deep_travel_products", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.string "location"
+    t.bigint "deep_travel_guide_id"
+    t.decimal "price", precision: 10, scale: 2
+    t.integer "sales_count", default: 0
+    t.text "description"
+    t.text "itinerary"
+    t.boolean "featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deep_travel_guide_id"], name: "index_deep_travel_products_on_deep_travel_guide_id"
   end
 
   create_table "destinations", force: :cascade do |t|
@@ -412,6 +443,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
+  add_foreign_key "deep_travel_products", "deep_travel_guides"
   add_foreign_key "itineraries", "users"
   add_foreign_key "itinerary_items", "itineraries"
   add_foreign_key "memberships", "users"
