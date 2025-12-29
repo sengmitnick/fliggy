@@ -1,0 +1,222 @@
+<div class="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-yellow-400">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to root_path, class: "p-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-xl font-bold text-gray-800">旅游度假</h1>
+      <button class="p-2">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <circle cx="3" cy="10" r="1.5"/>
+          <circle cx="10" cy="10" r="1.5"/>
+          <circle cx="17" cy="10" r="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="px-4 pt-6 pb-4">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="flex items-center px-4 py-3 border-b border-gray-100">
+        <svg class="w-6 h-6 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="珠海长隆海洋王国" class="flex-1 text-gray-600 text-sm outline-none placeholder-gray-400"/>
+        <button class="px-6 py-2 bg-yellow-400 text-gray-800 font-medium rounded-full text-sm ml-2">搜索</button>
+      </div>
+      
+      <!-- Hot Cities -->
+      <div class="px-4 py-3 flex items-center justify-between">
+        <% @hot_cities.each do |city| %>
+          <div class="text-center flex-1">
+            <div class="text-sm font-medium text-gray-800 mb-1"><%= city[:name] %></div>
+            <div class="text-xs text-gray-500"><%= city[:count] %></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour Categories Grid -->
+  <div class="px-4 pb-4">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div class="grid grid-cols-5 gap-px bg-gray-100">
+        <% @tour_categories.take(10).each do |category| %>
+          <div class="bg-white text-center py-4 relative">
+            <%= image_tag category[:icon], class: "w-8 h-8 mx-auto mb-2" %>
+            <div class="text-xs text-gray-700"><%= category[:name] %></div>
+            <% if category[:badge] %>
+              <div class="absolute top-1 right-1 bg-orange-400 text-white text-[10px] px-1.5 py-0.5 rounded">
+                <%= category[:badge] %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="grid grid-cols-5 gap-px bg-gray-100 border-t border-gray-100">
+        <% @tour_categories.drop(10).each do |category| %>
+          <div class="bg-white text-center py-4 relative">
+            <%= image_tag category[:icon], class: "w-8 h-8 mx-auto mb-2" %>
+            <div class="text-xs text-gray-700"><%= category[:name] %></div>
+            <% if category[:badge] %>
+              <div class="absolute top-1 right-1 bg-orange-400 text-white text-[10px] px-1.5 py-0.5 rounded">
+                <%= category[:badge] %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Free Tour Section -->
+  <div class="px-4 pb-4">
+    <div class="bg-gradient-to-br from-purple-400 to-purple-500 rounded-2xl shadow-sm p-4">
+      <div class="flex items-center">
+        <div class="text-white text-4xl mr-3">✈</div>
+        <div class="flex-1">
+          <div class="text-white font-bold text-base mb-1">自由行</div>
+        </div>
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Tags -->
+  <div class="px-4 pb-4">
+    <div class="bg-white rounded-2xl shadow-sm p-4">
+      <div class="grid grid-cols-5 gap-4">
+        <% @feature_tags.each do |tag| %>
+          <div class="text-center">
+            <%= image_tag tag[:icon], class: "w-10 h-10 mx-auto mb-1" %>
+            <div class="text-xs text-gray-700"><%= tag[:name] %></div>
+          </div>
+        <% end %>
+        <div class="text-center flex items-center justify-center">
+          <div class="text-xs text-gray-500">更多玩法</div>
+          <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promotional Banner -->
+  <div class="px-4 pb-4">
+    <div class="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl shadow-lg overflow-hidden">
+      <div class="relative h-32">
+        <div class="absolute inset-0 p-4 flex flex-col justify-between">
+          <div>
+            <div class="text-white font-bold text-lg mb-1">度假全球旅行 下单立减</div>
+            <div class="bg-yellow-400 text-gray-800 font-bold px-3 py-1 rounded inline-block">
+              领至高700元旅游度假补贴
+            </div>
+          </div>
+        </div>
+        <div class="absolute right-0 top-0 h-full w-1/2">
+          <div class="h-full flex items-center justify-center">
+            <div class="text-6xl">🏖️</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- City Selector and Attractions -->
+<div class="bg-gray-50 px-4 py-6 pb-24">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center">
+      <h2 class="text-2xl font-bold text-gray-800 mr-2"><%= @current_city %></h2>
+      <span class="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded">猜你想去</span>
+    </div>
+    <button class="flex items-center bg-yellow-400 text-gray-800 px-4 py-2 rounded-full text-sm font-medium">
+      更多目的地
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- City Tabs -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <% ['广州', '北京', '上海', '杭州', '惠州', '中国香港'].each do |city| %>
+      <% if city == @current_city %>
+        <button class="px-4 py-2 bg-white text-gray-800 font-medium rounded-full text-sm">
+          <%= city %>
+        </button>
+      <% else %>
+        <button class="px-4 py-2 bg-gray-200 text-gray-600 rounded-full text-sm">
+          <%= city %>
+        </button>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Attractions Section -->
+  <div class="mb-6">
+    <div class="flex items-center mb-3">
+      <h3 class="text-lg font-bold text-gray-800">深圳必玩</h3>
+      <span class="text-sm text-gray-500 ml-2">错过就像没来过</span>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Hot Attractions -->
+      <div>
+        <div class="flex items-center mb-2">
+          <span class="text-sm font-medium text-gray-700 mr-2">🌟 深圳景点热榜</span>
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <div class="bg-white rounded-xl overflow-hidden">
+          <% @hot_attractions.each do |attraction| %>
+            <div class="flex items-center p-3 border-b border-gray-100 last:border-b-0">
+              <div class="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg mr-3">
+                <%= image_tag attraction[:image], class: "w-full h-full object-cover rounded-lg" %>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-800 text-sm mb-1"><%= attraction[:name] %></div>
+                <div class="flex items-center justify-between">
+                  <div class="text-orange-600 font-bold text-sm"><%= attraction[:price] %></div>
+                  <div class="text-xs text-gray-500"><%= attraction[:sales] %></div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Experiences -->
+      <div>
+        <div class="flex items-center mb-2">
+          <span class="text-sm font-medium text-gray-700 mr-2">🎪 深圳特色体验</span>
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <% @experiences.each do |exp| %>
+            <div class="bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl h-32 flex items-center justify-center text-white font-bold text-lg relative overflow-hidden">
+              <% if exp[:image] %>
+                <%= image_tag exp[:image], class: "absolute inset-0 w-full h-full object-cover opacity-50" %>
+              <% end %>
+              <span class="relative z-10"><%= exp[:name] %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render 'shared/bottom_navigation' %>
