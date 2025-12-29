@@ -269,7 +269,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
-<<<<<<< HEAD
   create_table "hotel_facilities", force: :cascade do |t|
     t.bigint "hotel_id"
     t.string "name"
@@ -336,7 +335,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-=======
+  end
+
   create_table "itineraries", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "title"
@@ -406,7 +406,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_27_145149) do
     t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
     t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
     t.index ["user_id"], name: "index_notifications_on_user_id"
->>>>>>> 0bb3b305ee4bb6cd5601afba69c9ded93291781f
   end
 
   create_table "passengers", force: :cascade do |t|
