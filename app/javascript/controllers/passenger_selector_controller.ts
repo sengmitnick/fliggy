@@ -45,11 +45,37 @@ export default class extends Controller<HTMLElement> {
     console.log("PassengerSelector connected")
     this.switchToPassengerTab()
     this.updateDisplay()
+    
+    // Check if we should auto-open the modal (e.g., after adding a passenger)
+    const urlParams = new URLSearchParams(window.location.search)
+    const shouldOpenModal = urlParams.get('open_passenger_modal') === 'true'
+    console.log('Should open modal:', shouldOpenModal)
+    
+    if (shouldOpenModal) {
+      // Open the modal after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        console.log('Opening modal now...')
+        console.log('Modal target exists:', !!this.modalTarget)
+        if (this.hasModalTarget) {
+          this.openModal()
+          console.log('Modal opened successfully')
+        } else {
+          console.error('Modal target not found!')
+        }
+      }, 300)
+      
+      // Clean up URL parameter
+      urlParams.delete('open_passenger_modal')
+      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
+      window.history.replaceState({}, '', newUrl)
+    }
   }
 
   openModal(): void {
+    console.log('openModal called, modalTarget:', this.modalTarget)
     this.modalTarget.classList.remove("hidden")
     document.body.style.overflow = "hidden"
+    console.log('Modal classes after open:', this.modalTarget.classList.toString())
   }
 
   closeModal(): void {

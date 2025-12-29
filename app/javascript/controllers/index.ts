@@ -24,6 +24,8 @@ import TrainListController from "./train_list_controller"
 import TrainCitySelectorController from "./train_city_selector_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
 import DeepTravelController from "./deep_travel_controller"
+import DatePickerModalController from "./date_picker_modal_controller"
+import MultiCityController from "./multi_city_controller"
 
 const application = Application.start()
 
@@ -51,5 +53,7 @@ application.register("train-list", TrainListController)
 application.register("train-city-selector", TrainCitySelectorController)
 application.register("infinite-scroll", InfiniteScrollController)
 application.register("deep-travel", DeepTravelController)
+application.register("date-picker-modal", DatePickerModalController)
+application.register("multi-city", MultiCityController)
 
 window.Stimulus = application

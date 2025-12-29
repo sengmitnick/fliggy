@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-gray-50 pb-20">
+  <!-- Header -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to passengers_path(source: @traveler_type), class: "flex items-center gap-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-medium flex-1 text-center">
+        编辑<%= case @traveler_type when 'train', 'bus' then '乘车人' when 'flight' then '乘机人' else '出行人' end %>
+      </h1>
+      <%= link_to passenger_path(@passenger, source: @traveler_type), 
+        data: { 
+          turbo_method: :delete, 
+          turbo_confirm: "确定要删除这个#{@traveler_type == 'train' || @traveler_type == 'bus' ? '乘车人' : (@traveler_type == 'flight' ? '乘机人' : '出行人')}吗？" 
+        },
+        class: "text-red-500 text-sm" do %>
+        删除
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <div class="pb-32">
+    <%= form_with model: @passenger, url: passenger_path(@passenger, source: @traveler_type), method: :patch, local: true, data: { turbo: false } do |f| %>
+      <!-- Error Messages -->
+      <% if @passenger.errors.any? %>
+        <div class="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+          <div class="text-red-800 text-sm font-medium mb-1">请修正以下错误：</div>
+          <ul class="list-disc list-inside text-red-700 text-sm">
+            <% @passenger.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Form Fields -->
+      <div class="bg-white mt-4">
+        <!-- Name Field -->
+        <div class="px-4 py-4 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <label class="text-base text-gray-700 flex items-center">
+              <span class="text-red-500 mr-1">*</span>
+              姓名
+            </label>
+            <%= f.text_field :name, 
+              class: "flex-1 text-right text-base border-0 focus:ring-0 focus:outline-none",
+              placeholder: "请输入姓名",
+              required: true %>
+          </div>
+        </div>
+
+        <!-- ID Type Field -->
+        <div class="px-4 py-4 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <label class="text-base text-gray-700 flex items-center">
+              <span class="text-red-500 mr-1">*</span>
+              证件类型
+            </label>
+            <%= f.select :id_type,
+              [['身份证', '身份证'], ['护照', '护照'], ['港澳通行证', '港澳通行证'], ['台湾通行证', '台湾通行证']],
+              {},
+              class: "flex-1 text-right text-base border-0 focus:ring-0 focus:outline-none bg-transparent",
+              required: true %>
+          </div>
+        </div>
+
+        <!-- ID Number Field -->
+        <div class="px-4 py-4 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <label class="text-base text-gray-700 flex items-center">
+              <span class="text-red-500 mr-1">*</span>
+              证件号码
+            </label>
+            <%= f.text_field :id_number,
+              class: "flex-1 text-right text-base border-0 focus:ring-0 focus:outline-none",
+              placeholder: "请输入证件号码",
+              required: true %>
+          </div>
+        </div>
+
+        <!-- Phone Field -->
+        <div class="px-4 py-4">
+          <div class="flex items-center justify-between">
+            <label class="text-base text-gray-700">
+              手机号
+            </label>
+            <%= f.text_field :phone,
+              class: "flex-1 text-right text-base border-0 focus:ring-0 focus:outline-none",
+              placeholder: "请输入手机号",
+              type: "tel",
+              maxlength: "11" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="mx-4 mt-4 bg-blue-50 rounded-lg p-3">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+          <div class="text-sm text-blue-800">
+            <div class="font-medium mb-1">温馨提示</div>
+            <ul class="list-disc list-inside space-y-1 text-xs">
+              <li>请确保填写的姓名与证件上的姓名一致</li>
+              <li>证件号码将用于购票和登机验证</li>
+              <li>手机号码用于接收订单通知（选填）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-30">
+        <%= f.submit "保存", 
+          class: "w-full py-4 rounded-full font-bold text-black transition-colors",
+          style: "background: #FFD700;" %>
+      </div>
+    <% end %>
+  </div>
+</div>

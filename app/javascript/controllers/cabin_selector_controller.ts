@@ -34,17 +34,13 @@ export default class extends Controller<HTMLElement> {
       const buttonType = button.dataset.cabinType
       
       if (buttonType === cabinType) {
-        // Selected state
-        button.classList.remove("bg-white", "text-gray-700", "border-gray-300")
-        button.classList.add("text-gray-900", "font-medium", "border-gray-900")
-        button.style.background = "#FFFBF0"
-        button.style.borderWidth = "2px"
+        // Selected state - white background with subtle shadow
+        button.classList.add("bg-white", "shadow-sm", "text-gray-900")
+        button.classList.remove("text-gray-600")
       } else {
-        // Unselected state
-        button.classList.remove("text-gray-900", "font-medium", "border-gray-900")
-        button.classList.add("bg-white", "text-gray-700", "border-gray-300")
-        button.style.background = "white"
-        button.style.borderWidth = "1px"
+        // Unselected state - transparent background
+        button.classList.remove("bg-white", "shadow-sm", "text-gray-900")
+        button.classList.add("text-gray-600")
       }
     })
   }

@@ -1,0 +1,38 @@
+<%
+  active_tab = local_assigns.fetch(:active_tab, :flight)
+%>
+
+<!-- Tab Navigation -->
+<div class="bg-[#F2F3F7] rounded-t-[24px] pt-2 px-1">
+  <nav class="flex items-end">
+    <% [
+      { key: :flight, label: '机票', path: flights_path },
+      { key: :special_flight, label: '特价机票', path: '#', coming_soon: true },
+      { key: :train, label: '火车票', path: trains_path },
+      { key: :car_rental, label: '租车/接送', path: '#', coming_soon: true },
+      { key: :bus, label: '汽车票', path: '#', coming_soon: true }
+    ].each do |tab| %>
+      <% if tab[:key] == active_tab %>
+        <!-- Active Tab -->
+        <div class="relative bg-white flex-1 rounded-t-[12px] px-3 py-2.5 cursor-pointer">
+          <div class="flex flex-col items-center">
+            <span class="text-[15px] font-bold text-[#1a1a1a] leading-tight whitespace-nowrap"><%= tab[:label] %></span>
+            <!-- Yellow Indicator -->
+            <div class="absolute bottom-1 w-6 h-[4px] bg-[#FFD900] rounded-full"></div>
+          </div>
+        </div>
+      <% else %>
+        <!-- Inactive Tab -->
+        <% if tab[:coming_soon] %>
+          <button class="px-2 py-2 flex-1 text-[13px] font-medium text-[#666666] cursor-pointer whitespace-nowrap" data-action="click->coming-soon#show">
+            <%= tab[:label] %>
+          </button>
+        <% else %>
+          <%= link_to tab[:path], class: "px-2 py-2 flex-1 text-[13px] font-medium text-[#666666] cursor-pointer whitespace-nowrap text-center" do %>
+            <%= tab[:label] %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </nav>
+</div>
