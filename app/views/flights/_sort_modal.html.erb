@@ -1,0 +1,103 @@
+<!-- Sort Modal Overlay -->
+<div data-flight-sort-target="overlay" 
+     data-action="click->flight-sort#closeModal"
+     class="hidden fixed inset-0 bg-black opacity-0 transition-opacity duration-300 z-40">
+</div>
+
+<!-- Sort Modal -->
+<div data-flight-sort-target="modal" 
+     class="hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-2xl shadow-2xl transform translate-y-full transition-transform duration-300 z-50"
+     style="max-height: 60vh;">
+  
+  <!-- Modal Header -->
+  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+    <h3 class="text-lg font-bold">更多排序</h3>
+    <button data-action="click->flight-sort#closeModal" 
+            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal Content -->
+  <div class="p-4 space-y-3 overflow-y-auto" style="max-height: calc(60vh - 80px);">
+    
+    <!-- Duration Sort Section -->
+    <div class="mb-4">
+      <h4 class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+        </svg>
+        飞行时长
+      </h4>
+      <button data-action="click->flight-sort#applySortOption"
+              data-sort-type="duration_short"
+              class="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">耗时短-长</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Departure Time Section -->
+    <div class="mb-4">
+      <h4 class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+        </svg>
+        起飞时间
+      </h4>
+      <div class="grid grid-cols-2 gap-3">
+        <button data-action="click->flight-sort#applySortOption"
+                data-sort-type="departure_early"
+                class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+          </svg>
+          <span class="font-medium">起飞早-晚</span>
+        </button>
+        <button data-action="click->flight-sort#applySortOption"
+                data-sort-type="departure_late"
+                class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <svg class="w-5 h-5 text-gray-600 transform rotate-180" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+          </svg>
+          <span class="font-medium">起飞晚-早</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Arrival Time Section -->
+    <div class="mb-2">
+      <h4 class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4 transform rotate-180" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+        </svg>
+        到达时间
+      </h4>
+      <div class="grid grid-cols-2 gap-3">
+        <button data-action="click->flight-sort#applySortOption"
+                data-sort-type="arrival_early"
+                class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">到达早-晚</span>
+        </button>
+        <button data-action="click->flight-sort#applySortOption"
+                data-sort-type="arrival_late"
+                class="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <svg class="w-5 h-5 text-gray-600 transform rotate-180" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+          </svg>
+          <span class="font-medium">到达晚-早</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

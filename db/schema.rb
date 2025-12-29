@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_28_102505) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_29_083434) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -86,6 +86,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_28_102505) do
     t.integer "return_flight_id"
     t.date "return_date"
     t.integer "return_offer_id"
+    t.jsonb "multi_city_flights"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"

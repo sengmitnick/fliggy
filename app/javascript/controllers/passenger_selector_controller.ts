@@ -25,7 +25,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly modalTarget: HTMLElement
   declare readonly hasModalTarget: boolean
   declare readonly modalTitleTarget: HTMLElement
-  declare readonly selectedDisplayTarget: HTMLElement
+  declare readonly selectedDisplayTargets: HTMLElement[]
   declare readonly passengerTabTarget: HTMLButtonElement
   declare readonly countTabTarget: HTMLButtonElement
   declare readonly passengerListPanelTarget: HTMLElement
@@ -219,21 +219,27 @@ export default class extends Controller<HTMLElement> {
     // Update modal title
     this.modalTitleTarget.textContent = `当前已选: ${this.adultsValue}成人 ${this.childrenValue}儿童 ${this.infantsValue}婴儿`
     
-    // Update main display (passenger selection button in flights page)
+    // Determine the HTML content to display
+    let displayHTML: string
     if (this.selectedPassengerNamesValue.length > 0) {
       // If specific passengers are selected, show their names (single line, no label)
-      this.selectedDisplayTarget.innerHTML = `<div class="text-base text-gray-800">${this.selectedPassengerNamesValue.join('、')}</div>`
+      displayHTML = `<div class="text-base text-gray-800">${this.selectedPassengerNamesValue.join('、')}</div>`
     } else if (this.adultsValue > 1 || this.childrenValue > 0 || this.infantsValue > 0) {
       // If passenger count is set (but no specific passengers selected), show count summary (single line, no label)
       // Always show all three categories including zeros
-      this.selectedDisplayTarget.innerHTML = `<div class="text-base text-gray-800">${this.adultsValue}成人 ${this.childrenValue}儿童 ${this.infantsValue}婴儿</div>`
+      displayHTML = `<div class="text-base text-gray-800">${this.adultsValue}成人 ${this.childrenValue}儿童 ${this.infantsValue}婴儿</div>`
     } else {
       // Default state: 1 adult, no children/infants, no passengers selected (two-line layout with label)
-      this.selectedDisplayTarget.innerHTML = `
+      displayHTML = `
         <div class="text-base text-gray-800">选择乘机人</div>
         <div class="text-sm" style="color: #00A0E9;">快速找到低价票</div>
       `
     }
+    
+    // Update ALL selectedDisplay targets (both single/round-trip and multi-city forms)
+    this.selectedDisplayTargets.forEach(target => {
+      target.innerHTML = displayHTML
+    })
   }
 
   private updateCountDisplay(): void {

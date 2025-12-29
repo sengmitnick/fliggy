@@ -18,7 +18,9 @@
   <!-- Order Info Summary -->
   <div class="container mx-auto px-4 py-3">
     <div class="flex items-center justify-between text-sm">
-      <% if @booking.trip_type == 'round_trip' %>
+      <% if @booking.trip_type == 'multi_city' %>
+        <span class="text-gray-600">多程 | <%= @booking.multi_city_flight_objects.map { |f| f.departure_city }.first %> → ... → <%= @booking.multi_city_flight_objects.map { |f| f.destination_city }.last %> · <%= @flight.departure_time.strftime('%-m月%-d日') %></span>
+      <% elsif @booking.trip_type == 'round_trip' %>
         <span class="text-gray-600">往返 | <%= @flight.departure_city %> ⇄ <%= @flight.destination_city %> · <%= @flight.departure_time.strftime('%-m月%-d日') %> - <%= @booking.return_flight.departure_time.strftime('%-m月%-d日') %></span>
       <% else %>
         <span class="text-gray-600">单程 | <%= @flight.departure_city %> → <%= @flight.destination_city %> · <%= @flight.departure_time.strftime('%-m月%-d日') %></span>
@@ -105,24 +107,35 @@
         <span class="font-bold"><%= @booking.passenger_name %></span>
       </div>
 
-      <!-- Outbound Ticket Price -->
-      <div class="flex items-center justify-between py-2 border-b">
-        <span class="text-gray-600"><%= @booking.trip_type == 'round_trip' ? '去程机票' : '机票' %></span>
-        <span>¥<%= (@booking.flight.price).to_i %></span>
-      </div>
-
-      <!-- Return Ticket Price (if round trip) -->
-      <% if @booking.trip_type == 'round_trip' && @booking.return_flight %>
+      <% if @booking.trip_type == 'multi_city' && @booking.multi_city_flights.present? %>
+        <!-- Multi-city Flight Prices -->
+        <% @booking.multi_city_flight_objects.each_with_index do |flight, index| %>
+          <% next unless flight %>
+          <div class="flex items-center justify-between py-2 border-b">
+            <span class="text-gray-600">第<%= index + 1 %>程机票 (<%= flight.departure_city %> → <%= flight.destination_city %>)</span>
+            <span>¥<%= flight.price.to_i %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <!-- Outbound Ticket Price -->
         <div class="flex items-center justify-between py-2 border-b">
-          <span class="text-gray-600">返程机票</span>
-          <span>¥<%= (@booking.return_flight.price).to_i %></span>
+          <span class="text-gray-600"><%= @booking.trip_type == 'round_trip' ? '去程机票' : '机票' %></span>
+          <span>¥<%= (@booking.flight.price).to_i %></span>
         </div>
+
+        <!-- Return Ticket Price (if round trip) -->
+        <% if @booking.trip_type == 'round_trip' && @booking.return_flight %>
+          <div class="flex items-center justify-between py-2 border-b">
+            <span class="text-gray-600">返程机票</span>
+            <span>¥<%= (@booking.return_flight.price).to_i %></span>
+          </div>
+        <% end %>
       <% end %>
 
       <!-- Insurance -->
       <% if @booking.insurance_type.present? && @booking.insurance_type != 'none' %>
         <div class="flex items-center justify-between py-2 border-b">
-          <span class="text-gray-600">保险<%= @booking.trip_type == 'round_trip' ? '（往返×2）' : '' %></span>
+          <span class="text-gray-600">保险<%= @booking.trip_type == 'round_trip' ? '（往返×2）' : (@booking.trip_type == 'multi_city' ? "（×#{@booking.multi_city_flight_objects.length}）" : '') %></span>
           <span>¥<%= @booking.insurance_price.to_i %></span>
         </div>
       <% end %>

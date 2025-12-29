@@ -7,13 +7,14 @@ export default class extends Controller<HTMLElement> {
   }
 
   declare readonly buttonTargets: HTMLButtonElement[]
-  declare readonly hiddenInputTarget: HTMLInputElement
+  declare readonly hiddenInputTargets: HTMLInputElement[]
   declare selectedValue: string
 
   connect(): void {
     console.log("CabinSelector connected")
     // Check if there's a previously selected value from form
-    const currentValue = this.hiddenInputTarget.value
+    // Use the first hiddenInput to get the value (they should all have the same value)
+    const currentValue = this.hiddenInputTargets[0]?.value
     if (currentValue) {
       // Restore previous selection when returning from search
       this.selectCabin(currentValue)
@@ -26,8 +27,10 @@ export default class extends Controller<HTMLElement> {
   selectCabin(cabinType: string): void {
     this.selectedValue = cabinType
     
-    // Update hidden input value for form submission
-    this.hiddenInputTarget.value = cabinType
+    // Update ALL hidden input values for form submission (both single/round-trip and multi-city forms)
+    this.hiddenInputTargets.forEach(input => {
+      input.value = cabinType
+    })
     
     // Update button styles
     this.buttonTargets.forEach(button => {
