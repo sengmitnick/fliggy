@@ -209,6 +209,23 @@ class Flight < ApplicationRecord
     "#{hours}小时#{minutes}分钟"
   end
 
+  # 简化的时长显示，用于航班列表
+  def duration
+    hours = duration_minutes / 60
+    minutes = duration_minutes % 60
+    "#{hours}h#{minutes}m"
+  end
+
+  # 中转信息（当前都是直飞）
+  def transfer_info
+    direct_flight? ? "直飞" : "1次中转"
+  end
+
+  # 准点率（模拟数据）
+  def punctuality_rate
+    (85 + rand(10)).to_i
+  end
+
   # Check if this is a direct flight (always true for now)
   def direct_flight?
     true

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Promotion Banner -->
-    <div class="mx-4 my-3 px-3 py-2 rounded-lg flex items-center justify-between" style="background: linear-gradient(90deg, #FFF4E6 0%, #FFE8CC 100%);">
+    <div class="mx-4 my-3 px-3 py-2 rounded-lg flex items-center justify-between" style="background: linear-gradient(90deg, #FFF4E6 0%, #FFE8CC 100%);" data-trip-type-target="promotionBanner">
       <div class="flex items-center gap-2">
         <span class="text-sm font-bold" style="color: #FF6B35;">机酒联订更优惠</span>
         <span class="text-xs text-gray-600">购买国内机票立减<span class="font-bold text-red-500">20~30元</span></span>
@@ -54,8 +54,8 @@
       <button class="text-gray-400">×</button>
     </div>
 
-    <!-- From/To Selection -->
-    <div class="mx-4 mb-4">
+    <!-- Single/Round Trip Form -->
+    <div class="mx-4 mb-4" data-trip-type-target="oneWayRoundTripForm">
       <div class="flex items-center justify-between mb-4">
         <button 
           data-action="click->city-selector#openDeparture"
@@ -147,7 +147,72 @@
         <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
         <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
         <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
-        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back mt-2" style="background: #FFD700;">
+        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back my-2" style="background: #FFD700;">
+          搜索机票
+        </button>
+      <% end %>
+    </div>
+
+    <!-- Multi-City Form (hidden by default) -->
+    <div class="mx-4 mb-4 hidden" data-trip-type-target="multiCityForm">
+      <!-- Multi-City Segments Container -->
+      <div data-multi-city-target="segmentsContainer">
+        <!-- Segments will be rendered dynamically by the controller -->
+      </div>
+
+      <!-- Add Segment Button -->
+      <button 
+        type="button"
+        data-action="click->multi-city#addSegment"
+        data-multi-city-target="addButton"
+        class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 my-4">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-base font-medium">再加一程</span>
+      </button>
+
+      <!-- Passenger Selection -->
+      <button 
+        type="button"
+        data-action="click->passenger-selector#openModal"
+        class="w-full flex items-center justify-between py-3 border-b border-gray-100">
+        <div data-passenger-selector-target="selectedDisplay">
+          <div class="text-base text-gray-800">1成人 0儿童 0婴儿</div>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <!-- Cabin Class Selection -->
+      <div class="w-full flex mt-4">
+        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1 w-full">
+          <button 
+            type="button"
+            data-cabin-selector-target="button"
+            data-cabin-type="all"
+            data-action="click->cabin-selector#select"
+            class="flex-1 px-4 py-2 rounded-sm text-sm font-medium transition-colors">
+            全部舱位
+          </button>
+          <button 
+            type="button"
+            data-cabin-selector-target="button"
+            data-cabin-type="business"
+            data-action="click->cabin-selector#select"
+            class="flex-1 px-4 py-2 rounded-sm text-sm font-medium transition-colors whitespace-nowrap">
+            公务/头等舱
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Button for Multi-City -->
+      <%= form_with url: multi_city_search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
+        <%= f.hidden_field :trip_type, value: 'multi_city', data: { 'trip-type-target': 'tripTypeInput' } %>
+        <%= f.hidden_field :segments, value: '', data: { 'multi-city-target': 'hiddenSegmentsInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
+        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black mt-4" style="background: #FFD700;">
           搜索机票
         </button>
       <% end %>
