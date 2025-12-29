@@ -21,6 +21,7 @@ export default class extends Controller<HTMLElement> {
   declare currentDateValue: string
 
   private selectedDateObj: Date = new Date()
+  private currentMultiCitySegmentId: string | null = null
 
   connect(): void {
     console.log("DatePicker connected")
@@ -44,6 +45,23 @@ export default class extends Controller<HTMLElement> {
     if (this.hasSelectedDateTarget) {
       this.updateDisplayedDate()
     }
+    
+    // Listen for multi-city events
+    // eslint-disable-next-line no-undef
+    this.element.addEventListener('multi-city:open-date-picker', this.handleMultiCityOpen.bind(this) as unknown as EventListener)
+  }
+
+  disconnect(): void {
+    // eslint-disable-next-line no-undef
+    this.element.removeEventListener('multi-city:open-date-picker', this.handleMultiCityOpen.bind(this) as unknown as EventListener)
+  }
+
+  // Handle multi-city date picker request
+  private handleMultiCityOpen(event: CustomEvent): void {
+    const { segmentId } = event.detail
+    console.log('Date picker: Received multi-city open request', { segmentId })
+    this.currentMultiCitySegmentId = segmentId
+    this.openModal()
   }
 
   // Open check-in date picker
@@ -100,12 +118,37 @@ export default class extends Controller<HTMLElement> {
 
     this.selectedDateObj = selectedDate
     this.currentDateValue = dateStr
-    if (this.hasSelectedDateTarget) {
-      this.updateDisplayedDate()
+    
+    // Check if this is for multi-city
+    if (this.currentMultiCitySegmentId) {
+      console.log('Date picker: Multi-city mode, dispatching event', {
+        segmentId: this.currentMultiCitySegmentId,
+        date: dateStr
+      })
+      
+      // Trigger event to update multi-city segment
+      const updateEvent = new CustomEvent('date-picker:date-selected', {
+        detail: {
+          segmentId: this.currentMultiCitySegmentId,
+          date: dateStr
+        },
+        bubbles: true
+      })
+      document.dispatchEvent(updateEvent)
+      
+      // Reset multi-city state
+      this.currentMultiCitySegmentId = null
+    } else {
+      console.log('Date picker: Regular mode')
+      // Regular single/round trip selection
+      if (this.hasSelectedDateTarget) {
+        this.updateDisplayedDate()
+      }
+      if (this.hasDateInputTarget) {
+        this.dateInputTarget.value = dateStr
+      }
     }
-    if (this.hasDateInputTarget) {
-      this.dateInputTarget.value = dateStr
-    }
+    
     this.closeModal()
   }
 

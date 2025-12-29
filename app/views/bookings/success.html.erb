@@ -24,6 +24,50 @@
 
   <!-- Flight Info Card -->
   <div class="container mx-auto px-4 mb-4">
+    <% if @booking.trip_type == 'multi_city' && @booking.multi_city_flights.present? %>
+      <!-- Multi-city Flights -->
+      <% @booking.multi_city_flight_objects.each_with_index do |flight, index| %>
+        <% next unless flight %>
+        <div class="bg-white rounded-lg shadow p-4 <%= 'mb-4' unless index == @booking.multi_city_flight_objects.length - 1 %>">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <span class="bg-purple-500 text-white px-2 py-1 rounded text-xs font-bold">第<%= index + 1 %>程</span>
+              <span class="text-lg font-bold"><%= flight.departure_time.strftime('%-m月%-d日') %> 周<%= flight.departure_time.strftime('%u') %> <%= flight.departure_time.strftime('%H:%M') %></span>
+            </div>
+            <button type="button" class="text-blue-500 text-sm">
+              📋 分享航班
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="text-2xl font-bold"><%= flight.departure_time.strftime('%H:%M') %></div>
+              <div class="text-sm text-gray-600"><%= flight.departure_city %></div>
+              <div class="text-xs text-gray-500"><%= flight.departure_airport %></div>
+            </div>
+            <div class="flex-1 text-center px-4">
+              <div class="text-xs text-gray-500"><%= flight.duration_formatted %></div>
+              <div class="border-t border-gray-300 my-1"></div>
+              <div class="text-xs text-green-600">直飞</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold"><%= flight.arrival_time.strftime('%H:%M') %></div>
+              <div class="text-sm text-gray-600"><%= flight.destination_city %></div>
+              <div class="text-xs text-gray-500"><%= flight.arrival_airport %></div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded p-3">
+            <div class="flex items-center text-sm text-gray-700">
+              <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>已成功出票</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
     <!-- Outbound Flight -->
     <div class="bg-white rounded-lg shadow p-4 <%= 'mb-4' if @booking.trip_type == 'round_trip' && @booking.return_flight %>">
       <div class="flex items-center justify-between mb-4">
@@ -107,6 +151,7 @@
         </div>
       </div>
     <% end %>
+  <% end %>
   </div>
 
   <!-- Info Section -->

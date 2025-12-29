@@ -67,23 +67,40 @@
   </div>
 
   <!-- Date Selector -->
+  <%
+    # 构建所有程次的日期数组，用于前端校验
+    all_segment_dates = @segments.map { |seg| seg['date'] }
+    
+    # 构建已选航班的日期数组
+    selected_flight_dates = @selected_flights.map do |sf|
+      flight = Flight.find_by(id: sf['flight_id'])
+      flight&.flight_date&.to_s
+    end.compact
+  %>
   <div class="flex gap-1 px-2 py-2 overflow-x-auto no-scrollbar bg-white border-b border-gray-100">
     <% @date_prices.each do |date_info| %>
-      <%= link_to multi_city_results_flights_path(
+      <% link_url = multi_city_results_flights_path(
             segments: @segments.to_json, 
             current_segment: @current_segment_index,
             selected_flights: @selected_flights.to_json,
             date_override: date_info[:date],
             cabin_class: @cabin_class
-          ), 
-          data: { turbo: false },
-          class: "flex-shrink-0 px-3 py-2 rounded text-center #{date_info[:is_today] ? 'bg-yellow-400 text-gray-900' : 'bg-gray-100 text-gray-600'}" do %>
+          ) %>
+      <a href="#" 
+         data-controller="date-link"
+         data-date-link-all-segment-dates-value="<%= all_segment_dates.to_json %>"
+         data-date-link-selected-flight-dates-value="<%= selected_flight_dates.to_json %>"
+         data-date-link-current-segment-index-value="<%= @current_segment_index %>"
+         data-date-link-url-value="<%= link_url %>"
+         data-date-link-selected-date-value="<%= date_info[:date].to_s %>"
+         data-action="click->date-link#navigate"
+         class="flex-shrink-0 px-3 py-2 rounded text-center <%= date_info[:is_today] ? 'bg-yellow-400 text-gray-900' : 'bg-gray-100 text-gray-600' %>">
         <div class="text-sm font-bold"><%= I18n.l(date_info[:date], format: "%m-%d") %></div>
         <div class="text-xs <%= date_info[:is_today] ? 'text-gray-700' : 'text-gray-500' %>"><%= date_info[:weekday] %></div>
         <% if date_info[:price] > 0 %>
           <div class="text-xs font-bold text-red-500 mt-0.5">¥<%= date_info[:price] %></div>
         <% end %>
-      <% end %>
+      </a>
     <% end %>
   </div>
 
@@ -109,7 +126,6 @@
             selected_flights: (@selected_flights + [{ flight_id: flight.id, segment_index: @current_segment_index }]).to_json,
             cabin_class: @cabin_class
           ),
-          data: { turbo: false },
           class: "block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" do %>
         
         <!-- Time and Route -->

@@ -11,6 +11,7 @@ class Booking < ApplicationRecord
   validates :insurance_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :return_flight_id, presence: true, if: -> { trip_type == 'round_trip' }
   validates :return_date, presence: true, if: -> { trip_type == 'round_trip' }
+  validates :multi_city_flights, presence: true, if: -> { trip_type == 'multi_city' }
 
   # 订单状态
   enum :status, {
@@ -30,5 +31,19 @@ class Booking < ApplicationRecord
   # 判断是否为往返票
   def round_trip?
     trip_type == 'round_trip'
+  end
+  
+  # 判断是否为多程票
+  def multi_city?
+    trip_type == 'multi_city'
+  end
+  
+  # 获取多程航班列表
+  def multi_city_flight_objects
+    return [] unless multi_city? && multi_city_flights.present?
+    
+    multi_city_flights.map do |flight_data|
+      Flight.find_by(id: flight_data['flight_id'])
+    end.compact
   end
 end

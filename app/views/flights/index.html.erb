@@ -178,7 +178,8 @@
         data-action="click->passenger-selector#openModal"
         class="w-full flex items-center justify-between py-3 border-b border-gray-100">
         <div data-passenger-selector-target="selectedDisplay">
-          <div class="text-base text-gray-800">1成人 0儿童 0婴儿</div>
+          <div class="text-base text-gray-800">选择乘机人</div>
+          <div class="text-sm" style="color: #00A0E9;">快速找到低价票</div>
         </div>
         <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
@@ -212,7 +213,7 @@
         <%= f.hidden_field :trip_type, value: 'multi_city', data: { 'trip-type-target': 'tripTypeInput' } %>
         <%= f.hidden_field :segments, value: '', data: { 'multi-city-target': 'hiddenSegmentsInput' } %>
         <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
-        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black mt-4" style="background: #FFD700;">
+        <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black my-2" style="background: #FFD700;">
           搜索机票
         </button>
       <% end %>

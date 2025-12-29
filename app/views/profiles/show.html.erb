@@ -1,368 +1,359 @@
-<div class="min-h-screen bg-surface pb-20">
-  <!-- 顶部用户信息卡片 -->
-  <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white pb-6">
-    <div class="container-xl mx-auto px-4 pt-3">
-      <!-- 顶部工具栏 -->
-      <div class="flex justify-end gap-4 mb-4">
-        <button class="text-white/90">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-        </button>
-      </div>
+<style>
+  .bg-fliggy-green {
+    background: linear-gradient(135deg, #8ba891 0%, #6b8c75 100%);
+  }
+  .text-xxs {
+    font-size: 0.65rem;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
 
-      <!-- 用户头像和信息 -->
-      <div class="flex items-center gap-4 mb-6">
-        <div class="relative">
-          <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold border-2 border-white/50">
-            <%= (@user.name.present? ? @user.name.first : '是').upcase %>
-          </div>
-          <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center">
-            <span class="text-xs text-blue-600 font-bold">会员</span>
-          </div>
+<div class="min-h-screen bg-[#f6f6f6] pb-24">
+  <!-- 用户信息区域 -->
+  <div class="px-4 py-4 flex justify-between items-start bg-white">
+    <div class="flex items-center space-x-3">
+      <div class="relative">
+        <div class="w-14 h-14 rounded-full border-2 border-white overflow-hidden bg-gray-300 flex items-center justify-center text-2xl font-bold text-white">
+          <%= (current_user.name.presence&.first || current_user.email&.first || 'U').upcase %>
         </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2 mb-1">
-            <h2 class="text-lg font-bold"><%= @user.name.present? ? @user.name : '是小胜啊' %></h2>
-            <span class="text-xs bg-white/20 px-2 py-0.5 rounded">认证企业会员</span>
+        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gray-800 text-yellow-500 text-[10px] px-2 rounded-full border border-gray-600 whitespace-nowrap">F1会员</div>
+      </div>
+      <div>
+        <div class="flex items-center space-x-1">
+          <h2 class="text-xl font-bold"><%= current_user.name.presence || current_user.email&.split('@')&.first || '用户' %></h2>
+          <span class="text-[10px] bg-blue-50 text-blue-500 px-1 rounded border border-blue-200">认证企业会员</span>
+        </div>
+        <div class="mt-1 flex items-center space-x-2">
+          <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div class="w-0 h-full bg-yellow-400"></div>
           </div>
-          <div class="flex items-center gap-2 text-sm text-white/90">
-            <span>0/50 去升级></span>
-          </div>
+          <span class="text-xs text-gray-500">0/50 去升级 ></span>
         </div>
       </div>
     </div>
-
-    <!-- 会员权益卡片 -->
-    <div class="container-xl mx-auto px-4">
-      <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-2xl p-4 mb-4">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
-            </svg>
-            <span class="font-medium">砂锅会员权益中心</span>
-          </div>
-          <button class="text-sm bg-white/20 px-3 py-1 rounded-full">
-            直通40+品牌会员卡 >
-          </button>
+    <div class="flex space-x-4">
+      <div class="text-center cursor-pointer">
+        <div class="w-6 h-6 mx-auto flex items-center justify-center">
+          <%= image_tag 'profile/我的客服.png', class: 'w-5 h-5', alt: '我的客服' %>
         </div>
-        
-        <div class="grid grid-cols-4 gap-3 mt-3">
-          <div class="text-center">
-            <%= image_tag 'airfare/低价提醒.png', class: 'w-10 h-10 mx-auto mb-1', alt: '酒店低价' %>
-            <p class="text-xs">酒店低价</p>
-          </div>
-          <div class="text-center">
-            <%= image_tag 'airfare/值机选座.png', class: 'w-10 h-10 mx-auto mb-1', alt: '住6晚1' %>
-            <p class="text-xs">住6晚1</p>
-          </div>
-          <div class="text-center">
-            <%= image_tag 'airfare/特价机票.png', class: 'w-10 h-10 mx-auto mb-1', alt: '里程积累' %>
-            <p class="text-xs">里程积累</p>
-          </div>
-          <div class="text-center">
-            <%= image_tag 'airfare/机票次卡.png', class: 'w-10 h-10 mx-auto mb-1', alt: '火车余票优惠' %>
-            <p class="text-xs">火车余票优惠</p>
-          </div>
+        <p class="text-[10px] mt-1">我的客服</p>
+      </div>
+      <div class="text-center cursor-pointer">
+        <div class="w-6 h-6 mx-auto flex items-center justify-center">
+          <%= image_tag 'profile/设置.png', class: 'w-5 h-5', alt: '设置' %>
         </div>
+        <p class="text-[10px] mt-1">设置</p>
       </div>
     </div>
   </div>
 
-  <!-- 推荐新人区块 -->
-  <div class="container-xl mx-auto px-4 -mt-2 mb-4">
-    <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="text-2xl">🎁</div>
+  <!-- 飞猪会员中心卡片 -->
+  <div class="mx-3 mt-3 rounded-xl overflow-hidden shadow-sm">
+    <div class="bg-fliggy-green p-4 text-white">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold italic">飞猪会员中心</h3>
+        <div class="bg-white/20 px-2 py-1 rounded-full text-[10px] flex items-center">
+          直通40+品牌会员卡 >
+        </div>
+      </div>
+      <div class="grid grid-cols-4 gap-2 text-center">
         <div>
-          <p class="font-bold text-white">超级卡 每125元酒店双倍 会员至50%加速升级</p>
-          <p class="text-xs text-white/80 mt-1">立开通 ></p>
+          <div class="w-10 h-10 mx-auto mb-1">
+            <%= image_tag 'profile/酒店特权价.png', class: 'w-full h-full object-contain', alt: '酒店特权价' %>
+          </div>
+          <p class="text-[11px]">酒店特权价</p>
+        </div>
+        <div>
+          <div class="w-10 h-10 mx-auto mb-1">
+            <%= image_tag 'profile/住5送1.png', class: 'w-full h-full object-contain', alt: '住5送1' %>
+          </div>
+          <p class="text-[11px]">住5送1</p>
+        </div>
+        <div>
+          <div class="w-10 h-10 mx-auto mb-1">
+            <%= image_tag 'profile/里程抵房费.png', class: 'w-full h-full object-contain', alt: '里程抵房费' %>
+          </div>
+          <p class="text-[11px]">里程抵房费</p>
+        </div>
+        <div class="relative">
+          <div class="w-10 h-10 mx-auto mb-1">
+            <%= image_tag 'profile/火车票无忧退.png', class: 'w-full h-full object-contain', alt: '火车票无忧退' %>
+          </div>
+          <p class="text-[11px]">火车票无忧退</p>
+          <div class="absolute -top-1 -right-1 bg-white text-green-800 text-[8px] px-1 rounded">F2解锁</div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- 推荐专区 (可展开) -->
-  <div class="container-xl mx-auto px-4 mb-4">
-    <div class="bg-surface-elevated rounded-2xl overflow-hidden">
-      <div class="p-4 flex items-center justify-between border-b border-border">
-        <h3 class="font-bold text-primary">飞猪新人专区 <span class="text-sm font-normal text-info">可用2张</span></h3>
-        <button class="text-info">查看更多 ></button>
+    <div class="bg-white px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-sm">超省卡</span>
+        <span class="text-xs text-gray-500 italic">享125元酒旅立减 会员50%加速升级</span>
       </div>
-      <div class="p-3">
-        <div class="flex gap-2 overflow-x-auto scrollbar-hide">
-          <!-- 优惠券1 -->
-          <div class="flex-shrink-0 w-[110px] border-2 border-[#FF5722] rounded-lg overflow-hidden">
-            <div class="bg-[#FF5722] text-white px-2 py-3 text-center">
-              <p class="text-2xl font-bold leading-none mb-1">6<span class="text-base">折</span></p>
-              <p class="text-[10px] leading-tight">国内酒店</p>
-            </div>
-            <div class="bg-white px-2 py-1.5 text-center">
-              <p class="text-[10px] text-gray-600 mb-1">折扣</p>
-              <button class="bg-white border border-[#FF5722] text-[#FF5722] text-xs rounded-full px-3 py-0.5 w-full font-medium">领取</button>
-            </div>
-          </div>
-          
-          <!-- 优惠券2 -->
-          <div class="flex-shrink-0 w-[110px] border-2 border-[#FF5722] rounded-lg overflow-hidden">
-            <div class="bg-[#FF5722] text-white px-2 py-3 text-center">
-              <p class="text-xs leading-none mb-0.5">¥</p>
-              <p class="text-2xl font-bold leading-none mb-1">20</p>
-              <p class="text-[10px] leading-tight">国内酒店</p>
-            </div>
-            <div class="bg-white px-2 py-1.5 text-center">
-              <p class="text-[10px] text-gray-600 mb-1">4天</p>
-              <button class="bg-[#FF5722] text-white text-xs rounded-full px-3 py-0.5 w-full font-medium">去使用</button>
-            </div>
-          </div>
-
-          <!-- 优惠券3 -->
-          <div class="flex-shrink-0 w-[110px] border-2 border-[#FF5722] rounded-lg overflow-hidden">
-            <div class="bg-[#FF5722] text-white px-2 py-3 text-center">
-              <p class="text-xs leading-none mb-0.5">¥</p>
-              <p class="text-2xl font-bold leading-none mb-1">10</p>
-              <p class="text-[10px] leading-tight">国内酒店</p>
-            </div>
-            <div class="bg-white px-2 py-1.5 text-center">
-              <p class="text-[10px] text-gray-600 mb-1">4天</p>
-              <button class="bg-[#FF5722] text-white text-xs rounded-full px-3 py-0.5 w-full font-medium">去使用</button>
-            </div>
-          </div>
-
-          <!-- 优惠券4 -->
-          <div class="flex-shrink-0 w-[110px] border-2 border-[#FF5722] rounded-lg overflow-hidden">
-            <div class="bg-[#FF5722] text-white px-2 py-3 text-center">
-              <p class="text-2xl font-bold leading-none mb-1">97<span class="text-base">折</span></p>
-              <p class="text-[10px] leading-tight">国内酒店券</p>
-            </div>
-            <div class="bg-white px-2 py-1.5 text-center">
-              <p class="text-[10px] text-gray-600 mb-1">折扣</p>
-              <button class="bg-white border border-[#FF5722] text-[#FF5722] text-xs rounded-full px-3 py-0.5 w-full font-medium">领取</button>
-            </div>
-          </div>
-
-          <!-- 优惠券5 -->
-          <div class="flex-shrink-0 w-[110px] border-2 border-[#FF5722] rounded-lg overflow-hidden">
-            <div class="bg-[#FF5722] text-white px-2 py-3 text-center">
-              <p class="text-xs leading-none mb-0.5">¥</p>
-              <p class="text-2xl font-bold leading-none mb-1">5</p>
-              <p class="text-[10px] leading-tight">国际机票</p>
-            </div>
-            <div class="bg-white px-2 py-1.5 text-center">
-              <p class="text-[10px] text-gray-600 mb-1">满减</p>
-              <button class="bg-white border border-[#FF5722] text-[#FF5722] text-xs rounded-full px-3 py-0.5 w-full font-medium">领取</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button class="bg-indigo-500 text-white text-xs px-3 py-1 rounded-full">去开通 ></button>
     </div>
   </div>
 
-  <!-- 订单与服务区 -->
-  <div class="container-xl mx-auto px-4 mb-4">
-    <div class="bg-surface-elevated rounded-2xl overflow-hidden">
-      <!-- 我的订单 -->
-      <div class="p-4 border-b border-border">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-primary flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            待付款
-          </h3>
-          <%= link_to bookings_path, class: "text-info text-sm" do %>
-            查看全部订单 >
+  <!-- 订单功能区 -->
+  <div class="mx-3 mt-3 bg-white rounded-xl py-5 text-center">
+    <div class="grid grid-cols-5 gap-2 px-4">
+      <%= link_to bookings_path(status: :pending), class: "block space-y-2" do %>
+        <div class="relative">
+          <div class="w-8 h-8 mx-auto">
+            <%= image_tag 'profile/待付款.png', class: 'w-full h-full object-contain', alt: '待付款' %>
+          </div>
+          <% if @bookings_count[:pending] > 0 %>
+            <span class="absolute top-0 right-1/4 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center">
+              <%= @bookings_count[:pending] %>
+            </span>
           <% end %>
         </div>
-        <div class="grid grid-cols-5 gap-4 text-center">
-          <%= link_to bookings_path(status: :pending), class: "block" do %>
-            <div class="relative">
-              <svg class="w-8 h-8 mx-auto mb-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-              </svg>
-              <% if @bookings_count[:pending] > 0 %>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">
-                  <%= @bookings_count[:pending] %>
-                </span>
-              <% end %>
-              <p class="text-xs text-secondary">待付款</p>
-            </div>
-          <% end %>
+        <p class="text-xs text-gray-700">待付款</p>
+      <% end %>
 
-          <%= link_to bookings_path(status: :paid), class: "block" do %>
-            <div class="relative">
-              <svg class="w-8 h-8 mx-auto mb-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <% if @bookings_count[:paid] > 0 %>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">
-                  <%= @bookings_count[:paid] %>
-                </span>
-              <% end %>
-              <p class="text-xs text-secondary">待出行</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div class="relative">
-              <svg class="w-8 h-8 mx-auto mb-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-              </svg>
-              <% if @bookings_count[:completed] > 0 %>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">
-                  <%= @bookings_count[:completed] %>
-                </span>
-              <% end %>
-              <p class="text-xs text-secondary">浏览历史</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div class="relative">
-              <svg class="w-8 h-8 mx-auto mb-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-              <% if @bookings_count[:cancelled] > 0 %>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">
-                  <%= @bookings_count[:cancelled] %>
-                </span>
-              <% end %>
-              <p class="text-xs text-secondary">红包卡券</p>
-            </div>
-          <% end %>
-
-          <%= link_to bookings_path, class: "block" do %>
-            <div class="relative">
-              <svg class="w-8 h-8 mx-auto mb-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-              <% total = @bookings_count.values.sum %>
-              <% if total > 0 %>
-                <span class="absolute top-0 right-0 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">
-                  <%= total %>
-                </span>
-              <% end %>
-              <p class="text-xs text-secondary">我的里程</p>
-            </div>
+      <%= link_to bookings_path(status: :paid), class: "block space-y-2" do %>
+        <div class="relative">
+          <div class="w-8 h-8 mx-auto">
+            <%= image_tag 'profile/待出行.png', class: 'w-full h-full object-contain', alt: '待出行' %>
+          </div>
+          <% if @bookings_count[:paid] > 0 %>
+            <span class="absolute top-0 right-1/4 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center">
+              <%= @bookings_count[:paid] %>
+            </span>
           <% end %>
         </div>
+        <p class="text-xs text-gray-700">待出行</p>
+      <% end %>
+
+      <div class="block space-y-2">
+        <div class="relative">
+          <div class="w-8 h-8 mx-auto">
+            <%= image_tag 'profile/待评价.png', class: 'w-full h-full object-contain', alt: '待评价' %>
+          </div>
+        </div>
+        <p class="text-xs text-gray-700">待评价</p>
       </div>
 
-      <!-- 我的服务 -->
-      <div class="p-4">
-        <div class="grid grid-cols-4 gap-4 text-center mb-4">
-          <%= link_to passengers_path, class: "block" do %>
-            <div>
-              <%= image_tag 'airfare/我的订单.png', class: 'w-10 h-10 mx-auto mb-2', alt: '常用信息' %>
-              <p class="text-xs text-secondary">常用信息</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div>
-              <%= image_tag 'airfare/发票报销.png', class: 'w-10 h-10 mx-auto mb-2', alt: '发票抬头' %>
-              <p class="text-xs text-secondary">发票抬头</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div>
-              <%= image_tag 'airfare/我的收藏.png', class: 'w-10 h-10 mx-auto mb-2', alt: '我的挑战' %>
-              <p class="text-xs text-secondary">我的挑战</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div>
-              <%= image_tag 'airfare/家庭认证.png', class: 'w-10 h-10 mx-auto mb-2', alt: '企业会员' %>
-              <p class="text-xs text-secondary">企业会员</p>
-            </div>
-          <% end %>
-
-          <%= link_to "#", class: "block" do %>
-            <div>
-              <%= image_tag 'airfare/航班动态.png', class: 'w-10 h-10 mx-auto mb-2', alt: '我的礼物' %>
-              <p class="text-xs text-secondary">我的礼物</p>
-            </div>
-          <% end %>
+      <div class="block space-y-2">
+        <div class="relative">
+          <div class="w-8 h-8 mx-auto">
+            <%= image_tag 'profile/退款售后.png', class: 'w-full h-full object-contain', alt: '退款售后' %>
+          </div>
         </div>
+        <p class="text-xs text-gray-700">退款/售后</p>
+      </div>
 
-        <!-- 更多服务 -->
-        <div class="grid grid-cols-4 gap-4 text-center">
-          <%= link_to "#", class: "block" do %>
-            <div class="flex flex-col items-center">
-              <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center mb-2">
-                <span class="text-lg">💰</span>
-              </div>
-              <p class="text-xs text-secondary">最低可借</p>
-            </div>
-          <% end %>
+      <%= link_to bookings_path, class: "block space-y-2" do %>
+        <div class="w-8 h-8 mx-auto">
+          <%= image_tag 'profile/全部订单.png', class: 'w-full h-full object-contain', alt: '全部订单' %>
+        </div>
+        <p class="text-xs text-gray-700">全部订单</p>
+      <% end %>
+    </div>
+  </div>
 
-          <%= link_to "#", class: "block" do %>
-            <div class="flex flex-col items-center">
-              <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center mb-2">
-                <span class="text-lg">📱</span>
-              </div>
-              <p class="text-xs text-secondary">分期旅行</p>
-            </div>
-          <% end %>
+  <!-- 收藏与里程 -->
+  <div class="mx-3 mt-3 bg-white rounded-xl grid grid-cols-5 py-4 text-center">
+    <div>
+      <p class="text-blue-600 font-bold text-lg">2</p>
+      <p class="text-[11px] text-gray-700">我的收藏</p>
+    </div>
+    <div>
+      <p class="text-blue-600 font-bold text-lg">0</p>
+      <p class="text-[11px] text-gray-700">购物车</p>
+    </div>
+    <div>
+      <p class="text-blue-600 font-bold text-lg">1</p>
+      <p class="text-[11px] text-gray-700">浏览历史</p>
+    </div>
+    <div>
+      <p class="text-blue-600 font-bold text-lg">33</p>
+      <p class="text-[11px] text-gray-700">红包卡券</p>
+    </div>
+    <div class="relative">
+      <p class="text-blue-600 font-bold text-lg">0</p>
+      <p class="text-[11px] text-gray-700">我的里程</p>
+      <div class="absolute -top-2 right-1 bg-red-500 text-white text-[9px] px-1 rounded-sm">签到+2</div>
+    </div>
+  </div>
 
-          <%= link_to "#", class: "block" do %>
-            <div class="flex flex-col items-center">
-              <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mb-2">
-                <span class="text-lg">💳</span>
-              </div>
-              <p class="text-xs text-secondary">成名卡</p>
-            </div>
-          <% end %>
+  <!-- 工具格 -->
+  <div class="mx-3 mt-3 bg-white rounded-xl grid grid-cols-5 py-5 text-center gap-y-4">
+    <%= link_to passengers_path, class: "block space-y-2" do %>
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/常用信息.png', class: 'w-full h-full object-contain', alt: '常用信息' %>
+      </div>
+      <p class="text-[10px] text-gray-700">常用信息</p>
+    <% end %>
 
-          <%= link_to "#", class: "block" do %>
-            <div class="flex flex-col items-center">
-              <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center mb-2">
-                <span class="text-lg">💎</span>
-              </div>
-              <p class="text-xs text-secondary">借钱优选</p>
-            </div>
-          <% end %>
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/发票抬头.png', class: 'w-full h-full object-contain', alt: '发票抬头' %>
+      </div>
+      <p class="text-[10px] text-gray-700">发票抬头</p>
+    </div>
 
-          <%= link_to "#", class: "block" do %>
-            <div class="flex flex-col items-center">
-              <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center mb-2">
-                <span class="text-lg">📦</span>
-              </div>
-              <p class="text-xs text-secondary">我的钱包</p>
-            </div>
-          <% end %>
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/我的挑战.png', class: 'w-full h-full object-contain', alt: '我的挑战' %>
+      </div>
+      <p class="text-[10px] text-gray-700">我的挑战</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/企业会员.png', class: 'w-full h-full object-contain', alt: '企业会员' %>
+      </div>
+      <p class="text-[10px] text-gray-700">企业会员</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/我的礼物.png', class: 'w-full h-full object-contain', alt: '我的礼物' %>
+      </div>
+      <p class="text-[10px] text-gray-700">我的礼物</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/我的笔记.png', class: 'w-full h-full object-contain', alt: '我的笔记' %>
+      </div>
+      <p class="text-[10px] text-gray-700">我的笔记</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/店铺关注.png', class: 'w-full h-full object-contain', alt: '店铺关注' %>
+      </div>
+      <p class="text-[10px] text-gray-700">店铺关注</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/学生专区.png', class: 'w-full h-full object-contain', alt: '学生专区' %>
+      </div>
+      <p class="text-[10px] text-gray-700">学生专区</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/口令兑换.png', class: 'w-full h-full object-contain', alt: '口令兑换' %>
+      </div>
+      <p class="text-[10px] text-gray-700">口令兑换</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/创作者中心.png', class: 'w-full h-full object-contain', alt: '创作者中心' %>
+      </div>
+      <p class="text-[10px] text-gray-700">创作者中心</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/商家入驻.png', class: 'w-full h-full object-contain', alt: '商家入驻' %>
+      </div>
+      <p class="text-[10px] text-gray-700">商家入驻</p>
+    </div>
+
+    <div class="block space-y-2">
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/意见反馈.png', class: 'w-full h-full object-contain', alt: '意见反馈' %>
+      </div>
+      <p class="text-[10px] text-gray-700">意见反馈</p>
+    </div>
+  </div>
+
+  <!-- 金融服务 -->
+  <div class="mx-3 mt-3 bg-white rounded-xl flex items-center py-5 text-center divide-x divide-gray-100">
+    <div class="flex-1">
+      <div class="flex items-center justify-center space-x-1">
+        <span class="text-lg font-bold">30</span><span class="text-[10px] mt-1">万</span>
+        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+      </div>
+      <p class="text-[10px] text-gray-500">最高可借</p>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg font-bold">3<span class="text-sm font-normal">期免息</span></p>
+      <p class="text-[10px] text-gray-500">分期旅行</p>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg font-bold text-gray-700">240</p>
+      <p class="text-[10px] text-gray-500">联名卡</p>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg font-bold text-gray-700">20<span class="text-sm font-normal">万</span></p>
+      <p class="text-[10px] text-gray-500">借钱精选</p>
+    </div>
+    <div class="px-4">
+      <div class="w-8 h-8 mx-auto mb-1">
+        <%= image_tag 'profile/我的钱包.png', class: 'w-full h-full object-contain', alt: '我的钱包' %>
+      </div>
+      <p class="text-[10px] text-gray-500">我的钱包</p>
+    </div>
+  </div>
+
+  <!-- 超值福利 -->
+  <div class="mx-3 mt-3 bg-white rounded-xl p-4">
+    <div class="flex justify-between items-center mb-4">
+      <div class="flex items-center space-x-2">
+        <h3 class="font-bold text-orange-600">超值福利</h3>
+        <span class="text-xs bg-red-50 text-red-400 px-2 py-0.5 rounded-full">飞猪会员惊喜权益</span>
+      </div>
+      <button class="bg-yellow-400 text-xs px-3 py-1 rounded-full font-bold">一键领取</button>
+    </div>
+    <div class="flex space-x-3 overflow-x-auto pb-2 no-scrollbar">
+      <!-- 优惠券卡片 1 -->
+      <div class="flex-shrink-0 w-32 bg-orange-50 rounded-lg p-2 border border-orange-100 flex">
+        <div class="flex-1">
+          <p class="text-[10px] text-gray-600">国内机票</p>
+          <p class="text-orange-600 font-bold">封顶¥20</p>
+        </div>
+        <div class="border-l border-dashed border-orange-200 px-1 flex items-center">
+          <span class="text-[10px] text-orange-500 [writing-mode:vertical-rl]">领取</span>
+        </div>
+      </div>
+      <!-- 优惠券卡片 2 -->
+      <div class="flex-shrink-0 w-32 bg-orange-50 rounded-lg p-2 border border-orange-100 flex">
+        <div class="flex-1">
+          <p class="text-[10px] text-gray-600">国内酒店券</p>
+          <p class="text-orange-600 font-bold">封顶¥30</p>
+        </div>
+        <div class="border-l border-dashed border-orange-200 px-1 flex items-center">
+          <span class="text-[10px] text-orange-500 [writing-mode:vertical-rl]">领取</span>
+        </div>
+      </div>
+      <!-- 优惠券卡片 3 -->
+      <div class="flex-shrink-0 w-32 bg-orange-50 rounded-lg p-2 border border-orange-100 flex">
+        <div class="flex-1">
+          <p class="text-[10px] text-gray-600">接送券</p>
+          <p class="text-orange-600 font-bold">封顶¥80</p>
+        </div>
+        <div class="border-l border-dashed border-orange-200 px-1 flex items-center">
+          <span class="text-[10px] text-orange-500 [writing-mode:vertical-rl]">领取</span>
         </div>
       </div>
     </div>
   </div>
 
   <!-- 我的旅行回忆 -->
-  <div class="container-xl mx-auto px-4 mb-20">
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white text-center">
-      <div class="mb-4">
-        <svg class="w-16 h-16 mx-auto text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
+  <div class="mx-3 mt-3 bg-white rounded-xl overflow-hidden mb-8">
+    <div class="p-4 flex justify-between items-center">
+      <h3 class="font-bold">我的旅行回忆 ></h3>
+    </div>
+    <div class="relative h-32 bg-gradient-to-r from-blue-400 to-purple-500">
+      <div class="absolute inset-0 flex flex-col justify-end p-4">
+        <div class="bg-black/60 text-white text-xs px-3 py-1 rounded-full w-fit">
+          你有9个成就待解锁
+        </div>
       </div>
-      <h3 class="text-xl font-bold mb-2">我的旅行回忆 ></h3>
-      <p class="text-sm text-white/80">记录每一次美好的旅程</p>
     </div>
   </div>
-
-  <!-- Bottom Navigation -->
-  <%= render 'shared/bottom_navigation', active_tab: :profile %>
 </div>
 
-<style>
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>
+<%= render 'shared/bottom_navigation' %>
