@@ -695,7 +695,7 @@ if Rails.env.development?
   demo_user = User.find_or_create_by!(email: 'demo@example.com') do |u|
     u.password = 'password123'
     u.password_confirmation = 'password123'
-    u.email_verified = true
+    u.verified = true
   end
   
   # 确保用户有会员资格

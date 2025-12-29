@@ -28,7 +28,6 @@
   </head>
   <body class="w-full max-w-md mx-auto min-h-screen flex flex-col text-foreground <%= body_class %> bg-surface relative overflow-x-hidden" style="box-shadow: 0 0 0 100vw hsl(var(--color-surface-elevated)); clip-path: inset(0 -100vw);">
     <main class="flex-1 flex flex-col">
-      <%= render 'shared/navbar' unless @full_render %>
       <%= render 'shared/flash_messages' %>
       <%= yield %>
     </main>

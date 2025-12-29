@@ -24,6 +24,15 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("DatePicker connected")
+    // Send client's local date to server for timezone-aware filtering
+    const clientToday = this.formatDate(new Date())
+    const modalElement = this.modalTarget
+    
+    // Store client's today date as data attribute for server to use
+    if (modalElement) {
+      modalElement.dataset.clientToday = clientToday
+    }
+    
     // Initialize with today's date if no date is set
     if (this.currentDateValue) {
       this.selectedDateObj = new Date(this.currentDateValue)
@@ -78,7 +87,18 @@ export default class extends Controller<HTMLElement> {
     
     if (!dateStr) return
 
-    this.selectedDateObj = new Date(dateStr)
+    // Prevent selecting dates before today (using client timezone)
+    const selectedDate = new Date(`${dateStr}T00:00:00`)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    selectedDate.setHours(0, 0, 0, 0)
+    
+    if (selectedDate < today) {
+      console.log('Cannot select past dates (client timezone check)')
+      return
+    }
+
+    this.selectedDateObj = selectedDate
     this.currentDateValue = dateStr
     if (this.hasSelectedDateTarget) {
       this.updateDisplayedDate()

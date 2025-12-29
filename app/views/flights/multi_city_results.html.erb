@@ -1,0 +1,180 @@
+<div class="min-h-screen bg-white" data-controller="flight-search coming-soon">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to flights_path, class: "flex items-center gap-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+
+      <div class="flex-1 text-center">
+        <div class="text-lg font-bold">
+          第<%= @current_segment_index + 1 %>程：<%= @departure_city %> → <%= @destination_city %>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">
+          <%= I18n.l(@date, format: "%m月%d日 %A") %>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button class="text-sm text-primary" data-action="click->coming-soon#show">低价提醒</button>
+        <button data-action="click->coming-soon#show">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="px-4 pb-3">
+      <div class="flex items-center gap-1">
+        <% @segments.each_with_index do |segment, index| %>
+          <% if index > 0 %>
+            <div class="w-6 h-0.5 bg-gray-300"></div>
+          <% end %>
+          
+          <div class="flex items-center gap-1">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold <%= index < @current_segment_index ? 'bg-green-500 text-white' : (index == @current_segment_index ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500') %>">
+              <%= index + 1 %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Selected Segments Summary -->
+      <% if @selected_flights.any? %>
+        <div class="mt-3 space-y-1">
+          <% @selected_flights.each_with_index do |selected, index| %>
+            <% flight = Flight.find(selected['flight_id']) rescue nil %>
+            <% if flight %>
+              <div class="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
+                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[10px] font-bold">
+                  <%= index + 1 %>
+                </span>
+                <span><%= flight.departure_city %> → <%= flight.destination_city %></span>
+                <span class="text-gray-400">|</span>
+                <span><%= flight.departure_time_formatted %> - <%= flight.arrival_time_formatted %></span>
+                <span class="text-red-500 font-bold ml-auto">¥<%= flight.final_price.to_i %></span>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Date Selector -->
+  <div class="flex gap-1 px-2 py-2 overflow-x-auto no-scrollbar bg-white border-b border-gray-100">
+    <% @date_prices.each do |date_info| %>
+      <%= link_to multi_city_results_flights_path(
+            segments: @segments.to_json, 
+            current_segment: @current_segment_index,
+            selected_flights: @selected_flights.to_json,
+            date_override: date_info[:date],
+            cabin_class: @cabin_class
+          ), 
+          data: { turbo: false },
+          class: "flex-shrink-0 px-3 py-2 rounded text-center #{date_info[:is_today] ? 'bg-yellow-400 text-gray-900' : 'bg-gray-100 text-gray-600'}" do %>
+        <div class="text-sm font-bold"><%= I18n.l(date_info[:date], format: "%m-%d") %></div>
+        <div class="text-xs <%= date_info[:is_today] ? 'text-gray-700' : 'text-gray-500' %>"><%= date_info[:weekday] %></div>
+        <% if date_info[:price] > 0 %>
+          <div class="text-xs font-bold text-red-500 mt-0.5">¥<%= date_info[:price] %></div>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="flex items-center gap-2 px-4 py-3 bg-white border-b border-gray-100">
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+      直飞优先
+    </button>
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+      低价优先
+    </button>
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+      时间排序
+    </button>
+  </div>
+
+  <!-- Flight List -->
+  <div class="p-3 space-y-3" style="padding-bottom: 100px;">
+    <% @flights.each do |flight| %>
+      <%= link_to multi_city_results_flights_path(
+            segments: @segments.to_json,
+            current_segment: @current_segment_index + 1,
+            selected_flights: (@selected_flights + [{ flight_id: flight.id, segment_index: @current_segment_index }]).to_json,
+            cabin_class: @cabin_class
+          ),
+          data: { turbo: false },
+          class: "block bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" do %>
+        
+        <!-- Time and Route -->
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-2xl font-bold"><%= flight.departure_time_formatted %></div>
+            <div class="text-xs text-gray-500"><%= flight.departure_airport %></div>
+          </div>
+          
+          <div class="flex-1 px-3">
+            <div class="flex flex-col items-center">
+              <div class="text-xs text-gray-500 mb-1"><%= flight.duration %></div>
+              <div class="w-full border-t border-gray-300 relative">
+                <svg class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+                </svg>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                <%= flight.transfer_info %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-right">
+            <div class="text-2xl font-bold"><%= flight.arrival_time_formatted %></div>
+            <div class="text-xs text-gray-500"><%= flight.arrival_airport %></div>
+          </div>
+        </div>
+
+        <!-- Airline, Aircraft and Price -->
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600">
+            <span class="text-red-500 font-medium"><%= flight.airline %></span> 
+            <span><%= flight.flight_number %></span>
+            <span class="text-gray-400">| <%= flight.aircraft_type %></span>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-bold text-red-500">¥<%= flight.final_price.to_i %></div>
+            <div class="text-xs text-gray-400">起</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="mt-2 flex gap-2 flex-wrap">
+          <% if flight.punctuality_rate %>
+            <span class="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded">准点率<%= flight.punctuality_rate %>%</span>
+          <% end %>
+          <% if flight.discount_price > 0 %>
+            <span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">少量¥<%= flight.discount_price.to_i %></span>
+          <% end %>
+          <% if flight.available_seats && flight.available_seats < 10 %>
+            <span class="text-xs px-2 py-0.5 bg-orange-50 text-orange-600 rounded">仅剩<%= flight.available_seats %>座</span>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if @flights.empty? %>
+      <div class="text-center py-12 text-gray-500">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-lg mb-2">暂无航班</p>
+        <p class="text-sm">当前日期没有找到合适的航班，请选择其他日期</p>
+      </div>
+    <% end %>
+  </div>
+</div>

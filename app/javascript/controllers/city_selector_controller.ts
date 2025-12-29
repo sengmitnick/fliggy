@@ -54,6 +54,9 @@ export default class extends Controller<HTMLElement> {
   declare departureCityValue: string
   declare destinationCityValue: string
 
+  private currentMultiCitySegmentId: string | null = null
+  private currentMultiCityCityType: string | null = null
+
   connect(): void {
     console.log("CitySelector connected")
     // Initialize default values
@@ -63,6 +66,24 @@ export default class extends Controller<HTMLElement> {
     // Set initial values to hidden inputs
     this.departureCityInputTarget.value = this.departureCityValue
     this.destinationCityInputTarget.value = this.destinationCityValue
+    
+    // Listen for multi-city events
+    this.element.addEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this) as EventListener)
+  }
+
+  disconnect(): void {
+    this.element.removeEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this) as EventListener)
+  }
+
+  // Handle multi-city city selector request
+  private handleMultiCityOpen(event: CustomEvent): void {
+    const { segmentId, cityType } = event.detail
+    console.log('City selector: Received multi-city open request', { segmentId, cityType })
+    this.currentMultiCitySegmentId = segmentId
+    this.currentMultiCityCityType = cityType
+    this.selectionType = cityType === 'departure' ? 'departure' : 'destination'
+    this.updateModalTitle()
+    this.showModal()
   }
 
   // Open modal for departure city selection
@@ -97,14 +118,42 @@ export default class extends Controller<HTMLElement> {
     const button = event.currentTarget as HTMLElement
     const cityName = button.dataset.cityName || ''
     
-    if (this.selectionType === 'departure') {
-      this.departureCityValue = cityName
-      this.departureTarget.textContent = cityName
-      this.departureCityInputTarget.value = cityName
+    console.log('City selector: City selected:', cityName)
+    
+    // Check if this is for multi-city
+    if (this.currentMultiCitySegmentId && this.currentMultiCityCityType) {
+      console.log('City selector: Multi-city mode, dispatching event', {
+        segmentId: this.currentMultiCitySegmentId,
+        cityType: this.currentMultiCityCityType,
+        cityName: cityName
+      })
+      
+      // Trigger event to update multi-city segment - dispatch on document for better propagation
+      const updateEvent = new CustomEvent('city-selector:city-selected', {
+        detail: {
+          segmentId: this.currentMultiCitySegmentId,
+          cityType: this.currentMultiCityCityType,
+          cityName: cityName
+        },
+        bubbles: true
+      })
+      document.dispatchEvent(updateEvent)
+      
+      // Reset multi-city state
+      this.currentMultiCitySegmentId = null
+      this.currentMultiCityCityType = null
     } else {
-      this.destinationCityValue = cityName
-      this.destinationTarget.textContent = cityName
-      this.destinationCityInputTarget.value = cityName
+      console.log('City selector: Regular mode')
+      // Regular single/round trip selection
+      if (this.selectionType === 'departure') {
+        this.departureCityValue = cityName
+        this.departureTarget.textContent = cityName
+        this.departureCityInputTarget.value = cityName
+      } else {
+        this.destinationCityValue = cityName
+        this.destinationTarget.textContent = cityName
+        this.destinationCityInputTarget.value = cityName
+      }
     }
     
     this.closeModal()

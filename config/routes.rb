@@ -100,9 +100,14 @@ Rails.application.routes.draw do
   resources :flights, only: [:index, :show] do
     collection do
       get :search
+      get :multi_city_search, to: 'flights#multi_city_search'
+      get :multi_city_results, to: 'flights#multi_city_results'
     end
   end
   # End routes for flights
+
+  # Routes for passengers (常用信息)
+  resources :passengers, only: [:index, :new, :create, :edit, :update, :destroy]
 
   # write your business logic routes here
 

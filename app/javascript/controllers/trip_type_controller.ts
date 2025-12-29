@@ -1,7 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["tab", "returnDateSection", "tripTypeInput", "returnDateInput"]
+  static targets = [
+    "tab", 
+    "returnDateSection", 
+    "tripTypeInput", 
+    "returnDateInput",
+    "oneWayRoundTripForm",
+    "multiCityForm",
+    "promotionBanner"
+  ]
   static values = {
     currentType: { type: String, default: "one_way" }
   }
@@ -10,9 +18,15 @@ export default class extends Controller<HTMLElement> {
   declare readonly returnDateSectionTarget: HTMLElement
   declare readonly tripTypeInputTarget: HTMLInputElement
   declare readonly returnDateInputTarget: HTMLInputElement
+  declare readonly oneWayRoundTripFormTarget: HTMLElement
+  declare readonly multiCityFormTarget: HTMLElement
+  declare readonly promotionBannerTarget: HTMLElement
   declare readonly hasTripTypeInputTarget: boolean
   declare readonly hasReturnDateSectionTarget: boolean
   declare readonly hasReturnDateInputTarget: boolean
+  declare readonly hasOneWayRoundTripFormTarget: boolean
+  declare readonly hasMultiCityFormTarget: boolean
+  declare readonly hasPromotionBannerTarget: boolean
   declare currentTypeValue: string
 
   connect(): void {
@@ -77,6 +91,32 @@ export default class extends Controller<HTMLElement> {
         this.returnDateSectionTarget.classList.remove('hidden')
       } else {
         this.returnDateSectionTarget.classList.add('hidden')
+      }
+    }
+
+    // 展示/隐藏单程往返表单 vs 多程表单
+    if (this.hasOneWayRoundTripFormTarget && this.hasMultiCityFormTarget) {
+      if (this.currentTypeValue === 'multi_city') {
+        this.oneWayRoundTripFormTarget.classList.add('hidden')
+        this.multiCityFormTarget.classList.remove('hidden')
+        
+        // 触发自定义事件通知 multi-city 控制器初始化
+        const multiCityEvent = new CustomEvent('trip-type:multi-city-shown', {
+          bubbles: true
+        })
+        this.element.dispatchEvent(multiCityEvent)
+      } else {
+        this.oneWayRoundTripFormTarget.classList.remove('hidden')
+        this.multiCityFormTarget.classList.add('hidden')
+      }
+    }
+
+    // 多程模式下隐藏促销横幅
+    if (this.hasPromotionBannerTarget) {
+      if (this.currentTypeValue === 'multi_city') {
+        this.promotionBannerTarget.classList.add('hidden')
+      } else {
+        this.promotionBannerTarget.classList.remove('hidden')
       }
     }
   }
