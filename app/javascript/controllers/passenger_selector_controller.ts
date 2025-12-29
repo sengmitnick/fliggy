@@ -23,6 +23,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   declare readonly modalTarget: HTMLElement
+  declare readonly hasModalTarget: boolean
   declare readonly modalTitleTarget: HTMLElement
   declare readonly selectedDisplayTarget: HTMLElement
   declare readonly passengerTabTarget: HTMLButtonElement
@@ -66,7 +67,7 @@ export default class extends Controller<HTMLElement> {
       
       // Clean up URL parameter
       urlParams.delete('open_passenger_modal')
-      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
+      const newUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ''}`
       window.history.replaceState({}, '', newUrl)
     }
   }
