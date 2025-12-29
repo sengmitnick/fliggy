@@ -48,7 +48,9 @@ class FlightsController < ApplicationController
       if current_date < previous_date
         @error_message = "第#{index + 1}程日期不能早于第#{index}程，请返回航班首页修改"
         respond_to do |format|
-          format.turbo_stream { render turbo_stream: turbo_stream.append('body', partial: 'shared/toast', locals: { message: @error_message }) }
+          format.turbo_stream { 
+            render turbo_stream: render_to_string(partial: 'shared/show_toast', formats: [:turbo_stream], locals: { message: @error_message })
+          }
           format.html { redirect_to flights_path, alert: @error_message }
         end
         return
@@ -90,7 +92,9 @@ class FlightsController < ApplicationController
         if current_date < last_flight.flight_date
           @error_message = "第#{@current_segment_index + 1}程日期不能早于第#{@current_segment_index}程，请返回航班首页修改"
           respond_to do |format|
-            format.turbo_stream { render turbo_stream: turbo_stream.append('body', partial: 'shared/toast', locals: { message: @error_message }) }
+            format.turbo_stream { 
+              render turbo_stream: render_to_string(partial: 'shared/show_toast', formats: [:turbo_stream], locals: { message: @error_message })
+            }
             format.html { redirect_to flights_path, alert: @error_message }
           end
           return
@@ -111,7 +115,9 @@ class FlightsController < ApplicationController
         if current_date > next_date
           @error_message = "第#{@current_segment_index + 1}程日期不能晚于第#{next_index + 1}程，请返回航班首页修改"
           respond_to do |format|
-            format.turbo_stream { render turbo_stream: turbo_stream.append('body', partial: 'shared/toast', locals: { message: @error_message }) }
+            format.turbo_stream { 
+              render turbo_stream: render_to_string(partial: 'shared/show_toast', formats: [:turbo_stream], locals: { message: @error_message })
+            }
             format.html { redirect_to flights_path, alert: @error_message }
           end
           return
@@ -139,6 +145,8 @@ class FlightsController < ApplicationController
     # 搜索当前程的航班
     @flights = Flight.search(@departure_city, @destination_city, @date)
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    
+    render :multi_city_results
   end
 
   def show

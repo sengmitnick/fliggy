@@ -27,6 +27,7 @@ import DatePickerModalController from "./date_picker_modal_controller"
 import MultiCityController from "./multi_city_controller"
 import FlightFilterController from "./flight_filter_controller"
 import FlightSortController from "./flight_sort_controller"
+import DateLinkController from "./date_link_controller"
 
 const application = Application.start()
 
@@ -57,5 +58,6 @@ application.register("date-picker-modal", DatePickerModalController)
 application.register("multi-city", MultiCityController)
 application.register("flight-filter", FlightFilterController)
 application.register("flight-sort", FlightSortController)
+application.register("date-link", DateLinkController)
 
 window.Stimulus = application
