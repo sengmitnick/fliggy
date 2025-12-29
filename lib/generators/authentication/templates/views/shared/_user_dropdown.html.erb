@@ -7,8 +7,8 @@
           data-action="click->dropdown#toggle"
           class="flex items-center space-x-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
     <!-- User avatar -->
-    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-gray-50 text-sm font-medium">
-      <%= current_user.name&.first&.upcase || current_user.email&.first&.upcase || 'U' %>
+    <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm font-bold">
+      <%= (current_user.name.presence&.first || current_user.email&.first || 'U').upcase %>
     </div>
     <!-- User name (hidden on mobile) -->
     <span class="hidden md:block text-sm font-medium">
