@@ -1,68 +1,14 @@
-<div class="min-h-screen bg-white" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
-  <!-- Header with VIP Banner -->
-  <div class="relative">
-    <!-- VIP Banner with gradient background -->
-    <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #2E4A8B 0%, #4A6FA5 50%, #7B9FC9 100%);">
-      <!-- Background pattern/image -->
-      <div class="absolute inset-0 opacity-30">
-        <div class="h-full w-full" style="background-image: url('https://images.unsplash.com/photo-1519817914152-22d216bb9170?w=800'); background-size: cover; background-position: center;"></div>
-      </div>
-      
-      <!-- Content overlay -->
-      <div class="relative z-10 px-4 pt-3">
-        <!-- Top Bar -->
-        <div class="flex items-center justify-between mb-4">
-          <%= link_to root_path, class: "text-white" do %>
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          <% end %>
-          
-          <div class="flex-1 text-center">
-            <div class="text-white text-lg font-bold">飞猪超级VIP</div>
-          </div>
-          
-          <div class="flex gap-4">
-            <button class="text-white">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-              </svg>
-            </button>
-            <button class="text-white">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- VIP Promo Text -->
-        <div class="mb-6">
-          <div class="text-yellow-300 text-2xl font-bold mb-1">5折起住火车客栈款酒店</div>
-          <div class="text-white text-sm">爆款酒店春节不加价!立即抢!</div>
-        </div>
-      </div>
-    </div>
+<div class="min-h-screen bg-gray-100" data-controller="train-city-selector date-picker coming-soon" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+  <!-- Header with Banner -->
+  <div class="relative pb-8">
+    <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 
     <!-- Tabs Section -->
-    <div class="bg-white px-4 py-3 shadow-sm">
-      <div class="flex items-center justify-between gap-2">
-        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">机票</button>
-        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">特价机票</button>
-        <button class="flex-1 text-center py-2.5 font-bold text-base relative" style="color: #000;">
-          火车票
-          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-yellow-400 rounded-full"></div>
-        </button>
-        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">租车/接送</button>
-        <button class="flex-1 text-center py-2.5 text-gray-600 text-sm">汽车票</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="bg-white">
-    <!-- Trip Type Toggle -->
-    <div class="px-4 pt-4 pb-3 border-b border-gray-100">
+    <div class="relative mx-4 -mt-1 overflow-hidden z-50">
+      <%= render 'shared/transport_tabs', active_tab: :train %>
+  
+      <!-- White Card Container with Form -->
+      <div class="bg-white rounded-b-[24px] shadow-sm px-4 py-4">
       <div class="flex gap-8">
         <button class="relative pb-2">
           <span class="text-base font-medium">单程</span>
@@ -149,6 +95,7 @@
         <button class="text-sm text-gray-600">深圳站-广州市</button>
         <button class="text-sm text-gray-600">武汉市->深圳市</button>
         <button class="text-sm text-blue-600">清除</button>
+      </div>
       </div>
     </div>
   </div>

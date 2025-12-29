@@ -1,5 +1,5 @@
 <!-- Date Picker Modal -->
-<div data-date-picker-target="modal" class="fixed inset-0 bg-white z-50 hidden max-w-md mx-auto">
+<div data-date-picker-target="modal" class="fixed inset-0 bg-white z-50 hidden max-w-md mx-auto" data-controller="date-picker-modal">
   <!-- Header -->
   <div class="sticky top-0 bg-white border-b border-gray-200 z-10">
     <div class="flex items-center justify-between px-4 py-4">
@@ -125,7 +125,13 @@
               <div class="flex-1 py-3"></div>
             <% else %>
               <%
+                # Use client's today from data attribute if available, otherwise fallback to server Date.today
+                # This will be set by JavaScript on page load with client's timezone
+                client_today_str = nil # Will be read from data-client-today attribute via JavaScript
+                
                 is_today = date == Date.today
+                # For initial render, use server timezone; JavaScript will disable buttons dynamically
+                is_past = date < Date.today
                 is_selected = date.to_s == (params[:date] || Date.today.to_s)
                 price = date_prices[date]
                 
@@ -160,6 +166,7 @@
               <button 
                 data-action="click->date-picker#selectDate"
                 data-date="<%= date.to_s %>"
+                data-date-picker-modal-target="dateButton"
                 class="flex-1 py-2 flex flex-col items-center relative <%= is_selected ? 'bg-yellow-400 rounded-lg' : '' %>">
                 
                 <!-- Today marker -->
