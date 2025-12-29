@@ -84,10 +84,10 @@
             <span class="text-[12px] text-gray-700">租车</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+          <%= link_to tourism_index_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/旅游.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "旅游" %>
             <span class="text-[12px] text-gray-700">旅游</span>
-          </button>
+          <% end %>
         </div>
 
         <!-- Row 2 -->
