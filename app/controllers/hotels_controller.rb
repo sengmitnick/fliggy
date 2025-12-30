@@ -2,8 +2,8 @@ class HotelsController < ApplicationController
 
   def index
     @city = params[:city] || '深圳市'
-    @check_in = params[:check_in] || Date.today
-    @check_out = params[:check_out] || (Date.today + 1.day)
+    @check_in = params[:check_in] || Time.zone.today
+    @check_out = params[:check_out] || (Time.zone.today + 1.day)
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0
@@ -23,8 +23,8 @@ class HotelsController < ApplicationController
 
   def show
     @hotel = Hotel.find(params[:id])
-    @check_in = params[:check_in] || Date.today
-    @check_out = params[:check_out] || (Date.today + 1.day)
+    @check_in = params[:check_in] || Time.zone.today
+    @check_out = params[:check_out] || (Time.zone.today + 1.day)
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0

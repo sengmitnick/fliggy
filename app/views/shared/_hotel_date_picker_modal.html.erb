@@ -1,0 +1,53 @@
+<!-- Hotel Date Picker Modal -->
+<div data-hotel-date-picker-target="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+  <div class="bg-white w-full max-w-md mx-auto rounded-t-3xl pb-8 animate-slide-up max-h-[85vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white z-10 flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-xl font-bold text-gray-900" data-hotel-date-picker-target="promptText">请选择入住日期</h2>
+      <button data-action="click->hotel-date-picker#closeModal" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">
+        ×
+      </button>
+    </div>
+
+    <!-- Month Navigation -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <button data-action="click->hotel-date-picker#previousMonth" class="p-2 hover:bg-gray-100 rounded-full">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      
+      <div class="text-lg font-bold text-gray-900" data-hotel-date-picker-target="monthLabel">
+        2024年1月
+      </div>
+      
+      <button data-action="click->hotel-date-picker#nextMonth" class="p-2 hover:bg-gray-100 rounded-full">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="px-6 py-4" data-hotel-date-picker-target="calendar">
+      <!-- Calendar will be rendered dynamically -->
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="sticky bottom-0 bg-white px-6 pt-4 flex gap-3 border-t border-gray-100">
+      <button 
+        data-action="click->hotel-date-picker#reset"
+        class="flex-1 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+      >
+        重置
+      </button>
+      <button 
+        data-action="click->hotel-date-picker#confirm"
+        class="flex-1 py-4 rounded-full text-white font-bold transition-colors"
+        style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);"
+      >
+        完成
+      </button>
+    </div>
+  </div>
+</div>

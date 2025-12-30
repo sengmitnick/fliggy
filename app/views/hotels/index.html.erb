@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-white" data-controller="hotel-search date-picker">
+<div class="min-h-screen bg-white" data-controller="hotel-search hotel-date-picker hotel-guest-selector">
   <!-- Header Banner -->
   <div class="relative overflow-hidden" style="background: linear-gradient(135deg, #4A90E2 0%, #5B9BFF 100%);">
     <div class="px-4 py-6 pb-4">
@@ -159,29 +159,33 @@
     </div>
 
     <!-- Date Picker -->
-    <div class="flex items-center gap-2">
-      <button class="flex-1 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->date-picker#openCheckIn">
+    <button class="w-full flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-date-picker#openModal">
+      <div class="flex-1 flex items-center justify-between">
         <div>
-          <div class="text-xl font-bold"><%= @check_in.is_a?(String) ? Date.parse(@check_in).month : @check_in.month %>月<%= @check_in.is_a?(String) ? Date.parse(@check_in).day : @check_in.day %>日</div>
+          <div class="text-xl font-bold" data-hotel-date-picker-target="checkInDisplay"><%= @check_in.is_a?(String) ? Date.parse(@check_in).month : @check_in.month %>月<%= @check_in.is_a?(String) ? Date.parse(@check_in).day : @check_in.day %>日</div>
           <div class="text-xs text-gray-500"><%= date_label(@check_in) %></div>
         </div>
-      </button>
-
-      <div class="flex items-center justify-center px-2">
-        <div class="bg-gray-800 text-white text-xs px-2 py-1 rounded">1晚</div>
       </div>
 
-      <button class="flex-1 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->date-picker#openCheckOut">
+      <div class="flex items-center justify-center px-2">
+        <div class="bg-gray-800 text-white text-xs px-2 py-1 rounded" data-hotel-date-picker-target="nightsDisplay"><%= (@check_out.to_date - @check_in.to_date).to_i %>晚</div>
+      </div>
+
+      <div class="flex-1 flex items-center justify-between">
         <div>
-          <div class="text-xl font-bold"><%= @check_out.is_a?(String) ? Date.parse(@check_out).month : @check_out.month %>月<%= @check_out.is_a?(String) ? Date.parse(@check_out).day : @check_out.day %>日</div>
+          <div class="text-xl font-bold" data-hotel-date-picker-target="checkOutDisplay"><%= @check_out.is_a?(String) ? Date.parse(@check_out).month : @check_out.month %>月<%= @check_out.is_a?(String) ? Date.parse(@check_out).day : @check_out.day %>日</div>
           <div class="text-xs text-gray-500"><%= date_label(@check_out) %></div>
         </div>
-      </button>
-    </div>
+      </div>
+    </button>
+
+    <!-- Hidden inputs for date submission -->
+    <input type="hidden" data-hotel-date-picker-target="checkInInput" value="<%= @check_in %>">
+    <input type="hidden" data-hotel-date-picker-target="checkOutInput" value="<%= @check_out %>">
 
     <!-- Room and Guest Selector -->
-    <button class="w-full flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-search#openGuestSelector">
-      <span class="text-base"><%= @rooms %>间房 <%= @adults %>成人 <%= @children %>儿童</span>
+    <button class="w-full flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-guest-selector#openModal">
+      <span class="text-base" data-hotel-guest-selector-target="displayText"><%= @rooms %>间房 <%= @adults %>成人 <%= @children %>儿童</span>
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-500">价格/星级</span>
         <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -189,6 +193,11 @@
         </svg>
       </div>
     </button>
+
+    <!-- Hidden inputs for guest selector -->
+    <input type="hidden" data-hotel-guest-selector-target="roomsInput" value="<%= @rooms %>">
+    <input type="hidden" data-hotel-guest-selector-target="adultsInput" value="<%= @adults %>">
+    <input type="hidden" data-hotel-guest-selector-target="childrenInput" value="<%= @children %>">
 
     <!-- Quick Filters -->
     <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -741,6 +750,12 @@
       </button>
     </div>
   </div>
+
+  <!-- Hotel Guest Selector Modal -->
+  <%= render 'shared/hotel_guest_selector_modal' %>
+  
+  <!-- Hotel Date Picker Modal -->
+  <%= render 'shared/hotel_date_picker_modal' %>
 </div>
 
 <style>

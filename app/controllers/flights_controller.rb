@@ -9,7 +9,7 @@ class FlightsController < ApplicationController
   def search
     @departure_city = params[:departure_city] || '北京'
     @destination_city = params[:destination_city] || '杭州'
-    @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
+    @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
     @trip_type = params[:trip_type] || 'one_way'
     @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
 
