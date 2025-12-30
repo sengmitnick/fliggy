@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深度旅行+ 复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 自定义颜色变量 (提取自截图) */
+        :root {
+            --brand-yellow: #FFE855; /* 亮黄色 */
+            --bg-gray: #F5F6F8;
+            --price-red: #FF4D3F;
+            --text-main: #1A1A1A;
+            --text-sub: #999999;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f0f0f0;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#FFE855',
+                        price: '#FF4D3F',
+                        dark: '#111827',
+                    },
+                    fontSize: {
+                        'xxs': '0.65rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex justify-center min-h-screen bg-gray-100">
+
+    <!-- 手机容器 -->
+    <div class="w-full max-w-[430px] bg-[#F5F6F8] shadow-2xl relative overflow-y-auto no-scrollbar pb-10">
+
+        <!-- 顶部状态栏区域 (模拟) -->
+        <div class="bg-brand pt-2 pb-4 px-4 sticky top-0 z-50">
+            <!-- 状态栏 -->
+            <div class="flex justify-between items-center text-xs font-medium mb-3 opacity-80 text-black">
+                <span>5:09</span>
+                <div class="flex gap-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                    <span class="border border-black px-0.5 rounded text-[10px]">54</span>
+                </div>
+            </div>
+
+            <!-- 导航栏 -->
+            <div class="flex justify-between items-center mb-6">
+                <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl font-black italic tracking-tighter text-slate-900">深度旅行<span class="text-3xl relative -top-1">+</span></span>
+                    <span class="bg-slate-900 text-brand text-xs font-bold px-1.5 py-0.5 rounded transform -skew-x-12">向导</span>
+                </div>
+
+                <svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+            </div>
+
+            <div class="text-center text-sm font-medium mb-6">一起成为深度旅行家</div>
+
+            <!-- 人物头像分类 (横向滚动) -->
+            <div class="flex justify-between gap-4 px-2 mb-2">
+                <!-- 讲解 (激活) -->
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 rounded-full bg-white border-4 border-brand overflow-hidden relative mb-1 shadow-sm">
+                        <!-- 模拟人物头像 -->
+                        <div class="w-full h-full bg-gray-200 flex items-end justify-center overflow-hidden">
+                             <svg class="w-12 h-12 text-gray-400 -mb-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div class="absolute bottom-0 w-full bg-brand text-center text-xs font-bold py-0.5">讲解</div>
+                    </div>
+                    <!-- 三角箭头 -->
+                    <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-brand"></div>
+                </div>
+
+                <!-- 滑雪教学 -->
+                <div class="flex flex-col items-center relative opacity-90">
+                    <div class="w-16 h-16 rounded-full overflow-hidden relative mb-1">
+                        <div class="w-full h-full bg-slate-200 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                        </div>
+                        <!-- 蒙层 -->
+                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span class="text-white text-[10px]">敬请期待</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium text-slate-800">滑雪教学</span>
+                </div>
+
+                <!-- 潜水教学 -->
+                <div class="flex flex-col items-center relative opacity-90">
+                    <div class="w-16 h-16 rounded-full overflow-hidden relative mb-1">
+                        <div class="w-full h-full bg-blue-200"></div>
+                         <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span class="text-white text-[10px]">敬请期待</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium text-slate-800">潜水教学</span>
+                </div>
+
+                 <!-- 当地向导 -->
+                 <div class="flex flex-col items-center relative opacity-90">
+                    <div class="w-16 h-16 rounded-full overflow-hidden relative mb-1">
+                        <div class="w-full h-full bg-orange-200"></div>
+                         <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span class="text-white text-[10px]">敬请期待</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-medium text-slate-800">当地司导</span>
+                </div>
+                
+                 <!-- 跟拍人(部分显示) -->
+                 <div class="flex flex-col items-center relative opacity-90">
+                    <div class="w-16 h-16 rounded-full overflow-hidden relative mb-1 mr-[-20px]">
+                        <div class="w-full h-full bg-red-200"></div>
+                         <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span class="text-white text-[10px]">敬请期...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 地区 Tab -->
+        <div class="bg-brand pb-3 rounded-b-[20px] mb-4">
+             <div class="flex gap-2 px-4 overflow-x-auto no-scrollbar">
+                <button class="bg-brand text-slate-900 font-bold px-4 py-1.5 rounded text-sm border border-slate-900/10 shadow-sm flex-shrink-0">境内精选</button>
+                <button class="bg-white/50 text-slate-600 px-4 py-1.5 rounded text-sm flex-shrink-0">境外精选</button>
+                <button class="bg-white/50 text-slate-600 px-4 py-1.5 rounded text-sm flex-shrink-0">北京</button>
+                <button class="bg-white/50 text-slate-600 px-4 py-1.5 rounded text-sm flex-shrink-0">华东</button>
+                <button class="bg-white/50 text-slate-600 px-4 py-1.5 rounded text-sm flex-shrink-0">华中</button>
+                <button class="bg-white/50 text-slate-600 px-4 py-1.5 rounded text-sm flex-shrink-0">陕西</button>
+             </div>
+        </div>
+
+        <!-- 卡片 1: 故宫博物院 -->
+        <div class="bg-white rounded-xl mx-3 mb-3 p-4 shadow-sm">
+            <!-- 标题行 -->
+            <div class="flex items-center gap-1 mb-1">
+                <h3 class="font-bold text-lg text-slate-900">故宫博物院</h3>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+            <!-- 榜单标签 -->
+            <div class="flex items-center gap-1 text-xs text-amber-700 mb-1">
+                <span class="bg-amber-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span>
+                <span class="font-medium">全国博物馆景点榜·第1名</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">“ 明清皇宫紫禁城 ”</p>
+
+            <!-- 讲师主要内容 -->
+            <div class="flex gap-3 mb-4">
+                <!-- 左侧信息 -->
+                <div class="flex-1">
+                    <span class="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded mb-1 inline-block">精选讲师</span>
+                    <h4 class="font-bold text-lg text-slate-800">叶强</h4>
+                    <p class="text-xs text-gray-400 mb-2">粉丝100万+</p>
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-tight mb-2">“ 北京导游协会金牌导游 故宫认证讲解员 北京卫视《紫禁...</p>
+                    
+                    <div class="flex items-end justify-between mt-2">
+                        <div class="text-price font-bold text-lg leading-none">
+                            <span class="text-xs">¥</span>192.06<span class="text-xs font-normal text-gray-400 ml-0.5">起</span>
+                        </div>
+                        <button class="bg-brand text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full">去预约</button>
+                    </div>
+                    <p class="text-xxs text-gray-400 mt-1">已服务1万+人</p>
+                </div>
+                <!-- 右侧图片 -->
+                <div class="w-[110px] h-[140px] bg-slate-200 rounded-lg overflow-hidden relative flex-shrink-0">
+                    <!-- 占位图 -->
+                    <div class="w-full h-full bg-cover bg-center" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNTU1IiAvPjwvc3ZnPg=='); background-color: #333;">
+                        <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23665c54'/%3E%3C/svg%3E" class="object-cover w-full h-full opacity-80" alt="placeholder">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他讲师头像 -->
+            <div class="flex items-center justify-between bg-yellow-50/50 p-2 rounded-lg mb-3">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-red-800 border-2 border-white overflow-hidden relative">
+                         <div class="absolute inset-0 flex items-center justify-center text-white text-[8px]">讲师</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-gray-300 border-2 border-white"></div>
+                    <div class="w-8 h-8 rounded-lg bg-gray-400 border-2 border-white"></div>
+                    <div class="w-8 h-8 rounded-lg bg-gray-500 border-2 border-white"></div>
+                    <div class="w-8 h-8 rounded-lg bg-gray-600 border-2 border-white"></div>
+                </div>
+                <div class="flex items-center text-xs text-gray-500">
+                    更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </div>
+
+            <!-- 热销商品列表 -->
+            <div class="border-t border-gray-100 pt-3">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-700">热销讲解商品</span>
+                    <span class="text-xs text-gray-500 flex items-center">更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">北京故宫博物院讲解半日游【金牌资深讲师】...</p>
+                            <span class="text-xxs text-gray-400">已售200+</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥28<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">北京故宫导游讲解私家团深度精讲私家团北京...</p>
+                            <span class="text-xxs text-gray-400">已售44</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥80<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 2: 秦始皇帝陵博物院 -->
+        <div class="bg-white rounded-xl mx-3 mb-3 p-4 shadow-sm">
+             <!-- 标题行 -->
+             <div class="flex items-center gap-1 mb-1">
+                <h3 class="font-bold text-lg text-slate-900">秦始皇帝陵博物院（...</h3>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+            <!-- 榜单标签 -->
+            <div class="flex items-center gap-1 text-xs text-amber-700 mb-1">
+                <span class="bg-amber-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span>
+                <span class="font-medium">西安亲子景点榜·第1名</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">“ 大量青铜兵器 ”</p>
+
+            <!-- 讲师主要内容 -->
+            <div class="flex gap-3 mb-4">
+                <!-- 左侧信息 -->
+                <div class="flex-1">
+                    <span class="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded mb-1 inline-block">精选讲师</span>
+                    <h4 class="font-bold text-lg text-slate-800">惟真</h4>
+                    <p class="text-xs text-gray-400 mb-2">粉丝10万+ · 从业10年+</p>
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-tight mb-2">“ 西安市金牌导游&高级导游 ”</p>
+                    
+                    <div class="flex items-end justify-between mt-2">
+                        <div class="text-price font-bold text-lg leading-none">
+                            <span class="text-xs">¥</span>183<span class="text-xs font-normal text-gray-400 ml-0.5">起</span>
+                        </div>
+                        <button class="bg-brand text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full">去预约</button>
+                    </div>
+                    <p class="text-xxs text-gray-400 mt-1">已服务6000+人</p>
+                </div>
+                <!-- 右侧图片 (带视频UI) -->
+                <div class="w-[110px] h-[140px] bg-slate-800 rounded-lg overflow-hidden relative flex-shrink-0">
+                    <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%234b5563'/%3E%3C/svg%3E" class="object-cover w-full h-full opacity-60" alt="placeholder">
+                    <div class="absolute bottom-2 left-2 right-2 text-white text-[8px] leading-tight">
+                        2012年发掘这几年里边哪一年的发掘水平更好一些
+                    </div>
+                </div>
+            </div>
+
+            <!-- 头像行 -->
+             <div class="flex items-center justify-between bg-yellow-50/50 p-2 rounded-lg mb-3">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-gray-200 border-2 border-white overflow-hidden">
+                        <svg class="w-full h-full text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                     <div class="w-8 h-8 rounded-lg bg-red-500 border-2 border-white overflow-hidden"></div>
+                    <div class="w-8 h-8 rounded-lg bg-green-200 border-2 border-white overflow-hidden"></div>
+                    <div class="w-8 h-8 rounded-lg border-2 border-brand bg-white flex items-center justify-center overflow-hidden z-10">
+                         <div class="text-[8px] text-center font-bold">大咖<br>说</div>
+                    </div>
+                     <div class="w-8 h-8 rounded-lg bg-black border-2 border-white overflow-hidden"></div>
+                </div>
+                 <div class="flex items-center text-xs text-gray-500">
+                    更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </div>
+
+            <!-- 热销商品 -->
+             <div class="border-t border-gray-100 pt-3">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-700">热销讲解商品</span>
+                    <span class="text-xs text-gray-500 flex items-center">更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">盛迹说 西安秦始皇陵兵马俑金牌导游深度讲解...</p>
+                            <span class="text-xxs text-gray-400">可订明日 | 已售8</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥138<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">西安兵马俑+骊山园一日游含门票5H深度讲解+...</p>
+                            <span class="text-xxs text-gray-400">提前3天12点前全额退 | 已售300+</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥118<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 3: 中国国家博物馆 -->
+        <div class="bg-white rounded-xl mx-3 mb-3 p-4 shadow-sm">
+             <div class="flex items-center gap-1 mb-1">
+                <h3 class="font-bold text-lg text-slate-900">中国国家博物馆</h3>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-amber-700 mb-1">
+                <span class="bg-amber-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span>
+                <span class="font-medium">北京博物馆景点扫... · 第1名</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">“ 各地文化精髓 ”</p>
+
+            <div class="flex gap-3 mb-4">
+                <div class="flex-1">
+                    <span class="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded mb-1 inline-block">精选讲师</span>
+                    <h4 class="font-bold text-lg text-slate-800">贾建宇</h4>
+                    <p class="text-xs text-gray-400 mb-2">粉丝10万+</p>
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-tight mb-2">“ 中国国家博物馆资深讲解员 北京研学博物馆资深讲师 历...</p>
+                    
+                    <div class="flex items-end justify-between mt-2">
+                        <div class="text-gray-400 text-xs mt-2">已服务600+人</div>
+                        <button class="bg-gray-200 text-gray-400 text-xs font-bold px-3 py-1.5 rounded-full cursor-not-allowed">已约满</button>
+                    </div>
+                </div>
+                 <!-- 纯黑占位图 -->
+                <div class="w-[110px] h-[140px] bg-black rounded-lg overflow-hidden flex-shrink-0">
+                </div>
+            </div>
+
+            <!-- 头像行 -->
+            <div class="flex items-center justify-between bg-yellow-50/50 p-2 rounded-lg mb-3">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-lg border-2 border-brand bg-white overflow-hidden relative">
+                         <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%231f2937'/%3E%3C/svg%3E" class="w-full h-full object-cover">
+                    </div>
+                     <div class="w-8 h-8 rounded-lg bg-blue-800 border-2 border-white overflow-hidden"></div>
+                    <div class="w-8 h-8 rounded-lg bg-gray-600 border-2 border-white overflow-hidden"></div>
+                </div>
+                 <div class="flex items-center text-xs text-gray-500">
+                    更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </div>
+
+            <!-- 热销商品 -->
+             <div class="border-t border-gray-100 pt-3">
+                 <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-gray-700">热销讲解商品</span>
+                    <span class="text-xs text-gray-500 flex items-center">更多 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">北京国博讲解【10人小团 含入馆】一日游国博...</p>
+                            <span class="text-xxs text-gray-400">提前3天12点前全额退 | 已售200+</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥118<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div class="w-3/4">
+                            <p class="text-xs text-slate-800 line-clamp-1 mb-1">中国国家博物馆古代中国人工讲解含门票耳麦...</p>
+                            <span class="text-xxs text-gray-400">已售200+</span>
+                        </div>
+                        <div class="text-price text-xs font-bold">¥156.88<span class="font-normal text-xxs">起</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 4: 恭王府 -->
+        <div class="bg-white rounded-xl mx-3 mb-3 p-4 shadow-sm">
+             <div class="flex items-center gap-1 mb-1">
+                <h3 class="font-bold text-lg text-slate-900">恭王府</h3>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+            <div class="flex items-center gap-1 text-xs text-amber-700 mb-1">
+                <span class="bg-amber-100 rounded-full p-0.5"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg></span>
+                <span class="font-medium">京津冀历史古迹景... · 第3名</span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">“ 缩小版故宫 ”</p>
+
+            <div class="flex gap-3 mb-4">
+                <div class="flex-1">
+                    <span class="text-[10px] text-amber-700 bg-amber-50 px-1 py-0.5 rounded mb-1 inline-block">精选讲师</span>
+                    <h4 class="font-bold text-lg text-slate-800">蒋宏波</h4>
+                    <p class="text-xs text-gray-400 mb-2">粉丝1万+ · 从业10年+</p>
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-tight mb-2">“ 北京人，北京文旅局重点团队领军人，毕业于北京旅游学院...</p>
+                </div>
+                 <!-- 带字的图片 -->
+                <div class="w-[110px] h-[140px] bg-slate-300 rounded-lg overflow-hidden relative flex-shrink-0">
+                     <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%239ca3af'/%3E%3C/svg%3E" class="object-cover w-full h-full opacity-80">
+                     <div class="absolute top-1 left-2 text-white font-bold text-lg drop-shadow-md">恭<br>王<br>府</div>
+                     <!-- 竖排文字 -->
+                     <div class="absolute inset-y-0 right-8 flex flex-col justify-center items-center text-white text-lg font-bold border-2 border-white/80 p-1 h-32 my-auto w-8 leading-none">
+                        <span>深</span><span>度</span><span>讲</span><span>解</span>
+                     </div>
+                      <div class="absolute top-1 right-1 bg-black/40 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

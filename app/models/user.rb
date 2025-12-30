@@ -36,6 +36,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :passengers, dependent: :destroy
   has_many :bookings, dependent: :destroy
+  has_many :hotel_bookings, dependent: :destroy
   has_one :membership, dependent: :destroy
   has_many :brand_memberships, dependent: :destroy
   has_many :notifications, dependent: :destroy

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_29_083434) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_30_070512) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -299,6 +299,31 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_29_083434) do
     t.index ["priority", "scheduled_at"], name: "index_good_jobs_on_priority_scheduled_at_unfinished_unlocked", where: "((finished_at IS NULL) AND (locked_by_id IS NULL))"
     t.index ["queue_name", "scheduled_at"], name: "index_good_jobs_on_queue_name_and_scheduled_at", where: "(finished_at IS NULL)"
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
+  end
+
+  create_table "hotel_bookings", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.bigint "user_id"
+    t.bigint "hotel_room_id"
+    t.date "check_in_date"
+    t.date "check_out_date"
+    t.integer "rooms_count", default: 1
+    t.integer "adults_count", default: 1
+    t.integer "children_count", default: 0
+    t.string "guest_name"
+    t.string "guest_phone"
+    t.decimal "total_price"
+    t.decimal "original_price"
+    t.decimal "discount_amount", default: "0.0"
+    t.string "payment_method", default: "在线付"
+    t.string "coupon_code"
+    t.text "special_requests"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_id"], name: "index_hotel_bookings_on_hotel_id"
+    t.index ["hotel_room_id"], name: "index_hotel_bookings_on_hotel_room_id"
+    t.index ["user_id"], name: "index_hotel_bookings_on_user_id"
   end
 
   create_table "hotel_facilities", force: :cascade do |t|
