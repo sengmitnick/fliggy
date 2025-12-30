@@ -782,7 +782,10 @@ export default class extends Controller<HTMLElement> {
         tag.innerHTML = `
           ${filter.text}
           <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0
+                -1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"/>
           </svg>
         `
         tag.addEventListener("click", () => this.removeFilter(filter.type, filter.value))
@@ -866,31 +869,36 @@ export default class extends Controller<HTMLElement> {
           if (checkmark) checkmark.remove()
         }
         break
-      case "airline":
+      case "airline": {
         this.filters.airlines.delete(value)
         const airlineCheckbox = this.element.querySelector<HTMLInputElement>(`input[type="checkbox"][data-filter-type="airline"][value="${value}"]`)
         if (airlineCheckbox) airlineCheckbox.checked = false
         break
-      case "departureAirport":
+      }
+      case "departureAirport": {
         this.filters.departureAirports.delete(value)
         const depAirportCheckbox = this.element.querySelector<HTMLInputElement>(`input[type="checkbox"][data-filter-type="airport"][value="${value}"]`)
         if (depAirportCheckbox) depAirportCheckbox.checked = false
         break
-      case "arrivalAirport":
+      }
+      case "arrivalAirport": {
         this.filters.arrivalAirports.delete(value)
         const arrAirportCheckbox = this.element.querySelector<HTMLInputElement>(`input[type="checkbox"][data-filter-type="airport"][value="${value}"]`)
         if (arrAirportCheckbox) arrAirportCheckbox.checked = false
         break
-      case "departureTime":
+      }
+      case "departureTime": {
         this.filters.departureTimeRanges.delete(value)
         const timeCheckbox = this.element.querySelector<HTMLInputElement>(`input[type="checkbox"][data-filter-type="departure-time"][value="${value}"]`)
         if (timeCheckbox) timeCheckbox.checked = false
         break
-      case "aircraftModel":
+      }
+      case "aircraftModel": {
         this.filters.aircraftModels.delete(value)
         const modelCheckbox = this.element.querySelector<HTMLInputElement>(`input[type="checkbox"][data-filter-type="aircraft-model"][value="${value}"]`)
         if (modelCheckbox) modelCheckbox.checked = false
         break
+      }
     }
     
     this.updateResultCount()

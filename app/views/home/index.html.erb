@@ -64,10 +64,10 @@
       <div data-service-grid-target="page">
         <!-- Row 1 -->
         <div class="grid grid-cols-5 mb-2 h-[80px]">
-          <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
+          <%= link_to hotels_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/酒店.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "酒店" %>
             <span class="text-[12px] text-gray-700">酒店</span>
-          </button>
+          <% end %>
 
           <%= link_to flights_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/机票.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "机票" %>
@@ -137,7 +137,7 @@
 
           <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">
             <%= image_tag "home/出境游签证.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "出境游/签证" %>
-            <span class="text-[12px] text-gray-700">出境游/签证</span>
+            <span class="text-[12px] text-gray-700 whitespace-nowrap">出境游/签证</span>
           </button>
 
           <button class="flex flex-col items-center justify-end h-full" data-action="click->coming-soon#show">

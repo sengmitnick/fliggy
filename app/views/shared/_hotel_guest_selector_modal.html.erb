@@ -1,0 +1,116 @@
+<!-- Hotel Guest Selector Modal -->
+<div data-hotel-guest-selector-target="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+  <div class="bg-white w-full max-w-md mx-auto rounded-t-3xl pb-8 animate-slide-up">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-xl font-bold text-gray-900">选择客房和入住人数</h2>
+      <button 
+        data-action="click->hotel-guest-selector#closeModal"
+        class="text-gray-400 hover:text-gray-600 text-3xl leading-none p-2">
+        ×
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="px-6 py-6 space-y-6">
+      <!-- Rooms -->
+      <div class="flex items-center justify-between py-4">
+        <span class="text-lg text-gray-900">间数</span>
+        <div class="flex items-center gap-6">
+          <button 
+            data-action="click->hotel-guest-selector#decrementRooms"
+            class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </button>
+          <span class="text-2xl font-medium w-12 text-center" data-hotel-guest-selector-target="roomsCount">1</span>
+          <button 
+            data-action="click->hotel-guest-selector#incrementRooms"
+            class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Adults -->
+      <div class="flex items-center justify-between py-4">
+        <span class="text-lg text-gray-900">成人</span>
+        <div class="flex items-center gap-6">
+          <button 
+            data-action="click->hotel-guest-selector#decrementAdults"
+            class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </button>
+          <span class="text-2xl font-medium w-12 text-center" data-hotel-guest-selector-target="adultsCount">1</span>
+          <button 
+            data-action="click->hotel-guest-selector#incrementAdults"
+            class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Children -->
+      <div class="flex items-center justify-between py-4">
+        <div>
+          <div class="text-lg text-gray-900">儿童</div>
+          <div class="text-sm text-gray-500">0-17岁</div>
+        </div>
+        <div class="flex items-center gap-6">
+          <button 
+            data-action="click->hotel-guest-selector#decrementChildren"
+            class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </button>
+          <span class="text-2xl font-medium w-12 text-center" data-hotel-guest-selector-target="childrenCount">0</span>
+          <button 
+            data-action="click->hotel-guest-selector#incrementChildren"
+            class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="px-6 flex gap-3">
+      <button 
+        data-action="click->hotel-guest-selector#reset"
+        class="flex-1 py-4 rounded-full text-lg font-medium text-gray-700 bg-white border-2 border-gray-300 hover:border-gray-400 transition-colors">
+        重置
+      </button>
+      <button 
+        data-action="click->hotel-guest-selector#confirm"
+        class="flex-1 py-4 rounded-full text-lg font-bold text-black transition-colors"
+        style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);">
+        完成
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+</style>

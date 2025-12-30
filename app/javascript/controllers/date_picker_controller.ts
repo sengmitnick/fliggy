@@ -16,6 +16,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly modalTarget: HTMLElement
   declare readonly selectedDateTarget: HTMLElement
   declare readonly dateInputTarget: HTMLInputElement
+  declare readonly hasSelectedDateTarget: boolean
+  declare readonly hasDateInputTarget: boolean
   declare currentDateValue: string
 
   private selectedDateObj: Date = new Date()
@@ -39,7 +41,10 @@ export default class extends Controller<HTMLElement> {
       this.selectedDateObj = new Date()
       this.currentDateValue = this.formatDate(this.selectedDateObj)
     }
-    this.updateDisplayedDate()
+    // Only update displayed date if target exists (used in modal-based pickers)
+    if (this.hasSelectedDateTarget) {
+      this.updateDisplayedDate()
+    }
     
     // Listen for multi-city events
     // eslint-disable-next-line no-undef
@@ -57,6 +62,28 @@ export default class extends Controller<HTMLElement> {
     console.log('Date picker: Received multi-city open request', { segmentId })
     this.currentMultiCitySegmentId = segmentId
     this.openModal()
+  }
+
+  // Open check-in date picker
+  openCheckIn(): void {
+    const checkInDate = prompt("请输入入住日期 (YYYY-MM-DD)", this.formatDate(new Date()))
+    if (checkInDate) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('check_in', checkInDate)
+      window.location.href = url.toString()
+    }
+  }
+
+  // Open check-out date picker
+  openCheckOut(): void {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const checkOutDate = prompt("请输入离店日期 (YYYY-MM-DD)", this.formatDate(tomorrow))
+    if (checkOutDate) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('check_out', checkOutDate)
+      window.location.href = url.toString()
+    }
   }
 
   // Open date picker modal
@@ -114,8 +141,12 @@ export default class extends Controller<HTMLElement> {
     } else {
       console.log('Date picker: Regular mode')
       // Regular single/round trip selection
-      this.updateDisplayedDate()
-      this.dateInputTarget.value = dateStr
+      if (this.hasSelectedDateTarget) {
+        this.updateDisplayedDate()
+      }
+      if (this.hasDateInputTarget) {
+        this.dateInputTarget.value = dateStr
+      }
     }
     
     this.closeModal()

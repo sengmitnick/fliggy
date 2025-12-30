@@ -1,0 +1,129 @@
+<!-- 为你推荐 -->
+<div class="bg-white p-4 mb-2">
+  <h2 class="text-lg font-bold mb-4">为你推荐</h2>
+  <div class="space-y-4">
+    <!-- 推荐酒店1 -->
+    <%= link_to hotel_path(12), class: "flex items-start space-x-3 pb-4 border-b border-gray-100 hover:bg-gray-50 transition-colors -mx-4 px-4" do %>
+      <div class="flex-shrink-0 relative">
+        <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-32 h-24 rounded-lg object-cover"/>
+        <div class="absolute top-2 left-2 bg-amber-600 text-white text-xs px-2 py-0.5 rounded">优住会</div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-medium text-gray-900 text-sm mb-1 line-clamp-2">愉舍·云端影音Service Apartment(深圳南山科技园海岸...</h3>
+        <div class="flex items-center space-x-2 mb-1">
+          <div class="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">4.8</div>
+          <span class="text-xs text-gray-600">房间都有配置超大落地窗</span>
+        </div>
+        <div class="text-xs text-gray-600 mb-1">距当前酒店直线400米·近南山(地铁站)</div>
+        <div class="flex items-center space-x-1 mb-1.5">
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">信用住</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-500">2小时前有人预订</span>
+          <div class="text-right">
+            <div class="text-xs text-gray-400 line-through">¥761</div>
+            <div class="text-lg font-bold text-red-600">¥333 <span class="text-xs font-normal">起</span></div>
+          </div>
+        </div>
+        <div class="text-xs text-gray-600 mb-0.5">1.8万+预订</div>
+        <div class="text-xs text-red-500">首住特惠: 5项优惠¥428 ></div>
+      </div>
+    <% end %>
+
+    <!-- 推荐酒店2 -->
+    <%= link_to hotel_path(13), class: "flex items-start space-x-3 pb-4 border-b border-gray-100 hover:bg-gray-50 transition-colors -mx-4 px-4" do %>
+      <div class="flex-shrink-0 relative">
+        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-32 h-24 rounded-lg object-cover"/>
+        <div class="absolute top-2 left-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded">非住</div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center space-x-1 mb-1">
+          <h3 class="font-medium text-gray-900 text-sm">华威国际青年旅舍(深圳南山区南光地铁站店)</h3>
+          <span class="text-xs text-gray-500 px-1.5 py-0.5 bg-gray-100 rounded">经济</span>
+        </div>
+        <div class="flex items-center space-x-2 mb-1">
+          <div class="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">4.9</div>
+          <span class="text-xs text-gray-600">入住办理很快</span>
+        </div>
+        <div class="text-xs text-gray-600 mb-1">距当前酒店直线550米·近南山(地铁站)</div>
+        <div class="flex items-center space-x-1 mb-1.5">
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">信用住</span>
+        </div>
+        <div class="mb-1">
+          <span class="text-xs text-red-600">热卖！</span>
+          <span class="text-xs text-gray-600">低价房仅剩2间</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-600">300+预订</span>
+          <div class="text-right">
+            <div class="text-xs text-gray-400 line-through">¥61</div>
+            <div class="text-lg font-bold text-red-600">¥33 <span class="text-xs font-normal">起</span></div>
+          </div>
+        </div>
+        <div class="text-xs text-red-500">百亿神券: 非住会员优惠 最高省¥28 ></div>
+      </div>
+    <% end %>
+
+    <!-- 推荐酒店3 -->
+    <%= link_to hotel_path(14), class: "flex items-start space-x-3 pb-4 border-b border-gray-100 hover:bg-gray-50 transition-colors -mx-4 px-4" do %>
+      <div class="flex-shrink-0 relative">
+        <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-32 h-24 rounded-lg object-cover"/>
+        <div class="absolute top-2 left-2 bg-gray-800 text-white text-xs px-2 py-0.5 rounded">锦江</div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center space-x-1 mb-1">
+          <h3 class="font-medium text-gray-900 text-sm">7天酒店·东莞塘厦天虹购物中心店</h3>
+          <span class="text-xs text-gray-500 px-1.5 py-0.5 bg-gray-100 rounded">经济</span>
+        </div>
+        <div class="flex items-center space-x-2 mb-1">
+          <div class="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">4.7</div>
+          <span class="text-xs text-gray-600">附近有大型商场</span>
+        </div>
+        <div class="text-xs text-gray-600 mb-1">距当前酒店直线38.6公里·近塘厦沃尔玛</div>
+        <div class="flex items-center space-x-1 mb-1.5 flex-wrap">
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">返现金</span>
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">学校园边</span>
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">免费接送站</span>
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">免费送站</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-600">9000+预订</span>
+          <div class="text-right">
+            <div class="text-xs text-gray-400 line-through">¥140</div>
+            <div class="text-lg font-bold text-red-600">¥119 <span class="text-xs font-normal">起</span></div>
+          </div>
+        </div>
+        <div class="text-xs text-red-500">百亿神券: 3项优惠¥21 ></div>
+      </div>
+    <% end %>
+
+    <!-- 推荐酒店4 -->
+    <%= link_to hotel_path(15), class: "flex items-start space-x-3 hover:bg-gray-50 transition-colors -mx-4 px-4" do %>
+      <div class="flex-shrink-0 relative">
+        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80" alt="酒店" class="w-32 h-24 rounded-lg object-cover"/>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center space-x-1 mb-1">
+          <h3 class="font-medium text-gray-900 text-sm">深圳湾万丽酒店</h3>
+          <span class="text-xs text-gray-500 px-1.5 py-0.5 bg-gray-100 rounded">豪华</span>
+        </div>
+        <div class="flex items-center space-x-2 mb-1">
+          <div class="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">4.7</div>
+          <span class="text-xs text-gray-600">早上还能看到日出</span>
+        </div>
+        <div class="text-xs text-gray-600 mb-1">距当前酒店直线3.5公里·近万象天地</div>
+        <div class="flex items-center space-x-1 mb-1.5 flex-wrap">
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">信用住</span>
+          <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">温泉</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-500">2小时前有人预订</span>
+          <div class="text-right">
+            <div class="text-lg font-bold text-red-600">¥677 <span class="text-xs font-normal">起</span></div>
+          </div>
+        </div>
+        <div class="text-xs text-red-500">百亿神券: 优惠¥20 ></div>
+      </div>
+    <% end %>
+  </div>
+</div>

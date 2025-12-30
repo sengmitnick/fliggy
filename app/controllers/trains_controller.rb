@@ -8,7 +8,7 @@ class TrainsController < ApplicationController
   def search
     @departure_city = params[:departure_city] || "北京"
     @arrival_city = params[:arrival_city] || "杭州"
-    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @date = params[:date] ? Date.parse(params[:date]) : Time.zone.today
     @sort_by = params[:sort_by] || "departure_time" # departure_time, price, duration
     @only_high_speed = params[:only_high_speed] == "true"
     

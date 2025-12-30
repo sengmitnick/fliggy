@@ -13,6 +13,8 @@ import CouponController from "./coupon_controller"
 import ComingSoonController from "./coming_soon_controller"
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
+import HotelSearchController from "./hotel_search_controller"
+import HotelDetailController from "./hotel_detail_controller"
 import ServiceGridController from "./service_grid_controller"
 import PassengerSelectorController from "./passenger_selector_controller"
 import CabinSelectorController from "./cabin_selector_controller"
@@ -29,6 +31,8 @@ import MultiCityController from "./multi_city_controller"
 import FlightFilterController from "./flight_filter_controller"
 import FlightSortController from "./flight_sort_controller"
 import DateLinkController from "./date_link_controller"
+import HotelGuestSelectorController from "./hotel_guest_selector_controller"
+import HotelDatePickerController from "./hotel_date_picker_controller"
 
 const application = Application.start()
 
@@ -45,6 +49,8 @@ application.register("coupon", CouponController)
 application.register("coming-soon", ComingSoonController)
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
+application.register("hotel-search", HotelSearchController)
+application.register("hotel-detail", HotelDetailController)
 application.register("service-grid", ServiceGridController)
 application.register("passenger-selector", PassengerSelectorController)
 application.register("cabin-selector", CabinSelectorController)
@@ -61,5 +67,7 @@ application.register("multi-city", MultiCityController)
 application.register("flight-filter", FlightFilterController)
 application.register("flight-sort", FlightSortController)
 application.register("date-link", DateLinkController)
+application.register("hotel-guest-selector", HotelGuestSelectorController)
+application.register("hotel-date-picker", HotelDatePickerController)
 
 window.Stimulus = application
