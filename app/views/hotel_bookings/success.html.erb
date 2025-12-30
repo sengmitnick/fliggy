@@ -1,0 +1,225 @@
+<div class="min-h-screen bg-gradient-to-b from-yellow-100 to-white pb-20">
+  <!-- Header -->
+  <div class="bg-gradient-to-b from-yellow-200 to-yellow-100 px-4 py-3 flex items-center justify-between">
+    <%= link_to hotels_path, class: "text-gray-800" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    
+    <div class="text-gray-800">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="text-center py-6 px-4">
+    <div class="flex justify-center mb-3">
+      <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+    </div>
+    <h1 class="text-xl font-bold text-gray-900 mb-2">支付成功</h1>
+    <p class="text-sm text-gray-600">
+      预计最晚<span class="text-red-600 font-semibold">10:52</span>前确认，酒店<span class="text-red-600 font-semibold">入住</span>
+    </p>
+    <p class="text-xs text-gray-500 mt-1">
+      离店7天可司机10℃飞猪理 
+      <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-300 text-white text-xs">?</span>
+    </p>
+  </div>
+
+  <!-- Booking Details Card -->
+  <div class="mx-4 mb-4 bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="p-4">
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex-1">
+          <h2 class="font-semibold text-gray-900 text-base mb-1">
+            <%= @hotel.name %>
+          </h2>
+          <div class="flex items-center text-sm text-gray-600 mb-1">
+            <span class="font-semibold text-gray-900">
+              <%= @booking.check_in_date.strftime('%m-%d') %>
+            </span>
+            <span class="mx-2 text-gray-400">周六入住</span>
+            <span class="font-semibold text-gray-900">
+              <%= @booking.check_out_date.strftime('%m-%d') %>
+            </span>
+            <span class="ml-2 text-gray-400">周日离店</span>
+          </div>
+        </div>
+        <button class="px-3 py-1 border border-orange-400 text-orange-500 text-xs rounded-md flex items-center gap-1">
+          <span>分享行程</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="border-t border-gray-100 pt-3 space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">房级大床房</span>
+          <span class="text-gray-900"><%= @booking.rooms_count %>间</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">共住</span>
+          <span class="text-gray-900"><%= @booking.nights %>晚·无烟</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">入住人</span>
+          <span class="text-gray-900"><%= @booking.guest_name %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex border-t border-gray-100">
+      <%= link_to hotels_path, class: "flex-1 py-3 text-center text-sm text-gray-700 border-r border-gray-100" do %>
+        酒店列表
+      <% end %>
+      <%= link_to hotel_booking_path(@booking), class: "flex-1 py-3 text-center text-sm text-gray-700 border-r border-gray-100" do %>
+        订单详情
+      <% end %>
+      <a href="#" class="flex-1 py-3 text-center text-sm font-semibold text-yellow-600">
+        我的行程
+      </a>
+    </div>
+  </div>
+
+  <!-- Reward Banner -->
+  <div class="mx-4 mb-3 bg-gradient-to-r from-pink-50 to-red-50 rounded-xl p-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-red-400 rounded-lg flex items-center justify-center">
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="text-sm font-semibold text-gray-900">
+          魔彩积分<span class="text-red-500">+1人返钱20</span>
+          <span class="ml-1 text-red-500 text-xs">></span>
+        </div>
+        <div class="text-xs text-gray-500">宝贝返钱 ¥ 80</div>
+      </div>
+    </div>
+    <button class="px-4 py-1.5 bg-gradient-to-r from-red-400 to-red-500 text-white text-xs rounded-full font-semibold">
+      立即邀请
+    </button>
+  </div>
+
+  <!-- Notification Banner -->
+  <div class="mx-4 mb-3 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-xs text-gray-700">
+        近7天有<span class="text-red-500 font-semibold">4人</span>已用户享<span class="text-red-500">5满</span>券即已,
+        <br/>请注意朋友关一起参与即可
+      </span>
+    </div>
+    <button class="px-3 py-1 text-blue-500 text-xs font-semibold whitespace-nowrap">
+      分享优惠
+    </button>
+  </div>
+
+  <!-- Promotion Banner -->
+  <div class="mx-4 mb-3">
+    <div class="relative bg-gradient-to-r from-red-400 to-pink-400 rounded-xl overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=200&fit=crop" 
+           alt="飞西澳促销" 
+           class="w-full h-24 object-cover opacity-50">
+      <div class="absolute inset-0 flex items-center px-4">
+        <div>
+          <div class="text-white text-xs mb-1">让购物VIP</div>
+          <div class="text-white text-xl font-bold mb-1">
+            飞西澳机票狂减<span class="text-yellow-300">500元!</span>
+          </div>
+          <div class="text-white text-xs flex items-center gap-1">
+            <span>走！去西澳大利亚开启避暑之旅 🎪</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Header -->
+  <div class="px-4 py-3 flex items-center justify-between">
+    <h3 class="text-base font-bold text-gray-900">联到<span class="text-red-500">买优惠</span></h3>
+    <a href="#" class="text-xs text-gray-500 flex items-center gap-1">
+      地图领红包
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Date Section -->
+  <div class="px-4 mb-3">
+    <div class="text-sm">
+      <span class="text-gray-900"><%= @booking.check_in_date.strftime('%m月%d日') %></span>
+      <span class="text-red-500 font-semibold ml-2">武汉·订交通</span>
+    </div>
+  </div>
+
+  <!-- Transportation Options -->
+  <div class="px-4 grid grid-cols-3 gap-3 mb-4">
+    <button class="bg-yellow-100 rounded-lg py-4 flex flex-col items-center justify-center">
+      <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+      </svg>
+      <span class="text-sm text-gray-900">租车</span>
+    </button>
+    
+    <button class="bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center">
+      <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+      </svg>
+      <span class="text-sm text-gray-900">接机</span>
+    </button>
+    
+    <button class="bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center">
+      <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+      </svg>
+      <span class="text-sm text-gray-900">送机/站</span>
+    </button>
+  </div>
+
+  <!-- Route Info -->
+  <div class="px-4 mb-4">
+    <div class="bg-white rounded-lg border border-gray-200 p-3">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex-1">
+          <div class="text-xs text-gray-500 mb-1">出发地/目的地</div>
+          <div class="text-sm font-semibold text-gray-900">维也纳国际...</div>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+        <div class="flex-1 text-right">
+          <div class="text-xs text-gray-500 mb-1">武汉大学国际软件</div>
+          <button class="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded">优惠区车</button>
+        </div>
+      </div>
+      
+      <div class="flex items-center justify-between text-xs text-gray-500">
+        <div>
+          <span class="text-gray-900">周六</span>
+          <span class="ml-2"><%= @booking.check_in_date.strftime('%m月%d日 %H:%M') %></span>
+        </div>
+        <div>
+          <span class="text-gray-900">2次</span>
+        </div>
+        <div>
+          <span class="text-gray-900">周一</span>
+          <span class="ml-2"><%= @booking.check_out_date.strftime('%m月%d日 %H:%M') %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

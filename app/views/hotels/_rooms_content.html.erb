@@ -1,52 +1,67 @@
 <!-- 客房列表 -->
 <div class="bg-white mb-2">
-  <!-- 第一个房型 - 花园豪华套房 (特色展示) -->
-  <div class="border-b-8 border-gray-100">
-    <div class="flex items-start space-x-3 p-4">
-      <div class="flex-shrink-0 relative">
-        <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="房间" class="w-28 h-28 rounded-lg object-cover"/>
-        <div class="absolute bottom-1 right-1 bg-black bg-opacity-60 text-white text-xs px-2 py-0.5 rounded">
-          <span class="font-bold">8</span>
-        </div>
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center justify-between mb-1">
-          <h3 class="font-bold text-gray-900 text-base flex items-center">
-            花园豪华套房
-            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+  <% @hotel.hotel_rooms.each_with_index do |room, index| %>
+    <div class="<%= index > 0 ? 'border-t border-gray-100' : '' %>">
+      <div class="flex items-start space-x-3 p-4">
+        <div class="flex-shrink-0 relative">
+          <div class="w-28 h-28 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19,7H11V14H3V5H1V20H3V17H21V20H23V11A4,4 0 0,0 19,7M7,13A3,3 0 0,0 10,10A3,3 0 0,0 7,7A3,3 0 0,0 4,10A3,3 0 0,0 7,13Z"/>
             </svg>
-          </h3>
-          <button class="text-gray-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
+          </div>
         </div>
-        <p class="text-sm text-gray-600 mb-1">1张1.8米大床 86m² 有窗</p>
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs text-gray-400 line-through">¥1288</div>
-            <div class="flex items-baseline space-x-1">
-              <span class="text-red-600 text-xl font-bold">¥1260</span>
-              <span class="text-sm text-gray-600">起</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-gray-900 text-base flex items-center">
+              <%= room.room_type %>
+            </h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-2">
+            <%= room.bed_type %> <%= room.area %> 
+            <%= room.has_window ? '有窗' : '无窗' %>
+            · 最多<%= room.max_guests %>人
+          </p>
+          <div class="flex items-center justify-between">
+            <div>
+              <% if room.original_price && room.original_price > room.price %>
+                <div class="text-xs text-gray-400 line-through">¥<%= number_with_precision(room.original_price, precision: 0) %></div>
+              <% end %>
+              <div class="flex items-baseline space-x-1">
+                <span class="text-red-600 text-xl font-bold">¥<%= number_with_precision(room.price, precision: 0) %></span>
+                <span class="text-sm text-gray-600">起</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <% if room.available_rooms > 0 %>
+                <%= link_to new_hotel_hotel_booking_path(@hotel, 
+                  room_id: room.id,
+                  check_in: @check_in,
+                  check_out: @check_out,
+                  rooms: @rooms,
+                  adults: @adults,
+                  children: @children
+                ), class: "bg-gradient-to-r from-orange-400 to-orange-500 text-white px-6 py-2 rounded-full font-medium text-sm" do %>
+                  订
+                <% end %>
+              <% else %>
+                <span class="text-gray-400 text-sm">已订完</span>
+              <% end %>
             </div>
           </div>
-          <div class="text-right">
-            <div class="text-xs text-red-500 mb-1">百亿神券 优惠¥28</div>
-          </div>
+          
+          <% if room.available_rooms < 5 && room.available_rooms > 0 %>
+            <div class="mt-2 text-xs text-red-500">
+              仅剩<%= room.available_rooms %>间
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
-    
-    <!-- 已订完提示 -->
-    <div class="px-4 pb-4">
-      <div class="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-        <span class="text-sm text-gray-600">酒店热卖！查看其他2个已订完房型</span>
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </div>
+  <% end %>
+  
+  <% if @hotel.hotel_rooms.empty? %>
+    <div class="p-8 text-center text-gray-500">
+      <p>暂无可用房型</p>
     </div>
-  </div>
+  <% end %>
 </div>
