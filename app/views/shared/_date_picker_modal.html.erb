@@ -1,5 +1,5 @@
 <!-- Date Picker Modal -->
-<div data-date-picker-target="modal" class="fixed inset-0 bg-white z-50 hidden max-w-md mx-auto" data-controller="date-picker-modal">
+<div data-date-picker-target="modal" class="fixed inset-0 bg-white z-50 hidden max-w-md mx-auto">
   <!-- Header -->
   <div class="sticky top-0 bg-white border-b border-gray-200 z-10">
     <div class="flex items-center justify-between px-4 py-4">
@@ -166,7 +166,7 @@
               <button 
                 data-action="click->date-picker#selectDate"
                 data-date="<%= date.to_s %>"
-                data-date-picker-modal-target="dateButton"
+                data-date-picker-target="dateButton"
                 class="flex-1 py-2 flex flex-col items-center relative <%= is_selected ? 'bg-yellow-400 rounded-lg' : '' %>">
                 
                 <!-- Today marker -->

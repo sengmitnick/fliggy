@@ -60,35 +60,35 @@
         </div>
       <% else %>
         <!-- Regular notification categories -->
-        <div class="bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
-          <div class="flex items-center gap-3 flex-1">
-            <!-- Category icon -->
-            <div class="w-12 h-12 <%= category_icon_bg_class(category) %> rounded-full flex items-center justify-center <%= 'relative' if category == 'interactive' %>">
-              <% if category == 'folded' %>
-                <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
-                  <div class="bg-amber-400 rounded-sm"></div>
-                  <div class="bg-amber-400 rounded-sm"></div>
-                  <div class="bg-amber-400 rounded-sm"></div>
-                  <div class="bg-amber-400 rounded-sm"></div>
-                </div>
-              <% elsif category == 'interactive' %>
-                <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center text-white">
-                  💬
-                </div>
-              <% else %>
-                <span class="text-2xl"><%= category_icon(category) %></span>
-              <% end %>
-            </div>
-
-            <div class="flex-1">
-              <div class="flex items-center justify-between mb-0.5">
-                <span class="font-medium text-base"><%= display_name %></span>
-                <% if latest && latest.created_at %>
-                  <span class="text-sm text-gray-400"><%= format_notification_time(latest.created_at) %></span>
+        <% if latest %>
+          <%= link_to notification_path(latest), class: "bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100" do %>
+            <div class="flex items-center gap-3 flex-1">
+              <!-- Category icon -->
+              <div class="w-12 h-12 <%= category_icon_bg_class(category) %> rounded-full flex items-center justify-center <%= 'relative' if category == 'interactive' %>">
+                <% if category == 'folded' %>
+                  <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                  </div>
+                <% elsif category == 'interactive' %>
+                  <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center text-white">
+                    💬
+                  </div>
+                <% else %>
+                  <span class="text-2xl"><%= category_icon(category) %></span>
                 <% end %>
               </div>
-              
-              <% if latest %>
+
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="font-medium text-base"><%= display_name %></span>
+                  <% if latest.created_at %>
+                    <span class="text-sm text-gray-400"><%= format_notification_time(latest.created_at) %></span>
+                  <% end %>
+                </div>
+                
                 <div class="flex items-center gap-2">
                   <span class="text-sm text-gray-600"><%= latest.respond_to?(:content) ? latest.content : latest.title %></span>
                   <% if unread_count > 0 %>
@@ -99,12 +99,39 @@
                     <% end %>
                   <% end %>
                 </div>
-              <% else %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1">
+              <!-- Category icon -->
+              <div class="w-12 h-12 <%= category_icon_bg_class(category) %> rounded-full flex items-center justify-center <%= 'relative' if category == 'interactive' %>">
+                <% if category == 'folded' %>
+                  <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                    <div class="bg-amber-400 rounded-sm"></div>
+                  </div>
+                <% elsif category == 'interactive' %>
+                  <div class="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center text-white">
+                    💬
+                  </div>
+                <% else %>
+                  <span class="text-2xl"><%= category_icon(category) %></span>
+                <% end %>
+              </div>
+
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="font-medium text-base"><%= display_name %></span>
+                </div>
                 <div class="text-sm text-gray-600">暂无消息</div>
-              <% end %>
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     <% end %>
   </div>
