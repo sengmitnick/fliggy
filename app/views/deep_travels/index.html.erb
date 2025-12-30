@@ -1,9 +1,6 @@
-<div class="w-full max-w-[430px] mx-auto bg-[#F5F6F8] min-h-screen pb-20">
+<div class="w-full max-w-[430px] mx-auto min-h-screen pb-20">
   <!-- 顶部状态栏和导航区域 -->
-  <div class="bg-brand pt-2 pb-4 sticky top-0 z-50" style="background-color: #FFE855;">
-    <!-- 模拟状态栏 -->
-    
-
+  <div class="bg-brand pt-2 pb-4 px-4 sticky top-0 z-50" style="background: linear-gradient(180deg, #FFE855 0%, #FFFFFF 100%);">
     <!-- 导航栏 -->
     <div class="flex justify-between items-center mb-6">
       <%= link_to root_path, class: "text-black" do %>
@@ -21,9 +18,10 @@
     </div>
 
     <div class="text-center text-sm font-medium mb-6">一起成为深度旅行家</div>
-
+  </div>
+  
   <!-- Guide Categories (Horizontal scroll) -->
-  <div class="pb-2" data-controller="deep-travel">
+  <div class="px-4 pb-2" data-controller="deep-travel">
     <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
       <!-- Guide - Instructor -->
       <div class="flex-shrink-0 text-center">
@@ -52,8 +50,9 @@
     </div>
   </div>
 
-   <!-- Location Tabs -->
-  <div class="bg-white border-t border-b border-gray-200 my-2">
+
+  <!-- Location Tabs -->
+  <div class="bg-white border-t border-b border-gray-200">
     <div class="flex overflow-x-auto scrollbar-hide">
       <% ['境内精选', '境外精选', '北京', '华东', '华中', '陕西'].each do |loc| %>
         <%= link_to deep_travels_path(location: loc), 
@@ -63,6 +62,9 @@
       <% end %>
     </div>
   </div>
+
+  <!-- 开始灰色背景区域 -->
+  <div>
 
   <!-- 主要内容区域 -->
   <div class="px-3">
@@ -177,13 +179,16 @@
       </div>
     <% end %>
   </div>
+  </div>
 </div>
 
 <style>
   /* 隐藏滚动条但保留功能 */
+  .scrollbar-hide::-webkit-scrollbar,
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  .scrollbar-hide,
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
