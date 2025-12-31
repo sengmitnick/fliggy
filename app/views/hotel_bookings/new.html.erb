@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <%= form_with model: @booking, url: hotel_bookings_path, method: :post, class: "space-y-2", data: { controller: "payment-modal" } do |f| %>
+  <%= form_with model: @booking, url: hotel_bookings_path, method: :post, class: "space-y-2", data: { controller: "payment-modal hotel-traveler-selector" } do |f| %>
     <%= render 'shared/form_error_message', model: @booking %>
     
     <%= f.hidden_field :hotel_room_id, value: @hotel_room.id %>
@@ -92,8 +92,11 @@
         <div class="flex items-center space-x-2">
           <%= f.text_field :guest_name, 
             placeholder: "输入姓名", 
+            data: { hotel_traveler_selector_target: "guestNameInput" },
             class: "flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" %>
-          <button type="button" class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600">
+          <button type="button" 
+            data-action="click->hotel-traveler-selector#openModal"
+            class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
@@ -108,9 +111,10 @@
         </div>
         <div class="flex items-center space-x-2">
           <%= f.telephone_field :guest_phone, 
-            placeholder: "181 2380 5501", 
+            placeholder: "181 2380 5501",
+            data: { hotel_traveler_selector_target: "guestPhoneInput" },
             class: "flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" %>
-          <button type="button" class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600">
+          <button type="button" class="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-400">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
@@ -328,5 +332,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Hotel Traveler Selector Modal -->
+    <%= render 'shared/hotel_traveler_selector_modal' %>
   <% end %>
 </div>

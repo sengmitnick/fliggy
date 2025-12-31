@@ -10,7 +10,7 @@
       </div>
       <span class="font-medium"><%= booking.flight.airline %><%= booking.flight.flight_number %></span>
     </div>
-    <button class="text-blue-500 text-2xl" data-action="click->coming-soon#show">
+    <button class="text-blue-500 text-2xl" onclick="window.showToast('精彩即将上线，敬请期待')">
       📤
     </button>
   </div>
@@ -91,9 +91,9 @@
         <div class="text-sm">
           <span class="text-gray-500">订单号：</span>
           <span class="font-medium"><%= booking.id.to_s.rjust(12, '0') %></span>
-          <button class="ml-2 text-blue-500 text-xs" data-action="click->coming-soon#show">复制</button>
+          <button class="ml-2 text-blue-500 text-xs" onclick="window.showToast('精彩即将上线，敬请期待')">复制</button>
         </div>
-        <button class="text-sm text-gray-500" data-action="click->coming-soon#show">
+        <button class="text-sm text-gray-500" onclick="window.showToast('精彩即将上线，敬请期待')">
           官网选座 ›
         </button>
       </div>
@@ -102,16 +102,16 @@
 
   <!-- Action Buttons -->
   <div class="grid grid-cols-4 gap-0 border-t border-gray-100">
-    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100" data-action="click->coming-soon#show">
+    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100" onclick="window.showToast('精彩即将上线，敬请期待')">
       更多
     </button>
-    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100 font-medium" data-action="click->coming-soon#show">
+    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100 font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
       查看订单
     </button>
-    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100 font-medium" data-action="click->coming-soon#show">
+    <button class="py-4 text-center text-sm text-gray-700 border-r border-gray-100 font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
       航班动态
     </button>
-    <button class="py-4 text-center text-sm text-gray-700 font-medium" data-action="click->coming-soon#show">
+    <button class="py-4 text-center text-sm text-gray-700 font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
       行程群
     </button>
   </div>

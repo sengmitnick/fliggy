@@ -24,7 +24,7 @@
       <% else %>
         <!-- Inactive Tab -->
         <% if tab[:coming_soon] %>
-          <button class="px-2 py-2 flex-1 text-[13px] font-medium text-[#666666] cursor-pointer whitespace-nowrap" data-action="click->coming-soon#show">
+          <button class="px-2 py-2 flex-1 text-[13px] font-medium text-[#666666] cursor-pointer whitespace-nowrap" onclick="window.showToast('精彩即将上线，敬请期待')">
             <%= tab[:label] %>
           </button>
         <% else %>

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100 pb-20" data-controller="booking coming-soon">
+<div class="min-h-screen bg-gray-100 pb-20" data-controller="booking">
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
@@ -46,7 +46,7 @@
                 <span class="text-lg"><%= flight.departure_time.strftime('%-m月%-d日 周%u %H:%M') %></span>
                 <span class="text-lg"><%= flight.departure_city %>—<%= flight.destination_city %></span>
               </div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
 
             <div class="space-y-2">
@@ -54,19 +54,19 @@
                 <div class="text-gray-600">
                   成人 ¥<%= (offer&.price || flight.final_price).to_i %>
                   机建燃油 ¥<%= flight.discount_price.to_i %>
-                  <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+                  <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="inline-block align-middle">
                     <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
                     <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
                     </svg>
                   </button>
                 </div>
-                <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+                <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
               </div>
 
               <div class="flex items-center justify-between">
                 <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
-                <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+                <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
               </div>
             </div>
 
@@ -76,12 +76,12 @@
                 <span class="text-gray-400">|</span>
                 <span class="text-gray-600">托运行李共20公斤</span>
               </div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
 
             <div class="flex items-center justify-between mt-2 text-sm">
               <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
           </div>
         <% end %>
@@ -97,7 +97,7 @@
                 <span class="text-sm text-yellow-600 font-bold ml-2">去程</span>
               <% end %>
             </div>
-            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+            <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
           </div>
 
           <div class="space-y-2">
@@ -105,19 +105,19 @@
               <div class="text-gray-600">
                 成人 ¥<%= (@selected_offer&.price || @flight.final_price).to_i %>
                 机建燃油 ¥<%= @flight.discount_price.to_i %>
-                <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+                <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="inline-block align-middle">
                   <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                   <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
                   <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
                   </svg>
                 </button>
               </div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
 
             <div class="flex items-center justify-between">
               <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
           </div>
 
@@ -127,12 +127,12 @@
               <span class="text-gray-400">|</span>
               <span class="text-gray-600">托运行李共20公斤</span>
             </div>
-            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+            <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
           </div>
 
           <div class="flex items-center justify-between mt-2 text-sm">
             <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
-            <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+            <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
           </div>
         </div>
 
@@ -146,7 +146,7 @@
                 <span class="text-lg"><%= @return_flight.departure_city %>—<%= @return_flight.destination_city %></span>
                 <span class="text-sm text-blue-600 font-bold ml-2">返程</span>
               </div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
 
             <div class="space-y-2">
@@ -154,19 +154,19 @@
                 <div class="text-gray-600">
                   成人 ¥<%= (@return_offer&.price || @return_flight.final_price).to_i %>
                   机建燃油 ¥<%= @return_flight.discount_price.to_i %>
-                  <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+                  <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="inline-block align-middle">
                     <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
                     <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
                     </svg>
                   </button>
                 </div>
-                <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+                <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
               </div>
 
               <div class="flex items-center justify-between">
                 <div class="text-sm text-gray-600">延误无忧礼包¥49/程</div>
-                <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+                <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
               </div>
             </div>
 
@@ -176,12 +176,12 @@
                 <span class="text-gray-400">|</span>
                 <span class="text-gray-600">托运行李共20公斤</span>
               </div>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
 
             <div class="flex items-center justify-between mt-2 text-sm">
               <span class="text-gray-600">免费手提行李1件，8公斤/件</span>
-              <button type="button" data-action="click->coming-soon#show" class="text-2xl text-gray-400">></button>
+              <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-2xl text-gray-400">></button>
             </div>
           </div>
         <% end %>
@@ -192,7 +192,7 @@
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between">
         <h3 class="font-bold">已选择: 1成人</h3>
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500 text-sm">邀请好友填写</button>
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500 text-sm">邀请好友填写</button>
       </div>
 
       <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
@@ -312,7 +312,7 @@
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between mb-4">
         <h4 class="font-bold">国内航空意外险 
-          <button type="button" data-action="click->coming-soon#show" class="inline-block align-middle">
+          <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="inline-block align-middle">
             <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
             <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
@@ -396,7 +396,7 @@
       </div>
 
       <div class="text-center">
-        <button type="button" data-action="click->coming-soon#show" class="text-orange-500 text-sm font-medium bg-orange-50 px-4 py-1 rounded-full">更高性价比up</button>
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-orange-500 text-sm font-medium bg-orange-50 px-4 py-1 rounded-full">更高性价比up</button>
       </div>
     </div>
 
@@ -414,13 +414,13 @@
     <div class="bg-white rounded-lg shadow p-4 mb-20">
       <div class="text-xs text-gray-500 leading-relaxed">
         我已阅读并同意以下协议 
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">东方航空</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">上海航空运输总条件</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">行李规定</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">航班超售服务方案</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">东方航空购票须知</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</button>、
-        <button type="button" data-action="click->coming-soon#show" class="text-blue-500">关于禁止携带部分物品乘坐民航...</button>
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">东方航空</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">上海航空运输总条件</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">行李规定</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">航班超售服务方案</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">东方航空购票须知</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">关于民航旅客行李中携带锂电池规定的公告</button>、
+        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500">关于禁止携带部分物品乘坐民航...</button>
       </div>
     </div>
 

@@ -166,6 +166,11 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
+    resources :hotels do
+      collection do
+        post :generate_batch
+      end
+    end
     resources :deep_travel_products
     resources :deep_travel_guides
     resources :flight_offers
