@@ -35,7 +35,7 @@
           <div class="bg-white rounded-2xl p-4 shadow-sm">
             <div class="flex items-center justify-between mb-3">
               <div class="text-base font-medium">距<%= date_bookings.first.flight.arrival_airport %>·附近酒店</div>
-              <button class="text-sm text-blue-500 font-medium" data-action="click->coming-soon#show">
+              <button class="text-sm text-blue-500 font-medium" onclick="window.showToast('功能开发中，敬请期待...')">
                 <%= date_bookings.first.flight.destination_city %>酒店提前订
               </button>
             </div>
@@ -52,10 +52,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" onclick="window.showToast('功能开发中，敬请期待...')">
                 预约送接机
               </button>
-              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+              <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" onclick="window.showToast('功能开发中，敬请期待...')">
                 预订酒店
               </button>
             </div>

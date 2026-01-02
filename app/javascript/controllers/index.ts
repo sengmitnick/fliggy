@@ -10,7 +10,7 @@ import DatePickerController from "./date_picker_controller"
 import BookingController from "./booking_controller"
 import PaymentController from "./payment_controller"
 import CouponController from "./coupon_controller"
-import ComingSoonController from "./coming_soon_controller"
+// ComingSoonController removed - using window.showToast() instead
 import DestinationController from "./destination_controller"
 import RegionSelectorController from "./region_selector_controller"
 import HotelSearchController from "./hotel_search_controller"
@@ -26,7 +26,6 @@ import TrainListController from "./train_list_controller"
 import TrainCitySelectorController from "./train_city_selector_controller"
 import InfiniteScrollController from "./infinite_scroll_controller"
 import DeepTravelController from "./deep_travel_controller"
-import DatePickerModalController from "./date_picker_modal_controller"
 import MultiCityController from "./multi_city_controller"
 import FlightFilterController from "./flight_filter_controller"
 import FlightSortController from "./flight_sort_controller"
@@ -35,6 +34,9 @@ import HotelGuestSelectorController from "./hotel_guest_selector_controller"
 import HotelDatePickerController from "./hotel_date_picker_controller"
 import PaymentModalController from "./payment_modal_controller"
 import HotelTabsController from "./hotel_tabs_controller"
+import HotelTravelerSelectorController from "./hotel_traveler_selector_controller"
+import ToastController from "./toast_controller"
+import ToastTriggerController from "./toast_trigger_controller"
 
 const application = Application.start()
 
@@ -48,7 +50,7 @@ application.register("date-picker", DatePickerController)
 application.register("booking", BookingController)
 application.register("payment", PaymentController)
 application.register("coupon", CouponController)
-application.register("coming-soon", ComingSoonController)
+// ComingSoonController removed - using window.showToast() instead
 application.register("destination", DestinationController)
 application.register("region-selector", RegionSelectorController)
 application.register("hotel-search", HotelSearchController)
@@ -64,7 +66,6 @@ application.register("train-list", TrainListController)
 application.register("train-city-selector", TrainCitySelectorController)
 application.register("infinite-scroll", InfiniteScrollController)
 application.register("deep-travel", DeepTravelController)
-application.register("date-picker-modal", DatePickerModalController)
 application.register("multi-city", MultiCityController)
 application.register("flight-filter", FlightFilterController)
 application.register("flight-sort", FlightSortController)
@@ -73,5 +74,8 @@ application.register("hotel-guest-selector", HotelGuestSelectorController)
 application.register("hotel-date-picker", HotelDatePickerController)
 application.register("payment-modal", PaymentModalController)
 application.register("hotel-tabs", HotelTabsController)
+application.register("hotel-traveler-selector", HotelTravelerSelectorController)
+application.register("toast", ToastController)
+application.register("toast-trigger", ToastTriggerController)
 
 window.Stimulus = application

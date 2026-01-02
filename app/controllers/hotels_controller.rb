@@ -15,6 +15,7 @@ class HotelsController < ApplicationController
     @region = params[:region]
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
+    @query = params[:q]
 
     @hotels = Hotel.all
     
@@ -28,6 +29,9 @@ class HotelsController < ApplicationController
     # 城市筛选
     @hotels = @hotels.by_city(@city)
     
+    # 智能区域排序：如果搜索区级城市（如"深圳市南山区"），优先显示该区的酒店
+    district = extract_district(@city)
+    
     # 地区筛选
     @hotels = @hotels.by_region(@region) if @region.present?
     
@@ -40,9 +44,24 @@ class HotelsController < ApplicationController
       @hotels = @hotels.by_type(@hotel_type)
     end
     
+    # Apply search filter if query present
+    if @query.present?
+      @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
+    end
+    
     @hotels = @hotels.by_star_level(@star_level) if @star_level.present?
     @hotels = @hotels.by_price_range(@price_min, @price_max) if @price_min.present? || @price_max.present?
-    @hotels = @hotels.ordered.page(params[:page]).per(10)
+    
+    # 如果有区级信息，按地址匹配度排序（地址包含区名的排在前面）
+    if district.present?
+      @hotels = @hotels.order(
+        Arel.sql("CASE WHEN address ILIKE '%#{district}%' THEN 0 ELSE 1 END"),
+        :display_order, 
+        created_at: :desc
+      ).page(params[:page]).per(10)
+    else
+      @hotels = @hotels.ordered.page(params[:page]).per(10)
+    end
 
     @featured_hotels = Hotel.featured.limit(3)
   end
@@ -63,47 +82,32 @@ class HotelsController < ApplicationController
   end
 
   def search
-    @query = params[:q]
-    @city = params[:city] || '深圳市'
-    @check_in = params[:check_in] || Time.zone.today
-    @check_out = params[:check_out] || (Time.zone.today + 1.day)
-    @rooms = params[:rooms]&.to_i || 1
-    @adults = params[:adults]&.to_i || 1
-    @children = params[:children]&.to_i || 0
-    @hotel_type = params[:type]
-    @region = params[:region]
-    @location_type = params[:location_type] || 'domestic'
-    @room_category = params[:room_category]
-    
-    @hotels = Hotel.all
-    
-    # 位置筛选
-    if @location_type == 'international'
-      @hotels = @hotels.international
-    else
-      @hotels = @hotels.domestic
-    end
-    
-    @hotels = @hotels.by_city(@city)
-    @hotels = @hotels.by_region(@region) if @region.present?
-    
-    # 类型筛选
-    if @room_category == 'hourly'
-      @hotels = @hotels.with_hourly_rooms
-    elsif @hotel_type.present?
-      @hotels = @hotels.by_type(@hotel_type)
-    end
-    
-    if @query.present?
-      @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
-    end
-    
-    @hotels = @hotels.ordered.page(params[:page]).per(10)
-    
-    render :index
+    # Redirect to index with query parameter
+    redirect_to hotels_path(
+      q: params[:q], 
+      city: params[:city], 
+      check_in: params[:check_in], 
+      check_out: params[:check_out], 
+      rooms: params[:rooms], 
+      adults: params[:adults], 
+      children: params[:children],
+      type: params[:type],
+      region: params[:region],
+      location_type: params[:location_type],
+      room_category: params[:room_category]
+    )
   end
 
   private
+  
+  # 从城市名称中提取区级信息
+  # 例如："深圳市南山区" -> "南山区"
+  def extract_district(city)
+    return nil if city.blank?
+    # 匹配格式：XX市YY区
+    match = city.match(/市(.+区)$/)
+    match ? match[1] : nil
+  end
   
   def default_policy_data
     {

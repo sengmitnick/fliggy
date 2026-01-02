@@ -11,7 +11,6 @@ require 'open-uri'
 
 # ==================== 城市数据 ====================
 puts "正在初始化城市数据..."
-City.destroy_all
 
 # 中国主要城市数据（包含机场代码和主题标签）
 cities_data = [
@@ -179,11 +178,31 @@ cities_data = [
   { name: "台中", pinyin: "taizhong", airport_code: "RMQ", region: "台湾", is_hot: false, themes: [] },
 ]
 
-cities = cities_data.map do |data|
-  City.create!(data)
+# 使用 find_or_create_by 避免重复创建
+created_count = 0
+updated_count = 0
+
+cities_data.each do |data|
+  city = City.find_or_create_by(name: data[:name]) do |c|
+    c.pinyin = data[:pinyin]
+    c.airport_code = data[:airport_code]
+    c.region = data[:region]
+    c.is_hot = data[:is_hot]
+    c.themes = data[:themes]
+    created_count += 1
+  end
+  
+  # 如果城市已存在，更新其他属性
+  unless city.new_record? || city.id.nil?
+    if city.update(data.except(:name))
+      updated_count += 1
+    end
+  end
 end
 
-puts "创建了 #{cities.count} 个城市"
+puts "创建了 #{created_count} 个新城市"
+puts "更新了 #{updated_count} 个已存在的城市"
+puts "城市总数: #{City.count}"
 
 # ==================== 旅游目的地数据 ====================
 # 清理旧数据

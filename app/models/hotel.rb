@@ -20,7 +20,18 @@ class Hotel < ApplicationRecord
   validates :hotel_type, inclusion: { in: HOTEL_TYPES }, allow_nil: true
 
   scope :featured, -> { where(is_featured: true) }
-  scope :by_city, ->(city) { where(city: city) if city.present? }
+  scope :by_city, ->(city) { 
+    return all if city.blank?
+    # 智能城市匹配：支持区级搜索匹配市级数据
+    # 例如："深圳市南山区" 可以匹配 "深圳市" 或 "深圳市南山区"
+    base_city = city.split('市').first + '市' if city.include?('市')
+    if base_city && base_city != city
+      # 搜索精确匹配或基础城市匹配
+      where("city = ? OR city = ?", city, base_city)
+    else
+      where(city: city)
+    end
+  }
   scope :by_region, ->(region) { where(region: region) if region.present? }
   scope :by_price_range, ->(min, max) { where(price: min..max) if min.present? && max.present? }
   scope :by_star_level, ->(level) { where(star_level: level) if level.present? }

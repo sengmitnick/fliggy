@@ -18,8 +18,11 @@ RSpec.describe "Hotel bookings", type: :request do
   end
 
   describe "GET /hotel_bookings/new" do
+    let(:hotel) { create(:hotel) }
+    let(:hotel_room) { create(:hotel_room, hotel: hotel) }
+    
     it "returns http success" do
-      get new_hotel_booking_path
+      get new_hotel_hotel_booking_path(hotel_id: hotel.id, room_id: hotel_room.id)
       expect(response).to be_success_with_view_check('new')
     end
   end

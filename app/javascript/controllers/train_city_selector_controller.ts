@@ -2,25 +2,17 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
-    // stimulus-validator: disable-next-line
     "modal",
     "departure",
     "destination",
     "departureCityInput",
     "destinationCityInput",
-    // stimulus-validator: disable-next-line
     "tabDeparture",
-    // stimulus-validator: disable-next-line
     "tabDestination",
-    // stimulus-validator: disable-next-line
     "searchInput",
-    // stimulus-validator: disable-next-line
     "domesticList",
-    // stimulus-validator: disable-next-line
     "internationalList",
-    // stimulus-validator: disable-next-line
     "historySection",
-    // stimulus-validator: disable-next-line
     "currentCity"
   ]
 
@@ -35,21 +27,14 @@ export default class extends Controller<HTMLElement> {
   declare readonly destinationTarget: HTMLElement
   declare readonly departureCityInputTarget: HTMLInputElement
   declare readonly destinationCityInputTarget: HTMLInputElement
-  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasModalTarget: boolean
   declare readonly tabDepartureTarget: HTMLElement
-  // stimulus-validator: disable-next-line
   declare readonly tabDestinationTarget: HTMLElement
-  // stimulus-validator: disable-next-line
   declare readonly searchInputTarget: HTMLInputElement
-  // stimulus-validator: disable-next-line
   declare readonly domesticListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
   declare readonly internationalListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
   declare readonly historySectionTarget: HTMLElement
-  // stimulus-validator: disable-next-line
   declare readonly currentCityTarget: HTMLElement
   declare departureCityValue: string
   declare destinationCityValue: string
@@ -67,6 +52,10 @@ export default class extends Controller<HTMLElement> {
 
   // Open modal for departure city selection
   openDeparture(): void {
+    if (!this.hasModalTarget) {
+      console.log('TrainCitySelector: No modal available, skipping')
+      return
+    }
     this.selectionType = 'departure'
     this.updateModalTitle()
     this.showModal()
@@ -74,6 +63,10 @@ export default class extends Controller<HTMLElement> {
 
   // Open modal for destination city selection
   openDestination(): void {
+    if (!this.hasModalTarget) {
+      console.log('TrainCitySelector: No modal available, skipping')
+      return
+    }
     this.selectionType = 'destination'
     this.updateModalTitle()
     this.showModal()
@@ -81,12 +74,14 @@ export default class extends Controller<HTMLElement> {
 
   // Show modal
   showModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.remove('hidden')
     document.body.style.overflow = 'hidden'
   }
 
   // Close modal
   closeModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.add('hidden')
     document.body.style.overflow = ''
     this.clearSearch()
@@ -177,7 +172,6 @@ export default class extends Controller<HTMLElement> {
     this.historySectionTarget.classList.remove('hidden')
     
     // Show all cities
-    // stimulus-validator: disable-next-line
     const allButtons = this.element.querySelectorAll('[data-city-name]')
     allButtons.forEach((button) => {
       (button as HTMLElement).classList.remove('hidden')
@@ -186,6 +180,7 @@ export default class extends Controller<HTMLElement> {
 
   // Update modal title based on selection type
   private updateModalTitle(): void {
+    if (!this.hasModalTarget) return
     const titleElement = this.modalTarget.querySelector('[data-modal-title]')
     if (titleElement) {
       titleElement.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'

@@ -74,11 +74,11 @@ hourly_room_types = [
   { type: "4小时房", bed: "双床", area: "30㎡", category: "hourly" }
 ]
 
-# 创建 10 家酒店（hotel_type: 'hotel'）
+# 创建 50 家酒店（hotel_type: 'hotel'）
 puts "\n创建酒店..."
-10.times do |i|
+50.times do |i|
   city = cities[i % cities.length]
-  hotel_name_template = hotel_names[i]
+  hotel_name_template = hotel_names[i % hotel_names.length]
   hotel_name = "#{city}#{hotel_name_template[:prefix]}#{hotel_name_template[:suffix]}"
   
   # 随机星级（3-5星）
@@ -111,8 +111,20 @@ puts "\n创建酒店..."
     region: '国内'
   )
   
-  # 图片
-  hotel.update(image_url: "https://images.unsplash.com/photo-1566073771-7e72bca2f686?w=800&q=80")
+  # 图片使用Unsplash酒店相关图片
+  hotel_images = [
+    "https://images.unsplash.com/photo-1566073771-7e72bca2f686?w=800&q=80",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80",
+    "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80",
+    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
+    "https://images.unsplash.com/photo-1549294413-26f195200c16?w=800&q=80",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80",
+    "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80",
+    "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=800&q=80",
+    "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80"
+  ]
+  hotel.update(image_url: hotel_images[i % hotel_images.length])
   
   # 创建酒店政策
   HotelPolicy.create!(
