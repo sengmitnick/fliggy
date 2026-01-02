@@ -486,7 +486,10 @@ shenzhen_hotels = [
     star_level: 5,
     image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
     is_featured: true,
-    display_order: 1
+    display_order: 1,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '南山区'
   },
   {
     name: "深圳湾科技园丽雅尔酒店",
@@ -500,7 +503,10 @@ shenzhen_hotels = [
     star_level: 4,
     image_url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
     is_featured: true,
-    display_order: 2
+    display_order: 2,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '南山区'
   },
   {
     name: "深圳福田区威斯汀酒店",
@@ -514,7 +520,10 @@ shenzhen_hotels = [
     star_level: 4,
     image_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=80",
     is_featured: false,
-    display_order: 3
+    display_order: 3,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '福田区'
   },
   {
     name: "深圳罗湖区维也纳国际酒店",
@@ -528,7 +537,10 @@ shenzhen_hotels = [
     star_level: 3,
     image_url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80",
     is_featured: false,
-    display_order: 4
+    display_order: 4,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '罗湖区'
   },
   {
     name: "深圳宝安机场凯悦酒店",
@@ -542,7 +554,10 @@ shenzhen_hotels = [
     star_level: 4,
     image_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
     is_featured: false,
-    display_order: 5
+    display_order: 5,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '宝安区'
   },
   {
     name: "深圳欢乐港湾度假酒店",
@@ -556,7 +571,10 @@ shenzhen_hotels = [
     star_level: 4,
     image_url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80",
     is_featured: false,
-    display_order: 6
+    display_order: 6,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '宝安区'
   },
   {
     name: "深圳东门商务酒店",
@@ -570,7 +588,10 @@ shenzhen_hotels = [
     star_level: 3,
     image_url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
     is_featured: false,
-    display_order: 7
+    display_order: 7,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '罗湖区'
   },
   {
     name: "深圳北站希尔顿酒店",
@@ -584,7 +605,10 @@ shenzhen_hotels = [
     star_level: 5,
     image_url: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80",
     is_featured: false,
-    display_order: 8
+    display_order: 8,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '龙华区'
   },
   {
     name: "深圳西乡塑望酽酒店",
@@ -598,7 +622,10 @@ shenzhen_hotels = [
     star_level: 4,
     image_url: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80",
     is_featured: false,
-    display_order: 9
+    display_order: 9,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '南山区'
   },
   {
     name: "深圳大棅湾海滨度假村",
@@ -612,20 +639,88 @@ shenzhen_hotels = [
     star_level: 5,
     image_url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80",
     is_featured: true,
-    display_order: 10
+    display_order: 10,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '龙岗区'
+  },
+  # 民宿
+  {
+    name: "深圳南山区海景民宿",
+    city: "深圳市",
+    address: "南山区蛇口海上世界",
+    rating: 4.9,
+    price: 380,
+    original_price: 450,
+    distance: "距海上世界300米",
+    features: ["民宿", "海景", "温馨"],
+    star_level: nil,
+    image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+    is_featured: true,
+    display_order: 11,
+    hotel_type: 'homestay',
+    is_domestic: true,
+    region: '南山区'
+  },
+  {
+    name: "深圳大梅沙海边民宿",
+    city: "深圳市",
+    address: "盐田区大梅沙",
+    rating: 4.7,
+    price: 280,
+    original_price: 350,
+    distance: "距大梅沙海滨100米",
+    features: ["民宿", "海边", "亲子"],
+    star_level: nil,
+    image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
+    is_featured: false,
+    display_order: 12,
+    hotel_type: 'homestay',
+    is_domestic: true,
+    region: '盐田区'
+  },
+  {
+    name: "深圳华侨城艺术民宿",
+    city: "深圳市",
+    address: "南山区华侨城",
+    rating: 4.8,
+    price: 420,
+    original_price: 500,
+    distance: "距欢乐谷500米",
+    features: ["民宿", "艺术", "设计感"],
+    star_level: nil,
+    image_url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
+    is_featured: false,
+    display_order: 13,
+    hotel_type: 'homestay',
+    is_domestic: true,
+    region: '南山区'
   }
 ]
 
 shenzhen_hotels.each do |hotel_data|
   hotel = Hotel.create!(hotel_data)
   
-  # 为每个酒店创建几个房型
-  [
-    { room_type: "豪华大床房", bed_type: "大床", price: hotel.price, original_price: hotel.original_price, area: "35㎡", max_guests: 2, has_window: true, available_rooms: 5 },
-    { room_type: "高级双人房", bed_type: "双床", price: hotel.price + 50, original_price: hotel.original_price + 80, area: "38㎡", max_guests: 2, has_window: true, available_rooms: 8 },
-    { room_type: "商务套房", bed_type: "大床+沙发床", price: hotel.price + 200, original_price: hotel.original_price + 300, area: "65㎡", max_guests: 3, has_window: true, available_rooms: 3 }
-  ].each do |room_data|
+  # 为每个酒店和民宿创建过夜房型
+  overnight_rooms = [
+    { room_type: "豪华大床房", bed_type: "大床", price: hotel.price, original_price: hotel.original_price, area: "35㎡", max_guests: 2, has_window: true, available_rooms: 5, room_category: 'overnight' },
+    { room_type: "高级双人房", bed_type: "双床", price: hotel.price + 50, original_price: hotel.original_price + 80, area: "38㎡", max_guests: 2, has_window: true, available_rooms: 8, room_category: 'overnight' }
+  ]
+  
+  overnight_rooms.each do |room_data|
     hotel.hotel_rooms.create!(room_data)
+  end
+  
+  # 部分酒店和民宿提供钟点房（60%概率）
+  if rand < 0.6
+    hourly_rooms = [
+      { room_type: "2小时房", bed_type: "大床", price: (hotel.price * 0.3).round(0), original_price: (hotel.price * 0.35).round(0), area: "25㎡", max_guests: 2, has_window: true, available_rooms: 3, room_category: 'hourly' },
+      { room_type: "3小时房", bed_type: "大床", price: (hotel.price * 0.4).round(0), original_price: (hotel.price * 0.45).round(0), area: "28㎡", max_guests: 2, has_window: true, available_rooms: 2, room_category: 'hourly' }
+    ]
+    
+    hourly_rooms.each do |room_data|
+      hotel.hotel_rooms.create!(room_data)
+    end
   end
 end
 

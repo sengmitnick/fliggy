@@ -11,9 +11,35 @@ class HotelsController < ApplicationController
     @price_min = params[:price_min]
     @price_max = params[:price_max]
     @quick_filter = params[:quick_filter]
+    @hotel_type = params[:type] # hotel, homestay
+    @region = params[:region]
+    @location_type = params[:location_type] || 'domestic' # domestic, international
+    @room_category = params[:room_category] # hourly - 用于显示钟点房
 
     @hotels = Hotel.all
+    
+    # 位置筛选：国内/国际
+    if @location_type == 'international'
+      @hotels = @hotels.international
+    else
+      @hotels = @hotels.domestic
+    end
+    
+    # 城市筛选
     @hotels = @hotels.by_city(@city)
+    
+    # 地区筛选
+    @hotels = @hotels.by_region(@region) if @region.present?
+    
+    # 类型筛选：酒店/民宿/钟点房
+    if @room_category == 'hourly'
+      # 钟点房：查询所有有钟点房的住宿场所
+      @hotels = @hotels.with_hourly_rooms
+    elsif @hotel_type.present?
+      # 酒店或民宿：按 hotel_type 筛选
+      @hotels = @hotels.by_type(@hotel_type)
+    end
+    
     @hotels = @hotels.by_star_level(@star_level) if @star_level.present?
     @hotels = @hotels.by_price_range(@price_min, @price_max) if @price_min.present? || @price_max.present?
     @hotels = @hotels.ordered.page(params[:page]).per(10)
@@ -28,6 +54,7 @@ class HotelsController < ApplicationController
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0
+    @room_category = params[:room_category] # 房型分类：overnight 或 hourly
   end
 
   def policy
@@ -38,9 +65,34 @@ class HotelsController < ApplicationController
   def search
     @query = params[:q]
     @city = params[:city] || '深圳市'
+    @check_in = params[:check_in] || Time.zone.today
+    @check_out = params[:check_out] || (Time.zone.today + 1.day)
+    @rooms = params[:rooms]&.to_i || 1
+    @adults = params[:adults]&.to_i || 1
+    @children = params[:children]&.to_i || 0
+    @hotel_type = params[:type]
+    @region = params[:region]
+    @location_type = params[:location_type] || 'domestic'
+    @room_category = params[:room_category]
     
     @hotels = Hotel.all
+    
+    # 位置筛选
+    if @location_type == 'international'
+      @hotels = @hotels.international
+    else
+      @hotels = @hotels.domestic
+    end
+    
     @hotels = @hotels.by_city(@city)
+    @hotels = @hotels.by_region(@region) if @region.present?
+    
+    # 类型筛选
+    if @room_category == 'hourly'
+      @hotels = @hotels.with_hourly_rooms
+    elsif @hotel_type.present?
+      @hotels = @hotels.by_type(@hotel_type)
+    end
     
     if @query.present?
       @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")

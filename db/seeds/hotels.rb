@@ -31,12 +31,12 @@ hotel_names = [
   { prefix: "君悦", suffix: "大酒店" },
   { prefix: "皇冠假日", suffix: "酒店" },
   { prefix: "万达文华", suffix: "酒店" },
-  { prefix: "索菲特", suffix: "大酒店" },
-  { prefix: "朗廷", suffix: "酒店" },
-  { prefix: "康莱德", suffix: "酒店" },
-  { prefix: "瑞吉", suffix: "酒店" },
-  { prefix: "艾美", suffix: "酒店" },
-  { prefix: "柏悦", suffix: "酒店" }
+  { prefix: "索菲特", suffix: "大酒店" }
+]
+
+# 民宿名称模板
+homestay_names = [
+  "山海居", "云溪小筑", "半山客栈", "水云间", "竹林雅居"
 ]
 
 # 特色标签
@@ -60,8 +60,23 @@ address_suffixes = [
   "滨海路", "山景路", "湖畔大道", "CBD核心区"
 ]
 
-# 创建 20 家酒店
-20.times do |i|
+# 房型定义
+overnight_room_types = [
+  { type: "标准双床房", bed: "双床", area: "28㎡", category: "overnight" },
+  { type: "豪华大床房", bed: "大床", area: "35㎡", category: "overnight" },
+  { type: "行政套房", bed: "大床", area: "50㎡", category: "overnight" },
+  { type: "家庭房", bed: "双床+沙发床", area: "45㎡", category: "overnight" }
+]
+
+hourly_room_types = [
+  { type: "2小时房", bed: "大床", area: "25㎡", category: "hourly" },
+  { type: "3小时房", bed: "大床", area: "28㎡", category: "hourly" },
+  { type: "4小时房", bed: "双床", area: "30㎡", category: "hourly" }
+]
+
+# 创建 10 家酒店（hotel_type: 'hotel'）
+puts "\n创建酒店..."
+10.times do |i|
   city = cities[i % cities.length]
   hotel_name_template = hotel_names[i]
   hotel_name = "#{city}#{hotel_name_template[:prefix]}#{hotel_name_template[:suffix]}"
@@ -90,10 +105,13 @@ address_suffixes = [
     features: features_pool[i % features_pool.length],
     star_level: star_level,
     is_featured: [true, false, false].sample,
-    display_order: i
+    display_order: i,
+    hotel_type: 'hotel',
+    is_domestic: true,
+    region: '国内'
   )
   
-  # 图片稍后通过后台管理添加或使用image_url字段
+  # 图片
   hotel.update(image_url: "https://images.unsplash.com/photo-1566073771-7e72bca2f686?w=800&q=80")
   
   # 创建酒店政策
@@ -108,7 +126,7 @@ address_suffixes = [
     payment_methods: ["现金", "信用卡", "微信支付", "支付宝"]
   )
   
-  # 创建 3-5 个设施
+  # 创建设施
   facility_categories = [
     { name: "免费WiFi", icon: "wifi", description: "全酒店覆盖高速无线网络", category: "网络" },
     { name: "健身房", icon: "dumbbell", description: "24小时开放的现代化健身中心", category: "健身" },
@@ -130,16 +148,9 @@ address_suffixes = [
     )
   end
   
-  # 创建 2-4 个房型
-  room_types = [
-    { type: "标准双床房", bed: "双床", area: "28㎡" },
-    { type: "豪华大床房", bed: "大床", area: "35㎡" },
-    { type: "行政套房", bed: "大床", area: "50㎡" },
-    { type: "家庭房", bed: "双床+沙发床", area: "45㎡" }
-  ]
-  
-  rand(2..4).times do |j|
-    room = room_types[j]
+  # 创建过夜房型（2-3个）
+  rand(2..3).times do |j|
+    room = overnight_room_types[j]
     room_price = base_price + (j * 100)
     
     HotelRoom.create!(
@@ -151,10 +162,11 @@ address_suffixes = [
       area: room[:area],
       max_guests: [2, 2, 3, 4][j] || 2,
       has_window: true,
-      available_rooms: rand(5..20)
+      available_rooms: rand(5..20),
+      room_category: 'overnight'
     )
     
-    # 创建 Room 记录（用于详细房间信息）
+    # 创建 Room 记录
     Room.create!(
       hotel: hotel,
       name: room[:type],
@@ -168,9 +180,42 @@ address_suffixes = [
     )
   end
   
-  # 创建 3-8 条评论
+  # 部分酒店提供钟点房（60%的概率）
+  if rand < 0.6
+    rand(1..2).times do |j|
+      room = hourly_room_types[j]
+      room_price = (base_price * 0.3).round(0) + (j * 30)
+      
+      HotelRoom.create!(
+        hotel: hotel,
+        room_type: room[:type],
+        bed_type: room[:bed],
+        price: room_price,
+        original_price: (room_price * 1.2).round(0),
+        area: room[:area],
+        max_guests: 2,
+        has_window: true,
+        available_rooms: rand(3..10),
+        room_category: 'hourly'
+      )
+      
+      # 创建 Room 记录
+      Room.create!(
+        hotel: hotel,
+        name: room[:type],
+        size: room[:area],
+        bed_type: room[:bed],
+        price: room_price,
+        original_price: (room_price * 1.2).round(0),
+        amenities: ["免费WiFi", "空调", "液晶电视"],
+        breakfast_included: false,
+        cancellation_policy: "不可取消"
+      )
+    end
+  end
+  
+  # 创建评论
   rand(3..8).times do
-    # 确保有用户存在
     user = User.first || User.create!(
       email: "demo@example.com",
       email_verified: true,
@@ -197,14 +242,171 @@ address_suffixes = [
     )
   end
   
-  puts "已创建: #{hotel_name} (#{star_level}星)"
+  puts "已创建: #{hotel_name} (#{star_level}星, #{hotel.hotel_rooms.count}个房型)"
+end
+
+# 创建 5 家民宿（hotel_type: 'homestay'）
+puts "\n创建民宿..."
+5.times do |i|
+  city = cities[i % cities.length]
+  homestay_name = "#{city}#{homestay_names[i]}"
+  
+  # 民宿价格较低
+  base_price = rand(150..350)
+  
+  hotel = Hotel.create!(
+    name: homestay_name,
+    city: city,
+    address: "#{city}#{address_suffixes[i % address_suffixes.length]}#{rand(1..999)}号",
+    rating: (4.0 + rand * 1.0).round(1),
+    price: base_price,
+    original_price: (base_price * (1.1 + rand * 0.2)).round(0),
+    distance: "#{rand(1..10)}.#{rand(0..9)}km",
+    features: ["免费WiFi", "厨房", "洗衣机", "独立卫浴"],
+    star_level: nil, # 民宿没有星级
+    is_featured: [true, false].sample,
+    display_order: 10 + i,
+    hotel_type: 'homestay',
+    is_domestic: true,
+    region: '国内'
+  )
+  
+  # 图片
+  hotel.update(image_url: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&q=80")
+  
+  # 创建民宿政策
+  HotelPolicy.create!(
+    hotel: hotel,
+    check_in_time: "15:00",
+    check_out_time: "11:00",
+    pet_policy: "允许携带宠物",
+    breakfast_type: "不提供早餐",
+    breakfast_hours: "",
+    breakfast_price: 0,
+    payment_methods: ["现金", "微信支付", "支付宝"]
+  )
+  
+  # 民宿设施
+  HotelFacility.create!(
+    hotel: hotel,
+    name: "厨房",
+    icon: "utensils",
+    description: "配备完整厨具和餐具",
+    category: "生活"
+  )
+  
+  HotelFacility.create!(
+    hotel: hotel,
+    name: "洗衣机",
+    icon: "tshirt",
+    description: "免费使用洗衣机和烘干机",
+    category: "生活"
+  )
+  
+  # 创建民宿房型（1-2个过夜房型）
+  rand(1..2).times do |j|
+    room_types = [
+      { type: "温馨单间", bed: "大床", area: "20㎡" },
+      { type: "舒适双床房", bed: "双床", area: "25㎡" }
+    ]
+    room = room_types[j]
+    room_price = base_price + (j * 50)
+    
+    HotelRoom.create!(
+      hotel: hotel,
+      room_type: room[:type],
+      bed_type: room[:bed],
+      price: room_price,
+      original_price: (room_price * 1.15).round(0),
+      area: room[:area],
+      max_guests: j == 0 ? 2 : 3,
+      has_window: true,
+      available_rooms: rand(2..5),
+      room_category: 'overnight'
+    )
+    
+    Room.create!(
+      hotel: hotel,
+      name: room[:type],
+      size: room[:area],
+      bed_type: room[:bed],
+      price: room_price,
+      original_price: (room_price * 1.15).round(0),
+      amenities: ["免费WiFi", "空调", "电视", "独立卫浴", "厨房"],
+      breakfast_included: false,
+      cancellation_policy: "入住前48小时免费取消"
+    )
+  end
+  
+  # 部分民宿也提供钟点房（40%的概率）
+  if rand < 0.4
+    room = { type: "2小时房", bed: "大床", area: "18㎡" }
+    room_price = (base_price * 0.25).round(0)
+    
+    HotelRoom.create!(
+      hotel: hotel,
+      room_type: room[:type],
+      bed_type: room[:bed],
+      price: room_price,
+      original_price: (room_price * 1.15).round(0),
+      area: room[:area],
+      max_guests: 2,
+      has_window: true,
+      available_rooms: rand(1..3),
+      room_category: 'hourly'
+    )
+    
+    Room.create!(
+      hotel: hotel,
+      name: room[:type],
+      size: room[:area],
+      bed_type: room[:bed],
+      price: room_price,
+      original_price: (room_price * 1.15).round(0),
+      amenities: ["免费WiFi", "空调", "独立卫浴"],
+      breakfast_included: false,
+      cancellation_policy: "不可取消"
+    )
+  end
+  
+  # 创建评论
+  rand(2..5).times do
+    user = User.first || User.create!(
+      email: "demo@example.com",
+      email_verified: true,
+      password_digest: BCrypt::Password.create("password123")
+    )
+    
+    comments = [
+      "民宿很温馨，像在家一样舒适。",
+      "房东很热情，给了很多旅游建议。",
+      "位置安静，适合放松休息。",
+      "性价比超高，厨房设施齐全。",
+      "装修风格独特，拍照很好看。"
+    ]
+    
+    HotelReview.create!(
+      hotel: hotel,
+      user: user,
+      rating: (4.0 + rand * 1.0).round(1),
+      comment: comments.sample,
+      helpful_count: rand(0..30)
+    )
+  end
+  
+  puts "已创建: #{homestay_name} (民宿, #{hotel.hotel_rooms.count}个房型)"
 end
 
 puts "\n酒店数据创建完成！"
 puts "总计创建:"
-puts "- 酒店: #{Hotel.count} 家"
-puts "- 房型: #{HotelRoom.count} 个"
+puts "- 酒店: #{Hotel.where(hotel_type: 'hotel').count} 家"
+puts "- 民宿: #{Hotel.where(hotel_type: 'homestay').count} 家"
+puts "- 总住宿场所: #{Hotel.count} 家"
+puts "- 过夜房型: #{HotelRoom.where(room_category: 'overnight').count} 个"
+puts "- 钟点房型: #{HotelRoom.where(room_category: 'hourly').count} 个"
+puts "- 总房型: #{HotelRoom.count} 个"
 puts "- 房间详情: #{Room.count} 个"
 puts "- 酒店政策: #{HotelPolicy.count} 条"
 puts "- 酒店设施: #{HotelFacility.count} 个"
 puts "- 酒店评论: #{HotelReview.count} 条"
+puts "\n有钟点房的住宿场所: #{Hotel.with_hourly_rooms.count} 家"

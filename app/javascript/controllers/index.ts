@@ -34,6 +34,7 @@ import DateLinkController from "./date_link_controller"
 import HotelGuestSelectorController from "./hotel_guest_selector_controller"
 import HotelDatePickerController from "./hotel_date_picker_controller"
 import PaymentModalController from "./payment_modal_controller"
+import HotelTabsController from "./hotel_tabs_controller"
 
 const application = Application.start()
 
@@ -71,5 +72,6 @@ application.register("date-link", DateLinkController)
 application.register("hotel-guest-selector", HotelGuestSelectorController)
 application.register("hotel-date-picker", HotelDatePickerController)
 application.register("payment-modal", PaymentModalController)
+application.register("hotel-tabs", HotelTabsController)
 
 window.Stimulus = application

@@ -1,6 +1,17 @@
 <!-- 客房列表 -->
 <div class="bg-white mb-2">
-  <% @hotel.hotel_rooms.each_with_index do |room, index| %>
+  <%
+    # 根据 room_category 筛选房型
+    rooms_to_display = if @room_category == 'hourly'
+      @hotel.hotel_rooms.hourly
+    elsif @room_category == 'overnight'
+      @hotel.hotel_rooms.overnight
+    else
+      @hotel.hotel_rooms
+    end
+  %>
+  
+  <% rooms_to_display.each_with_index do |room, index| %>
     <div class="<%= index > 0 ? 'border-t border-gray-100' : '' %>">
       <div class="flex items-start space-x-3 p-4">
         <div class="flex-shrink-0 relative">
@@ -59,7 +70,7 @@
     </div>
   <% end %>
   
-  <% if @hotel.hotel_rooms.empty? %>
+  <% if rooms_to_display.empty? %>
     <div class="p-8 text-center text-gray-500">
       <p>暂无可用房型</p>
     </div>
