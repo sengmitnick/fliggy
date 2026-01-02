@@ -46,7 +46,6 @@ export default class extends Controller<HTMLElement> {
 
   openSearchModal(): void {
     this.searchModalTarget.classList.remove("hidden")
-    // Focus on search input
     setTimeout(() => {
       this.searchInputTarget.focus()
     }, 100)
@@ -57,10 +56,17 @@ export default class extends Controller<HTMLElement> {
   }
 
   submitSearch(): void {
-    // Find the form and submit it
-    const form = this.searchInputTarget.closest("form")
+    const form = this.searchInputTarget.closest("form") as HTMLFormElement
     if (form) {
+      // Always submit the form, even if input is empty
       form.requestSubmit()
+    }
+  }
+
+  handleSearchInputKeypress(event: KeyboardEvent): void {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      this.submitSearch()
     }
   }
 

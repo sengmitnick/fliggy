@@ -45,19 +45,25 @@
   <% if params[:q].present? %>
     <!-- Filtered Search Header -->
     <div class="bg-white px-4 py-3 border-b border-gray-200 sticky top-14 z-30">
-      <!-- Search Query Display with Clear Button -->
+      <!-- Search Query Display with Edit Support -->
       <div class="flex items-center gap-2 mb-3">
-        <div class="flex-1 flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          <input type="text" value="<%= params[:q] %>" class="w-full bg-transparent border-none outline-none text-sm" readonly>
-          <%= link_to hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "flex-shrink-0" do %>
-            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293z" clip-rule="evenodd"/>
+        <%= form_with url: hotels_path, method: :get, class: "flex-1", data: { turbo: false } do |f| %>
+          <div class="flex-1 flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-          <% end %>
-        </div>
+            <%= f.text_field :q, value: params[:q], class: "w-full bg-transparent border-none outline-none text-sm", placeholder: "位置/品牌/酒店" %>
+            <%= f.hidden_field :city, value: @city %>
+            <%= f.hidden_field :check_in, value: @check_in %>
+            <%= f.hidden_field :check_out, value: @check_out %>
+            <%= f.hidden_field :rooms, value: @rooms %>
+            <%= f.hidden_field :adults, value: @adults %>
+            <%= f.hidden_field :children, value: @children %>
+            <button type="submit" class="text-base font-medium px-2" style="color: #FFD700;">
+              搜索
+            </button>
+          </div>
+        <% end %>
         <button class="text-blue-500">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
@@ -452,8 +458,13 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
           <%= form_with url: search_hotels_path, method: :get, class: "flex-1", data: { turbo: false } do |f| %>
-            <%= f.text_field :q, placeholder: "位置/品牌/酒店", class: "w-full bg-transparent border-none outline-none text-sm", value: params[:q], data: { hotel_search_target: "searchInput" } %>
+            <%= f.text_field :q, placeholder: "位置/品牌/酒店", class: "w-full bg-transparent border-none outline-none text-sm", value: params[:q], data: { hotel_search_target: "searchInput", action: "keypress->hotel-search#handleSearchInputKeypress" } %>
             <%= f.hidden_field :city, value: @city %>
+            <%= f.hidden_field :check_in, value: @check_in %>
+            <%= f.hidden_field :check_out, value: @check_out %>
+            <%= f.hidden_field :rooms, value: @rooms %>
+            <%= f.hidden_field :adults, value: @adults %>
+            <%= f.hidden_field :children, value: @children %>
           <% end %>
         </div>
         <button class="text-base font-medium" style="color: #FFD700;" data-action="click->hotel-search#submitSearch">搜索</button>
@@ -477,9 +488,9 @@
             </button>
           </div>
           <div class="flex gap-2 flex-wrap">
-            <button class="px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700">深圳市·万豪</button>
-            <button class="px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700">深圳市·万丽</button>
-            <button class="px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700">深圳市·深圳南山区</button>
+            <%= link_to "深圳市·万豪", hotels_path(q: "万豪", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
+            <%= link_to "深圳市·万丽", hotels_path(q: "万丽", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
+            <%= link_to "深圳市·深圳南山区", hotels_path(q: "深圳南山区", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
           </div>
         </div>
 
@@ -497,14 +508,14 @@
             </svg>
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotSearchContent">
-            <%= link_to "深圳北站", search_hotels_path(q: "深圳北站", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "深圳南山区", search_hotels_path(q: "深圳南山区", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "深圳湾", search_hotels_path(q: "深圳湾", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "深圳北", search_hotels_path(q: "深圳北", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "福田口岸", search_hotels_path(q: "福田口岸", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "福田站", search_hotels_path(q: "福田站", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "罗湖口岸", search_hotels_path(q: "罗湖口岸", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "深圳宝安国际机场", search_hotels_path(q: "深圳宝安国际机场", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "深圳北站", hotels_path(q: "深圳北站", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "深圳南山区", hotels_path(q: "深圳南山区", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "深圳湾", hotels_path(q: "深圳湾", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "深圳北", hotels_path(q: "深圳北", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "福田口岸", hotels_path(q: "福田口岸", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "福田站", hotels_path(q: "福田站", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "罗湖口岸", hotels_path(q: "罗湖口岸", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "深圳宝安国际机场", hotels_path(q: "深圳宝安国际机场", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
           </div>
         </div>
 
@@ -522,14 +533,14 @@
             </svg>
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotBrandContent">
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">希尔顿花园</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">万丽</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">菲住</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">万豪</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">希尔顿</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">亚朵</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">全季</button>
-            <button class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center">维也纳</button>
+            <%= link_to "希尔顿花园", hotels_path(q: "希尔顿花园", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "万丽", hotels_path(q: "万丽", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "菲住", hotels_path(q: "菲住", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "万豪", hotels_path(q: "万豪", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "希尔顿", hotels_path(q: "希尔顿", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "亚朵", hotels_path(q: "亚朵", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "全季", hotels_path(q: "全季", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "维也纳", hotels_path(q: "维也纳", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
           </div>
         </div>
 
@@ -547,14 +558,14 @@
             </svg>
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotLocationContent">
-            <%= link_to "宝安机场商圈", search_hotels_path(q: "宝安机场商圈", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "南澳", search_hotels_path(q: "南澳", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "田贝/水贝珠宝城", search_hotels_path(q: "田贝/水贝珠宝城", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "华强北商业区", search_hotels_path(q: "华强北商业区", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "坂田", search_hotels_path(q: "坂田", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "龙岗中心区/大运新城", search_hotels_path(q: "龙岗中心区/大运新城", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "较场尾大鹏所城", search_hotels_path(q: "较场尾大鹏所城", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
-            <%= link_to "观澜", search_hotels_path(q: "观澜", city: @city), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "宝安机场商圈", hotels_path(q: "宝安机场商圈", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "南澳", hotels_path(q: "南澳", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "田贝/水贝珠宝城", hotels_path(q: "田贝/水贝珠宝城", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "华强北商业区", hotels_path(q: "华强北商业区", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "坂田", hotels_path(q: "坂田", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "龙岗中心区/大运新城", hotels_path(q: "龙岗中心区/大运新城", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "较场尾大鹏所城", hotels_path(q: "较场尾大鹏所城", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+            <%= link_to "观澜", hotels_path(q: "观澜", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
           </div>
         </div>
 
