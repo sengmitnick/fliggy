@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-white" data-controller="flight-search coming-soon">
+<div class="min-h-screen bg-white" data-controller="flight-search">
   <!-- Header -->
   <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
     <!-- Top Bar -->
@@ -19,8 +19,8 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button class="text-sm text-primary" data-action="click->coming-soon#show">低价提醒</button>
-        <button data-action="click->coming-soon#show">
+        <button class="text-sm text-primary" onclick="window.showToast('精彩即将上线，敬请期待')">低价提醒</button>
+        <button onclick="window.showToast('精彩即将上线，敬请期待')">
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
           </svg>
@@ -106,13 +106,13 @@
 
   <!-- Filter Buttons -->
   <div class="flex items-center gap-2 px-4 py-3 bg-white border-b border-gray-100">
-    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" onclick="window.showToast('精彩即将上线，敬请期待')">
       直飞优先
     </button>
-    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" onclick="window.showToast('精彩即将上线，敬请期待')">
       低价优先
     </button>
-    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" data-action="click->coming-soon#show">
+    <button class="px-3 py-1 rounded-full text-xs border border-gray-300 bg-white" onclick="window.showToast('精彩即将上线，敬请期待')">
       时间排序
     </button>
   </div>

@@ -1,0 +1,209 @@
+<% content_for :title, "New Hotel" %>
+
+<div class="container-md">
+  <div class="flex items-center space-x-4">
+    <%= link_to admin_hotels_path, class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Hotels
+    <% end %>
+  </div>
+
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4 mb-8">Create New Hotel</h1>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @hotel], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @hotel %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@hotel, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :name) ? { required: true } : {}) %>
+          <% if @hotel.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- City -->
+        <div class="mb-4">
+          <%= form.label :city, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            City<% if field_required?(@hotel, :city) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :city, {
+            placeholder: "Enter city...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :city) ? { required: true } : {}) %>
+          <% if @hotel.errors[:city].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:city].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-4">
+          <%= form.label :address, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Address<% if field_required?(@hotel, :address) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :address, {
+            rows: 5,
+            placeholder: "Enter address...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :address) ? { required: true } : {}) %>
+          <% if @hotel.errors[:address].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:address].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-4">
+          <%= form.label :rating, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rating<% if field_required?(@hotel, :rating) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :rating, {
+            placeholder: "Enter rating...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :rating) ? { required: true } : {}) %>
+          <% if @hotel.errors[:rating].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:rating].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+          <%= form.label :price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price<% if field_required?(@hotel, :price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price, {
+            placeholder: "Enter price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :price) ? { required: true } : {}) %>
+          <% if @hotel.errors[:price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@hotel, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :original_price) ? { required: true } : {}) %>
+          <% if @hotel.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Distance -->
+        <div class="mb-4">
+          <%= form.label :distance, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Distance<% if field_required?(@hotel, :distance) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :distance, {
+            placeholder: "Enter distance...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :distance) ? { required: true } : {}) %>
+          <% if @hotel.errors[:distance].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:distance].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Features -->
+        <div class="mb-4">
+          <%= form.label :features, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Features<% if field_required?(@hotel, :features) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :features, {
+            rows: 5,
+            placeholder: "Enter features...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :features) ? { required: true } : {}) %>
+          <% if @hotel.errors[:features].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:features].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Star level -->
+        <div class="mb-4">
+          <%= form.label :star_level, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Star level<% if field_required?(@hotel, :star_level) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :star_level, {
+            placeholder: "Enter star level...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :star_level) ? { required: true } : {}) %>
+          <% if @hotel.errors[:star_level].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:star_level].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image url -->
+        <div class="mb-4">
+          <%= form.label :image_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image url<% if field_required?(@hotel, :image_url) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :image_url, {
+            placeholder: "Enter image url...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :image_url) ? { required: true } : {}) %>
+          <% if @hotel.errors[:image_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:image_url].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Is featured -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :is_featured, 
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is featured</span>
+          </label>
+        </div>
+
+        <!-- Display order -->
+        <div class="mb-4">
+          <%= form.label :display_order, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Display order<% if field_required?(@hotel, :display_order) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :display_order, {
+            placeholder: "Enter display order...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@hotel, :display_order) ? { required: true } : {}) %>
+          <% if @hotel.errors[:display_order].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:display_order].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+          <%= form.label :image, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image
+          <% end %>
+          <%= form.file_field :image, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <% if @hotel.errors[:image].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @hotel.errors[:image].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_hotels_path, class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Create Hotel", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

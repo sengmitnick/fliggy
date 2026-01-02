@@ -200,6 +200,13 @@ class BookingsController < ApplicationController
   def pay
     @booking = current_user.bookings.find(params[:id])
     @booking.update!(status: :paid)
+    
+    # 创建预订成功通知
+    @booking.create_booking_notification
+    
+    # 创建出票成功通知
+    @booking.create_ticket_issued_notification
+    
     render json: { success: true }
   end
 

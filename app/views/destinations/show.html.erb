@@ -13,7 +13,7 @@
 
         <!-- Navigation -->
         <div class="flex items-center gap-5">
-          <button class="flex items-center gap-2" onclick="alert('功能开发中')">
+          <button class="flex items-center gap-2" onclick="window.showToast('精彩即将上线，敬请期待')">
             <span class="text-sm font-medium whitespace-nowrap">问一问</span>
           </button>
           <%= link_to root_path, class: "text-sm font-medium border-b-2 border-transparent pb-0.5 whitespace-nowrap" do %>
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Cart Icon -->
-        <button class="flex flex-col items-center gap-0" onclick="alert('功能开发中')">
+        <button class="flex flex-col items-center gap-0" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "home/购物车.png", class: "w-5 h-5", alt: "购物车" %>
           <span class="text-[9px] whitespace-nowrap">我的收藏</span>
         </button>
@@ -41,7 +41,7 @@
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
             <span class="text-base text-gray-700 font-medium"><%= @destination.name %>的酒店</span>
           </div>
-          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;" onclick="alert('功能开发中')">
+          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')">
             搜索
           </button>
         </div>
@@ -49,10 +49,10 @@
 
       <!-- Quick Links -->
       <div class="flex gap-2 mt-2.5 overflow-x-auto pb-1 no-scrollbar">
-        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>酒店</button>
-        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>景点</button>
-        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>美食</button>
-        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="alert('功能开发中')"><%= @destination.name %>攻略</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')"><%= @destination.name %>酒店</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')"><%= @destination.name %>景点</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')"><%= @destination.name %>美食</button>
+        <button class="px-4 py-1.5 text-xs text-gray-700 whitespace-nowrap" style="background: #EBEBEB; border-radius: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')"><%= @destination.name %>攻略</button>
       </div>
     </div>
   </div>
@@ -61,46 +61,46 @@
   <div class="mx-4 bg-white rounded-3xl border border-gray-200 p-2 mb-4 mt-4">
     <!-- Row 1 -->
     <div class="grid grid-cols-5 mb-6">
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/酒店.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "酒店" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/机票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "机票" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/火车票.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "火车票" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/租车.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "租车" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/玩乐体验.png", class: "max-w-full h-auto object-contain", style: "max-height: 80px;", alt: "玩乐体验" %>
       </button>
     </div>
 
     <!-- Row 2 -->
     <div class="grid grid-cols-5">
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/跟团游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "跟团游" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/景点门票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "景点门票" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/景酒套票.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "景酒套票" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/包车游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "包车游" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "travel-services/一日游.png", class: "max-w-full h-auto object-contain", style: "max-height: 70px;", alt: "一日游" %>
       </button>
     </div>
@@ -360,22 +360,22 @@
         <%= image_tag "home/Tab飞猪首页_激活.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "飞猪" %>
       <% end %>
 
-      <button class="flex flex-col items-center justify-center relative" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center relative" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "home/Tab会员.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "会员" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center relative" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center relative" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "home/Tab消息.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "消息" %>
         <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
           <div class="ml-[24px] w-2 h-2 bg-red-500 rounded-full"></div>
         </div>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "home/Tab行程.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "行程" %>
       </button>
 
-      <button class="flex flex-col items-center justify-center" onclick="alert('功能开发中')">
+      <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "home/Tab我的.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的" %>
       </button>
     </div>

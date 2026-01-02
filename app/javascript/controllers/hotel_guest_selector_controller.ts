@@ -12,6 +12,10 @@ export default class extends Controller<HTMLElement> {
     "displayText"
   ]
 
+  declare readonly hasRoomsInputTarget: boolean
+  declare readonly hasAdultsInputTarget: boolean
+  declare readonly hasChildrenInputTarget: boolean
+
   static values = {
     rooms: Number,
     adults: Number,
@@ -33,11 +37,13 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("HotelGuestSelector connected")
-    // Initialize values from inputs or defaults
-    this.roomsValue = parseInt(this.roomsInputTarget.value) || 1
-    this.adultsValue = parseInt(this.adultsInputTarget.value) || 1
-    this.childrenValue = parseInt(this.childrenInputTarget.value) || 0
-    this.updateDisplay()
+    // Only initialize if input targets exist (modal view)
+    if (this.hasRoomsInputTarget && this.hasAdultsInputTarget && this.hasChildrenInputTarget) {
+      this.roomsValue = parseInt(this.roomsInputTarget.value) || 1
+      this.adultsValue = parseInt(this.adultsInputTarget.value) || 1
+      this.childrenValue = parseInt(this.childrenInputTarget.value) || 0
+      this.updateDisplay()
+    }
   }
 
   disconnect(): void {

@@ -18,6 +18,9 @@ export default class extends Controller<HTMLElement> {
     "checkInInput", "checkOutInput", "checkInDisplay", "checkOutDisplay",
     "nightsDisplay"
   ]
+
+  declare readonly hasCheckInInputTarget: boolean
+  declare readonly hasCheckOutInputTarget: boolean
   
   static values = {
     checkIn: String,
@@ -44,14 +47,16 @@ export default class extends Controller<HTMLElement> {
   private checkOutDate: Date | null = null
 
   connect(): void {
-    // Initialize dates from hidden inputs (use local timezone)
-    if (this.checkInInputTarget.value) {
-      this.checkInDate = this.parseLocalDate(this.checkInInputTarget.value)
+    // Only initialize if input targets exist (modal view)
+    if (this.hasCheckInInputTarget && this.hasCheckOutInputTarget) {
+      if (this.checkInInputTarget.value) {
+        this.checkInDate = this.parseLocalDate(this.checkInInputTarget.value)
+      }
+      if (this.checkOutInputTarget.value) {
+        this.checkOutDate = this.parseLocalDate(this.checkOutInputTarget.value)
+      }
+      this.updateDisplay()
     }
-    if (this.checkOutInputTarget.value) {
-      this.checkOutDate = this.parseLocalDate(this.checkOutInputTarget.value)
-    }
-    this.updateDisplay()
   }
 
   private parseLocalDate(dateStr: string): Date {

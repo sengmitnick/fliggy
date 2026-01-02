@@ -13,6 +13,10 @@ export default class extends Controller<HTMLElement> {
     // stimulus-validator: disable-next-line
     "tabDestination",
     // stimulus-validator: disable-next-line
+    "tabDomestic",
+    // stimulus-validator: disable-next-line
+    "tabInternational",
+    // stimulus-validator: disable-next-line
     "searchInput",
     // stimulus-validator: disable-next-line
     "domesticList",
@@ -21,7 +25,19 @@ export default class extends Controller<HTMLElement> {
     // stimulus-validator: disable-next-line
     "historySection",
     // stimulus-validator: disable-next-line
-    "currentCity"
+    "currentCity",
+    // stimulus-validator: disable-next-line
+    "locationStatus",
+    // stimulus-validator: disable-next-line
+    "locationButton",
+    // stimulus-validator: disable-next-line
+    "locationText",
+    // stimulus-validator: disable-next-line
+    "locationSpinner",
+    // stimulus-validator: disable-next-line
+    "locatedCity",
+    // stimulus-validator: disable-next-line
+    "locatedCityButton"
   ]
 
   static values = {
@@ -42,6 +58,10 @@ export default class extends Controller<HTMLElement> {
   // stimulus-validator: disable-next-line
   declare readonly tabDestinationTarget: HTMLElement
   // stimulus-validator: disable-next-line
+  declare readonly tabDomesticTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly tabInternationalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly searchInputTarget: HTMLInputElement
   // stimulus-validator: disable-next-line
   declare readonly domesticListTarget: HTMLElement
@@ -51,6 +71,18 @@ export default class extends Controller<HTMLElement> {
   declare readonly historySectionTarget: HTMLElement
   // stimulus-validator: disable-next-line
   declare readonly currentCityTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly locationStatusTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly locationButtonTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line
+  declare readonly locationTextTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly locationSpinnerTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly locatedCityTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly locatedCityButtonTarget: HTMLButtonElement
   declare departureCityValue: string
   declare destinationCityValue: string
 
@@ -175,16 +207,40 @@ export default class extends Controller<HTMLElement> {
   // Switch between domestic and international tabs
   showDomestic(): void {
     this.domesticListTarget.classList.remove('hidden')
+    this.domesticListTarget.classList.add('flex')
     this.internationalListTarget.classList.add('hidden')
-    this.tabDepartureTarget.classList.add('active-tab')
-    this.tabDestinationTarget.classList.remove('active-tab')
+    this.internationalListTarget.classList.remove('flex')
+    
+    // Update tab styles
+    this.tabDomesticTarget.classList.add('text-gray-900')
+    this.tabDomesticTarget.classList.remove('text-gray-500')
+    this.tabInternationalTarget.classList.remove('text-gray-900')
+    this.tabInternationalTarget.classList.add('text-gray-500')
+    
+    // Show/hide underline
+    const domesticUnderline = this.tabDomesticTarget.querySelector('div')
+    const internationalUnderline = this.tabInternationalTarget.querySelector('div')
+    if (domesticUnderline) domesticUnderline.classList.remove('hidden')
+    if (internationalUnderline) internationalUnderline.classList.add('hidden')
   }
 
   showInternational(): void {
     this.domesticListTarget.classList.add('hidden')
+    this.domesticListTarget.classList.remove('flex')
     this.internationalListTarget.classList.remove('hidden')
-    this.tabDepartureTarget.classList.remove('active-tab')
-    this.tabDestinationTarget.classList.add('active-tab')
+    this.internationalListTarget.classList.add('flex')
+    
+    // Update tab styles
+    this.tabDomesticTarget.classList.remove('text-gray-900')
+    this.tabDomesticTarget.classList.add('text-gray-500')
+    this.tabInternationalTarget.classList.add('text-gray-900')
+    this.tabInternationalTarget.classList.remove('text-gray-500')
+    
+    // Show/hide underline
+    const domesticUnderline = this.tabDomesticTarget.querySelector('div')
+    const internationalUnderline = this.tabInternationalTarget.querySelector('div')
+    if (domesticUnderline) domesticUnderline.classList.add('hidden')
+    if (internationalUnderline) internationalUnderline.classList.remove('hidden')
   }
 
   // Search cities
@@ -251,5 +307,104 @@ export default class extends Controller<HTMLElement> {
     if (section) {
       section.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  // Request user location
+  requestLocation(): void {
+    if (!navigator.geolocation) {
+      this.locationTextTarget.textContent = '浏览器不支持定位'
+      return
+    }
+
+    // Show loading state
+    this.locationButtonTarget.disabled = true
+    this.locationTextTarget.textContent = '定位中...'
+    this.locationSpinnerTarget.classList.remove('hidden')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => this.handleLocationSuccess(position),
+      (error) => this.handleLocationError(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  }
+
+  // Handle location success
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async handleLocationSuccess(position: any): Promise<void> {
+    const { latitude, longitude } = position.coords
+    console.log('Location obtained:', latitude, longitude)
+
+    try {
+      // Call reverse geocoding API
+      const response = await fetch('/api/geocoding/reverse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
+        },
+        body: JSON.stringify({
+          lat: latitude,
+          lng: longitude
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('定位服务失败')
+      }
+
+      const data = await response.json()
+      console.log('City found:', data)
+
+      // Update UI with located city
+      this.locationTextTarget.textContent = `当前位置: ${data.city}`
+      this.locationButtonTarget.disabled = false
+      this.locationSpinnerTarget.classList.add('hidden')
+
+      // Show located city button
+      this.locatedCityButtonTarget.textContent = data.city
+      this.locatedCityButtonTarget.dataset.cityName = data.city
+      this.locatedCityButtonTarget.dataset.cityPinyin = data.pinyin
+      this.locatedCityTarget.classList.remove('hidden')
+
+    } catch (error) {
+      console.error('Reverse geocoding error:', error)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.handleLocationError(error as any)
+    }
+  }
+
+  // Handle location error
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleLocationError(error: any): void {
+    let errorMessage = '定位失败'
+
+    if ('code' in error) {
+      switch (error.code) {
+        case 1:
+          errorMessage = '用户拒绝定位'
+          break
+        case 2:
+          errorMessage = '位置信息不可用'
+          break
+        case 3:
+          errorMessage = '定位超时'
+          break
+      }
+    }
+
+    console.error('Location error:', error)
+    this.locationTextTarget.textContent = errorMessage
+    this.locationButtonTarget.disabled = false
+    this.locationSpinnerTarget.classList.add('hidden')
+  }
+
+  // Get CSRF token
+  private getCSRFToken(): string {
+    const token = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement
+    return token ? token.content : ''
   }
 }

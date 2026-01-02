@@ -1,0 +1,62 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to trips_path, class: "mr-3" do %>
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-semibold flex-1"><%= @notification.category_display_name %></h1>
+    </div>
+  </div>
+
+  <!-- Notification Content -->
+  <div class="p-4">
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <!-- Notification Header -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-start justify-between mb-2">
+          <h2 class="text-lg font-semibold text-gray-900 flex-1"><%= @notification.title %></h2>
+          <% unless @notification.read? %>
+            <span class="w-2 h-2 bg-red-500 rounded-full mt-2 ml-3 flex-shrink-0"></span>
+          <% end %>
+        </div>
+        <div class="text-sm text-gray-500">
+          <%= @notification.created_at.strftime('%Y年%m月%d日 %H:%M') %>
+        </div>
+      </div>
+
+      <!-- Notification Body -->
+      <div class="px-4 py-6">
+        <div class="prose prose-sm max-w-none">
+          <p class="text-base text-gray-700 leading-relaxed whitespace-pre-wrap"><%= @notification.content %></p>
+        </div>
+      </div>
+
+      <!-- Action Buttons (if needed) -->
+      <% if @notification.category == 'itinerary' %>
+        <div class="px-4 py-4 border-t border-gray-100">
+          <%= link_to trips_path, class: "block w-full py-3 bg-blue-500 text-white text-center font-medium rounded-lg hover:bg-blue-600 transition-colors" do %>
+            查看我的行程
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Additional Actions -->
+    <div class="mt-4 space-y-2">
+      <% unless @notification.read? %>
+        <%= button_to mark_as_read_notification_path(@notification), 
+            method: :patch,
+            class: "w-full py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors" do %>
+          标记为已读
+        <% end %>
+      <% end %>
+      
+      <%= link_to messages_path, class: "block w-full py-3 bg-white border border-gray-300 text-gray-700 text-center font-medium rounded-lg hover:bg-gray-50 transition-colors" do %>
+        返回消息列表
+      <% end %>
+    </div>
+  </div>
+</div>

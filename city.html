@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>目的地选择复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏滚动条但保持滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 模拟移动端字体渲染 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <!-- 手机外框模拟 -->
+    <div class="w-[390px] h-[844px] bg-black/50 relative overflow-hidden rounded-[40px] shadow-2xl flex flex-col">
+        
+        <!-- 背景透视层 (模拟APP背景) -->
+        <div class="absolute inset-0 bg-gray-200 z-0"></div>
+
+        <!-- 弹窗主体容器 -->
+        <div class="absolute bottom-0 w-full h-[92%] bg-white rounded-t-3xl z-10 flex flex-col overflow-hidden">
+            
+            <!-- 顶部固定区域 -->
+            <div class="px-4 pt-4 pb-2 bg-white z-20 shrink-0">
+                <!-- 顶部切换和关闭按钮 -->
+                <div class="flex justify-between items-center mb-4 relative">
+                    <div class="flex-1 flex justify-center">
+                        <div class="bg-gray-100 p-1 rounded-lg flex text-sm font-medium">
+                            <button class="bg-white shadow-sm px-4 py-1.5 rounded-md text-gray-900">单选目的地</button>
+                            <button class="px-4 py-1.5 text-gray-500">多选目的地</button>
+                        </div>
+                    </div>
+                    <button class="absolute right-0 p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 搜索框 -->
+                <div class="bg-gray-100 rounded-xl px-3 py-2.5 flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span class="text-gray-400 text-sm">搜索机场/城市/国家中英文或拼音</span>
+                </div>
+
+                <!-- 国内/国际 Tab -->
+                <div class="flex items-center text-base font-medium border-b border-gray-100">
+                    <div class="px-6 py-2 text-gray-500">国内</div>
+                    <div class="px-6 py-2 text-gray-900 border-b-2 border-black relative top-[1px]">国际/中国港澳台</div>
+                </div>
+            </div>
+
+            <!-- 下方主体内容区 (Flex布局: 左侧导航 + 右侧内容) -->
+            <div class="flex flex-1 overflow-hidden">
+                
+                <!-- 左侧侧边栏 -->
+                <div class="w-[90px] bg-[#F7F8FA] overflow-y-auto no-scrollbar shrink-0 pb-20">
+                    <div class="flex flex-col text-xs text-gray-500">
+                        <div class="py-4 text-center">历史/热门</div> <!-- 上方截图未选中 -->
+                        <div class="py-4 text-center bg-white font-bold text-gray-900 relative">
+                            当前/历史
+                            <!-- 选中指示条 -->
+                            <!-- <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-500 rounded-r"></div> -->
+                        </div>
+                        <div class="py-4 text-center">中国港澳台</div>
+                        <div class="py-4 text-center">日韩</div>
+                        <div class="py-4 text-center">东南亚</div>
+                        <div class="py-4 text-center">欧洲</div>
+                        <div class="py-4 text-center">美洲</div>
+                        <div class="py-4 text-center">亚洲其他</div>
+                        <div class="py-4 text-center">大洋洲</div>
+                        <div class="py-4 text-center">非洲</div>
+                        
+                        <!-- 免签落地签 (带图标) -->
+                        <div class="py-4 text-center flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-0.5 text-green-600 font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                                </svg>
+                                <span>免签落地签</span>
+                            </div>
+                        </div>
+
+                        <div class="py-4 text-center">精选海岛</div>
+                    </div>
+                </div>
+
+                <!-- 右侧内容区 -->
+                <div class="flex-1 overflow-y-auto no-scrollbar bg-white p-3 pb-20">
+                    
+                    <!-- 当前/历史 -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3">当前/历史</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="bg-gray-50 px-4 py-2 rounded-md flex items-center gap-1 min-w-[80px] justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="text-sm font-medium text-gray-900">深圳</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 热门推荐 (四宫格) -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3">热门推荐</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- 全球低价 -->
+                            <div class="bg-gray-50 rounded-lg p-3 flex flex-col items-center justify-center gap-2 h-20">
+                                <div class="relative">
+                                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div class="absolute -right-1 -top-1 bg-red-500 text-white text-[8px] px-0.5 rounded-full">¥</div>
+                                </div>
+                                <span class="text-xs font-medium">全球低价</span>
+                            </div>
+                            <!-- 免签落地签 -->
+                            <div class="bg-gray-50 rounded-lg p-3 flex flex-col items-center justify-center gap-2 h-20">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-xs font-medium">免签落地签</span>
+                            </div>
+                            <!-- 暖冬度假 -->
+                            <div class="bg-gray-50 rounded-lg p-3 flex flex-col items-center justify-center gap-2 h-20">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <span class="text-xs font-medium">暖冬度假</span>
+                            </div>
+                            <!-- 网红打卡 -->
+                            <div class="bg-gray-50 rounded-lg p-3 flex flex-col items-center justify-center gap-2 h-20">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21v-8a2 2 0 012-2h14a2 2 0 012 2v8M12 3v18M12 3a9 9 0 00-9 9m18 0a9 9 0 00-9-9"></path></svg>
+                                <span class="text-xs font-medium">网红打卡</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 城市列表网格 -->
+                    <div class="grid grid-cols-3 gap-2 mb-8">
+                        <!-- 首尔 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">首尔</span>
+                            <span class="text-[10px] text-gray-400">韩国</span>
+                        </div>
+                        <!-- 曼谷 (免签) -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
+                            <span class="text-sm font-medium text-gray-900">曼谷</span>
+                            <span class="text-[10px] text-gray-400">泰国</span>
+                        </div>
+                        <!-- 东京 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">东京</span>
+                            <span class="text-[10px] text-gray-400">日本</span>
+                        </div>
+                        <!-- 吉隆坡 (免签) -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
+                            <span class="text-sm font-medium text-gray-900">吉隆坡</span>
+                            <span class="text-[10px] text-gray-400">马来西亚</span>
+                        </div>
+                        <!-- 新加坡 (免签) -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
+                            <span class="text-sm font-medium text-gray-900">新加坡</span>
+                            <span class="text-[10px] text-gray-400"></span> <!-- 空白 -->
+                        </div>
+                        <!-- 大阪 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">大阪</span>
+                            <span class="text-[10px] text-gray-400">日本</span>
+                        </div>
+                        <!-- 伊斯坦布尔 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">伊斯坦布尔</span>
+                            <span class="text-[10px] text-gray-400">土耳其</span>
+                        </div>
+                        <!-- 胡志明 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">胡志明</span>
+                            <span class="text-[10px] text-gray-400">越南</span>
+                        </div>
+                        <!-- 济州岛 (免签) -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
+                            <span class="text-sm font-medium text-gray-900">济州岛</span>
+                            <span class="text-[10px] text-gray-400">韩国</span>
+                        </div>
+                         <!-- 河内 -->
+                         <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">河内</span>
+                            <span class="text-[10px] text-gray-400">越南</span>
+                        </div>
+                        <!-- 悉尼 -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative">
+                            <span class="text-sm font-medium text-gray-900">悉尼</span>
+                            <span class="text-[10px] text-gray-400">澳大利亚</span>
+                        </div>
+                        <!-- 清迈 (免签) -->
+                        <div class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
+                            <span class="text-sm font-medium text-gray-900">清迈</span>
+                            <span class="text-[10px] text-gray-400">泰国</span>
+                        </div>
+                    </div>
+
+                    <!-- 热门地区 -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3">热门地区</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- 日本 -->
+                            <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-blue-200 to-blue-50 relative">
+                                    <!-- 富士山插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <path d="M0 60 L100 60 L100 50 L0 50 Z" fill="#374151" /> <!-- 道路 -->
+                                        <path d="M20 50 L50 10 L80 50 Z" fill="#9CA3AF" /> <!-- 山 -->
+                                        <path d="M35 30 L50 10 L65 30 Z" fill="white" /> <!-- 雪顶 -->
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">日本</span>
+                            </div>
+                            <!-- 泰国 -->
+                            <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-orange-100 to-orange-50 relative">
+                                    <!-- 泰国寺庙插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                         <path d="M10 60 L90 60 L90 55 L10 55 Z" fill="#1F2937" /> <!-- 水 -->
+                                         <path d="M20 55 L20 30 L50 10 L80 30 L80 55 Z" fill="#FCD34D" /> <!-- 庙 -->
+                                         <path d="M50 10 L50 0" stroke="#FCD34D" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">泰国</span>
+                            </div>
+                            <!-- 韩国 -->
+                            <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-gray-200 to-white relative">
+                                    <!-- 韩国建筑插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <path d="M10 60 L90 60 L90 40 L10 40 Z" fill="#E5E7EB" />
+                                        <path d="M5 40 L95 40 L50 15 Z" fill="#374151" /> <!-- 屋顶 -->
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">韩国</span>
+                            </div>
+                            <!-- 中国港澳台 -->
+                            <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-cyan-100 to-blue-50 relative">
+                                    <!-- 城市天际线插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <rect x="10" y="30" width="10" height="30" fill="#60A5FA" />
+                                        <rect x="25" y="20" width="15" height="40" fill="#3B82F6" />
+                                        <rect x="45" y="35" width="10" height="25" fill="#93C5FD" />
+                                        <rect x="60" y="25" width="12" height="35" fill="#2563EB" />
+                                        <rect x="0" y="55" width="100" height="5" fill="#1E40AF" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">中国港澳台</span>
+                            </div>
+                             <!-- 马来西亚 -->
+                             <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-orange-200 to-yellow-50 relative">
+                                    <!-- 双子塔插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <rect x="35" y="20" width="10" height="40" fill="#9CA3AF" />
+                                        <rect x="55" y="20" width="10" height="40" fill="#9CA3AF" />
+                                        <rect x="40" y="50" width="20" height="10" fill="#4B5563" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">马来西亚</span>
+                            </div>
+                             <!-- 澳大利亚 -->
+                             <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-blue-300 to-blue-100 relative">
+                                    <!-- 歌剧院插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <path d="M10 60 Q 30 20 50 60" fill="white" />
+                                        <path d="M40 60 Q 60 30 80 60" fill="white" />
+                                        <rect x="0" y="58" width="100" height="2" fill="#1D4ED8" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">澳大利亚</span>
+                            </div>
+                             <!-- 美国 -->
+                             <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-teal-100 to-teal-50 relative">
+                                    <!-- 自由女神插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <rect x="45" y="30" width="10" height="30" fill="#115E59" />
+                                        <rect x="20" y="40" width="60" height="20" fill="#99F6E4" opacity="0.5" /> <!-- Skyline -->
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">美国</span>
+                            </div>
+                             <!-- 英国 -->
+                             <div class="flex flex-col gap-1">
+                                <div class="w-full aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-b from-amber-100 to-amber-50 relative">
+                                    <!-- 大本钟插画占位 -->
+                                    <svg class="absolute bottom-0 w-full h-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+                                        <rect x="70" y="20" width="10" height="40" fill="#B45309" />
+                                        <circle cx="75" cy="25" r="3" fill="white" />
+                                        <rect x="10" y="40" width="50" height="20" fill="#78350F" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center font-medium text-gray-800">英国</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 推荐主题 (标题占位) -->
+                    <div class="mb-8">
+                        <h3 class="text-sm font-bold text-gray-900 mb-3">推荐主题</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                             <!-- 全球低价 -->
+                             <div class="bg-gray-50 rounded-lg py-4 flex flex-col items-center justify-center gap-1">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-xs">全球低价</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg py-4 flex flex-col items-center justify-center gap-1">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-xs">全国低价</span>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg py-4 flex flex-col items-center justify-center gap-1">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="text-xs">免签落地签</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

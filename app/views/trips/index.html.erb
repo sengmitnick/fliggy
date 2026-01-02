@@ -1,17 +1,17 @@
-<div class="min-h-screen bg-gray-50 pb-20" data-controller="coming-soon infinite-scroll" data-infinite-scroll-page-value="1" data-infinite-scroll-has-more-value="<%= @has_more %>">
+<div class="min-h-screen bg-gray-50 pb-20" data-controller="infinite-scroll" data-infinite-scroll-page-value="1" data-infinite-scroll-has-more-value="<%= @has_more %>">
   <!-- Header -->
   <div class="bg-white sticky top-0 z-40 border-b border-gray-100">
     <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <h1 class="text-2xl font-semibold">行程</h1>
-        <button class="px-3 py-1 bg-gray-100 rounded-full text-xs" data-action="click->coming-soon#show">
+        <button class="px-3 py-1 bg-gray-100 rounded-full text-xs" onclick="window.showToast('精彩即将上线，敬请期待')">
           我的路线
         </button>
       </div>
       <div class="flex items-center gap-3">
-        <button class="text-2xl" data-action="click->coming-soon#show">📤</button>
-        <button class="text-2xl" data-action="click->coming-soon#show">➕</button>
-        <button class="text-2xl" data-action="click->coming-soon#show">⋯</button>
+        <button class="text-2xl" onclick="window.showToast('精彩即将上线，敬请期待')">📤</button>
+        <button class="text-2xl" onclick="window.showToast('精彩即将上线，敬请期待')">➕</button>
+        <button class="text-2xl" onclick="window.showToast('精彩即将上线，敬请期待')">⋯</button>
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@
         </div>
         <div class="text-sm text-gray-600">"Hi, 我是AI行程助手"</div>
       </div>
-      <button class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium" data-action="click->coming-soon#show">
+      <button class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
         问一问
       </button>
     </div>
@@ -71,7 +71,7 @@
               <div class="bg-white rounded-2xl p-4 shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                   <div class="text-base font-medium">距<%= date_bookings.first.flight.arrival_airport %>·附近酒店</div>
-                  <button class="text-sm text-blue-500 font-medium" data-action="click->coming-soon#show">
+                  <button class="text-sm text-blue-500 font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
                     <%= date_bookings.first.flight.destination_city %>酒店提前订
                   </button>
                 </div>
@@ -88,10 +88,10 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
                     预约送接机
                   </button>
-                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" data-action="click->coming-soon#show">
+                  <button class="py-3 border border-gray-300 rounded-lg text-sm font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
                     预订酒店
                   </button>
                 </div>
@@ -127,7 +127,7 @@
         <div class="text-6xl mb-4">✈️</div>
         <h3 class="text-lg font-medium mb-2">暂无行程</h3>
         <p class="text-gray-500 mb-4">预订机票或酒店后，行程会自动添加到这里</p>
-        <button class="px-6 py-2 bg-blue-500 text-white rounded-full font-medium" data-action="click->coming-soon#show">
+        <button class="px-6 py-2 bg-blue-500 text-white rounded-full font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
           去预订
         </button>
       </div>

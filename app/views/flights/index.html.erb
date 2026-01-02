@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type coming-soon passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -411,23 +411,23 @@
 
   <!-- Bottom Navigation -->
   <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 z-50">
-    <div class="grid grid-cols-5 px-2 py-2" data-controller="coming-soon">
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+    <div class="grid grid-cols-5 px-2 py-2">
+      <button class="flex flex-col items-center justify-center gap-1.5" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "airfare/我的收藏.png", class: "w-6 h-6", alt: "我的收藏" %>
         <span class="text-[11px] text-gray-700">我的收藏</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+      <button class="flex flex-col items-center justify-center gap-1.5" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "airfare/航班动态.png", class: "w-6 h-6", alt: "航班动态" %>
         <span class="text-[11px] text-gray-700">航班动态</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+      <button class="flex flex-col items-center justify-center gap-1.5" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "airfare/值机选座.png", class: "w-6 h-6", alt: "值机选座" %>
         <span class="text-[11px] text-gray-700">值机选座</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center gap-1.5" data-action="click->coming-soon#show">
+      <button class="flex flex-col items-center justify-center gap-1.5" onclick="window.showToast('精彩即将上线，敬请期待')">
         <%= image_tag "airfare/发票报销.png", class: "w-6 h-6", alt: "发票报销" %>
         <span class="text-[11px] text-gray-700">发票报销</span>
       </button>
