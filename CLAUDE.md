@@ -1,72 +1,227 @@
-# CLAUDE.md
+### Startup Command:
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+bin/dev (Do not use `rails s` directly, as it may cause js/css loading issues)
 
-## Project basics
-- Framework: Ruby on Rails 7.2 with Postgres, Propshaft, Turbo/Stimulus frontend, Tailwind CSS via cssbundling-rails, esbuild+TypeScript via jsbundling-rails.
-- Background/cron: good_job is present for async jobs (see config/initializers, jobs under app/jobs if added).
-- Authentication/identity: email/password flows under `app/controllers/identity/*`, OmniAuth providers under `app/controllers/sessions/omniauth_controller.rb`, session handling in `app/controllers/sessions_controller.rb` and `app/models/session.rb`.
-- Admin back office: controllers under `app/controllers/admin/*`, views in `app/views/admin/*`; default superuser admin/admin, login at `/admin` (see README).
-- Public/API: API endpoints under `app/controllers/api/v1/*`; web-facing flows (registrations, passwords, invitations) under `app/controllers/*` plus concerns for Turbo rendering and friendly errors.
-- Domain models: flights/bookings/passengers (`app/models/flight*.rb`, `booking.rb`, `passenger.rb`), hotels (`hotel*.rb`, `hotel_booking.rb`), travel content (`destination.rb`, `deep_travel_*`, `tour_product.rb`), memberships/notifications.
-- Frontend assets: TypeScript entrypoints in `app/javascript/*.ts` bundled to `app/assets/builds`; Tailwind styles in `app/assets/stylesheets/*.css`; images under `app/assets/images/`.
+### The project uses the following tech stack:
 
-## Setup & environment
-- Install system deps: Postgres, Ruby 3.x with Rails 7, Node/npm.
-- App setup (deps, DB, seeds):
-  ```bash
-  ./bin/setup
-  ```
-- Local development server (runs Rails + asset watchers via Procfile.dev):
-  ```bash
-  bin/dev
-  ```
-- Alternate manual start: `bin/rails server` plus `npm run watch:css` and `npm run watch:js`.
+Ruby on Rails 7.2
+Tailwind v3
+Figaro
+PostgreSQL
+Active Storage (Local disk only, NO cloud storage like S3/GCS)
+Kaminari
+Puma
+RSpec
+Stimulus + Turbo (Stream response, no Frame tags, no stream_from)
+ActionCable( solid_queue, no redis )
+FriendlyId
 
-## Package/asset commands
-- Build assets (runs lint + JS bundle): `npm run build`
-- JS only: `npm run build:js` (prod minified: `npm run build:js:prod`)
-- CSS only: `npm run build:css` (app/admin targets); watch in dev: `npm run watch:css`
-- JS watch: `npm run watch:js`
+Do not add or remove any components and avoid upgrading or downgrading components.
 
-## Linting & type checks
-- Full lint (ESLint + TS noEmit): `npm run lint`
-- ESLint only: `npm run lint:eslint`
-- TS types only: `npm run lint:types` or `npm run type-check`
-- Auto-fix lint: `npm run lint:fix`
+**When users ask about deployment/architecture/environment setup** → Read `docs/project.md`
 
-## Tests
-- RSpec suite: `bundle exec rspec`
-- Single file: `bundle exec rspec spec/validators/flight_booking_task_validator.rb`
-- Rails tasks also available via `bundle exec rake spec` if needed.
+## What time you should run/stop project
 
-## Domain-specific validation tool
-- CLI validation for flight booking tasks lives in `lib/tasks/vision_validate.rake` with validator at `spec/validators/flight_booking_task_validator.rb`.
-- Common commands:
-  ```bash
-  bundle exec rake vision:help
-  bundle exec rake vision:validate departure_city=深圳 arrival_city=武汉 departure_date=2025-01-15
-  ```
-- Refer to `VISION_VALIDATION.md` and docs/CLI_VALIDATION_GUIDE.md for parameter options (passenger_name, contact_phone, insurance flags, should_complete_payment, etc.).
+Restarting project is unnecessary because Rails automatically hot-reloads code changes in most cases. Changes to the following explicitly require a restart:
+- `config/` directory files (except `config/routes.rb`)
+- `Gemfile`
+- `config/application.yml`
+- `config/appname.txt`
 
-## Key docs to consult
-- Root README.md: installation prerequisites, admin defaults, tech stack, quick start (`./bin/setup`, `bin/dev`).
-- IMPLEMENTATION_SUMMARY.md: overview of the vision validation tool, file map, and usage examples.
-- docs/PROJECT_STRUCTURE.md: curated map of docs and core files.
-- docs/CLI_VALIDATION_GUIDE.md, docs/README.md, VISION_VALIDATION.md: detailed guidance on the validation workflow and task definitions.
+**CRITICAL: If you run `rails g authentication`, `rails g stripe_pay`, or `rails g llm`, you MUST run `touch tmp/restart.txt` at the END after ALL tasks are complete.**
 
-## Architectural map
-- Controllers:
-  - `app/controllers/admin/*`: admin dashboard CRUD for users, bookings, flights, etc.
-  - `app/controllers/api/v1/*`: JSON auth/profile endpoints; API base at `app/controllers/api/base_controller.rb`.
-  - `app/controllers/identity/*`: email/password lifecycle (verification, reset, update) using Devise-like flows without Devise.
-  - General web controllers (registrations, sessions, invitations) plus concerns for Turbo rendering (`turbo_compatible_render_concern.rb`), friendly errors, and CSRF dev bypass.
-- Models: core booking/flight/hotel/membership/notification entities under `app/models` with standard ActiveRecord relations; `Current` used for per-request context.
-- Views: HTML/Turbo in `app/views`; admin views under `app/views/admin`; mailers in `app/views/*mailer*` (if present).
-- Assets: Tailwind CSS and TypeScript/Stimulus entrypoints compiled by esbuild into Propshaft pipeline (`app/assets/builds`).
-- Background jobs: good_job configured (check `config/initializers/good_job.rb` if modifying queues/crons).
+## MANDATORY PROJECT WORKFLOW - FOLLOW EXACTLY IN THIS ORDER
 
-## Notes for Claude
-- Prefer using `bundle exec` for Ruby tasks to match locked gem versions.
-- When touching validation tooling, mirror docs in `VISION_VALIDATION.md` and `docs/*GUIDE*.md` to keep CLI examples consistent.
-- Keep admin defaults (admin/admin) only in dev context; avoid altering without coordination.
+**STOP! Before creating ANY models or controllers, you MUST complete these steps first:**
+
+### Step 1: REQUIRED - Update Application Name and Design System First
+**ALWAYS start by updating the application name:** `echo "YourAppName" > config/appname.txt`
+
+**ALWAYS start by updating existing design system variables in `app/assets/stylesheets/application.css`** (using `npm run build:css` to keep it right). DO NOT create any models/controllers before this.
+
+**ALWAYS use HSL colors in application.css and tailwind.config.js**
+
+If there are rgb colors in index.css, make sure to not use them in tailwind.config.js wrapped in hsl functions as this will create wrong colors
+
+CRITICAL: USE SEMANTIC TOKENS FOR COLORS, GRADIENTS, FONTS, ETC. It's important you follow best practices. DO NOT use direct colors like text-white, text-black, bg-white, bg-black, etc. Everything must be themed via the design system defined in the `application.css` and `tailwind.config.js` files!
+
+**NEVER use `@apply group` in CSS** - `group` class should only be added in HTML templates, not in CSS @apply directives.
+
+**USE EXISTING COMPONENTS**: The system has complete .btn-*, .card-*, .alert-*, .badge-*, .form-* classes. Use these instead of creating new ones. See `application.css` header for full list. Custom components go in application.css bottom section. NEVER modify `components.css`.
+
+Pay attention to contrast, color, and typography.
+
+### Step 2: REQUIRED - Develop demo view based Design System and user requirements
+Develop a demo view based on the new design system and user requirements, allowing users to quickly see a UI effect. The view should be located at `app/views/shared/demo.html.erb` (Only write body content, The system has already completed route configuration - when there's no home/index.html.erb, the homepage will automatically render this view)
+
+### Step 3: REQUIRED - Testing visit '/'
+**ALWAYS run the project, then use `curl http://localhost:<PORT>/` to ensure these is no error**
+
+### Step 4: Then proceed with other features
+Only after completing Steps 1-3, you can create other models and controllers.
+
+### Step 5: MANDATORY - Pass ALL tests and Remove Demo Before Task Completion
+**CRITICAL: Run `rake test` with tool run_cmds and ensure ALL tests pass before delivering any feature**
+- This is NON-NEGOTIABLE - never deliver with failing tests
+- Run multiple times until all tests pass (see Testing Requirements section)
+- **If you are planning tasks with TodoWrite tool, ALWAYS include "Run rake test and ensure all tests pass" as a specific task item**
+- Remove demo page and references after ALL tests pass.
+
+
+## Some important tips when Developing user authentication/payment/LLM-calling(AI APP) system
+
+**⚠️ BEFORE CREATING ANY MODELS - CHECK THESE GENERATORS FIRST:**
+
+When developing features that require User or Order models, **DO NOT create them manually**. Use these generators instead:
+
+1. **User Authentication System**: Use `rails generate authentication` to generate User model and authentication system
+   - **IMPORTANT**: Before running this generator, ensure NO User model exists
+   - The generator creates: User model, migration, sessions, authentication logic, and user pages
+   - If User model already exists, remove it first to avoid conflicts
+
+2. **Stripe Payment System**: Use `rails generate stripe_pay [--auth]` to generate polymorphic Payment model
+   - **CRITICAL**: Generates Payment model (NOT Order) - Payment works with ANY business model via polymorphic association
+   - Use `--auth` option to add user association (requires User model exists)
+   - **Payment Model Pattern**:
+     - Payment = Technical layer (handles Stripe integration, payment status)
+     - Order/Subscription/Booking = Business layer (your domain logic)
+     - Payment belongs_to :payable (polymorphic) - can attach to any model
+   - **Generator creates**: Payment model, controller, service, partial views, admin interface
+   - **You MUST create**: Your business model (Order/Subscription/etc), payment views (show.html.erb, success.html.erb)
+   - **Example usage**: See `lib/generators/stripe_pay/USAGE` for complete examples
+
+3. **LLM Integration:**: Use `rails generate llm` to generate LLM service infrastructure. Always prefer streaming via ActionCable - use `LlmStreamJob.perform_later(channel_name:, prompt:, system:)` for real-time streaming responses. Auto-configures LLM_BASE_URL, LLM_API_KEY, LLM_MODEL in application.yml. When storing LLM messages, include `LlmMessageValidationConcern` - don't validate role & content yourself.
+
+Do not recreate administrator functionality in User model. Administrator system already exists. Adding admin page low priority.
+
+
+## Some important tips when coding
+
+**CRITICAL: Demo File Management**
+- `app/views/shared/demo.html.erb` is ONLY for early development preview with fake data - NEVER copy its content to home/index.html.erb
+- Once ANY real homepage exists (like `app/views/home/index.html.erb`), you MUST delete demo.html.erb immediately
+- NEVER reference or link to demo.html.erb in production features - create real pages with real data from database instead
+- Demo serves as temporary placeholder until real pages are developed - copying demo code creates incomplete links and fake data issues
+
+Do not generate any fake data that should originally be in the database for users.
+
+Do not write any business logic in the admin backend that should only be for website management and maintenance.
+
+Generate images using this placeholder website: https://images.unsplash.com/ and simultaneously verify accessibility with `curl` if you need static assets.
+
+**ActiveStorage in Seeds**: When creating seed data for models with image attachments, Use unsplash image for pretty UI. Example: `Photo.create!(title: 'Demo', image: { io: URI.open('https://images.unsplash.com/xxx'), filename: 'photo.jpg' })`.
+
+**Image Processing**: Prefer native ActiveStorage variants. If custom processing needed, use `ImageProcessing::Vips` only. Forbidden: MiniMagick, direct Vips::Image.
+
+When installing any new gem or npm packages, always specify a version you are most familiar with and suitable for the project. Do not use the latest version directly.
+
+**ALWAYS prefer `rails generate models` for batch model generation:**
+- Syntax: `rails g models product name:string:default=Untitled price:decimal:default=0 + category name:string + tag name:string color:string:default=#000000`
+- Separator: `+` splits different models
+- Enhanced syntax support:
+  - **Default values**: `field:type:default=value` (e.g., `status:string:default=draft`, `count:integer:default=0`)
+  - **Serialize**: `field:text:serialize` (only for text/string; json/jsonb auto-handled)
+- **Protected names**: Cannot use `user`, `order`, `payment`, etc. (suggests alternatives)
+
+Use `rails generate model xxx` only when generating a single model (supports same enhanced syntax as above).
+
+Use `rails generate service xxx` to generate a service file, not generate by yourself.
+
+Use `rails generate admin_crud xxx` (where xxx is your model name that you created before) to create the initial CRUD when developing the admin management page, modify generated code for free.
+
+Use `rails generate controller xxx [action1] [action2] [--auth] [--single]` (where xxx is your controller name, action is optional(all actions by default), --auth means need authenticate_user!, --single generates singular resource without index action) to create controllers when developing the user-side functionality, modify generated code for free.
+
+Use `rails generate channel xxx [action1] [action2] [--auth]` to create ActionCable channels. Generates BOTH xxx_channel.rb (WebSocket) AND xxx_controller.ts (handles BOTH WebSocket AND UI interactions). Don't create separate controllers - extend the generated one. --auth means need current_user and authenticate_user!
+
+Use `rails generate pwa` to generate Progressive Web App setup with manifest, service worker, and install controller. Auto-detects app name from config.x.appname and theme color from application.css --color-primary.
+
+Use `rails generate stimulus_controller xxx` to create new Stimulus controller, not generate by yourself.
+
+**⚠️ TURBO STREAM ARCHITECTURE - Mandatory Rules:**
+
+**What is Turbo Stream?**
+- Turbo Stream = Response format (render xxx.turbo_stream.erb) for partial DOM updates
+- ❌ NOT `turbo_stream_from` in views (we don't use this pattern)
+- ❌ NOT `<turbo-frame>` tags (we don't use Frame feature)
+
+**Frontend (Stimulus):**
+- ❌ NO `fetch()` - breaks Turbo Drive, requires manual DOM updates
+- ❌ NO `preventDefault() + requestSubmit()` - preventDefault blocks submission
+- ✅ Stimulus for UI only (toggle, show/hide) - NOT for data submission
+
+**Backend (Controllers):**
+- ✅ Prefer HTML: Render normal HTML views by default
+- ✅ Use Turbo Stream when needed: For partial updates, create `action.turbo_stream.erb` templates
+- ❌ NO `respond_to` blocks - unnecessary branching
+- ❌ NO `format.html/json/xml` - violates architecture
+- ❌ NO `render json:` - JSON data passing is disabled (API namespace `app/controllers/api/` exempt)
+- ❌ NO `head :ok` - frontend cannot determine UI updates
+
+**ActionCable Channel Pattern:**
+- Frontend calls backend: `this.perform('methodName', {params})`
+- Backend receives: Define `def methodName(data)` in channel
+- Backend broadcasts: `ActionCable.server.broadcast(channel, {type: 'event-name', data: {}})`
+- Type-based routing: Frontend defines `handleEventName(data)` method, backend triggers it via `type: 'event-name'`
+- ❌ NO manual message parsing - the routing happens automatically
+
+**⚠️ STIMULUS TESTING - CRITICAL COMPLIANCE**:
+- ALWAYS run `bundle exec rspec spec/javascript/stimulus_validator_spec.rb` after ANY Stimulus-related changes
+- ALL stimulus validator errors are REAL errors, NOT false positives - fix them immediately
+- NEVER dismiss or ignore stimulus validator failures as "misleading" or "incorrect"
+- These tests validate critical controller-view integration - failures mean broken functionality
+
+Use FriendlyId (already configured) if need slug URLs. For user-facing content use `friendly_id :title, use: :slugged`, for admin/API use simple IDs.
+
+Every form should include error messages using the shared partial. Add `<%= render 'shared/form_error_message', model: @your_model %>` at the beginning of every form for consistent error display. Never write nested form.
+
+## 🎯 FRONTEND DEVELOPMENT RULES - STIMULUS + TURBO + TYPESCRIPT
+
+**MANDATORY**: ALL frontend interactions MUST use Stimulus controllers. NO inline JavaScript allowed.
+
+ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure JavaScript or jQuery allowed.
+
+## Testing Requirements
+
+**MANDATORY**:
+- View/Controller changes: `bundle exec rspec spec/requests/xxx_spec.rb` must pass
+- Major changes or before delivery: Run full `rake test` to ensure stability
+
+`rake test` is configured to only show 5 failed test cases at a time, so you should repeatedly run rake test if these have errors (no more than 10 rounds) until all tests pass
+
+For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
+```bash
+curl -H 'Authorization: Bearer <token>' http://localhost:<PORT>/your_endpoint
+```
+
+Do not use `rails console`, use `rails runner` instead if you want insert or check db data.
+
+Use `bundle exec rspec spec/requests/xxx_spec.rb --format documentation`( not -v or --version ) for single test.
+
+**When you see "Views for xxx are not yet developed" error during testing, immediately create the corresponding view file, then re-run the tests.**
+
+Temporary files should be written in the `tmp` directory.
+
+## Debugging Frontend Errors
+
+**Frontend Error Report Protocol:**
+1. **Read logs FIRST** - Don't guess, check Run project output and stack traces
+2. **Identify root cause** - What action triggered it? What's the actual error?
+3. **Minimal fix** - Fix only what's broken based on logs
+4. **Test** - Verify the exact scenario that failed
+
+## Code Quality
+
+**FAIL FAST PRINCIPLE:**
+- NEVER use default values to hide missing required data
+- Let functions return `nil` or raise errors when data is missing
+- Validate inputs early and explicitly
+- Avoid "silent failures" that mask bugs
+
+**CODE COMMENTS:**
+- Minimal comments, focus on self-documenting code
+- English only, explain WHY not WHAT
+- No obvious comments that repeat the code
+
+## Some files never edit
+
+Never edit `application.html.erb`, `admin/base_controller.rb`, `clipboard_controller.ts`, `dropdown_controller.ts`, `theme_controller.ts`.
