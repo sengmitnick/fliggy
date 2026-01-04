@@ -25,14 +25,22 @@
       <% if current_user&.passengers&.any? %>
         <!-- Manual Add Button -->
         <div class="px-4 py-3 border-b border-gray-100">
-          <button 
-            data-action="click->hotel-traveler-selector#closeModal"
-            class="w-full py-3 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+          <%= link_to new_passenger_path(
+            return_to: 'hotel_booking_new',
+            source: 'hotel',
+            hotel_id: @hotel.id,
+            room_id: params[:room_id],
+            check_in: params[:check_in],
+            check_out: params[:check_out],
+            rooms: params[:rooms],
+            adults: params[:adults],
+            children: params[:children]
+          ), class: "w-full py-3 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 font-medium hover:bg-gray-50 transition-colors" do %>
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
             </svg>
             手动添加
-          </button>
+          <% end %>
         </div>
 
         <!-- From Contacts Button -->
@@ -92,11 +100,19 @@
           <div class="text-gray-500 text-base mb-2">暂无常用出行人</div>
           <div class="text-sm text-gray-400 mb-6">请添加常用出行人信息以便快速预订</div>
           
-          <button 
-            data-action="click->hotel-traveler-selector#closeModal"
-            class="px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors">
+          <%= link_to new_passenger_path(
+            return_to: 'hotel_booking_new',
+            source: 'hotel',
+            hotel_id: @hotel.id,
+            room_id: params[:room_id],
+            check_in: params[:check_in],
+            check_out: params[:check_out],
+            rooms: params[:rooms],
+            adults: params[:adults],
+            children: params[:children]
+          ), class: "px-6 py-3 rounded-full bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors" do %>
             手动输入信息
-          </button>
+          <% end %>
         </div>
       <% end %>
     </div>

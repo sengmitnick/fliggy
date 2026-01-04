@@ -5,24 +5,43 @@ class BookingsController < ApplicationController
   def index
     @status_filter = params[:status] || 'all'
     
-    @bookings = current_user.bookings.includes(:flight, :return_flight)
-                           .order(created_at: :desc)
+    # Fetch flight bookings
+    flight_bookings = current_user.bookings.includes(:flight, :return_flight)
+                                  .order(created_at: :desc)
+    
+    # Fetch hotel bookings
+    hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
+                                 .order(created_at: :desc)
     
     # Filter by status
     case @status_filter
     when 'pending'
-      @bookings = @bookings.where(status: 'pending')
+      flight_bookings = flight_bookings.where(status: 'pending')
+      hotel_bookings = hotel_bookings.where(status: 'pending')
     when 'upcoming'
-      @bookings = @bookings.where(status: ['paid', 'completed'])
-                           .where('bookings.created_at >= ?', Date.today)
+      flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
+                                       .where('bookings.created_at >= ?', Date.today)
+      hotel_bookings = hotel_bookings.where(status: ['paid', 'confirmed'])
+                                     .where('hotel_bookings.check_in_date >= ?', Date.today)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
-      @bookings = @bookings.none
+      flight_bookings = flight_bookings.none
+      hotel_bookings = hotel_bookings.none
     when 'refund'
-      @bookings = @bookings.where(status: 'cancelled')
+      flight_bookings = flight_bookings.where(status: 'cancelled')
+      hotel_bookings = hotel_bookings.where(status: 'cancelled')
     end
     
-    @bookings = @bookings.page(params[:page]).per(10)
+    # Combine and sort by created_at
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a)
+                    .sort_by(&:created_at).reverse
+    
+    # Manual pagination
+    @page = (params[:page] || 1).to_i
+    @per_page = 10
+    @total_count = @all_bookings.length
+    @total_pages = (@total_count.to_f / @per_page).ceil
+    @bookings = @all_bookings[(@page - 1) * @per_page, @per_page] || []
   end
 
   def new

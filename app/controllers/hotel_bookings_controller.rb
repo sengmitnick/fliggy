@@ -11,10 +11,13 @@ class HotelBookingsController < ApplicationController
       check_out_date: params[:check_out] || (Date.today + 1.day),
       rooms_count: params[:rooms]&.to_i || 1,
       adults_count: params[:adults]&.to_i || 1,
-      children_count: params[:children]&.to_i || 0
+      children_count: params[:children]&.to_i || 0,
+      insurance_type: 'none',
+      insurance_price: 0
     )
     
     @booking.calculate_total_price
+    @insurance_options = InsuranceService.available_options(booking_class: 'HotelBooking')
   end
 
   def create
@@ -27,10 +30,36 @@ class HotelBookingsController < ApplicationController
     @booking.user = Current.user if Current.user
     @booking.calculate_total_price
     
-    if @booking.save
-      redirect_to success_hotel_booking_path(@booking)
-    else
+    # Process insurance if provided
+    if params[:hotel_booking][:insurance_type].present?
+      flow_service = BookingFlowService.new(@booking)
+      flow_service.process_insurance(
+        params[:hotel_booking][:insurance_type],
+        trip_type: :single,
+        trip_count: 1
+      )
+    end
+    
+    # Lock the room for 10 minutes
+    flow_service = BookingFlowService.new(@booking)
+    unless flow_service.lock_resource
+      flash.now[:alert] = '房间锁定失败，请重试'
+      @insurance_options = InsuranceService.available_options(booking_class: 'HotelBooking')
       render :new, status: :unprocessable_entity
+      return
+    end
+    
+    if @booking.save
+      respond_to do |format|
+        format.html { redirect_to hotel_booking_path(@booking) }
+        format.json { render json: { success: true, booking_id: @booking.id } }
+      end
+    else
+      @insurance_options = InsuranceService.available_options(booking_class: 'HotelBooking')
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @booking.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -38,6 +67,32 @@ class HotelBookingsController < ApplicationController
     @booking = HotelBooking.find(params[:id])
     @hotel = @booking.hotel
     @hotel_room = @booking.hotel_room
+    
+    # Check if room lock has expired
+    if BookingFlowService.lock_expired?(@booking) && @booking.status == 'pending'
+      flash[:alert] = '订单已过期，请重新预订'
+      redirect_to hotel_path(@hotel)
+    end
+  end
+
+  def pay
+    @booking = HotelBooking.find(params[:id])
+    
+    flow_service = BookingFlowService.new(@booking)
+    if flow_service.complete_payment
+      respond_to do |format|
+        format.html { redirect_to success_hotel_booking_path(@booking) }
+        format.json { render json: { success: true } }
+      end
+    else
+      respond_to do |format|
+        format.html { 
+          flash[:alert] = flow_service.errors.join(', ')
+          redirect_to hotel_path(@booking.hotel), status: :unprocessable_entity
+        }
+        format.json { render json: { success: false, errors: flow_service.errors }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def success
@@ -59,7 +114,9 @@ class HotelBookingsController < ApplicationController
       :guest_phone,
       :payment_method,
       :coupon_code,
-      :special_requests
+      :special_requests,
+      :insurance_type,
+      :insurance_price
     )
   end
 end

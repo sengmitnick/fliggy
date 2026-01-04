@@ -4,11 +4,29 @@ class TripsController < ApplicationController
     @full_render = true
     if current_user
       # 已登录用户：加载真实订单数据（首次5个）
-      @bookings = current_user.bookings.includes(:flight).where('flights.flight_date >= ?', Date.today).references(:flights).order('flights.flight_date ASC, flights.departure_time ASC').limit(5)
+      # Fetch flight bookings
+      flight_bookings = current_user.bookings.includes(:flight).where('flights.flight_date >= ?', Date.today).references(:flights)
+      
+      # Fetch hotel bookings (upcoming check-ins)
+      hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
+                                   .where('hotel_bookings.check_in_date >= ?', Date.today)
+                                   .where(status: ['paid', 'confirmed'])
+      
+      # Combine both types sorted by date
+      # For flights, use flight_date; for hotels, use check_in_date
+      combined = (flight_bookings.to_a + hotel_bookings.to_a).sort_by do |item|
+        if item.is_a?(Booking)
+          [item.flight.flight_date, item.flight.departure_time]
+        else # HotelBooking
+          [item.check_in_date, Time.parse('00:00')]
+        end
+      end
+      
+      @bookings = combined.first(5)
       @has_upcoming_trips = @bookings.any?
       
       # 获取总数，用于判断是否还有更多
-      @total_bookings_count = current_user.bookings.joins(:flight).where('flights.flight_date >= ?', Date.today).count
+      @total_bookings_count = combined.length
       @has_more = @total_bookings_count > 5
     else
       # 未登录用户：显示演示数据
@@ -38,10 +56,27 @@ class TripsController < ApplicationController
     page = params[:page].to_i
     offset = page * 5
     
-    @bookings = current_user.bookings.includes(:flight).where('flights.flight_date >= ?', Date.today).references(:flights).order('flights.flight_date ASC, flights.departure_time ASC').offset(offset).limit(5)
+    # Fetch flight bookings
+    flight_bookings = current_user.bookings.includes(:flight).where('flights.flight_date >= ?', Date.today).references(:flights)
+    
+    # Fetch hotel bookings
+    hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
+                                 .where('hotel_bookings.check_in_date >= ?', Date.today)
+                                 .where(status: ['paid', 'confirmed'])
+    
+    # Combine and sort
+    combined = (flight_bookings.to_a + hotel_bookings.to_a).sort_by do |item|
+      if item.is_a?(Booking)
+        [item.flight.flight_date, item.flight.departure_time]
+      else
+        [item.check_in_date, Time.parse('00:00')]
+      end
+    end
+    
+    @bookings = combined[offset, 5] || []
     
     # 判断是否还有更多
-    @total_bookings_count = current_user.bookings.joins(:flight).where('flights.flight_date >= ?', Date.today).count
+    @total_bookings_count = combined.length
     @has_more = @total_bookings_count > (offset + 5)
   end
 

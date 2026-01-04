@@ -1,0 +1,65 @@
+<!-- Insurance recommendation modal - Shared between booking types -->
+<div data-<%= controller_name %>-target="insuranceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+  <div class="bg-white rounded-t-3xl w-full max-w-2xl mx-auto pb-8 animate-slide-up">
+    <button type="button" data-action="click-><%= controller_name %>#skipInsurance" class="absolute top-4 right-4 text-gray-400 text-2xl">
+      ×
+    </button>
+    
+    <!-- Insurance illustration -->
+    <div class="relative h-48 bg-gradient-to-b from-orange-400 to-orange-600 rounded-t-3xl overflow-hidden">
+      <div class="absolute inset-0 flex items-center justify-center">
+        <!-- Shield/Protection icon -->
+        <svg class="w-32 h-32 text-white opacity-90" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="absolute bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-full font-bold">
+        <%= local_assigns[:max_coverage] || '最高保100万' %>
+      </div>
+    </div>
+    
+    <div class="px-6 pt-6">
+      <h3 class="text-xl font-bold text-center mb-2">
+        <span class="text-red-500">注意!</span>你未添加保障
+      </h3>
+      
+      <div class="text-center text-gray-600 mb-6">
+        <p class="mb-2">建议添加:<%= local_assigns[:recommended_insurance] || '旅行保障' %> 
+          <span class="text-orange-500">¥<%= local_assigns[:recommended_price] || '25' %></span>
+          <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
+          </svg>
+        </p>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 inline-flex items-center">
+          <span class="text-yellow-600 mr-2">✓</span>
+          <span class="text-sm">保障升级</span>
+          <span class="mx-2">|</span>
+          <span class="text-sm text-orange-500"><%= local_assigns[:coverage_description] || '多重保障' %></span>
+        </div>
+      </div>
+      
+      <p class="text-xs text-gray-400 text-center mb-6">
+        本模块为保险按保页面，由蚂蚁保险代理有限公司展示
+        <svg class="inline w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 12l-6 6h12l-6-6z"/>
+        </svg>
+      </p>
+      
+      <div class="flex gap-3">
+        <button type="button" data-action="click-><%= controller_name %>#skipInsurance" 
+                class="flex-1 py-4 border-2 border-gray-300 rounded-full text-gray-700 font-bold">
+          放弃
+        </button>
+        <button type="button" 
+                data-action="click-><%= controller_name %>#selectInsurance"
+                data-insurance-type="<%= local_assigns[:default_insurance_type] || 'standard' %>"
+                data-insurance-price="<%= local_assigns[:default_insurance_price] || '50' %>"
+                class="flex-1 py-4 rounded-full text-white font-bold"
+                style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
+          立即添加
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

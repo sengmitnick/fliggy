@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-gray-50 pb-24">
   <!-- 顶部导航栏 -->
-  <div class="bg-white border-b border-gray-200 sticky top-0 z-50">
+  <div class="bg-white border-b border-gray-200 sticky top-0 z-40">
     <div class="flex items-center justify-between p-4">
       <div class="flex items-center space-x-3">
         <%= link_to hotel_path(@hotel), class: "text-gray-600" do %>
@@ -13,7 +13,13 @@
     </div>
   </div>
 
-  <%= form_with model: @booking, url: hotel_bookings_path, method: :post, class: "space-y-2", data: { controller: "payment-modal hotel-traveler-selector" } do |f| %>
+  <!-- Controller wrapper -->
+  <div data-controller="hotel-booking payment-confirmation"
+       data-payment-confirmation-amount-value="<%= (@hotel_room.price * @booking.rooms_count + (@booking.insurance_price || 0)).to_i %>"
+       data-payment-confirmation-user-email-value="<%= current_user.email %>"
+       data-payment-confirmation-payment-url-value="/hotel_bookings/<%='BOOKING_ID_PLACEHOLDER'%>/pay"
+       data-payment-confirmation-success-url-value="/hotel_bookings/<%='BOOKING_ID_PLACEHOLDER'%>/success">
+    <%= form_with model: @booking, url: hotel_bookings_path, method: :post, class: "space-y-2", data: { controller: "payment-modal hotel-traveler-selector", hotel_booking_target: "form" } do |f| %>
     <%= render 'shared/form_error_message', model: @booking %>
     
     <%= f.hidden_field :hotel_room_id, value: @hotel_room.id %>
@@ -23,6 +29,8 @@
     <%= f.hidden_field :adults_count, value: @booking.adults_count %>
     <%= f.hidden_field :children_count, value: @booking.children_count %>
     <%= f.hidden_field :payment_method, value: "花呗", data: { payment_modal_target: "paymentMethodInput" } %>
+    <%= f.hidden_field :insurance_type, id: "hotel_booking_insurance_type", value: "none" %>
+    <%= f.hidden_field :insurance_price, id: "hotel_booking_insurance_price", value: 0 %>
     <%= hidden_field_tag :hotel_id, @hotel.id %>
 
     <!-- 日期和房型信息 -->
@@ -177,6 +185,80 @@
       </div>
     </div>
 
+    <!-- 保险提示 -->
+    <div class="bg-orange-50 px-4 py-3 flex items-center">
+      <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-red-500 font-medium text-sm">出门在外，有保障让家人更安心</span>
+      <div class="ml-auto">
+        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=100&h=60&fit=crop" alt="" class="h-12 w-auto rounded">
+      </div>
+    </div>
+
+    <!-- 酒店保险选项 -->
+    <div class="bg-white p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="font-bold text-gray-900">酒店保险
+          <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="inline-block align-middle">
+            <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">i</text>
+            </svg>
+          </button>
+        </h4>
+      </div>
+
+      <!-- 保险选项卡 -->
+      <div class="space-y-3">
+        <!-- 无保障 -->
+        <label class="relative border-2 border-gray-300 rounded-lg p-4 cursor-pointer transition-all hover:border-gray-400 block" data-insurance-card>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <input type="radio" name="insurance_selection" value="none" class="w-5 h-5"
+                     data-action="change->hotel-booking#selectInsuranceOption"
+                     data-insurance-type="none"
+                     data-insurance-price="0"
+                     checked>
+              <div>
+                <div class="font-bold text-base text-gray-900">无保障</div>
+                <div class="text-xs text-gray-500 mt-1">(放弃保障)</div>
+              </div>
+            </div>
+            <div class="text-red-500 text-xl font-bold">×</div>
+          </div>
+        </label>
+
+        <% if @insurance_options.present? %>
+          <% @insurance_options.each do |key, option| %>
+            <% next if key == :none %>
+            <label class="relative border-2 border-gray-300 rounded-lg p-4 cursor-pointer transition-all hover:border-orange-400 block" data-insurance-card>
+              <div class="flex items-start justify-between">
+                <div class="flex items-start space-x-3 flex-1">
+                  <input type="radio" name="insurance_selection" value="<%= key %>" class="w-5 h-5 mt-1"
+                         data-action="change->hotel-booking#selectInsuranceOption"
+                         data-insurance-type="<%= key %>"
+                         data-insurance-price="<%= option[:price] %>">
+                  <div class="flex-1">
+                    <div class="font-bold text-base text-gray-900"><%= option[:name] %></div>
+                    <% if option[:cancellation_refund] %>
+                      <div class="text-xs text-gray-600 mt-1">取消退款：<%= (option[:cancellation_refund] * 100).to_i %>%</div>
+                    <% elsif option[:hospitalization] %>
+                      <div class="text-xs text-gray-600 mt-1">住院补贴：¥<%= option[:hospitalization] %>/天</div>
+                      <div class="text-xs text-gray-600">交通津贴：¥<%= option[:transportation] %></div>
+                    <% elsif option[:max_coverage] %>
+                      <div class="text-xs text-gray-600 mt-1">最高保障：¥<%= number_with_precision(option[:max_coverage], precision: 0, delimiter: ',') %></div>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="text-red-500 font-bold text-lg">¥<%= option[:price] %></div>
+              </div>
+            </label>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
     <!-- 营销卡片 -->
     <div class="bg-gradient-to-r from-red-50 to-orange-50 mx-4 rounded-lg overflow-hidden">
       <div class="flex items-center p-4">
@@ -194,6 +276,9 @@
       </div>
     </div>
 
+    <!-- Hotel Traveler Selector Modal -->
+    <%= render 'shared/hotel_traveler_selector_modal' %>
+
     <!-- 底部支付栏 -->
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40">
       <div class="max-w-md mx-auto">
@@ -210,7 +295,7 @@
             </div>
           </div>
           <button type="button" 
-            data-action="click->payment-modal#open"
+            data-action="click->hotel-booking#handleSubmit"
             class="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-8 py-3 rounded-full font-bold text-base shadow-lg">
             立即支付
           </button>
@@ -332,8 +417,59 @@
         </div>
       </div>
     </div>
-
-    <!-- Hotel Traveler Selector Modal -->
-    <%= render 'shared/hotel_traveler_selector_modal' %>
   <% end %>
+
+    <!-- 保险推荐弹窗 -->
+  <div data-hotel-booking-target="insuranceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center">
+    <div class="bg-white rounded-t-3xl w-full max-w-2xl mx-auto animate-slide-up">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h3 class="text-xl font-bold text-gray-900 text-center">注意！你未添加保障</h3>
+      </div>
+      
+      <!-- 弹窗内容 -->
+      <div class="px-6 py-6">
+        <div class="text-center mb-6">
+          <div class="text-6xl mb-4">🛡️</div>
+          <p class="text-gray-700 text-base mb-2">建议添加：<span class="font-bold">酒店无理由取消险</span></p>
+          <p class="text-red-500 text-2xl font-bold">¥16</p>
+          <p class="text-xs text-gray-500 mt-2">取消退款100%，让您放心预订</p>
+        </div>
+        
+        <!-- 按钮组 -->
+        <div class="space-y-3">
+          <button type="button" 
+            data-action="click->hotel-booking#selectRecommendedInsurance"
+            data-insurance-type="hotel_cancellation"
+            data-insurance-price="16"
+            class="w-full py-4 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full font-bold text-lg shadow-lg">
+            立即添加
+          </button>
+          <button type="button" 
+            data-action="click->hotel-booking#skipInsurance"
+            class="w-full py-4 bg-gray-100 text-gray-700 rounded-full font-medium text-base">
+            放弃
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认等待弹窗 -->
+  <div data-hotel-booking-target="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-80 mx-auto p-8 text-center animate-fade-in">
+      <!-- 加载动画 -->
+      <div class="mb-6">
+        <svg class="animate-spin h-16 w-16 mx-auto text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">正在锁定房间...</h3>
+      <p class="text-gray-600 text-sm">请稍候，正在为您锁定房间</p>
+    </div>
+  </div>
+  
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
 </div>
