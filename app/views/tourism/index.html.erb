@@ -41,12 +41,12 @@
         <!-- 左侧一列 (约占 1/6 宽度) -->
         <div class="w-1/6 flex flex-col">
           <!-- 跟团游 - 高度占 1/3 -->
-          <div class="h-24 bg-gradient-to-br from-[#ff7e60] to-[#ff5241] flex flex-col items-center justify-center text-white border-b border-r border-[#fdf2cc] relative">
+          <%= link_to tour_groups_path, class: "h-24 bg-gradient-to-br from-[#ff7e60] to-[#ff5241] flex flex-col items-center justify-center text-white border-b border-r border-[#fdf2cc] relative" do %>
             <%= image_tag 'tourism/跟团游.png', class: 'w-8 h-8 opacity-90' %>
             <span class="text-[11px] font-bold mt-1 tracking-tighter flex items-center">
               跟团游<span class="scale-75 ml-0.5">〉</span>
             </span>
-          </div>
+          <% end %>
           <!-- 自由行 - 跨两行高度，高度占 2/3 -->
           <div class="flex-1 bg-gradient-to-br from-[#7c88ff] to-[#5a6bff] flex flex-col items-center justify-center text-white border-r border-[#fdf2cc] relative min-h-[144px]">
             <%= image_tag 'tourism/自由行.png', class: 'w-9 h-9 opacity-90 mb-1' %>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上海旅游页面复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- 搜索栏 -->
+    <div class="sticky top-0 z-10 bg-white px-4 py-2 flex items-center space-x-3">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-1.5 border border-yellow-400">
+            <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <span class="text-gray-700 text-sm">上海</span>
+        </div>
+        <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+    </div>
+
+    <!-- 主导航图标 -->
+    <div class="bg-gray-100 pt-2">
+        <div class="grid grid-cols-5 text-center text-xs text-gray-600">
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-8 h-8 flex items-center justify-center"><svg class="w-6 h-6" fill="gray" viewBox="0 0 20 20"><path d="M11 17a1 1 0 001.447.894l5-2.5A1 1 0 0018 14.5V2.5a1 1 0 00-1.447-.894l-5 2.5A1 1 0 0011 5v12zM9 17V5a1 1 0 00-1.447-.894l-5 2.5A1 1 0 002 7.5v12a1 1 0 001.447.894l5-2.5A1 1 0 009 17z"/></svg></div>
+                <span>综合</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1 bg-white rounded-t-xl pt-1">
+                <div class="w-8 h-8 flex items-center justify-center"><svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M4 10l1-1 8-4 8 4 1 1-9 4-9-4zM3 14l9 4 9-4M3 18l9 4 9-4"/></svg></div>
+                <span class="font-bold text-black text-sm">跟团游</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-8 h-8 flex items-center justify-center"><svg class="w-6 h-6" fill="gray" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+                <span>独立成团</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-8 h-8 flex items-center justify-center"><svg class="w-6 h-6" fill="gray" viewBox="0 0 24 24"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.97 4.13a1.5 1.5 0 01-1.35 0L3.18 17.5a1 1 0 01-.18-1.7l8.47-4.43c.35-.18.73-.27 1.12-.27.39 0 .77.09 1.12.27l6.76 3.53c.32.17.53.5.53.88v.82z"/></svg></div>
+                <span>自由出行</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-8 h-8 flex items-center justify-center"><svg class="w-6 h-6" fill="gray" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
+                <span>出境必备</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 二级导航 -->
+    <div class="bg-white flex px-4 py-3 space-x-6 text-sm text-gray-600 border-b overflow-x-auto hide-scrollbar">
+        <div class="relative flex flex-col items-center font-bold text-black shrink-0">
+            <span>全部</span>
+            <div class="absolute -bottom-1 w-6 h-0.5 bg-black"></div>
+        </div>
+        <span class="shrink-0">多日游</span>
+        <span class="shrink-0">邮轮游</span>
+        <span class="shrink-0">一日游</span>
+    </div>
+
+    <!-- 顶部横排卡片 -->
+    <div class="bg-white p-3 flex space-x-2 overflow-x-auto hide-scrollbar">
+        <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+            <div class="absolute inset-0 bg-blue-900/40 flex flex-col items-center justify-center text-white">
+                <span class="font-bold text-sm">上海+迪士尼</span>
+                <span class="text-[10px] opacity-80">都市乐园精华连线·玩2-3天</span>
+            </div>
+            <div class="w-full h-full bg-blue-300"></div> <!-- Placeholder for image -->
+        </div>
+        <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+            <div class="absolute inset-0 bg-orange-900/40 flex flex-col items-center justify-center text-white">
+                <span class="font-bold text-sm">上海+杭州</span>
+                <span class="text-[10px] opacity-80">探寻华东人文风光·玩2-4天</span>
+            </div>
+            <div class="w-full h-full bg-orange-300"></div>
+        </div>
+        <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+            <div class="absolute inset-0 bg-green-900/40 flex flex-col items-center justify-center text-white">
+                <span class="font-bold text-sm">自然博</span>
+                <span class="text-[10px] opacity-80">探秘文明史</span>
+            </div>
+            <div class="w-full h-full bg-green-300"></div>
+        </div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="bg-white px-4 py-2 border-b">
+        <div class="flex justify-between text-xs text-gray-700 mb-3">
+            <div class="flex items-center">智能排序 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></div>
+            <div class="flex items-center">出发地 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></div>
+            <div class="flex items-center">天数/日期 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></div>
+            <div class="flex items-center">筛选 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg></div>
+        </div>
+        <div class="flex space-x-2 overflow-x-auto hide-scrollbar">
+            <span class="bg-gray-100 px-3 py-1 rounded text-xs flex items-center shrink-0">团类型 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></span>
+            <span class="bg-gray-100 px-3 py-1 rounded text-xs flex items-center shrink-0">游玩路线 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></span>
+            <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">不用早起</span>
+            <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">往返直飞</span>
+            <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">全额退</span>
+        </div>
+    </div>
+
+    <!-- 列表内容 -->
+    <div class="space-y-3 p-3">
+        <!-- 卡片 1 -->
+        <div class="bg-white rounded-xl flex overflow-hidden">
+            <div class="relative w-32 h-44 shrink-0">
+                <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg">一日游</div>
+                <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1">上海出发</div>
+                <div class="w-full h-full bg-sky-200 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>
+                </div>
+            </div>
+            <div class="flex-1 p-2 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-sm leading-snug line-clamp-2">上海+上海天文馆+一日游+随时可定+上午下午场大咖讲解</h3>
+                    <div class="mt-1 flex items-center text-[10px]">
+                        <span class="bg-blue-600 text-white px-1 rounded-sm mr-1 font-bold">4.9</span>
+                        <span class="text-blue-600 font-bold">超棒</span>
+                        <span class="text-gray-400 ml-1">讲解生动，孩子爱听</span>
+                    </div>
+                    <div class="text-[11px] text-gray-500 mt-1">上海天文馆·研学</div>
+                    <div class="flex space-x-1 mt-1">
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">可订明日</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">无自费</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">纯玩无购物</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-end">
+                    <div class="text-[10px] text-gray-400">
+                        <div>天津梦远旅行社专营店</div>
+                        <div>已售9000+</div>
+                    </div>
+                    <div class="text-red-500 font-bold">
+                        <span class="text-xs">¥</span><span class="text-xl">68</span><span class="text-xs font-normal ml-0.5 text-gray-500">起</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 2 -->
+        <div class="bg-white rounded-xl flex overflow-hidden">
+            <div class="relative w-32 h-44 shrink-0">
+                <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg">一日游</div>
+                <div class="w-full h-full bg-indigo-200 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>
+                </div>
+            </div>
+            <div class="flex-1 p-2 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-sm leading-snug">上海+上海科技馆+一日游+快速出票+大咖讲解+精品小团</h3>
+                    <div class="text-[11px] text-gray-500 mt-1">无购物·无自费</div>
+                    <div class="flex space-x-1 mt-1">
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">无自费</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">无购物</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-end">
+                    <div class="text-[10px] text-gray-400">
+                        <div>北京趣发现旅行社专营店</div>
+                        <div>已售7</div>
+                    </div>
+                    <div class="text-red-500 font-bold">
+                        <span class="text-xs">¥</span><span class="text-xl">25</span><span class="text-xs font-normal ml-0.5 text-gray-500">起</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 3 -->
+        <div class="bg-white rounded-xl flex overflow-hidden">
+            <div class="relative w-32 h-44 shrink-0">
+                <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg">一日游</div>
+                <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1">上海出发</div>
+                <div class="w-full h-full bg-pink-200 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/></svg>
+                </div>
+            </div>
+            <div class="flex-1 p-2 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-sm leading-snug line-clamp-2">上海+东方明珠/城市历史发展陈列馆/外滩+一日游+观魔都美景历史...</h3>
+                    <div class="mt-1 flex items-center text-[10px]">
+                        <span class="bg-blue-600 text-white px-1 rounded-sm mr-1 font-bold">4.9</span>
+                        <span class="text-blue-600 font-bold">超棒</span>
+                        <span class="text-gray-400 ml-1">东方明珠美景入画来</span>
+                    </div>
+                    <div class="text-[11px] text-gray-500 mt-1 truncate">外滩·上海城市历史发展陈列馆·东方明珠...</div>
+                    <div class="flex space-x-1 mt-1">
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">可订今日</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">无自费</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">纯玩无购物</span>
+                        <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded">支持改期</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-end">
+                    <div class="text-[10px] text-gray-400">
+                        <div>江苏五方旅行社</div>
+                        <div>已售1000+</div>
+                    </div>
+                    <div class="text-red-500 font-bold">
+                        <span class="text-xs">¥</span><span class="text-xl">109</span><span class="text-xs font-normal ml-0.5 text-gray-500">起</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
