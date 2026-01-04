@@ -418,7 +418,8 @@ export default class extends Controller<HTMLElement> {
           checkmark.setAttribute('class', 'absolute right-1 top-1 w-4 h-4 text-yellow-600')
           checkmark.setAttribute('fill', 'currentColor')
           checkmark.setAttribute('viewBox', '0 0 20 20')
-          checkmark.innerHTML = '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>'
+          checkmark.innerHTML =
+            '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>'
           button.appendChild(checkmark)
         }
       } else {
@@ -493,7 +494,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Handle location success
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private async handleLocationSuccess(position: any): Promise<void> {
     const { latitude, longitude } = position.coords
     console.log('Location obtained:', latitude, longitude)
@@ -532,13 +533,13 @@ export default class extends Controller<HTMLElement> {
 
     } catch (error) {
       console.error('Reverse geocoding error:', error)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       this.handleLocationError(error as any)
     }
   }
 
   // Handle location error
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private handleLocationError(error: any): void {
     let errorMessage = '定位失败'
 

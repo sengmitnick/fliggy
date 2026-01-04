@@ -175,10 +175,8 @@
                 data-date-picker-target="dateButton"
                 class="flex-1 py-2 flex flex-col items-center relative <%= is_selected ? 'bg-yellow-400 rounded-lg' : '' %>">
                 
-                <!-- Today marker -->
-                <% if is_today %>
-                  <div class="absolute top-1 text-xs text-gray-600">今日</div>
-                <% end %>
+                <!-- Today marker (will be shown by JS based on client timezone) -->
+                <div class="absolute top-1 text-xs text-gray-600 hidden" data-today-marker>今日</div>
                 
                 <!-- Selected marker -->
                 <% if is_selected %>

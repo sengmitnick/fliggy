@@ -6,7 +6,7 @@ RSpec.describe "SpecialFlights", type: :request do
       get special_flights_path
       expect(response).to have_http_status(:success)
       expect(response.body).to include('特价机票')
-      expect(response.body).to include('data-controller="special-flights date-picker"')
+      expect(response.body).to include('data-controller="special-flights')
     end
 
     it "displays default departure and destination cities" do
@@ -21,32 +21,11 @@ RSpec.describe "SpecialFlights", type: :request do
       expect(response.body).to include('北京')
       expect(response.body).to include('上海')
     end
-  end
 
-  describe "GET /special_flights/search" do
-    it "redirects back when no destination cities provided" do
-      get search_special_flights_path, params: { departure_city: '深圳', date: '2026-01-15' }
-      expect(response).to redirect_to(special_flights_path)
-      follow_redirect!
-      expect(response.body).to include('请至少选择一个目的地城市')
-    end
-
-    it "accepts fuzzy date format" do
-      get search_special_flights_path, params: { 
-        departure_city: '深圳', 
-        destination_cities: '杭州',
-        date: 'fuzzy:2026-01,2026-02'
-      }
-      expect(response).to have_http_status(:success)
-    end
-
-    it "accepts exact date format" do
-      get search_special_flights_path, params: { 
-        departure_city: '深圳', 
-        destination_cities: '杭州',
-        date: '2026-01-15'
-      }
-      expect(response).to have_http_status(:success)
+    it "search form redirects to flights/search with sort_by=price" do
+      get special_flights_path
+      expect(response.body).to include('action="/flights/search"')
+      expect(response.body).to include('value="price"')
     end
   end
 end

@@ -40,6 +40,20 @@ export default class extends Controller<HTMLElement> {
     // Send client's local date to server for timezone-aware filtering
     const clientToday = this.formatDate(new Date())
     
+    // Initialize with today's date using client timezone
+    this.selectedDateObj = new Date()
+    this.currentDateValue = this.formatDate(this.selectedDateObj)
+    
+    // Update displayed date immediately with client timezone
+    if (this.hasSelectedDateTarget) {
+      this.updateDisplayedDate()
+    }
+    
+    // Update hidden input with client timezone date
+    if (this.hasDateInputTarget) {
+      this.dateInputTarget.value = this.currentDateValue
+    }
+    
     // Only access modal if it exists in this controller's scope
     if (!this.hasModalTarget) {
       console.log("DatePicker: No modal target found, skipping modal setup")
@@ -55,18 +69,6 @@ export default class extends Controller<HTMLElement> {
     
     // Update past date buttons based on client timezone
     this.updatePastDates()
-    
-    // Initialize with today's date if no date is set
-    if (this.currentDateValue) {
-      this.selectedDateObj = new Date(this.currentDateValue)
-    } else {
-      this.selectedDateObj = new Date()
-      this.currentDateValue = this.formatDate(this.selectedDateObj)
-    }
-    // Only update displayed date if target exists (used in modal-based pickers)
-    if (this.hasSelectedDateTarget) {
-      this.updateDisplayedDate()
-    }
     
     // Listen for multi-city events
     // eslint-disable-next-line no-undef
@@ -189,7 +191,8 @@ export default class extends Controller<HTMLElement> {
     const dayName = this.getDayName(this.selectedDateObj)
     
     this.selectedDateTarget.innerHTML = `
-      ${month}<span class="text-base text-gray-600">月</span>${day}<span class="text-base text-gray-600">日 ${dayName}</span>
+      ${month}<span class="text-lg font-medium mx-0.5">月</span>${day}<span class="text-lg font-medium ml-0.5 mr-2">日</span>
+      <span class="text-base text-gray-500 font-medium">${dayName}</span>
     `
   }
 
@@ -255,6 +258,7 @@ export default class extends Controller<HTMLElement> {
   private updatePastDates(): void {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    const todayStr = this.formatDate(today)
     
     this.dateButtonTargets.forEach(button => {
       const dateStr = button.dataset.date
@@ -262,6 +266,12 @@ export default class extends Controller<HTMLElement> {
       
       const buttonDate = new Date(`${dateStr}T00:00:00`)
       buttonDate.setHours(0, 0, 0, 0)
+      
+      // Check if this is today (client timezone)
+      const todayMarker = button.querySelector('[data-today-marker]') as HTMLElement
+      if (dateStr === todayStr && todayMarker) {
+        todayMarker.classList.remove('hidden')
+      }
       
       if (buttonDate < today) {
         // Disable past dates
@@ -274,7 +284,7 @@ export default class extends Controller<HTMLElement> {
       }
     })
     
-    console.log(`DatePicker: Updated ${this.dateButtonTargets.length} date buttons based on client timezone`)
+    console.log(`DatePicker: Updated ${this.dateButtonTargets.length} date buttons based on client timezone (today: ${todayStr})`)
   }
 
   // Switch to exact date tab

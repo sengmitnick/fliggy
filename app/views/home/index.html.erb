@@ -256,9 +256,9 @@
       </button>
 
       <!-- Card 2 - Special Flights -->
-      <button class="relative overflow-hidden rounded-4" onclick="window.showToast('精彩即将上线，敬请期待')">
+      <%= link_to special_flights_path, class: "relative overflow-hidden rounded-4" do %>
         <%= image_tag "home/特价机票.png", class: "w-full h-auto", alt: "特价机票" %>
-      </button>
+      <% end %>
 
       <!-- Card 3 - Flight List -->
       <button class="relative overflow-hidden rounded-4" onclick="window.showToast('精彩即将上线，敬请期待')">

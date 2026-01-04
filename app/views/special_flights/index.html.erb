@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="special-flights date-picker city-selector">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -25,7 +25,7 @@
           </div>
 
           <!-- Search Form -->
-          <%= form_with url: search_special_flights_path, method: :get, data: { turbo: false }, class: "space-y-3" do |f| %>
+          <%= form_with url: search_flights_path, method: :get, data: { turbo: false, controller: "special-flights-form", action: "submit->special-flights-form#handleSubmit" }, class: "space-y-3" do |f| %>
             
             <!-- Departure City -->
             <div class="flex items-center justify-between py-3 border-b border-gray-100">
@@ -34,10 +34,9 @@
                 <button type="button" 
                         data-action="click->city-selector#openDeparture"
                         class="text-lg font-bold text-gray-900">
-                  <span data-city-selector-target="departure"><%= @departure_city %></span>
+                  <span data-city-selector-target="departure">深圳</span>
                 </button>
-                <%= f.hidden_field :departure_city, value: @departure_city, data: { city_selector_target: "departureCityInput" } %>
-                <%= f.hidden_field :destination_city, value: @destination_cities&.first || '杭州', data: { city_selector_target: "destinationCityInput" }, style: "display:none;" %>
+                <%= f.hidden_field :departure_city, value: '深圳', data: { city_selector_target: "departureCityInput" } %>
               </div>
             </div>
 
@@ -46,14 +45,14 @@
               <div class="text-sm text-gray-500">目的地</div>
               <div class="flex items-center gap-2">
                 <button type="button" 
-                        data-action="click->special-flights#openCitySelector"
+                        data-action="click->city-selector#openDestination click->city-selector#switchToMultiSelect"
                         class="text-lg font-bold text-gray-900 flex items-center gap-1">
-                  <span data-special-flights-target="destinationCitiesDisplay"><%= @destination_cities.join(',') %></span>
+                  <span data-city-selector-target="destination">杭州</span>
                   <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                   </svg>
                 </button>
-                <%= f.hidden_field :destination_cities, value: @destination_cities.join(','), data: { special_flights_target: "destinationCitiesInput" } %>
+                <%= f.hidden_field :destination_cities, value: '杭州', data: { city_selector_target: "destinationCityInput" } %>
               </div>
             </div>
 
@@ -65,12 +64,16 @@
                         data-action="click->date-picker#openModal"
                         class="text-base font-medium text-gray-900">
                   <span data-date-picker-target="selectedDate">
-                    未来1个月 <span class="text-sm text-gray-600">出发</span>
+                    <%= Date.today.month %>月<%= Date.today.day %>日 <span class="text-sm text-gray-600">今天</span>
                   </span>
                 </button>
-                <%= f.hidden_field :date, value: "", data: { date_picker_target: "dateInput" } %>
+                <%= f.hidden_field :date, value: Date.today, data: { date_picker_target: "dateInput" } %>
               </div>
             </div>
+
+            <!-- Hidden fields for routing -->
+            <%= f.hidden_field :sort_by, value: 'price' %>
+            <%= f.hidden_field :trip_type, value: 'one_way' %>
 
             <!-- Search Button -->
             <div class="pt-2">
@@ -118,104 +121,9 @@
     </div>
   </div>
 
-  <!-- Multi-City Selector Modal -->
-  <div data-special-flights-target="cityModal" class="hidden fixed inset-0 z-50 overflow-hidden">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black bg-opacity-50" data-action="click->special-flights#closeCityModal"></div>
-    
-    <!-- Modal Content -->
-    <div class="absolute inset-0 flex items-end justify-center">
-      <div class="bg-white w-full max-w-md mx-auto h-[85vh] rounded-t-3xl flex flex-col overflow-hidden">
-        
-        <!-- Header -->
-        <div class="px-4 pt-4 pb-2 bg-white z-20 shrink-0 border-b border-gray-100">
-          <div class="flex justify-between items-center mb-4">
-            <div class="text-lg font-bold text-gray-900">多选目的地</div>
-            <button 
-              data-action="click->special-flights#closeCityModal"
-              class="p-1">
-              <svg class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Search Box -->
-          <div class="bg-gray-100 rounded-xl px-3 py-2.5 flex items-center mb-4">
-            <svg class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input 
-              type="text"
-              data-special-flights-target="searchInput"
-              data-action="input->special-flights#search"
-              placeholder="搜索城市"
-              class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none">
-          </div>
-
-          <!-- Selected Cities Display -->
-          <div class="mb-3">
-            <div class="text-xs text-gray-500 mb-2">已选择目的地</div>
-            <div data-special-flights-target="selectedCitiesContainer" class="flex flex-wrap gap-2">
-              <span class="text-gray-500">未选择目的地</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- City List -->
-        <div data-special-flights-target="cityList" class="flex-1 overflow-y-auto px-4 py-4">
-          <div class="mb-4">
-            <div class="text-sm font-medium text-gray-900 mb-3">热门城市</div>
-            <div class="grid grid-cols-4 gap-3">
-              <% if defined?(@hot_cities) && @hot_cities.present? %>
-                <% @hot_cities.each do |city| %>
-                  <button 
-                    type="button"
-                    data-action="click->special-flights#toggleCity"
-                    data-city-name="<%= city.name %>"
-                    data-city-pinyin="<%= city.pinyin %>"
-                    class="py-2 text-center text-sm rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors <%= @destination_cities.include?(city.name) ? 'bg-primary text-white' : '' %>">
-                    <%= city.name %>
-                  </button>
-                <% end %>
-              <% else %>
-                <% [{name: "北京", pinyin: "beijing"}, {name: "上海", pinyin: "shanghai"}, {name: "广州", pinyin: "guangzhou"}, {name: "杭州", pinyin: "hangzhou"}, {name: "成都", pinyin: "chengdu"}, {name: "深圳", pinyin: "shenzhen"}, {name: "重庆", pinyin: "chongqing"}, {name: "西安", pinyin: "xian"}, {name: "武汉", pinyin: "wuhan"}, {name: "郑州", pinyin: "zhengzhou"}, {name: "昆明", pinyin: "kunming"}, {name: "哈尔滨", pinyin: "haerbin"}].each do |city| %>
-                  <button 
-                    type="button"
-                    data-action="click->special-flights#toggleCity"
-                    data-city-name="<%= city[:name] %>"
-                    data-city-pinyin="<%= city[:pinyin] %>"
-                    class="py-2 text-center text-sm rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors <%= @destination_cities.include?(city[:name]) ? 'bg-primary text-white' : '' %>">
-                    <%= city[:name] %>
-                  </button>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="px-4 py-3 bg-white border-t border-gray-100 flex gap-3">
-          <button 
-            type="button"
-            data-action="click->special-flights#clearAllCities"
-            class="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">
-            清空
-          </button>
-          <button 
-            type="button"
-            data-action="click->special-flights#confirmCitySelection"
-            class="flex-[2] py-3 bg-primary text-white rounded-lg font-bold hover:bg-opacity-90">
-            确定
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Date Picker Modal (Fuzzy Date Version for Special Flights) -->
-  <%= render 'shared/special_flights_date_picker_modal' %>
-
-  <!-- City Selector Modal for Departure -->
+  <!-- City Selector Modal -->
   <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Date Picker Modal -->
+  <%= render 'shared/date_picker_modal' %>
 </div>

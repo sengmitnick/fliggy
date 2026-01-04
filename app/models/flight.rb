@@ -176,9 +176,28 @@ class Flight < ApplicationRecord
     flight_offers.ordered
   end
 
+  # Get minimum offer price from flight_offers (套餐最低价)
+  def min_offer_price
+    flight_offers.minimum(:price) || price
+  end
+
   # Calculate final price after discount
   def final_price
     price - discount_price
+  end
+
+  # Calculate discount percentage (e.g., 20 means 2折, 80 means 8折)
+  def discount_percent
+    return 100 if discount_price.nil? || discount_price.zero?
+    return 100 if price.nil? || price.zero?
+    
+    # Calculate actual discount percentage
+    # discount_price is the amount saved, not the percentage
+    # So if price is 300 and discount_price is 200, final is 100, which is ~3.3折 (33%)
+    actual_price = final_price
+    return 0 if actual_price <= 0
+    
+    (actual_price.to_f / price.to_f * 100).round
   end
 
   # Format departure time

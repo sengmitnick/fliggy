@@ -63,7 +63,7 @@
           <% @flights.each do |flight| %>
             <div data-round-trip-selector-target="outboundFlight" 
                  data-flight-id="<%= flight.id %>" 
-                 data-price="<%= flight.final_price %>"
+                 data-price="<%= flight.min_offer_price %>"
                  data-action="click->round-trip-selector#selectOutbound"
                  class="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition-all">
               
@@ -94,15 +94,16 @@
                   <span class="text-red-500"><%= flight.airline %></span> <%= flight.flight_number %>(中)
                 </div>
                 <div class="text-right">
-                  <div class="text-lg font-bold text-red-500">¥<%= flight.final_price.to_i %></div>
+                  <div class="text-lg font-bold text-red-500">¥<%= flight.min_offer_price.to_i %></div>
                   <div class="text-xs text-gray-400">起</div>
                 </div>
               </div>
 
               <!-- Tags -->
-              <% if flight.discount_price > 0 %>
+              <% cheapest_offer = flight.flight_offers.order(:price).first %>
+              <% if cheapest_offer && cheapest_offer.cashback_amount > 0 %>
                 <div class="mt-2">
-                  <span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">少量¥<%= flight.discount_price.to_i %></span>
+                  <span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">少量¥<%= cheapest_offer.cashback_amount.to_i %></span>
                 </div>
               <% end %>
             </div>
@@ -140,7 +141,7 @@
           <% @return_flights.each do |flight| %>
             <div data-round-trip-selector-target="returnFlight" 
                  data-flight-id="<%= flight.id %>" 
-                 data-price="<%= flight.final_price %>"
+                 data-price="<%= flight.min_offer_price %>"
                  data-action="click->round-trip-selector#selectReturn"
                  class="bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition-all">
               
@@ -171,15 +172,16 @@
                   <span class="text-red-500"><%= flight.airline %></span> <%= flight.flight_number %>(中)
                 </div>
                 <div class="text-right">
-                  <div class="text-lg font-bold text-red-500">¥<%= flight.final_price.to_i %></div>
+                  <div class="text-lg font-bold text-red-500">¥<%= flight.min_offer_price.to_i %></div>
                   <div class="text-xs text-gray-400">起</div>
                 </div>
               </div>
 
               <!-- Tags -->
-              <% if flight.discount_price > 0 %>
+              <% cheapest_offer = flight.flight_offers.order(:price).first %>
+              <% if cheapest_offer && cheapest_offer.cashback_amount > 0 %>
                 <div class="mt-2">
-                  <span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">少量¥<%= flight.discount_price.to_i %></span>
+                  <span class="text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded">少量¥<%= cheapest_offer.cashback_amount.to_i %></span>
                 </div>
               <% end %>
             </div>
@@ -215,7 +217,7 @@
 
 <% else %>
   <!-- Original Single-Way Layout -->
-  <div class="min-h-screen bg-white" data-controller="flight-search flight-filter flight-sort date-picker" data-flight-search-departure-value="<%= @departure_city %>" data-flight-search-destination-value="<%= @destination_city %>" data-flight-search-date-value="<%= @date.to_s %>" data-date-picker-current-date-value="<%= @date.to_s %>">
+  <div class="min-h-screen bg-white" data-controller="flight-search flight-filter flight-sort date-picker" data-flight-search-departure-value="<%= @departure_city %>" data-flight-search-destination-value="<%= @destination_city %>" data-flight-search-date-value="<%= @date.to_s %>" data-date-picker-current-date-value="<%= @date.to_s %>" data-flight-sort-initial-sort-value="<%= @sort_by == 'price' ? 'price_asc' : 'default' %>">
     <!-- Header -->
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
@@ -356,18 +358,17 @@
               
               <!-- Price -->
               <div>
-                <% if flight.discount_price > 0 %>
-                  <div class="text-xs text-gray-400 line-through">¥<%= flight.price.to_i %></div>
-                <% end %>
-                <div class="text-2xl font-bold text-red-500">¥<%= flight.final_price.to_i %></div>
+                <div class="text-2xl font-bold text-red-500">¥<%= flight.min_offer_price.to_i %></div>
+                <div class="text-xs text-gray-400">起</div>
               </div>
             </div>
           </div>
 
           <!-- Tags and Benefits -->
           <div class="flex flex-wrap gap-2 mb-3">
-            <% if flight.discount_price > 0 %>
-              <span class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded">返现金 部分返¥<%= flight.discount_price.to_i %></span>
+            <% cheapest_offer = flight.flight_offers.order(:price).first %>
+            <% if cheapest_offer && cheapest_offer.cashback_amount > 0 %>
+              <span class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded">返现金 部分返¥<%= cheapest_offer.cashback_amount.to_i %></span>
             <% end %>
             <% if rand < 0.5 %>
               <span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded flex items-center gap-1">

@@ -10,6 +10,7 @@ class FlightsController < ApplicationController
     @departure_city = params[:departure_city] || '北京'
     @destination_city = params[:destination_city] || '杭州'
     @trip_type = params[:trip_type] || 'one_way'
+    @sort_by = params[:sort_by] || 'time' # 'time' or 'price'
     
     # Check if either departure or destination contains multiple cities (comma-separated)
     if @departure_city.include?(',') || @destination_city.include?(',')
@@ -52,6 +53,19 @@ class FlightsController < ApplicationController
 
     # Get or generate flights for the outbound route and date
     @flights = Flight.search(@departure_city, @destination_city, @date)
+    
+    # Apply sorting based on sort_by parameter
+    if @sort_by == 'price'
+      # Sort by minimum offer price from flight_offers table
+      @flights = @flights.includes(:flight_offers)
+                         .select('flights.*, MIN(flight_offers.price) as min_price')
+                         .left_joins(:flight_offers)
+                         .group('flights.id')
+                         .order('min_price ASC')
+    else
+      # Default: sort by departure time
+      @flights = @flights.order(:departure_time)
+    end
 
     # Get prices for nearby dates (5 days)
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
@@ -59,6 +73,13 @@ class FlightsController < ApplicationController
     # For round trip, also get return flights
     if @trip_type == 'round_trip' && @return_date
       @return_flights = Flight.search(@destination_city, @departure_city, @return_date)
+      if @sort_by == 'price'
+        @return_flights = @return_flights.includes(:flight_offers)
+                                         .select('flights.*, MIN(flight_offers.price) as min_price')
+                                         .left_joins(:flight_offers)
+                                         .group('flights.id')
+                                         .order('min_price ASC')
+      end
       @return_date_prices = get_date_prices(@destination_city, @departure_city, @return_date)
     end
   end
@@ -66,19 +87,25 @@ class FlightsController < ApplicationController
   # 多选城市中转页面 - 显示所有出发地×目的地的笛卡尔积组合
   def combinations
     departure_cities = params[:departure_city]&.split(',')&.map(&:strip) || ['北京']
-    destination_cities = params[:destination_city]&.split(',')&.map(&:strip) || ['杭州']
+    destination_cities = params[:destination_cities]&.split(',')&.map(&:strip) || ['杭州']
     @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
     @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
     @trip_type = params[:trip_type] || 'one_way'
     @cabin_class = params[:cabin_class] || 'all'
+    @sort_by = params[:sort_by] || 'time'
 
     # 生成所有出发地×目的地的笛卡尔积组合
     @combinations = []
     departure_cities.each do |departure|
       destination_cities.each do |destination|
         # 获取该组合的最低价航班
-        flights = Flight.search(departure, destination, @date)
-        min_price = flights.minimum(:price) || 0
+        flights = Flight.search(departure, destination, @date).includes(:flight_offers)
+        # 使用flight_offers的最低价格
+        min_price = if flights.any?
+          flights.map(&:min_offer_price).min
+        else
+          0
+        end
         
         @combinations << {
           departure_city: departure,
@@ -232,13 +259,16 @@ class FlightsController < ApplicationController
       
       # Check each day in the month
       (start_date..end_date).each do |date|
-        flights = Flight.search(departure_city, destination_city, date)
+        flights = Flight.search(departure_city, destination_city, date).includes(:flight_offers)
         next if flights.empty?
         
-        min_price_flight = flights.min_by(&:price)
-        if min_price_flight && min_price_flight.price < cheapest_price
-          cheapest_price = min_price_flight.price
-          cheapest_flight = min_price_flight
+        # Find flight with minimum offer price
+        flights.each do |flight|
+          min_offer = flight.min_offer_price
+          if min_offer < cheapest_price
+            cheapest_price = min_offer
+            cheapest_flight = flight
+          end
         end
       end
     end
@@ -250,8 +280,13 @@ class FlightsController < ApplicationController
     prices = []
     (-2..2).each do |offset|
       date = center_date + offset.days
-      flights = Flight.search(departure_city, destination_city, date)
-      min_price = flights.minimum(:price) || 0
+      flights = Flight.search(departure_city, destination_city, date).includes(:flight_offers)
+      # Get minimum offer price from all flights on this date
+      min_price = if flights.any?
+        flights.map(&:min_offer_price).min
+      else
+        0
+      end
       
       prices << {
         date: date,
