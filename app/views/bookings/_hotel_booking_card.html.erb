@@ -1,0 +1,108 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden mb-3">
+  <!-- Hotel Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div class="flex items-center space-x-2">
+      <div class="w-6 h-6 bg-secondary/10 rounded flex items-center justify-center">
+        <svg class="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+      </div>
+      <span class="text-sm font-semibold text-text-primary"><%= booking.hotel.name %></span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'cancelled' %>
+        <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded">已关闭</span>
+      <% elsif booking.status == 'pending' %>
+        <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded">待付款</span>
+      <% elsif booking.status == 'paid' || booking.status == 'confirmed' %>
+        <span class="px-2 py-1 bg-success/10 text-success text-xs rounded">预订成功</span>
+      <% elsif booking.status == 'completed' %>
+        <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">已完成</span>
+      <% end %>
+      <button type="button" class="text-text-muted">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hotel Booking Details -->
+  <%= link_to success_hotel_booking_path(booking), class: "block" do %>
+    <div class="px-4 py-4">
+      <!-- Room Type -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex-1">
+          <div class="text-text-primary text-lg font-bold mb-1">
+            <%= booking.hotel_room.room_type %>
+          </div>
+          <div class="text-xs text-text-muted mb-2">
+            <%= booking.hotel.city %> · <%= booking.hotel.address %>
+          </div>
+          <div class="text-xs text-text-muted">
+            入住: <%= booking.check_in_date.strftime('%Y-%m-%d') %>(<%= ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][booking.check_in_date.wday] %>) 
+            - 
+            离店: <%= booking.check_out_date.strftime('%Y-%m-%d') %>(<%= ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][booking.check_out_date.wday] %>)
+          </div>
+          <div class="text-xs text-text-muted mt-1">
+            共<%= booking.nights %>晚 · <%= booking.rooms_count %>间 · <%= booking.adults_count %>位成人
+            <% if booking.children_count > 0 %>
+              · <%= booking.children_count %>位儿童
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guest Info -->
+      <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
+        <span>入住人: <%= booking.guest_name %></span>
+        <span>|</span>
+        <span><%= booking.guest_phone %></span>
+      </div>
+
+      <!-- Services/Tags -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">酒店预订</span>
+        <% if booking.insurance_type != 'none' %>
+          <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">保险</span>
+        <% end %>
+        <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded"><%= booking.payment_method %></span>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Price Section -->
+  <div class="px-4 py-3 bg-surface-elevated flex items-center justify-between">
+    <div>
+      <div class="text-text-muted text-xs mb-1">
+        <% if booking.status == 'cancelled' %>
+          未付款
+        <% else %>
+          实付款
+        <% end %>
+      </div>
+      <div class="flex items-baseline space-x-1">
+        <span class="text-xs text-text-primary">¥</span>
+        <span class="text-2xl font-bold text-primary"><%= sprintf('%.2f', booking.total_price_with_insurance) %></span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'paid' || booking.status == 'confirmed' || booking.status == 'completed' %>
+        <%= link_to '查看详情', success_hotel_booking_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '再来一单', new_hotel_hotel_booking_path(booking.hotel, 
+          check_in: booking.check_in_date, 
+          check_out: booking.check_out_date,
+          rooms: booking.rooms_count,
+          adults: booking.adults_count,
+          children: booking.children_count,
+          room_id: booking.hotel_room_id
+        ), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% elsif booking.status == 'cancelled' %>
+        <%= link_to '重新预订', new_hotel_hotel_booking_path(booking.hotel), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+      <% elsif booking.status == 'pending' %>
+        <%= link_to '取消订单', '#', class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '立即支付', success_hotel_booking_path(booking), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% end %>
+    </div>
+  </div>
+</div>

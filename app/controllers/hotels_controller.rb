@@ -11,13 +11,38 @@ class HotelsController < ApplicationController
     @price_min = params[:price_min]
     @price_max = params[:price_max]
     @quick_filter = params[:quick_filter]
+    @hotel_type = params[:type] # hotel, homestay
+    @region = params[:region]
+    @location_type = params[:location_type] || 'domestic' # domestic, international
+    @room_category = params[:room_category] # hourly - 用于显示钟点房
     @query = params[:q]
 
     @hotels = Hotel.all
+    
+    # 位置筛选：国内/国际
+    if @location_type == 'international'
+      @hotels = @hotels.international
+    else
+      @hotels = @hotels.domestic
+    end
+    
+    # 城市筛选
     @hotels = @hotels.by_city(@city)
     
     # 智能区域排序：如果搜索区级城市（如"深圳市南山区"），优先显示该区的酒店
     district = extract_district(@city)
+    
+    # 地区筛选
+    @hotels = @hotels.by_region(@region) if @region.present?
+    
+    # 类型筛选：酒店/民宿/钟点房
+    if @room_category == 'hourly'
+      # 钟点房：查询所有有钟点房的住宿场所
+      @hotels = @hotels.with_hourly_rooms
+    elsif @hotel_type.present?
+      # 酒店或民宿：按 hotel_type 筛选
+      @hotels = @hotels.by_type(@hotel_type)
+    end
     
     # Apply search filter if query present
     if @query.present?
@@ -48,6 +73,7 @@ class HotelsController < ApplicationController
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0
+    @room_category = params[:room_category] # 房型分类：overnight 或 hourly
   end
 
   def policy
@@ -57,7 +83,19 @@ class HotelsController < ApplicationController
 
   def search
     # Redirect to index with query parameter
-    redirect_to hotels_path(q: params[:q], city: params[:city], check_in: params[:check_in], check_out: params[:check_out], rooms: params[:rooms], adults: params[:adults], children: params[:children])
+    redirect_to hotels_path(
+      q: params[:q], 
+      city: params[:city], 
+      check_in: params[:check_in], 
+      check_out: params[:check_out], 
+      rooms: params[:rooms], 
+      adults: params[:adults], 
+      children: params[:children],
+      type: params[:type],
+      region: params[:region],
+      location_type: params[:location_type],
+      room_category: params[:room_category]
+    )
   end
 
   private

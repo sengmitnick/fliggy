@@ -1,0 +1,49 @@
+<%
+  # 根据 URL 参数确定激活的标签
+  location_type = params[:location_type] || 'domestic'
+  hotel_type = params[:type]
+  room_category = params[:room_category]
+  
+  # 确定当前激活的 tab
+  if room_category == 'hourly'
+    active_tab = 'hourly'
+  elsif hotel_type == 'homestay'
+    active_tab = 'homestay'
+  elsif location_type == 'international'
+    active_tab = 'international'
+  else
+    active_tab = 'domestic'
+  end
+%>
+
+<!-- Tab Navigation -->
+<div class="bg-[#F2F3F7] rounded-t-[24px] pt-2 px-1" data-controller="hotel-tabs">
+  <nav class="flex items-end">
+    <% [
+      { key: 'domestic', label: '国内' },
+      { key: 'international', label: '国际' },
+      { key: 'hourly', label: '钟点房' },
+      { key: 'homestay', label: '民宿' }
+    ].each do |tab| %>
+      <% if tab[:key] == active_tab %>
+        <!-- Active Tab -->
+        <div class="relative bg-white flex-1 rounded-t-[12px] px-3 py-2.5 cursor-pointer"
+             data-hotel-tabs-target="tab"
+             data-tab-type="<%= tab[:key] %>"
+             data-action="click->hotel-tabs#switchTab">
+          <div class="flex flex-col items-center">
+            <span class="text-[15px] font-bold text-[#1a1a1a] leading-tight whitespace-nowrap"><%= tab[:label] %></span>
+          </div>
+        </div>
+      <% else %>
+        <!-- Inactive Tab -->
+        <button class="px-2 py-2 flex-1 text-[13px] font-medium text-[#666666] cursor-pointer whitespace-nowrap"
+                data-hotel-tabs-target="tab"
+                data-tab-type="<%= tab[:key] %>"
+                data-action="click->hotel-tabs#switchTab">
+          <%= tab[:label] %>
+        </button>
+      <% end %>
+    <% end %>
+  </nav>
+</div>

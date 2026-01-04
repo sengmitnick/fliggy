@@ -33,9 +33,12 @@ import DateLinkController from "./date_link_controller"
 import HotelGuestSelectorController from "./hotel_guest_selector_controller"
 import HotelDatePickerController from "./hotel_date_picker_controller"
 import PaymentModalController from "./payment_modal_controller"
+import PaymentConfirmationController from "./payment_confirmation_controller"
+import HotelTabsController from "./hotel_tabs_controller"
 import HotelTravelerSelectorController from "./hotel_traveler_selector_controller"
 import ToastController from "./toast_controller"
 import ToastTriggerController from "./toast_trigger_controller"
+import HotelBookingController from "./hotel_booking_controller"
 
 const application = Application.start()
 
@@ -72,8 +75,11 @@ application.register("date-link", DateLinkController)
 application.register("hotel-guest-selector", HotelGuestSelectorController)
 application.register("hotel-date-picker", HotelDatePickerController)
 application.register("payment-modal", PaymentModalController)
+application.register("payment-confirmation", PaymentConfirmationController)
+application.register("hotel-tabs", HotelTabsController)
 application.register("hotel-traveler-selector", HotelTravelerSelectorController)
 application.register("toast", ToastController)
 application.register("toast-trigger", ToastTriggerController)
+application.register("hotel-booking", HotelBookingController)
 
 window.Stimulus = application

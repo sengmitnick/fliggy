@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_30_070512) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_03_091037) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -321,6 +321,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_30_070512) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.datetime "locked_until"
     t.index ["hotel_id"], name: "index_hotel_bookings_on_hotel_id"
     t.index ["hotel_room_id"], name: "index_hotel_bookings_on_hotel_room_id"
     t.index ["user_id"], name: "index_hotel_bookings_on_user_id"
@@ -375,6 +378,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_30_070512) do
     t.integer "available_rooms", default: 10
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "room_category", default: "overnight"
+    t.index ["room_category"], name: "index_hotel_rooms_on_room_category"
   end
 
   create_table "hotels", force: :cascade do |t|
@@ -392,6 +397,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_30_070512) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "hotel_type", default: "hotel"
+    t.string "region"
+    t.boolean "is_domestic", default: true
+    t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
+    t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
+    t.index ["region"], name: "index_hotels_on_region"
   end
 
   create_table "itineraries", force: :cascade do |t|

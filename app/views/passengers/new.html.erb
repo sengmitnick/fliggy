@@ -7,6 +7,16 @@
           flights_path(open_passenger_modal: 'true')
         elsif @return_to == 'booking_new'
           new_booking_path(flight_id: @flight_id)
+        elsif @return_to == 'hotel_booking_new'
+          new_hotel_hotel_booking_path(
+            @hotel_id,
+            room_id: @room_id,
+            check_in: @check_in,
+            check_out: @check_out,
+            rooms: @rooms,
+            adults: @adults,
+            children: @children
+          )
         else
           passengers_path(source: @traveler_type)
         end
@@ -17,7 +27,7 @@
         </svg>
       <% end %>
       <h1 class="text-lg font-medium flex-1 text-center">
-        添加<%= case @traveler_type when 'train', 'bus' then '乘车人' when 'flight' then '乘机人' else '出行人' end %>
+        添加<%= case @traveler_type when 'train', 'bus' then '乘车人' when 'flight' then '乘机人' when 'hotel' then '入住人' else '出行人' end %>
       </h1>
       <div class="w-6"></div>
     </div>
@@ -25,7 +35,18 @@
 
   <!-- Form Content -->
   <div class="pb-32">
-    <%= form_with model: @passenger, url: passengers_path(source: @traveler_type, return_to: @return_to, flight_id: @flight_id), method: :post, local: true, data: { turbo: false } do |f| %>
+    <%= form_with model: @passenger, url: passengers_path(
+      source: @traveler_type,
+      return_to: @return_to,
+      flight_id: @flight_id,
+      hotel_id: @hotel_id,
+      room_id: @room_id,
+      check_in: @check_in,
+      check_out: @check_out,
+      rooms: @rooms,
+      adults: @adults,
+      children: @children
+    ), method: :post, local: true, data: { turbo: false } do |f| %>
       <!-- Error Messages -->
       <% if @passenger.errors.any? %>
         <div class="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">

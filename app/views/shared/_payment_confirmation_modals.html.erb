@@ -1,0 +1,166 @@
+<%# 
+  Shared payment confirmation modals
+  
+  Required data attributes on parent element:
+  - data-controller="payment-confirmation"
+  
+  Required parameters:
+  - amount: Total amount to display
+  - user_email: Current user email
+  - payment_url: URL to submit payment (PATCH request)
+  - success_url: URL to redirect after success
+%>
+
+<!-- Processing Modal (正在校验指纹...) -->
+<div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-end" data-payment-confirmation-target="processingModal">
+  <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up">
+    <button type="button" data-action="click->payment-confirmation#closeProcessingModal" class="text-gray-400 text-2xl mb-4">←</button>
+    
+    <!-- Amount -->
+    <div class="text-center py-6">
+      <div class="text-5xl font-bold mb-8">¥<span data-payment-confirmation-target="processingAmount"></span></div>
+    </div>
+
+    <!-- Account -->
+    <div class="py-3 border-b">
+      <div class="flex items-center justify-between">
+        <span class="text-gray-600">账号</span>
+        <span class="text-gray-900" data-payment-confirmation-target="userEmail"></span>
+      </div>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="py-3 mb-8">
+      <div class="flex items-center justify-between">
+        <span class="text-gray-600">付款方式</span>
+        <div class="flex items-center">
+          <span class="text-blue-500 text-xl mr-2">💳</span>
+          <span class="text-gray-900">花呗</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verifying Fingerprint -->
+    <div class="text-center py-8">
+      <div class="text-gray-600 mb-4">请验证指纹</div>
+      <div class="inline-block mb-6">
+        <svg class="w-20 h-20 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 1C8.676 1 6 3.676 6 7c0 2.515 1.513 4.67 3.676 5.598A8.007 8.007 0 0 0 4 20h2c0-3.309 2.691-6 6-6s6 2.691 6 6h2a8.007 8.007 0 0 0-5.676-7.402C16.487 11.67 18 9.515 18 7c0-3.324-2.676-6-6-6zm0 2c2.243 0 4 1.757 4 4s-1.757 4-4 4-4-1.757-4-4 1.757-4 4-4z"/>
+        </svg>
+      </div>
+      <div class="text-blue-500 text-sm">
+        <button type="button" data-action="click->payment-confirmation#switchToPasswordPay" class="underline">使用密码</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Password Payment Modal (密码支付) -->
+<div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-end" data-payment-confirmation-target="passwordModal">
+  <div class="bg-white w-full rounded-t-3xl animate-slide-up">
+    <div class="flex items-center justify-between p-4 border-b">
+      <button type="button" data-action="click->payment-confirmation#closePasswordModal" class="text-gray-400 text-2xl">×</button>
+      <div class="text-lg font-medium">请输入支付密码</div>
+      <div class="w-8"></div>
+    </div>
+    
+    <!-- Amount Display -->
+    <div class="text-center py-6">
+      <div class="text-4xl font-bold">¥<span data-payment-confirmation-target="passwordAmount"></span></div>
+    </div>
+
+    <!-- Password Dots Display -->
+    <div class="flex justify-center gap-3 py-6">
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot1"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot2"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot3"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot4"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot5"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot6"></div>
+    </div>
+
+    <!-- Numeric Keypad (3x4 Grid) -->
+    <div class="px-6 pb-6">
+      <div class="grid grid-cols-3 gap-4">
+        <!-- Row 1: 1, 2, 3 -->
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="1" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">1</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="2" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">2</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="3" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">3</button>
+        
+        <!-- Row 2: 4, 5, 6 -->
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="4" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">4</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="5" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">5</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="6" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">6</button>
+        
+        <!-- Row 3: 7, 8, 9 -->
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="7" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">7</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="8" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">8</button>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="9" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">9</button>
+        
+        <!-- Row 4: Empty, 0, Delete -->
+        <div class="h-16"></div>
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="0" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">0</button>
+        <button type="button" data-action="click->payment-confirmation#deletePassword" 
+                class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Status Modal (正在付款 / 付款成功) -->
+<div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-end" data-payment-confirmation-target="statusModal">
+  <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up">
+    <button type="button" data-action="click->payment-confirmation#closeStatusModal" class="text-gray-400 text-2xl mb-4">←</button>
+    
+    <!-- Amount -->
+    <div class="text-center py-6">
+      <div class="text-5xl font-bold mb-8">¥<span data-payment-confirmation-target="statusAmount"></span></div>
+    </div>
+
+    <!-- Account -->
+    <div class="py-3 border-b">
+      <div class="flex items-center justify-between">
+        <span class="text-gray-600">账号</span>
+        <span class="text-gray-900" data-payment-confirmation-target="statusUserEmail"></span>
+      </div>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="py-3 mb-8">
+      <div class="flex items-center justify-between">
+        <span class="text-gray-600">付款方式</span>
+        <div class="flex items-center">
+          <span class="text-blue-500 text-xl mr-2">💳</span>
+          <span class="text-gray-900">花呗</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="text-center py-8">
+      <div class="inline-block w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <span class="text-5xl" data-payment-confirmation-target="statusIcon">💳</span>
+      </div>
+      <div class="text-xl font-medium" data-payment-confirmation-target="statusText">正在付款</div>
+      <div class="mt-2" data-payment-confirmation-target="statusDots">
+        <span class="inline-block w-2 h-2 bg-gray-400 rounded-full mx-1 animate-pulse"></span>
+        <span class="inline-block w-2 h-2 bg-gray-400 rounded-full mx-1 animate-pulse" style="animation-delay: 0.2s"></span>
+        <span class="inline-block w-2 h-2 bg-gray-400 rounded-full mx-1 animate-pulse" style="animation-delay: 0.4s"></span>
+      </div>
+    </div>
+  </div>
+</div>
