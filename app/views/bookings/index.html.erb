@@ -78,13 +78,33 @@
     <div class="space-y-3">
       <% if @bookings.any? %>
         <% @bookings.each do |booking| %>
-          <%= render partial: 'bookings/booking_card', locals: { booking: booking } %>
+          <% if booking.is_a?(Booking) %>
+            <%= render partial: 'bookings/booking_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(HotelBooking) %>
+            <%= render partial: 'bookings/hotel_booking_card', locals: { booking: booking } %>
+          <% end %>
         <% end %>
         
-        <!-- Pagination -->
-        <div class="py-4">
-          <%= paginate @bookings, theme: 'twitter-bootstrap-4' %>
-        </div>
+        <!-- Manual Pagination -->
+        <% if @total_pages > 1 %>
+          <div class="py-4 flex justify-center items-center space-x-2">
+            <% if @page > 1 %>
+              <%= link_to bookings_path(status: @status_filter, page: @page - 1), class: 'px-3 py-1 bg-surface border border-border rounded text-sm' do %>
+                上一页
+              <% end %>
+            <% end %>
+            
+            <span class="text-sm text-text-muted">
+              第 <%= @page %> / <%= @total_pages %> 页 (共 <%= @total_count %> 条)
+            </span>
+            
+            <% if @page < @total_pages %>
+              <%= link_to bookings_path(status: @status_filter, page: @page + 1), class: 'px-3 py-1 bg-surface border border-border rounded text-sm' do %>
+                下一页
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
       <% else %>
         <!-- Empty State -->
         <div class="flex flex-col items-center justify-center py-12">
@@ -92,8 +112,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <p class="text-text-muted text-base mb-2">暂无订单</p>
-          <p class="text-text-muted text-sm">去预订您的第一张机票吧</p>
-          <%= link_to '搜索航班', search_flights_path, class: 'mt-4 btn-primary' %>
+          <p class="text-text-muted text-sm">去预订您的第一张机票或酒店吧</p>
+          <div class="flex gap-2 mt-4">
+            <%= link_to '搜索航班', search_flights_path, class: 'btn-primary' %>
+            <%= link_to '搜索酒店', hotels_path, class: 'btn-primary' %>
+          </div>
         </div>
       <% end %>
     </div>

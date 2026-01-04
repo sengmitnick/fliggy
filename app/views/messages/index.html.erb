@@ -61,7 +61,7 @@
       <% else %>
         <!-- Regular notification categories -->
         <% if latest %>
-          <%= link_to notification_path(latest), class: "bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100" do %>
+          <%= link_to category_notifications_path(category), class: "bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between hover:bg-gray-50 active:bg-gray-100" do %>
             <div class="flex items-center gap-3 flex-1">
               <!-- Category icon -->
               <div class="w-12 h-12 <%= category_icon_bg_class(category) %> rounded-full flex items-center justify-center <%= 'relative' if category == 'interactive' %>">

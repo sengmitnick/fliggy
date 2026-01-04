@@ -11,6 +11,13 @@ class PassengersController < ApplicationController
     @passenger = current_user.passengers.build
     @return_to = params[:return_to]
     @flight_id = params[:flight_id]
+    @hotel_id = params[:hotel_id]
+    @room_id = params[:room_id]
+    @check_in = params[:check_in]
+    @check_out = params[:check_out]
+    @rooms = params[:rooms]
+    @adults = params[:adults]
+    @children = params[:children]
   end
 
   def create
@@ -27,6 +34,17 @@ class PassengersController < ApplicationController
       elsif params[:return_to] == 'booking_new'
         Rails.logger.info "Redirecting to new_booking_path with flight_id"
         redirect_to new_booking_path(flight_id: params[:flight_id]), notice: "#{traveler_label}添加成功"
+      elsif params[:return_to] == 'hotel_booking_new'
+        Rails.logger.info "Redirecting to new_hotel_hotel_booking_path with hotel_id and booking params"
+        redirect_to new_hotel_hotel_booking_path(
+          params[:hotel_id],
+          room_id: params[:room_id],
+          check_in: params[:check_in],
+          check_out: params[:check_out],
+          rooms: params[:rooms],
+          adults: params[:adults],
+          children: params[:children]
+        ), notice: "#{traveler_label}添加成功"
       else
         Rails.logger.info "Redirecting to passengers_path"
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
@@ -35,6 +53,13 @@ class PassengersController < ApplicationController
       @traveler_type = params[:source]
       @return_to = params[:return_to]
       @flight_id = params[:flight_id]
+      @hotel_id = params[:hotel_id]
+      @room_id = params[:room_id]
+      @check_in = params[:check_in]
+      @check_out = params[:check_out]
+      @rooms = params[:rooms]
+      @adults = params[:adults]
+      @children = params[:children]
       render :new
     end
   end
@@ -74,6 +99,8 @@ class PassengersController < ApplicationController
       '乘车人'
     when 'flight'
       '乘机人'
+    when 'hotel'
+      '入住人'
     else
       '出行人'
     end
