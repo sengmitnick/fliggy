@@ -49,8 +49,8 @@ class TourGroupsController < ApplicationController
     @destination = params[:destination].presence || '上海'
     @active_tab = params[:tab].presence || 'group_tour'  # 默认选中跟团游
     
-    # Search results - 示例数据
-    @search_results = [
+    # Search results - 示例数据（增加更多数据以测试滚动效果）
+    base_results = [
       {
         image: 'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=600',
         badge: '一日游',
@@ -92,7 +92,52 @@ class TourGroupsController < ApplicationController
         sales: '已售1000+',
         price: '109',
         price_suffix: '起'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=600',
+        badge: '跟团游',
+        departure: '上海出发',
+        title: '上海+迪士尼乐园+2日游+含门票+精选酒店+往返接送',
+        rating: 4.8,
+        rating_desc: '迪士尼梦幻之旅',
+        highlights: ['迪士尼乐园', '含门票', '接送服务'],
+        tags: ['可订明日', '含酒店', '含门票'],
+        provider: '上海春秋旅行社',
+        sales: '已售5000+',
+        price: '899',
+        price_suffix: '起'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600',
+        badge: '一日游',
+        departure: '上海出发',
+        title: '上海+朱家角古镇+一日游+纯玩无购物+含午餐',
+        rating: 4.7,
+        rating_desc: '古镇风情浓郁',
+        highlights: ['朱家角古镇', '江南水乡', '含午餐'],
+        tags: ['纯玩无购物', '无自费', '含餐'],
+        provider: '携程旅行专营店',
+        sales: '已售3000+',
+        price: '128',
+        price_suffix: '起'
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
+        badge: '跟团游',
+        departure: '上海出发',
+        title: '上海+苏州+杭州+3日游+经典江南三城+含住宿',
+        rating: 4.9,
+        rating_desc: '江南美景尽收眼底',
+        highlights: ['苏州园林', '西湖', '乌镇'],
+        tags: ['精品小团', '含酒店', '纯玩'],
+        provider: '杭州携程国际旅行社',
+        sales: '已售8000+',
+        price: '1299',
+        price_suffix: '起'
       }
     ]
+    
+    # 复制3次以确保有足够内容产生滚动
+    @search_results = base_results * 3
   end
 end
