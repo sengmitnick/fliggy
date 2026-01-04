@@ -46,6 +46,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   private selectionType: 'departure' | 'destination' = 'departure'
+  private isMultiSelectMode: boolean = false
+  private selectedCities: string[] = []
 
   declare readonly departureTarget: HTMLElement
   declare readonly destinationTarget: HTMLElement
@@ -122,14 +124,20 @@ export default class extends Controller<HTMLElement> {
   // Open modal for departure city selection
   openDeparture(): void {
     this.selectionType = 'departure'
+    this.isMultiSelectMode = false
+    this.selectedCities = []
     this.updateModalTitle()
+    this.updateMultiSelectUI()
     this.showModal()
   }
 
   // Open modal for destination city selection
   openDestination(): void {
     this.selectionType = 'destination'
+    this.isMultiSelectMode = false
+    this.selectedCities = []
     this.updateModalTitle()
+    this.updateMultiSelectUI()
     this.showModal()
   }
 
@@ -152,6 +160,18 @@ export default class extends Controller<HTMLElement> {
     const cityName = button.dataset.cityName || ''
     
     console.log('City selector: City selected:', cityName)
+    
+    // Multi-select mode
+    if (this.isMultiSelectMode) {
+      if (this.selectedCities.includes(cityName)) {
+        this.selectedCities = this.selectedCities.filter(city => city !== cityName)
+      } else {
+        this.selectedCities.push(cityName)
+      }
+      this.updateSelectedCitiesDisplay()
+      this.updateCityButtonStates()
+      return
+    }
     
     // Check if this is for multi-city
     if (this.currentMultiCitySegmentId && this.currentMultiCityCityType) {
@@ -292,10 +312,150 @@ export default class extends Controller<HTMLElement> {
 
   // Update modal title based on selection type
   private updateModalTitle(): void {
-    const titleElement = this.modalTarget.querySelector('[data-modal-title]')
-    if (titleElement) {
-      titleElement.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'
+    const singleSelectTitle = this.modalTarget.querySelector('[data-single-select-title]')
+    const multiSelectTitle = this.modalTarget.querySelector('[data-multi-select-title]')
+    
+    if (singleSelectTitle) {
+      singleSelectTitle.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'
     }
+    if (multiSelectTitle) {
+      multiSelectTitle.textContent = this.selectionType === 'departure' ? '多选出发地' : '多选目的地'
+    }
+  }
+
+  // Switch to single select mode
+  switchToSingleSelect(): void {
+    this.isMultiSelectMode = false
+    this.selectedCities = []
+    this.updateModalTitle()
+    this.updateMultiSelectUI()
+  }
+
+  // Switch to multi select mode
+  switchToMultiSelect(): void {
+    this.isMultiSelectMode = true
+    // Initialize with current selection type's value
+    const currentValue = this.selectionType === 'departure' ? this.departureCityValue : this.destinationCityValue
+    if (currentValue && currentValue !== '') {
+      // Support comma-separated multiple cities
+      this.selectedCities = currentValue.split(',').map(city => city.trim()).filter(city => city !== '')
+    } else {
+      this.selectedCities = []
+    }
+    this.updateModalTitle()
+    this.updateMultiSelectUI()
+  }
+
+  // Update multi-select UI elements
+  private updateMultiSelectUI(): void {
+    const selectedCitiesContainer = this.modalTarget.querySelector('[data-selected-cities]')
+    const confirmButton = this.modalTarget.querySelector('[data-confirm-button]')
+    const singleSelectTab = this.modalTarget.querySelector('[data-single-select-tab]')
+    const multiSelectTab = this.modalTarget.querySelector('[data-multi-select-tab]')
+    
+    if (this.isMultiSelectMode) {
+      selectedCitiesContainer?.classList.remove('hidden')
+      confirmButton?.classList.remove('hidden')
+      singleSelectTab?.classList.remove('bg-white', 'shadow-sm', 'text-gray-900')
+      singleSelectTab?.classList.add('text-gray-500')
+      multiSelectTab?.classList.remove('text-gray-500')
+      multiSelectTab?.classList.add('bg-white', 'shadow-sm', 'text-gray-900')
+      this.updateSelectedCitiesDisplay()
+      this.updateCityButtonStates()
+    } else {
+      selectedCitiesContainer?.classList.add('hidden')
+      confirmButton?.classList.add('hidden')
+      singleSelectTab?.classList.remove('text-gray-500')
+      singleSelectTab?.classList.add('bg-white', 'shadow-sm', 'text-gray-900')
+      multiSelectTab?.classList.remove('bg-white', 'shadow-sm', 'text-gray-900')
+      multiSelectTab?.classList.add('text-gray-500')
+      this.clearCityButtonStates()
+    }
+  }
+
+  // Update selected cities display
+  private updateSelectedCitiesDisplay(): void {
+    const container = this.modalTarget.querySelector('[data-selected-cities]')
+    if (!container) return
+    
+    container.innerHTML = this.selectedCities.map(city => `
+      <div class="inline-flex items-center bg-yellow-100 px-3 py-1.5 rounded-lg">
+        <span class="text-sm font-medium text-gray-900">${city}</span>
+        <button 
+          data-action="click->city-selector#removeSelectedCity"
+          data-city-name="${city}"
+          class="ml-2 text-gray-500 hover:text-gray-700">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    `).join('')
+  }
+
+  // Remove selected city
+  removeSelectedCity(event: Event): void {
+    event.stopPropagation()
+    const button = event.currentTarget as HTMLElement
+    const cityName = button.dataset.cityName || ''
+    this.selectedCities = this.selectedCities.filter(city => city !== cityName)
+    this.updateSelectedCitiesDisplay()
+    this.updateCityButtonStates()
+  }
+
+  // Update city button states (show checkmarks)
+  private updateCityButtonStates(): void {
+    const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
+    cityButtons.forEach(button => {
+      const cityName = (button as HTMLElement).dataset.cityName || ''
+      const isSelected = this.selectedCities.includes(cityName)
+      
+      if (isSelected) {
+        button.classList.add('bg-yellow-100', 'relative')
+        if (!button.querySelector('[data-checkmark]')) {
+          const checkmark = document.createElement('svg')
+          checkmark.setAttribute('data-checkmark', '')
+          checkmark.setAttribute('class', 'absolute right-1 top-1 w-4 h-4 text-yellow-600')
+          checkmark.setAttribute('fill', 'currentColor')
+          checkmark.setAttribute('viewBox', '0 0 20 20')
+          checkmark.innerHTML = '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>'
+          button.appendChild(checkmark)
+        }
+      } else {
+        button.classList.remove('bg-yellow-100', 'relative')
+        button.querySelector('[data-checkmark]')?.remove()
+      }
+    })
+  }
+
+  // Clear city button states
+  private clearCityButtonStates(): void {
+    const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
+    cityButtons.forEach(button => {
+      button.classList.remove('bg-yellow-100', 'relative')
+      button.querySelector('[data-checkmark]')?.remove()
+    })
+  }
+
+  // Confirm multi-select
+  confirmMultiSelect(): void {
+    if (this.selectedCities.length === 0) {
+      alert('请至少选择一个城市')
+      return
+    }
+    
+    // Update city value based on selection type
+    if (this.selectionType === 'departure') {
+      this.departureCityValue = this.selectedCities.join(',')
+      this.departureTarget.textContent = this.selectedCities.join('、')
+      this.departureCityInputTarget.value = this.departureCityValue
+    } else {
+      this.destinationCityValue = this.selectedCities.join(',')
+      this.destinationTarget.textContent = this.selectedCities.join('、')
+      this.destinationCityInputTarget.value = this.destinationCityValue
+    }
+    
+    this.closeModal()
   }
 
   // Jump to letter section

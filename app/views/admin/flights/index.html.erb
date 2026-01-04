@@ -4,12 +4,20 @@
   <!-- Page Title and Actions -->
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">航班管理</h1>
-    <%= link_to new_admin_flight_path, class: "btn-primary" do %>
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-      </svg>
-      新建航班
-    <% end %>
+    <div class="flex gap-3">
+      <%= link_to generator_admin_flights_path, class: "btn-secondary" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        批量生成航班
+      <% end %>
+      <%= link_to new_admin_flight_path, class: "btn-primary" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        新建航班
+      <% end %>
+    </div>
   </div>
 
   <!-- Flights Table -->

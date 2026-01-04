@@ -1,0 +1,102 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to flights_path, class: "flex items-center gap-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+
+      <div class="flex-1 text-center">
+        <div class="text-lg font-bold">选择航线</div>
+        <div class="text-xs text-gray-500 mt-1">
+          <%= I18n.l(@date, format: "%m月%d日") %>
+        </div>
+      </div>
+
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- Combinations List -->
+  <div class="px-4 py-4 space-y-3">
+    <% @combinations.each do |combo| %>
+      <div class="bg-white rounded-xl p-4 shadow-sm">
+        <!-- Route Information -->
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900"><%= combo[:departure_city] %></div>
+              <div class="text-xs text-gray-500 mt-1">出发</div>
+            </div>
+            
+            <div class="flex-1 relative">
+              <div class="border-t-2 border-gray-300 relative">
+                <svg class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+                </svg>
+              </div>
+            </div>
+            
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900"><%= combo[:destination_city] %></div>
+              <div class="text-xs text-gray-500 mt-1">到达</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price and Action -->
+        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div>
+            <% if combo[:has_flights] %>
+              <div class="text-sm text-gray-500">最低价</div>
+              <div class="text-2xl font-bold text-red-500">¥<%= combo[:min_price].to_i %></div>
+            <% else %>
+              <div class="text-sm text-gray-400">暂无航班</div>
+            <% end %>
+          </div>
+          
+          <% if combo[:has_flights] %>
+            <%= link_to search_flights_path(
+                  departure_city: combo[:departure_city],
+                  destination_city: combo[:destination_city],
+                  date: @date,
+                  return_date: @return_date,
+                  trip_type: @trip_type,
+                  cabin_class: @cabin_class
+                ),
+                data: { turbo: false },
+                class: "px-6 py-2.5 bg-yellow-400 text-gray-900 rounded-full text-sm font-bold hover:bg-yellow-500 transition-colors" do %>
+              查看航班
+            <% end %>
+          <% else %>
+            <div class="px-6 py-2.5 bg-gray-200 text-gray-400 rounded-full text-sm font-bold cursor-not-allowed">
+              暂无航班
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Tags -->
+        <% if combo[:has_flights] %>
+          <div class="mt-3 flex gap-2">
+            <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded">直飞</span>
+            <span class="text-xs px-2 py-1 bg-green-50 text-green-600 rounded">可退改</span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Empty State -->
+  <% if @combinations.empty? %>
+    <div class="flex flex-col items-center justify-center py-20">
+      <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div class="text-gray-400 text-lg">暂无可选航线</div>
+      <div class="text-gray-400 text-sm mt-2">请返回重新选择城市</div>
+      <%= link_to "返回首页", flights_path, class: "mt-6 px-6 py-2.5 bg-yellow-400 text-gray-900 rounded-full text-sm font-bold" %>
+    </div>
+  <% end %>
+</div>

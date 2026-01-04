@@ -9,8 +9,45 @@ class FlightsController < ApplicationController
   def search
     @departure_city = params[:departure_city] || '北京'
     @destination_city = params[:destination_city] || '杭州'
-    @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
     @trip_type = params[:trip_type] || 'one_way'
+    
+    # Check if either departure or destination contains multiple cities (comma-separated)
+    if @departure_city.include?(',') || @destination_city.include?(',')
+      redirect_to combinations_flights_path(
+        departure_city: @departure_city,
+        destination_city: @destination_city,
+        date: params[:date],
+        return_date: params[:return_date],
+        trip_type: @trip_type,
+        cabin_class: params[:cabin_class]
+      )
+      return
+    end
+    
+    # Handle fuzzy date format
+    if params[:date].present? && params[:date].start_with?('fuzzy:')
+      # Extract months from fuzzy date format: fuzzy:2026-01,2026-02
+      months_string = params[:date].sub('fuzzy:', '')
+      months = months_string.split(',')
+      
+      # Find cheapest flight across all dates in selected months
+      cheapest_flight = find_cheapest_in_months(@departure_city, @destination_city, months)
+      
+      if cheapest_flight
+        @date = cheapest_flight.flight_date
+        @is_fuzzy_date = true
+        @selected_months = months
+      else
+        # Fallback to first day of first month
+        @date = Date.parse("#{months.first}-01")
+        @is_fuzzy_date = true
+        @selected_months = months
+      end
+    else
+      @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
+      @is_fuzzy_date = false
+    end
+    
     @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
 
     # Get or generate flights for the outbound route and date
@@ -23,6 +60,33 @@ class FlightsController < ApplicationController
     if @trip_type == 'round_trip' && @return_date
       @return_flights = Flight.search(@destination_city, @departure_city, @return_date)
       @return_date_prices = get_date_prices(@destination_city, @departure_city, @return_date)
+    end
+  end
+
+  # 多选城市中转页面 - 显示所有出发地×目的地的笛卡尔积组合
+  def combinations
+    departure_cities = params[:departure_city]&.split(',')&.map(&:strip) || ['北京']
+    destination_cities = params[:destination_city]&.split(',')&.map(&:strip) || ['杭州']
+    @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
+    @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
+    @trip_type = params[:trip_type] || 'one_way'
+    @cabin_class = params[:cabin_class] || 'all'
+
+    # 生成所有出发地×目的地的笛卡尔积组合
+    @combinations = []
+    departure_cities.each do |departure|
+      destination_cities.each do |destination|
+        # 获取该组合的最低价航班
+        flights = Flight.search(departure, destination, @date)
+        min_price = flights.minimum(:price) || 0
+        
+        @combinations << {
+          departure_city: departure,
+          destination_city: destination,
+          min_price: min_price,
+          has_flights: flights.any?
+        }
+      end
     end
   end
 
@@ -155,6 +219,32 @@ class FlightsController < ApplicationController
   end
 
   private
+
+  def find_cheapest_in_months(departure_city, destination_city, months)
+    cheapest_flight = nil
+    cheapest_price = Float::INFINITY
+    
+    months.each do |month_str|
+      # Parse year and month
+      year, month = month_str.split('-').map(&:to_i)
+      start_date = Date.new(year, month, 1)
+      end_date = start_date.end_of_month
+      
+      # Check each day in the month
+      (start_date..end_date).each do |date|
+        flights = Flight.search(departure_city, destination_city, date)
+        next if flights.empty?
+        
+        min_price_flight = flights.min_by(&:price)
+        if min_price_flight && min_price_flight.price < cheapest_price
+          cheapest_price = min_price_flight.price
+          cheapest_flight = min_price_flight
+        end
+      end
+    end
+    
+    cheapest_flight
+  end
 
   def get_date_prices(departure_city, destination_city, center_date)
     prices = []

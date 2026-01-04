@@ -36,6 +36,7 @@ import PaymentModalController from "./payment_modal_controller"
 import HotelTravelerSelectorController from "./hotel_traveler_selector_controller"
 import ToastController from "./toast_controller"
 import ToastTriggerController from "./toast_trigger_controller"
+import SpecialFlightsController from "./special_flights_controller"
 
 const application = Application.start()
 
@@ -75,5 +76,6 @@ application.register("payment-modal", PaymentModalController)
 application.register("hotel-traveler-selector", HotelTravelerSelectorController)
 application.register("toast", ToastController)
 application.register("toast-trigger", ToastTriggerController)
+application.register("special-flights", SpecialFlightsController)
 
 window.Stimulus = application

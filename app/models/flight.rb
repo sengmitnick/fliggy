@@ -80,18 +80,12 @@ class Flight < ApplicationRecord
     flights
   end
 
-  # Get or generate flights for a route and date
+  # Search flights for a route and date (no auto-generation)
   def self.search(departure_city, destination_city, date)
-    flights = by_route(departure_city, destination_city)
-              .by_date(date)
-              .available
-              .ordered_by_time
-
-    if flights.empty?
-      flights = generate_for_route(departure_city, destination_city, date)
-    end
-
-    flights
+    by_route(departure_city, destination_city)
+      .by_date(date)
+      .available
+      .ordered_by_time
   end
 
   # Generate multiple pricing packages for this flight
