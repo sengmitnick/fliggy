@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import type PaymentConfirmationController from "./payment_confirmation_controller"
 
 export default class extends Controller<HTMLElement> {
   static targets = ["insuranceModal", "confirmModal", "form"]
@@ -7,15 +6,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly insuranceModalTarget: HTMLElement
   declare readonly confirmModalTarget: HTMLElement
   declare readonly formTarget: HTMLFormElement
-
-  private bookingId: string | null = null
-
-  get paymentConfirmationController(): PaymentConfirmationController {
-    return this.application.getControllerForElementAndIdentifier(
-      this.element,
-      "payment-confirmation"
-    ) as PaymentConfirmationController
-  }
 
   // Handle insurance option selection in form
   selectInsuranceOption(event: Event): void {
@@ -155,42 +145,7 @@ export default class extends Controller<HTMLElement> {
   submitForm(): void {
     console.log('Submitting form:', this.formTarget)
     
-    // Submit form via fetch to get booking ID
-    const formData = new FormData(this.formTarget)
-    
-    fetch(this.formTarget.action, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || '',
-        'Accept': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && data.booking_id) {
-          this.bookingId = data.booking_id
-          
-          // Close confirm modal
-          this.closeConfirmModal()
-          
-          // Update payment-confirmation controller URLs with actual booking ID
-          const paymentController = this.paymentConfirmationController
-          paymentController.paymentUrlValue = `/hotel_bookings/${this.bookingId}/pay`
-          paymentController.successUrlValue = `/hotel_bookings/${this.bookingId}/success`
-          
-          // Start payment flow
-          paymentController.startPaymentFlow()
-        } else {
-          console.error('Form submission failed:', data)
-          alert('预订失败，请重试')
-          this.closeConfirmModal()
-        }
-      })
-      .catch(error => {
-        console.error('Form submission error:', error)
-        alert('预订失败，请重试')
-        this.closeConfirmModal()
-      })
+    // Submit form normally - let Rails handle the redirect
+    this.formTarget.submit()
   }
 }

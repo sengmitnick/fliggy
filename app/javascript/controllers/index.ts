@@ -8,7 +8,6 @@ import CitySelectorController from "./city_selector_controller"
 import FlightSearchController from "./flight_search_controller"
 import DatePickerController from "./date_picker_controller"
 import BookingController from "./booking_controller"
-import PaymentController from "./payment_controller"
 import CouponController from "./coupon_controller"
 // ComingSoonController removed - using window.showToast() instead
 import DestinationController from "./destination_controller"
@@ -47,6 +46,7 @@ import BookingModalController from "./booking_modal_controller"
 import BottomBarController from "./bottom_bar_controller"
 import InsuranceSelectorController from "./insurance_selector_controller"
 import TourTravelerSelectorController from "./tour_traveler_selector_controller"
+import SpecialFlightsFormController from "./special_flights_form_controller"
 
 const application = Application.start()
 
@@ -58,7 +58,6 @@ application.register("city-selector", CitySelectorController)
 application.register("flight-search", FlightSearchController)
 application.register("date-picker", DatePickerController)
 application.register("booking", BookingController)
-application.register("payment", PaymentController)
 application.register("coupon", CouponController)
 // ComingSoonController removed - using window.showToast() instead
 application.register("destination", DestinationController)
@@ -97,5 +96,6 @@ application.register("booking-modal", BookingModalController)
 application.register("bottom-bar", BottomBarController)
 application.register("insurance-selector", InsuranceSelectorController)
 application.register("tour-traveler-selector", TourTravelerSelectorController)
+application.register("special-flights-form", SpecialFlightsFormController)
 
 window.Stimulus = application

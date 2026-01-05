@@ -191,6 +191,13 @@
       <p class="text-[10px] text-gray-700">常用信息</p>
     <% end %>
 
+    <%= link_to edit_pay_password_profile_path, class: "block space-y-2" do %>
+      <div class="w-8 h-8 mx-auto">
+        <%= image_tag 'profile/我的钱包.png', class: 'w-full h-full object-contain', alt: '支付密码' %>
+      </div>
+      <p class="text-[10px] text-gray-700">支付密码</p>
+    <% end %>
+
     <div class="block space-y-2">
       <div class="w-8 h-8 mx-auto">
         <%= image_tag 'profile/发票抬头.png', class: 'w-full h-full object-contain', alt: '发票抬头' %>

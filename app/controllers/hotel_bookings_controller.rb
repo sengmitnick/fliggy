@@ -78,6 +78,8 @@ class HotelBookingsController < ApplicationController
   def pay
     @booking = HotelBooking.find(params[:id])
     
+    # Password already verified by frontend via /profile/verify_pay_password
+    # Just process the payment
     flow_service = BookingFlowService.new(@booking)
     if flow_service.complete_payment
       respond_to do |format|

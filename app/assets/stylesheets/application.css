@@ -193,6 +193,15 @@
     @apply bg-white font-bold;
   }
 
+  /* Password input dots for payment modal */
+  .password-dot {
+    @apply transition-colors duration-200;
+  }
+
+  .password-dot.active {
+    @apply bg-blue-500 border-blue-500;
+  }
+
 } /* End of @layer components */
 
 @tailwind utilities;

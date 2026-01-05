@@ -693,6 +693,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_05_032706) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "airline_memberships", default: {}
+    t.string "pay_password_digest"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

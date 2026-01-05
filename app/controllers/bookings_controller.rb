@@ -218,6 +218,9 @@ class BookingsController < ApplicationController
 
   def pay
     @booking = current_user.bookings.find(params[:id])
+    
+    # Password already verified by frontend via /profile/verify_pay_password
+    # Just process the payment
     @booking.update!(status: :paid)
     
     # 创建预订成功通知
