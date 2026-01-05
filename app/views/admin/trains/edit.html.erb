@@ -1,0 +1,76 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">编辑车次</h1>
+    <%= link_to "返回列表", admin_trains_path, class: "btn-secondary" %>
+  </div>
+
+  <div class="card p-6 max-w-2xl">
+    <%= form_with model: [:admin, @train], class: "space-y-6" do |form| %>
+      <%= render 'shared/form_error_message', model: @train %>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :departure_city, "出发城市", class: "form-label" %>
+          <%= form.text_field :departure_city, class: "form-input", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :arrival_city, "到达城市", class: "form-label" %>
+          <%= form.text_field :arrival_city, class: "form-input", required: true %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :train_number, "车次号", class: "form-label" %>
+          <%= form.text_field :train_number, class: "form-input", placeholder: "例如：G1234", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :available_seats, "余票数量", class: "form-label" %>
+          <%= form.number_field :available_seats, class: "form-input", min: 0, required: true %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :departure_time, "出发时间", class: "form-label" %>
+          <%= form.datetime_field :departure_time, class: "form-input", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :arrival_time, "到达时间", class: "form-label" %>
+          <%= form.datetime_field :arrival_time, class: "form-input", required: true %>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :duration, "行程时长（分钟）", class: "form-label" %>
+        <%= form.number_field :duration, class: "form-input", min: 0, required: true %>
+        <p class="mt-1 text-sm text-gray-500">例如：120 表示 2 小时</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= form.label :price_second_class, "二等座价格", class: "form-label" %>
+          <%= form.number_field :price_second_class, step: 0.01, class: "form-input", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :price_first_class, "一等座价格", class: "form-label" %>
+          <%= form.number_field :price_first_class, step: 0.01, class: "form-input", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :price_business_class, "商务座价格", class: "form-label" %>
+          <%= form.number_field :price_business_class, step: 0.01, class: "form-input", required: true %>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3">
+        <%= link_to "取消", admin_trains_path, class: "btn-secondary" %>
+        <%= form.submit "更新车次", class: "btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

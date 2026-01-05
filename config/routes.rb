@@ -198,6 +198,12 @@ Rails.application.routes.draw do
         post :batch_generate
       end
     end
+    resources :trains do
+      collection do
+        get :generator
+        post :batch_generate
+      end
+    end
     resources :users
     resources :admin_oplogs, only: [:index, :show]
     resources :administrators

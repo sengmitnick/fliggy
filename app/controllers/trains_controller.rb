@@ -14,7 +14,7 @@ class TrainsController < ApplicationController
     @sort_by = params[:sort_by] || "departure_time" # departure_time, price, duration
     @only_high_speed = params[:only_high_speed] == "true"
     
-    # Use model search method with automatic generation
+    # Use model search method (no auto-generation)
     @trains = Train.search(
       @departure_city,
       @arrival_city,

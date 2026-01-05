@@ -1,0 +1,97 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">批量生成火车票数据</h1>
+    <%= link_to "返回火车票列表", admin_trains_path, class: "btn-secondary" %>
+  </div>
+
+  <div class="card p-6 max-w-2xl">
+    <%= form_with url: batch_generate_admin_trains_path, method: :post, class: "space-y-6" do |form| %>
+      
+      <!-- Route Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :departure_city, "出发城市", class: "form-label" %>
+          <%= form.select :departure_city, 
+              options_for_select(@cities), 
+              { prompt: "选择出发城市" },
+              class: "form-input",
+              required: true %>
+        </div>
+
+        <div>
+          <%= form.label :arrival_city, "到达城市", class: "form-label" %>
+          <%= form.select :arrival_city, 
+              options_for_select(@cities), 
+              { prompt: "选择到达城市" },
+              class: "form-input",
+              required: true %>
+        </div>
+      </div>
+
+      <!-- Date Range Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :start_date, "开始日期", class: "form-label" %>
+          <%= form.date_field :start_date, 
+              value: Date.today,
+              class: "form-input",
+              required: true %>
+        </div>
+
+        <div>
+          <%= form.label :end_date, "结束日期", class: "form-label" %>
+          <%= form.date_field :end_date, 
+              value: Date.today + 30.days,
+              class: "form-input",
+              required: true %>
+        </div>
+      </div>
+
+      <!-- Info Box -->
+      <div class="alert alert-info">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="font-medium">生成说明</p>
+          <ul class="mt-1 text-sm list-disc list-inside space-y-1">
+            <li>每个日期会生成 6-10 个车次</li>
+            <li>车次类型包括：高铁（G字头）、动车（D字头）</li>
+            <li>如果该路线和日期已有车次数据，将跳过生成</li>
+            <li>自动生成二等座、一等座、商务座价格</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "取消", admin_trains_path, class: "btn-secondary" %>
+        <%= form.submit "开始生成", class: "btn-primary" %>
+      </div>
+
+    <% end %>
+  </div>
+
+  <!-- Recent Generation Stats -->
+  <div class="card p-6 mt-6 max-w-2xl">
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">当前数据统计</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= Train.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">总车次数</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= Train.select(:departure_city, :arrival_city).distinct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">线路数量</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= Train.where("departure_time >= ?", Date.today).select("DATE(departure_time)").distinct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">覆盖日期</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= Train.high_speed.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">高铁动车</div>
+      </div>
+    </div>
+  </div>
+</div>

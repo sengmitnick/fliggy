@@ -67,7 +67,7 @@ class Train < ApplicationRecord
     trains
   end
 
-  # Search trains with automatic generation (like Flight.search)
+  # Search trains for a route and date (no auto-generation)
   def self.search(departure_city, arrival_city, date, options = {})
     trains = by_route(departure_city, arrival_city)
              .by_date(date)
@@ -84,25 +84,6 @@ class Train < ApplicationRecord
       trains = trains.ordered_by_duration
     else
       trains = trains.ordered_by_time
-    end
-
-    # If no trains found, generate them
-    if trains.empty?
-      generated = generate_for_route(departure_city, arrival_city, date)
-      trains = generated.select { |t| t.available_seats > 0 }
-      
-      # Apply filters on generated trains
-      trains = trains.select { |t| t.train_number.start_with?('G', 'D') } if options[:only_high_speed]
-      
-      # Apply sorting on generated trains
-      case options[:sort_by]
-      when 'price'
-        trains = trains.sort_by(&:price_second_class)
-      when 'duration'
-        trains = trains.sort_by(&:duration)
-      else
-        trains = trains.sort_by(&:departure_time)
-      end
     end
 
     trains
