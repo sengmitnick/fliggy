@@ -3,8 +3,15 @@ class TourGroupsController < ApplicationController
     # Default destination
     @destination = params[:destination].presence || '上海'
     
-    # Hot destinations
-    @hot_destinations = ['上海', '北京', '杭州', '广州', '成都']
+    # Hot destinations - 从数据库获取
+    @hot_destinations = TourGroupProduct.select(:destination)
+                                        .distinct
+                                        .pluck(:destination)
+                                        .compact
+                                        .uniq
+                                        .take(5)
+    
+    @hot_destinations = ['上海', '北京', '杭州', '广州', '成都'] if @hot_destinations.empty?
     
     # Duration options
     @duration_options = [
@@ -19,125 +26,124 @@ class TourGroupsController < ApplicationController
       { label: '小团', description: '最多15人', value: 'small' }
     ]
     
-    # Tour recommendations
-    @tour_recommendations = [
+    # Tour recommendations - 从数据库获取
+    products = TourGroupProduct.includes(:travel_agency)
+                               .where("destination LIKE ?", "%#{@destination}%")
+                               .featured
+                               .by_display_order
+                               .limit(3)
+    
+    @tour_recommendations = products.map do |product|
       {
-        image: 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=500',
-        badge: '跟团游',
-        title: '泗水巴厘省 巴厘岛佩尼达岛 6天5晚 6人小团',
-        price: '¥3399起',
-        sales: '已售15'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500',
-        badge: '一日游',
-        title: '七加旅行普吉岛出海一日游皇帝岛珊瑚',
-        price: '¥168起',
-        sales: '已售1万+'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500',
-        badge: '跟团游',
-        title: '丽江大理 玉龙雪山大理古城 5天',
-        price: '¥1799起',
-        sales: ''
+        id: product.id,
+        image: product.image_url,
+        badge: product.badge,
+        title: product.title,
+        price: product.format_price,
+        sales: product.format_sales
       }
-    ]
+    end
   end
   
   def search
     @destination = params[:destination].presence || '上海'
     @active_tab = params[:tab].presence || 'group_tour'  # 默认选中跟团游
     
-    # Search results - 示例数据（增加更多数据以测试滚动效果）
-    base_results = [
+    # 从数据库查询产品
+    products = TourGroupProduct.includes(:travel_agency)
+                               .where("destination LIKE ?", "%#{@destination}%")
+    
+    # 根据 tab 筛选
+    products = case @active_tab
+               when 'comprehensive'
+                 products # 综合：显示所有
+               when 'group_tour'
+                 products.by_category('group_tour')
+               when 'private_group'
+                 products.by_category('private_group')
+               when 'free_travel'
+                 products.by_category('free_travel')
+               when 'outbound_essentials'
+                 products.by_category('outbound_essentials')
+               else
+                 products
+               end
+    
+    # 排序和限制
+    products = products.by_display_order.limit(50)
+    
+    # 转换为视图需要的格式
+    @search_results = products.map do |product|
       {
-        image: 'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=600',
-        badge: '一日游',
-        departure: '上海出发',
-        title: '上海+上海天文馆+一日游+随时可定+上午下午场大咖讲解',
-        rating: 4.9,
-        rating_desc: '讲解生动，孩子爱听',
-        highlights: ['上海天文馆', '研学'],
-        tags: ['可订明日', '无自费', '纯玩无购物'],
-        provider: '天津梦远旅行社专营店',
-        sales: '已售9000+',
-        price: '68',
-        price_suffix: '起'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1550592704-6c76defa9985?w=600',
-        badge: '一日游',
-        departure: nil,
-        title: '上海+上海科技馆+一日游+快速出票+大咖讲解+精品小团',
-        rating: nil,
-        rating_desc: nil,
-        highlights: ['无购物', '无自费'],
-        tags: ['无自费', '无购物'],
-        provider: '北京趣发现旅行社专营店',
-        sales: '已售7',
-        price: '25',
-        price_suffix: '起'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=600',
-        badge: '一日游',
-        departure: '上海出发',
-        title: '上海+东方明珠/城市历史发展陈列馆/外滩+一日游+观魔都美景历史...',
-        rating: 4.9,
-        rating_desc: '东方明珠美景入画来',
-        highlights: ['外滩', '上海城市历史发展陈列馆', '东方明珠'],
-        tags: ['可订今日', '无自费', '纯玩无购物', '支持改期'],
-        provider: '江苏五方旅行社',
-        sales: '已售1000+',
-        price: '109',
-        price_suffix: '起'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=600',
-        badge: '跟团游',
-        departure: '上海出发',
-        title: '上海+迪士尼乐园+2日游+含门票+精选酒店+往返接送',
-        rating: 4.8,
-        rating_desc: '迪士尼梦幻之旅',
-        highlights: ['迪士尼乐园', '含门票', '接送服务'],
-        tags: ['可订明日', '含酒店', '含门票'],
-        provider: '上海春秋旅行社',
-        sales: '已售5000+',
-        price: '899',
-        price_suffix: '起'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600',
-        badge: '一日游',
-        departure: '上海出发',
-        title: '上海+朱家角古镇+一日游+纯玩无购物+含午餐',
-        rating: 4.7,
-        rating_desc: '古镇风情浓郁',
-        highlights: ['朱家角古镇', '江南水乡', '含午餐'],
-        tags: ['纯玩无购物', '无自费', '含餐'],
-        provider: '携程旅行专营店',
-        sales: '已售3000+',
-        price: '128',
-        price_suffix: '起'
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600',
-        badge: '跟团游',
-        departure: '上海出发',
-        title: '上海+苏州+杭州+3日游+经典江南三城+含住宿',
-        rating: 4.9,
-        rating_desc: '江南美景尽收眼底',
-        highlights: ['苏州园林', '西湖', '乌镇'],
-        tags: ['精品小团', '含酒店', '纯玩'],
-        provider: '杭州携程国际旅行社',
-        sales: '已售8000+',
-        price: '1299',
+        id: product.id,
+        image: product.image_url,
+        badge: product.badge,
+        departure: product.departure_label,
+        title: product.title,
+        rating: product.rating > 0 ? product.rating : nil,
+        rating_desc: product.rating_desc,
+        highlights: product.highlights || [],
+        tags: product.tags || [],
+        provider: product.travel_agency.name,
+        sales: product.format_sales,
+        price: product.price.to_i.to_s,
         price_suffix: '起'
       }
-    ]
+    end
     
-    # 复制3次以确保有足够内容产生滚动
-    @search_results = base_results * 3
+    # 如果没有数据，提供提示
+    if @search_results.empty?
+      @search_results = [
+        {
+          image: 'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=600',
+          badge: '暂无数据',
+          departure: nil,
+          title: "暂无#{@destination}相关旅游产品，请尝试其他目的地",
+          rating: nil,
+          rating_desc: nil,
+          highlights: [],
+          tags: [],
+          provider: '',
+          sales: '',
+          price: '0',
+          price_suffix: ''
+        }
+      ]
+    end
+  end
+
+  def show
+    @product = TourGroupProduct.includes(
+      :travel_agency,
+      :tour_packages,
+      :tour_itinerary_days,
+      tour_reviews: :user
+    ).find(params[:id])
+    
+    # 准备套餐数据
+    @packages = @product.tour_packages.by_display_order
+    @selected_package = @packages.first
+    
+    # 准备行程数据
+    @itinerary_days = @product.tour_itinerary_days.by_day_order
+    
+    # 准备评价数据
+    @reviews = @product.tour_reviews.recent.limit(10)
+    @featured_reviews = @product.featured_reviews
+    @review_stats = {
+      total_count: @product.review_count,
+      average_rating: @product.average_rating,
+      guide_attitude: @product.tour_reviews.average(:guide_attitude)&.round(1) || 0,
+      meal_quality: @product.tour_reviews.average(:meal_quality)&.round(1) || 0,
+      itinerary_arrangement: @product.tour_reviews.average(:itinerary_arrangement)&.round(1) || 0,
+      travel_transportation: @product.tour_reviews.average(:travel_transportation)&.round(1) || 0
+    }
+    
+    # 推荐相关产品
+    @related_products = TourGroupProduct.includes(:travel_agency)
+                                       .where(destination: @product.destination)
+                                       .where.not(id: @product.id)
+                                       .popular
+                                       .limit(4)
   end
 end

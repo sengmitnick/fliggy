@@ -129,7 +129,7 @@
   <div class="space-y-3 p-3">
     <% @search_results.each_with_index do |result, index| %>
       <!-- 卡片 <%= index + 1 %> -->
-      <div class="bg-white rounded-md flex overflow-hidden">
+      <%= link_to tour_group_path(result[:id]), class: "bg-white rounded-md flex overflow-hidden hover:shadow-md transition-shadow" do %>
         <div class="relative w-32 h-44 shrink-0">
           <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg"><%= result[:badge] %></div>
           <% if result[:departure].present? %>
@@ -174,7 +174,7 @@
             </div>
           </div>
         </div>
-      </div>
+      <% end %>
     <% end %>
   </div>
 </div>

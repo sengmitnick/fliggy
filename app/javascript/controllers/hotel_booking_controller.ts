@@ -166,31 +166,31 @@ export default class extends Controller<HTMLElement> {
         'Accept': 'application/json'
       }
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success && data.booking_id) {
-        this.bookingId = data.booking_id
-        
-        // Close confirm modal
-        this.closeConfirmModal()
-        
-        // Update payment-confirmation controller URLs with actual booking ID
-        const paymentController = this.paymentConfirmationController
-        paymentController.paymentUrlValue = `/hotel_bookings/${this.bookingId}/pay`
-        paymentController.successUrlValue = `/hotel_bookings/${this.bookingId}/success`
-        
-        // Start payment flow
-        paymentController.startPaymentFlow()
-      } else {
-        console.error('Form submission failed:', data)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.booking_id) {
+          this.bookingId = data.booking_id
+          
+          // Close confirm modal
+          this.closeConfirmModal()
+          
+          // Update payment-confirmation controller URLs with actual booking ID
+          const paymentController = this.paymentConfirmationController
+          paymentController.paymentUrlValue = `/hotel_bookings/${this.bookingId}/pay`
+          paymentController.successUrlValue = `/hotel_bookings/${this.bookingId}/success`
+          
+          // Start payment flow
+          paymentController.startPaymentFlow()
+        } else {
+          console.error('Form submission failed:', data)
+          alert('预订失败，请重试')
+          this.closeConfirmModal()
+        }
+      })
+      .catch(error => {
+        console.error('Form submission error:', error)
         alert('预订失败，请重试')
         this.closeConfirmModal()
-      }
-    })
-    .catch(error => {
-      console.error('Form submission error:', error)
-      alert('预订失败，请重试')
-      this.closeConfirmModal()
-    })
+      })
   }
 }
