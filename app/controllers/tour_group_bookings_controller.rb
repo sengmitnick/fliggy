@@ -39,19 +39,42 @@ class TourGroupBookingsController < ApplicationController
     @booking.user = current_user
     @booking.tour_group_product = @product
     @booking.tour_package = @package
+    @booking.status = 'pending'
     
     # 计算总价
     @booking.total_price = @booking.calculate_total_price
     
     if @booking.save
-      redirect_to tour_group_path(@product), notice: '订单创建成功！'
+      redirect_to tour_group_booking_path(@booking), notice: '订单创建成功，请确认并支付'
     else
       # 设置视图需要的实例变量（用于重新渲染表单）
       @travel_date = @booking.travel_date || Date.today
       @adult_count = @booking.adult_count || 1
       @child_count = @booking.child_count || 0
-      render :new
+      render :new, status: :unprocessable_entity
     end
+  end
+
+  def show
+    @booking = current_user.tour_group_bookings.includes(:tour_group_product, :tour_package).find(params[:id])
+    @product = @booking.tour_group_product
+    @package = @booking.tour_package
+  end
+
+  def pay
+    @booking = current_user.tour_group_bookings.find(params[:id])
+    
+    # Password already verified by frontend via /profile/verify_pay_password
+    # Just process the payment
+    @booking.update!(status: 'confirmed')
+    
+    render json: { success: true }
+  end
+
+  def success
+    @booking = current_user.tour_group_bookings.includes(:tour_group_product, :tour_package, :booking_travelers).find(params[:id])
+    @product = @booking.tour_group_product
+    @package = @booking.tour_package
   end
 
   def destroy
