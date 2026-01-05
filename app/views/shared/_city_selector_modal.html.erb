@@ -12,11 +12,19 @@
         <!-- 顶部切换和关闭按钮 -->
         <div class="flex justify-between items-center mb-4 relative">
           <div class="flex-1 flex justify-center">
-            <div class="bg-gray-100 p-1 rounded-lg flex text-sm font-medium">
-              <button class="bg-white shadow-sm px-4 py-1.5 rounded-md text-gray-900">
-                <span data-modal-title>单选目的地</span>
+            <div class="bg-gray-100 p-1 rounded-sm flex text-sm font-medium">
+              <button 
+                data-single-select-tab
+                data-action="click->city-selector#switchToSingleSelect"
+                class="bg-white shadow-sm px-4 py-1.5 rounded-sm text-gray-900">
+                <span data-single-select-title>单选目的地</span>
               </button>
-              <button class="px-4 py-1.5 text-gray-500">多选目的地</button>
+              <button 
+                data-multi-select-tab
+                data-action="click->city-selector#switchToMultiSelect"
+                class="px-4 py-1.5 rounded-sm text-gray-500">
+                <span data-multi-select-title>多选目的地</span>
+              </button>
             </div>
           </div>
           <button 
@@ -28,17 +36,28 @@
           </button>
         </div>
 
+        <!-- 已选城市标签容器 (多选模式) -->
+        <div data-selected-cities class="hidden flex flex-wrap gap-2 mb-3"></div>
+
         <!-- 搜索框 -->
-        <div class="bg-gray-100 rounded-xl px-3 py-2.5 flex items-center mb-4">
-          <svg class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input 
-            type="text"
-            data-city-selector-target="searchInput"
-            data-action="input->city-selector#search"
-            placeholder="搜索机场/城市/国家中英文或拼音"
-            class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex-1 bg-gray-100 rounded-xl px-3 py-2.5 flex items-center">
+            <svg class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input 
+              type="text"
+              data-city-selector-target="searchInput"
+              data-action="input->city-selector#search"
+              placeholder="搜索机场/城市/国家中英文或拼音"
+              class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none">
+          </div>
+          <button 
+            data-confirm-button
+            data-action="click->city-selector#confirmMultiSelect"
+            class="hidden bg-yellow-400 text-gray-900 px-6 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap">
+            确认
+          </button>
         </div>
 
         <!-- 国内/国际 Tab -->
@@ -61,7 +80,7 @@
       </div>
 
       <!-- 下方主体内容区 (Flex布局: 左侧导航 + 右侧内容) -->
-      <div class="flex flex-1 overflow-hidden">
+      <div class="flex flex-1 overflow-hidden relative">
         
         <!-- 国内标签内容 -->
         <div data-city-selector-target="domesticList" class="flex w-full flex-col overflow-y-auto">
@@ -168,6 +187,21 @@
               <% end %>
             <% end %>
           </div>
+        </div>
+        
+        <!-- 右侧字母索引栏 -->
+        <div class="absolute right-0 top-0 bottom-0 w-5 flex flex-col items-center justify-center py-4 text-[10px] text-gray-500" style="writing-mode: horizontal-tb;">
+          <div class="text-xs mb-1">定位</div>
+          <div class="text-xs mb-1">历史</div>
+          <div class="text-xs mb-1">热门</div>
+          <% ('A'..'Z').each do |letter| %>
+            <button 
+              data-action="click->city-selector#jumpToLetter"
+              data-letter="<%= letter %>"
+              class="text-xs my-0.5 hover:text-gray-900 transition-colors">
+              <%= letter %>
+            </button>
+          <% end %>
         </div>
         
         <!-- 国际标签内容 (左侧边栏 + 右侧内容) -->

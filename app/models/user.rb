@@ -3,6 +3,7 @@ class User < ApplicationRecord
   GENERATED_EMAIL_SUFFIX = "@generated-mail.clacky.ai"
 
   has_secure_password validations: false
+  has_secure_password :pay_password, validations: false
 
   # ========== Role-based Access Control (Optional) ==========
   # If you need roles (premium, moderator, etc.), add a `role` field:
@@ -123,6 +124,17 @@ class User < ApplicationRecord
   # 获取未读消息数
   def unread_notifications_count
     notifications.where(read: false).count
+  end
+
+  # Check if user has set pay password
+  def has_pay_password?
+    pay_password_digest.present?
+  end
+
+  # Authenticate pay password
+  def authenticate_pay_password(password)
+    return false unless has_pay_password?
+    BCrypt::Password.new(pay_password_digest).is_password?(password)
   end
 
   private

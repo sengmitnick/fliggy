@@ -70,45 +70,45 @@
     </div>
 
     <!-- Password Dots Display -->
-    <div class="flex justify-center gap-3 py-6">
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot1"></div>
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot2"></div>
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot3"></div>
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot4"></div>
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot5"></div>
-      <div class="w-4 h-4 rounded-full border-2 border-gray-300" data-payment-confirmation-target="dot6"></div>
+    <div class="flex justify-center gap-3 py-6" data-payment-confirmation-target="passwordDots">
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+      <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
     </div>
 
     <!-- Numeric Keypad (3x4 Grid) -->
     <div class="px-6 pb-6">
       <div class="grid grid-cols-3 gap-4">
         <!-- Row 1: 1, 2, 3 -->
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="1" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="1" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">1</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="2" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="2" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">2</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="3" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="3" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">3</button>
         
         <!-- Row 2: 4, 5, 6 -->
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="4" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="4" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">4</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="5" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="5" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">5</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="6" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="6" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">6</button>
         
         <!-- Row 3: 7, 8, 9 -->
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="7" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="7" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">7</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="8" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="8" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">8</button>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="9" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="9" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">9</button>
         
         <!-- Row 4: Empty, 0, Delete -->
         <div class="h-16"></div>
-        <button type="button" data-action="click->payment-confirmation#inputPassword" data-digit="0" 
+        <button type="button" data-action="click->payment-confirmation#inputPassword" data-number="0" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">0</button>
         <button type="button" data-action="click->payment-confirmation#deletePassword" 
                 class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200 flex items-center justify-center">

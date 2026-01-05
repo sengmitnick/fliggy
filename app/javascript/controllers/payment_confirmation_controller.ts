@@ -1,24 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
-export default class extends Controller<HTMLElement> {
+export default class extends Controller {
   static targets = [
-    "processingModal",
     "passwordModal",
+    "fingerprintModal",
     "statusModal",
-    "processingAmount",
+    "passwordDots",
     "passwordAmount",
     "statusAmount",
-    "userEmail",
     "statusUserEmail",
     "statusIcon",
     "statusText",
-    "statusDots",
-    "dot1",
-    "dot2",
-    "dot3",
-    "dot4",
-    "dot5",
-    "dot6"
+    "statusDots"
   ]
 
   static values = {
@@ -28,80 +21,58 @@ export default class extends Controller<HTMLElement> {
     successUrl: String
   }
 
-  declare readonly processingModalTarget: HTMLElement
   declare readonly passwordModalTarget: HTMLElement
+  declare readonly fingerprintModalTarget: HTMLElement
   declare readonly statusModalTarget: HTMLElement
-  declare readonly processingAmountTarget: HTMLElement
+  declare readonly passwordDotsTarget: HTMLElement
   declare readonly passwordAmountTarget: HTMLElement
   declare readonly statusAmountTarget: HTMLElement
-  declare readonly userEmailTarget: HTMLElement
   declare readonly statusUserEmailTarget: HTMLElement
   declare readonly statusIconTarget: HTMLElement
   declare readonly statusTextTarget: HTMLElement
   declare readonly statusDotsTarget: HTMLElement
-  declare readonly dot1Target: HTMLElement
-  declare readonly dot2Target: HTMLElement
-  declare readonly dot3Target: HTMLElement
-  declare readonly dot4Target: HTMLElement
-  declare readonly dot5Target: HTMLElement
-  declare readonly dot6Target: HTMLElement
-
-  declare amountValue: string
-  declare userEmailValue: string
-  declare paymentUrlValue: string
-  declare successUrlValue: string
+  declare readonly amountValue: string
+  declare readonly userEmailValue: string
+  declare readonly paymentUrlValue: string
+  declare readonly successUrlValue: string
 
   private password: string = ""
 
   connect(): void {
-    console.log("PaymentConfirmation controller connected")
-  }
-
-  // Public method to start payment flow (called from parent controller)
-  startPaymentFlow(): void {
-    this.showProcessingModal()
-  }
-
-  showProcessingModal(): void {
-    this.processingAmountTarget.textContent = this.amountValue
-    this.userEmailTarget.textContent = this.userEmailValue
-    this.processingModalTarget.classList.remove('hidden')
-  }
-
-  closeProcessingModal(): void {
-    this.processingModalTarget.classList.add('hidden')
-  }
-
-  switchToPasswordPay(): void {
-    this.closeProcessingModal()
-    this.showPasswordModal()
+    // Initialize controller
   }
 
   showPasswordModal(): void {
-    this.passwordAmountTarget.textContent = this.amountValue
     this.password = ""
     this.updatePasswordDots()
+    this.passwordAmountTarget.textContent = this.amountValue
     this.passwordModalTarget.classList.remove('hidden')
   }
 
   closePasswordModal(): void {
     this.passwordModalTarget.classList.add('hidden')
-    this.password = ""
-    this.updatePasswordDots()
+  }
+
+  showFingerprintModal(): void {
+    this.fingerprintModalTarget.classList.remove('hidden')
+  }
+
+  closeFingerprintModal(): void {
+    this.fingerprintModalTarget.classList.add('hidden')
   }
 
   inputPassword(event: Event): void {
     const button = event.currentTarget as HTMLButtonElement
-    const digit = button.dataset.digit || ""
-    
+    const number = button.dataset.number
+
+    if (!number) return
+
     if (this.password.length < 6) {
-      this.password += digit
+      this.password += number
       this.updatePasswordDots()
-      
+
       if (this.password.length === 6) {
-        setTimeout(() => {
-          this.processPasswordPayment()
-        }, 300)
+        this.processPasswordPayment()
       }
     }
   }
@@ -113,32 +84,133 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  updatePasswordDots(): void {
-    const dots = [
-      this.dot1Target,
-      this.dot2Target,
-      this.dot3Target,
-      this.dot4Target,
-      this.dot5Target,
-      this.dot6Target
-    ]
-    
+  private updatePasswordDots(): void {
+    const dots = this.passwordDotsTarget.querySelectorAll('.password-dot')
     dots.forEach((dot, index) => {
       if (index < this.password.length) {
-        dot.classList.add('bg-blue-500')
-        dot.classList.remove('border-gray-300')
-        dot.classList.add('border-blue-500')
+        dot.classList.add('active')
       } else {
-        dot.classList.remove('bg-blue-500')
-        dot.classList.add('border-gray-300')
-        dot.classList.remove('border-blue-500')
+        dot.classList.remove('active')
       }
     })
   }
 
-  processPasswordPayment(): void {
-    this.closePasswordModal()
+  processFingerprintPayment(): void {
+    // Simulate fingerprint verification
+    this.closeFingerprintModal()
     this.showPayingStatus()
+
+    setTimeout(() => {
+      this.showPaymentSuccess()
+      setTimeout(() => {
+        window.location.href = this.successUrlValue
+      }, 2000)
+    }, 2000)
+  }
+
+  cancelFingerprintPayment(): void {
+    this.closeFingerprintModal()
+  }
+
+  processPasswordPayment(): void {
+    // Do NOT close modal here - wait for verification result
+    // First verify password before showing payment status
+    this.verifyPasswordThenPay()
+  }
+
+  async verifyPasswordThenPay(): Promise<void> {
+    try {
+      // Call verify API first
+      const verifyResponse = await fetch('/profile/verify_pay_password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({
+          pay_password: this.password
+        })
+      })
+
+      const verifyData = await verifyResponse.json()
+
+      if (!verifyResponse.ok || !verifyData.success) {
+        // Password is wrong - show toast and reset
+        const message = verifyData.message || '支付密码错误'
+        
+        // 如果是需要设置支付密码，直接跳转
+        if (message.includes('请先设置支付密码') || message.includes('设置支付密码')) {
+          this.passwordModalTarget.classList.add('hidden')
+          window.location.href = '/profile/edit_pay_password'
+          return
+        }
+        
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast(message)
+        } else {
+          alert(message)
+        }
+        // Clear password and stay on password input page
+        this.password = ""
+        this.updatePasswordDots()
+        this.passwordModalTarget.classList.remove('hidden')
+        return
+      }
+
+      // Password is correct - proceed with payment
+      this.passwordModalTarget.classList.add('hidden')
+      this.showPayingStatus()
+      
+      // Process actual payment
+      await this.processActualPayment()
+      
+    } catch (error) {
+      console.error('验证支付密码失败:', error)
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('网络错误，请重试')
+      } else {
+        alert('网络错误，请重试')
+      }
+      this.password = ""
+      this.updatePasswordDots()
+      this.passwordModalTarget.classList.remove('hidden')
+    }
+  }
+
+  async processActualPayment(): Promise<void> {
+    try {
+      const response = await fetch(this.paymentUrlValue, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({}) // Password already verified, just trigger payment
+      })
+
+      if (response.ok) {
+        // Show success status
+        this.showPaymentSuccess()
+        // Redirect after showing success
+        setTimeout(() => {
+          window.location.href = this.successUrlValue
+        }, 2000)
+      } else {
+        const data = await response.json()
+        throw new Error(data.message || '支付失败')
+      }
+    } catch (error) {
+      console.error('支付失败:', error)
+      this.closeStatusModal()
+      const message = error instanceof Error ? error.message : '支付失败，请重试'
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(message)
+      } else {
+        alert(message)
+      }
+      this.password = ""
+      this.showPasswordModal()
+    }
   }
 
   showPayingStatus(): void {
@@ -148,51 +220,15 @@ export default class extends Controller<HTMLElement> {
     this.statusTextTarget.textContent = '正在付款'
     this.statusDotsTarget.style.display = 'block'
     this.statusModalTarget.classList.remove('hidden')
-    
-    setTimeout(() => {
-      this.showPaymentSuccess()
-    }, 2000)
   }
 
   showPaymentSuccess(): void {
     this.statusIconTarget.textContent = '✓'
     this.statusTextTarget.textContent = '付款成功'
     this.statusDotsTarget.style.display = 'none'
-    
-    setTimeout(() => {
-      this.redirectToSuccessPage()
-    }, 2000)
   }
 
   closeStatusModal(): void {
     this.statusModalTarget.classList.add('hidden')
-  }
-
-  redirectToSuccessPage(): void {
-    console.log('Redirecting to success page...')
-    console.log('Payment URL:', this.paymentUrlValue)
-    console.log('Success URL:', this.successUrlValue)
-    
-    fetch(this.paymentUrlValue, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
-      }
-    }).then(response => {
-      console.log('Payment response:', response.status, response.ok)
-      if (response.ok) {
-        console.log('Payment successful, redirecting to:', this.successUrlValue)
-        window.location.href = this.successUrlValue
-      } else {
-        console.error('Payment failed with status:', response.status)
-        alert('支付失败，请重试')
-        this.closeStatusModal()
-      }
-    }).catch(error => {
-      console.error('支付失败:', error)
-      alert('支付失败，请重试')
-      this.closeStatusModal()
-    })
   }
 }

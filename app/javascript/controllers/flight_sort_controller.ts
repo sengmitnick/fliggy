@@ -9,6 +9,10 @@ export default class extends Controller<HTMLElement> {
     "timeSortButton",
     "flightList"
   ]
+  
+  static values = {
+    initialSort: { type: String, default: "default" }
+  }
 
   declare readonly modalTarget: HTMLElement
   declare readonly overlayTarget: HTMLElement
@@ -16,6 +20,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly pricePriorityButtonTarget: HTMLButtonElement
   declare readonly timeSortButtonTarget: HTMLButtonElement
   declare readonly flightListTarget: HTMLElement
+  declare readonly initialSortValue: string
 
   // Sort state
   private currentSort: string = "default" // default, direct_priority, price_asc, departure_early, departure_late, arrival_early, arrival_late, duration_short
@@ -24,6 +29,15 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("FlightSort controller connected")
+    
+    // Initialize sort state based on initialSort value
+    if (this.initialSortValue === "price_asc") {
+      this.currentSort = "price_asc"
+      this.pricePriorityActive = true
+      this.pricePriorityButtonTarget.classList.add("border-b-2", "border-black")
+      this.pricePriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
+      this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
+    }
   }
 
   // Toggle direct flight priority

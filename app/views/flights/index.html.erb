@@ -226,9 +226,9 @@
   <!-- Quick Links -->
   <div class="mx-4 mt-4 bg-white rounded-2xl pt-[3px] pb-[18px] shadow-sm">
     <div class="grid grid-cols-5 items-center">
-      <div class="flex flex-1 flex-col items-center gap-1.5">
+      <%= link_to special_flights_path, class: "flex flex-1 flex-col items-center gap-1.5" do %>
         <%= image_tag "airfare/特价机票.png", class: "w-full h-auto", alt: "特价机票" %>
-      </div>
+      <% end %>
 
       <div class="flex flex-1 flex-col items-center gap-1.5 relative">
         <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
@@ -293,8 +293,12 @@
   <div class="bg-white pt-5 pb-8 rounded-t-3xl -mt-4 relative z-10">
     <div class="mx-4">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-lg font-bold text-[#333333]">特价机票</span>
-        <button class="text-[13px] text-gray-500 flex items-center">更多 <span class="ml-0.5 text-[10px] mt-0.5">›</span></button>
+        <%= link_to search_flights_path(sort_by: 'price', departure_city: '深圳', destination_city: '杭州', date: (Date.today + 7.days).to_s, trip_type: 'one_way'), class: "text-lg font-bold text-[#333333]" do %>
+          特价机票
+        <% end %>
+        <%= link_to search_flights_path(sort_by: 'price', departure_city: '深圳', destination_city: '杭州', date: (Date.today + 7.days).to_s, trip_type: 'one_way'), class: "text-[13px] text-gray-500 flex items-center" do %>
+          更多 <span class="ml-0.5 text-[10px] mt-0.5">›</span>
+        <% end %>
       </div>
 
       <!-- Offer Tabs -->

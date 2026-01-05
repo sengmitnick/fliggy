@@ -127,6 +127,9 @@ Rails.application.routes.draw do
     member do
       get :edit_password
       patch :update_password
+      get :edit_pay_password
+      patch :update_pay_password
+      post :verify_pay_password
     end
   end
 
@@ -136,11 +139,15 @@ Rails.application.routes.draw do
   resources :flights, only: [:index, :show] do
     collection do
       get :search
+      get :combinations
       get :multi_city_search, to: 'flights#multi_city_search'
       get :multi_city_results, to: 'flights#multi_city_results'
     end
   end
   # End routes for flights
+
+  # Special flights (only index page, search redirects to flights/search?sort_by=price)
+  resources :special_flights, only: [:index]
 
   # Routes for passengers (常用信息)
   resources :passengers, only: [:index, :new, :create, :edit, :update, :destroy]
@@ -185,7 +192,12 @@ Rails.application.routes.draw do
     resources :flight_offers
     resources :passengers
     resources :bookings
-    resources :flights
+    resources :flights do
+      collection do
+        get :generator
+        post :batch_generate
+      end
+    end
     resources :users
     resources :admin_oplogs, only: [:index, :show]
     resources :administrators
