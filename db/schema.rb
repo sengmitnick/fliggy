@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_05_075247) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_administrators_on_name", unique: true
     t.index ["role"], name: "index_administrators_on_role"
+  end
+
+  create_table "booking_options", force: :cascade do |t|
+    t.bigint "train_id"
+    t.string "title"
+    t.text "description"
+    t.decimal "extra_fee", default: "0.0"
+    t.text "benefits"
+    t.integer "priority", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["train_id"], name: "index_booking_options_on_train_id"
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -528,6 +541,37 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
+  end
+
+  create_table "train_bookings", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "train_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "seat_type"
+    t.string "carriage_number"
+    t.string "seat_number"
+    t.decimal "total_price"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.string "status", default: "pending"
+    t.boolean "accept_terms", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["train_id"], name: "index_train_bookings_on_train_id"
+    t.index ["user_id"], name: "index_train_bookings_on_user_id"
+  end
+
+  create_table "train_seats", force: :cascade do |t|
+    t.bigint "train_id"
+    t.string "seat_type", default: "second_class"
+    t.decimal "price", default: "0.0"
+    t.integer "available_count", default: 0
+    t.integer "total_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["train_id"], name: "index_train_seats_on_train_id"
   end
 
   create_table "trains", force: :cascade do |t|

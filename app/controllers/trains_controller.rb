@@ -6,6 +6,11 @@ class TrainsController < ApplicationController
     @all_cities = City.all.order(:pinyin)
   end
 
+  def show
+    @train = Train.find(params[:id])
+    @hot_cities = City.hot_cities.order(:pinyin)
+    @all_cities = City.all.order(:pinyin)
+  end
 
   def search
     @departure_city = params[:departure_city] || "北京"

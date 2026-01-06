@@ -1,0 +1,166 @@
+<div class="min-h-screen bg-gray-100" data-controller="train-seat-selector" data-train-seat-selector-train-id-value="<%= @train.id %>">
+  <!-- Header -->
+  <div class="bg-white border-b">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <%= link_to search_trains_path, class: "text-2xl" do %>
+        ←
+      <% end %>
+      <span class="text-base font-medium"><%= @train.departure_time.strftime('01月%d日') %> 周<%= @train.departure_time.strftime('%w') %></span>
+      <div class="flex items-center space-x-3">
+        <button type="button" onclick="window.showToast('功能开发中')" class="text-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+        <button type="button" onclick="window.showToast('功能开发中')" class="text-xl">
+          ⋮
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Train Info Card -->
+  <div class="bg-white mx-4 mt-3 rounded-lg p-4 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl font-bold"><%= @train.departure_time.strftime('%H:%M') %></span>
+      </div>
+      <div class="text-center flex-1 px-4">
+        <div class="text-xs text-gray-500 mb-1">
+          <%= (@train.duration / 60).to_i %>时<%= @train.duration % 60 %>分
+        </div>
+        <div class="flex items-center justify-center">
+          <div class="flex-1 border-t border-gray-300"></div>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl font-bold"><%= @train.arrival_time.strftime('%H:%M') %></span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex-1">
+        <div class="text-base text-gray-800">
+          <%= @train.departure_city %>
+          <span class="text-xs ml-1 px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">始</span>
+        </div>
+      </div>
+      <div class="flex-1 text-center">
+        <div class="inline-flex items-center bg-yellow-100 px-3 py-1 rounded">
+          <span class="text-xs font-bold text-gray-800"><%= @train.train_number %></span>
+          <span class="text-xs text-gray-600 ml-2">时刻表</span>
+          <span class="ml-1">→</span>
+        </div>
+      </div>
+      <div class="flex-1 text-right">
+        <div class="text-base text-gray-800">
+          <span class="text-xs mr-1 px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">终</span>
+          <%= @train.arrival_city %>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center text-xs text-gray-500 space-x-3 mb-3">
+      <span>购票须知</span>
+      <span>复兴号·智能动车</span>
+    </div>
+
+    <!-- Promotional Banner -->
+    <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-2.5 flex items-center justify-between">
+      <div class="flex items-center">
+        <span class="text-red-500 font-bold text-sm">预订即送</span>
+        <span class="text-xs text-gray-600 ml-2">下单赠接送机券/元旦租车特惠</span>
+      </div>
+      <button class="text-xs text-red-500 border border-red-300 rounded px-2.5 py-1">查看</button>
+    </div>
+  </div>
+
+  <!-- Seat Type Tabs (从数据库读取) -->
+  <div class="bg-yellow-50 mx-4 mt-3 rounded-lg p-1 flex items-center justify-between">
+    <% @train.train_seats.each do |seat| %>
+      <div 
+        class="rounded-lg px-3 py-2 flex-1 text-center mx-0.5 relative cursor-pointer"
+        data-train-seat-selector-target="seatTab"
+        data-seat-type="<%= seat.seat_type %>"
+        data-seat-price="<%= seat.price %>"
+        data-action="click->train-seat-selector#selectSeat"
+      >
+        <div class="text-sm font-medium text-gray-800"><%= seat.seat_type_name %></div>
+        <div class="text-xs font-bold text-red-500 mt-0.5">¥<%= seat.price.to_i %></div>
+        <div class="text-xs text-gray-500 mt-0.5"><%= seat.availability_status %></div>
+        
+        <% if seat.seat_type == 'business_class' && seat.available_count > 0 %>
+          <span class="absolute top-0 right-0 bg-yellow-400 text-gray-900 px-1.5 py-0.5 text-xs rounded-bl rounded-tr">9.1折</span>
+        <% end %>
+        
+        <!-- 选中指示箭头 -->
+        <div class="seat-arrow hidden absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+          <div class="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Booking Options Container (从数据库读取订票套餐) -->
+  <div data-train-seat-selector-target="optionsContainer">
+    <% @train.booking_options.active.ordered.each do |option| %>
+      <div class="bg-white mx-4 mt-2 rounded-lg shadow-sm">
+        <%= link_to new_train_booking_path(train_id: @train.id, seat_type: 'second_class'), class: "block" do %>
+          <div class="p-4 flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-center mb-1">
+                <% if option.title == '超值7大权益' %>
+                  <span class="bg-red-100 text-red-600 px-2 py-0.5 text-xs rounded mr-2">限时优惠¥10</span>
+                <% end %>
+                <span class="text-xs text-gray-500"><%= option.title %></span>
+              </div>
+              
+              <% if option.description.present? %>
+                <div class="text-xs text-gray-400 mt-1"><%= option.description %></div>
+              <% end %>
+              
+              <% if option.benefits_list.any? %>
+                <div class="flex items-center space-x-2 text-xs text-gray-500 mt-2">
+                  <% option.benefits_list.take(3).each_with_index do |benefit, index| %>
+                    <span><%= benefit %></span>
+                    <% if index < [option.benefits_list.length - 1, 2].min %>
+                      <span>·</span>
+                    <% end %>
+                  <% end %>
+                  <% if option.extra_fee > 0 %>
+                    <span class="text-red-500">+¥<%= option.extra_fee.to_i %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="flex items-center space-x-3 ml-4">
+              <div class="text-right">
+                <!-- 价格会根据选择的座位类型动态显示 -->
+                <div class="text-red-500 font-bold text-xl">
+                  ¥<span class="booking-option-price" data-extra-fee="<%= option.extra_fee %>"><%= (@train.train_seats.first&.price || @train.price_second_class).to_i + option.extra_fee.to_i %></span>
+                </div>
+                <% if option.extra_fee > 0 %>
+                  <div class="text-xs text-gray-400">+¥<%= option.extra_fee.to_i %></div>
+                <% end %>
+              </div>
+              
+              <button type="button" class="bg-orange-500 text-white px-6 py-2 rounded font-bold text-base">
+                订
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Bottom Safe Badge -->
+  <div class="mx-4 mt-6 mb-6 flex items-center justify-center py-4">
+    <span class="text-2xl mr-2">👍</span>
+    <div class="text-center">
+      <div class="font-bold text-gray-800">飞猪旅行·硬核保障</div>
+      <div class="text-xs text-gray-500 mt-1">—— 出票安心·出行安心·服务安心 ——</div>
+    </div>
+  </div>
+</div>

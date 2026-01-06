@@ -1,4 +1,8 @@
 class Train < ApplicationRecord
+  has_many :train_bookings, dependent: :destroy
+  has_many :train_seats, dependent: :destroy
+  has_many :booking_options, dependent: :destroy
+  
   validates :departure_city, :arrival_city, :departure_time, :arrival_time, presence: true
   validates :train_number, :duration, presence: true
   validates :price_second_class, numericality: { greater_than: 0 }
@@ -60,6 +64,52 @@ class Train < ApplicationRecord
         price_business_class: business_class,
         available_seats: rand(50..200)
       )
+      
+      # 为每趟车创建座位类型数据
+      [
+        { seat_type: 'second_class', price: second_class, total: rand(300..500) },
+        { seat_type: 'first_class', price: first_class, total: rand(100..200) },
+        { seat_type: 'business_class', price: business_class, total: rand(20..50) },
+        { seat_type: 'no_seat', price: second_class * 0.5, total: 999 }
+      ].each do |seat_data|
+        available = (seat_data[:total] * rand(0.3..0.9)).to_i
+        train.train_seats.create!(
+          seat_type: seat_data[:seat_type],
+          price: seat_data[:price],
+          total_count: seat_data[:total],
+          available_count: available
+        )
+      end
+      
+      # 为每趟车创建3种订票套餐
+      [
+        {
+          title: '超值7大权益',
+          description: '含送站、预约座位、延误退改、分享红包等',
+          extra_fee: 59,
+          benefits: ['送站服务', '预约座位', '延误退改', '退票无忧', '分享红包', '出行保障', '优先客服'],
+          priority: 1,
+          is_active: true
+        },
+        {
+          title: '登录12306购票',
+          description: '使用12306账号直接购买，享受官方价格',
+          extra_fee: 0,
+          benefits: ['官方价格', '无额外费用', '账号直购'],
+          priority: 2,
+          is_active: true
+        },
+        {
+          title: '免登12306购票',
+          description: '无顰12306账号，快速下单',
+          extra_fee: 25,
+          benefits: ['无顰12306', '快速下单', '支付便捷'],
+          priority: 3,
+          is_active: true
+        }
+      ].each do |option_data|
+        train.booking_options.create!(option_data)
+      end
       
       trains << train
     end

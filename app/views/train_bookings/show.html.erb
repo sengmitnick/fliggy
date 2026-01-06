@@ -1,0 +1,96 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">订单详情</h2>
+      
+      <!-- Train Info -->
+      <div class="border-b border-gray-200 pb-4 mb-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">车次信息</h3>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-600">车次号</span>
+            <span class="text-gray-900 font-medium"><%= @train.train_number %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">出发站</span>
+            <span class="text-gray-900"><%= @train.departure_city %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">到达站</span>
+            <span class="text-gray-900"><%= @train.arrival_city %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">出发时间</span>
+            <span class="text-gray-900"><%= @train.departure_time.strftime('%Y-%m-%d %H:%M') %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">到达时间</span>
+            <span class="text-gray-900"><%= @train.arrival_time.strftime('%Y-%m-%d %H:%M') %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passenger Info -->
+      <div class="border-b border-gray-200 pb-4 mb-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">乘车人信息</h3>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-600">姓名</span>
+            <span class="text-gray-900"><%= @train_booking.passenger_name %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">身份证号</span>
+            <span class="text-gray-900 font-mono"><%= @train_booking.passenger_id_number[0..5] %>********<%= @train_booking.passenger_id_number[-4..-1] %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">联系电话</span>
+            <span class="text-gray-900"><%= @train_booking.contact_phone %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">座位类型</span>
+            <span class="text-gray-900"><%= @train_booking.seat_type_label %></span>
+          </div>
+          <% if @train_booking.seat_info != '未分配' %>
+            <div class="flex justify-between">
+              <span class="text-gray-600">座位信息</span>
+              <span class="text-gray-900 font-medium text-blue-600"><%= @train_booking.seat_info %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Order Info -->
+      <div class="pb-4 mb-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-2">订单信息</h3>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-600">订单号</span>
+            <span class="text-gray-900 font-mono">#<%= @train_booking.id %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">订单状态</span>
+            <span class="px-2 py-1 rounded-full text-xs <%= @train_booking.paid? ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+              <%= @train_booking.status == 'paid' ? '已支付' : '待支付' %>
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">下单时间</span>
+            <span class="text-gray-900"><%= @train_booking.created_at.strftime('%Y-%m-%d %H:%M:%S') %></span>
+          </div>
+          <div class="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+            <span class="text-gray-900">总计</span>
+            <span class="text-blue-600">¥<%= @train_booking.total_price %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex space-x-3">
+        <%= link_to '返回首页', root_path, class: 'flex-1 px-6 py-3 text-center border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50' %>
+        <% if @train_booking.pending? %>
+          <%= link_to '继续支付', lock_train_booking_path(@train_booking), class: 'flex-1 px-6 py-3 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-700' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
