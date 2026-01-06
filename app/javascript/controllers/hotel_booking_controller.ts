@@ -1,11 +1,12 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["insuranceModal", "confirmModal", "form"]
+  static targets = ["insuranceModal", "confirmModal", "form", "totalPriceAmount"]
 
   declare readonly insuranceModalTarget: HTMLElement
   declare readonly confirmModalTarget: HTMLElement
   declare readonly formTarget: HTMLFormElement
+  declare readonly totalPriceAmountTarget: HTMLElement
 
   // Handle insurance option selection in form
   selectInsuranceOption(event: Event): void {
@@ -33,6 +34,23 @@ export default class extends Controller<HTMLElement> {
         selectedCard.classList.add('border-orange-400')
       }
     }
+
+    // Update total price
+    this.updateTotalPrice()
+  }
+
+  // Update total price display
+  private updateTotalPrice(): void {
+    if (!this.hasTotalPriceAmountTarget) return
+    
+    const basePrice = parseFloat(this.totalPriceAmountTarget.dataset.basePrice || '0')
+    const insurancePriceField = document.getElementById('hotel_booking_insurance_price') as HTMLInputElement
+    const insurancePrice = parseFloat(insurancePriceField?.value || '0')
+    
+    // Calculate total price: base price + insurance price
+    const totalPrice = basePrice + insurancePrice
+    
+    this.totalPriceAmountTarget.textContent = totalPrice.toFixed(2)
   }
 
   setInsuranceValues(insuranceType: string, insurancePrice: string): void {

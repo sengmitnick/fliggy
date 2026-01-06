@@ -21,10 +21,18 @@
           <% if room.respond_to?(:image) && room.image.attached? %>
             <%= image_tag room.image, class: "w-full h-full object-cover", alt: room.room_type %>
           <% else %>
-            <svg class="w-full h-full text-blue-200" viewBox="0 0 100 100" preserveAspectRatio="none" fill="currentColor">
-              <rect width="100" height="100" />
-              <path d="M0 80 L30 50 L60 80 L90 40 L100 60 L100 100 L0 100 Z" fill="#93c5fd" />
-            </svg>
+            <% 
+              # 使用真实的Unsplash酒店房间图片
+              room_images = [
+                'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400',  # 现代酒店房间
+                'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400',  # 豪华套房
+                'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400',  # 温馨卧室
+                'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400',  # 精致客房
+                'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400'   # 高级房间
+              ]
+              image_url = room_images[index % room_images.length]
+            %>
+            <%= image_tag image_url, class: "w-full h-full object-cover", alt: room.room_type, loading: "lazy" %>
           <% end %>
           <!-- 本店最低价标签 -->
           <% if index == 0 %>
