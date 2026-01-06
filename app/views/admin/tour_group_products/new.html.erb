@@ -1,0 +1,308 @@
+<% content_for :title, "New Tour group product" %>
+
+<div class="container-md">
+  <div class="flex items-center space-x-4">
+    <%= link_to admin_tour_group_products_path, class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Tour group products
+    <% end %>
+  </div>
+
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4 mb-8">Create New Tour group product</h1>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @tour_group_product], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @tour_group_product %>
+
+        <!-- Title -->
+        <div class="mb-4">
+          <%= form.label :title, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Title<% if field_required?(@tour_group_product, :title) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :title, {
+            placeholder: "Enter title...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :title) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:title].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:title].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Subtitle -->
+        <div class="mb-4">
+          <%= form.label :subtitle, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Subtitle<% if field_required?(@tour_group_product, :subtitle) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :subtitle, {
+            placeholder: "Enter subtitle...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :subtitle) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:subtitle].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:subtitle].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Tour category -->
+        <div class="mb-4">
+          <%= form.label :tour_category, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Tour category<% if field_required?(@tour_group_product, :tour_category) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :tour_category, {
+            placeholder: "Enter tour category...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :tour_category) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:tour_category].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:tour_category].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Destination -->
+        <div class="mb-4">
+          <%= form.label :destination, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Destination<% if field_required?(@tour_group_product, :destination) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :destination, {
+            placeholder: "Enter destination...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :destination) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:destination].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:destination].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Duration -->
+        <div class="mb-4">
+          <%= form.label :duration, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Duration<% if field_required?(@tour_group_product, :duration) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :duration, {
+            placeholder: "Enter duration...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :duration) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:duration].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:duration].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Departure city -->
+        <div class="mb-4">
+          <%= form.label :departure_city, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure city<% if field_required?(@tour_group_product, :departure_city) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :departure_city, {
+            placeholder: "Enter departure city...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :departure_city) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:departure_city].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:departure_city].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+          <%= form.label :price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price<% if field_required?(@tour_group_product, :price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price, {
+            placeholder: "Enter price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :price) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@tour_group_product, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :original_price) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-4">
+          <%= form.label :rating, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rating<% if field_required?(@tour_group_product, :rating) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :rating, {
+            placeholder: "Enter rating...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :rating) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:rating].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:rating].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rating desc -->
+        <div class="mb-4">
+          <%= form.label :rating_desc, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rating desc<% if field_required?(@tour_group_product, :rating_desc) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :rating_desc, {
+            placeholder: "Enter rating desc...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :rating_desc) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:rating_desc].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:rating_desc].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Highlights -->
+        <div class="mb-4">
+          <%= form.label :highlights, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Highlights<% if field_required?(@tour_group_product, :highlights) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :highlights, {
+            rows: 5,
+            placeholder: "Enter highlights...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :highlights) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:highlights].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:highlights].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Tags -->
+        <div class="mb-4">
+          <%= form.label :tags, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Tags<% if field_required?(@tour_group_product, :tags) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :tags, {
+            rows: 5,
+            placeholder: "Enter tags...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :tags) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:tags].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:tags].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Provider -->
+        <div class="mb-4">
+          <%= form.label :provider, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Provider<% if field_required?(@tour_group_product, :provider) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :provider, {
+            placeholder: "Enter provider...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :provider) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:provider].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:provider].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Sales count -->
+        <div class="mb-4">
+          <%= form.label :sales_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Sales count<% if field_required?(@tour_group_product, :sales_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :sales_count, {
+            placeholder: "Enter sales count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :sales_count) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:sales_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:sales_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Badge -->
+        <div class="mb-4">
+          <%= form.label :badge, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Badge<% if field_required?(@tour_group_product, :badge) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :badge, {
+            placeholder: "Enter badge...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :badge) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:badge].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:badge].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Departure label -->
+        <div class="mb-4">
+          <%= form.label :departure_label, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure label<% if field_required?(@tour_group_product, :departure_label) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :departure_label, {
+            placeholder: "Enter departure label...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :departure_label) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:departure_label].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:departure_label].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image url -->
+        <div class="mb-4">
+          <%= form.label :image_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image url<% if field_required?(@tour_group_product, :image_url) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :image_url, {
+            placeholder: "Enter image url...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :image_url) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:image_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:image_url].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Is featured -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :is_featured, 
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is featured</span>
+          </label>
+        </div>
+
+        <!-- Display order -->
+        <div class="mb-4">
+          <%= form.label :display_order, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Display order<% if field_required?(@tour_group_product, :display_order) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :display_order, {
+            placeholder: "Enter display order...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@tour_group_product, :display_order) ? { required: true } : {}) %>
+          <% if @tour_group_product.errors[:display_order].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:display_order].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Travel agency -->
+        <div class="mb-4">
+          <%= form.label :travel_agency_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Travel agency<% if field_required?(@tour_group_product, :travel_agency) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :travel_agency_id, 
+              options_for_select([['Select Travel agency', '']] + TravelAgency.all.map { |item| [item.name, item.id] }, @tour_group_product.travel_agency_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @tour_group_product.errors[:travel_agency_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @tour_group_product.errors[:travel_agency_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_tour_group_products_path, class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Create Tour group product", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

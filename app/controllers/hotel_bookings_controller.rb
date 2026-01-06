@@ -50,16 +50,10 @@ class HotelBookingsController < ApplicationController
     end
     
     if @booking.save
-      respond_to do |format|
-        format.html { redirect_to hotel_booking_path(@booking) }
-        format.json { render json: { success: true, booking_id: @booking.id } }
-      end
+      redirect_to hotel_booking_path(@booking)
     else
       @insurance_options = InsuranceService.available_options(booking_class: 'HotelBooking')
-      respond_to do |format|
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: @booking.errors.full_messages }, status: :unprocessable_entity }
-      end
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -82,18 +76,9 @@ class HotelBookingsController < ApplicationController
     # Just process the payment
     flow_service = BookingFlowService.new(@booking)
     if flow_service.complete_payment
-      respond_to do |format|
-        format.html { redirect_to success_hotel_booking_path(@booking) }
-        format.json { render json: { success: true } }
-      end
+      render json: { success: true }
     else
-      respond_to do |format|
-        format.html { 
-          flash[:alert] = flow_service.errors.join(', ')
-          redirect_to hotel_path(@booking.hotel), status: :unprocessable_entity
-        }
-        format.json { render json: { success: false, errors: flow_service.errors }, status: :unprocessable_entity }
-      end
+      render json: { success: false, message: flow_service.errors.join(', ') }, status: :unprocessable_entity
     end
   end
 

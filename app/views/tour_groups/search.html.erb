@@ -1,0 +1,197 @@
+<div class="bg-gray-100">
+  <!-- 搜索栏 - 固定顶部 -->
+  <div class="sticky top-0 z-50 bg-white px-4 py-2 flex items-center space-x-3">
+    <%= link_to tour_groups_path do %>
+      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-1.5 border border-yellow-400">
+      <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <span class="text-gray-700 text-sm"><%= @destination %></span>
+    </div>
+    <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+    </svg>
+  </div>
+
+  <!-- 主导航图标 -->
+  <div class="bg-gray-100 pt-2">
+    <div class="grid grid-cols-5 text-center text-xs text-gray-600">
+      <% 
+        tabs = [
+          { id: 'comprehensive', icon: 'tourism_tabs/综合.png', icon_active: 'tourism_tabs/综合-激活.png', label: '综合' },
+          { id: 'group_tour', icon: 'tourism_tabs/跟团游.png', icon_active: 'tourism_tabs/跟团游-激活.png', label: '跟团游' },
+          { id: 'private_group', icon: 'tourism_tabs/独立成团.png', icon_active: 'tourism_tabs/独立成团-激活.png', label: '独立成团' },
+          { id: 'free_travel', icon: 'tourism_tabs/自由出行.png', icon_active: 'tourism_tabs/自由出行-激活.png', label: '自由出行' },
+          { id: 'outbound_essentials', icon: 'tourism_tabs/出境必备.png', icon_active: 'tourism_tabs/出境必备-激活.png', label: '出境必备' }
+        ]
+      %>
+      
+      <% tabs.each do |tab| %>
+        <%= link_to search_tour_groups_path(destination: @destination, tab: tab[:id]), 
+            class: "flex flex-col items-center space-y-1 #{@active_tab == tab[:id] ? 'bg-white rounded-t-md pt-1' : ''}" do %>
+          <div class="w-8 h-8 flex items-center justify-center">
+            <%= image_tag(@active_tab == tab[:id] ? tab[:icon_active] : tab[:icon], 
+                class: 'w-6 h-6', alt: tab[:label]) %>
+          </div>
+          <span class="<%= @active_tab == tab[:id] ? 'font-bold text-black text-sm' : '' %>">
+            <%= tab[:label] %>
+          </span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 二级导航 -->
+  <div class="bg-white flex px-4 py-3 space-x-6 text-sm text-gray-600 border-b overflow-x-auto hide-scrollbar">
+    <div class="relative flex flex-col items-center font-bold text-black shrink-0">
+      <span>全部</span>
+      <div class="absolute -bottom-3 w-6 h-0.5 bg-black"></div>
+    </div>
+    <span class="shrink-0">精品小团</span>
+    <span class="shrink-0">多日游</span>
+    <span class="shrink-0">一日游</span>
+  </div>
+
+  <!-- 顶部横排卡片 -->
+  <div class="bg-white p-3 flex space-x-2 overflow-x-auto hide-scrollbar">
+    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+      <div class="absolute inset-0 bg-blue-900/40 flex flex-col items-center justify-center text-white">
+        <span class="font-bold text-sm">上海+迪士尼</span>
+        <span class="text-[10px] opacity-80">都市乐园精华连线·玩2-3天</span>
+      </div>
+      <%= image_tag 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=600', 
+          class: 'w-full h-full object-cover', alt: '上海+迪士尼' %>
+    </div>
+    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+      <div class="absolute inset-0 bg-orange-900/40 flex flex-col items-center justify-center text-white">
+        <span class="font-bold text-sm">上海+杭州</span>
+        <span class="text-[10px] opacity-80">探寻华东人文风光·玩2-4天</span>
+      </div>
+      <%= image_tag 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600', 
+          class: 'w-full h-full object-cover', alt: '上海+杭州' %>
+    </div>
+    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
+      <div class="absolute inset-0 bg-green-900/40 flex flex-col items-center justify-center text-white">
+        <span class="font-bold text-sm">自然博</span>
+        <span class="text-[10px] opacity-80">探秘文明史</span>
+      </div>
+      <%= image_tag 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', 
+          class: 'w-full h-full object-cover', alt: '自然博' %>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="bg-white px-4 py-2 border-b">
+    <div class="flex justify-between text-xs text-gray-700 mb-3">
+      <div class="flex items-center">智能排序 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </div>
+      <div class="flex items-center">出发地 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </div>
+      <div class="flex items-center">天数/日期 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </div>
+      <div class="flex items-center">筛选 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+        </svg>
+      </div>
+    </div>
+    <div class="flex space-x-2 overflow-x-auto hide-scrollbar">
+      <span class="bg-gray-100 px-3 py-1 rounded text-xs flex items-center shrink-0">团类型 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </span>
+      <span class="bg-gray-100 px-3 py-1 rounded text-xs flex items-center shrink-0">游玩路线 
+        <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </span>
+      <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">不用早起</span>
+      <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">往返直飞</span>
+      <span class="bg-gray-100 px-3 py-1 rounded text-xs shrink-0">全额退</span>
+    </div>
+  </div>
+
+  <!-- 列表内容 -->
+  <div class="space-y-3 p-3">
+    <% @search_results.each_with_index do |result, index| %>
+      <!-- 卡片 <%= index + 1 %> -->
+      <%= link_to tour_group_path(result[:id]), class: "bg-white rounded-md flex overflow-hidden hover:shadow-md transition-shadow" do %>
+        <div class="relative w-32 h-44 shrink-0">
+          <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg"><%= result[:badge] %></div>
+          <% if result[:departure].present? %>
+            <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1"><%= result[:departure] %></div>
+          <% end %>
+          <div class="w-full h-full bg-sky-200 flex items-center justify-center">
+            <%= image_tag result[:image], class: 'w-full h-full object-cover', alt: result[:title] %>
+          </div>
+        </div>
+        <div class="flex-1 p-2 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-sm leading-snug line-clamp-2"><%= result[:title] %></h3>
+            <% if result[:rating].present? %>
+              <div class="mt-1 flex items-center text-[10px]">
+                <span class="bg-blue-600 text-white px-1 rounded-sm mr-1 font-bold"><%= result[:rating] %></span>
+                <span class="text-blue-600 font-bold">超棒</span>
+                <span class="text-gray-400 ml-1"><%= result[:rating_desc] %></span>
+              </div>
+            <% end %>
+            <% if result[:highlights].present? %>
+              <div class="text-[11px] text-gray-500 mt-1"><%= result[:highlights].join('·') %></div>
+            <% end %>
+            <% if result[:tags].present? %>
+              <div class="flex space-x-1 mt-1">
+                <% result[:tags].each do |tag| %>
+                  <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded"><%= tag %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <div class="flex justify-between items-end">
+            <div class="text-[10px] text-gray-400">
+              <% if result[:provider].present? %>
+                <div><%= result[:provider] %></div>
+              <% end %>
+              <% if result[:sales].present? %>
+                <div><%= result[:sales] %></div>
+              <% end %>
+            </div>
+            <div class="text-red-500 font-bold">
+              <span class="text-xs">¥</span><span class="text-xl"><%= result[:price].gsub('¥', '') %></span><span class="text-xs font-normal ml-0.5 text-gray-500"><%= result[:price_suffix] %></span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
