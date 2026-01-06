@@ -42,7 +42,9 @@ export default class extends Controller<HTMLElement> {
 
   static values = {
     departureCity: String,
-    destinationCity: String
+    destinationCity: String,
+    enableMultiSelect: { type: Boolean, default: true },
+    modalTitle: { type: String, default: '' }
   }
 
   private selectionType: 'departure' | 'destination' = 'departure'
@@ -87,12 +89,14 @@ export default class extends Controller<HTMLElement> {
   declare readonly locatedCityButtonTarget: HTMLButtonElement
   declare departureCityValue: string
   declare destinationCityValue: string
+  declare enableMultiSelectValue: boolean
+  declare modalTitleValue: string
 
   private currentMultiCitySegmentId: string | null = null
   private currentMultiCityCityType: string | null = null
 
   connect(): void {
-    console.log("CitySelector connected")
+    console.log("CitySelector connected", { enableMultiSelect: this.enableMultiSelectValue })
     // Initialize default values
     if (!this.departureCityValue) this.departureCityValue = "北京"
     if (!this.destinationCityValue) this.destinationCityValue = "杭州"
@@ -100,6 +104,11 @@ export default class extends Controller<HTMLElement> {
     // Set initial values to hidden inputs
     this.departureCityInputTarget.value = this.departureCityValue
     this.destinationCityInputTarget.value = this.destinationCityValue
+    
+    // Hide multi-select UI if disabled
+    if (!this.enableMultiSelectValue) {
+      this.hideMultiSelectUI()
+    }
     
     // Listen for multi-city events
     this.element.addEventListener('multi-city:open-city-selector', this.handleMultiCityOpen.bind(this))
@@ -202,6 +211,9 @@ export default class extends Controller<HTMLElement> {
         this.departureCityValue = cityName
         this.departureTarget.textContent = cityName
         this.departureCityInputTarget.value = cityName
+        
+        // Dispatch city-changed event for tour-group-filter to listen
+        this.dispatchCityChangedEvent(cityName)
       } else {
         this.destinationCityValue = cityName
         this.destinationTarget.textContent = cityName
@@ -210,6 +222,16 @@ export default class extends Controller<HTMLElement> {
     }
     
     this.closeModal()
+  }
+
+  // Dispatch city-changed event for other controllers (like tour-group-filter)
+  private dispatchCityChangedEvent(cityName: string): void {
+    const cityChangedEvent = new CustomEvent('city-selector:city-changed', {
+      detail: { cityName },
+      bubbles: true
+    })
+    this.element.dispatchEvent(cityChangedEvent)
+    console.log('City selector: Dispatched city-changed event', cityName)
   }
 
   // Switch cities
@@ -315,11 +337,19 @@ export default class extends Controller<HTMLElement> {
     const singleSelectTitle = this.modalTarget.querySelector('[data-single-select-title]')
     const multiSelectTitle = this.modalTarget.querySelector('[data-multi-select-title]')
     
-    if (singleSelectTitle) {
-      singleSelectTitle.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'
-    }
-    if (multiSelectTitle) {
-      multiSelectTitle.textContent = this.selectionType === 'departure' ? '多选出发地' : '多选目的地'
+    // If custom modal title is provided and multi-select is disabled, use custom title
+    if (!this.enableMultiSelectValue && this.modalTitleValue) {
+      if (singleSelectTitle) {
+        singleSelectTitle.textContent = this.modalTitleValue
+      }
+    } else {
+      // Default behavior: update based on selection type
+      if (singleSelectTitle) {
+        singleSelectTitle.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'
+      }
+      if (multiSelectTitle) {
+        multiSelectTitle.textContent = this.selectionType === 'departure' ? '多选出发地' : '多选目的地'
+      }
     }
   }
 
@@ -567,5 +597,32 @@ export default class extends Controller<HTMLElement> {
   private getCSRFToken(): string {
     const token = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement
     return token ? token.content : ''
+  }
+
+  // Hide multi-select UI elements (for pages that don't need multi-select)
+  private hideMultiSelectUI(): void {
+    // Replace the toggle buttons container with a fixed title
+    const singleSelectTab = this.modalTarget.querySelector('[data-single-select-tab]')
+    const multiSelectTab = this.modalTarget.querySelector('[data-multi-select-tab]')
+    
+    if (singleSelectTab && multiSelectTab) {
+      const toggleContainer = singleSelectTab.parentElement
+      if (toggleContainer) {
+        // Replace the entire toggle container with a simple title
+        const titleText = this.modalTitleValue || '选择目的地'
+        toggleContainer.outerHTML = `<div class="text-lg font-bold text-gray-900">${titleText}</div>`
+      }
+    }
+    
+    // Hide selected cities container and confirm button
+    const selectedCitiesContainer = this.modalTarget.querySelector('[data-selected-cities]') as HTMLElement
+    const confirmButton = this.modalTarget.querySelector('[data-confirm-button]') as HTMLElement
+    
+    if (selectedCitiesContainer) {
+      selectedCitiesContainer.style.display = 'none'
+    }
+    if (confirmButton) {
+      confirmButton.style.display = 'none'
+    }
   }
 }

@@ -1,4 +1,9 @@
-<div class="min-h-screen bg-white">
+<div class="min-h-screen bg-white" 
+     data-controller="city-selector"
+     data-city-selector-departure-city-value="<%= @destination %>"
+     data-city-selector-destination-city-value=""
+     data-city-selector-enable-multi-select-value="false"
+     data-city-selector-modal-title-value="选择目的地">
   <!-- Reuse the transport header with blue background -->
   <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 
@@ -28,16 +33,23 @@
     </div>
 
     <!-- White Card Container with Form -->
-    <div class="bg-white rounded-b-[24px] shadow-sm px-4 pt-4 pb-6">
+    <div class="bg-white rounded-b-[24px] shadow-sm px-4 pt-4 pb-6" 
+         data-controller="tour-group-filter"
+         data-tour-group-filter-destination-value="<%= @destination %>"
+         data-tour-group-filter-duration-value=""
+         data-tour-group-filter-group-size-value="">
       
       <!-- Destination Section -->
       <div class="mb-4">
         <button 
           type="button"
+          data-action="click->city-selector#openDeparture"
           class="w-full text-left flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-600 mb-1">我想去</div>
-            <div class="text-[32px] font-bold leading-tight"><%= @destination %></div>
+            <div class="text-[32px] font-bold leading-tight" 
+                 data-city-selector-target="departure"
+                 data-tour-group-filter-target="departureDisplay"><%= @destination %></div>
           </div>
           <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
@@ -51,7 +63,10 @@
           <% @hot_destinations.each do |city| %>
             <button 
               type="button"
-              class="<%= city == @destination ? 'bg-[#FFE8CC]' : 'bg-gray-50' %> px-4 py-2 rounded-lg flex items-center gap-1 text-sm">
+              data-tour-group-filter-target="destinationButton"
+              data-destination="<%= city %>"
+              data-action="click->tour-group-filter#selectDestination"
+              class="<%= city == @destination ? 'bg-[#FFE8CC]' : 'bg-gray-50' %> px-4 py-2 rounded-lg flex items-center gap-1 text-sm transition-colors">
               <span class="text-base">🔥</span>
               <span class="font-medium"><%= city %></span>
             </button>
@@ -63,11 +78,13 @@
       <div class="mb-4">
         <div class="text-sm text-gray-600 mb-2">天数</div>
         <div class="flex gap-3">
-          <button class="flex-1 py-3 rounded-lg bg-gray-50 text-sm font-medium">
-            一日游
-          </button>
-          <% @duration_options[1..2].each do |option| %>
-            <button class="flex-1 py-3 rounded-lg bg-gray-50 text-sm font-medium relative">
+          <% @duration_options.each do |option| %>
+            <button 
+              type="button"
+              data-tour-group-filter-target="durationButton"
+              data-duration="<%= option[:value] %>"
+              data-action="click->tour-group-filter#selectDuration"
+              class="flex-1 py-3 rounded-lg bg-gray-50 text-sm font-medium relative transition-colors">
               <%= option[:label] %>
               <% if option[:hot] %>
                 <span class="absolute -top-1 -right-1 text-base">🔥</span>
@@ -81,22 +98,32 @@
       <div class="mb-4">
         <div class="flex gap-4">
           <% @group_size_options.each do |option| %>
-            <label class="flex items-center gap-2 cursor-pointer">
+            <button 
+              type="button"
+              data-tour-group-filter-target="groupSizeButton"
+              data-group-size="<%= option[:value] %>"
+              data-action="click->tour-group-filter#selectGroupSize"
+              class="flex items-center gap-2 cursor-pointer">
               <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                <div class="w-3 h-3 rounded-full bg-transparent"></div>
+                <div class="w-3 h-3 rounded-full bg-transparent radio-circle transition-colors"></div>
               </div>
               <div>
                 <span class="text-base font-medium"><%= option[:label] %></span>
                 <span class="text-xs text-gray-500 ml-1"><%= option[:description] %></span>
               </div>
-            </label>
+            </button>
           <% end %>
         </div>
       </div>
 
       <!-- Search Button -->
       <%= form_with url: search_tour_groups_path, method: :get, local: true, data: { turbo: false } do |f| %>
-        <%= f.hidden_field :destination, value: @destination %>
+        <%= f.hidden_field :destination, value: @destination, data: { tour_group_filter_target: 'destinationInput', city_selector_target: 'departureCityInput' } %>
+        <%= f.hidden_field :duration, data: { tour_group_filter_target: 'durationInput' } %>
+        <%= f.hidden_field :group_size, data: { tour_group_filter_target: 'groupSizeInput' } %>
+        <!-- Hidden destination target (required by city-selector controller but not used) -->
+        <span class="hidden" data-city-selector-target="destination"></span>
+        <%= f.hidden_field :unused_destination, value: '', data: { city_selector_target: 'destinationCityInput' }, class: 'hidden' %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black" style="background: #FFD700;">
           搜索跟团游商品
         </button>
@@ -232,6 +259,9 @@
     </div>
 
   </div>
+
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
 
   <!-- Bottom Navigation -->
   <%= render 'shared/bottom_navigation' %>

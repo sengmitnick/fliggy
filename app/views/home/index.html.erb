@@ -102,10 +102,10 @@
             <span class="text-[12px] text-gray-700">接送机</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to tour_groups_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/跟团游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "跟团游" %>
             <span class="text-[12px] text-gray-700">跟团游</span>
-          </button>
+          <% end %>
 
           <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
             <%= image_tag "home/汽车票.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "汽车票" %>

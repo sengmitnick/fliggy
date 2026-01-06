@@ -47,11 +47,24 @@ class TourGroupsController < ApplicationController
   
   def search
     @destination = params[:destination].presence || '上海'
+    @duration = params[:duration].presence
+    @group_size = params[:group_size].presence
     @active_tab = params[:tab].presence || 'group_tour'  # 默认选中跟团游
     
     # 从数据库查询产品
     products = TourGroupProduct.includes(:travel_agency)
                                .where("destination LIKE ?", "%#{@destination}%")
+    
+    # 根据天数筛选（如果提供）
+    if @duration.present?
+      products = products.where(duration: @duration)
+    end
+    
+    # 根据团队大小筛选（如果提供）
+    if @group_size.present?
+      # 这里假设数据库有 group_size 字段，如果没有可以忽略或根据其他逻辑筛选
+      # products = products.where(group_size: @group_size)
+    end
     
     # 根据 tab 筛选
     products = case @active_tab
