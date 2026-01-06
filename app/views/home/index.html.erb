@@ -79,10 +79,10 @@
             <span class="text-[12px] text-gray-700">火车票</span>
           <% end %>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to cars_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/租车.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "租车" %>
             <span class="text-[12px] text-gray-700">租车</span>
-          </button>
+          <% end %>
 
           <%= link_to tourism_index_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/旅游.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "旅游" %>

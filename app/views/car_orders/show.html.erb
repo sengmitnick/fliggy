@@ -1,0 +1,108 @@
+<div class="min-h-screen bg-[#F7F8FA] pb-20" data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @car_order.total_price.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="<%= pay_car_order_path(@car_order) %>"
+     data-payment-confirmation-success-url-value="<%= success_car_order_path(@car_order) %>">
+  
+  <!-- 顶部状态栏 & 导航 -->
+  <div class="bg-[#FFD900] sticky top-0 z-50">
+    <div class="flex items-center h-12 px-4 relative">
+      <%= link_to cars_path, class: "absolute left-4" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="w-full text-center text-lg font-bold">确认支付</h1>
+    </div>
+  </div>
+
+  <div class="p-3 space-y-3">
+    <!-- 订单信息卡片 -->
+    <div class="bg-white rounded-xl p-4">
+      <h3 class="font-bold mb-4">订单详情</h3>
+      
+      <!-- 车辆信息 -->
+      <div class="flex items-center space-x-3 pb-3 border-b">
+        <div class="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+          <% if @car.image_url.present? %>
+            <%= image_tag @car.image_url, alt: "#{@car.brand} #{@car.car_model}", class: "w-full h-full object-cover" %>
+          <% else %>
+            <svg class="text-gray-400 w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <div class="font-bold text-lg"><%= @car.brand %> <%= @car.car_model %></div>
+          <div class="text-sm text-gray-500 mt-1">滴滴租车</div>
+        </div>
+      </div>
+
+      <!-- 驾驶人信息 -->
+      <div class="flex justify-between py-3 border-b">
+        <span class="text-gray-600">驾驶人</span>
+        <span class="font-bold"><%= @car_order.driver_name %></span>
+      </div>
+
+      <!-- 取还车时间 -->
+      <div class="flex justify-between py-3 border-b">
+        <span class="text-gray-600">取车时间</span>
+        <span><%= @car_order.pickup_datetime.strftime('%Y年%m月%d日 %H:%M') if @car_order.pickup_datetime %></span>
+      </div>
+
+      <div class="flex justify-between py-3 border-b">
+        <span class="text-gray-600">还车时间</span>
+        <span><%= @car_order.return_datetime.strftime('%Y年%m月%d日 %H:%M') if @car_order.return_datetime %></span>
+      </div>
+
+      <!-- 取还车地点 -->
+      <div class="flex justify-between py-3 border-b">
+        <span class="text-gray-600">取还车地点</span>
+        <span><%= @car_order.pickup_location %></span>
+      </div>
+
+      <!-- 联系电话 -->
+      <div class="flex justify-between py-3 border-b">
+        <span class="text-gray-600">联系电话</span>
+        <span><%= @car_order.contact_phone %></span>
+      </div>
+
+      <!-- 总价 -->
+      <div class="flex justify-between py-3 font-bold text-lg">
+        <span>订单金额</span>
+        <span class="text-[#FF5000]">￥<%= @car_order.total_price.to_i %></span>
+      </div>
+    </div>
+
+    <!-- 温馨提示 -->
+    <div class="bg-yellow-50 rounded-xl p-4 text-sm text-gray-700">
+      <div class="flex items-start space-x-2">
+        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <div class="font-bold mb-1">温馨提示</div>
+          <div class="text-xs leading-relaxed">
+            1. 请确认订单信息无误后再支付<br>
+            2. 支付成功后，门店会与您联系确认取车时间<br>
+            3. 取车时请携带身份证、驾驶证原件
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部支付按钮 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-gray-500">应付金额</div>
+        <div class="text-2xl font-bold text-[#FF5000]">￥<%= @car_order.total_price.to_i %></div>
+      </div>
+      <button type="button" 
+              data-action="click->payment-confirmation#showPasswordModal" 
+              class="bg-[#FF5000] text-white px-10 py-4 rounded-full text-lg font-bold">
+        立即支付
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>
