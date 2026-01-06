@@ -1,0 +1,289 @@
+<% content_for :title, "Edit Car" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_car_path(@car.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Car
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Car</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @car], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @car %>
+
+        <!-- Brand -->
+        <div class="mb-4">
+          <%= form.label :brand, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Brand<% if field_required?(@car, :brand) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :brand, {
+            placeholder: "Enter brand...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :brand) ? { required: true } : {}) %>
+          <% if @car.errors[:brand].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:brand].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Car model -->
+        <div class="mb-4">
+          <%= form.label :car_model, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Car model<% if field_required?(@car, :car_model) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :car_model, {
+            placeholder: "Enter car model...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :car_model) ? { required: true } : {}) %>
+          <% if @car.errors[:car_model].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:car_model].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-4">
+          <%= form.label :category, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Category<% if field_required?(@car, :category) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :category, {
+            placeholder: "Enter category...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :category) ? { required: true } : {}) %>
+          <% if @car.errors[:category].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:category].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Seats -->
+        <div class="mb-4">
+          <%= form.label :seats, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Seats<% if field_required?(@car, :seats) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :seats, {
+            placeholder: "Enter seats...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :seats) ? { required: true } : {}) %>
+          <% if @car.errors[:seats].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:seats].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Doors -->
+        <div class="mb-4">
+          <%= form.label :doors, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Doors<% if field_required?(@car, :doors) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :doors, {
+            placeholder: "Enter doors...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :doors) ? { required: true } : {}) %>
+          <% if @car.errors[:doors].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:doors].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Transmission -->
+        <div class="mb-4">
+          <%= form.label :transmission, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Transmission<% if field_required?(@car, :transmission) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :transmission, {
+            placeholder: "Enter transmission...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :transmission) ? { required: true } : {}) %>
+          <% if @car.errors[:transmission].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:transmission].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Fuel type -->
+        <div class="mb-4">
+          <%= form.label :fuel_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Fuel type<% if field_required?(@car, :fuel_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :fuel_type, {
+            placeholder: "Enter fuel type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :fuel_type) ? { required: true } : {}) %>
+          <% if @car.errors[:fuel_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:fuel_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Engine -->
+        <div class="mb-4">
+          <%= form.label :engine, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Engine<% if field_required?(@car, :engine) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :engine, {
+            placeholder: "Enter engine...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :engine) ? { required: true } : {}) %>
+          <% if @car.errors[:engine].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:engine].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price per day -->
+        <div class="mb-4">
+          <%= form.label :price_per_day, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price per day<% if field_required?(@car, :price_per_day) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price_per_day, {
+            placeholder: "Enter price per day...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :price_per_day) ? { required: true } : {}) %>
+          <% if @car.errors[:price_per_day].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:price_per_day].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Total price -->
+        <div class="mb-4">
+          <%= form.label :total_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Total price<% if field_required?(@car, :total_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :total_price, {
+            placeholder: "Enter total price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :total_price) ? { required: true } : {}) %>
+          <% if @car.errors[:total_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:total_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Discount amount -->
+        <div class="mb-4">
+          <%= form.label :discount_amount, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Discount amount<% if field_required?(@car, :discount_amount) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :discount_amount, {
+            placeholder: "Enter discount amount...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :discount_amount) ? { required: true } : {}) %>
+          <% if @car.errors[:discount_amount].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:discount_amount].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-4">
+          <%= form.label :location, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Location<% if field_required?(@car, :location) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :location, {
+            placeholder: "Enter location...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :location) ? { required: true } : {}) %>
+          <% if @car.errors[:location].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:location].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Pickup location -->
+        <div class="mb-4">
+          <%= form.label :pickup_location, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Pickup location<% if field_required?(@car, :pickup_location) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :pickup_location, {
+            placeholder: "Enter pickup location...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :pickup_location) ? { required: true } : {}) %>
+          <% if @car.errors[:pickup_location].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:pickup_location].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Features -->
+        <div class="mb-4">
+          <%= form.label :features, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Features<% if field_required?(@car, :features) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :features, {
+            rows: 5,
+            placeholder: "Enter features...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :features) ? { required: true } : {}) %>
+          <% if @car.errors[:features].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:features].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Tags -->
+        <div class="mb-4">
+          <%= form.label :tags, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Tags<% if field_required?(@car, :tags) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :tags, {
+            rows: 5,
+            placeholder: "Enter tags...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :tags) ? { required: true } : {}) %>
+          <% if @car.errors[:tags].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:tags].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Is featured -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :is_featured,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is featured</span>
+          </label>
+        </div>
+
+        <!-- Is available -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :is_available,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is available</span>
+          </label>
+        </div>
+
+        <!-- Sales rank -->
+        <div class="mb-4">
+          <%= form.label :sales_rank, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Sales rank<% if field_required?(@car, :sales_rank) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :sales_rank, {
+            placeholder: "Enter sales rank...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :sales_rank) ? { required: true } : {}) %>
+          <% if @car.errors[:sales_rank].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:sales_rank].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image url -->
+        <div class="mb-4">
+          <%= form.label :image_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image url<% if field_required?(@car, :image_url) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :image_url, {
+            placeholder: "Enter image url...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@car, :image_url) ? { required: true } : {}) %>
+          <% if @car.errors[:image_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @car.errors[:image_url].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_car_path(@car.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Car", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

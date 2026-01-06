@@ -250,6 +250,18 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
+    resources :cars do
+      collection do
+        get :generator
+        post :batch_generate
+      end
+    end
+    resources :hotel_packages do
+      collection do
+        get :generator
+        post :batch_generate
+      end
+    end
     resources :tour_group_products do
       collection do
         get :generator
