@@ -13,27 +13,36 @@ class BookingsController < ApplicationController
     hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
                                  .order(created_at: :desc)
     
+    # Fetch tour group bookings
+    tour_group_bookings = current_user.tour_group_bookings.includes(:tour_group_product, :tour_package)
+                                      .order(created_at: :desc)
+    
     # Filter by status
     case @status_filter
     when 'pending'
       flight_bookings = flight_bookings.where(status: 'pending')
       hotel_bookings = hotel_bookings.where(status: 'pending')
+      tour_group_bookings = tour_group_bookings.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
       hotel_bookings = hotel_bookings.where(status: ['paid', 'confirmed'])
                                      .where('hotel_bookings.check_in_date >= ?', Date.today)
+      tour_group_bookings = tour_group_bookings.where(status: 'confirmed')
+                                               .where('tour_group_bookings.travel_date >= ?', Date.today)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
       hotel_bookings = hotel_bookings.none
+      tour_group_bookings = tour_group_bookings.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
+      tour_group_bookings = tour_group_bookings.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a)
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a)
                     .sort_by(&:created_at).reverse
     
     # Manual pagination
