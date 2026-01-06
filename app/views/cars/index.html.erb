@@ -84,9 +84,9 @@
     </div>
 
     <!-- 搜索按钮 -->
-    <button class="w-full py-4 rounded-xl text-lg mb-4 font-bold" style="background-color: #ffda00; color: #333;">
+    <%= link_to search_cars_path, class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center", style: "background-color: #ffda00; color: #333;" do %>
       搜索租车
-    </button>
+    <% end %>
 
     <!-- 保障信息 -->
     <div class="text-center text-[10px] text-gray-400">
