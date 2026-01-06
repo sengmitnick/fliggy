@@ -37,6 +37,10 @@ class CarsController < ApplicationController
       @cars = @cars.order(price_per_day: :desc)
     end
   end
+  
+  def show
+    @car = Car.find(params[:id])
+  end
 
   private
   # Write your private methods here

@@ -40,6 +40,7 @@ class User < ApplicationRecord
   has_many :hotel_bookings, dependent: :destroy
   has_many :train_bookings, dependent: :destroy
   has_many :tour_group_bookings, dependent: :destroy
+  has_many :car_orders, dependent: :destroy
   has_one :membership, dependent: :destroy
   has_many :brand_memberships, dependent: :destroy
   has_many :notifications, dependent: :destroy
