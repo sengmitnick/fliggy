@@ -1,5 +1,5 @@
 <!-- 客房列表 -->
-<div class="bg-white mb-2">
+<div class="bg-white">
   <%
     # 根据 room_category 筛选房型
     rooms_to_display = if @room_category == 'hourly'
@@ -12,59 +12,130 @@
   %>
   
   <% rooms_to_display.each_with_index do |room, index| %>
-    <div class="<%= index > 0 ? 'border-t border-gray-100' : '' %>">
-      <div class="flex items-start space-x-3 p-4">
-        <div class="flex-shrink-0 relative">
-          <div class="w-28 h-28 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-            <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19,7H11V14H3V5H1V20H3V17H21V20H23V11A4,4 0 0,0 19,7M7,13A3,3 0 0,0 10,10A3,3 0 0,0 7,7A3,3 0 0,0 4,10A3,3 0 0,0 7,13Z"/>
+    <!-- 房型详情列表项 -->
+    <div class="p-3 flex space-x-3 <%= index > 0 ? 'border-t border-gray-100' : '' %>">
+      <!-- 左侧图片区域 -->
+      <div class="relative w-28 h-36 flex-shrink-0">
+        <!-- 图片占位符 -->
+        <div class="w-full h-full bg-blue-100 rounded-lg overflow-hidden relative">
+          <% if room.respond_to?(:image) && room.image.attached? %>
+            <%= image_tag room.image, class: "w-full h-full object-cover", alt: room.room_type %>
+          <% else %>
+            <svg class="w-full h-full text-blue-200" viewBox="0 0 100 100" preserveAspectRatio="none" fill="currentColor">
+              <rect width="100" height="100" />
+              <path d="M0 80 L30 50 L60 80 L90 40 L100 60 L100 100 L0 100 Z" fill="#93c5fd" />
             </svg>
-          </div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between mb-1">
-            <h3 class="font-bold text-gray-900 text-base flex items-center">
-              <%= room.room_type %>
-            </h3>
-          </div>
-          <p class="text-sm text-gray-600 mb-2">
-            <%= room.bed_type %> <%= room.area %> 
-            <%= room.has_window ? '有窗' : '无窗' %>
-            · 最多<%= room.max_guests %>人
-          </p>
-          <div class="flex items-center justify-between">
-            <div>
-              <% if room.original_price && room.original_price > room.price %>
-                <div class="text-xs text-gray-400 line-through">¥<%= number_with_precision(room.original_price, precision: 0) %></div>
-              <% end %>
-              <div class="flex items-baseline space-x-1">
-                <span class="text-red-600 text-xl font-bold">¥<%= number_with_precision(room.price, precision: 0) %></span>
-                <span class="text-sm text-gray-600">起</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <% if room.available_rooms > 0 %>
-                <%= link_to new_hotel_hotel_booking_path(@hotel, 
-                  room_id: room.id,
-                  check_in: @check_in,
-                  check_out: @check_out,
-                  rooms: @rooms,
-                  adults: @adults,
-                  children: @children
-                ), class: "bg-gradient-to-r from-orange-400 to-orange-500 text-white px-6 py-2 rounded-full font-medium text-sm" do %>
-                  订
-                <% end %>
-              <% else %>
-                <span class="text-gray-400 text-sm">已订完</span>
-              <% end %>
-            </div>
-          </div>
-          
-          <% if room.available_rooms < 5 && room.available_rooms > 0 %>
-            <div class="mt-2 text-xs text-red-500">
-              仅剩<%= room.available_rooms %>间
+          <% end %>
+          <!-- 本店最低价标签 -->
+          <% if index == 0 %>
+            <div class="absolute top-0 left-0 bg-[#FF5A43] text-white text-[10px] px-1.5 py-0.5 rounded-br-lg font-medium">
+              本店最低价
             </div>
           <% end %>
+          <!-- 图片数量 -->
+          <div class="absolute bottom-1 right-1 bg-black/50 text-white text-[10px] px-1.5 rounded-full">
+            <%= rand(5..10) %>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧文字内容 -->
+      <div class="flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center mb-1">
+            <% if room.respond_to?(:is_promotion) && room.is_promotion %>
+              <span class="bg-[#FF2D55] text-white text-[10px] px-1 rounded mr-1 leading-tight">闪促</span>
+            <% elsif index == 0 %>
+              <span class="bg-[#FF2D55] text-white text-[10px] px-1 rounded mr-1 leading-tight">闪促</span>
+            <% end %>
+            <h3 class="text-sm font-bold text-gray-900 flex items-center">
+              <%= room.room_type %>
+              <svg class="w-3 h-3 text-gray-400 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </h3>
+          </div>
+          
+          <div class="text-[11px] text-gray-500 space-x-1 mb-1">
+            <span><%= (room.respond_to?(:breakfast_included) && room.breakfast_included) ? '含早餐' : '无早餐' %></span>
+            <span class="text-gray-300">|</span>
+            <span><%= room.bed_type %></span>
+            <span class="text-gray-300">|</span>
+            <span><%= room.max_guests %>人入住</span>
+            <span class="text-gray-300">|</span>
+            <span><%= room.area %></span>
+          </div>
+          
+          <div class="text-[11px] text-gray-500 mb-1"><%= room.has_window ? '有窗' : '无窗' %></div>
+          
+          <% if room.respond_to?(:free_cancellation) && room.free_cancellation %>
+            <div class="flex items-center text-[11px] text-[#00B0A7] mb-2">
+              <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <%= (Date.today - 1.day).strftime('%-m月%-d日') %>12点前可免费取消
+            </div>
+          <% else %>
+            <div class="flex items-center text-[11px] text-[#00B0A7] mb-2">
+              <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <%= (Date.today - 1.day).strftime('%-m月%-d日') %>12点前可免费取消
+            </div>
+          <% end %>
+          
+          <div class="flex flex-wrap gap-1 mb-2">
+            <span class="text-[9px] px-1 py-0.5 border border-gray-200 text-gray-600 rounded">买贵多倍赔</span>
+            <span class="text-[9px] px-1 py-0.5 border border-gray-200 text-gray-600 rounded">立即确认</span>
+            <span class="text-[9px] px-1 py-0.5 border border-gray-200 text-gray-600 rounded">可购取消险</span>
+          </div>
+          
+          <div class="text-[10px] text-gray-400"><%= @hotel.name %>旗舰店</div>
+        </div>
+
+        <!-- 价格与按钮区域 -->
+        <div class="flex justify-between items-end mt-2">
+          <div class="flex flex-col">
+            <div class="flex items-baseline space-x-1">
+              <% if room.original_price && room.original_price > room.price %>
+                <span class="text-gray-400 text-[10px] line-through">¥<%= number_with_precision(room.original_price, precision: 0) %></span>
+              <% end %>
+              <span class="text-[#FF5A43] text-xs font-bold">¥</span>
+              <span class="text-[#FF5A43] text-2xl font-bold -mb-1"><%= number_with_precision(room.price, precision: 0) %></span>
+            </div>
+            <% if room.respond_to?(:coupon_available) && room.coupon_available %>
+              <div class="mt-1 flex items-center">
+                <span class="text-[#FF2D55] text-[10px] italic font-bold">膨胀神券</span>
+                <div class="bg-[#FF2D55] text-white text-[10px] px-1 rounded-sm ml-1 flex items-center">
+                  已膨至 <span class="text-xs font-bold ml-0.5"><%= rand(15..30) %></span>
+                  <svg class="w-2 h-2 ml-0.5 transform rotate-[-45deg]" fill="currentColor" viewBox="0 0 20 20"><path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                </div>
+              </div>
+            <% elsif index == 0 %>
+              <div class="mt-1 flex items-center">
+                <span class="text-[#FF2D55] text-[10px] italic font-bold">膨胀神券</span>
+                <div class="bg-[#FF2D55] text-white text-[10px] px-1 rounded-sm ml-1 flex items-center">
+                  已膨至 <span class="text-xs font-bold ml-0.5"><%= rand(15..30) %></span>
+                  <svg class="w-2 h-2 ml-0.5 transform rotate-[-45deg]" fill="currentColor" viewBox="0 0 20 20"><path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- 订房按钮 -->
+          <div class="flex flex-col items-center">
+            <% if room.available_rooms > 0 %>
+              <%= link_to new_hotel_hotel_booking_path(@hotel, 
+                room_id: room.id,
+                check_in: @check_in,
+                check_out: @check_out,
+                rooms: @rooms,
+                adults: @adults,
+                children: @children
+              ), class: "bg-[#FF9500] text-white rounded-lg w-14 h-12 flex flex-col items-center justify-center shadow-sm" do %>
+                <span class="text-lg font-bold leading-tight">订</span>
+                <span class="text-[9px]">在线付</span>
+              <% end %>
+            <% else %>
+              <div class="bg-gray-300 text-white rounded-lg w-14 h-12 flex flex-col items-center justify-center shadow-sm">
+                <span class="text-sm font-bold">已订完</span>
+              </div>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
