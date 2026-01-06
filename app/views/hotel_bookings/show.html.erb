@@ -1,4 +1,8 @@
-<div class="min-h-screen bg-gradient-to-b from-yellow-100 to-white pb-20">
+<div class="min-h-screen bg-gradient-to-b from-yellow-100 to-white pb-20" data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @booking.total_price_with_insurance.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="/hotel_bookings/<%= @booking.id %>/pay"
+     data-payment-confirmation-success-url-value="/hotel_bookings/<%= @booking.id %>/success">
   <!-- Header -->
   <div class="bg-gradient-to-b from-yellow-200 to-yellow-100 px-4 py-3 flex items-center justify-between">
     <%= link_to hotels_path, class: "text-gray-800" do %>
@@ -134,11 +138,14 @@
         <div class="text-xs text-gray-500">应付金额</div>
         <div class="text-xl font-bold text-red-500">¥<%= @booking.total_price_with_insurance %></div>
       </div>
-      <%= button_to pay_hotel_booking_path(@booking), 
-                    class: "px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all",
-                    data: { turbo: false } do %>
+      <button type="button"
+              data-action="click->payment-confirmation#showPasswordModal"
+              class="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all">
         立即支付
-      <% end %>
+      </button>
     </div>
   </div>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
 </div>

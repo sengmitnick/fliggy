@@ -101,7 +101,7 @@
         <%= link_to '重新预订', new_hotel_hotel_booking_path(booking.hotel), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
       <% elsif booking.status == 'pending' %>
         <%= link_to '取消订单', '#', class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
-        <%= link_to '立即支付', success_hotel_booking_path(booking), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+        <%= link_to '立即支付', hotel_booking_path(booking), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
       <% end %>
     </div>
   </div>

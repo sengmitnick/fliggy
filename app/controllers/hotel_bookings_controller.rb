@@ -76,10 +76,9 @@ class HotelBookingsController < ApplicationController
     # Just process the payment
     flow_service = BookingFlowService.new(@booking)
     if flow_service.complete_payment
-      redirect_to success_hotel_booking_path(@booking)
+      render json: { success: true }
     else
-      flash[:alert] = flow_service.errors.join(', ')
-      redirect_to hotel_path(@booking.hotel), status: :unprocessable_entity
+      render json: { success: false, message: flow_service.errors.join(', ') }, status: :unprocessable_entity
     end
   end
 

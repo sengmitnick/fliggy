@@ -34,7 +34,7 @@ Rails.application.routes.draw do
   resources :hotel_bookings, only: [:create, :show] do
     member do
       get :success
-      post :pay
+      patch :pay
     end
   end
   
