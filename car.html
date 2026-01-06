@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接送/租车复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .bg-main { background-color: #f7f8fa; }
+        .text-active { color: #333333; font-weight: bold; }
+        .tab-indicator { height: 3px; width: 20px; background-color: #333; border-radius: 2px; margin-top: 4px; }
+        .yellow-btn { background-color: #ffda00; color: #333; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-main text-gray-800 pb-24"> 
+
+    <!-- 2. 顶部 Banner (图3) -->
+    <div class="relative h-48 bg-blue-100 overflow-hidden">
+        <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-blue-300 to-blue-500">
+             <!-- 背景占位 -->
+             <div class="text-white text-xl font-bold italic">- 嗨跨年暖冬租车狂欢 -</div>
+        </div>
+        <div class="absolute top-4 left-4 flex space-x-2">
+            <div class="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </div>
+        </div>
+        <div class="absolute top-4 right-4 flex space-x-2">
+            <div class="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">📷</div>
+            <div class="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center">...</div>
+        </div>
+        <div class="absolute bottom-4 left-4 text-white text-xs">
+            新人租2免1 · 长租88折 · 最高立减200元
+        </div>
+    </div>
+
+    <!-- 3. 主导航 Tabs -->
+    <div class="bg-white/80 backdrop-blur px-4 pt-2 -mt-4 rounded-t-2xl relative z-10">
+        <div class="flex justify-between text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <span class="px-2">机票</span>
+            <span class="px-2">特价机票</span>
+            <span class="px-2">火车票</span>
+            <div class="flex flex-col items-center px-2">
+                <span class="text-black font-bold text-lg">租车/接送</span>
+                <div class="tab-indicator"></div>
+            </div>
+            <span class="px-2">汽车票</span>
+        </div>
+
+        <!-- 子 Tabs -->
+        <div class="flex justify-around text-sm border-b border-gray-100 pb-3">
+            <div class="flex flex-col items-center">
+                <span class="text-black font-bold">租车</span>
+                <div class="w-6 h-1 bg-black rounded mt-1"></div>
+            </div>
+            <span class="text-gray-500">接送机</span>
+            <span class="text-gray-500">接送火车</span>
+            <span class="text-gray-500">打车</span>
+        </div>
+    </div>
+
+    <!-- 4. 搜索卡片 -->
+    <div class="mx-4 mt-2 bg-white rounded-xl p-4 shadow-sm">
+        <!-- 国内/国际选择 -->
+        <div class="flex bg-gray-100 p-1 rounded-lg mb-4 text-sm">
+            <button class="flex-1 py-1.5 rounded-md bg-white shadow-sm font-bold">国内</button>
+            <button class="flex-1 py-1.5 text-gray-500">国际/中国港澳台</button>
+        </div>
+
+        <!-- 地点 -->
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex-1 border-r border-gray-100">
+                <div class="text-2xl font-bold flex items-center">
+                    武汉 <svg class="w-4 h-4 ml-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg>
+                </div>
+            </div>
+            <div class="flex-[1.5] pl-4 flex justify-between items-center">
+                <div class="text-lg font-bold">天河国际机场T3</div>
+                <div class="flex items-center text-xs text-gray-400">异地还车 <div class="w-10 h-6 bg-gray-200 rounded-full ml-1 relative"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div></div></div>
+            </div>
+        </div>
+
+        <!-- 行程推荐卡片 -->
+        <div class="flex space-x-2 mb-4">
+            <div class="flex-1 bg-blue-50/50 p-2 rounded border border-blue-100 relative">
+                <div class="text-[10px] text-gray-500">天河国际机场T3</div>
+                <div class="text-[10px] text-gray-400">01-16 12:55 到达</div>
+                <div class="absolute top-2 right-2 text-blue-300">✈️</div>
+            </div>
+            <div class="flex-1 bg-gray-50 p-2 rounded border border-gray-100 relative">
+                <div class="text-[10px] text-gray-500">深圳北站</div>
+                <div class="text-[10px] text-gray-400">01-19 19:30 到达</div>
+                <div class="absolute top-2 right-2 text-gray-300">🚆</div>
+            </div>
+        </div>
+
+        <!-- 时间选择 -->
+        <div class="flex justify-between items-center py-2 mb-4 border-b border-gray-50">
+            <div class="text-center">
+                <div class="text-xs text-gray-400">周六</div>
+                <div class="text-xl font-bold">1月10日 <span class="text-sm">13:55</span></div>
+            </div>
+            <div class="px-3 py-0.5 border border-gray-200 rounded-full text-xs">2天</div>
+            <div class="text-center">
+                <div class="text-xs text-gray-400">周一</div>
+                <div class="text-xl font-bold">1月12日 <span class="text-sm">13:55</span></div>
+            </div>
+        </div>
+
+        <!-- 选项 -->
+        <div class="flex space-x-2 mb-6">
+            <button class="bg-gray-100 px-4 py-2 rounded-lg text-sm">送车上门</button>
+            <button class="bg-gray-100 px-4 py-2 rounded-lg text-sm">新能源车</button>
+        </div>
+
+        <!-- 搜索按钮 -->
+        <button class="w-full yellow-btn py-4 rounded-xl text-lg mb-4">搜索租车</button>
+
+        <!-- 保障信息 -->
+        <div class="text-center text-[10px] text-gray-400">
+            平台保障 免押金 · 无车退赔 · 不符退赔 · 洗车交付 >
+        </div>
+    </div>
+
+    <!-- 5. 优惠活动区 -->
+    <div class="mx-4 mt-4 bg-red-50/50 rounded-xl p-4 border border-red-100">
+        <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center">
+                <span class="text-red-500 font-bold mr-2">新春早鸟订</span>
+                <span class="text-red-400 text-xs italic">越早订越便宜</span>
+            </div>
+            <span class="text-xs text-gray-400">查看更多</span>
+        </div>
+        <div class="bg-white rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="text-red-500 mr-4 text-center">
+                    <div class="text-lg font-bold">¥50</div>
+                    <div class="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full">兑换</div>
+                </div>
+                <div>
+                    <div class="font-bold text-sm">里程兑红包</div>
+                    <div class="text-[10px] text-gray-400">租车特惠 可叠加平台商家优惠</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. 大牌专区 -->
+    <div class="mx-4 mt-4">
+        <div class="flex items-center mb-3">
+            <span class="font-bold text-lg">大牌专区 · 神州租车</span>
+            <span class="ml-2 text-xs text-gray-400">品牌限时特惠</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+            <div class="bg-orange-50 p-3 rounded-xl relative h-24 overflow-hidden">
+                <div class="text-sm font-bold">首日<span class="text-red-500 text-xl">0</span>租金</div>
+                <div class="text-[10px] text-gray-500">新用户专享 ></div>
+                <div class="absolute bottom-0 right-0 w-16 h-12 bg-gray-200">
+                     <!-- 汽车占位图 -->
+                     <svg viewBox="0 0 100 60" class="w-full h-full text-orange-200" fill="currentColor"><rect x="10" y="30" width="80" height="20" rx="5"/><circle cx="25" cy="50" r="8"/><circle cx="75" cy="50" r="8"/></svg>
+                </div>
+            </div>
+            <div class="bg-yellow-50 p-3 rounded-xl relative h-24 overflow-hidden">
+                <div class="text-sm font-bold">快捷<span class="text-red-500">自助取还</span></div>
+                <div class="text-[10px] text-gray-500">春节租车预订 ></div>
+                <div class="absolute bottom-0 right-0 w-16 h-12 bg-gray-200">
+                     <!-- 汽车占位图 -->
+                     <svg viewBox="0 0 100 60" class="w-full h-full text-yellow-200" fill="currentColor"><rect x="10" y="30" width="80" height="20" rx="5"/><circle cx="25" cy="50" r="8"/><circle cx="75" cy="50" r="8"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. 城市热销榜单 -->
+    <div class="mx-4 mt-6">
+        <div class="text-lg font-bold mb-4">城市热销车型榜单</div>
+        <div class="flex space-x-6 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <div class="yellow-btn px-4 py-1 rounded-full text-black">武汉</div>
+            <span>深圳</span>
+            <span>成都</span>
+            <span>乌鲁木齐</span>
+            <span>三亚</span>
+        </div>
+
+        <!-- 车型列表 -->
+        <div class="space-y-4">
+            <!-- 车型 1 -->
+            <div class="flex items-center space-x-4">
+                <div class="w-32 h-20 bg-gray-100 rounded-lg flex items-center justify-center relative">
+                    <svg class="w-24 h-12 text-blue-300" fill="currentColor" viewBox="0 0 100 50"><rect x="10" y="15" width="80" height="20" rx="10"/><circle cx="30" cy="35" r="7"/><circle cx="70" cy="35" r="7"/></svg>
+                    <div class="absolute top-0 left-0 bg-red-100 text-red-500 text-[8px] px-1 rounded-br-lg">👍 低价好车</div>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">本田飞度</div>
+                    <div class="text-[10px] text-gray-400">超跑GK5，空间魔术</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-red-500 font-bold">¥26<span class="text-[10px]">/天起</span></div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full mt-1">马上抢</button>
+                </div>
+            </div>
+
+            <!-- 车型 2 -->
+            <div class="flex items-center space-x-4">
+                <div class="w-32 h-20 bg-gray-100 rounded-lg flex items-center justify-center relative">
+                    <svg class="w-24 h-12 text-gray-300" fill="currentColor" viewBox="0 0 100 50"><rect x="10" y="15" width="80" height="20" rx="10"/><circle cx="30" cy="35" r="7"/><circle cx="70" cy="35" r="7"/></svg>
+                    <div class="absolute top-0 left-0 bg-red-100 text-red-500 text-[8px] px-1 rounded-br-lg">🔥 城市热销</div>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">大众朗逸</div>
+                    <div class="text-[10px] text-gray-400">家用省油，皮实耐开</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-red-500 font-bold">¥36<span class="text-[10px]">/天起</span></div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full mt-1">马上抢</button>
+                </div>
+            </div>
+
+            <!-- 车型 3 -->
+            <div class="flex items-center space-x-4">
+                <div class="w-32 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-24 h-12 text-gray-400" fill="currentColor" viewBox="0 0 100 50"><rect x="10" y="10" width="80" height="25" rx="5"/><circle cx="30" cy="35" r="7"/><circle cx="70" cy="35" r="7"/></svg>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">丰田RAV4荣放</div>
+                    <div class="text-[10px] text-gray-400">越野基因，家用可靠</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-red-500 font-bold">¥34<span class="text-[10px]">/天起</span></div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full mt-1">马上抢</button>
+                </div>
+            </div>
+
+            <!-- 车型 4 (图2) -->
+            <div class="flex items-center space-x-4">
+                <div class="w-32 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-24 h-12 text-gray-300" fill="currentColor" viewBox="0 0 100 50"><rect x="10" y="15" width="80" height="20" rx="8"/><circle cx="30" cy="35" r="7"/><circle cx="70" cy="35" r="7"/></svg>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">雪佛兰科鲁兹</div>
+                    <div class="text-[10px] text-gray-400">经典家轿，颜值高</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-red-500 font-bold">¥34<span class="text-[10px]">/天起</span></div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-full mt-1">马上抢</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. 租车指南 -->
+    <div class="mx-4 mt-8">
+        <div class="text-lg font-bold mb-4">租车指南</div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm">租车指引</div>
+                    <div class="text-[10px] text-gray-400">免押租车 ></div>
+                </div>
+                <div class="w-10 h-10 bg-gray-200 rounded overflow-hidden">
+                    <svg class="w-full h-full p-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+            </div>
+            <div class="bg-white p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm">舒心租</div>
+                    <div class="text-[10px] text-gray-400">车损全额免赔 ></div>
+                </div>
+                <div class="w-10 h-10 bg-gray-200 rounded overflow-hidden">
+                    <svg class="w-full h-full p-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. 更多出行 -->
+    <div class="mx-4 mt-8">
+        <div class="text-lg font-bold mb-4">更多出行</div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm">打车出行</div>
+                    <div class="text-[10px] text-gray-400">即时出发</div>
+                </div>
+                <div class="text-2xl">🚕</div>
+            </div>
+            <div class="bg-white p-3 rounded-xl flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm">预订接送机</div>
+                    <div class="text-[10px] text-red-500">减10元</div>
+                </div>
+                <div class="text-2xl">✈️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. 底部导航 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around py-2 px-2 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">🧭</div>
+            <span class="text-[10px] text-gray-500 mt-1">租车指南</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">🩹</div>
+            <span class="text-[10px] text-gray-500 mt-1">小伤免赔</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">💳</div>
+            <span class="text-[10px] text-gray-500 mt-1">超值次卡</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">👍</div>
+            <span class="text-[10px] text-gray-500 mt-1">舒心租</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">📄</div>
+            <span class="text-[10px] text-gray-500 mt-1">我的订单</span>
+        </div>
+    </div>
+
+</body>
+</html>
