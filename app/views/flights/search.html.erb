@@ -292,29 +292,31 @@
       </button>
 
       <!-- Filter Tags -->
-      <div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm flex items-center gap-1 relative" data-action="click->flight-filter#openModal">
-          筛选
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"/>
-          </svg>
-          <span data-flight-filter-target="filterBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
-        </button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDirectFlight" data-action="click->flight-filter#toggleQuickDirectFlight">只看直飞</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoSharedFlight" data-action="click->flight-filter#toggleQuickNoSharedFlight">不看共享航班</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickCheckedLuggage" data-action="click->flight-filter#toggleQuickCheckedLuggage">含托运行李额</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoTransit" data-action="click->flight-filter#toggleQuickNoTransit">无需过境签</button>
-        <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDiscountPrice" data-action="click->flight-filter#toggleQuickDiscountPrice">看优惠前价格</button>
+      <div class="w-full overflow-x-auto no-scrollbar">
+        <div class="flex gap-2 px-4 pb-3 min-w-max">
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm flex items-center gap-1 relative" data-action="click->flight-filter#openModal">
+            筛选
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"/>
+            </svg>
+            <span data-flight-filter-target="filterBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
+          </button>
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDirectFlight" data-action="click->flight-filter#toggleQuickDirectFlight">只看直飞</button>
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoSharedFlight" data-action="click->flight-filter#toggleQuickNoSharedFlight">不看共享航班</button>
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickCheckedLuggage" data-action="click->flight-filter#toggleQuickCheckedLuggage">含托运行李额</button>
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickNoTransit" data-action="click->flight-filter#toggleQuickNoTransit">无需过境签</button>
+          <button class="flex-shrink-0 px-3 py-1.5 rounded-full border border-gray-300 text-sm whitespace-nowrap" data-flight-filter-target="quickDiscountPrice" data-action="click->flight-filter#toggleQuickDiscountPrice">看优惠前价格</button>
+        </div>
       </div>
     </div>
 
     <!-- Flight List -->
-    <div class="px-4 py-3 space-y-3" data-flight-sort-target="flightList">
+    <div class="w-full space-y-3" data-flight-sort-target="flightList">
       <% @flights.each do |flight| %>
-        <%= link_to flight_path(flight), data: { turbo: false }, class: "block" do %>
-          <div class="bg-white p-5 relative border-b border-gray-100">
+        <%= link_to flight_path(flight), data: { turbo: false }, class: "block w-full" do %>
+          <div class="bg-white p-3 relative border-b border-gray-100 w-full max-w-full">
             <!-- 右上角收藏星标 -->
-            <div class="absolute top-4 right-4 text-gray-300">
+            <div class="absolute top-1 right-4 text-gray-300">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
@@ -322,15 +324,15 @@
 
             <div class="flex justify-between items-start">
               <!-- 时间和地点 -->
-              <div class="flex items-center space-x-8">
+              <div class="flex items-center space-x-2">
                 <!-- 出发 -->
                 <div class="text-center">
-                  <div class="text-[32px] font-semibold leading-tight text-gray-900"><%= flight.departure_time_formatted %></div>
+                  <div class="text-[28px] font-semibold leading-tight text-gray-900"><%= flight.departure_time_formatted %></div>
                   <div class="text-sm text-gray-600 mt-1"><%= flight.departure_airport %></div>
                 </div>
 
                 <!-- 航程指示线 -->
-                <div class="flex flex-col items-center justify-center min-w-[80px]">
+                <div class="flex-1 flex flex-col items-center justify-center min-w-[80px]">
                   <span class="text-[11px] text-gray-400 mb-0.5">总<%= flight.duration_minutes / 60 %>h<% if flight.duration_minutes % 60 > 0 %><%= flight.duration_minutes % 60 %>m<% end %></span>
                   <div class="w-full h-[1px] bg-gray-200 relative">
                     <div class="absolute right-0 -top-[2px] w-1 h-1 bg-gray-200 rotate-45 border-t border-r border-gray-200"></div>
@@ -342,10 +344,10 @@
                   <% if flight.arrival_time.to_date != flight.departure_time.to_date %>
                     <div class="relative inline-block text-left">
                       <div class="text-[11px] text-gray-500 absolute -top-4 left-0 whitespace-nowrap"><%= flight.arrival_time.strftime('%m-%d') %> <%= ['周日','周一','周二','周三','周四','周五','周六'][flight.arrival_time.wday] %></div>
-                      <div class="text-[32px] font-semibold leading-tight text-gray-900"><%= flight.arrival_time_formatted %></div>
+                      <div class="text-[28px] font-semibold leading-tight text-gray-900"><%= flight.arrival_time_formatted %></div>
                     </div>
                   <% else %>
-                    <div class="text-[32px] font-semibold leading-tight text-gray-900"><%= flight.arrival_time_formatted %></div>
+                    <div class="text-[24px] font-semibold leading-tight text-gray-900"><%= flight.arrival_time_formatted %></div>
                   <% end %>
                   <div class="text-sm text-gray-600 mt-1 text-left"><%= flight.arrival_airport %></div>
                 </div>
