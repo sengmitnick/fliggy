@@ -51,6 +51,7 @@ import TrainBookingController from "./train_booking_controller"
 import TrainBookingLockController from "./train_booking_lock_controller"
 import TrainSeatSelectorController from "./train_seat_selector_controller"
 import TourGroupFilterController from "./tour_group_filter_controller"
+import CarRentalTabsController from "./car_rental_tabs_controller"
 
 const application = Application.start()
 
@@ -105,5 +106,6 @@ application.register("train-booking", TrainBookingController)
 application.register("train-booking-lock", TrainBookingLockController)
 application.register("train-seat-selector", TrainSeatSelectorController)
 application.register("tour-group-filter", TourGroupFilterController)
+application.register("car-rental-tabs", CarRentalTabsController)
 
 window.Stimulus = application

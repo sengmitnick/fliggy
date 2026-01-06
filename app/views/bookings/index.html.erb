@@ -84,6 +84,8 @@
             <%= render partial: 'bookings/hotel_booking_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(TourGroupBooking) %>
             <%= render partial: 'bookings/tour_group_booking_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(CarOrder) %>
+            <%= render partial: 'bookings/car_order_card', locals: { booking: booking } %>
           <% end %>
         <% end %>
         
