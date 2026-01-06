@@ -120,10 +120,10 @@
 
         <!-- Row 3 -->
         <div class="grid grid-cols-5 mb-2  h-[60px]">
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to hotel_packages_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/酒店套餐.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "酒店套餐" %>
             <span class="text-[12px] text-gray-700">酒店套餐</span>
-          </button>
+          <% end %>
 
           <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
             <%= image_tag "home/保险服务.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "保险服务" %>

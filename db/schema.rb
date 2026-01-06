@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_06_102746) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_06_124922) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -404,6 +404,60 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_102746) do
     t.index ["hotel_id"], name: "index_hotel_facilities_on_hotel_id"
   end
 
+  create_table "hotel_package_orders", force: :cascade do |t|
+    t.bigint "hotel_package_id"
+    t.bigint "user_id"
+    t.string "order_number"
+    t.integer "quantity", default: 1
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "payment_method"
+    t.datetime "purchased_at"
+    t.integer "used_count", default: 0
+    t.datetime "valid_until"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "package_option_id", null: false
+    t.bigint "passenger_id", null: false
+    t.string "booking_type", default: "stockup"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.index ["hotel_package_id"], name: "index_hotel_package_orders_on_hotel_package_id"
+    t.index ["order_number"], name: "index_hotel_package_orders_on_order_number"
+    t.index ["package_option_id"], name: "index_hotel_package_orders_on_package_option_id"
+    t.index ["passenger_id"], name: "index_hotel_package_orders_on_passenger_id"
+    t.index ["user_id"], name: "index_hotel_package_orders_on_user_id"
+  end
+
+  create_table "hotel_packages", force: :cascade do |t|
+    t.string "brand_name"
+    t.string "title"
+    t.text "description"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.integer "sales_count", default: 0
+    t.boolean "is_featured", default: false
+    t.integer "valid_days", default: 365
+    t.text "terms"
+    t.string "brand_logo_url"
+    t.string "region"
+    t.string "package_type", default: "standard"
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "hotel_id"
+    t.string "brand"
+    t.string "city"
+    t.integer "night_count", default: 2
+    t.boolean "refundable", default: false
+    t.boolean "instant_booking", default: false
+    t.boolean "luxury", default: false
+    t.string "slug"
+    t.index ["brand_name"], name: "index_hotel_packages_on_brand_name"
+    t.index ["hotel_id"], name: "index_hotel_packages_on_hotel_id"
+    t.index ["slug"], name: "index_hotel_packages_on_slug", unique: true
+  end
+
   create_table "hotel_policies", force: :cascade do |t|
     t.bigint "hotel_id"
     t.string "check_in_time"
@@ -538,6 +592,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_102746) do
     t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
     t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "package_options", force: :cascade do |t|
+    t.bigint "hotel_package_id"
+    t.string "name"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.integer "night_count"
+    t.text "description"
+    t.boolean "can_split", default: true
+    t.integer "display_order", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["hotel_package_id"], name: "index_package_options_on_hotel_package_id"
   end
 
   create_table "passengers", force: :cascade do |t|
@@ -787,6 +856,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_102746) do
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
+  add_foreign_key "hotel_package_orders", "package_options"
+  add_foreign_key "hotel_package_orders", "passengers"
+  add_foreign_key "hotel_packages", "hotels"
   add_foreign_key "itineraries", "users"
   add_foreign_key "itinerary_items", "itineraries"
   add_foreign_key "memberships", "users"
