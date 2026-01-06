@@ -1,0 +1,273 @@
+<div class="min-h-screen bg-surface">
+  <!-- Hero Section with Background -->
+  <div class="relative h-52 overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark">
+      <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" alt="酒店" class="w-full h-full object-cover opacity-40">
+    </div>
+    
+    <!-- Content Overlay -->
+    <div class="relative z-10 h-full flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3">
+        <%= link_to root_path, class: "p-2 rounded-full bg-black/20 backdrop-blur-sm" do %>
+          <svg class="w-6 h-6 text-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        <% end %>
+        
+        <div class="flex gap-2">
+          <div class="px-4 py-1.5 rounded-full bg-black/20 backdrop-blur-sm text-surface text-sm">30</div>
+          <button class="p-2 rounded-full bg-black/20 backdrop-blur-sm">
+            <svg class="w-6 h-6 text-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Title -->
+      <div class="flex-1 flex flex-col justify-center px-4">
+        <h1 class="text-3xl font-bold text-surface mb-1">
+          元旦套餐<span class="text-primary">不加价</span>
+        </h1>
+        <p class="text-surface/90 text-sm">酒店爆款限时抢购</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Tags -->
+  <div class="bg-gradient-to-r from-primary/10 to-warning/10 px-4 py-3 flex items-center gap-3 overflow-x-auto no-scrollbar">
+    <div class="flex items-center gap-2 text-sm whitespace-nowrap">
+      <span class="text-2xl">🎊</span>
+      <span class="font-medium text-text-primary">酒店套餐</span>
+    </div>
+    <div class="flex items-center gap-2 text-sm whitespace-nowrap">
+      <span class="text-2xl">📍</span>
+      <span class="font-medium text-text-primary">权益更多 价格更低</span>
+    </div>
+    <div class="flex items-center gap-2 text-sm whitespace-nowrap">
+      <span class="text-2xl">👍</span>
+      <span class="font-medium text-text-primary">住吃玩乐 一价全包</span>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="sticky top-0 z-20 bg-surface border-b border-border px-4 py-3" 
+       data-controller="city-selector" 
+       data-city-selector-departure-city-value="武汉">
+    <%= form_with url: search_hotel_packages_path, method: :get, data: { turbo: false }, class: "flex gap-3" do |f| %>
+      <!-- City Selector -->
+      <button type="button" 
+              data-action="click->city-selector#openDeparture"
+              class="flex items-center gap-2 bg-surface-elevated rounded-lg px-4 py-2.5 min-w-[100px]">
+        <span data-city-selector-target="departure" class="font-medium text-text-primary text-base">武汉</span>
+        <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <%= f.hidden_field :city, value: '武汉', data: { city_selector_target: "departureCityInput" } %>
+      
+      <!-- Search Input -->
+      <div class="flex-1 relative">
+        <%= f.text_field :q, 
+            value: @query,
+            placeholder: "位置/品牌/酒店",
+            class: "w-full bg-surface-elevated rounded-lg px-4 py-2.5 text-base text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary" %>
+      </div>
+      
+      <!-- Search Button -->
+      <%= f.submit "搜索", class: "btn-primary px-6 py-2.5 rounded-lg font-medium whitespace-nowrap" %>
+    <% end %>
+
+    <!-- City Selector Modal -->
+    <%= render 'shared/city_selector_modal' %>
+  </div>
+
+  <!-- Hot Cities -->
+  <% if @hot_cities.present? %>
+    <div class="px-4 py-4">
+      <h3 class="text-base font-medium text-text-secondary mb-3">我想去</h3>
+      <div class="grid grid-cols-4 gap-3">
+        <% @hot_cities.each do |city| %>
+          <%= link_to search_hotel_packages_path(city: city.name), class: "flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-elevated hover:bg-primary/10 transition-colors" do %>
+            <div class="text-2xl">📍</div>
+            <div class="space-y-0.5 text-center">
+              <div class="text-sm font-medium text-text-primary"><%= city.name %></div>
+              <div class="text-xs text-text-muted"><%= %w[古都新韵 东方明珠 美食天堂 时尚之都].sample %></div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Promotional Sections -->
+  <div class="space-y-4 pb-20">
+    <!-- 周三好货问 -->
+    <div class="px-4">
+      <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1E3A5F] to-[#2B4C6F] h-48">
+        <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800" alt="周三好货问" class="absolute inset-0 w-full h-full object-cover opacity-60">
+        <div class="relative z-10 p-6 h-full flex flex-col">
+          <div class="flex items-center gap-2 text-surface mb-2">
+            <span class="text-2xl font-bold">24</span>
+            <span class="text-sm">SEP</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface mb-1">周三好货问</h3>
+          <p class="text-surface/90 text-sm mb-4">爆款限时抢购</p>
+          <div class="mt-auto">
+            <span class="inline-block px-4 py-1.5 bg-primary text-text-primary rounded-full text-sm font-medium">
+              必囤好货，限时抢购！
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 爆款热卖榜 -->
+    <div class="px-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold text-text-primary">爆款热卖榜</h3>
+        <div class="flex items-center gap-1 text-sm text-primary">
+          <span class="badge-primary text-xs px-2 py-1">TOP 1</span>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800" alt="爆款热卖榜" class="w-full h-40 object-cover">
+        <div class="bg-surface-elevated p-3">
+          <p class="text-sm text-text-secondary">超划算人气套餐</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 爆款直播 -->
+    <div class="px-4">
+      <h3 class="text-lg font-bold text-text-primary mb-3">爆款直播</h3>
+      <div class="relative rounded-2xl overflow-hidden h-48">
+        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800" alt="爆款直播" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div class="absolute top-4 left-4 flex items-center gap-2 bg-danger/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
+          <div class="flex items-center gap-1">
+            <div class="w-2 h-2 bg-surface rounded-full animate-pulse"></div>
+            <span class="text-surface text-xs font-medium">直播中</span>
+          </div>
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+          <p class="text-surface font-bold text-lg mb-1">爆款直播间</p>
+          <div class="flex items-center gap-2">
+            <span class="text-surface/90 text-sm">🎁</span>
+          </div>
+        </div>
+        <button class="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-danger flex items-center justify-center">
+          <svg class="w-6 h-6 text-surface" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 发现好去处 -->
+    <div class="px-4">
+      <div class="flex items-center gap-3 mb-3 overflow-x-auto no-scrollbar pb-2">
+        <h3 class="text-lg font-bold text-text-primary whitespace-nowrap">发现好去处</h3>
+        <div class="flex gap-2">
+          <%= link_to "热门景点", hotel_packages_path, class: "nav-pill active" %>
+          <%= link_to "不约可退", hotel_packages_path, class: "nav-pill" %>
+          <%= link_to "奢享套房", hotel_packages_path, class: "nav-pill" %>
+          <%= link_to "大牌酒店", hotel_packages_path, class: "nav-pill" %>
+          <%= link_to "即买即约", hotel_packages_path, class: "nav-pill" %>
+        </div>
+      </div>
+
+      <!-- Package Grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <% if @packages.present? %>
+          <% @packages.each do |package| %>
+            <%= link_to "#", class: "block" do %>
+              <div class="card overflow-hidden">
+                <div class="relative">
+                  <% if package.brand_logo.attached? %>
+                    <%= image_tag package.brand_logo, alt: package.brand_name, class: "w-full h-40 object-cover" %>
+                  <% else %>
+                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400" alt="<%= package.brand_name %>" class="w-full h-40 object-cover">
+                  <% end %>
+                  <% if package.is_featured %>
+                    <div class="absolute top-2 left-2 badge-danger text-xs px-2 py-1 rounded">
+                      官方直营
+                    </div>
+                  <% end %>
+                  <% if package.has_discount? %>
+                    <div class="absolute top-2 right-2 bg-danger text-surface text-xs px-2 py-1 rounded-full font-bold">
+                      <%= package.discount_rate.to_i %>折
+                    </div>
+                  <% end %>
+                </div>
+                <div class="p-3 space-y-2">
+                  <h4 class="font-bold text-text-primary text-sm line-clamp-2 leading-tight">
+                    <%= package.title %>
+                  </h4>
+                  <p class="text-xs text-text-muted line-clamp-1">
+                    <%= package.brand_name %> · <%= package.region %>
+                  </p>
+                  <div class="flex items-end justify-between">
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-danger text-lg font-bold">¥<%= package.price.to_i %></span>
+                      <% if package.original_price.present? && package.original_price > package.price %>
+                        <span class="text-xs text-text-muted line-through">¥<%= package.original_price.to_i %></span>
+                      <% end %>
+                    </div>
+                    <span class="text-xs text-text-muted">已售<%= package.sales_count %></span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        <% else %>
+          <!-- Empty State with Sample Data -->
+          <% 6.times do |i| %>
+            <div class="card overflow-hidden">
+              <div class="relative">
+                <img src="https://images.unsplash.com/photo-<%= %w[1566073771259-6a8506099945 1582719478250-c89cae4dc85b 1571896349842-33c89424de2d 1542314831-068cd1dbfeeb 1551882547-ff40c63fe5fa 1520250497591-112f2f40a3f4].sample %>?w=400" alt="酒店套餐" class="w-full h-40 object-cover">
+                <% if i.even? %>
+                  <div class="absolute top-2 left-2 badge-danger text-xs px-2 py-1 rounded">
+                    官方直营
+                  </div>
+                <% end %>
+                <% if i % 3 == 0 %>
+                  <div class="absolute top-2 right-2 bg-danger text-surface text-xs px-2 py-1 rounded-full font-bold">
+                    <%= [8, 7, 6, 5].sample %>折
+                  </div>
+                <% end %>
+              </div>
+              <div class="p-3 space-y-2">
+                <h4 class="font-bold text-text-primary text-sm line-clamp-2 leading-tight">
+                  <%= %w[华住美仑 万豪酒店 希尔顿 洲际酒店 凯悦酒店 香格里拉].sample %>品牌全国140+店2晚可折分通兑 全程不加价
+                </h4>
+                <p class="text-xs text-text-muted line-clamp-1">
+                  <%= %w[华住 万豪 希尔顿 洲际 凯悦 香格里拉].sample %> · 全国通用
+                </p>
+                <div class="flex items-end justify-between">
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-danger text-lg font-bold">¥<%= [699, 899, 1099, 1299, 1499].sample %></span>
+                    <span class="text-xs text-text-muted line-through">¥<%= [999, 1199, 1399, 1599, 1799].sample %></span>
+                  </div>
+                  <span class="text-xs text-text-muted">已售<%= rand(100..9999) %></span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Pagination -->
+      <% if @packages.present? %>
+        <div class="mt-6">
+          <%= paginate @packages, theme: 'twitter-bootstrap-4' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <%= render 'shared/bottom_navigation' %>
+</div>

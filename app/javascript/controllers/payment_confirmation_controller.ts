@@ -4,9 +4,12 @@ export default class extends Controller {
   static targets = [
     "passwordModal",
     "fingerprintModal",
+    "processingModal",
     "statusModal",
     "passwordDots",
     "passwordAmount",
+    "processingAmount",
+    "userEmail",
     "statusAmount",
     "statusUserEmail",
     "statusIcon",
@@ -22,15 +25,25 @@ export default class extends Controller {
   }
 
   declare readonly passwordModalTarget: HTMLElement
-  declare readonly fingerprintModalTarget: HTMLElement
+  declare readonly hasPasswordModalTarget: boolean
+  declare readonly hasFingerprintModalTarget: boolean
+  declare readonly hasProcessingModalTarget: boolean
   declare readonly statusModalTarget: HTMLElement
+  declare readonly hasStatusModalTarget: boolean
   declare readonly passwordDotsTarget: HTMLElement
+  declare readonly hasPasswordDotsTarget: boolean
   declare readonly passwordAmountTarget: HTMLElement
+  declare readonly hasPasswordAmountTarget: boolean
   declare readonly statusAmountTarget: HTMLElement
+  declare readonly hasStatusAmountTarget: boolean
   declare readonly statusUserEmailTarget: HTMLElement
+  declare readonly hasStatusUserEmailTarget: boolean
   declare readonly statusIconTarget: HTMLElement
+  declare readonly hasStatusIconTarget: boolean
   declare readonly statusTextTarget: HTMLElement
+  declare readonly hasStatusTextTarget: boolean
   declare readonly statusDotsTarget: HTMLElement
+  declare readonly hasStatusDotsTarget: boolean
   declare readonly amountValue: string
   declare readonly userEmailValue: string
   declare readonly paymentUrlValue: string
@@ -40,25 +53,29 @@ export default class extends Controller {
 
   connect(): void {
     // Initialize controller
+    console.log("Payment confirmation controller connected")
   }
 
   showPasswordModal(): void {
+    if (!this.hasPasswordModalTarget) {
+      console.error("Password modal target not found")
+      return
+    }
+    
     this.password = ""
-    this.updatePasswordDots()
-    this.passwordAmountTarget.textContent = this.amountValue
+    if (this.hasPasswordDotsTarget) {
+      this.updatePasswordDots()
+    }
+    if (this.hasPasswordAmountTarget) {
+      this.passwordAmountTarget.textContent = this.amountValue
+    }
     this.passwordModalTarget.classList.remove('hidden')
   }
 
   closePasswordModal(): void {
-    this.passwordModalTarget.classList.add('hidden')
-  }
-
-  showFingerprintModal(): void {
-    this.fingerprintModalTarget.classList.remove('hidden')
-  }
-
-  closeFingerprintModal(): void {
-    this.fingerprintModalTarget.classList.add('hidden')
+    if (this.hasPasswordModalTarget) {
+      this.passwordModalTarget.classList.add('hidden')
+    }
   }
 
   inputPassword(event: Event): void {
@@ -85,6 +102,8 @@ export default class extends Controller {
   }
 
   private updatePasswordDots(): void {
+    if (!this.hasPasswordDotsTarget) return
+    
     const dots = this.passwordDotsTarget.querySelectorAll('.password-dot')
     dots.forEach((dot, index) => {
       if (index < this.password.length) {
@@ -93,23 +112,6 @@ export default class extends Controller {
         dot.classList.remove('active')
       }
     })
-  }
-
-  processFingerprintPayment(): void {
-    // Simulate fingerprint verification
-    this.closeFingerprintModal()
-    this.showPayingStatus()
-
-    setTimeout(() => {
-      this.showPaymentSuccess()
-      setTimeout(() => {
-        window.location.href = this.successUrlValue
-      }, 2000)
-    }, 2000)
-  }
-
-  cancelFingerprintPayment(): void {
-    this.closeFingerprintModal()
   }
 
   processPasswordPayment(): void {
@@ -140,7 +142,9 @@ export default class extends Controller {
         
         // 如果是需要设置支付密码，直接跳转
         if (message.includes('请先设置支付密码') || message.includes('设置支付密码')) {
-          this.passwordModalTarget.classList.add('hidden')
+          if (this.hasPasswordModalTarget) {
+            this.passwordModalTarget.classList.add('hidden')
+          }
           window.location.href = '/profile/edit_pay_password'
           return
         }
@@ -153,12 +157,16 @@ export default class extends Controller {
         // Clear password and stay on password input page
         this.password = ""
         this.updatePasswordDots()
-        this.passwordModalTarget.classList.remove('hidden')
+        if (this.hasPasswordModalTarget) {
+          this.passwordModalTarget.classList.remove('hidden')
+        }
         return
       }
 
       // Password is correct - proceed with payment
-      this.passwordModalTarget.classList.add('hidden')
+      if (this.hasPasswordModalTarget) {
+        this.passwordModalTarget.classList.add('hidden')
+      }
       this.showPayingStatus()
       
       // Process actual payment
@@ -173,7 +181,9 @@ export default class extends Controller {
       }
       this.password = ""
       this.updatePasswordDots()
-      this.passwordModalTarget.classList.remove('hidden')
+      if (this.hasPasswordModalTarget) {
+        this.passwordModalTarget.classList.remove('hidden')
+      }
     }
   }
 
@@ -214,21 +224,41 @@ export default class extends Controller {
   }
 
   showPayingStatus(): void {
-    this.statusAmountTarget.textContent = this.amountValue
-    this.statusUserEmailTarget.textContent = this.userEmailValue
-    this.statusIconTarget.textContent = '💳'
-    this.statusTextTarget.textContent = '正在付款'
-    this.statusDotsTarget.style.display = 'block'
+    if (!this.hasStatusModalTarget) return
+    
+    if (this.hasStatusAmountTarget) {
+      this.statusAmountTarget.textContent = this.amountValue
+    }
+    if (this.hasStatusUserEmailTarget) {
+      this.statusUserEmailTarget.textContent = this.userEmailValue
+    }
+    if (this.hasStatusIconTarget) {
+      this.statusIconTarget.textContent = '💳'
+    }
+    if (this.hasStatusTextTarget) {
+      this.statusTextTarget.textContent = '正在付款'
+    }
+    if (this.hasStatusDotsTarget) {
+      this.statusDotsTarget.style.display = 'block'
+    }
     this.statusModalTarget.classList.remove('hidden')
   }
 
   showPaymentSuccess(): void {
-    this.statusIconTarget.textContent = '✓'
-    this.statusTextTarget.textContent = '付款成功'
-    this.statusDotsTarget.style.display = 'none'
+    if (this.hasStatusIconTarget) {
+      this.statusIconTarget.textContent = '✓'
+    }
+    if (this.hasStatusTextTarget) {
+      this.statusTextTarget.textContent = '付款成功'
+    }
+    if (this.hasStatusDotsTarget) {
+      this.statusDotsTarget.style.display = 'none'
+    }
   }
 
   closeStatusModal(): void {
-    this.statusModalTarget.classList.add('hidden')
+    if (this.hasStatusModalTarget) {
+      this.statusModalTarget.classList.add('hidden')
+    }
   }
 }

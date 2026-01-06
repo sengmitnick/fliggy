@@ -1,0 +1,354 @@
+<div class="max-w-md mx-auto bg-white min-h-screen relative pb-20">
+  
+  <!-- 浮动头部导航 -->
+  <div class="fixed top-0 left-0 right-0 max-w-md mx-auto z-50 flex justify-between items-center px-4 py-3">
+    <%= link_to search_hotel_packages_path, class: "w-8 h-8 bg-black/30 rounded-full flex items-center justify-center" do %>
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    <% end %>
+    <div class="flex space-x-2">
+      <div class="w-8 h-8 bg-black/30 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+      </div>
+      <div class="w-8 h-8 bg-black/30 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+      </div>
+      <div class="w-8 h-8 bg-black/30 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 主图区域 -->
+  <div class="relative h-[400px] bg-gray-100">
+    <% if @package.brand_logo.attached? %>
+      <%= image_tag @package.brand_logo, class: "w-full h-full object-cover" %>
+    <% else %>
+      <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" alt="<%= @package.brand_name %>" class="w-full h-full object-cover">
+    <% end %>
+    <!-- 轮播指示器 -->
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 px-10">
+      <div class="h-1 flex-1 bg-white/50 rounded-full overflow-hidden"><div class="h-full bg-white w-full"></div></div>
+      <div class="h-1 flex-1 bg-white/30 rounded-full"></div>
+      <div class="h-1 flex-1 bg-white/30 rounded-full"></div>
+      <div class="h-1 flex-1 bg-white/30 rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- 2. 价格及标题 -->
+  <div class="p-4">
+    <div class="flex items-baseline space-x-1 text-orange-600">
+      <span class="text-xl font-bold">¥</span>
+      <span class="text-3xl font-bold"><%= @package.price.to_i %></span>
+      <span class="text-sm">起</span>
+      <% if @package.original_price.present? && @package.original_price > @package.price %>
+        <span class="text-gray-400 line-through text-sm ml-2">¥<%= @package.original_price.to_i %></span>
+      <% end %>
+    </div>
+    
+    <div class="flex flex-wrap gap-2 mt-2">
+      <% if @package.refundable? %>
+        <span class="bg-orange-50 text-orange-600 text-xs px-2 py-0.5 border border-orange-200 rounded">不约可退</span>
+      <% end %>
+      <% if @package.instant_booking? %>
+        <span class="bg-orange-50 text-orange-600 text-xs px-2 py-0.5 border border-orange-200 rounded">即买即约</span>
+      <% end %>
+      <% if @package.luxury? %>
+        <span class="bg-orange-50 text-orange-600 text-xs px-2 py-0.5 border border-orange-200 rounded">奢享套房</span>
+      <% end %>
+    </div>
+
+    <div class="mt-3 flex items-center">
+      <span class="bg-yellow-400 text-black text-[10px] font-bold px-1 rounded-sm mr-2 italic"><%= @package.brand_name %></span>
+      <span class="text-gray-500 text-xs">玩得酷 靠得住</span>
+      <span class="ml-auto text-gray-400 text-xs">已售 <%= @package.sales_count %>+</span>
+    </div>
+
+    <h1 class="text-lg font-bold mt-2 leading-tight">
+      <%= @package.title %>
+    </h1>
+
+    <div class="flex mt-3 space-x-2">
+      <span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded">酒店热销 <%= [@package.sales_count * 48, 24].max %>万+</span>
+      <span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded">酒店评价 <%= [@package.sales_count / 5, 1].max %>万+</span>
+    </div>
+
+    <!-- 榜单 -->
+    <div class="mt-4 bg-orange-50/50 p-2 rounded-lg flex items-center justify-between">
+      <div class="flex items-center text-xs">
+        <span class="bg-orange-100 text-orange-700 px-1 rounded mr-2">榜单</span>
+        <span class="font-medium text-gray-700"><%= @package.region || @package.city %>高档型酒店套餐榜·第1名</span>
+      </div>
+      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </div>
+  </div>
+
+  <div class="h-2 bg-gray-100"></div>
+
+  <!-- 3. 服务保障 & 日期 -->
+  <div class="p-4 space-y-4">
+    <div class="flex items-center justify-between text-sm">
+      <div class="flex space-x-3 text-orange-700 font-medium">
+        <span>囤好货</span>
+        <span class="text-gray-300">|</span>
+        <span>先囤后约</span>
+        <span class="text-gray-300">|</span>
+        <span>不约可退</span>
+        <span class="text-gray-300">|</span>
+        <span>在线预约</span>
+      </div>
+      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </div>
+    
+    <div class="flex items-start justify-between">
+      <div class="flex">
+        <span class="text-gray-400 text-sm w-12 shrink-0">日期</span>
+        <div class="text-sm">
+          <p class="font-medium">2025-10-30至2026-01-31</p>
+          <p class="text-gray-500 text-xs mt-1">提前1天预约</p>
+        </div>
+      </div>
+      <svg class="w-4 h-4 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <div class="flex">
+        <span class="text-gray-400 text-sm w-12 shrink-0">保障</span>
+        <span class="text-sm font-medium">过期自动退</span>
+      </div>
+      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </div>
+  </div>
+
+  <div class="h-2 bg-gray-100"></div>
+
+  <!-- 4. 适用酒店 -->
+  <div class="p-4 flex items-center justify-between border-b border-gray-50">
+    <div>
+      <p class="text-xs text-gray-400 mb-1">适用酒店</p>
+      <p class="text-sm font-bold"><%= @package.region || '全国区域' %> · <%= @package.city %>等多城通用</p>
+      <% if @package.hotel.present? %>
+        <p class="text-xs text-orange-500 mt-1">含 <%= @package.hotel.name %></p>
+      <% end %>
+    </div>
+    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+  </div>
+
+  <!-- 5. 套餐选择 -->
+  <div class="p-4">
+    <h3 class="font-bold text-lg mb-4">套餐选择</h3>
+    
+    <!-- 套餐列表 -->
+    <div class="space-y-6">
+      <% @package.package_options.active.ordered.each do |option| %>
+        <div class="border-b border-gray-100 pb-4">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-medium"><%= option.name %> <%= option.price.to_i %>元 客房<%= option.night_count %>晚<%= option.can_split ? '可拆分' : '' %></span>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </div>
+          <div class="flex items-center text-xs text-gray-500 mb-4">
+            <span class="bg-orange-50 text-orange-600 px-1 rounded mr-2">住</span>
+            <span><%= option.night_count %>晚 多房型可选，以实际预约为准</span>
+          </div>
+          <div class="flex justify-between items-end">
+            <span class="text-xs text-blue-600">查看可约酒店及日期 ></span>
+            <div class="flex space-x-2">
+              <span class="text-orange-600 font-bold text-xl mr-2">¥<%= option.price.to_i %></span>
+              <button class="px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm">预约</button>
+              <%= link_to "囤货", new_hotel_package_order_path(package_option_id: option.id), class: "px-4 py-1 bg-orange-500 text-white rounded-full text-sm" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 6. 详情页选项卡 (Sticky) -->
+  <div class="sticky top-0 z-20 flex border-b border-gray-100 bg-white">
+    <div class="flex-1 py-3 text-center text-sm font-bold border-b-2 border-orange-500">商品</div>
+    <div class="flex-1 py-3 text-center text-sm text-gray-500">评价</div>
+    <div class="flex-1 py-3 text-center text-sm text-gray-500">图文</div>
+    <div class="flex-1 py-3 text-center text-sm text-gray-500">推荐</div>
+  </div>
+
+  <!-- 7. 评价区域 -->
+  <div class="p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold">商品评价</h3>
+      <span class="text-xs text-gray-400">查看全部 ></span>
+    </div>
+    <div class="flex items-center space-x-4 mb-4">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-blue-600 leading-none">5.0</div>
+        <div class="text-[10px] bg-blue-100 text-blue-600 px-1 rounded mt-1">超棒</div>
+      </div>
+      <div class="flex-1 grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-gray-400">
+        <div class="flex justify-between">描述相符 <span class="text-blue-600">5.0</span></div>
+        <div class="flex justify-between">住宿环境 <span class="text-blue-600">5.0</span></div>
+        <div class="flex justify-between">服务体验 <span class="text-blue-600">5.0</span></div>
+        <div class="flex justify-between">性价比 <span class="text-blue-600">5.0</span></div>
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-2 mb-2">
+      <div class="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center overflow-hidden">
+        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+      </div>
+      <span class="text-xs font-medium">匿名用户</span>
+      <span class="bg-gray-200 text-gray-500 text-[8px] px-1 rounded italic">F3</span>
+      <span class="text-[10px] text-gray-400 ml-auto">已购 <%= @package.price.to_i %>元 客房<%= @package.night_count %>晚可拆分</span>
+    </div>
+    <p class="text-xs leading-relaxed">价格划算，惊喜的入住体验，感谢每一位工作人员</p>
+  </div>
+
+  <div class="h-2 bg-gray-100"></div>
+
+  <!-- 8. 店铺信息 -->
+  <div class="p-4 flex items-center space-x-3">
+    <div class="w-12 h-12 bg-yellow-400 rounded-lg flex items-center justify-center">
+      <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99z"/></svg>
+    </div>
+    <div class="flex-1">
+      <h4 class="font-bold text-sm"><%= @package.brand_name %>酒店官方旗舰店</h4>
+      <div class="flex items-center space-x-1 mt-1">
+        <span class="bg-orange-100 text-orange-600 text-[8px] px-1 rounded">品牌官方</span>
+        <span class="text-gray-400 text-[10px]">官方直营 品质保障</span>
+      </div>
+      <div class="flex space-x-4 text-[10px] text-gray-400 mt-1">
+        <span>描述相符 <span class="text-red-500">4.7 低</span></span>
+        <span>服务态度 <span class="text-red-500">4.9 高</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="flex px-4 space-x-2 mb-6">
+    <button class="flex-1 py-1.5 border border-gray-200 rounded-full text-xs flex items-center justify-center">
+      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg> 进店逛逛
+    </button>
+    <button class="flex-1 py-1.5 border border-gray-200 rounded-full text-xs flex items-center justify-center">
+      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg> 全部宝贝
+    </button>
+    <button class="flex-1 py-1.5 border border-gray-200 rounded-full text-xs flex items-center justify-center">
+      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> 联系商家
+    </button>
+  </div>
+
+  <!-- 9. 图文介绍 -->
+  <div class="bg-blue-900 text-white p-6 relative overflow-hidden">
+    <div class="text-center relative z-10">
+      <p class="text-sm opacity-80 mb-2"><%= @package.brand_name %>全国门店通兑</p>
+      <h2 class="text-3xl font-bold mb-2"><%= @package.night_count %>晚可拆分全程不加价</h2>
+      <div class="bg-white/10 inline-block px-4 py-1 rounded-full text-sm">
+        🏷️ 特惠价: ¥<%= @package.price.to_i %>起/套
+      </div>
+    </div>
+    <!-- 背景装饰图 -->
+    <div class="mt-8 relative h-64 bg-gray-200/20 rounded-t-xl">
+      <% if @package.brand_logo.attached? %>
+        <%= image_tag @package.brand_logo, class: "w-full h-full object-cover rounded-t-xl opacity-30" %>
+      <% else %>
+        <div class="absolute inset-0 flex items-center justify-center text-white/20">
+          <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 10. 预约流程与说明 -->
+  <div class="p-4 bg-white">
+    <h3 class="font-bold mb-4">预约流程</h3>
+    <div class="flex justify-between items-center px-4 py-6 border border-gray-50 rounded-lg text-[10px] text-gray-500">
+      <div class="text-center flex-1">
+        <div class="w-8 h-8 mx-auto mb-2 flex items-center justify-center border border-gray-200 rounded-full">¥</div>
+        <p>购买套餐<br>(先囤再约)</p>
+      </div>
+      <div class="text-gray-200">→</div>
+      <div class="text-center flex-1">
+        <div class="w-8 h-8 mx-auto mb-2 flex items-center justify-center border border-gray-200 rounded-full">💬</div>
+        <p>立即预约<br>(选择酒店和日期)</p>
+      </div>
+      <div class="text-gray-200">→</div>
+      <div class="text-center flex-1">
+        <div class="w-8 h-8 mx-auto mb-2 flex items-center justify-center border border-gray-200 rounded-full">🕒</div>
+        <p>提交预约订单<br>(等商家确认)</p>
+      </div>
+      <div class="text-gray-200">→</div>
+      <div class="text-center flex-1">
+        <div class="w-8 h-8 mx-auto mb-2 flex items-center justify-center border border-gray-200 rounded-full">👤</div>
+        <p>等待入住<br>(商家确认有房)</p>
+      </div>
+    </div>
+
+    <h3 class="font-bold mt-8 mb-4">预约说明</h3>
+    <table class="w-full text-xs">
+      <tr class="border-b border-gray-50">
+        <td class="py-3 text-gray-400 w-24">可入住日期</td>
+        <td class="py-3">2025-10-30 至 2026-01-31</td>
+      </tr>
+      <tr class="border-b border-gray-50">
+        <td class="py-3 text-gray-400">预约开放时间</td>
+        <td class="py-3">2025-10-29 至 2026-01-30</td>
+      </tr>
+      <tr class="border-b border-gray-50">
+        <td class="py-3 text-gray-400">提前预约天数</td>
+        <td class="py-3 text-gray-500 italic">为保证服务质量，为您提供优质服务，请至少提前1天预约</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 11. 推荐列表 -->
+  <div class="p-4 bg-gray-50">
+    <h3 class="font-bold text-center py-4">看了又看</h3>
+    <div class="grid grid-cols-2 gap-3">
+      <% HotelPackage.where.not(id: @package.id).limit(2).each do |package| %>
+        <%= link_to hotel_package_path(package), class: "bg-white rounded-lg overflow-hidden shadow-sm" do %>
+          <div class="h-40 bg-gray-200 relative">
+            <% if package.brand_logo.attached? %>
+              <%= image_tag package.brand_logo, class: "w-full h-full object-cover" %>
+            <% else %>
+              <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              </div>
+            <% end %>
+          </div>
+          <div class="p-2">
+            <p class="text-xs font-medium line-clamp-2"><%= package.title %></p>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-orange-600 font-bold text-sm">¥ <%= package.price.to_i %></span>
+              <span class="text-[10px] text-gray-400">已售<%= package.sales_count %>+笔</span>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 12. 底部购买栏 (固定) -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 px-4 py-2 flex items-center space-x-4 z-50">
+    <div class="flex space-x-4 text-gray-500">
+      <div class="text-center">
+        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <span class="text-[10px]">客服</span>
+      </div>
+      <div class="text-center">
+        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <span class="text-[10px]">店铺</span>
+      </div>
+      <div class="text-center">
+        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        <span class="text-[10px]">收藏</span>
+      </div>
+    </div>
+    <div class="flex-1 flex overflow-hidden rounded-full font-bold">
+      <button class="flex-1 bg-yellow-400 text-black py-2.5 text-sm">加入购物车</button>
+      <button class="flex-1 bg-orange-600 text-white py-2.5 text-sm">立即购买</button>
+    </div>
+  </div>
+
+  <!-- 回顶部悬浮按钮 -->
+  <div class="fixed bottom-24 right-4 z-40">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-10 h-10 bg-white border border-gray-100 rounded-full shadow-lg flex flex-col items-center justify-center opacity-80">
+      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"></path></svg>
+      <span class="text-[8px] text-gray-400">顶部</span>
+    </button>
+  </div>
+
+</div>

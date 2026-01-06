@@ -1096,3 +1096,6 @@ puts "✅ 深度旅游数据加载完成！"
 # ==================== 旅游产品（跟团游商城）数据 ====================
 load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
 load Rails.root.join('db', 'seeds', 'tour_details.rb')
+
+# ==================== 酒店套餐数据 ====================
+load Rails.root.join('db', 'seeds', 'hotel_packages.rb')

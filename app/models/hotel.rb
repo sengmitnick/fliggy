@@ -6,6 +6,7 @@ class Hotel < ApplicationRecord
   has_many :hotel_reviews, dependent: :destroy
   has_many :hotel_facilities, dependent: :destroy
   has_many :hotel_bookings, dependent: :destroy
+  has_many :hotel_packages, dependent: :nullify
 
   serialize :features, coder: JSON
 
