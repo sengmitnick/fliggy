@@ -55,6 +55,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly destinationTarget: HTMLElement
   declare readonly departureCityInputTarget: HTMLInputElement
   declare readonly destinationCityInputTarget: HTMLInputElement
+  // Optional target checkers - these mark targets as optional
+  declare readonly hasDepartureTarget: boolean
+  declare readonly hasDestinationTarget: boolean
+  declare readonly hasDepartureCityInputTarget: boolean
+  declare readonly hasDestinationCityInputTarget: boolean
   // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
   // stimulus-validator: disable-next-line
@@ -101,9 +106,13 @@ export default class extends Controller<HTMLElement> {
     if (!this.departureCityValue) this.departureCityValue = "北京"
     if (!this.destinationCityValue) this.destinationCityValue = "杭州"
     
-    // Set initial values to hidden inputs
-    this.departureCityInputTarget.value = this.departureCityValue
-    this.destinationCityInputTarget.value = this.destinationCityValue
+    // Set initial values to hidden inputs (only if targets exist)
+    if (this.hasDepartureCityInputTarget) {
+      this.departureCityInputTarget.value = this.departureCityValue
+    }
+    if (this.hasDestinationCityInputTarget) {
+      this.destinationCityInputTarget.value = this.destinationCityValue
+    }
     
     // Hide multi-select UI if disabled
     if (!this.enableMultiSelectValue) {
@@ -209,15 +218,23 @@ export default class extends Controller<HTMLElement> {
       // Regular single/round trip selection
       if (this.selectionType === 'departure') {
         this.departureCityValue = cityName
-        this.departureTarget.textContent = cityName
-        this.departureCityInputTarget.value = cityName
+        if (this.hasDepartureTarget) {
+          this.departureTarget.textContent = cityName
+        }
+        if (this.hasDepartureCityInputTarget) {
+          this.departureCityInputTarget.value = cityName
+        }
         
         // Dispatch city-changed event for tour-group-filter to listen
         this.dispatchCityChangedEvent(cityName)
       } else {
         this.destinationCityValue = cityName
-        this.destinationTarget.textContent = cityName
-        this.destinationCityInputTarget.value = cityName
+        if (this.hasDestinationTarget) {
+          this.destinationTarget.textContent = cityName
+        }
+        if (this.hasDestinationCityInputTarget) {
+          this.destinationCityInputTarget.value = cityName
+        }
       }
     }
     
@@ -240,10 +257,18 @@ export default class extends Controller<HTMLElement> {
     this.departureCityValue = this.destinationCityValue
     this.destinationCityValue = temp
     
-    this.departureTarget.textContent = this.departureCityValue
-    this.destinationTarget.textContent = this.destinationCityValue
-    this.departureCityInputTarget.value = this.departureCityValue
-    this.destinationCityInputTarget.value = this.destinationCityValue
+    if (this.hasDepartureTarget) {
+      this.departureTarget.textContent = this.departureCityValue
+    }
+    if (this.hasDestinationTarget) {
+      this.destinationTarget.textContent = this.destinationCityValue
+    }
+    if (this.hasDepartureCityInputTarget) {
+      this.departureCityInputTarget.value = this.departureCityValue
+    }
+    if (this.hasDestinationCityInputTarget) {
+      this.destinationCityInputTarget.value = this.destinationCityValue
+    }
   }
 
   // Switch between domestic and international tabs

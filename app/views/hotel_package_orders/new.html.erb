@@ -1,0 +1,294 @@
+<div class="bg-gray-100 min-h-screen pb-32" data-controller="hotel-package-order payment-confirmation" data-payment-confirmation-amount-value="<%= @package_option.price.to_i %>" data-payment-confirmation-user-email-value="<%= current_user.email %>" data-payment-confirmation-payment-url-value="<%= hotel_package_orders_path %>" data-payment-confirmation-success-url-value="#">
+  <!-- 顶部黄色区域 -->
+  <div class="bg-[#FFDA44] sticky top-0 z-50">
+    <!-- 导航栏 -->
+    <div class="flex items-center px-3 h-11 relative">
+      <%= link_to hotel_package_path(@package), class: "p-1" do %>
+        <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <div class="absolute left-1/2 transform -translate-x-1/2 text-lg font-bold">填写订单</div>
+    </div>
+
+    <!-- Tab 选项卡 -->
+    <div class="flex items-end px-3 mt-2">
+      <!-- 激活的 Tab -->
+      <div class="w-1/2 bg-[#F5F8FA] rounded-t-xl py-3 flex flex-col items-center justify-center relative z-10"
+           data-hotel-package-order-target="stockupTab"
+           data-action="click->hotel-package-order#selectTab"
+           data-tab="stockup">
+        <span class="text-base font-bold text-black leading-tight">先囤后约</span>
+        <span class="text-[10px] text-gray-500 mt-0.5">想住再约，不约可退</span>
+      </div>
+      
+      <!-- 未激活的 Tab -->
+      <div class="w-1/2 bg-[#FCEEA8] bg-opacity-60 rounded-t-xl py-3 flex flex-col items-center justify-center relative text-gray-700"
+           data-hotel-package-order-target="instantTab"
+           data-action="click->hotel-package-order#selectTab"
+           data-tab="instant">
+        <div class="relative">
+          <span class="text-base font-medium leading-tight">立即预约</span>
+          <!-- 红色角标 -->
+          <div class="absolute -top-5 -right-12 bg-[#FF5000] text-white text-[10px] px-1.5 py-0.5 rounded-tr-lg rounded-bl-lg rounded-tl-sm transform scale-90">
+            早订安心
+          </div>
+        </div>
+        <span class="text-[10px] text-gray-600 mt-0.5">先约先得，锁定库存</span>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @order, url: hotel_package_orders_path, class: "px-3 -mt-2 relative z-20", data: { action: "submit->hotel-package-order#handleSubmit" } do |form| %>
+    <%= render 'shared/form_error_message', model: @order %>
+    <%= form.hidden_field :package_option_id, value: @package_option.id %>
+    <%= form.hidden_field :booking_type, value: 'stockup', data: { hotel_package_order_target: 'bookingTypeInput' } %>
+
+    <!-- 商品卡片 -->
+    <div class="bg-white rounded-b-xl rounded-tr-xl p-4 shadow-sm">
+      <h1 class="text-[15px] font-bold text-gray-900 leading-snug">
+        <%= @package.title %>
+      </h1>
+      
+      <div class="flex justify-between items-center mt-3">
+        <div class="text-gray-500 text-xs">
+          预订套餐 <span class="text-black ml-2 font-medium"><%= @package_option.name %> <%= number_to_currency(@package_option.price, unit: '¥', precision: 0) %> <%= @package_option.description %></span>
+        </div>
+        <%= link_to hotel_package_path(@package), class: "flex items-center text-xs text-gray-500" do %>
+          详情
+          <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <% end %>
+      </div>
+
+      <div class="flex items-center mt-2 text-xs text-gray-600">
+        <span class="bg-[#FFF1EB] text-[#FF5000] rounded-full w-4 h-4 flex items-center justify-center mr-1 text-[10px]">住</span>
+        <%= @package_option.night_count %>晚 多房型可选，以实际预约为准
+      </div>
+
+      <!-- 标签行 -->
+      <div class="flex flex-wrap gap-2 mt-3">
+        <span class="border border-[#FFD5BC] text-[#FF5000] text-[10px] px-1 rounded-[2px]">囤好货</span>
+        <span class="border border-[#FFD5BC] text-[#FF5000] text-[10px] px-1 rounded-[2px]">先囤后约 · 不约可退 · 在线预约</span>
+      </div>
+
+      <!-- 规则提示 -->
+      <div class="bg-gray-50 rounded-lg p-3 mt-3 text-xs text-gray-500 leading-relaxed">
+        <span class="inline-block border border-gray-400 rounded-full w-3 h-3 text-[9px] text-center leading-3 mr-1">!</span>
+        套餐退订规则：有效期内未预约支持 100% 退款，过期未预约支持 100% 退款，<span class="font-bold text-black">但是整份宝贝中存在部分预约，整份宝贝均不支持退款</span>
+      </div>
+    </div>
+
+    <!-- 购买数量 -->
+    <div class="bg-white rounded-xl p-4 mt-3 flex justify-between items-center shadow-sm">
+      <span class="text-base font-medium text-gray-900">购买数量</span>
+      <div class="flex flex-col items-end">
+        <span class="text-base font-bold text-black mb-1" data-hotel-package-order-target="totalPrice">
+          <%= number_to_currency(@package_option.price, unit: '¥', precision: 2) %>
+        </span>
+        <div class="flex items-center">
+          <!-- 减号 -->
+          <button type="button"
+                  data-action="click->hotel-package-order#decreaseQuantity"
+                  data-hotel-package-order-target="decreaseBtn"
+                  class="w-6 h-6 rounded-full border flex items-center justify-center"
+                  data-price="<%= @package_option.price %>">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+          </button>
+          <%= form.number_field :quantity, 
+              value: 1, 
+              min: 1, 
+              max: 99, 
+              class: "mx-3 text-base font-medium text-center w-8 border-0 outline-none",
+              data: { hotel_package_order_target: 'quantityInput' } %>
+          <!-- 加号 -->
+          <button type="button"
+                  data-action="click->hotel-package-order#increaseQuantity"
+                  data-hotel-package-order-target="increaseBtn"
+                  class="w-6 h-6 rounded-full border border-blue-500 bg-blue-50 flex items-center justify-center text-blue-600"
+                  data-price="<%= @package_option.price %>">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 联系人 -->
+    <div class="bg-white rounded-xl p-4 mt-3 shadow-sm">
+      <div class="text-base font-bold text-gray-900 mb-4">联系人</div>
+      
+      <% if @passengers.any? %>
+        <div class="space-y-4">
+          <% @passengers.each do |passenger| %>
+            <label class="flex items-center justify-between border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-500"
+                   data-action="click->hotel-package-order#selectPassenger"
+                   data-passenger-name="<%= passenger.name %>"
+                   data-passenger-phone="<%= passenger.phone %>">
+              <%= form.radio_button :passenger_id, passenger.id, class: "mr-3" %>
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-medium text-black"><%= passenger.name %></span>
+                  <svg class="w-6 h-6 border border-blue-500 rounded-full p-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <div class="text-sm text-gray-500"><%= passenger.phone %></div>
+              </div>
+            </label>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-6">
+          <p class="text-gray-500 mb-4">暂无出行人信息</p>
+          <%= link_to "添加出行人", new_passenger_path, class: "text-blue-500 font-medium" %>
+        </div>
+      <% end %>
+
+      <%= form.hidden_field :contact_name, data: { hotel_package_order_target: 'contactNameInput' } %>
+      <%= form.hidden_field :contact_phone, data: { hotel_package_order_target: 'contactPhoneInput' } %>
+    </div>
+
+    <!-- 会员优惠 -->
+    <div class="bg-white rounded-xl p-4 mt-3 shadow-sm">
+      <div class="text-base font-bold text-gray-900 mb-4">F1会员 · 本单可享</div>
+      
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="text-gray-500 text-sm">优惠</span>
+          <span class="text-gray-400 text-sm">无优惠可用</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-gray-500 text-sm">返赠</span>
+          <div class="flex items-center">
+            <span class="text-black text-sm font-medium"><%= (@package_option.price * 0.5).to_i %>飞猪里程等2项</span>
+            <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部悬浮 Banner -->
+    <div class="fixed bottom-[60px] left-0 right-0 px-3 z-30">
+      <div class="bg-[#FFF0F0] rounded-xl p-3 flex items-center justify-between shadow-sm border border-pink-100">
+        <div class="flex items-center">
+          <div class="bg-gradient-to-r from-[#FF5000] to-[#FF0036] text-white text-[10px] px-1 rounded-sm font-bold mr-2 leading-4">
+            ¥15.9/年<br>超省卡
+          </div>
+          <span class="text-[#FF5000] text-sm font-medium">开通享125元券包，两单立即回本</span>
+          <svg class="w-3 h-3 text-[#FF5000] ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        <!-- 圆圈勾选框 -->
+        <div class="w-5 h-5 rounded-full border border-gray-300 bg-white"></div>
+      </div>
+    </div>
+
+    <!-- 底部固定栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 h-16 px-4 flex justify-between items-center z-40">
+      <div class="flex items-end">
+        <span class="text-[#FF5000] text-sm font-bold mb-1">¥</span>
+        <span class="text-[#FF5000] text-2xl font-bold leading-none" data-hotel-package-order-target="bottomPrice">
+          <%= @package_option.price.to_i %>
+        </span>
+        <div class="flex items-center text-gray-400 text-xs ml-2 mb-1">
+          明细
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        </div>
+      </div>
+      
+      <%= form.submit "立即支付", class: "bg-gradient-to-r from-[#FF9000] to-[#FF5000] text-white font-bold text-base px-8 py-2.5 rounded-full shadow-lg shadow-orange-200" %>
+    </div>
+  <% end %>
+
+  <!-- 支付确认模态框 -->
+  <div data-hotel-package-order-target="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl w-11/12 max-w-md mx-auto p-6 animate-scale-in">
+      <h3 class="text-lg font-bold text-center mb-6">确认支付信息</h3>
+      
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-bold text-lg"><%= @package.title %></div>
+            <div class="text-gray-600"><%= @package_option.name %></div>
+            <div class="text-green-600 flex items-center mt-1">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-gray-600">购买数量: <span class="font-bold" data-hotel-package-order-target="confirmQuantity">1</span> 份</div>
+            <div class="text-green-600 flex items-center mt-1">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-bold">联系人: <span data-hotel-package-order-target="confirmContact"></span></div>
+            <div class="text-green-600 flex items-center mt-1">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-gray-600">预约方式: <span data-hotel-package-order-target="confirmBookingType">先囤后约</span></div>
+            <div class="text-green-600 flex items-center mt-1">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t pt-4">
+          <div class="flex items-center justify-between">
+            <div class="text-gray-600">支付金额</div>
+            <div class="text-2xl font-bold text-red-500">
+              ¥<span data-hotel-package-order-target="confirmTotalPrice"><%= @package_option.price.to_i %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 text-center">
+        <div class="text-gray-500 mb-2">处理中，请稍候...</div>
+        <div class="flex justify-center">
+          <!-- 加载动画 -->
+          <svg class="w-16 h-16 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= render 'shared/payment_confirmation_modals', amount: @package_option.price.to_i, user_email: current_user.email %>
+</div>
+
+<style>
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.password-dot.active {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+</style>

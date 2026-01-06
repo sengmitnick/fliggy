@@ -38,6 +38,7 @@ class User < ApplicationRecord
   has_many :passengers, dependent: :destroy
   has_many :bookings, dependent: :destroy
   has_many :hotel_bookings, dependent: :destroy
+  has_many :hotel_package_orders, dependent: :destroy
   has_many :train_bookings, dependent: :destroy
   has_many :tour_group_bookings, dependent: :destroy
   has_many :car_orders, dependent: :destroy
