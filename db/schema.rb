@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_05_032706) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_administrators_on_name", unique: true
     t.index ["role"], name: "index_administrators_on_role"
+  end
+
+  create_table "booking_travelers", force: :cascade do |t|
+    t.integer "tour_group_booking_id"
+    t.string "traveler_name"
+    t.string "id_number"
+    t.string "traveler_type", default: "adult"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tour_group_booking_id"], name: "index_booking_travelers_on_tour_group_booking_id"
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -511,6 +521,96 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "tour_group_bookings", force: :cascade do |t|
+    t.integer "tour_group_product_id"
+    t.integer "tour_package_id"
+    t.integer "user_id"
+    t.date "travel_date"
+    t.integer "adult_count", default: 1
+    t.integer "child_count", default: 0
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.string "insurance_type", default: "none"
+    t.string "status", default: "pending"
+    t.decimal "total_price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tour_group_product_id"], name: "index_tour_group_bookings_on_tour_group_product_id"
+    t.index ["tour_package_id"], name: "index_tour_group_bookings_on_tour_package_id"
+    t.index ["user_id"], name: "index_tour_group_bookings_on_user_id"
+  end
+
+  create_table "tour_group_products", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.string "tour_category", default: "group_tour"
+    t.string "destination"
+    t.integer "duration", default: 1
+    t.string "departure_city"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price", default: "0.0"
+    t.decimal "rating", default: "0.0"
+    t.string "rating_desc"
+    t.text "highlights"
+    t.text "tags"
+    t.string "provider"
+    t.integer "sales_count", default: 0
+    t.string "badge"
+    t.string "departure_label"
+    t.string "image_url"
+    t.boolean "is_featured", default: false
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "travel_agency_id", null: false
+    t.integer "reward_points", default: 0
+    t.boolean "requires_merchant_confirm", default: false
+    t.integer "merchant_confirm_hours", default: 48
+    t.boolean "success_rate_high", default: false
+    t.text "description"
+    t.text "cost_includes"
+    t.text "cost_excludes"
+    t.text "safety_notice"
+    t.text "booking_notice"
+    t.text "insurance_notice"
+    t.text "cancellation_policy"
+    t.text "price_explanation"
+    t.text "group_tour_notice"
+    t.boolean "custom_tour_available", default: false
+    t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
+  end
+
+  create_table "tour_itinerary_days", force: :cascade do |t|
+    t.bigint "tour_group_product_id"
+    t.integer "day_number", default: 1
+    t.string "title"
+    t.text "attractions"
+    t.text "assembly_point"
+    t.text "assembly_details"
+    t.text "disassembly_point"
+    t.text "disassembly_details"
+    t.string "transportation"
+    t.text "service_info"
+    t.integer "duration_minutes", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tour_group_product_id"], name: "index_tour_itinerary_days_on_tour_group_product_id"
+  end
+
+  create_table "tour_packages", force: :cascade do |t|
+    t.bigint "tour_group_product_id"
+    t.string "name"
+    t.decimal "price", default: "0.0"
+    t.decimal "child_price", default: "0.0"
+    t.integer "purchase_count", default: 0
+    t.text "description"
+    t.boolean "is_featured", default: false
+    t.integer "display_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tour_group_product_id"], name: "index_tour_packages_on_tour_group_product_id"
+  end
+
   create_table "tour_products", force: :cascade do |t|
     t.bigint "destination_id"
     t.string "name"
@@ -527,7 +627,33 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.boolean "is_featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "tour_type"
+    t.integer "duration"
+    t.string "departure_city"
+    t.string "rating_desc"
+    t.text "highlights"
+    t.string "provider"
+    t.string "badge"
+    t.string "departure_label"
+    t.string "price_suffix", default: "起"
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
+  end
+
+  create_table "tour_reviews", force: :cascade do |t|
+    t.bigint "tour_group_product_id"
+    t.bigint "user_id"
+    t.decimal "rating", default: "5.0"
+    t.decimal "guide_attitude", default: "5.0"
+    t.decimal "meal_quality", default: "5.0"
+    t.decimal "itinerary_arrangement", default: "5.0"
+    t.decimal "travel_transportation", default: "5.0"
+    t.text "comment"
+    t.boolean "is_featured", default: false
+    t.integer "helpful_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tour_group_product_id"], name: "index_tour_reviews_on_tour_group_product_id"
+    t.index ["user_id"], name: "index_tour_reviews_on_user_id"
   end
 
   create_table "trains", force: :cascade do |t|
@@ -542,6 +668,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
     t.decimal "price_first_class"
     t.decimal "price_business_class"
     t.integer "available_seats"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "travel_agencies", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.string "logo_url"
+    t.decimal "rating", default: "5.0"
+    t.integer "sales_count", default: 0
+    t.boolean "is_verified", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -572,4 +709,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_04_141002) do
   add_foreign_key "notifications", "users"
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "tour_group_products", "travel_agencies"
 end

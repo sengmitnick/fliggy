@@ -38,6 +38,14 @@ import HotelTravelerSelectorController from "./hotel_traveler_selector_controlle
 import ToastController from "./toast_controller"
 import ToastTriggerController from "./toast_trigger_controller"
 import HotelBookingController from "./hotel_booking_controller"
+import TourDetailController from "./tour_detail_controller"
+import CarouselController from "./carousel_controller"
+import ScrollSpyController from "./scroll_spy_controller"
+import PackageSwitcherController from "./package_switcher_controller"
+import BookingModalController from "./booking_modal_controller"
+import BottomBarController from "./bottom_bar_controller"
+import InsuranceSelectorController from "./insurance_selector_controller"
+import TourTravelerSelectorController from "./tour_traveler_selector_controller"
 import SpecialFlightsFormController from "./special_flights_form_controller"
 
 const application = Application.start()
@@ -80,6 +88,14 @@ application.register("hotel-traveler-selector", HotelTravelerSelectorController)
 application.register("toast", ToastController)
 application.register("toast-trigger", ToastTriggerController)
 application.register("hotel-booking", HotelBookingController)
+application.register("tour-detail", TourDetailController)
+application.register("carousel", CarouselController)
+application.register("scroll-spy", ScrollSpyController)
+application.register("package-switcher", PackageSwitcherController)
+application.register("booking-modal", BookingModalController)
+application.register("bottom-bar", BottomBarController)
+application.register("insurance-selector", InsuranceSelectorController)
+application.register("tour-traveler-selector", TourTravelerSelectorController)
 application.register("special-flights-form", SpecialFlightsFormController)
 
 window.Stimulus = application

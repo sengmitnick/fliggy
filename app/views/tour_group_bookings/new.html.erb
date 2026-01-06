@@ -1,0 +1,421 @@
+<div class="min-h-screen bg-surface pb-32" data-controller="tour-traveler-selector">
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to tour_group_path(@product), class: "text-foreground" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <h1 class="flex-1 text-center text-lg font-semibold text-foreground">填写订单</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <%= form_with model: @booking, url: tour_group_bookings_path, method: :post, html: { class: "space-y-3" } do |f| %>
+    <%= f.hidden_field :tour_group_product_id, value: @product.id %>
+    <%= f.hidden_field :tour_package_id, value: @package.id %>
+    <%= f.hidden_field :travel_date, value: @travel_date %>
+    <%= f.hidden_field :adult_count, value: @adult_count %>
+    <%= f.hidden_field :child_count, value: @child_count %>
+    
+    <!-- 行程信息 -->
+    <div class="bg-white px-4 py-4">
+      <div class="flex items-start gap-3">
+        <% if @product.main_image.attached? %>
+          <%= image_tag @product.main_image, class: "w-20 h-20 rounded-lg object-cover" %>
+        <% end %>
+        <div class="flex-1">
+          <h2 class="text-base font-semibold text-foreground mb-1"><%= @product.title %></h2>
+          <div class="space-y-1 text-sm text-foreground-secondary">
+            <div class="flex items-center gap-2">
+              <span class="text-foreground-muted">套餐类型</span>
+              <span><%= @package.name %></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-foreground-muted">出游人群</span>
+              <span>成人</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 出行时间和人数 -->
+      <div class="mt-4 pt-4 border-t border-border">
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm text-foreground-muted">出行日期</span>
+          <span class="text-sm text-foreground"><%= l(@travel_date, format: :long) %></span>
+        </div>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm text-foreground-muted">出行人数</span>
+          <span class="text-sm text-foreground">
+            成人 <%= @adult_count %> 人
+            <% if @child_count > 0 %>
+              ，儿童 <%= @child_count %> 人
+            <% end %>
+          </span>
+        </div>
+      </div>
+      
+      <!-- 取消政策 -->
+      <div class="mt-4 pt-4 border-t border-border">
+        <div class="flex items-start gap-2">
+          <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <div class="text-sm text-foreground">
+              <span class="font-medium"><%= l(@travel_date - 1.day, format: '%m月%d日') %>0:00前全额退</span>
+            </div>
+          </div>
+          <button type="button" class="text-sm text-blue-500">详情 ></button>
+        </div>
+        
+        <div class="mt-3 flex items-start gap-2">
+          <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <span class="text-sm text-foreground">即时确认 商家承诺拍下付款后即可顺利出行</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 标签 -->
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="badge-outline text-xs">无购物</span>
+        <span class="badge-outline text-xs">无自费</span>
+        <span class="badge-outline text-xs">赠旅意险</span>
+        <span class="badge-outline text-xs">成团保障</span>
+      </div>
+    </div>
+    
+    <!-- 我要付款后填写出行人 -->
+    <div class="bg-white px-4 py-3">
+      <label class="flex items-center justify-between">
+        <span class="text-sm text-foreground font-medium">我要付款后填写出行人</span>
+        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300" />
+      </label>
+    </div>
+    
+    <!-- 出行人信息 -->
+    <div class="bg-white px-4 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-semibold text-foreground">选择 <%= @adult_count + @child_count %> 位游客</h3>
+        <button type="button" class="text-sm text-blue-500">
+          <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+          邀请同行人填写
+        </button>
+      </div>
+      
+      <%= f.fields_for :booking_travelers do |traveler_form| %>
+        <% traveler_index = @booking.booking_travelers.index(traveler_form.object) %>
+        <div class="mb-4 p-4 bg-surface rounded-lg border border-border">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
+                <%= traveler_form.object.traveler_type == 'adult' ? '成' : '儿' %>
+              </div>
+              <span class="text-sm font-medium text-foreground">
+                <%= traveler_form.object.traveler_type == 'adult' ? '成人' : '儿童' %>
+              </span>
+            </div>
+            <button type="button" class="w-6 h-6 text-foreground-muted">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="flex items-center py-2 border-b border-border">
+              <label class="text-sm text-foreground-muted w-16">姓名</label>
+              <%= traveler_form.text_field :traveler_name, 
+                  placeholder: "请输入姓名",
+                  data: { "tour-traveler-selector-target": "travelerNameInput" },
+                  class: "flex-1 text-sm text-foreground focus:outline-none" %>
+              <button type="button" 
+                      class="text-blue-500"
+                      data-action="click->tour-traveler-selector#openModal"
+                      data-traveler-index="<%= traveler_index %>">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="flex items-center py-2">
+              <label class="text-sm text-foreground-muted w-16">身份证</label>
+              <%= traveler_form.text_field :id_number, 
+                  placeholder: "请输入身份证号",
+                  data: { "tour-traveler-selector-target": "travelerIdInput" },
+                  class: "flex-1 text-sm text-foreground focus:outline-none" %>
+            </div>
+            
+            <%= traveler_form.hidden_field :traveler_type %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- 添加出行人按钮 -->
+      <button type="button" class="w-full py-3 text-sm font-medium text-center rounded-lg border-2 border-dashed border-gray-300 text-foreground-muted hover:border-primary hover:text-primary">
+        <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        更多出行人
+      </button>
+    </div>
+    
+    <!-- 留言备注 -->
+    <div class="bg-white px-4 py-4">
+      <h3 class="text-base font-semibold text-foreground mb-3">留言备注</h3>
+      <textarea 
+        rows="3" 
+        placeholder="选填，请先和商家协商一致"
+        class="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+    </div>
+    
+    <!-- 联系人 -->
+    <div class="bg-white px-4 py-4">
+      <h3 class="text-base font-semibold text-foreground mb-4">联系人</h3>
+      
+      <div class="space-y-3">
+        <div class="flex items-center py-3 border-b border-border">
+          <label class="text-sm text-foreground-muted w-16">姓名</label>
+          <%= f.text_field :contact_name, 
+              placeholder: "请输入联系人姓名",
+              class: "flex-1 text-sm text-foreground focus:outline-none" %>
+          <button type="button" class="text-blue-500">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="flex items-center py-3">
+          <label class="text-sm text-foreground-muted w-16">手机号</label>
+          <span class="text-xs text-foreground-muted mr-2">+86</span>
+          <svg class="w-4 h-4 text-foreground-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+          <%= f.text_field :contact_phone, 
+              placeholder: "请输入手机号",
+              class: "flex-1 text-sm text-foreground focus:outline-none" %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 保险 -->
+    <div class="bg-white px-4 py-4" 
+         data-controller="insurance-selector"
+         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
+         data-insurance-selector-adult-count-value="<%= @adult_count %>"
+         data-insurance-selector-child-count-value="<%= @child_count %>">
+      <div class="flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <span class="text-sm text-orange-500">出游添加保障，家人更安心</span>
+      </div>
+      
+      <h3 class="text-base font-semibold text-foreground mb-3">境内旅行保障</h3>
+      <div class="flex items-center gap-2 mb-3 text-xs text-foreground-muted">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <span>含户外运动专项保障</span>
+      </div>
+      
+      <!-- 保险选项 -->
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <!-- 无保障 -->
+        <label class="relative cursor-pointer">
+          <%= f.radio_button :insurance_type, 'none', 
+              checked: @booking.insurance_type == 'none',
+              class: "peer sr-only",
+              data: { 
+                action: "change->insurance-selector#updatePrice",
+                "insurance-selector-target": "radio"
+              } %>
+          <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
+            <div class="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+            <div class="text-sm font-medium text-foreground mb-1">无保障</div>
+            <div class="text-xs text-foreground-muted mb-2">放弃保障</div>
+            <div class="absolute top-2 right-2 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center">
+              <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
+        </label>
+        
+        <!-- 升级保障 -->
+        <label class="relative cursor-pointer">
+          <%= f.radio_button :insurance_type, 'standard', 
+              class: "peer sr-only",
+              data: { 
+                action: "change->insurance-selector#updatePrice",
+                "insurance-selector-target": "radio"
+              } %>
+          <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #FFE4B3;">
+              <svg class="w-6 h-6" style="color: #FF9500;" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+            </div>
+            <div class="text-sm font-medium text-foreground mb-1">升级保障</div>
+            <div class="text-xs text-foreground-muted mb-1">经典爆款</div>
+            <div class="text-xs text-foreground-secondary">
+              旅行意外¥50万<br>
+              意外医疗¥5万<br>
+              财物丢失¥2000
+            </div>
+            <div class="mt-2 text-sm font-semibold text-red-500">¥15/人</div>
+            <div class="absolute top-2 right-2 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center">
+              <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
+        </label>
+        
+        <!-- 尊享保障 -->
+        <label class="relative cursor-pointer">
+          <%= f.radio_button :insurance_type, 'premium', 
+              class: "peer sr-only",
+              data: { 
+                action: "change->insurance-selector#updatePrice",
+                "insurance-selector-target": "radio"
+              } %>
+          <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
+            <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #E6F3FF;">
+              <svg class="w-6 h-6" style="color: #1890FF;" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+              </svg>
+            </div>
+            <div class="text-sm font-medium text-foreground mb-1">尊享保障</div>
+            <div class="text-xs text-foreground-muted mb-1">达人之选</div>
+            <div class="text-xs text-foreground-secondary">
+              旅行意外¥100万<br>
+              意外医疗¥20万<br>
+              财物丢失¥5000
+            </div>
+            <div class="mt-2 text-sm font-semibold text-red-500">¥35/人</div>
+            <div class="absolute top-2 right-2 w-5 h-5 rounded-full border-2 border-gray-300 peer-checked:border-primary peer-checked:bg-primary flex items-center justify-center">
+              <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
+        </label>
+      </div>
+      
+      <div class="text-center">
+        <span class="inline-block px-3 py-1 text-xs rounded-full" style="background: #FFF3E0; color: #FF9800;">70%用户的选择</span>
+      </div>
+      
+      <!-- 度假行程取消保障 -->
+      <div class="mt-4 p-4 bg-surface rounded-lg">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <h4 class="text-sm font-medium text-foreground mb-1">度假行程取消保障</h4>
+            <div class="flex items-center gap-1 mb-2">
+              <svg class="w-4 h-4 text-foreground-muted" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-xs text-foreground-muted">订单无忧退</span>
+            </div>
+            <div class="text-xs text-foreground-secondary">
+              因恶劣天气、行前突发疾病/意外等原因取消100%损失赔付<br>
+              最高赔付 ¥3000<br>
+              支持订单无理由取消，快速理赔到账
+            </div>
+          </div>
+          <div class="text-right ml-4">
+            <div class="text-base font-semibold text-red-500">¥4.90/份</div>
+            <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-2" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-3 text-xs text-foreground-muted">
+        明亚保险经纪 本保险为保险投保页面，由明亚保险经纪股份有限公司管理运营。请仔细阅读
+        <button type="button" class="text-blue-500">客户通知书</button>、
+        <button type="button" class="text-blue-500">保险代理协议</button>、
+        <button type="button" class="text-blue-500">投保须知及条款</button>
+        等重要内容。为保障你的权益，我们将会安全记录你的操作。
+      </div>
+    </div>
+    
+    <!-- F1会员本单可享 -->
+    <div class="bg-white px-4 py-4">
+      <h3 class="text-base font-semibold text-foreground mb-4">F1会员·本单可享</h3>
+      
+      <div class="space-y-3">
+        <div class="flex items-center justify-between py-2">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-foreground-muted">优惠</span>
+            <svg class="w-4 h-4 text-foreground-muted" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-foreground-secondary">无优惠可用</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm text-foreground-muted">返赠</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-red-500">49飞猪里程等3项</span>
+            <svg class="w-4 h-4 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 电子合同、线路标准退订须知 -->
+    <div class="bg-white px-4 py-4">
+      <label class="flex items-start gap-2">
+        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-0.5 flex-shrink-0" required />
+        <span class="text-xs text-foreground-secondary">
+          请您仔细阅读
+          <button type="button" class="text-blue-500">电子合同</button>、
+          <button type="button" class="text-blue-500">线路标准退订须知</button>
+          点击去付款即代表您已阅读并同意条款内容。
+        </span>
+      </label>
+    </div>
+    
+    <!-- 底部固定栏 -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-foreground-muted">合计</span>
+          <button type="button" class="text-xs text-blue-500">
+            明细
+            <svg class="w-3 h-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+            </svg>
+          </button>
+        </div>
+        <div>
+          <span class="text-2xl font-bold text-red-500" data-insurance-selector-target="totalPrice">¥<%= @booking.calculate_total_price %></span>
+        </div>
+      </div>
+      <%= f.submit "立即支付", 
+          class: "btn-primary w-full py-4 text-lg font-semibold rounded-full" %>
+    </div>
+  <% end %>
+  
+  <!-- Tour Traveler Selector Modal -->
+  <%= render 'shared/tour_traveler_selector_modal' %>
+</div>

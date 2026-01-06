@@ -1,0 +1,917 @@
+<div class="min-h-screen bg-background pb-20" data-controller="tour-detail scroll-spy" data-scroll-spy-offset-value="120">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4 flex-1 min-w-0">
+        <%= link_to search_tour_groups_path(destination: @product.destination), class: "text-foreground" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        <% end %>
+        <h1 class="text-lg font-semibold text-foreground truncate flex-1 min-w-0"><%= @product.title %></h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <button type="button" class="text-foreground-muted hover:text-foreground">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+          </svg>
+        </button>
+        <button type="button" class="text-foreground-muted hover:text-foreground">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Gallery -->
+  <div class="relative bg-surface" data-controller="carousel">
+    <% if @product.main_image.attached? %>
+      <%= image_tag @product.main_image, class: "w-full h-80 object-cover" %>
+    <% else %>
+      <%= image_tag @product.image_url, class: "w-full h-80 object-cover" %>
+    <% end %>
+    
+    <% if @product.gallery_images.attached? && @product.gallery_images.count > 0 %>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-surface-dark/80 backdrop-blur-sm rounded-full text-sm text-white">
+        1/<%= @product.gallery_images.count + 1 %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="sticky top-14 z-40 bg-background border-b border-border">
+    <div class="flex overflow-x-auto scrollbar-hide">
+      <a href="#overview" 
+         data-scroll-spy-target="tab" 
+         data-section="overview"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        商品
+      </a>
+      <a href="#packages" 
+         data-scroll-spy-target="tab" 
+         data-section="packages"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        套餐
+      </a>
+      <a href="#itinerary" 
+         data-scroll-spy-target="tab" 
+         data-section="itinerary"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        行程
+      </a>
+      <a href="#gallery" 
+         data-scroll-spy-target="tab" 
+         data-section="gallery"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        图文
+      </a>
+      <a href="#reviews" 
+         data-scroll-spy-target="tab" 
+         data-section="reviews"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        评价
+      </a>
+      <a href="#costs" 
+         data-scroll-spy-target="tab" 
+         data-section="costs"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        费用
+      </a>
+      <a href="#recommendations" 
+         data-scroll-spy-target="tab" 
+         data-section="recommendations"
+         data-action="click->scroll-spy#scrollToSection"
+         class="flex-shrink-0 px-4 py-3 text-sm font-medium border-b-2 transition-colors border-transparent text-foreground-muted hover:text-foreground">
+        推荐
+      </a>
+    </div>
+  </div>
+
+  <!-- Page Content - All sections displayed -->
+  <div class="pb-4">
+    <!-- Overview Section -->
+    <section id="overview" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <!-- Product Info -->
+      <div class="bg-surface p-4">
+        <% if @product.badge.present? %>
+          <span class="inline-block px-2 py-1 mb-2 text-xs font-medium bg-primary/10 text-primary rounded"><%= @product.badge %></span>
+        <% end %>
+        <h2 class="text-xl font-bold text-foreground mb-2"><%= @product.title %></h2>
+        
+        <div class="flex items-center gap-4 mb-3">
+          <div class="flex items-center gap-1">
+            <span class="text-2xl font-bold text-accent"><%= @product.average_rating %></span>
+            <div class="flex">
+              <% 5.times do |i| %>
+                <svg class="w-4 h-4 <%= i < @product.average_rating.floor ? 'text-accent' : 'text-border' %>" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+          <span class="text-sm text-foreground-muted"><%= @product.review_count %>条评价</span>
+          <span class="text-sm text-foreground-muted"><%= @product.format_sales %></span>
+        </div>
+
+        <% if @product.highlights.present? %>
+          <div class="space-y-2 mb-3">
+            <% @product.highlights.each do |highlight| %>
+              <div class="flex items-start gap-2 text-sm text-foreground-secondary">
+                <svg class="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span><%= highlight %></span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @product.tags.present? %>
+          <div class="flex flex-wrap gap-2">
+            <% @product.tags.each do |tag| %>
+              <span class="badge-outline-sm"><%= tag %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Price Info -->
+      <div class="bg-surface p-4">
+        <div class="flex items-end justify-between mb-3">
+          <div>
+            <div class="text-sm text-foreground-muted mb-1">起价</div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-xs text-accent">¥</span>
+              <span class="text-3xl font-bold text-accent"><%= @product.price.to_i %></span>
+              <span class="text-sm text-foreground-muted">/人</span>
+            </div>
+          </div>
+          <% if @product.reward_points && @product.reward_points > 0 %>
+            <div class="text-right">
+              <div class="text-sm text-foreground-muted">可获积分</div>
+              <div class="text-lg font-semibold text-primary"><%= @product.reward_points %></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Merchant Info -->
+      <div class="bg-surface p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-semibold text-foreground">商家信息</h3>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-surface-secondary rounded-full flex items-center justify-center text-lg font-bold text-primary">
+            <%= @product.travel_agency.name[0] %>
+          </div>
+          <div class="flex-1">
+            <div class="font-medium text-foreground"><%= @product.travel_agency.name %></div>
+            <% if @product.success_rate_high %>
+              <div class="text-sm text-success">成功率高</div>
+            <% end %>
+          </div>
+          <button type="button" class="btn-outline-sm">进店</button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <% if @product.description.present? %>
+        <div class="bg-surface p-4">
+          <h3 class="text-base font-semibold text-foreground mb-3">产品详情</h3>
+          <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+            <%= @product.description %>
+          </div>
+        </div>
+      <% end %>
+    </section>
+
+    <!-- Packages Section -->
+    <section id="packages" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <% if @packages.any? %>
+      <!-- Booking Button (triggers modal) -->
+      <div class="bg-surface p-4" data-controller="booking-modal">
+        <button type="button" 
+                class="w-full py-4 rounded-xl text-base font-semibold text-white flex items-center justify-center gap-2"
+                style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);"
+                data-action="click->booking-modal#open">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          选择出行日期
+        </button>
+        
+        <!-- Booking Modal -->
+        <div class="hidden fixed inset-0 z-[60]" data-booking-modal-target="modal">
+          <!-- Backdrop -->
+          <div class="absolute inset-0 bg-black bg-opacity-50" data-action="click->booking-modal#close"></div>
+          
+          <!-- Modal Content -->
+          <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto pb-20">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
+              <div class="flex-1">
+                <div class="text-xl font-bold text-red-500">券后价 ¥<%= @selected_package.price %><span class="text-sm">起</span></div>
+                <div class="text-sm text-foreground-muted line-through">¥<%= (@selected_package.price * 1.2).to_i %></div>
+              </div>
+              <button type="button" 
+                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                      data-action="click->booking-modal#close">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Selected Info -->
+            <div class="px-4 py-3 bg-[#FFF9E6] text-sm text-foreground-secondary">
+              已选："出发地: <%= @product.destination %>"、"套餐类型: <%= @selected_package.name %>"、"购买数量: 成人1"
+            </div>
+            
+            <!-- Package Type Selection -->
+            <div class="px-4 py-4 border-b border-gray-100">
+              <h3 class="text-base font-semibold text-foreground mb-3">套餐类型 <%= @product.destination %></h3>
+              <div class="grid grid-cols-2 gap-3">
+                <% @packages.each do |package| %>
+                  <button type="button"
+                          class="px-4 py-3 rounded-lg border-2 text-sm font-medium text-left relative <%= package == @selected_package ? 'bg-[#FFF9E6] border-[#FFD700]' : 'bg-white border-gray-200' %>"
+                          data-booking-modal-target="packageBtn"
+                          data-package-id="<%= package.id %>"
+                          data-action="click->booking-modal#selectPackage">
+                    <div class="font-medium text-foreground"><%= package.name %></div>
+                    <% if package == @selected_package %>
+                      <svg class="absolute top-2 right-2 w-5 h-5" style="color: #FFD700;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Date Selection -->
+            <div class="px-4 py-4 border-b border-gray-100">
+              <h3 class="text-base font-semibold text-foreground mb-3">出行日期</h3>
+              
+              <!-- Month Tabs -->
+              <div class="flex gap-4 mb-4 border-b border-gray-100">
+                <% 4.times do |i| %>
+                  <% month = (Date.today + i.months) %>
+                  <button type="button"
+                          class="pb-2 text-sm font-medium <%= i == 0 ? 'text-red-500 border-b-2 border-red-500' : 'text-foreground-muted' %>"
+                          data-booking-modal-target="monthTab"
+                          data-month="<%= month.month %>"
+                          data-action="click->booking-modal#selectMonth">
+                    <%= month.month %>月<br>
+                    <span class="text-xs text-red-500">¥<%= @selected_package.price %>起</span>
+                  </button>
+                <% end %>
+              </div>
+              
+              <!-- Calendar -->
+              <div class="grid grid-cols-7 gap-2" data-booking-modal-target="calendar">
+                <!-- Weekday Headers -->
+                <% %w[日 一 二 三 四 五 六].each do |day| %>
+                  <div class="text-center text-sm font-medium <%= day == '日' ? 'text-red-500' : day == '六' ? 'text-red-400' : 'text-foreground-muted' %>">
+                    <%= day %>
+                  </div>
+                <% end %>
+                
+                <!-- Calendar Days (Current Month) -->
+                <% start_date = Date.today %>
+                <% end_date = start_date.end_of_month %>
+                <% (start_date.beginning_of_month.wday).times do %>
+                  <div></div>
+                <% end %>
+                <% (start_date..end_date).each do |date| %>
+                  <% is_past = date < Date.today %>
+                  <% is_holiday = date.saturday? || date.sunday? %>
+                  <button type="button"
+                          class="aspect-square rounded-lg text-sm flex flex-col items-center justify-center <%= is_past ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50' %>"
+                          data-booking-modal-target="dateBtn"
+                          data-date="<%= date.to_s %>"
+                          data-action="click->booking-modal#selectDate"
+                          <%= 'disabled' if is_past %>>
+                    <% if is_holiday && !is_past %>
+                      <span class="text-xs text-[#FFD700]">休</span>
+                    <% end %>
+                    <div class="font-medium <%= is_past ? '' : 'text-foreground' %>"><%= date.day %></div>
+                    <% unless is_past %>
+                      <div class="text-xs text-red-500">¥<%= @selected_package.price %></div>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Quantity Selection -->
+            <div class="px-4 py-4">
+              <h3 class="text-base font-semibold text-foreground mb-3">购买数量</h3>
+              
+              <!-- Adult Quantity -->
+              <div class="flex items-center justify-between py-3">
+                <div>
+                  <div class="text-sm font-medium text-foreground">成人：18周岁(含)以上</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button"
+                          class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                          data-action="click->booking-modal#decreaseAdult">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                    </svg>
+                  </button>
+                  <span class="text-base font-medium w-8 text-center" data-booking-modal-target="adultCount">1</span>
+                  <button type="button"
+                          class="w-8 h-8 rounded-full border-2 flex items-center justify-center"
+                          style="border-color: #FFD700; color: #FFD700;"
+                          data-action="click->booking-modal#increaseAdult">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Child Quantity -->
+              <% if @selected_package.child_price > 0 %>
+              <div class="flex items-center justify-between py-3 border-t border-gray-100">
+                <div>
+                  <div class="text-sm font-medium text-foreground">儿童：0周岁(含)-17周岁(含)</div>
+                  <button type="button" class="text-xs text-blue-500 mt-1">?</button>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button type="button"
+                          class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                          data-action="click->booking-modal#decreaseChild">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                    </svg>
+                  </button>
+                  <span class="text-base font-medium w-8 text-center" data-booking-modal-target="childCount">0</span>
+                  <button type="button"
+                          class="w-8 h-8 rounded-full border-2 flex items-center justify-center"
+                          style="border-color: #FFD700; color: #FFD700;"
+                          data-action="click->booking-modal#increaseChild">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <% end %>
+              
+              <!-- Notice -->
+              <div class="mt-4 flex items-start gap-2 text-xs text-orange-500">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <span>购买多件商品时的实际结算金额以下单页结算为准</span>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="sticky bottom-0 bg-white px-4 py-3 border-t border-gray-100 flex gap-3">
+              <button type="button"
+                      class="flex-1 py-4 rounded-xl text-base font-semibold"
+                      style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;"
+                      data-action="click->booking-modal#addToCart">
+                加入购物车
+              </button>
+              <button type="button"
+                      class="flex-1 py-4 rounded-xl text-base font-semibold text-white"
+                      style="background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%);"
+                      data-action="click->booking-modal#buyNow">
+                领券购买
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% end %>
+      
+      <!-- Package Selection Title and Cards -->
+      <% if @packages.any? %>
+      <div data-controller="package-switcher" data-package-switcher-selected-id-value="<%= @selected_package&.id %>">
+        <div class="bg-surface p-4">
+          <h3 class="text-lg font-semibold text-foreground mb-4">选择套餐</h3>
+          
+          <!-- Horizontal Scrollable Package Cards -->
+          <div class="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4">
+          <% @packages.each do |package| %>
+            <div class="<%= package == @selected_package ? 'bg-[#FFF9E6] border-2 border-[#FFD700]' : 'bg-white border border-gray-100' %> rounded-2xl flex-shrink-0 w-80 shadow-sm hover:shadow-md transition-shadow cursor-pointer" 
+                 data-package-switcher-target="card" 
+                 data-package-id="<%= package.id %>"
+                 data-action="click->package-switcher#selectPackage">
+              <div class="p-4">
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="text-base font-bold text-foreground"><%= package.name %></h4>
+                      <% if package.is_featured %>
+                        <span class="inline-block px-2 py-0.5 text-xs font-medium rounded" style="background: #FFD700; color: #000;">推荐</span>
+                      <% end %>
+                    </div>
+                    <% if package.description.present? %>
+                      <p class="text-sm text-foreground-muted leading-relaxed"><%= package.description %></p>
+                    <% end %>
+                  </div>
+                  <div class="text-right ml-4">
+                    <div class="text-xl font-bold text-red-500"><%= package.format_price %></div>
+                    <% if package.child_price > 0 %>
+                      <div class="text-xs text-foreground-muted">儿童 <%= package.format_child_price %></div>
+                    <% end %>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div class="text-sm text-foreground-muted">
+                    已售 <%= package.purchase_count %> 份
+                  </div>
+                  <% if package == @selected_package %>
+                    <svg class="w-6 h-6" style="color: #FFD700;" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          </div>
+        </div>
+        
+        <!-- Package Details Section -->
+        <div class="bg-surface p-4" data-package-switcher-target="details">
+        <% @packages.each do |package| %>
+          <div class="<%= package == @selected_package ? '' : 'hidden' %>" data-package-id="<%= package.id %>">
+            <h3 class="text-base font-semibold text-foreground mb-4"><%= package.name %>·行程包含</h3>
+            
+            <!-- 游玩景点 -->
+            <% if @itinerary_days.first&.attractions&.present? %>
+              <div class="mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <h4 class="text-sm font-medium text-foreground">游玩</h4>
+                </div>
+                <div class="pl-7 text-sm text-foreground-secondary">
+                  <% attractions_text = @itinerary_days.flat_map { |day| day.attractions || [] }.join("·") %>
+                  <%= "#{@itinerary_days.length}个景点，共玩约#{@itinerary_days.sum(&:duration_minutes) / 60.0}小时" %>
+                </div>
+                <div class="pl-7 text-sm text-foreground-muted mt-1">
+                  <%= attractions_text %>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- 集散 -->
+            <% if @itinerary_days.first&.assembly_point&.present? %>
+              <div class="mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                  <h4 class="text-sm font-medium text-foreground">集散</h4>
+                </div>
+                <div class="pl-7 space-y-2">
+                  <% @itinerary_days.each do |day| %>
+                    <% if day.assembly_point.present? %>
+                      <div class="text-sm">
+                        <span class="text-foreground-secondary"><%= day.assembly_point.split(' ').first %></span>
+                        <span class="text-foreground-muted"> <%= day.assembly_point.split(' ', 2).last %></span>
+                      </div>
+                      <% if day.assembly_details.present? %>
+                        <div class="text-xs text-foreground-muted">
+                          <%= day.assembly_details %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- 服务 -->
+            <% service_items = [] %>
+            <% @itinerary_days.each do |day| %>
+              <% if day.service_info.present? %>
+                <% service_items.concat(day.service_info.split('|').map(&:strip)) %>
+              <% end %>
+            <% end %>
+            <% service_items.uniq! %>
+            <% if service_items.any? %>
+              <div class="mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                  <h4 class="text-sm font-medium text-foreground">服务</h4>
+                </div>
+                <div class="pl-7 text-sm text-foreground-secondary">
+                  最多<%= service_items.find { |s| s.include?('人') }&.match(/\d+/)[0] || '15' %>人｜<%= service_items.reject { |s| s.include?('人') }.join('|') %>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- 交通 -->
+            <% if @itinerary_days.any? { |day| day.transportation.present? } %>
+              <div class="mb-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                  </svg>
+                  <h4 class="text-sm font-medium text-foreground">交通</h4>
+                </div>
+                <div class="pl-7 text-sm text-foreground-secondary">
+                  <%= @itinerary_days.map(&:transportation).compact.first || '无行程用车' %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        </div>
+      </div>
+      <% end %>
+    </section>
+
+    <!-- Itinerary Section -->
+    <section id="itinerary" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <div class="bg-surface p-4">
+        <h3 class="text-lg font-semibold text-foreground mb-4">行程安排</h3>
+      </div>
+      <% @itinerary_days.each do |day| %>
+        <div class="bg-white p-4 mx-4 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style="background: #FFD700; color: #000;">
+              D<%= day.day_number %>
+            </div>
+            <h4 class="text-base font-semibold text-foreground"><%= day.title %></h4>
+          </div>
+
+          <% if day.attractions.present? %>
+            <div class="mb-4">
+              <h5 class="text-sm font-medium text-foreground mb-2">游玩景点</h5>
+              <div class="space-y-2">
+                <% day.attractions.each do |attraction| %>
+                  <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-sm text-foreground-secondary"><%= attraction %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+
+          <% if day.assembly_point.present? %>
+            <div class="mb-3 pl-7">
+              <div class="text-sm font-medium text-foreground mb-1">集合地点</div>
+              <div class="text-sm text-foreground-secondary"><%= day.assembly_point %></div>
+              <% if day.assembly_details.present? %>
+                <div class="text-xs text-foreground-muted mt-1"><%= day.assembly_details %></div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% if day.disassembly_point.present? %>
+            <div class="mb-3 pl-7">
+              <div class="text-sm font-medium text-foreground mb-1">解散地点</div>
+              <div class="text-sm text-foreground-secondary"><%= day.disassembly_point %></div>
+              <% if day.disassembly_details.present? %>
+                <div class="text-xs text-foreground-muted mt-1"><%= day.disassembly_details %></div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% if day.transportation.present? %>
+            <div class="mb-3 pl-7">
+              <div class="text-sm font-medium text-foreground mb-1">交通方式</div>
+              <div class="text-sm text-foreground-secondary"><%= day.transportation %></div>
+            </div>
+          <% end %>
+
+          <% if day.service_info.present? %>
+            <div class="pl-7">
+              <div class="text-sm font-medium text-foreground mb-1">服务说明</div>
+              <div class="text-sm text-foreground-secondary whitespace-pre-line"><%= day.service_info %></div>
+            </div>
+          <% end %>
+
+          <% if day.duration_minutes > 0 %>
+            <div class="mt-3 pl-7">
+              <span class="text-xs text-foreground-muted">预计时长：<%= day.format_duration %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <div class="bg-surface p-4">
+        <h3 class="text-lg font-semibold text-foreground mb-4">图片展示</h3>
+        <% if @product.gallery_images.attached? && @product.gallery_images.count > 0 %>
+          <div class="grid grid-cols-2 gap-2">
+            <% @product.gallery_images.each do |image| %>
+              <%= image_tag image, class: "w-full h-40 object-cover rounded-lg" %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-foreground-muted">
+            暂无更多图片
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="reviews" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <div class="bg-surface p-4">
+        <h3 class="text-lg font-semibold text-foreground mb-4">用户评价</h3>
+        
+        <!-- Rating Stats -->
+        <div class="mb-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="text-center">
+              <div class="text-4xl font-bold text-accent mb-1"><%= @review_stats[:average_rating] %></div>
+              <div class="flex justify-center mb-1">
+                <% 5.times do |i| %>
+                  <svg class="w-4 h-4 <%= i < @review_stats[:average_rating].floor ? 'text-accent' : 'text-border' %>" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                  </svg>
+                <% end %>
+              </div>
+              <div class="text-xs text-foreground-muted"><%= @review_stats[:total_count] %>条评价</div>
+            </div>
+            
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-foreground-muted w-16">导游态度</span>
+                <div class="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">
+                  <div class="h-full bg-accent" style="width: <%= (@review_stats[:guide_attitude] / 5.0 * 100).round %>%"></div>
+                </div>
+                <span class="text-xs font-medium text-foreground w-8 text-right"><%= @review_stats[:guide_attitude] %></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-foreground-muted w-16">餐饮质量</span>
+                <div class="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">
+                  <div class="h-full bg-accent" style="width: <%= (@review_stats[:meal_quality] / 5.0 * 100).round %>%"></div>
+                </div>
+                <span class="text-xs font-medium text-foreground w-8 text-right"><%= @review_stats[:meal_quality] %></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-foreground-muted w-16">行程安排</span>
+                <div class="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">
+                  <div class="h-full bg-accent" style="width: <%= (@review_stats[:itinerary_arrangement] / 5.0 * 100).round %>%"></div>
+                </div>
+                <span class="text-xs font-medium text-foreground w-8 text-right"><%= @review_stats[:itinerary_arrangement] %></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-foreground-muted w-16">旅行交通</span>
+                <div class="flex-1 h-2 bg-surface-secondary rounded-full overflow-hidden">
+                  <div class="h-full bg-accent" style="width: <%= (@review_stats[:travel_transportation] / 5.0 * 100).round %>%"></div>
+                </div>
+                <span class="text-xs font-medium text-foreground w-8 text-right"><%= @review_stats[:travel_transportation] %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review List -->
+        <div class="space-y-4">
+          <% if @reviews.any? %>
+            <% @reviews.each do |review| %>
+              <div class="border-t border-border pt-4 first:border-t-0 first:pt-0">
+                <div class="flex items-start gap-3 mb-2">
+                  <div class="w-10 h-10 bg-surface-secondary rounded-full flex items-center justify-center text-sm font-medium text-primary">
+                    <%= review.user.email[0].upcase %>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-sm font-medium text-foreground"><%= review.user.email.split('@').first %></span>
+                      <% if review.is_featured %>
+                        <span class="badge-primary-sm">精选</span>
+                      <% end %>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class="flex">
+                        <% 5.times do |i| %>
+                          <svg class="w-3 h-3 <%= i < review.rating.floor ? 'text-accent' : 'text-border' %>" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                          </svg>
+                        <% end %>
+                      </div>
+                      <span class="text-xs text-foreground-muted"><%= review.created_at.strftime('%Y-%m-%d') %></span>
+                    </div>
+                    <p class="text-sm text-foreground-secondary leading-relaxed mb-2"><%= review.comment %></p>
+                    
+                    <% if review.images.attached? %>
+                      <div class="flex gap-2 mb-2">
+                        <% review.images.each do |image| %>
+                          <%= image_tag image, class: "w-20 h-20 object-cover rounded" %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                    
+                    <div class="flex items-center gap-4 text-xs text-foreground-muted">
+                      <button type="button" class="flex items-center gap-1 hover:text-foreground">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                        </svg>
+                        <span>有用 <%= review.helpful_count %></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="text-center py-8 text-foreground-muted">
+              暂无评价
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Costs Section -->
+    <section id="costs" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <div class="bg-surface p-4">
+        <h3 class="text-lg font-semibold text-foreground mb-4">费用说明</h3>
+        
+        <!-- Cost Includes -->
+        <% if @product.cost_includes.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              费用包含
+            </h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line pl-7">
+              <%= @product.cost_includes %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Cost Excludes -->
+        <% if @product.cost_excludes.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-destructive" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
+              费用不含
+            </h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line pl-7">
+              <%= @product.cost_excludes %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Price Explanation -->
+        <% if @product.price_explanation.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3">价格说明</h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+              <%= @product.price_explanation %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Safety Notice -->
+        <% if @product.safety_notice.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              安全须知
+            </h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line pl-7">
+              <%= @product.safety_notice %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Booking Notice -->
+        <% if @product.booking_notice.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3">预订须知</h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+              <%= @product.booking_notice %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Cancellation Policy -->
+        <% if @product.cancellation_policy.present? %>
+          <div class="mb-6">
+            <h4 class="text-base font-medium text-foreground mb-3">退改政策</h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+              <%= @product.cancellation_policy %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Insurance Notice -->
+        <% if @product.insurance_notice.present? %>
+          <div>
+            <h4 class="text-base font-medium text-foreground mb-3">保险说明</h4>
+            <div class="text-sm text-foreground-secondary leading-relaxed whitespace-pre-line">
+              <%= @product.insurance_notice %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Recommendations Section -->
+    <section id="recommendations" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
+      <div class="bg-surface p-4">
+        <h3 class="text-lg font-semibold text-foreground mb-4">相关推荐</h3>
+        <% if @related_products.any? %>
+          <div class="grid grid-cols-2 gap-3">
+            <% @related_products.each do |product| %>
+              <%= link_to tour_group_path(product), class: "bg-background rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow" do %>
+                <%= image_tag product.image_url, class: "w-full h-32 object-cover" %>
+                <div class="p-2">
+                  <h4 class="text-sm font-medium text-foreground line-clamp-2 mb-1"><%= product.title %></h4>
+                  <div class="flex items-center justify-between">
+                    <span class="text-accent font-bold">¥<%= product.price.to_i %></span>
+                    <span class="text-xs text-foreground-muted"><%= product.format_sales %></span>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-foreground-muted">
+            暂无相关推荐
+          </div>
+        <% end %>
+      </div>
+    </section>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <div class="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border" data-controller="bottom-bar">
+    <div class="flex items-center gap-3 px-4 py-3">
+      <button type="button" class="flex flex-col items-center gap-1 text-foreground-muted hover:text-foreground">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        <span class="text-xs">咨询</span>
+      </button>
+      <button type="button" class="flex flex-col items-center gap-1 text-foreground-muted hover:text-foreground">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span class="text-xs">店铺</span>
+      </button>
+      <button type="button" class="flex flex-col items-center gap-1 text-foreground-muted hover:text-foreground">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+        <span class="text-xs">收藏</span>
+      </button>
+      <button type="button" 
+              class="btn-outline flex-1"
+              data-action="click->bottom-bar#openModal">
+        加入购物车
+      </button>
+      <button type="button" 
+              class="btn-primary flex-1"
+              data-action="click->bottom-bar#openModal">
+        立即购买
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

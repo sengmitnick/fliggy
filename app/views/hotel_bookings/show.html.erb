@@ -1,0 +1,151 @@
+<div class="min-h-screen bg-gradient-to-b from-yellow-100 to-white pb-20" data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @booking.total_price_with_insurance.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="/hotel_bookings/<%= @booking.id %>/pay"
+     data-payment-confirmation-success-url-value="/hotel_bookings/<%= @booking.id %>/success">
+  <!-- Header -->
+  <div class="bg-gradient-to-b from-yellow-200 to-yellow-100 px-4 py-3 flex items-center justify-between">
+    <%= link_to hotels_path, class: "text-gray-800" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    <% end %>
+    
+    <h1 class="text-lg font-semibold text-gray-900">订单详情</h1>
+    
+    <div class="text-gray-800">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Status Banner -->
+  <% if @booking.locked_until.present? %>
+    <div class="mx-4 mt-4 mb-3 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 flex items-center gap-2">
+      <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-sm text-yellow-800">
+        订单已创建，请在 <%= distance_of_time_in_words_to_now(@booking.locked_until) %> 内完成支付
+      </span>
+    </div>
+  <% end %>
+
+  <!-- Booking Details Card -->
+  <div class="mx-4 mb-4 bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="p-4">
+      <div class="mb-3">
+        <h2 class="font-semibold text-gray-900 text-base mb-1">
+          <%= @hotel.name %>
+        </h2>
+        <div class="text-xs text-gray-500">
+          <%= @hotel.address %>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-3 space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">房型</span>
+          <span class="text-gray-900"><%= @hotel_room.room_type %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">入住时间</span>
+          <span class="text-gray-900">
+            <%= @booking.check_in_date.strftime('%Y-%m-%d') %>
+          </span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">离店时间</span>
+          <span class="text-gray-900">
+            <%= @booking.check_out_date.strftime('%Y-%m-%d') %>
+          </span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">房间数量</span>
+          <span class="text-gray-900"><%= @booking.rooms_count %>间</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">共住</span>
+          <span class="text-gray-900"><%= @booking.nights %>晚</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">入住人数</span>
+          <span class="text-gray-900">成人<%= @booking.adults_count %>人<% if @booking.children_count > 0 %>, 儿童<%= @booking.children_count %>人<% end %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">入住人</span>
+          <span class="text-gray-900"><%= @booking.guest_name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">联系电话</span>
+          <span class="text-gray-900"><%= @booking.guest_phone %></span>
+        </div>
+        
+        <% if @booking.insurance_type.present? %>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">保险</span>
+            <span class="text-gray-900"><%= @booking.insurance_type %> ¥<%= @booking.insurance_price %></span>
+          </div>
+        <% end %>
+        
+        <% if @booking.special_requests.present? %>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">特殊要求</span>
+            <span class="text-gray-900"><%= @booking.special_requests %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Price Details -->
+    <div class="border-t border-gray-100 px-4 py-3 space-y-2">
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-600">房费</span>
+        <span class="text-gray-900">¥<%= @booking.original_price || @booking.total_price %></span>
+      </div>
+      <% if @booking.discount_amount.present? && @booking.discount_amount > 0 %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">优惠</span>
+          <span class="text-red-500">-¥<%= @booking.discount_amount %></span>
+        </div>
+      <% end %>
+      <% if @booking.insurance_price.present? && @booking.insurance_price > 0 %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">保险费</span>
+          <span class="text-gray-900">¥<%= @booking.insurance_price %></span>
+        </div>
+      <% end %>
+      <div class="flex justify-between text-base font-semibold border-t border-gray-100 pt-2">
+        <span class="text-gray-900">总计</span>
+        <span class="text-red-500">¥<%= @booking.total_price_with_insurance %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Method -->
+  <div class="mx-4 mb-4 bg-white rounded-xl shadow-sm p-4">
+    <div class="flex justify-between items-center">
+      <span class="text-sm text-gray-600">支付方式</span>
+      <span class="text-sm text-gray-900 font-semibold"><%= @booking.payment_method %></span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between mb-2">
+      <div>
+        <div class="text-xs text-gray-500">应付金额</div>
+        <div class="text-xl font-bold text-red-500">¥<%= @booking.total_price_with_insurance %></div>
+      </div>
+      <button type="button"
+              data-action="click->payment-confirmation#showPasswordModal"
+              class="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all">
+        立即支付
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>

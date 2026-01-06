@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-surface pb-32" data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @booking.total_price.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="<%= pay_tour_group_booking_path(@booking) %>"
+     data-payment-confirmation-success-url-value="<%= success_tour_group_booking_path(@booking) %>">
+  
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to tour_group_path(@product), class: "text-foreground" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <h1 class="flex-1 text-center text-lg font-semibold text-foreground">订单确认</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <div class="flex items-start gap-3">
+      <% if @product.main_image.attached? %>
+        <%= image_tag @product.main_image, class: "w-20 h-20 rounded-lg object-cover" %>
+      <% end %>
+      <div class="flex-1">
+        <h2 class="text-base font-semibold text-foreground mb-2"><%= @product.title %></h2>
+        <div class="space-y-1 text-sm text-foreground-secondary">
+          <div class="flex items-center gap-2">
+            <span class="text-foreground-muted">套餐</span>
+            <span><%= @package.name %></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-foreground-muted">出行日期</span>
+            <span><%= l(@booking.travel_date, format: :long) %></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-foreground-muted">人数</span>
+            <span>成人 <%= @booking.adult_count %> 人<% if @booking.child_count > 0 %>，儿童 <%= @booking.child_count %> 人<% end %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Details -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <h3 class="text-base font-semibold text-foreground mb-4">费用明细</h3>
+    
+    <div class="space-y-3">
+      <!-- Package Price -->
+      <div class="flex items-center justify-between py-2 border-b border-border">
+        <span class="text-sm text-foreground-muted">套餐价格</span>
+        <span class="text-foreground">¥<%= @booking.base_price.to_i %></span>
+      </div>
+      
+      <!-- Insurance Price -->
+      <% if @booking.insurance_type != 'none' %>
+        <div class="flex items-center justify-between py-2 border-b border-border">
+          <span class="text-sm text-foreground-muted">旅游保险（<%= @booking.insurance_type == 'standard' ? '标准版' : '豪华版' %>）</span>
+          <span class="text-foreground">¥<%= @booking.insurance_price.to_i %></span>
+        </div>
+      <% end %>
+      
+      <!-- Total Price -->
+      <div class="flex items-center justify-between pt-3">
+        <span class="text-lg font-semibold text-foreground">总计</span>
+        <span class="text-xl font-bold text-primary">¥<%= @booking.total_price.to_i %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Info -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <h3 class="text-base font-semibold text-foreground mb-4">联系人信息</h3>
+    
+    <div class="space-y-2">
+      <div class="flex items-center justify-between py-2">
+        <span class="text-sm text-foreground-muted">联系人</span>
+        <span class="text-foreground"><%= @booking.contact_name %></span>
+      </div>
+      <div class="flex items-center justify-between py-2">
+        <span class="text-sm text-foreground-muted">手机号</span>
+        <span class="text-foreground"><%= @booking.contact_phone %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Travelers Info -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <h3 class="text-base font-semibold text-foreground mb-4">出行人信息</h3>
+    
+    <div class="space-y-3">
+      <% @booking.booking_travelers.each_with_index do |traveler, index| %>
+        <div class="flex items-start gap-3 py-2 <%= 'border-b border-border' unless index == @booking.booking_travelers.length - 1 %>">
+          <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-medium text-sm flex-shrink-0">
+            <%= traveler.traveler_type == 'adult' ? '成' : '儿' %>
+          </div>
+          <div class="flex-1">
+            <div class="text-foreground font-medium"><%= traveler.traveler_name %></div>
+            <div class="text-sm text-foreground-muted"><%= traveler.id_number %></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Important Notice -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <div class="flex items-start gap-2">
+      <svg class="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+      </svg>
+      <div class="flex-1">
+        <div class="text-sm text-foreground">
+          <p class="mb-2">支付后订单即时确认，商家承诺顺利出行</p>
+          <p class="text-foreground-muted">取消政策：<%= l(@booking.travel_date - 1.day, format: '%m月%d日') %>0:00前可全额退款</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Payment Button -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-border shadow-lg">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-foreground-muted">总计</div>
+        <div class="text-xl font-bold text-primary">¥<%= @booking.total_price.to_i %></div>
+      </div>
+      <button type="button" 
+              data-action="click->payment-confirmation#showPasswordModal" 
+              class="btn-primary px-8 py-3 rounded-lg text-lg font-semibold">
+        立即支付
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>
