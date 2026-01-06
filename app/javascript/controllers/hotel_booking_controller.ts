@@ -41,7 +41,7 @@ export default class extends Controller<HTMLElement> {
 
   // Update total price display
   private updateTotalPrice(): void {
-    if (!this.hasTotalPriceAmountTarget) return
+    if (!this.totalPriceAmountTarget) return
     
     const basePrice = parseFloat(this.totalPriceAmountTarget.dataset.basePrice || '0')
     const insurancePriceField = document.getElementById('hotel_booking_insurance_price') as HTMLInputElement

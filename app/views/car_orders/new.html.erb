@@ -144,45 +144,70 @@
     <!-- 升级商家保障 -->
     <div>
       <h3 class="font-bold text-lg mb-3">升级商家保障，租车达人必备</h3>
-      <div class="flex space-x-3 overflow-x-auto pb-4 snap-x">
-        <!-- 基础保障 (左侧遮挡部分模拟) -->
-        <div class="bg-white border rounded-xl p-4 w-12 flex-shrink-0 opacity-50 overflow-hidden"></div>
+      <div class="flex space-x-3 overflow-x-auto no-scrollbar snap-x px-1 pb-4">
         
-        <!-- 优享保障 -->
-        <div class="bg-white border-2 border-green-500 rounded-xl p-4 w-64 flex-shrink-0 relative snap-center">
-          <div class="absolute top-0 left-0 right-0 h-1.5 bg-green-500 rounded-t-lg"></div>
-          <div class="text-center mt-2">
-            <div class="text-xs bg-green-500 text-white inline-block px-2 py-0.5 rounded-sm mb-2">车损免赔 更全保障</div>
-            <h4 class="text-xl font-bold text-green-700">优享保障</h4>
-            <p class="text-[10px] text-green-600">详情 ></p>
+        <!-- 基础保障卡片 -->
+        <div class="bg-[#F9FAFB] border border-gray-100 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2">
+            <span class="bg-gray-200 text-gray-500 text-[10px] px-3 py-0.5 rounded-b-lg">当前已含</span>
           </div>
-          <div class="mt-4 space-y-2 text-xs">
-            <div class="flex items-center"><svg class="w-3 h-3 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 车损保障：<span class="bg-green-50 text-green-700 px-0.5">全额赔付</span>，含玻璃、车轮损失自付</div>
-            <div class="flex items-center"><svg class="w-3 h-3 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 三者保障：<span class="bg-green-50 text-green-700 px-0.5">保额100万</span></div>
-            <div class="flex items-center"><svg class="w-3 h-3 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 折旧费：车损5000元以下免收</div>
-            <div class="flex items-center"><svg class="w-3 h-3 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> 停运费：<span class="text-green-700">正常收取</span></div>
+          <div class="text-center mt-4">
+            <h4 class="text-xl font-bold text-gray-700">基础保障</h4>
+            <p class="text-[10px] text-gray-400 mt-1">详情 ></p>
           </div>
-          <div class="mt-6 flex justify-between items-center border-t pt-4">
-            <div class="text-[#FF5000] font-bold">+ ￥40<span class="text-xs font-normal text-gray-500">/天</span></div>
-            <div class="w-6 h-6 rounded-full border-2 border-gray-200"></div>
+          <div class="mt-4 space-y-2 text-[11px] text-gray-500">
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>车损保障：<span class="underline decoration-dotted">1500元以内自付</span>，不含玻璃、车轮</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>三者保障：<span class="underline decoration-dotted">保额50万</span></span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>折旧费：车损5000元以下免收</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-red-400 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> <span>停运费：正常收取</span></div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-gray-200">
+            <div class="text-gray-400 font-bold">已含</div>
           </div>
         </div>
 
-        <!-- 尊享保障 -->
-        <div class="bg-white border rounded-xl p-4 w-64 flex-shrink-0 snap-center">
-          <div class="text-center mt-2">
-            <div class="text-[10px] bg-orange-100 text-orange-600 inline-block px-2 py-0.5 rounded-sm mb-2">免折旧</div>
-            <h4 class="text-xl font-bold text-orange-700">尊享</h4>
+        <!-- 优享保障卡片 (绿色样式) -->
+        <div class="bg-white border-2 border-green-500 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
+            <span class="bg-green-500 text-white text-[10px] px-3 py-0.5 rounded-b-lg">车损免赔 更全保障</span>
           </div>
-          <div class="mt-4 space-y-2 text-xs">
-            <div class="flex items-center"><svg class="w-3 h-3 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 车损保障：全额...</div>
-            <div class="flex items-center"><svg class="w-3 h-3 text-orange-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> 三者保障：...</div>
+          <div class="text-center mt-4">
+            <h4 class="text-xl font-bold text-green-800">优享保障</h4>
+            <p class="text-[10px] text-green-600 mt-1">详情 ></p>
           </div>
-          <div class="mt-6 flex justify-between items-center border-t pt-4">
-            <div class="text-gray-900 font-bold">+ ￥90<span class="text-xs font-normal text-gray-500">/天</span></div>
-            <div class="w-6 h-6 rounded-full border-2 border-gray-200"></div>
+          <div class="mt-4 space-y-2 text-[11px] text-gray-600">
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>车损保障：<span class="text-green-600 bg-green-50 px-0.5">全额赔付</span>，含玻璃、车轮</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>三者保障：<span class="text-green-600 bg-green-50 px-0.5">保额100万</span></span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-green-500 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>折旧费：车损5000元以下免收</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-red-400 mr-1.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> <span>停运费：正常收取</span></div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
+            <div class="text-gray-900 font-bold">+ ￥40<span class="text-[10px] font-normal text-gray-400">/天</span></div>
+            <div class="w-6 h-6 rounded-full border border-gray-300"></div>
           </div>
         </div>
+
+        <!-- 尊享保障卡片 (橙色样式) -->
+        <div class="bg-white border-2 border-orange-400 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
+            <span class="bg-orange-500 text-white text-[10px] px-3 py-0.5 rounded-b-lg">免折旧费 免停运费</span>
+          </div>
+          <div class="text-center mt-4">
+            <h4 class="text-xl font-bold text-orange-800">尊享保障</h4>
+            <p class="text-[10px] text-orange-600 mt-1">详情 ></p>
+          </div>
+          <div class="mt-4 space-y-2 text-[11px] text-gray-600">
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-orange-400 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>车损保障：<span class="text-orange-600">全额赔付</span>，含玻璃、车轮</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-orange-400 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>三者保障：<span class="underline decoration-dotted">保额100万</span></span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-orange-400 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>折旧费：全额免收</span></div>
+            <div class="flex items-start"><svg class="w-3.5 h-3.5 text-orange-400 mr-1.5 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> <span>停运费：全额免收</span></div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
+            <div class="text-gray-900 font-bold">+ ￥90<span class="text-[10px] font-normal text-gray-400">/天</span></div>
+            <div class="w-6 h-6 rounded-full border border-gray-300"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 

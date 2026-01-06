@@ -99,7 +99,7 @@ export default class extends Controller<HTMLElement> {
 
   // 更新总价显示
   private updateTotalPrice(): void {
-    if (!this.hasTotalPriceAmountTarget) return
+    if (!this.totalPriceAmountTarget) return
     
     const basePrice = parseInt(this.totalPriceAmountTarget.dataset.basePrice || '0')
     const insurancePriceField = document.getElementById('booking_insurance_price') as HTMLInputElement
