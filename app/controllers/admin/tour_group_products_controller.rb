@@ -38,6 +38,49 @@ class Admin::TourGroupProductsController < Admin::BaseController
     redirect_to admin_tour_group_products_path, notice: 'Tour group product was successfully deleted.'
   end
 
+  # 批量生成页面
+  def generator
+    @destinations = City.pluck(:name).sort
+    @departure_cities = City.pluck(:name).sort
+  end
+
+  # 批量生成旅游产品
+  def batch_generate
+    destination = params[:destination]
+    departure_city = params[:departure_city]
+    start_date = Date.parse(params[:start_date])
+    end_date = Date.parse(params[:end_date])
+    count_per_day = params[:count_per_day].to_i
+
+    if destination.blank? || departure_city.blank?
+      redirect_to generator_admin_tour_group_products_path, alert: '请选择目的地和出发城市'
+      return
+    end
+
+    if start_date > end_date
+      redirect_to generator_admin_tour_group_products_path, alert: '开始日期不能晚于结束日期'
+      return
+    end
+
+    if count_per_day < 1 || count_per_day > 10
+      redirect_to generator_admin_tour_group_products_path, alert: '每天生成数量必须在1-10之间'
+      return
+    end
+
+    products = TourGroupProduct.generate_for_destination(
+      destination, 
+      departure_city, 
+      start_date, 
+      end_date, 
+      count_per_day: count_per_day
+    )
+
+    redirect_to admin_tour_group_products_path, 
+                notice: "成功生成 #{products.count} 个旅游产品 (#{destination}, #{start_date} 至 #{end_date})"
+  rescue ArgumentError => e
+    redirect_to generator_admin_tour_group_products_path, alert: "日期格式错误: #{e.message}"
+  end
+
   private
 
   def set_tour_group_product

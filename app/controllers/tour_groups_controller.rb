@@ -91,25 +91,8 @@ class TourGroupsController < ApplicationController
       }
     end
     
-    # 如果没有数据，提供提示
-    if @search_results.empty?
-      @search_results = [
-        {
-          image: 'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=600',
-          badge: '暂无数据',
-          departure: nil,
-          title: "暂无#{@destination}相关旅游产品，请尝试其他目的地",
-          rating: nil,
-          rating_desc: nil,
-          highlights: [],
-          tags: [],
-          provider: '',
-          sales: '',
-          price: '0',
-          price_suffix: ''
-        }
-      ]
-    end
+    # 如果没有数据，不显示任何结果（避免无效链接）
+    @search_results = [] if @search_results.empty?
   end
 
   def show

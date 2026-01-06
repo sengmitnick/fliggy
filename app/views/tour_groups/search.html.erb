@@ -127,53 +127,66 @@
 
   <!-- 列表内容 -->
   <div class="space-y-3 p-3">
-    <% @search_results.each_with_index do |result, index| %>
-      <!-- 卡片 <%= index + 1 %> -->
-      <%= link_to tour_group_path(result[:id]), class: "bg-white rounded-md flex overflow-hidden hover:shadow-md transition-shadow" do %>
-        <div class="relative w-32 h-44 shrink-0">
-          <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg"><%= result[:badge] %></div>
-          <% if result[:departure].present? %>
-            <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1"><%= result[:departure] %></div>
-          <% end %>
-          <div class="w-full h-full bg-sky-200 flex items-center justify-center">
-            <%= image_tag result[:image], class: 'w-full h-full object-cover', alt: result[:title] %>
-          </div>
+    <% if @search_results.empty? %>
+      <!-- 空状态提示 -->
+      <div class="bg-white rounded-lg p-8 text-center">
+        <div class="text-gray-300 mb-4">
+          <svg class="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
-        <div class="flex-1 p-2 flex flex-col justify-between">
-          <div>
-            <h3 class="font-bold text-sm leading-snug line-clamp-2"><%= result[:title] %></h3>
-            <% if result[:rating].present? %>
-              <div class="mt-1 flex items-center text-[10px]">
-                <span class="bg-blue-600 text-white px-1 rounded-sm mr-1 font-bold"><%= result[:rating] %></span>
-                <span class="text-blue-600 font-bold">超棒</span>
-                <span class="text-gray-400 ml-1"><%= result[:rating_desc] %></span>
-              </div>
+        <h3 class="text-lg font-bold text-gray-700 mb-2">暂无相关产品</h3>
+        <p class="text-gray-500 text-sm">暂无<%= @destination %>相关旅游产品，请尝试其他目的地</p>
+      </div>
+    <% else %>
+      <% @search_results.each_with_index do |result, index| %>
+        <!-- 卡片 <%= index + 1 %> -->
+        <%= link_to tour_group_path(result[:id]), class: "bg-white rounded-md flex overflow-hidden hover:shadow-md transition-shadow" do %>
+          <div class="relative w-32 h-44 shrink-0">
+            <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg"><%= result[:badge] %></div>
+            <% if result[:departure].present? %>
+              <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1"><%= result[:departure] %></div>
             <% end %>
-            <% if result[:highlights].present? %>
-              <div class="text-[11px] text-gray-500 mt-1"><%= result[:highlights].join('·') %></div>
-            <% end %>
-            <% if result[:tags].present? %>
-              <div class="flex space-x-1 mt-1">
-                <% result[:tags].each do |tag| %>
-                  <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded"><%= tag %></span>
+            <div class="w-full h-full bg-sky-200 flex items-center justify-center">
+              <%= image_tag result[:image], class: 'w-full h-full object-cover', alt: result[:title] %>
+            </div>
+          </div>
+          <div class="flex-1 p-2 flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-sm leading-snug line-clamp-2"><%= result[:title] %></h3>
+              <% if result[:rating].present? %>
+                <div class="mt-1 flex items-center text-[10px]">
+                  <span class="bg-blue-600 text-white px-1 rounded-sm mr-1 font-bold"><%= result[:rating] %></span>
+                  <span class="text-blue-600 font-bold">超棒</span>
+                  <span class="text-gray-400 ml-1"><%= result[:rating_desc] %></span>
+                </div>
+              <% end %>
+              <% if result[:highlights].present? %>
+                <div class="text-[11px] text-gray-500 mt-1"><%= result[:highlights].join('·') %></div>
+              <% end %>
+              <% if result[:tags].present? %>
+                <div class="flex space-x-1 mt-1">
+                  <% result[:tags].each do |tag| %>
+                    <span class="text-[9px] border border-gray-200 text-gray-400 px-1 rounded"><%= tag %></span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <div class="flex justify-between items-end">
+              <div class="text-[10px] text-gray-400">
+                <% if result[:provider].present? %>
+                  <div><%= result[:provider] %></div>
+                <% end %>
+                <% if result[:sales].present? %>
+                  <div><%= result[:sales] %></div>
                 <% end %>
               </div>
-            <% end %>
-          </div>
-          <div class="flex justify-between items-end">
-            <div class="text-[10px] text-gray-400">
-              <% if result[:provider].present? %>
-                <div><%= result[:provider] %></div>
-              <% end %>
-              <% if result[:sales].present? %>
-                <div><%= result[:sales] %></div>
-              <% end %>
-            </div>
-            <div class="text-red-500 font-bold">
-              <span class="text-xs">¥</span><span class="text-xl"><%= result[:price].gsub('¥', '') %></span><span class="text-xs font-normal ml-0.5 text-gray-500"><%= result[:price_suffix] %></span>
+              <div class="text-red-500 font-bold">
+                <span class="text-xs">¥</span><span class="text-xl"><%= result[:price].gsub('¥', '') %></span><span class="text-xs font-normal ml-0.5 text-gray-500"><%= result[:price_suffix] %></span>
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     <% end %>
   </div>
