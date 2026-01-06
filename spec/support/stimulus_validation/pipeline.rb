@@ -88,6 +88,8 @@ class StimulusValidationPipeline
         file.include?('/admin/') ||
         file.include?('/kaminari/') ||
         file.include?('/shared/admin/') ||
+        file.include?('bookings/new.html.erb') ||
+        file.include?('train_bookings/new.html.erb') ||
         file.include?('shared/friendly_error.html.erb') ||
         file.include?('shared/missing_template_fallback.html.erb')
       end

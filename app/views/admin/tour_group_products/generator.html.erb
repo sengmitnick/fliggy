@@ -1,0 +1,110 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">批量生成旅游产品数据</h1>
+    <%= link_to "返回产品列表", admin_tour_group_products_path, class: "btn-secondary" %>
+  </div>
+
+  <div class="card p-6 max-w-2xl">
+    <%= form_with url: batch_generate_admin_tour_group_products_path, method: :post, class: "space-y-6" do |form| %>
+      
+      <!-- Destination and Departure City Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :destination, "目的地", class: "form-label" %>
+          <%= form.select :destination, 
+              options_for_select(@destinations), 
+              { prompt: "选择目的地" },
+              class: "form-input",
+              required: true %>
+        </div>
+
+        <div>
+          <%= form.label :departure_city, "出发城市", class: "form-label" %>
+          <%= form.select :departure_city, 
+              options_for_select(@departure_cities), 
+              { prompt: "选择出发城市" },
+              class: "form-input",
+              required: true %>
+        </div>
+      </div>
+
+      <!-- Date Range Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :start_date, "开始日期", class: "form-label" %>
+          <%= form.date_field :start_date, 
+              value: Date.today,
+              class: "form-input",
+              required: true %>
+        </div>
+
+        <div>
+          <%= form.label :end_date, "结束日期", class: "form-label" %>
+          <%= form.date_field :end_date, 
+              value: Date.today + 30.days,
+              class: "form-input",
+              required: true %>
+        </div>
+      </div>
+
+      <!-- Count Per Day -->
+      <div>
+        <%= form.label :count_per_day, "每天生成数量", class: "form-label" %>
+        <%= form.number_field :count_per_day, 
+            value: 5,
+            min: 1,
+            max: 10,
+            class: "form-input",
+            required: true %>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">每天生成的旅游产品数量（1-10）</p>
+      </div>
+
+      <!-- Info Box -->
+      <div class="alert alert-info">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="font-medium">生成说明</p>
+          <ul class="mt-1 text-sm list-disc list-inside space-y-1">
+            <li>每个产品会自动生成 3 种价格套餐（经济型/舒适型/豪华型）</li>
+            <li>每个产品会自动生成完整行程（根据天数）</li>
+            <li>产品类型包括：跟团游、私家团、自由行、出境必备</li>
+            <li>主题包括：古镇漫游、山水之旅、都市休闲、海岛度假、文化探索</li>
+            <li>天数随机（2-7天），价格根据天数自动计算</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "取消", admin_tour_group_products_path, class: "btn-secondary" %>
+        <%= form.submit "开始生成", class: "btn-primary" %>
+      </div>
+
+    <% end %>
+  </div>
+
+  <!-- Recent Generation Stats -->
+  <div class="card p-6 mt-6 max-w-2xl">
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">当前数据统计</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= TourGroupProduct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">总产品数</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= TourGroupProduct.select(:destination).distinct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">目的地数量</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= TourPackage.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">价格套餐</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= TourItineraryDay.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">行程天数</div>
+      </div>
+    </div>
+  </div>
+</div>

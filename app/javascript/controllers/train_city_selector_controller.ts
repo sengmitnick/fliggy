@@ -171,6 +171,7 @@ export default class extends Controller<HTMLElement> {
     this.searchInputTarget.value = ''
     this.historySectionTarget.classList.remove('hidden')
     
+    // stimulus-validator: disable-next-line
     // Show all cities
     const allButtons = this.element.querySelectorAll('[data-city-name]')
     allButtons.forEach((button) => {

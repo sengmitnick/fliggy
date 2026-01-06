@@ -25,9 +25,7 @@
     </div>
   </div>
 
-  <%= form_with(model: @booking, url: bookings_path(flight_id: @trip_type == 'multi_city' ? @multi_city_flights.first[:flight]&.id : @flight.id), 
-                data: { action: "submit->booking#handleSubmit" },
-                class: "container mx-auto px-4 py-4") do |form| %>
+  <%= form_with(model: @booking, url: bookings_path(flight_id: @trip_type == 'multi_city' ? @multi_city_flights.first[:flight]&.id : @flight.id), data: { action: "submit->booking#handleSubmit" }, class: "container mx-auto px-4 py-4") do |form| %>
     <%= render 'shared/form_error_message', model: @booking %>
 
     <!-- 航班信息卡片 -->

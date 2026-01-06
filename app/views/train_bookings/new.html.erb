@@ -1,0 +1,310 @@
+<div class="min-h-screen bg-gray-100 pb-20" data-controller="train-booking">
+  <!-- Header -->
+  <div class="bg-white border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center">
+      <%= link_to train_path(@train), class: "text-2xl mr-4" do %>
+        ←
+      <% end %>
+      <div class="flex-1 flex items-center space-x-4">
+        <span class="text-lg font-bold">填订单</span>
+        <span class="text-gray-400">—</span>
+        <span class="text-gray-400">选服务</span>
+        <span class="text-gray-400">—</span>
+        <span class="text-gray-400">去支付</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示信息 -->
+  <div class="container mx-auto px-4 py-3">
+    <div class="bg-blue-50 text-blue-600 text-sm px-3 py-2 rounded flex items-center">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span>余票紧张 当前价格仅剩6张，建议尽快预订</span>
+    </div>
+  </div>
+
+  <!-- Train Info Card -->
+  <div class="bg-white container mx-auto rounded-lg shadow p-4 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-2">
+        <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded text-sm font-bold">高铁</span>
+        <span class="text-lg"><%= @train.departure_time.strftime('%-m月%-d日 周%u') %></span>
+        <span class="text-lg"><%= @train.departure_city %>—<%= @train.arrival_city %></span>
+      </div>
+      <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
+    </div>
+
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex-1">
+        <div class="text-2xl font-bold"><%= @train.departure_time.strftime('%H:%M') %></div>
+        <div class="text-sm text-gray-600 mt-1"><%= @train.departure_city %>站</div>
+      </div>
+
+      <div class="flex-1 text-center px-4">
+        <div class="text-xs text-gray-500 mb-1">
+          <%= (@train.duration / 60).to_i %>时<%= @train.duration % 60 %>分
+        </div>
+        <div class="relative">
+          <div class="border-t border-gray-300"></div>
+          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2">
+            <span class="text-xs text-gray-400"><%= @train.train_number %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 text-right">
+        <div class="text-2xl font-bold"><%= @train.arrival_time.strftime('%H:%M') %></div>
+        <div class="text-sm text-gray-600 mt-1"><%= @train.arrival_city %>站</div>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <div class="flex items-center justify-between">
+        <div class="text-gray-600">
+          成人 ¥<%= @selected_price.to_i %>
+          <button type="button" onclick="window.showToast('功能开发中')" class="inline-block align-middle">
+            <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            <text x="10" y="14" text-anchor="middle" font-size="12" fill="currentColor">?</text>
+            </svg>
+          </button>
+        </div>
+        <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-600">出行无忧礼包¥59/人</div>
+        <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold"><%= @seat_type_label %></span>
+        <span class="text-gray-400">|</span>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded" />
+          <span class="ml-1 text-gray-600">接受无座</span>
+        </label>
+      </div>
+      <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
+    </div>
+  </div>
+
+  <%= form_with url: train_bookings_path, method: :post, class: "container mx-auto px-4 py-4", data: { action: "submit->train-booking#handleSubmit" } do |f| %>
+    <%= f.hidden_field :train_id, value: @train.id, name: 'train_booking[train_id]' %>
+    <%= f.hidden_field :seat_type, value: @selected_seat_type, id: 'booking_seat_type', name: 'train_booking[seat_type]' %>
+    <%= f.hidden_field :total_price, value: @selected_price, id: 'booking_total_price', name: 'train_booking[total_price]' %>
+    <%= f.hidden_field :carriage_number, id: 'booking_carriage_number', name: 'train_booking[carriage_number]', data: { train_booking_target: "selectedCarriage" } %>
+    <%= f.hidden_field :insurance_type, id: 'booking_insurance_type', name: 'train_booking[insurance_type]', value: 'none' %>
+    <%= f.hidden_field :insurance_price, id: 'booking_insurance_price', name: 'train_booking[insurance_price]', value: '0' %>
+    <%= f.hidden_field :accept_terms, id: 'booking_accept_terms', name: 'train_booking[accept_terms]', value: '0' %>
+
+    <!-- 已选择人数 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold">已选择: 1成人</h3>
+        <button type="button" onclick="window.showToast('功能开发中')" class="text-blue-500 text-sm">邀请好友填写</button>
+      </div>
+
+      <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
+        会员价商品限本人陆旅客使用身份证或户口簿购买｜仅限1位以下(含1位)
+        乘客购买｜当前价格剩余6张
+      </div>
+    </div>
+
+    <!-- Passenger Section -->
+    <div class="bg-white rounded-lg shadow mb-4">
+
+      <% if current_user.passengers.any? %>
+        <% current_user.passengers.each_with_index do |passenger, index| %>
+          <label class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50">
+            <div class="flex items-center flex-1">
+              <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+              </svg>
+              <div class="flex-1">
+                <div class="flex items-center">
+                  <span class="font-bold text-lg"><%= passenger.name %></span>
+                  <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">成人票</span>
+                </div>
+                <div class="text-sm text-gray-600 mt-1">
+                  身份证 <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
+                  <span class="ml-2 text-gray-400">其他证件 ></span>
+                </div>
+              </div>
+            </div>
+            <input type="radio" 
+                   name="passenger" 
+                   id="passenger_<%= passenger.id %>"
+                   class="w-5 h-5 text-orange-500"
+                   <%= 'checked' if index == 0 %>
+                   data-action="change->train-booking#selectPassenger"
+                   data-passenger-name="<%= passenger.name %>"
+                   data-id-number="<%= passenger.id_number %>"
+                   data-phone="<%= passenger.phone %>" />
+          </label>
+          <% if index == 0 %>
+            <%= f.hidden_field :passenger_name, id: 'booking_passenger_name', name: 'train_booking[passenger_name]', value: passenger.name %>
+            <%= f.hidden_field :passenger_id_number, id: 'booking_passenger_id_number', name: 'train_booking[passenger_id_number]', value: passenger.id_number %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <div class="p-4 text-center text-gray-500">
+          暂无常用乘车人
+        </div>
+      <% end %>
+
+      <%= link_to new_passenger_path(source: 'train', return_to: 'train_booking_new', train_id: @train.id, seat_type: @selected_seat_type), 
+                  class: "w-full py-4 border-t flex items-center justify-center text-gray-700" do %>
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        更多乘车人
+      <% end %>
+    </div>
+
+    <!-- Contact Phone -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <span class="font-medium">联系手机</span>
+        <%= f.telephone_field :contact_phone, 
+              id: 'booking_contact_phone',
+              name: 'train_booking[contact_phone]',
+              value: current_user.passengers.first&.phone,
+              placeholder: "180 2712 8600",
+              class: "text-right border-0 focus:ring-0 flex-1" %>
+      </div>
+    </div>
+
+    <!-- Seat Selection Section -->
+    <div class="bg-white rounded-lg shadow mb-4">
+      <div class="p-4 border-b flex items-center justify-between">
+        <div>
+          <h3 class="font-bold">座席随心选</h3>
+          <p class="text-sm text-gray-500">座席图示 →</p>
+        </div>
+      </div>
+
+      <!-- Online Seat Selection -->
+      <div class="p-4 border-b">
+        <div class="flex items-center justify-between mb-3">
+          <span class="font-medium">在线选座</span>
+          <span class="text-sm text-gray-500" data-train-booking-target="selectedSeatCount">0/1</span>
+        </div>
+
+        <!-- Seat Position Options -->
+        <div class="grid grid-cols-5 gap-2 mb-4">
+          <% [
+            { letter: 'A', position: '靠窗' },
+            { letter: 'B', position: '' },
+            { letter: 'C', position: '过道' },
+            { letter: 'D', position: '' },
+            { letter: 'F', position: '靠窗' }
+          ].each do |seat| %>
+            <button type="button"
+                    data-action="click->train-booking#selectSeat"
+                    data-seat-letter="<%= seat[:letter] %>"
+                    data-train-booking-target="seatButton"
+                    class="py-3 text-center border border-gray-300 rounded bg-white text-gray-700 transition-all cursor-pointer hover:border-orange-300">
+              <div class="font-bold text-lg"><%= seat[:letter] %></div>
+              <div class="text-xs mt-1"><%= seat[:position] %></div>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Carriage Selection -->
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="font-medium">选车厢</span>
+          <span class="text-sm text-gray-500">¥13/人</span>
+        </div>
+
+        <div class="grid grid-cols-6 gap-2 mb-4">
+          <% (3..8).each do |num| %>
+            <button type="button"
+                    data-action="click->train-booking#selectCarriage"
+                    data-carriage="<%= num.to_s.rjust(2, '0') %>"
+                    data-train-booking-target="carriageButton"
+                    class="carriage-btn py-2 text-center border border-gray-300 rounded transition-all bg-white text-gray-700">
+              <%= num.to_s.rjust(2, '0') %>
+            </button>
+          <% end %>
+        </div>
+
+        <!-- Near Door Option -->
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+          <div>
+            <span class="font-medium">选近车门</span>
+            <span class="text-xs text-gray-500 ml-2">上下更方便</span>
+          </div>
+          <div class="flex items-center">
+            <span class="text-sm mr-2">¥12/人</span>
+            <label class="relative inline-block w-10 h-6">
+              <input type="checkbox" class="sr-only peer"
+                     data-action="change->train-booking#toggleNearDoor">
+              <span class="absolute inset-0 bg-gray-200 peer-checked:bg-orange-400 rounded-full transition"></span>
+              <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insurance Section -->
+    <%= render 'shared/insurance_modal', 
+               booking_type: 'train',
+               base_price: @selected_price %>
+
+    <!-- Hotel Promotion -->
+    <div class="bg-white rounded-lg p-4 flex items-center justify-between mb-4">
+      <div class="flex items-center flex-1">
+        <span class="text-2xl mr-3">🏨</span>
+        <div>
+          <div class="font-bold text-red-500">火猪联打<span class="text-sm">更优惠</span></div>
+          <div class="text-xs text-gray-500">下单后30天内订酒店并入住，本单立减¥10 →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar with Price and Submit -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <button type="button" 
+                  onclick="window.showToast('功能开发中')"
+                  class="text-gray-600 text-sm">
+            明细 ▼
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <div class="text-xs text-gray-500">
+              联络优惠¥<span id="discount-amount">10</span>
+            </div>
+            <div class="flex items-center">
+              <span class="text-red-500 text-2xl font-bold" data-train-booking-target="totalPrice">
+                ¥<%= @selected_price.to_i %>
+              </span>
+            </div>
+          </div>
+          
+          <button type="submit" 
+                  class="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg">
+            联络优惠
+          </button>
+          
+          <button type="button"
+                  data-action="click->train-booking#handleNormalBooking"
+                  class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold">
+            普通预订
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

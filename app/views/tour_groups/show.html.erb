@@ -516,7 +516,7 @@
                   <h4 class="text-sm font-medium text-foreground">服务</h4>
                 </div>
                 <div class="pl-7 text-sm text-foreground-secondary">
-                  最多<%= service_items.find { |s| s.include?('人') }&.match(/\d+/)[0] || '15' %>人｜<%= service_items.reject { |s| s.include?('人') }.join('|') %>
+                  最多<%= (service_items.find { |s| s.include?('人') }&.match(/\d+/)&.[](0)) || '15' %>人｜<%= service_items.reject { |s| s.include?('人') }.join('|') %>
                 </div>
               </div>
             <% end %>

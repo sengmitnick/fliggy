@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Success Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-3xl mx-auto px-4 py-6">
+      <div class="text-center">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">支付成功</h1>
+        <p class="text-gray-600">订单已完成，请查收您的火车票</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-4 py-6">
+    <!-- Train Ticket Card -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+      <!-- Ticket Header -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <div class="text-sm opacity-90 mb-1">订单号</div>
+            <div class="font-mono text-base">#<%= @train_booking.id %></div>
+          </div>
+          <div class="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+            <%= @train_booking.seat_type_label %>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-3xl font-bold mb-1"><%= @train.departure_time_formatted %></div>
+            <div class="text-base opacity-90"><%= @train.departure_city %></div>
+          </div>
+          
+          <div class="flex-1 px-6">
+            <div class="flex items-center">
+              <div class="flex-1 border-t-2 border-white border-dashed"></div>
+              <div class="mx-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </div>
+              <div class="flex-1 border-t-2 border-white border-dashed"></div>
+            </div>
+            <div class="text-center text-sm opacity-90 mt-1">
+              <%= @train.train_number %>
+            </div>
+          </div>
+          
+          <div class="text-right">
+            <div class="text-3xl font-bold mb-1"><%= @train.arrival_time_formatted %></div>
+            <div class="text-base opacity-90"><%= @train.arrival_city %></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ticket Details -->
+      <div class="p-6">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <div class="text-sm text-gray-600 mb-1">出发日期</div>
+            <div class="text-base text-gray-900 font-medium">
+              <%= @train.departure_time.to_date.strftime('%Y年%m月%d日') %>
+            </div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-600 mb-1">预计到达</div>
+            <div class="text-base text-gray-900 font-medium">
+              <%= @train.arrival_time.to_date.strftime('%Y年%m月%d日') %>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-4 mb-4">
+          <h3 class="text-base font-bold text-gray-900 mb-3">乘车人信息</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-sm text-gray-600 mb-1">姓名</div>
+              <div class="text-base text-gray-900"><%= @train_booking.passenger_name %></div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">身份证号</div>
+              <div class="text-base text-gray-900 font-mono">
+                <%= @train_booking.passenger_id_number[0..5] %>********<%= @train_booking.passenger_id_number[-4..-1] %>
+              </div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">联系电话</div>
+              <div class="text-base text-gray-900"><%= @train_booking.contact_phone %></div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">座位信息</div>
+              <div class="text-base text-gray-900 font-medium text-blue-600">
+                <%= @train_booking.seat_info %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% if @train_booking.insurance_type.present? && @train_booking.insurance_type != 'none' %>
+          <div class="border-t border-gray-200 pt-4 mb-4">
+            <h3 class="text-base font-bold text-gray-900 mb-2">保险信息</h3>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-gray-900">
+                  <%= InsuranceService.get_option(@train_booking.insurance_type)[:name] %>
+                </div>
+                <div class="text-xs text-gray-600">
+                  最高赔付 <%= number_to_currency(InsuranceService.get_option(@train_booking.insurance_type)[:coverage] / 10000.0, unit: '万元', precision: 0) %>
+                </div>
+              </div>
+              <div class="text-sm text-gray-900">¥<%= @train_booking.insurance_price %></div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="border-t border-gray-200 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-gray-600">票价</span>
+            <span class="text-gray-900">¥<%= (@train_booking.total_price - (@train_booking.insurance_price || 0)).round(2) %></span>
+          </div>
+          <% if @train_booking.insurance_price.present? && @train_booking.insurance_price > 0 %>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-gray-600">保险费</span>
+              <span class="text-gray-900">¥<%= @train_booking.insurance_price %></span>
+            </div>
+          <% end %>
+          <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-gray-200">
+            <span class="text-gray-900">总计</span>
+            <span class="text-blue-600">¥<%= @train_booking.total_price %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Follow-up Services -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">后续服务</h3>
+      <div class="grid grid-cols-3 gap-4">
+        <%= link_to '#', class: 'text-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors' do %>
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-2">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="text-sm text-gray-900 font-medium">查看订单</div>
+        <% end %>
+
+        <%= link_to '#', class: 'text-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors' do %>
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-2">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="text-sm text-gray-900 font-medium">改签</div>
+        <% end %>
+
+        <%= link_to '#', class: 'text-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors' do %>
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mb-2">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <div class="text-sm text-gray-900 font-medium">退票</div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex space-x-3">
+      <%= link_to '返回首页', root_path, class: 'flex-1 px-6 py-3 text-center border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors' %>
+      <%= link_to '继续预订', search_trains_path, class: 'flex-1 px-6 py-3 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors' %>
+    </div>
+  </div>
+</div>

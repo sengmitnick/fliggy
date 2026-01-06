@@ -47,6 +47,9 @@ import BottomBarController from "./bottom_bar_controller"
 import InsuranceSelectorController from "./insurance_selector_controller"
 import TourTravelerSelectorController from "./tour_traveler_selector_controller"
 import SpecialFlightsFormController from "./special_flights_form_controller"
+import TrainBookingController from "./train_booking_controller"
+import TrainBookingLockController from "./train_booking_lock_controller"
+import TrainSeatSelectorController from "./train_seat_selector_controller"
 
 const application = Application.start()
 
@@ -97,5 +100,8 @@ application.register("bottom-bar", BottomBarController)
 application.register("insurance-selector", InsuranceSelectorController)
 application.register("tour-traveler-selector", TourTravelerSelectorController)
 application.register("special-flights-form", SpecialFlightsFormController)
+application.register("train-booking", TrainBookingController)
+application.register("train-booking-lock", TrainBookingLockController)
+application.register("train-seat-selector", TrainSeatSelectorController)
 
 window.Stimulus = application

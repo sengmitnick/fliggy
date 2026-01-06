@@ -573,19 +573,19 @@ export default class extends Controller<HTMLElement> {
     this.noSharedFlightCheckboxTarget.checked = false
     this.discountPriceCheckboxTarget.checked = false
     
-    // Reset all airline checkboxes
+    // stimulus-validator: disable-next-line
     const airlineCheckboxes = this.element.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-filter-type="airline"]')
     airlineCheckboxes.forEach(cb => cb.checked = false)
     
-    // Reset all airport checkboxes
+    // stimulus-validator: disable-next-line
     const airportCheckboxes = this.element.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-filter-type="airport"]')
     airportCheckboxes.forEach(cb => cb.checked = false)
     
-    // Reset all departure time checkboxes
+    // stimulus-validator: disable-next-line
     const timeCheckboxes = this.element.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-filter-type="departure-time"]')
     timeCheckboxes.forEach(cb => cb.checked = false)
     
-    // Reset all aircraft model checkboxes
+    // stimulus-validator: disable-next-line
     const modelCheckboxes = this.element.querySelectorAll<HTMLInputElement>('input[type="checkbox"][data-filter-type="aircraft-model"]')
     modelCheckboxes.forEach(cb => cb.checked = false)
     

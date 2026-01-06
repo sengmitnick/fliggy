@@ -133,7 +133,8 @@
   <div class="pb-20">
     <% if @trains.any? %>
       <% @trains.each do |train| %>
-        <div class="bg-white mb-2 p-4" data-train-list-target="trainItem">
+        <%= link_to train_path(train), class: "block" do %>
+          <div class="bg-white mb-2 p-4" data-train-list-target="trainItem">
           <div class="flex items-center justify-between">
             <!-- Departure Time & Station -->
             <div class="flex-1">
@@ -223,7 +224,7 @@
               <% end %>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
     <% else %>
       <div class="bg-white p-12 text-center">
