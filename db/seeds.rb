@@ -718,7 +718,13 @@ shenzhen_hotels = [
 ]
 
 shenzhen_hotels.each do |hotel_data|
-  hotel = Hotel.create!(hotel_data)
+  # Prepare image for inline attachment
+  image_url = hotel_data.delete(:image_url) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
+  image_io = URI.open(image_url)
+  
+  hotel = Hotel.create!(hotel_data.merge(
+    image: { io: image_io, filename: 'hotel.jpg' }
+  ))
   
   # 为每个酒店和民宿创建过夜房型
   overnight_rooms = [
@@ -922,8 +928,14 @@ guides_data = [
 ]
 
 puts "正在创建讲解员..."
+require "open-uri"
 guides = guides_data.map do |data|
-  guide = DeepTravelGuide.create!(data)
+  avatar_io = URI.open('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400')
+  guide = DeepTravelGuide.create!(
+    data.merge(
+      avatar: { io: avatar_io, filename: 'avatar.jpg' }
+    )
+  )
   
   # 为第一个讲解员附加视频
   if guide.name == "叶强" && File.exist?(video_path)
@@ -1086,7 +1098,16 @@ products_data = [
 
 products = products_data.map do |data|
   guide = data.delete(:guide)
-  DeepTravelProduct.create!(data.merge(deep_travel_guide: guide))
+  
+  # Prepare images for inline attachment
+  images = 3.times.map do |i|
+    { io: URI.open("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&sig=#{i}"), filename: "photo_#{i}.jpg" }
+  end
+  
+  DeepTravelProduct.create!(data.merge(
+    deep_travel_guide: guide,
+    images: images
+  ))
 end
 
 puts "创建了 #{products.count} 个深度旅游产品"
