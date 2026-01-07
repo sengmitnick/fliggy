@@ -163,6 +163,9 @@ brands.each_with_index do |brand, brand_idx|
       p.brand_logo_url = brand[:logo]  # 直接设置图片URL字段
     end
     
+    # 为每个套餐生成选项
+    package.generate_options
+    
     print "."
   end
 end
@@ -172,3 +175,4 @@ puts "   - Featured: #{HotelPackage.featured.count}"
 puts "   - VIP: #{HotelPackage.by_type('vip').count}"
 puts "   - Standard: #{HotelPackage.by_type('standard').count}"
 puts "   - Limited: #{HotelPackage.by_type('limited').count}"
+puts "   - Package Options: #{PackageOption.count}"
