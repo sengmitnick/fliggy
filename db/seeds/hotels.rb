@@ -111,18 +111,18 @@ puts "\n创建酒店..."
     region: '国内'
   )
   
-  # 图片使用Unsplash酒店相关图片
+  # 图片使用Unsplash酒店相关图片（优化格式确保可访问）
   hotel_images = [
-    "https://images.unsplash.com/photo-1566073771-7e72bca2f686?w=800&q=80",
-    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
-    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80",
-    "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80",
-    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
-    "https://images.unsplash.com/photo-1549294413-26f195200c16?w=800&q=80",
-    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80",
-    "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80",
-    "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=800&q=80",
-    "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80"
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1549294413-26f195200c16?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=800&q=80&fm=jpg&fit=crop&auto=format",
+    "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80&fm=jpg&fit=crop&auto=format"
   ]
   hotel.update(image_url: hotel_images[i % hotel_images.length])
   
@@ -230,7 +230,6 @@ puts "\n创建酒店..."
   rand(3..8).times do
     user = User.first || User.create!(
       email: "demo@example.com",
-      email_verified: true,
       password_digest: BCrypt::Password.create("password123")
     )
     
@@ -284,7 +283,7 @@ puts "\n创建民宿..."
   )
   
   # 图片
-  hotel.update(image_url: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&q=80")
+  hotel.update(image_url: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&q=80&fm=jpg&fit=crop&auto=format")
   
   # 创建民宿政策
   HotelPolicy.create!(
@@ -385,7 +384,6 @@ puts "\n创建民宿..."
   rand(2..5).times do
     user = User.first || User.create!(
       email: "demo@example.com",
-      email_verified: true,
       password_digest: BCrypt::Password.create("password123")
     )
     
