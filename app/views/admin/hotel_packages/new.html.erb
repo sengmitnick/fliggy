@@ -1,0 +1,139 @@
+<% content_for :title, "新建酒店套餐" %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">新建酒店套餐</h1>
+    <%= link_to "返回列表", admin_hotel_packages_path, class: "btn-secondary" %>
+  </div>
+
+  <div class="card p-6 max-w-3xl">
+    <%= form_with model: @hotel_package, url: admin_hotel_packages_path, class: "space-y-6" do |form| %>
+      <%= render 'shared/form_error_message', model: @hotel_package %>
+
+      <!-- Basic Information -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">基本信息</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <%= form.label :brand_name, "品牌名称", class: "form-label" %>
+            <%= form.text_field :brand_name, class: "form-input", required: true %>
+          </div>
+
+          <div>
+            <%= form.label :city, "城市", class: "form-label" %>
+            <%= form.text_field :city, class: "form-input", required: true %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :title, "套餐标题", class: "form-label" %>
+          <%= form.text_field :title, class: "form-input", required: true %>
+        </div>
+
+        <div>
+          <%= form.label :description, "套餐描述", class: "form-label" %>
+          <%= form.text_area :description, rows: 3, class: "form-input" %>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <%= form.label :region, "地区", class: "form-label" %>
+            <%= form.select :region, 
+                ["全国通用", "华东地区", "华南地区", "华北地区", "西南地区", "华中地区", "西北地区", "东北地区"],
+                { prompt: "选择地区" },
+                class: "form-input" %>
+          </div>
+
+          <div>
+            <%= form.label :package_type, "套餐类型", class: "form-label" %>
+            <%= form.select :package_type, 
+                [["标准套餐", "standard"], ["VIP会员", "vip"], ["限时特惠", "limited"]],
+                { prompt: "选择类型" },
+                class: "form-input",
+                required: true %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :night_count, "住宿晚数", class: "form-label" %>
+          <%= form.number_field :night_count, value: 2, min: 1, class: "form-input", required: true %>
+        </div>
+      </div>
+
+      <!-- Price Information -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">价格信息</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <%= form.label :price, "当前价格", class: "form-label" %>
+            <%= form.number_field :price, step: 0.01, class: "form-input", required: true %>
+          </div>
+
+          <div>
+            <%= form.label :original_price, "原价", class: "form-label" %>
+            <%= form.number_field :original_price, step: 0.01, class: "form-input" %>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <%= form.label :sales_count, "销售数量", class: "form-label" %>
+            <%= form.number_field :sales_count, value: 0, min: 0, class: "form-input" %>
+          </div>
+
+          <div>
+            <%= form.label :valid_days, "有效天数", class: "form-label" %>
+            <%= form.number_field :valid_days, value: 365, min: 1, class: "form-input", required: true %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Settings -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">附加设置</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center">
+            <%= form.check_box :is_featured, class: "form-checkbox" %>
+            <%= form.label :is_featured, "推荐套餐", class: "ml-2 text-sm text-gray-700 dark:text-gray-300" %>
+          </div>
+
+          <div class="flex items-center">
+            <%= form.check_box :refundable, class: "form-checkbox" %>
+            <%= form.label :refundable, "可退款", class: "ml-2 text-sm text-gray-700 dark:text-gray-300" %>
+          </div>
+
+          <div class="flex items-center">
+            <%= form.check_box :instant_booking, class: "form-checkbox" %>
+            <%= form.label :instant_booking, "即时预订", class: "ml-2 text-sm text-gray-700 dark:text-gray-300" %>
+          </div>
+
+          <div class="flex items-center">
+            <%= form.check_box :luxury, class: "form-checkbox" %>
+            <%= form.label :luxury, "奢华套餐", class: "ml-2 text-sm text-gray-700 dark:text-gray-300" %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :display_order, "显示顺序", class: "form-label" %>
+          <%= form.number_field :display_order, value: 0, min: 0, class: "form-input" %>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div>
+        <%= form.label :terms, "使用条款", class: "form-label" %>
+        <%= form.text_area :terms, rows: 5, class: "form-input" %>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">每条规则一行</p>
+      </div>
+
+      <!-- Submit Buttons -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "取消", admin_hotel_packages_path, class: "btn-secondary" %>
+        <%= form.submit "创建套餐", class: "btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

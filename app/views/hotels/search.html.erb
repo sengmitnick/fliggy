@@ -1,0 +1,251 @@
+<div class="min-h-screen bg-gray-100 max-w-[450px] mx-auto relative">
+
+  <!-- 搜索栏区域 -->
+  <div class="bg-white px-3 pb-2 pt-3 flex items-center gap-2 sticky top-0 z-40">
+    <!-- 返回按钮 -->
+    <%= link_to hotels_path, class: "flex-shrink-0" do %>
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    
+    <!-- 搜索输入框 (黄色边框) -->
+    <%= form_with url: search_hotels_path, method: :get, data: { turbo: false }, class: "flex-1" do |f| %>
+      <div class="flex-1 flex items-center border-[1.5px] border-[#ffd000] rounded-full h-10 px-3 bg-white shadow-sm overflow-hidden">
+        <!-- 城市 -->
+        <span class="font-bold text-gray-800 text-sm mr-1"><%= @city.gsub('市', '') %></span>
+        <!-- 日期 -->
+        <div class="flex flex-col justify-center leading-none text-[9px] text-gray-500 mr-2 border-r border-gray-200 pr-2 h-6">
+          <span><%= @check_in.strftime('%m-%d') %> <span class="text-gray-400"><%= @rooms %>间</span></span>
+          <span><%= @check_out.strftime('%m-%d') %> <span class="text-gray-400"><%= @adults %>人</span></span>
+        </div>
+        <!-- 关键字 -->
+        <%= f.text_field :q, value: params[:q], class: "text-gray-800 text-sm flex-1 truncate border-none outline-none bg-transparent p-0", placeholder: "" %>
+        <%= f.hidden_field :city, value: @city %>
+        <%= f.hidden_field :check_in, value: @check_in %>
+        <%= f.hidden_field :check_out, value: @check_out %>
+        <%= f.hidden_field :rooms, value: @rooms %>
+        <%= f.hidden_field :adults, value: @adults %>
+        <%= f.hidden_field :children, value: @children %>
+        <!-- 清除按钮 -->
+        <% if params[:q].present? %>
+          <div class="bg-gray-200 rounded-full p-0.5 ml-1 cursor-pointer" onclick="this.closest('form').querySelector('[name=q]').value=''; this.closest('form').submit();">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path>
+            </svg>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- 右侧图标 -->
+    <div class="flex gap-3 text-gray-800">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="19" cy="12" r="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="bg-white px-4 py-2 flex justify-between items-center text-xs font-medium text-gray-700 border-b border-gray-100">
+    <div class="flex items-center">
+      推荐排序 
+      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </div>
+    <div class="flex items-center">
+      位置距离 
+      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </div>
+    <div class="flex items-center">
+      价格/星级 
+      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </div>
+    <div class="flex items-center">
+      筛选 
+      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 快捷标签 (横向滚动) -->
+  <div class="bg-white pl-3 py-2 flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-100">
+    <div class="bg-red-50 text-red-500 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap">出行特惠</div>
+    <div class="bg-red-50 text-red-500 px-3 py-1.5 rounded text-xs font-bold italic whitespace-nowrap">附近2公里</div>
+    <div class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-xs font-medium flex items-center whitespace-nowrap">
+      <span class="text-red-500 mr-1">🎉</span> 热门优惠 
+      <svg class="w-2 h-2 ml-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap">客栈/民宿</div>
+    <div class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-xs font-medium flex items-center whitespace-nowrap">
+      热门品牌
+      <svg class="w-2 h-2 ml-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 地图模块 -->
+  <div class="relative w-full h-32 overflow-hidden" style="background-color: #eef4f9; background-image: linear-gradient(#dcebf5 2px, transparent 2px), linear-gradient(90deg, #dcebf5 2px, transparent 2px); background-size: 40px 40px;">
+    <!-- 地图内容模拟 -->
+    <div class="absolute top-0 left-0 w-1/3 h-full bg-blue-100 opacity-50 transform -skew-x-12"></div>
+    <div class="absolute bottom-4 left-4 text-xs font-bold text-gray-400">高德地图</div>
+    
+    <!-- 价格气泡 -->
+    <% if @hotels.present? %>
+      <% @hotels.first(3).each_with_index do |hotel, index| %>
+        <% positions = [[45, 32], [55, 48], [65, 24]] %>
+        <% left_pos, top_pos = positions[index] %>
+        <div class="absolute flex flex-col items-center z-10" style="top: <%= top_pos %>px; left: <%= left_pos %>%;">
+          <div class="bg-[#5c7cfa] text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg border border-white">
+            <span>¥<%= hotel.price %></span>
+          </div>
+          <div class="w-1.5 h-1.5 bg-[#5c7cfa] transform rotate-45 -mt-0.5"></div>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <!-- 红点中心 -->
+    <div class="absolute top-5 left-[50%] transform -translate-x-1/2">
+      <div class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center animate-pulse">
+        <div class="w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow"></div>
+      </div>
+    </div>
+
+    <!-- 浮动按钮 -->
+    <div class="absolute bottom-3 right-3 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 flex items-center gap-1 border border-gray-200">
+      <div class="bg-indigo-500 p-0.5 rounded-sm">
+        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 13a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z"/>
+        </svg>
+      </div>
+      看大地图 
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+    <div class="absolute bottom-3 right-28 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 border border-gray-200">
+      关闭
+    </div>
+  </div>
+
+  <!-- 酒店列表 -->
+  <div class="pb-10">
+    <% @hotels.each do |hotel| %>
+      <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "flex bg-white p-3 border-b border-gray-200" do %>
+        <!-- 左侧图片 -->
+        <div class="relative w-[110px] h-[140px] bg-gray-200 rounded-lg overflow-hidden shrink-0">
+          <% if hotel.image.attached? %>
+            <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+          <% elsif hotel.image_url.present? %>
+            <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'" %>
+          <% else %>
+            <svg class="w-full h-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+              <rect width="24" height="24" fill="#e5e7eb"/>
+              <path d="M2 22h20V10l-10-8-10 8v12z" fill="#9ca3af" opacity="0.5"/>
+              <circle cx="5" cy="18" r="1" fill="#fff"/>
+              <circle cx="9" cy="18" r="1" fill="#fff"/>
+              <circle cx="13" cy="18" r="1" fill="#fff"/>
+              <circle cx="5" cy="14" r="1" fill="#fff"/>
+              <circle cx="9" cy="14" r="1" fill="#fff"/>
+              <circle cx="13" cy="14" r="1" fill="#fff"/>
+            </svg>
+          <% end %>
+          <!-- 促销标签 -->
+          <% if hotel.is_featured %>
+            <div class="absolute bottom-0 w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white text-[10px] font-medium text-center py-1">
+              限时里程 <span class="text-yellow-100 font-bold text-xs">20</span> 倍抵现金
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- 右侧内容 -->
+        <div class="flex-1 ml-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start">
+              <h3 class="font-bold text-base text-gray-900 leading-tight">
+                <% if hotel.is_featured %>
+                  <span class="bg-[#ff4d4f] text-white text-[10px] px-1 rounded-sm align-middle mr-1 relative -top-0.5">闪促</span>
+                <% end %>
+                <%= hotel.name %>
+              </h3>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1"><%= hotel.hotel_type == 'hotel' ? '酒店' : '民宿' %> · <%= hotel.star_level %>星</div>
+            <% if hotel.rating.present? %>
+              <div class="flex items-center mt-1">
+                <span class="bg-[#5c7cfa] text-white text-[10px] font-bold px-1 rounded-sm mr-1"><%= hotel.rating %></span>
+                <span class="text-[#5c7cfa] text-xs mr-2">设施齐全</span>
+              </div>
+            <% end %>
+            <div class="text-xs text-gray-500 mt-0.5 truncate"><%= hotel.address %></div>
+            
+            <!-- 设施标签 -->
+            <% if hotel.features.present? && hotel.features.is_a?(Array) %>
+              <div class="flex flex-wrap gap-1 mt-1.5">
+                <% hotel.features.first(4).each do |feature| %>
+                  <span class="text-[10px] text-gray-600 border border-gray-200 px-1 rounded bg-gray-50"><%= feature %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex justify-between items-end mt-1">
+            <span class="text-[10px] text-gray-400"><%= rand(50..500) %>+预订</span>
+            <div class="text-right">
+              <% if hotel.original_price.present? && hotel.original_price > hotel.price %>
+                <div class="text-[10px] text-gray-400 line-through">¥<%= hotel.original_price %></div>
+              <% end %>
+              <div class="text-[#ff4d4f] leading-none">
+                <span class="text-xs font-bold">¥</span><span class="text-2xl font-bold"><%= hotel.price %></span><span class="text-xs text-gray-500">起</span>
+              </div>
+              <% if hotel.is_featured %>
+                <div class="bg-[#ff4d4f] text-white text-[10px] px-1 rounded-sm inline-block mt-0.5 scale-90 origin-right">
+                  膨胀神券 <span class="bg-white/20 px-0.5 ml-0.5 rounded-sm">已膨至<%= rand(10..50) %>↗</span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <!-- 分页 -->
+    <% if @hotels.present? %>
+      <div class="px-4 py-4">
+        <%= paginate @hotels %>
+      </div>
+    <% else %>
+      <div class="text-center py-8 text-gray-500">
+        暂无符合条件的酒店
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 底部导航 -->
+  <%= render 'shared/bottom_navigation' %>
+</div>
+
+<style>
+  /* 隐藏滚动条但保留功能 */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

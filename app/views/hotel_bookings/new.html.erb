@@ -285,7 +285,7 @@
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <div class="flex items-baseline space-x-1">
-              <span class="text-red-600 text-2xl font-bold">¥<%= number_with_precision(@booking.total_price, precision: 2) %></span>
+              <span class="text-red-600 text-2xl font-bold">¥<span data-hotel-booking-target="totalPriceAmount" data-base-price="<%= number_with_precision(@booking.total_price, precision: 2) %>"><%= number_with_precision(@booking.total_price, precision: 2) %></span></span>
             </div>
             <div class="text-xs text-gray-500">
               已优惠¥<%= number_with_precision(13.84, precision: 2) %>

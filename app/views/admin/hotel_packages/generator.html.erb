@@ -1,0 +1,92 @@
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">批量生成酒店套餐数据</h1>
+    <%= link_to "返回套餐列表", admin_hotel_packages_path, class: "btn-secondary" %>
+  </div>
+
+  <div class="card p-6 max-w-2xl">
+    <%= form_with url: batch_generate_admin_hotel_packages_path, method: :post, class: "space-y-6" do |form| %>
+      
+      <!-- Region and City Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :region, "地区", class: "form-label" %>
+          <%= form.select :region, 
+              options_for_select(@regions), 
+              { prompt: "选择地区" },
+              class: "form-input",
+              required: true %>
+        </div>
+
+        <div>
+          <%= form.label :city, "城市", class: "form-label" %>
+          <%= form.select :city, 
+              options_for_select(@cities), 
+              { prompt: "选择城市" },
+              class: "form-input",
+              required: true %>
+        </div>
+      </div>
+
+      <!-- Count -->
+      <div>
+        <%= form.label :count, "生成数量", class: "form-label" %>
+        <%= form.number_field :count, 
+            value: 10,
+            min: 1,
+            max: 50,
+            class: "form-input",
+            required: true %>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">一次生成的酒店套餐数量（1-50）</p>
+      </div>
+
+      <!-- Info Box -->
+      <div class="alert alert-info">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="font-medium">生成说明</p>
+          <ul class="mt-1 text-sm list-disc list-inside space-y-1">
+            <li>每个套餐会自动生成 2-3 个选项（标准/含早/豪华）</li>
+            <li>包含多种主题：商务出行、家庭亲子、度假休闲、奢华体验、限时特惠</li>
+            <li>品牌包括：华住、万豪、希尔顿、洲际、凯悦、香格里拉等</li>
+            <li>自动生成价格、销量、折扣等信息</li>
+            <li>住宿晚数：1-5晚随机</li>
+            <li>套餐类型：标准、VIP、限时随机</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "取消", admin_hotel_packages_path, class: "btn-secondary" %>
+        <%= form.submit "开始生成", class: "btn-primary" %>
+      </div>
+
+    <% end %>
+  </div>
+
+  <!-- Recent Generation Stats -->
+  <div class="card p-6 mt-6 max-w-2xl">
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">当前数据统计</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= HotelPackage.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">总套餐数</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= HotelPackage.select(:brand_name).distinct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">品牌数量</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= HotelPackage.select(:city).distinct.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">覆盖城市</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary"><%= PackageOption.count %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">套餐选项</div>
+      </div>
+    </div>
+  </div>
+</div>

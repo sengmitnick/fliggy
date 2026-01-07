@@ -188,6 +188,9 @@ class ErbAstParser
 
   # Check if ERB block should be parsed for targets
   def should_parse_for_targets?(code, controller_name, target_name)
+    # Skip standalone control structures that can't be parsed as Ruby
+    return false if code.strip.match?(/^(if|unless|case|when|else|elsif|end|do|while|for|begin|rescue|ensure)\b/)
+    
     # Must contain 'data' and either 'target' or the specific target name
     return false unless code.include?('data')
     return true if code.include?('target') || code.include?(target_name)
@@ -197,12 +200,18 @@ class ErbAstParser
 
   # Check if ERB block should be parsed for actions
   def should_parse_for_actions?(code)
+    # Skip standalone control structures that can't be parsed as Ruby
+    return false if code.strip.match?(/^(if|unless|case|when|else|elsif|end|do|while|for|begin|rescue|ensure)\b/)
+    
     # Must contain 'data' and 'action'
     code.include?('data') && code.include?('action')
   end
 
   # Check if ERB block should be parsed for values
   def should_parse_for_values?(code, controller_name, value_name)
+    # Skip standalone control structures that can't be parsed as Ruby
+    return false if code.strip.match?(/^(if|unless|case|when|else|elsif|end|do|while|for|begin|rescue|ensure)\b/)
+    
     # Must contain 'data' and either 'value' or the specific value name
     return false unless code.include?('data')
     return true if code.include?('value') || code.include?(value_name)

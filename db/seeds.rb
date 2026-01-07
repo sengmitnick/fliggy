@@ -718,7 +718,13 @@ shenzhen_hotels = [
 ]
 
 shenzhen_hotels.each do |hotel_data|
-  hotel = Hotel.create!(hotel_data)
+  # Prepare image for inline attachment
+  image_url = hotel_data.delete(:image_url) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
+  image_io = URI.open(image_url)
+  
+  hotel = Hotel.create!(hotel_data.merge(
+    image: { io: image_io, filename: 'hotel.jpg' }
+  ))
   
   # 为每个酒店和民宿创建过夜房型
   overnight_rooms = [
@@ -757,18 +763,39 @@ puts "正在初始化火车票数据..."
 Train.destroy_all
 
 # 使用自动生成功能为热门线路预生成今天和明天的数据
-# 其他日期和路线将在搜索时自动生成
+# 其他日期和路线将在管理后台手动生成或通过 Train.generate_for_route 创建
 popular_routes = [
-  ['北京', '杭州'],
-  ['杭州', '北京'],
   ['北京', '上海'],
   ['上海', '北京'],
-  ['深圳', '广州'],
-  ['广州', '深圳']
+  ['北京', '深圳'],
+  ['深圳', '北京'],
+  ['上海', '深圳'],
+  ['深圳', '上海'],
+  ['北京', '广州'],
+  ['广州', '北京'],
+  ['上海', '广州'],
+  ['广州', '上海'],
+  ['北京', '成都'],
+  ['成都', '北京'],
+  ['上海', '成都'],
+  ['成都', '上海'],
+  ['北京', '杭州'],
+  ['杭州', '北京'],
+  ['上海', '杭州'],
+  ['杭州', '上海'],
+  ['北京', '西安'],
+  ['西安', '北京'],
+  ['上海', '西安'],
+  ['西安', '上海'],
+  ['深圳', '成都'],
+  ['成都', '深圳'],
+  ['广州', '成都'],
+  ['成都', '广州']
 ]
 
 trains_created = 0
-(0..1).each do |day_offset|
+# 为每条热门线路生成未来7天的火车票
+(0..6).each do |day_offset|
   target_date = Date.today + day_offset.days
   popular_routes.each do |departure, arrival|
     generated = Train.generate_for_route(departure, arrival, target_date)
@@ -776,8 +803,8 @@ trains_created = 0
   end
 end
 
-puts "预生成了 #{trains_created} 条火车票记录 (热门线路今明两天)"
-puts "其他线路和日期将在搜索时自动生成"
+puts "预生成了 #{trains_created} 条火车票记录 (#{popular_routes.count} 条热门线路，未来7天)"
+puts "其他线路和日期将在管理后台手动生成或通过 Train.generate_for_route 创建"
 puts "火车票数据初始化完成！"
 
 # ==================== 会员权益数据 ====================
@@ -922,8 +949,14 @@ guides_data = [
 ]
 
 puts "正在创建讲解员..."
+require "open-uri"
 guides = guides_data.map do |data|
-  guide = DeepTravelGuide.create!(data)
+  avatar_io = URI.open('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400')
+  guide = DeepTravelGuide.create!(
+    data.merge(
+      avatar: { io: avatar_io, filename: 'avatar.jpg' }
+    )
+  )
   
   # 为第一个讲解员附加视频
   if guide.name == "叶强" && File.exist?(video_path)
@@ -1086,16 +1119,47 @@ products_data = [
 
 products = products_data.map do |data|
   guide = data.delete(:guide)
-  DeepTravelProduct.create!(data.merge(deep_travel_guide: guide))
+  
+  # Prepare images for inline attachment
+  images = 3.times.map do |i|
+    { io: URI.open("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&sig=#{i}"), filename: "photo_#{i}.jpg" }
+  end
+  
+  DeepTravelProduct.create!(data.merge(
+    deep_travel_guide: guide,
+    images: images
+  ))
 end
 
 puts "创建了 #{products.count} 个深度旅游产品"
 
 puts "✅ 深度旅游数据加载完成！"
 
+# ==================== 机票数据 ====================
+load Rails.root.join('db', 'seeds', 'flights.rb')
+
+# ==================== 酒店数据 ====================
+load Rails.root.join('db', 'seeds', 'hotels.rb')
+
+# ==================== 租车数据 ====================
+load Rails.root.join('db', 'seeds', 'cars.rb')
+
 # ==================== 旅游产品（跟团游商城）数据 ====================
 load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
-load Rails.root.join('db', 'seeds', 'tour_details.rb')
+# 跟团游产品详情已通过随机生成器自动创建
 
 # ==================== 酒店套餐数据 ====================
 load Rails.root.join('db', 'seeds', 'hotel_packages.rb')
+
+puts "\n🎉 所有数据初始化完成！"
+puts "====================================="
+puts "数据统计："
+puts "  - 城市: #{City.count}"
+puts "  - 目的地: #{Destination.count}"
+puts "  - 酒店: #{Hotel.count}"
+puts "  - 租车: #{Car.count}"
+puts "  - 跟团游产品: #{TourGroupProduct.count}"
+puts "  - 酒店套餐: #{HotelPackage.count}"
+puts "  - 火车票: #{Train.count}"
+puts "  - 机票: #{Flight.count}"
+puts "====================================="

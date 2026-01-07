@@ -1,15 +1,5 @@
-<%# 
-  Shared payment confirmation modals
-  
-  Required data attributes on parent element:
-  - data-controller="payment-confirmation"
-  
-  Required parameters:
-  - amount: Total amount to display
-  - user_email: Current user email
-  - payment_url: URL to submit payment (PATCH request)
-  - success_url: URL to redirect after success
-%>
+<%# Payment confirmation modals partial %>
+<%# Required: data-controller="payment-confirmation", amount, user_email, payment_url, success_url %>
 
 <!-- Processing Modal (正在校验指纹...) -->
 <div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-end" data-payment-confirmation-target="processingModal">

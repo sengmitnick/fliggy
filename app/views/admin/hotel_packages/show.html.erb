@@ -1,0 +1,210 @@
+<% content_for :title, "酒店套餐详情" %>
+
+<div class="container-xl">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">酒店套餐详情</h1>
+    <div class="flex gap-3">
+      <%= link_to "返回列表", admin_hotel_packages_path, class: "btn-secondary" %>
+      <%= link_to "编辑", edit_admin_hotel_package_path(@hotel_package), class: "btn-primary" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Information -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">基本信息</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">品牌名称</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.brand_name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">套餐标题</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.title %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">城市</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.city %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">地区</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.region %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">住宿晚数</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.night_count %>晚</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">套餐类型</dt>
+            <dd class="mt-1 text-sm">
+              <% if @hotel_package.package_type == 'vip' %>
+                <span class="badge badge-warning">VIP会员</span>
+              <% elsif @hotel_package.package_type == 'limited' %>
+                <span class="badge badge-error">限时特惠</span>
+              <% else %>
+                <span class="badge badge-info">标准套餐</span>
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="mt-4">
+          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">套餐描述</dt>
+          <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.description %></dd>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">价格信息</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">当前价格</dt>
+            <dd class="mt-1 text-2xl font-bold text-primary">¥<%= @hotel_package.price %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">原价</dt>
+            <dd class="mt-1 text-lg text-gray-500 line-through">¥<%= @hotel_package.original_price %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">折扣率</dt>
+            <dd class="mt-1 text-sm text-green-600 dark:text-green-400">
+              <%= @hotel_package.discount_rate.round(1) %>% OFF
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">销售数量</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.sales_count %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">使用条款</h2>
+        <div class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+          <%= @hotel_package.terms %>
+        </div>
+      </div>
+
+      <% if @hotel_package.package_options.any? %>
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">套餐选项</h2>
+          <div class="space-y-3">
+            <% @hotel_package.package_options.order(:display_order).each do |option| %>
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="font-medium text-gray-900 dark:text-gray-100"><%= option.name %></h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1"><%= option.description %></p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-lg font-semibold text-primary">¥<%= option.price %></p>
+                    <% if option.breakfast_included %>
+                      <span class="text-xs text-green-600 dark:text-green-400">含早餐</span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">状态信息</h2>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">是否推荐</dt>
+            <dd class="mt-1">
+              <% if @hotel_package.is_featured %>
+                <span class="badge badge-success">是</span>
+              <% else %>
+                <span class="badge badge-secondary">否</span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">可退款</dt>
+            <dd class="mt-1">
+              <% if @hotel_package.refundable %>
+                <span class="badge badge-success">可退</span>
+              <% else %>
+                <span class="badge badge-error">不可退</span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">即时预订</dt>
+            <dd class="mt-1">
+              <% if @hotel_package.instant_booking %>
+                <span class="badge badge-success">支持</span>
+              <% else %>
+                <span class="badge badge-secondary">不支持</span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">奢华套餐</dt>
+            <dd class="mt-1">
+              <% if @hotel_package.luxury %>
+                <span class="badge badge-warning">是</span>
+              <% else %>
+                <span class="badge badge-secondary">否</span>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">有效天数</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.valid_days %>天</dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">显示顺序</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100"><%= @hotel_package.display_order %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">时间信息</h2>
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">创建时间</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+              <%= @hotel_package.created_at.strftime("%Y-%m-%d %H:%M") %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">更新时间</dt>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+              <%= @hotel_package.updated_at.strftime("%Y-%m-%d %H:%M") %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">操作</h2>
+        <div class="space-y-2">
+          <%= link_to edit_admin_hotel_package_path(@hotel_package), class: "btn-primary w-full" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            编辑套餐
+          <% end %>
+          <%= button_to admin_hotel_package_path(@hotel_package),
+              method: :delete,
+              form: { data: { turbo_confirm: "确定要删除这个酒店套餐吗？此操作不可恢复。" } },
+              class: "btn-error w-full" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            删除套餐
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

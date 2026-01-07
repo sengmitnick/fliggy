@@ -3,12 +3,12 @@
 puts "Creating hotel packages..."
 
 brands = [
-  { name: "华住", logo: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400" },
-  { name: "万豪", logo: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400" },
-  { name: "希尔顿", logo: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400" },
-  { name: "洲际", logo: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400" },
-  { name: "凯悦", logo: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400" },
-  { name: "香格里拉", logo: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400" }
+  { name: "华住", logo: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80&fm=jpg&fit=crop&auto=format" },
+  { name: "万豪", logo: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80&fm=jpg&fit=crop&auto=format" },
+  { name: "希尔顿", logo: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80&fm=jpg&fit=crop&auto=format" },
+  { name: "洲际", logo: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&q=80&fm=jpg&fit=crop&auto=format" },
+  { name: "凯悦", logo: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80&fm=jpg&fit=crop&auto=format" },
+  { name: "香格里拉", logo: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80&fm=jpg&fit=crop&auto=format" }
 ]
 
 regions = ["全国通用", "华东地区", "华南地区", "华北地区", "西南地区", "华中地区"]
@@ -160,13 +160,11 @@ brands.each_with_index do |brand, brand_idx|
       p.refundable = package_info[:refundable]
       p.instant_booking = package_info[:instant_booking]
       p.luxury = package_info[:luxury]
+      p.brand_logo_url = brand[:logo]  # 直接设置图片URL字段
     end
     
-    # Attach logo if needed (using URL as placeholder)
-    unless package.brand_logo.attached?
-      package.brand_logo_url = brand[:logo]
-      package.save!
-    end
+    # 为每个套餐生成选项
+    package.generate_options
     
     print "."
   end
@@ -177,3 +175,4 @@ puts "   - Featured: #{HotelPackage.featured.count}"
 puts "   - VIP: #{HotelPackage.by_type('vip').count}"
 puts "   - Standard: #{HotelPackage.by_type('standard').count}"
 puts "   - Limited: #{HotelPackage.by_type('limited').count}"
+puts "   - Package Options: #{PackageOption.count}"

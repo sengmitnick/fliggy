@@ -50,9 +50,11 @@ import SpecialFlightsFormController from "./special_flights_form_controller"
 import TrainBookingController from "./train_booking_controller"
 import TrainBookingLockController from "./train_booking_lock_controller"
 import TrainSeatSelectorController from "./train_seat_selector_controller"
+import TourGroupFilterController from "./tour_group_filter_controller"
 import CarRentalTabsController from "./car_rental_tabs_controller"
 import HotelPackageSearchController from "./hotel_package_search_controller"
 import HotelPackageOrderController from "./hotel_package_order_controller"
+import PwaInstallController from "./pwa_install_controller"
 
 const application = Application.start()
 
@@ -106,8 +108,10 @@ application.register("special-flights-form", SpecialFlightsFormController)
 application.register("train-booking", TrainBookingController)
 application.register("train-booking-lock", TrainBookingLockController)
 application.register("train-seat-selector", TrainSeatSelectorController)
+application.register("tour-group-filter", TourGroupFilterController)
 application.register("car-rental-tabs", CarRentalTabsController)
 application.register("hotel-package-search", HotelPackageSearchController)
 application.register("hotel-package-order", HotelPackageOrderController)
+application.register("pwa-install", PwaInstallController)
 
 window.Stimulus = application

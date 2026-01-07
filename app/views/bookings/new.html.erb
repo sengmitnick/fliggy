@@ -430,12 +430,13 @@
       <div class="container mx-auto px-4 py-3 flex items-center justify-between">
         <div>
           <div class="text-xs text-gray-500">共1人 已优惠¥<%= rand(10..50) %></div>
-          <div class="text-2xl font-bold text-red-500">
-            <% if @trip_type == 'multi_city' && @multi_city_flights.present? %>
-              ¥<%= @multi_city_flights.sum { |f| (f[:offer]&.price || f[:flight]&.final_price || 0) }.to_i %>
-            <% else %>
-              ¥<%= (@selected_offer&.price || @flight&.final_price || 0).to_i %>
-            <% end %>
+          <div class="text-2xl font-bold text-red-500" data-booking-target="totalPrice">
+            <% base_price = if @trip_type == 'multi_city' && @multi_city_flights.present?
+              @multi_city_flights.sum { |f| (f[:offer]&.price || f[:flight]&.final_price || 0) }.to_i
+            else
+              (@selected_offer&.price || @flight&.final_price || 0).to_i
+            end %>
+            ¥<span data-booking-target="totalPriceAmount" data-base-price="<%= base_price %>"><%= base_price %></span>
           </div>
         </div>
         <%= form.submit '去支付 去选服务', class: "btn-primary px-6 py-3 text-lg rounded-lg" %>

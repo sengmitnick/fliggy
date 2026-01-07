@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="bg-gray-100 pb-4" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -251,27 +251,27 @@
   <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 z-50">
     <div class="grid grid-cols-5 gap-2 px-2 py-2">
       <button class="flex flex-col items-center justify-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "train/12306Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "12306" %>
+        <%= image_tag "train/12306Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 30px;", alt: "12306" %>
         <span class="text-[10px] text-gray-700 whitespace-nowrap">12306(未登录)</span>
       </button>
 
       <button class="flex flex-col items-center justify-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "train/抢票Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "抢票" %>
+        <%= image_tag "train/抢票Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 30px;", alt: "抢票" %>
         <span class="text-[10px] text-gray-700 whitespace-nowrap">抢票</span>
       </button>
 
       <button class="flex flex-col items-center justify-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "train/学生核验Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "学生核验" %>
+        <%= image_tag "train/学生核验Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 30px;", alt: "学生核验" %>
         <span class="text-[10px] text-gray-700 whitespace-nowrap">学生核验</span>
       </button>
 
       <button class="flex flex-col items-center justify-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "train/在线换座Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "在线换座" %>
+        <%= image_tag "train/在线换座Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 30px;", alt: "在线换座" %>
         <span class="text-[10px] text-gray-700 whitespace-nowrap">在线换座</span>
       </button>
 
       <button class="flex flex-col items-center justify-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "train/我的订单Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 50px;", alt: "我的订单" %>
+        <%= image_tag "train/我的订单Tab.png", class: "max-w-full h-auto object-contain", style: "max-height: 30px;", alt: "我的订单" %>
         <span class="text-[10px] text-gray-700 whitespace-nowrap">我的订单</span>
       </button>
     </div>

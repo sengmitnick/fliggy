@@ -1,12 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["termsModal", "insuranceModal", "memberModal", "confirmModal"]
+  static targets = ["termsModal", "insuranceModal", "memberModal", "confirmModal", "totalPriceAmount"]
 
   declare readonly termsModalTarget: HTMLElement
   declare readonly insuranceModalTarget: HTMLElement
   declare readonly memberModalTarget: HTMLElement
   declare readonly confirmModalTarget: HTMLElement
+  declare readonly totalPriceAmountTarget: HTMLElement
 
   // 追踪会员检查是否已完成
   private memberCheckCompleted: boolean = false
@@ -91,6 +92,24 @@ export default class extends Controller<HTMLElement> {
         checkmark.style.display = 'flex'
       }
     }
+
+    // 更新底部总价
+    this.updateTotalPrice()
+  }
+
+  // 更新总价显示
+  private updateTotalPrice(): void {
+    if (!this.totalPriceAmountTarget) return
+    
+    const basePrice = parseInt(this.totalPriceAmountTarget.dataset.basePrice || '0')
+    const insurancePriceField = document.getElementById('booking_insurance_price') as HTMLInputElement
+    const insurancePrice = parseInt(insurancePriceField?.value || '0')
+    
+    // 计算总价：基础价格 + 保险价格 × 人数（当前假设为1人）
+    const passengerCount = 1
+    const totalPrice = basePrice + (insurancePrice * passengerCount)
+    
+    this.totalPriceAmountTarget.textContent = totalPrice.toString()
   }
 
   showTermsModal(event: Event): void {

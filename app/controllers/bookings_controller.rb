@@ -21,6 +21,10 @@ class BookingsController < ApplicationController
     car_orders = current_user.car_orders.includes(:car)
                              .order(created_at: :desc)
     
+    # Fetch hotel package orders
+    hotel_package_orders = current_user.hotel_package_orders.includes(:hotel_package, :package_option)
+                                       .order(created_at: :desc)
+    
     # Filter by status
     case @status_filter
     when 'pending'
@@ -28,6 +32,7 @@ class BookingsController < ApplicationController
       hotel_bookings = hotel_bookings.where(status: 'pending')
       tour_group_bookings = tour_group_bookings.where(status: 'pending')
       car_orders = car_orders.where(status: 'pending')
+      hotel_package_orders = hotel_package_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -37,21 +42,24 @@ class BookingsController < ApplicationController
                                                .where('tour_group_bookings.travel_date >= ?', Date.today)
       car_orders = car_orders.where(status: 'paid')
                              .where('car_orders.pickup_datetime >= ?', DateTime.now)
+      hotel_package_orders = hotel_package_orders.where(status: 'paid')
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
       hotel_bookings = hotel_bookings.none
       tour_group_bookings = tour_group_bookings.none
       car_orders = car_orders.none
+      hotel_package_orders = hotel_package_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
       tour_group_bookings = tour_group_bookings.where(status: 'cancelled')
       car_orders = car_orders.where(status: 'cancelled')
+      hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a)
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a)
                     .sort_by(&:created_at).reverse
     
     # Manual pagination

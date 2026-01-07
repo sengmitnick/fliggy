@@ -24,14 +24,22 @@ class Hotel < ApplicationRecord
   scope :by_city, ->(city) { 
     return all if city.blank?
     # 智能城市匹配：支持区级搜索匹配市级数据
-    # 例如："深圳市南山区" 可以匹配 "深圳市" 或 "深圳市南山区"
-    base_city = city.split('市').first + '市' if city.include?('市')
-    if base_city && base_city != city
-      # 搜索精确匹配或基础城市匹配
-      where("city = ? OR city = ?", city, base_city)
-    else
-      where(city: city)
-    end
+    # 同时支持 "深圳" 和 "深圳市" 相互匹配
+    # 例如："深圳市南山区" 可以匹配 "深圳市" 或 "深圳"
+    
+    # 移除"市"字符以获取基础城市名
+    base_city_name = city.gsub(/市.*$/, '')
+    
+    # 构建匹配条件：支持多种格式
+    # 1. 精确匹配
+    # 2. 基础城市名匹配（如 "深圳" 匹配 "深圳市"）
+    # 3. 基础城市名 + 市匹配（如 "深圳市" 匹配 "深圳"）
+    where(
+      "city = :exact OR city = :base OR city = :base_with_city",
+      exact: city,
+      base: base_city_name,
+      base_with_city: "#{base_city_name}市"
+    )
   }
   scope :by_region, ->(region) { where(region: region) if region.present? }
   scope :by_price_range, ->(min, max) { where(price: min..max) if min.present? && max.present? }

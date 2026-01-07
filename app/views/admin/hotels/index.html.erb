@@ -5,22 +5,24 @@
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Hotels Management</h1>
     <div class="flex gap-3">
-      <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger" class="btn-secondary relative">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-        </svg>
-        Batch Generate
-        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      <div data-dropdown-target="menu" class="hidden absolute mt-12 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
-        <div class="py-1" role="menu">
-          <%= form_with url: generate_batch_admin_hotels_path, method: :post, class: "px-4 py-3" do |f| %>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">生成数量</label>
-            <%= f.number_field :count, value: 10, min: 1, max: 100, class: "form-input w-full mb-3" %>
-            <%= f.submit "生成酒店", class: "btn-primary w-full", data: { confirm: "确定要生成酒店数据吗?" } %>
-          <% end %>
+      <div data-controller="dropdown" class="relative">
+        <button type="button" data-action="click->dropdown#toggle" data-dropdown-target="trigger" class="btn-secondary">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Batch Generate
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div data-dropdown-target="menu" class="hidden absolute mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
+          <div class="py-1" role="menu">
+            <%= form_with url: generate_batch_admin_hotels_path, method: :post, class: "px-4 py-3", data: { turbo: false } do |f| %>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">生成数量</label>
+              <%= f.number_field :count, value: 10, min: 1, max: 100, class: "form-input w-full mb-3" %>
+              <%= f.submit "生成酒店", class: "btn-primary w-full", data: { confirm: "确定要生成酒店数据吗?" } %>
+            <% end %>
+          </div>
         </div>
       </div>
       <%= link_to new_admin_hotel_path, class: "btn-primary" do %>
