@@ -2,8 +2,14 @@ class FlightsController < ApplicationController
 
   def index
     # Flight search page with city selector
-    @hot_cities = City.hot_cities.order(:pinyin)
-    @all_cities = City.all.order(:pinyin)
+    # Cache city data to improve performance (cities rarely change)
+    @hot_cities = Rails.cache.fetch('cities/hot_cities', expires_in: 24.hours) do
+      City.hot_cities.order(:pinyin).to_a
+    end
+    
+    @all_cities = Rails.cache.fetch('cities/all_cities', expires_in: 24.hours) do
+      City.all.order(:pinyin).to_a
+    end
   end
 
   def search
