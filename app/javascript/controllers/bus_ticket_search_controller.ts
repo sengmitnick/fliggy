@@ -65,6 +65,69 @@ export default class extends Controller {
     evening: '晚上 18:00-23:59'
   }
 
+  connect(): void {
+    // 页面加载时从 URL 参数恢复筛选状态
+    this.restoreFiltersFromUrl()
+  }
+
+  // 从 URL 参数恢复筛选状态
+  restoreFiltersFromUrl(): void {
+    const urlParams = new URLSearchParams(window.location.search)
+    
+    // 恢复发车时段
+    const timeSlots = urlParams.get('time_slots')
+    if (timeSlots) {
+      timeSlots.split(',').forEach(time => {
+        this.selectedDepartureTimes.add(time)
+        // 找到对应的卡片并添加选中样式
+        const timeCard = this.departureTimeCardTargets.find(
+          card => card.dataset.time === time
+        )
+        if (timeCard) this.addSelectedStyle(timeCard)
+      })
+    }
+    
+    // 恢复座位类型
+    const seatTypes = urlParams.get('seat_types')
+    if (seatTypes) {
+      seatTypes.split(',').forEach(seatType => {
+        this.selectedSeatTypes.add(seatType)
+        const seatCard = this.seatTypeCardTargets.find(
+          card => card.dataset.seatType === seatType
+        )
+        if (seatCard) this.addSelectedStyle(seatCard)
+      })
+    }
+    
+    // 恢复出发车站
+    const departureStations = urlParams.get('departure_stations')
+    if (departureStations) {
+      departureStations.split(',').forEach(station => {
+        this.selectedDepartureStations.add(station)
+        const depCard = this.departureStationCardTargets.find(
+          card => card.dataset.station === station
+        )
+        if (depCard) this.addSelectedStyle(depCard)
+      })
+    }
+    
+    // 恢复到达车站
+    const arrivalStations = urlParams.get('arrival_stations')
+    if (arrivalStations) {
+      arrivalStations.split(',').forEach(station => {
+        this.selectedArrivalStations.add(station)
+        const arrCard = this.arrivalStationCardTargets.find(
+          card => card.dataset.station === station
+        )
+        if (arrCard) this.addSelectedStyle(arrCard)
+      })
+    }
+    
+    // 更新界面状态
+    this.updateFilterBadge()
+    this.updateSelectedTags()
+  }
+
   openFilter(): void {
     this.overlayTarget.classList.remove("hidden")
     this.modalTarget.classList.remove("hidden")
