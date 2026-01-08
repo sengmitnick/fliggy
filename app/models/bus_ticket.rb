@@ -1,0 +1,2 @@
+class BusTicket < ApplicationRecord
+end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_06_124922) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_08_035331) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -124,6 +124,27 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_06_124922) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_brand_memberships_on_user_id"
+  end
+
+  create_table "bus_routes", force: :cascade do |t|
+    t.string "origin"
+    t.string "destination"
+    t.integer "duration"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "bus_tickets", force: :cascade do |t|
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "departure_time"
+    t.string "arrival_time"
+    t.decimal "price", default: "0.0"
+    t.string "status", default: "available"
+    t.string "seat_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "car_orders", force: :cascade do |t|

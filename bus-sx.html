@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车票筛选高保真复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏滚动条但保持滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 模拟手机字体的平滑渲染 */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 flex justify-center items-center min-h-screen">
+
+    <!-- 手机外壳容器 -->
+    <div class="relative w-[375px] h-[812px] bg-white shadow-2xl overflow-hidden font-sans text-sm">
+
+        <!-- 1. 模拟顶部背景 (被遮罩覆盖的部分) -->
+        <div class="pt-12 px-4 pb-4">
+            <!-- 顶部导航栏模拟 -->
+            <div class="flex justify-between items-center mb-4 text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                <div class="text-lg font-bold flex items-center">
+                    深圳 <span class="mx-2 text-gray-400">→</span> 广州市 <span class="ml-1 text-xs">▼</span>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-1 h-1 bg-gray-800 rounded-full"></div>
+                    <div class="w-1 h-1 bg-gray-800 rounded-full"></div>
+                    <div class="w-1 h-1 bg-gray-800 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- 日期栏模拟 -->
+            <div class="flex justify-between bg-gray-50 p-1 rounded-lg mb-4 text-xs text-center">
+                <div class="flex-1 py-2 text-gray-400">01-08<br>今天</div>
+                <div class="flex-1 py-2 bg-[#FFD900] rounded font-medium text-black shadow-sm">01-09<br>明天</div>
+                <div class="flex-1 py-2 text-gray-400">01-10<br>周六</div>
+                <div class="flex-1 py-2 text-gray-400">01-11<br>周日</div>
+                <div class="flex-1 py-2 text-gray-400">01-12<br>周一</div>
+            </div>
+        </div>
+
+        <!-- 2. 黑色半透明遮罩 -->
+        <div class="absolute inset-0 bg-black/60 z-10"></div>
+
+        <!-- 3. 筛选弹窗主体 -->
+        <div class="absolute bottom-0 left-0 right-0 h-[85%] bg-white rounded-t-2xl z-20 flex flex-col overflow-hidden animate-slide-up">
+            
+            <!-- 弹窗头部 -->
+            <div class="relative h-14 flex items-center justify-center border-b border-gray-100 flex-shrink-0">
+                <h2 class="text-[17px] font-bold text-gray-900">筛选</h2>
+                <!-- 关闭按钮 -->
+                <button class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 弹窗中间内容区 (左右分栏) -->
+            <div class="flex flex-1 overflow-hidden">
+                
+                <!-- 左侧侧边栏 -->
+                <div class="w-[90px] bg-[#F7F8FA] overflow-y-auto no-scrollbar flex-shrink-0 pb-20">
+                    <div class="py-4 px-3 text-[13px] font-medium text-gray-900 bg-white border-l-4 border-[#FFD900]">发车时段</div>
+                    <div class="py-4 px-3 text-[13px] text-gray-600">车型</div>
+                    <div class="py-4 px-3 text-[13px] text-gray-600">出发车站</div>
+                    <div class="py-4 px-3 text-[13px] text-gray-600">到达车站</div>
+                </div>
+
+                <!-- 右侧内容滚动区 -->
+                <div class="flex-1 bg-white overflow-y-auto no-scrollbar p-4 pb-24">
+                    
+                    <!-- Section 1: 发车时段 -->
+                    <div class="mb-8">
+                        <h3 class="text-[15px] font-bold mb-3 text-gray-900">发车时段</h3>
+                        <div class="space-y-2">
+                            <div class="bg-[#F7F8FA] text-gray-300 rounded px-3 py-3 text-[13px]">凌晨 00:00-05:59</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">上午 06:00-11:59</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">下午 12:00-17:59</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">晚上 18:00-23:59</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: 车型 -->
+                    <div class="mb-8">
+                        <h3 class="text-[15px] font-bold mb-3 text-gray-900">车型</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-4 py-2 text-[13px] min-w-[70px] text-center">中型车</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-4 py-2 text-[13px] min-w-[70px] text-center">大型车</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-4 py-2 text-[13px] min-w-[70px] text-center">普通巴士</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: 出发车站 -->
+                    <div class="mb-8">
+                        <h3 class="text-[15px] font-bold mb-3 text-gray-900">出发车站</h3>
+                        <div class="space-y-2">
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">深圳公明汽车站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">深圳宝安汽车站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">宝安汽车站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">深圳湾口岸</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">深圳市流塘招呼站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] leading-relaxed">
+                                大剧院地铁站E出口（直行20米公交...
+                            </div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">
+                                大剧院地铁站E口
+                            </div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] leading-relaxed">
+                                西乡路口①公交站前面20米西乡流塘停...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: 到达车站 (截图1内容) -->
+                    <div class="mb-4">
+                        <h3 class="text-[15px] font-bold mb-3 text-gray-900">到达车站</h3>
+                        <div class="space-y-2">
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">广州天河-燕塘站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] leading-relaxed">广州白云火车站（可换成8和12号线地...</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] leading-relaxed">海珠广场站F口左前方100米（侨光东公...</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">燕塘地铁站C口对面</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">广州(南沙)</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">黄埔</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">双岗地铁站（黄埔区13号线）</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">天河燕塘地铁站</div>
+                            <div class="bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px]">越秀公园地铁站</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部按钮区 -->
+            <div class="h-auto bg-white border-t border-gray-100 p-3 flex gap-3 flex-shrink-0 pb-8">
+                <button class="flex-1 bg-[#F5F6F8] text-gray-600 rounded-full h-11 text-[15px] font-medium">重置</button>
+                <button class="flex-[2] bg-[#FFD900] text-[#111111] rounded-full h-11 text-[15px] font-medium shadow-sm">查看164条结果</button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
