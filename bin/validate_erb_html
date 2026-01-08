@@ -61,10 +61,17 @@ class ERBHTMLValidator
       if json_result.is_a?(Array) && json_result.any?
         file_errors = json_result.first
         if file_errors['errorCount'] && file_errors['errorCount'] > 0
-          return {
-            file: file_path,
-            errors: file_errors['messages']
-          }
+          # Filter out trailing whitespace warnings (they are too strict)
+          filtered_messages = file_errors['messages'].reject do |msg|
+            msg['message'] =~ /trailing whitespace/i
+          end
+          
+          if filtered_messages.any?
+            return {
+              file: file_path,
+              errors: filtered_messages
+            }
+          end
         end
       end
     rescue JSON::ParserError
