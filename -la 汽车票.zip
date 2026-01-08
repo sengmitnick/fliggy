@@ -1,0 +1,5 @@
+[33m4868b6f[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/perfect-bus-ticket[m[33m, [m[1;31morigin/master[m[33m)[m 添加汽车票静态资源
+[33md61e041[m Merge pull request #25 from sengmitnick/feature/perfect-bus-ticket-flow
+[33mfc7571e[m[33m ([m[1;31morigin/feature/perfect-bus-ticket-flow[m[33m, [m[1;32mfeature/perfect-bus-ticket-flow[m[33m)[m feat: add ERB HTML validation system
+[33m44cb9ed[m Merge pull request #24 from sengmitnick/feature/optimize-existing-ui
+[33m98d5ab0[m fix: add generate_options call to hotel packages seeds and create maintenance rake tasks

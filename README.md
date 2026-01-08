@@ -1,4 +1,4 @@
-.iu
+.iuq'c'p
 # ClackyAI Rails7 starter
 
 The template for ClackyAI
