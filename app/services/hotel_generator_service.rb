@@ -1,4 +1,9 @@
 class HotelGeneratorService < ApplicationService
+  def call
+    # Instance method required by ApplicationService pattern
+    self.class.generate_batch(10)
+  end
+
   def self.generate_batch(count)
     generated_count = 0
     

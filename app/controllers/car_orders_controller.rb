@@ -29,7 +29,7 @@ class CarOrdersController < ApplicationController
     # Password already verified by frontend via /profile/verify_pay_password
     @car_order.update!(status: 'paid')
     
-    render json: { success: true }
+    redirect_to success_car_order_path(@car_order), notice: '支付成功'
   end
 
   def success
