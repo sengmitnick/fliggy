@@ -8,9 +8,30 @@ class BusTicketsController < ApplicationController
     @bus_ticket = BusTicket.find(params[:id])
   end
 
+  # 实时计算筛选结果数量（AJAX接口）
+  def count_filtered_results
+    @origin = params[:origin]
+    @destination = params[:destination]
+    @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
+    
+    # 基础查询
+    @bus_tickets = BusTicket.where(
+      origin: @origin,
+      destination: @destination,
+      departure_date: @date,
+      status: 'available'
+    )
+    
+    # 应用筛选
+    apply_filters
+    
+    # 返回数量
+    render json: { count: @bus_tickets.count }
+  end
+
   def search
     @origin = params[:origin] || '深圳'
-    @destination = params[:destination] || '广州市'
+    @destination = params[:destination] || '广州'
     @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
     
     # Search bus tickets with base criteria
@@ -64,16 +85,16 @@ class BusTicketsController < ApplicationController
   def apply_filters
     # Filter by time slots
     if params[:time_slots].present?
-      time_slots = params[:time_slots].split(',')
+      time_slots = params[:time_slots].is_a?(Array) ? params[:time_slots] : params[:time_slots].split(',')
       time_conditions = time_slots.map do |slot|
         case slot
-        when 'early'
+        when 'morning'  # 凌晨
           "departure_time >= '00:00' AND departure_time < '06:00'"
-        when 'morning'
+        when 'morning2'  # 上午
           "departure_time >= '06:00' AND departure_time < '12:00'"
-        when 'afternoon'
+        when 'afternoon'  # 下午
           "departure_time >= '12:00' AND departure_time < '18:00'"
-        when 'evening'
+        when 'evening'  # 晚上
           "departure_time >= '18:00' AND departure_time < '24:00'"
         end
       end.compact
@@ -83,19 +104,19 @@ class BusTicketsController < ApplicationController
     
     # Filter by seat types
     if params[:seat_types].present?
-      seat_types = params[:seat_types].split(',')
+      seat_types = params[:seat_types].is_a?(Array) ? params[:seat_types] : params[:seat_types].split(',')
       @bus_tickets = @bus_tickets.where(seat_type: seat_types)
     end
     
     # Filter by departure stations
     if params[:departure_stations].present?
-      departure_stations = params[:departure_stations].split(',')
+      departure_stations = params[:departure_stations].is_a?(Array) ? params[:departure_stations] : params[:departure_stations].split(',')
       @bus_tickets = @bus_tickets.where(departure_station: departure_stations)
     end
     
     # Filter by arrival stations
     if params[:arrival_stations].present?
-      arrival_stations = params[:arrival_stations].split(',')
+      arrival_stations = params[:arrival_stations].is_a?(Array) ? params[:arrival_stations] : params[:arrival_stations].split(',')
       @bus_tickets = @bus_tickets.where(arrival_station: arrival_stations)
     end
   end

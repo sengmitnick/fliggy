@@ -11,7 +11,7 @@
   </style>
 <% end %>
 
-<div class="bg-gray-100 min-h-screen flex justify-center" data-controller="city-selector bus-date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州市" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="bg-gray-100 min-h-screen flex justify-center" data-controller="city-selector bus-date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- 移动端容器限制 -->
   <div class="w-full max-w-md bg-gray-50 relative min-h-screen flex flex-col">
 
@@ -98,7 +98,7 @@
           </button>
 
           <button type="button" data-action="click->city-selector#openDestination" class="flex-1 text-right">
-            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="destination">广州市</span>
+            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="destination">广州</span>
           </button>
         </div>
 
@@ -111,7 +111,7 @@
         <!-- 搜索按钮 -->
         <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false } do |f| %>
           <%= f.hidden_field :origin, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
-          <%= f.hidden_field :destination, value: '广州市', data: { 'city-selector-target': 'destinationCityInput' } %>
+          <%= f.hidden_field :destination, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
           <%= f.hidden_field :date, value: Date.today, data: { 'bus-date-picker-target': 'dateInput' } %>
           <button type="submit" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
             搜索汽车票
@@ -120,7 +120,7 @@
 
         <!-- 历史记录 -->
         <div class="flex justify-between text-xs text-gray-400">
-          <span>深圳-广州市</span>
+          <span>深圳-广州</span>
           <span>清除</span>
         </div>
       </div>

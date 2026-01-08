@@ -21,6 +21,7 @@ Rails.application.routes.draw do
   resources :bus_tickets, only: [:index, :show] do
     collection do
       get :search
+      get :count_filtered_results
     end
   end
   # End routes for bus_tickets
@@ -267,6 +268,7 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
+    resources :bus_tickets
     resources :cars do
       collection do
         get :generator
