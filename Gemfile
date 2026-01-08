@@ -43,6 +43,7 @@ group :test do
   gem "launchy"
   gem "capybara"
   gem "selenium-webdriver"
+  gem "playwright-ruby-client"
 end
 gem "omniauth", "~> 2.1"
 gem "omniauth-rails_csrf_protection", "~> 1.0"

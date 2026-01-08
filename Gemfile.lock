@@ -207,6 +207,10 @@ GEM
       net-smtp
     marcel (1.0.4)
     matrix (0.4.3)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2025.0924)
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
@@ -273,6 +277,10 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.9)
+    playwright-ruby-client (1.57.1)
+      base64
+      concurrent-ruby (>= 1.1.6)
+      mime-types (>= 3.0)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -474,6 +482,7 @@ DEPENDENCIES
   ostruct (~> 0.6.3)
   parser (= 3.3.5.0)
   pg (>= 1.1)
+  playwright-ruby-client
   propshaft (~> 1.1.0)
   puma (>= 5.0)
   rack-cors
