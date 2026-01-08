@@ -55,6 +55,9 @@ import CarRentalTabsController from "./car_rental_tabs_controller"
 import HotelPackageSearchController from "./hotel_package_search_controller"
 import HotelPackageOrderController from "./hotel_package_order_controller"
 import PwaInstallController from "./pwa_install_controller"
+import BusDatePickerController from "./bus_date_picker_controller"
+import BusTicketSearchController from "./bus_ticket_search_controller"
+import BusTicketOrderController from "./bus_ticket_order_controller"
 
 const application = Application.start()
 
@@ -113,5 +116,8 @@ application.register("car-rental-tabs", CarRentalTabsController)
 application.register("hotel-package-search", HotelPackageSearchController)
 application.register("hotel-package-order", HotelPackageOrderController)
 application.register("pwa-install", PwaInstallController)
+application.register("bus-date-picker", BusDatePickerController)
+application.register("bus-ticket-search", BusTicketSearchController)
+application.register("bus-ticket-order", BusTicketOrderController)
 
 window.Stimulus = application

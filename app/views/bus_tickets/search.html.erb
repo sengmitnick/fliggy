@@ -1,0 +1,146 @@
+<% content_for :head do %>
+  <style>
+    /* 自定义滚动条隐藏 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<% end %>
+
+<div class="w-full max-w-[430px] bg-[#f5f7fa] relative flex flex-col min-h-screen pb-16" data-controller="bus-ticket-search">
+
+  <!-- 导航栏 -->
+  <div class="bg-white px-3 py-2 flex items-center justify-between sticky top-0 z-20">
+    <%= link_to bus_tickets_path, class: "p-1" do %>
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    <% end %>
+    <div class="text-lg font-bold text-gray-900 flex items-center">
+      <%= @origin %> <span class="text-gray-300 mx-2">─</span> <%= @destination %>
+      <svg class="w-4 h-4 ml-1 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+    </div>
+    <button type="button" class="p-1" data-action="click->bus-ticket-search#openFilter" aria-label="筛选">
+      <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24"><path d="M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+    </button>
+  </div>
+
+  <!-- 日期选择 -->
+  <div class="bg-white pb-2">
+    <div class="flex overflow-x-auto no-scrollbar px-2 space-x-1">
+      <% @nearby_dates.each do |date_info| %>
+        <% 
+          date = date_info[:date]
+          is_selected = date == @date
+          day_label = if date == Date.today
+                        '今天'
+                      elsif date == Date.today + 1
+                        '明天'
+                      else
+                        date.strftime('%A').split('')[1..2].join # 周几
+                      end
+          day_label_map = {
+            'onday' => '周一',
+            'uesday' => '周二',
+            'ednesday' => '周三',
+            'hursday' => '周四',
+            'riday' => '周五',
+            'aturday' => '周六',
+            'unday' => '周日'
+          }
+          day_label = case date.wday
+                      when 0 then '周日'
+                      when 1 then '周一'
+                      when 2 then '周二'
+                      when 3 then '周三'
+                      when 4 then '周四'
+                      when 5 then '周五'
+                      when 6 then '周六'
+                      end
+          day_label = '今天' if date == Date.today
+          day_label = '明天' if date == Date.today + 1
+          day_label = '后天' if date == Date.today + 2
+        %>
+        <%= link_to search_bus_tickets_path(origin: @origin, destination: @destination, date: date), 
+          class: "flex-shrink-0 flex flex-col items-center justify-center w-[72px] h-[52px] rounded-lg #{ is_selected ? 'bg-[#fceea3] text-gray-900' : 'text-gray-800' }" do %>
+          <span class="text-xs font-medium"><%= date.strftime('%m-%d') %></span>
+          <span class="text-sm font-bold"><%= day_label %></span>
+        <% end %>
+      <% end %>
+      
+      <!-- 日历图标 -->
+      <div class="flex-shrink-0 flex flex-col items-center justify-center w-[40px] h-[52px] text-gray-600 bg-white/90 sticky right-0 shadow-[-10px_0_10px_white]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 列表内容 -->
+  <div class="flex-1 overflow-y-auto px-2 pt-2 space-y-2 pb-4">
+    <% if @bus_tickets.any? %>
+      <% @bus_tickets.each do |ticket| %>
+        <%= link_to bus_ticket_path(ticket, origin: @origin, destination: @destination, date: @date), 
+          class: "bg-white p-4 rounded-lg flex flex-col relative block" do %>
+          <div class="flex justify-between items-start">
+            <!-- 左侧：时间 -->
+            <div class="w-[80px]">
+              <div class="text-[26px] font-bold text-gray-900 leading-none"><%= ticket.departure_time %></div>
+              <% if ticket.duration_minutes %>
+                <div class="text-xs text-gray-400 mt-1 flex items-center">
+                  约<%= (ticket.duration_minutes / 60.0).round(1) %>小时
+                  <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- 中间：站点 -->
+            <div class="flex-1 flex flex-col justify-center space-y-2 relative">
+              <!-- 起点 -->
+              <div class="flex items-start">
+                <div class="w-2 h-2 bg-[#6b8af8] rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
+                <span class="text-[15px] font-medium text-gray-900 leading-snug"><%= ticket.departure_station %></span>
+              </div>
+              <!-- 终点 -->
+              <div class="flex items-start">
+                <div class="w-2 h-2 bg-[#ff8a65] rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
+                <span class="text-[15px] font-medium text-gray-900 leading-snug"><%= ticket.arrival_station %></span>
+              </div>
+            </div>
+            
+            <!-- 右侧：价格 -->
+            <div class="text-right pl-2">
+              <div class="text-[#ff5500] font-bold whitespace-nowrap">
+                <span class="text-sm">¥</span><span class="text-2xl"><%= ticket.price.to_i %></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 底部信息 -->
+          <div class="mt-2 pl-[80px]">
+            <div class="flex items-center text-gray-500 text-xs gap-1">
+              <% if ticket.seat_type.present? %>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                <%= ticket.seat_type %>
+              <% end %>
+              <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="bg-white p-8 rounded-lg flex flex-col items-center justify-center text-gray-500">
+        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-lg font-medium">暂无班次</p>
+        <p class="text-sm mt-1">请选择其他日期或路线</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Filter Modal -->
+  <%= render 'bus_tickets/filter_modal' %>
+</div>

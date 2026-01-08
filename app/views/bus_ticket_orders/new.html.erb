@@ -1,0 +1,353 @@
+<div class="bg-[#F5F6F8] text-[#333] pb-32 min-h-screen" 
+     data-controller="bus-ticket-order payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @total_price %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value=""
+     data-payment-confirmation-success-url-value="">
+  
+  <!-- 顶部黄色背景区域 -->
+  <div class="bg-[#FFD944] pb-16 pt-2 sticky top-0 z-10">
+    <!-- 标题栏 -->
+    <div class="flex items-center justify-between px-4 h-11">
+      <%= link_to bus_ticket_path(@bus_ticket), class: "text-[#333]" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-bold tracking-wide">填写订单</h1>
+      <div class="w-6"></div> <!-- 占位符保持居中 -->
+    </div>
+  </div>
+
+  <!-- 主内容区：负margin向上覆盖黄色背景 -->
+  <div class="px-3 -mt-12 relative z-20 space-y-3">
+    
+    <!-- 1. 行程信息卡片 -->
+    <div class="bg-white rounded-xl p-5 shadow-sm">
+      <!-- 日期 -->
+      <div class="text-xl font-bold mb-4 flex items-end">
+        <%= @bus_ticket.departure_date.strftime('%m月%d日') %>
+        <span class="text-sm font-normal ml-2 text-gray-800">
+          <%= I18n.l(@bus_ticket.departure_date, format: '%A') %> <%= @bus_ticket.departure_time %>
+        </span>
+      </div>
+
+      <!-- 站点路线 -->
+      <div class="relative pl-6">
+        <!-- 垂直虚线连接 -->
+        <div class="absolute left-[5px] top-2 bottom-6 w-[2px] bg-gradient-to-b from-gray-300 to-transparent bg-repeat-y" data-pattern="dashed-line"></div>
+        
+        <!-- 起点 -->
+        <div class="mb-5 relative">
+          <div class="absolute -left-6 top-1.5 w-2.5 h-2.5 rounded-full bg-[#E5E5E5]"></div>
+          <div class="text-[17px] font-bold text-[#333]"><%= @bus_ticket.departure_station %></div>
+        </div>
+        
+        <!-- 终点 -->
+        <div class="relative">
+          <div class="absolute -left-6 top-1.5 w-2.5 h-2.5 rounded-full bg-[#E5E5E5]"></div>
+          <div class="text-[17px] font-bold text-[#333]"><%= @bus_ticket.arrival_station %></div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 my-4"></div>
+
+      <!-- 底部提示 -->
+      <div class="space-y-1.5">
+        <div class="flex items-center text-xs text-gray-500">
+          <svg class="w-3.5 h-3.5 text-[#5D6B8F] mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          发车前<span class="text-[#5D6B8F]">可在线退票</span> <span class="text-gray-300 mx-1">|</span> 手续费 ¥ 0.00起
+          <span class="ml-auto text-[#333] flex items-center">
+            购票须知
+            <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </span>
+        </div>
+        <div class="flex items-center text-xs text-gray-500">
+          <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          不支持在线改签
+        </div>
+        <div class="flex items-center text-xs text-gray-500">
+          <svg class="w-3.5 h-3.5 text-[#5D6B8F] mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          无需取票，可凭身份证/电子票二维码进站
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 乘车人列表 -->
+    <div class="bg-white rounded-xl px-4 py-2 shadow-sm">
+      <div class="flex justify-between items-center py-3">
+        <h2 class="font-bold text-[16px]">
+          请选择乘车人
+          <span class="text-xs font-normal text-gray-400 ml-1">最多选择5人</span>
+        </h2>
+      </div>
+
+      <% if @passengers.any? %>
+        <% @passengers.first(5).each do |passenger| %>
+          <div class="flex items-center justify-between py-4 border-t border-gray-50"
+               data-action="click->bus-ticket-order#togglePassenger"
+               data-passenger-id="<%= passenger.id %>"
+               data-passenger-name="<%= passenger.name %>"
+               data-passenger-id-number="<%= passenger.id_number %>"
+               data-passenger-phone="<%= passenger.phone %>">
+            <div class="flex items-start">
+              <div class="mr-3 mt-1 text-gray-400">
+                <!-- 编辑图标 -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center mb-1">
+                  <span class="text-[17px] font-bold mr-2"><%= passenger.name %></span>
+                  <span class="text-[10px] text-gray-500 border border-gray-300 rounded px-1 py-[1px]">成人票</span>
+                </div>
+                <div class="text-gray-400 text-sm tracking-wide">
+                  <%= passenger.id_type %> <%= passenger.id_number.gsub(/(\d{6})(\d{8})(\d{4})/, '\1 \2 \3') %>
+                </div>
+              </div>
+            </div>
+            <!-- 选中状态: 黄色勾选 -->
+            <div class="text-gray-300" data-bus-ticket-order-target="checkIcon">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="py-6 text-center text-gray-400">
+          <p class="mb-2">暂无乘车人信息</p>
+          <p class="text-sm">请先添加乘车人</p>
+        </div>
+      <% end %>
+
+      <!-- 新增乘车人按钮 -->
+      <div class="py-4 flex justify-center">
+        <%= link_to new_passenger_path(return_to: request.fullpath), class: "bg-[#FFF8D8] text-[#333] font-medium py-3 px-12 rounded-full w-2/3 flex items-center justify-center" do %>
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          新增乘车人
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 3. 取票电话 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+      <div class="flex items-center">
+        <span class="text-gray-500 mr-4 text-[15px]">取票电话</span>
+        <span class="text-[17px] font-medium" data-bus-ticket-order-target="contactPhone">
+          <%= current_user.passengers.first&.phone || '请添加乘车人' %>
+        </span>
+      </div>
+      <svg class="w-6 h-6 text-[#5D6B8F] opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path>
+        <circle cx="12" cy="7" r="4" stroke-width="1.5"></circle>
+      </svg>
+    </div>
+
+    <!-- 4. 保险模块 -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm pt-2">
+      <!-- 顶部 Banner 图片模拟 -->
+      <div class="bg-gradient-to-r from-orange-50 to-blue-50 px-4 py-3 flex justify-between items-center relative overflow-hidden">
+        <div class="z-10">
+          <div class="flex items-center text-[#FF5533] font-bold mb-1">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            添加保障，出游更安心
+          </div>
+        </div>
+        <!-- 模拟背景中的卡车插画 -->
+        <div class="absolute right-0 bottom-0 opacity-80">
+          <svg width="120" height="60" viewBox="0 0 100 50">
+            <path d="M10 40 L40 40 L40 20 L20 20 Z" fill="#9FB4D8" />
+            <path d="M40 40 L90 40 L90 10 L40 10 Z" fill="#7A94C4" />
+            <circle cx="25" cy="40" r="5" fill="#555" />
+            <circle cx="75" cy="40" r="5" fill="#555" />
+            <path d="M85 10 L85 40 M45 10 L45 40" stroke="white" stroke-width="2" opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <div class="flex items-center mb-3">
+          <h3 class="font-bold text-[16px]">汽车出行综合保障</h3>
+          <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+
+        <!-- 保险卡片 Grid -->
+        <div class="grid grid-cols-3 gap-2">
+          <!-- 卡片 1: 无保障 -->
+          <div class="border-2 <%= @insurance_type == 'none' ? 'border-[#FFD944]' : 'border-gray-100' %> rounded-lg p-2 text-center relative h-40 flex flex-col items-center"
+               data-action="click->bus-ticket-order#selectInsurance"
+               data-insurance-type="none"
+               data-insurance-price="0">
+            <div class="text-gray-300 mb-1 mt-1">
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12z" opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">无保障</div>
+            <div class="text-[10px] text-gray-400 border border-gray-200 rounded px-1 mb-2">放弃保障</div>
+            
+            <div class="space-y-1 w-full flex flex-col items-center">
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+
+            <!-- 选中的黄色圆圈 -->
+            <div class="mt-auto mb-1 <%= @insurance_type == 'none' ? 'text-[#FFD944]' : 'text-gray-300' %>">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 卡片 2: 基础保障 -->
+          <div class="<%= @insurance_type == 'premium' ? 'bg-[#FFFAED]' : 'bg-gray-50' %> border <%= @insurance_type == 'premium' ? 'border-[#FFD944]' : 'border-gray-100' %> rounded-lg p-2 text-center h-40 flex flex-col items-center"
+               data-action="click->bus-ticket-order#selectInsurance"
+               data-insurance-type="premium"
+               data-insurance-price="3">
+            <div class="text-[#FFD944] mb-1 mt-1">
+              <!-- 盾牌图标 -->
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">基础保障</div>
+            <div class="text-[10px] text-[#D88C3C] border border-[#D88C3C] bg-[#FEF6E8] rounded px-1 mb-2">经济之选</div>
+            
+            <div class="space-y-0.5 w-full text-[10px] text-gray-500 text-center leading-tight">
+              <div>意外受伤¥10万</div>
+              <div>财物丢失¥500</div>
+              <div>停运补偿¥50</div>
+            </div>
+
+            <div class="mt-auto flex items-center justify-center space-x-1 mb-1">
+              <span class="font-bold">¥3/人</span>
+              <div class="<%= @insurance_type == 'premium' ? 'text-[#FFD944]' : 'text-gray-300' %>">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 卡片 3: 升级保障 -->
+          <div class="<%= @insurance_type == 'refund' ? 'bg-[#F0F7FF]' : 'bg-gray-50' %> border <%= @insurance_type == 'refund' ? 'border-[#5D9CEC]' : 'border-gray-100' %> rounded-lg p-2 text-center h-40 flex flex-col items-center"
+               data-action="click->bus-ticket-order#selectInsurance"
+               data-insurance-type="refund"
+               data-insurance-price="9">
+            <div class="text-[#5D9CEC] mb-1 mt-1">
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">退票保障</div>
+            <div class="text-[10px] text-[#4A89DC] border border-[#4A89DC] bg-[#EBF4FF] rounded px-1 mb-2">明智之选</div>
+            
+            <div class="space-y-0.5 w-full text-[10px] text-gray-500 text-center leading-tight">
+              <div>意外受伤¥20万</div>
+              <div>财物丢失¥1000</div>
+              <div>退票无忧¥100</div>
+            </div>
+
+            <div class="mt-auto flex items-center justify-center space-x-1 mb-1">
+              <span class="font-bold">¥9/人</span>
+              <div class="<%= @insurance_type == 'refund' ? 'text-[#5D9CEC]' : 'text-gray-300' %>">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 85% 用户的选择 标签 -->
+        <div class="relative mt-2">
+          <div class="absolute left-1/2 -translate-x-1/2 -top-[10px] bg-[#FF8C00] text-white text-[10px] px-3 py-0.5 rounded-full z-10 shadow-sm">
+            85%用户的选择
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 法律声明 -->
+    <div class="px-2 pb-4">
+      <p class="text-gray-400 text-xs leading-relaxed text-justify">
+        蚂蚁保保险代理有限公司 本模块为保险投保页面，由蚂蚁保保险代理有限公司管理运营。请仔细阅读<span class="text-[#0088CC]">客户通知书</span>; <span class="text-[#0088CC]">保险代理/经纪协议</span>; <span class="text-[#0088CC]">投保须知</span>、<span class="text-[#0088CC]">责任除外</span>、<span class="text-[#0088CC]">条款及投保声明</span>等重要内容。为保障你的权益，我们将安全记录你的操作。
+      </p>
+    </div>
+    
+    <!-- 支付同意条款 -->
+    <div class="flex items-start px-2 mb-4">
+      <svg class="w-4 h-4 text-[#5D6B8F] mt-0.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div class="text-sm text-[#333]">
+        点击去支付表示您已阅读并同意 <br>
+        <span class="text-[#5D6B8F]">《汽车票预订协议》</span>
+      </div>
+    </div>
+
+    <!-- 底部商家信息 -->
+    <div class="text-xs text-gray-500 px-2 pb-8 space-y-1">
+      <div>卖家  阿斯兰汽车票专营店</div>
+      <div>出票方  广东南粤通票务专营店</div>
+    </div>
+  </div>
+
+  <!-- 底部固定支付栏 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-safe">
+    <div class="flex items-center justify-between px-4 py-2 h-16">
+      <div class="flex flex-col">
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 mr-1" data-bus-ticket-order-target="passengerCount">共1人</span>
+          <span class="text-[#FF4400] text-sm font-bold">¥</span>
+          <span class="text-[#FF4400] text-3xl font-bold leading-none" data-bus-ticket-order-target="totalPrice"><%= @total_price %></span>
+        </div>
+        <div class="flex items-center text-xs text-gray-400">
+          含服务费 <span class="ml-2">明细</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <button type="button" data-action="click->bus-ticket-order#submitOrder"
+              data-bus-ticket-id="<%= @bus_ticket.id %>"
+              data-base-price="<%= @base_price %>"
+              class="bg-[#FF5533] text-white text-lg font-bold py-2.5 px-10 rounded-full shadow-lg shadow-orange-200">
+        去支付
+      </button>
+    </div>
+  </div>
+
+  <!-- Hidden form data -->
+  <div data-bus-ticket-order-target="formData" class="hidden"
+       data-insurance-type="<%= @insurance_type %>"
+       data-insurance-price="<%= @insurance_price %>">
+  </div>
+  
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>

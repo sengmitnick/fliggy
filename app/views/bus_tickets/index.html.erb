@@ -1,4 +1,17 @@
-<div class="bg-gray-100 min-h-screen flex justify-center">
+<% content_for :head do %>
+  <style>
+    /* 隐藏滚动条但保留功能 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<% end %>
+
+<div class="bg-gray-100 min-h-screen flex justify-center" data-controller="city-selector bus-date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州市" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- 移动端容器限制 -->
   <div class="w-full max-w-md bg-gray-50 relative min-h-screen flex flex-col">
 
@@ -75,30 +88,35 @@
 
         <!-- 始发地 / 目的地 -->
         <div class="flex justify-between items-center mb-4">
-          <div class="flex-1 text-left">
-            <div class="text-3xl font-bold text-gray-900">深圳</div>
-          </div>
+          <button type="button" data-action="click->city-selector#openDeparture" class="flex-1 text-left">
+            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="departure">深圳</span>
+          </button>
 
           <!-- 切换图标 -->
-          <div class="w-10 h-10 rounded-full flex items-center justify-center">
+          <button type="button" data-action="click->city-selector#switchCities" class="w-10 h-10 rounded-full flex items-center justify-center" aria-label="切换城市">
             <%= image_tag "bus_tickets/切换.png", class: "w-full h-full object-contain", alt: "切换" %>
-          </div>
+          </button>
 
-          <div class="flex-1 text-right">
-            <div class="text-3xl font-bold text-gray-900">广州市</div>
-          </div>
+          <button type="button" data-action="click->city-selector#openDestination" class="flex-1 text-right">
+            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="destination">广州市</span>
+          </button>
         </div>
 
         <!-- 日期选择 -->
-        <div class="flex items-end mb-8 border-b border-gray-100 pb-4">
-          <span class="text-2xl font-bold text-gray-900 mr-2"><%= Date.today.strftime("%-m月%-d日") %></span>
+        <button type="button" data-action="click->bus-date-picker#openModal" class="flex items-end mb-8 border-b border-gray-100 pb-4 text-left w-full">
+          <span class="text-2xl font-bold text-gray-900 mr-2" data-bus-date-picker-target="selectedDate"><%= Date.today.strftime("%-m月%-d日") %></span>
           <span class="text-gray-500 text-base mb-0.5">今天</span>
-        </div>
+        </button>
 
         <!-- 搜索按钮 -->
-        <button type="button" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
-          搜索汽车票
-        </button>
+        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false } do |f| %>
+          <%= f.hidden_field :origin, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
+          <%= f.hidden_field :destination, value: '广州市', data: { 'city-selector-target': 'destinationCityInput' } %>
+          <%= f.hidden_field :date, value: Date.today, data: { 'bus-date-picker-target': 'dateInput' } %>
+          <button type="submit" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
+            搜索汽车票
+          </button>
+        <% end %>
 
         <!-- 历史记录 -->
         <div class="flex justify-between text-xs text-gray-400">
@@ -168,24 +186,19 @@
 
     <!-- 底部导航栏 -->
     <div class="absolute bottom-6 left-0 right-0 flex justify-center items-center pointer-events-none">
-      <div class="bg-white shadow-lg rounded-full px-4 py-2 flex flex-col items-center pointer-events-auto cursor-pointer">
+      <%= link_to bookings_path, class: "bg-white shadow-lg rounded-full px-4 py-2 flex flex-col items-center pointer-events-auto cursor-pointer" do %>
         <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
         </svg>
         <span class="text-[10px] text-gray-800 font-medium mt-0.5">我的订单</span>
-      </div>
+      <% end %>
     </div>
 
   </div>
-</div>
 
-<style>
-  /* 隐藏滚动条但保留功能 */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-</style>
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+
+  <!-- Bus Date Picker Modal -->
+  <%= render 'bus_tickets/bus_date_picker_modal' %>
+</div>
