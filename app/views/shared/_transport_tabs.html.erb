@@ -10,7 +10,7 @@
       { key: :special_flight, label: '特价机票', path: special_flights_path },
       { key: :train, label: '火车票', path: trains_path },
       { key: :car_rental, label: '租车/接送', path: cars_path },
-      { key: :bus, label: '汽车票', path: '#', coming_soon: true }
+      { key: :bus, label: '汽车票', path: bus_tickets_path }
     ].each do |tab| %>
       <% if tab[:key] == active_tab %>
         <!-- Active Tab -->

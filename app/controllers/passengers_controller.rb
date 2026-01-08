@@ -18,6 +18,8 @@ class PassengersController < ApplicationController
     @rooms = params[:rooms]
     @adults = params[:adults]
     @children = params[:children]
+    @bus_ticket_id = params[:bus_ticket_id]
+    @insurance_type = params[:insurance_type]
   end
 
   def create
@@ -45,6 +47,12 @@ class PassengersController < ApplicationController
           adults: params[:adults],
           children: params[:children]
         ), notice: "#{traveler_label}添加成功"
+      elsif params[:return_to] == 'bus_ticket_order_new'
+        Rails.logger.info "Redirecting to new_bus_ticket_order_path with bus_ticket_id"
+        redirect_to new_bus_ticket_order_path(
+          bus_ticket_id: params[:bus_ticket_id],
+          insurance_type: params[:insurance_type]
+        ), notice: "#{traveler_label}添加成功"
       else
         Rails.logger.info "Redirecting to passengers_path"
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
@@ -60,6 +68,8 @@ class PassengersController < ApplicationController
       @rooms = params[:rooms]
       @adults = params[:adults]
       @children = params[:children]
+      @bus_ticket_id = params[:bus_ticket_id]
+      @insurance_type = params[:insurance_type]
       render :new
     end
   end

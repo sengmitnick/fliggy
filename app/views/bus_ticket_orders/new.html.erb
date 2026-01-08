@@ -132,7 +132,7 @@
 
       <!-- 新增乘车人按钮 -->
       <div class="py-4 flex justify-center">
-        <%= link_to new_passenger_path(return_to: request.fullpath), class: "bg-[#FFF8D8] text-[#333] font-medium py-3 px-12 rounded-full w-2/3 flex items-center justify-center" do %>
+        <%= link_to new_passenger_path(source: 'bus', return_to: 'bus_ticket_order_new', bus_ticket_id: @bus_ticket.id, insurance_type: @insurance_type), class: "bg-[#FFF8D8] text-[#333] font-medium py-3 px-12 rounded-full w-2/3 flex items-center justify-center" do %>
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
