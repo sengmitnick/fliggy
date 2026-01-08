@@ -1,0 +1,153 @@
+#!/usr/bin/env ruby
+# Validate ERB files HTML structure by preprocessing and using html-validate
+
+require 'fileutils'
+require 'tempfile'
+require 'json'
+
+class ERBHTMLValidator
+  def initialize
+    @errors = []
+    @temp_dir = Dir.mktmpdir('erb_html_validate')
+  end
+
+  def strip_erb_tags(content)
+    # More intelligent ERB stripping that maintains HTML structure
+    result = content.dup
+    
+    # Remove ERB comments
+    result.gsub!(/<%#.*?%>/m, '')
+    
+    # Replace ERB output tags with placeholder span
+    result.gsub!(/<%=\s*(.*?)\s*%>/m) do |match|
+      # Preserve HTML if the ERB outputs HTML helpers
+      if match =~ /render|link_to|form_|button_to|image_tag/
+        '<div class="erb-placeholder"></div>'
+      else
+        'placeholder'
+      end
+    end
+    
+    # Remove ERB logic tags but try to preserve structure
+    result.gsub!(/<%\s*if\s+.*?%>/m, '')
+    result.gsub!(/<%\s*unless\s+.*?%>/m, '')
+    result.gsub!(/<%\s*elsif\s+.*?%>/m, '')
+    result.gsub!(/<%\s*else\s*%>/m, '')
+    result.gsub!(/<%\s*end\s*%>/m, '')
+    result.gsub!(/<%\s*.*?\.each\s+do\s+.*?%>/m, '')
+    result.gsub!(/<%\s*case\s+.*?%>/m, '')
+    result.gsub!(/<%\s*when\s+.*?%>/m, '')
+    
+    # Remove any remaining ERB tags
+    result.gsub!(/<%.*?%>/m, '')
+    
+    result
+  end
+
+  def validate_file(file_path)
+    content = File.read(file_path)
+    stripped = strip_erb_tags(content)
+    
+    # Create temp HTML file
+    temp_file = File.join(@temp_dir, File.basename(file_path, '.erb'))
+    File.write(temp_file, stripped)
+    
+    # Run html-validate
+    result = `npx html-validate "#{temp_file}" --formatter json 2>&1`
+    
+    begin
+      json_result = JSON.parse(result)
+      
+      if json_result.is_a?(Array) && json_result.any?
+        file_errors = json_result.first
+        if file_errors['errorCount'] && file_errors['errorCount'] > 0
+          return {
+            file: file_path,
+            errors: file_errors['messages']
+          }
+        end
+      end
+    rescue JSON::ParserError
+      # If not JSON, check for plain text errors
+      if result.include?('error') && !result.include?('"valid": true')
+        return {
+          file: file_path,
+          errors: [{ message: result }]
+        }
+      end
+    end
+    
+    nil
+  end
+
+  def validate_all(file_pattern = 'app/views/**/*.html.erb')
+    files = Dir.glob(file_pattern)
+    
+    puts "🔍 Validating #{files.length} ERB files for HTML structure...\n"
+    
+    files.each_with_index do |file, idx|
+      print "\r[#{idx + 1}/#{files.length}] Checking..."
+      
+      if error = validate_file(file)
+        @errors << error
+      end
+    end
+    
+    print "\r#{' ' * 50}\r" # Clear progress line
+    
+    cleanup
+    report_results
+  end
+
+  def validate_single(file_path)
+    puts "🔍 Validating #{file_path}...\n"
+    
+    if error = validate_file(file_path)
+      @errors << error
+    end
+    
+    cleanup
+    report_results
+  end
+
+  private
+
+  def cleanup
+    FileUtils.rm_rf(@temp_dir) if File.exist?(@temp_dir)
+  end
+
+  def report_results
+    if @errors.empty?
+      puts "✅ All ERB files have valid HTML structure!"
+      exit 0
+    else
+      puts "❌ Found HTML structure issues in #{@errors.length} file(s):\n\n"
+      
+      @errors.each do |error_info|
+        puts "📄 #{error_info[:file]}"
+        error_info[:errors].each do |err|
+          if err.is_a?(Hash)
+            line = err['line'] || '?'
+            col = err['column'] || '?'
+            message = err['message'] || err.inspect
+            puts "   Line #{line}:#{col} - #{message}"
+          else
+            puts "   #{err}"
+          end
+        end
+        puts
+      end
+      
+      exit 1
+    end
+  end
+end
+
+# Main
+validator = ERBHTMLValidator.new
+
+if ARGV[0]
+  validator.validate_single(ARGV[0])
+else
+  validator.validate_all
+end
