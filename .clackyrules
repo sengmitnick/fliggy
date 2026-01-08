@@ -187,6 +187,13 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 - Major changes or before delivery: Run full `rake test` to ensure stability
 - Browser testing: Use Playwright for end-to-end testing (see Playwright Testing section)
 
+**Testing Order (CRITICAL - Follow this sequence):**
+1. **ERB HTML Validation**: Run `bin/validate_erb_html` to check HTML structure validity
+2. **Unit/Request Tests**: Run `rake test` to verify backend logic
+3. **Browser E2E Tests**: Run Playwright tests to verify user flows
+
+NEVER skip Step 1 - HTML structure errors will cause Playwright tests to fail.
+
 `rake test` is configured to only show 5 failed test cases at a time, so you should repeatedly run rake test if these have errors (no more than 10 rounds) until all tests pass
 
 For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
@@ -201,6 +208,27 @@ Use `bundle exec rspec spec/requests/xxx_spec.rb --format documentation`( not -v
 **When you see "Views for xxx are not yet developed" error during testing, immediately create the corresponding view file, then re-run the tests.**
 
 Temporary files should be written in the `tmp` directory.
+
+## ERB HTML Validation
+
+**Purpose**: Validate HTML structure in ERB templates before running other tests.
+
+**Commands**:
+- Validate all: `bin/validate_erb_html` or `rake erb:validate`
+- Validate single file: `bin/validate_erb_html app/views/xxx.html.erb` or `rake erb:validate_file[app/views/xxx.html.erb]`
+
+**When to use**:
+- ALWAYS run before Playwright tests when frontend pages are involved
+- After creating or modifying any `.html.erb` files
+- Before committing view changes
+
+**What it checks**:
+- HTML tag matching (opening/closing tags)
+- Proper nesting structure
+- Valid HTML5 syntax
+- Filters out ERB-specific false positives
+
+See `docs/ERB_HTML_VALIDATION.md` for detailed documentation.
 
 ## Playwright Testing
 
