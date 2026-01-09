@@ -1,0 +1,154 @@
+<div class="min-h-screen bg-[#F7F8FA] pb-20" data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="/deep_travel_bookings/<%= @booking.id %>/pay"
+     data-payment-confirmation-success-url-value="/deep_travel_bookings/<%= @booking.id %>/success">
+  <!-- 顶部导航栏 -->
+  <div class="bg-[#FFD900] sticky top-0 z-50">
+    <div class="flex items-center h-12 px-4 relative">
+      <%= link_to deep_travel_path(@guide), class: "absolute left-4" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="w-full text-center text-lg font-bold">订单详情</h1>
+    </div>
+  </div>
+
+  <!-- 订单状态提示 -->
+  <div class="px-4 py-3">
+    <div class="bg-[#FFF7E6] border border-[#FFD900] rounded-lg px-3 py-2 flex items-center">
+      <svg class="w-5 h-5 text-[#FF9500] mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-sm text-gray-800">订单已创建，请尽快完成支付</span>
+    </div>
+  </div>
+
+  <!-- 讲师信息卡片 -->
+  <div class="px-4 mb-4">
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="flex items-center p-4 border-b">
+        <% if @guide.avatar.attached? %>
+          <%= image_tag @guide.avatar, class: "w-16 h-16 rounded-full object-cover" %>
+        <% else %>
+          <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+            <span class="text-2xl text-gray-400">👤</span>
+          </div>
+        <% end %>
+        <div class="ml-3 flex-1">
+          <div class="font-bold text-lg"><%= @guide.name %></div>
+          <div class="text-sm text-gray-600"><%= @guide.title %></div>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="px-2 py-0.5 bg-[#FFD900] text-xs rounded"><%= @guide.rank %></span>
+            <span class="text-xs text-gray-500"><%= @guide.follower_count %>关注</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 行程信息 -->
+      <div class="p-4 space-y-3">
+        <div class="flex items-center text-sm">
+          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span class="text-gray-600">出发日期：</span>
+          <span class="font-medium"><%= @booking.travel_date.strftime('%Y年%m月%d日') %></span>
+        </div>
+        
+        <div class="flex items-center text-sm">
+          <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <span class="text-gray-600">出行人数：</span>
+          <span class="font-medium"><%= @booking.adult_count %>成人 <%= @booking.child_count %>儿童</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出行人信息 -->
+  <div class="px-4 mb-4">
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <h3 class="font-bold text-base mb-3">出行人信息</h3>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">姓名</span>
+          <span class="font-medium"><%= @booking.traveler_name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">身份证号</span>
+          <span class="font-medium"><%= @booking.traveler_id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">联系电话</span>
+          <span class="font-medium"><%= @booking.traveler_phone %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系人信息 -->
+  <div class="px-4 mb-4">
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <h3 class="font-bold text-base mb-3">紧急联系人</h3>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">姓名</span>
+          <span class="font-medium"><%= @booking.contact_name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">联系电话</span>
+          <span class="font-medium"><%= @booking.contact_phone %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 订单金额明细 -->
+  <div class="px-4 mb-20">
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <h3 class="font-bold text-base mb-3">订单金额</h3>
+      
+      <div class="space-y-2 pb-3 border-b">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">成人 × <%= @booking.adult_count %></span>
+          <span>¥<%= (@product.price * @booking.adult_count).to_i %></span>
+        </div>
+        <% if @booking.child_count > 0 %>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">儿童 × <%= @booking.child_count %></span>
+            <span>¥<%= ((@product.price * 0.8).round * @booking.child_count).to_i %></span>
+          </div>
+        <% end %>
+        <% if @booking.insurance_price && @booking.insurance_price > 0 %>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">旅行保险</span>
+            <span>¥<%= @booking.insurance_price.to_i %></span>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="flex justify-between items-center pt-3">
+        <span class="font-bold text-base">订单总额</span>
+        <span class="text-[#FF5000] text-2xl font-bold">¥<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部支付按钮 -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t shadow-lg z-40">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-gray-500">总计</div>
+        <div class="text-xl font-bold text-[#FF5000]">¥<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %></div>
+      </div>
+      <button type="button" 
+              data-action="click->payment-confirmation#showPasswordModal" 
+              class="bg-[#FF5000] text-white px-8 py-3 rounded-full text-lg font-bold shadow-lg">
+        立即支付
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>

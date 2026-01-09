@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_08_055405) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_09_050032) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -221,6 +221,30 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_08_055405) do
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "deep_travel_bookings", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "deep_travel_guide_id"
+    t.bigint "deep_travel_product_id"
+    t.date "travel_date"
+    t.integer "adult_count", default: 1
+    t.integer "child_count", default: 0
+    t.string "traveler_name"
+    t.string "traveler_id_number"
+    t.string "traveler_phone"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.decimal "total_price", precision: 10, scale: 2
+    t.decimal "insurance_price", precision: 10, scale: 2
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deep_travel_guide_id"], name: "index_deep_travel_bookings_on_deep_travel_guide_id"
+    t.index ["deep_travel_product_id"], name: "index_deep_travel_bookings_on_deep_travel_product_id"
+    t.index ["user_id"], name: "index_deep_travel_bookings_on_user_id"
   end
 
   create_table "deep_travel_guides", force: :cascade do |t|

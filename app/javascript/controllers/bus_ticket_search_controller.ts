@@ -642,17 +642,17 @@ export default class extends Controller {
   // 更新底部排序按钮显示
   updateSortButtonsDisplay(): void {
     // 重置所有按钮样式
-    if (this.hasTimeButtonTarget) {
+    if (this.timeButtonTarget) {
       this.resetButtonStyle(this.timeButtonTarget)
     }
-    if (this.hasPriceButtonTarget) {
+    if (this.priceButtonTarget) {
       this.resetButtonStyle(this.priceButtonTarget)
     }
 
     // 根据当前排序高亮对应按钮
-    if (this.currentSortField === 'time' && this.hasTimeButtonTarget) {
+    if (this.currentSortField === 'time' && this.timeButtonTarget) {
       this.highlightButton(this.timeButtonTarget, this.currentSortDirection === 'asc' ? '早→晚' : '晚→早')
-    } else if (this.currentSortField === 'price' && this.hasPriceButtonTarget) {
+    } else if (this.currentSortField === 'price' && this.priceButtonTarget) {
       this.highlightButton(this.priceButtonTarget, this.currentSortDirection === 'asc' ? '低→高' : '高→低')
     }
   }

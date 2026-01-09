@@ -1,0 +1,366 @@
+<% content_for :page_title, "填写订单" %>
+
+<div class="bg-gray-50 min-h-screen pb-24">
+  <!-- 头部导航 -->
+  <div class="bg-white sticky top-0 z-10 shadow-sm">
+    <div class="max-w-[480px] mx-auto flex items-center px-4 py-3">
+      <%= link_to deep_travel_path(@guide), class: "mr-3" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-bold flex-1">填写订单</h1>
+    </div>
+  </div>
+
+  <%= form_with model: @booking, url: deep_travel_bookings_path, method: :post, local: true, class: "max-w-[480px] mx-auto space-y-3 p-4", data: { turbo: false } do |f| %>
+    <%= render 'shared/form_error_message', model: @booking %>
+    
+    <!-- Hidden fields -->
+    <%= f.hidden_field :deep_travel_guide_id, value: @guide.id %>
+    <%= f.hidden_field :deep_travel_product_id, value: @product.id %>
+    <%= f.hidden_field :travel_date, value: @travel_date %>
+    <%= f.hidden_field :adult_count, value: @adult_count %>
+    <%= f.hidden_field :child_count, value: @child_count %>
+    <%= f.hidden_field :total_price, value: @final_price %>
+
+    <!-- 卡片 1: 行程信息 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start space-x-3">
+        <% if @guide.avatar.attached? %>
+          <%= image_tag @guide.avatar, class: "w-16 h-16 rounded-lg object-cover" %>
+        <% else %>
+          <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        <% end %>
+        
+        <div class="flex-1">
+          <div class="font-bold text-base text-[#111111] line-clamp-2 mb-1"><%= @product.title %></div>
+          <div class="text-sm text-gray-500">
+            <%= Date.parse(@travel_date).strftime("%m月%d日") %> · <%= @guide.name %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 2: 票价信息 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm space-y-3">
+      <% if @adult_count > 0 %>
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-base font-bold text-[#111111]">成人</div>
+          </div>
+          <div class="flex flex-col items-end">
+            <div class="text-base font-medium mb-1">¥<%= @adult_price %><span class="text-xs text-gray-500 font-normal">/人</span></div>
+            <span class="text-sm text-gray-600">x <%= @adult_count %></span>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @child_count > 0 %>
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-base font-bold text-[#111111]">儿童</div>
+          </div>
+          <div class="flex flex-col items-end">
+            <div class="text-base font-medium mb-1">¥<%= @child_price %><span class="text-xs text-gray-500 font-normal">/人</span></div>
+            <span class="text-sm text-gray-600">x <%= @child_count %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 卡片 3: 选择游客 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-bold text-base">选择 <%= @adult_count + @child_count %> 位游客</div>
+      </div>
+      
+      <% if @passengers.any? %>
+        <!-- 游客选择列表 -->
+        <div id="traveler-selection-container">
+          <%= f.fields_for :booking_travelers do |traveler_form| %>
+            <% traveler_index = @booking.booking_travelers.index(traveler_form.object) %>
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200 traveler-card" data-traveler-index="<%= traveler_index %>">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 bg-[#577CE8] text-white rounded-full flex items-center justify-center font-semibold">
+                    <%= traveler_form.object.traveler_type == 'adult' ? '成' : '儿' %>
+                  </div>
+                  <span class="text-sm font-medium text-[#111111]">
+                    <%= traveler_form.object.traveler_type == 'adult' ? '成人' : '儿童' %>  <%= traveler_index + 1 %>
+                  </span>
+                </div>
+                <button type="button" class="text-[#577CE8] text-sm" onclick="openPassengerModal(<%= traveler_index %>)">
+                  选择出行人
+                </button>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex items-center py-2 border-b border-gray-200">
+                  <label class="text-sm text-gray-600 w-16">姓名</label>
+                  <%= traveler_form.text_field :traveler_name, 
+                      placeholder: "请选择出行人",
+                      readonly: true,
+                      class: "flex-1 text-sm text-[#111111] bg-transparent focus:outline-none traveler-name-input",
+                      data: { traveler_index: traveler_index } %>
+                </div>
+                
+                <div class="flex items-center py-2">
+                  <label class="text-sm text-gray-600 w-16">身份证</label>
+                  <%= traveler_form.text_field :id_number, 
+                      placeholder: "请选择出行人",
+                      readonly: true,
+                      class: "flex-1 text-sm text-[#111111] bg-transparent focus:outline-none traveler-id-input",
+                      data: { traveler_index: traveler_index } %>
+                </div>
+                
+                <%= traveler_form.hidden_field :traveler_type %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- 添加更多出行人按钮 -->
+        <%= link_to new_passenger_path(
+          source: 'deep_travel',
+          return_to: 'deep_travel_booking_new',
+          guide_id: @guide.id,
+          date: @travel_date,
+          adult_count: @adult_count,
+          child_count: @child_count
+        ), class: "mt-4 w-full flex items-center justify-center text-[#577CE8] text-sm font-medium py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#577CE8]" do %>
+          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          更多出行人
+        <% end %>
+      <% else %>
+        <!-- 无出行人时显示空状态 -->
+        <div class="text-center py-8">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">暂无常用出行人</p>
+          <%= link_to new_passenger_path(
+            source: 'deep_travel',
+            return_to: 'deep_travel_booking_new',
+            guide_id: @guide.id,
+            date: @travel_date,
+            adult_count: @adult_count,
+            child_count: @child_count
+          ), class: "inline-flex items-center justify-center text-white bg-[#577CE8] text-sm font-medium py-3 px-6 rounded-lg hover:bg-[#4a6bc7]" do %>
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            添加常用出行人
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 卡片 4: 联系人 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="font-bold text-[#111111] mb-4">联系人</div>
+      
+      <div class="space-y-3">
+        <div>
+          <%= f.label :contact_name, "姓名", class: "text-sm text-gray-600 block mb-1" %>
+          <%= f.text_field :contact_name, 
+                          placeholder: "请输入联系人姓名", 
+                          class: "w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-[#FFDD00] focus:ring-1 focus:ring-[#FFDD00] outline-none" %>
+        </div>
+
+        <div>
+          <%= f.label :contact_phone, "手机号", class: "text-sm text-gray-600 block mb-1" %>
+          <%= f.text_field :contact_phone, 
+                          placeholder: "请输入联系人手机号", 
+                          class: "w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-[#FFDD00] focus:ring-1 focus:ring-[#FFDD00] outline-none" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 5: 留言备注 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="font-bold text-[#111111] mb-2">留言备注</div>
+      <%= f.text_area :notes, 
+                      placeholder: "选填,请先和商家协商一致", 
+                      rows: 3,
+                      class: "w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-[#FFDD00] focus:ring-1 focus:ring-[#FFDD00] outline-none" %>
+    </div>
+
+    <!-- 卡片 6: 优惠信息 -->
+    <% if @discount_amount > 0 %>
+      <div class="bg-white rounded-xl p-4 shadow-sm">
+        <div class="flex justify-between items-center">
+          <div class="text-gray-500 text-sm">优惠</div>
+          <div class="flex items-center text-sm">
+            <span class="text-[#FF5030] font-bold mr-1">共减¥<%= @discount_amount %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- 底部协议文字 -->
+    <div class="flex items-start px-1 mt-4 mb-2">
+      <div class="mt-0.5 mr-2">
+        <div class="w-4 h-4 rounded-full border border-gray-400"></div>
+      </div>
+      <div class="text-xs text-gray-500 leading-tight">
+        请您仔细阅读<span class="text-[#577CE8]">电子合同</span>、<span class="text-[#577CE8]">线路标准退预订须知</span>点击去付款即代表您已阅读并同意条款内容。
+      </div>
+    </div>
+
+    <!-- 底部固定栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-2 flex items-center justify-between z-50 max-w-[480px] mx-auto">
+      <div class="flex flex-col">
+        <div class="flex items-end text-[#FF5030]">
+          <span class="text-sm font-bold mb-1">¥</span>
+          <span class="text-3xl font-bold leading-none"><%= @final_price %></span>
+        </div>
+        <% if @discount_amount > 0 %>
+          <div class="text-xs text-gray-400">已优惠 ¥<%= @discount_amount %></div>
+        <% end %>
+      </div>
+      
+      <%= f.submit "立即支付", 
+                  class: "bg-gradient-to-r from-[#FF7A45] to-[#FF5533] text-white font-bold text-lg px-8 py-2.5 rounded-full shadow-lg shadow-orange-200 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Passenger Selection Modal -->
+<div id="passenger-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="closePassengerModal(event)">
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[480px] mx-auto max-h-[70vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <h3 class="text-lg font-bold">选择出行人</h3>
+      <button type="button" onclick="closePassengerModal()" class="text-gray-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-4 space-y-3" id="passenger-list-modal">
+      <% @passengers.each do |passenger| %>
+        <div class="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors passenger-modal-item"
+             data-passenger-id="<%= passenger.id %>"
+             data-name="<%= passenger.name %>"
+             data-id-number="<%= passenger.id_number %>"
+             onclick="selectPassengerForTraveler(this)">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center flex-1">
+              <div class="w-10 h-10 bg-[#577CE8] text-white rounded-full flex items-center justify-center font-semibold mr-3">
+                本
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center">
+                  <span class="font-medium text-base text-[#111111]"><%= passenger.name %></span>
+                  <span class="ml-2 text-xs text-gray-500">本人</span>
+                </div>
+                <div class="text-sm text-gray-500 mt-1">身份证 <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1 ********\2') %></div>
+              </div>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentTravelerIndex = null;
+
+// Open passenger selection modal
+function openPassengerModal(travelerIndex) {
+  currentTravelerIndex = travelerIndex;
+  document.getElementById('passenger-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close passenger selection modal
+function closePassengerModal(event) {
+  if (!event || event.target.id === 'passenger-modal' || event.target.closest('button')) {
+    document.getElementById('passenger-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    currentTravelerIndex = null;
+  }
+}
+
+// Select passenger for current traveler
+function selectPassengerForTraveler(element) {
+  if (currentTravelerIndex === null) return;
+  
+  const name = element.dataset.name;
+  const idNumber = element.dataset.idNumber;
+  
+  // Update form fields
+  const nameInput = document.querySelector(`[data-traveler-index="${currentTravelerIndex}"].traveler-name-input`);
+  const idInput = document.querySelector(`[data-traveler-index="${currentTravelerIndex}"].traveler-id-input`);
+  
+  if (nameInput) nameInput.value = name;
+  if (idInput) idInput.value = idNumber;
+  
+  // Update card styling
+  const travelerCard = document.querySelector(`.traveler-card[data-traveler-index="${currentTravelerIndex}"]`);
+  if (travelerCard) {
+    travelerCard.classList.remove('border-gray-200', 'bg-gray-50');
+    travelerCard.classList.add('border-[#FFDD00]', 'bg-[#FFF9E6]');
+  }
+  
+  // Close modal
+  closePassengerModal();
+  
+  if (window.showToast) {
+    window.showToast(`已选择 ${name}`);
+  }
+}
+
+// Validate all travelers selected before submission
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form[action="/deep_travel_bookings"]');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const travelerCards = document.querySelectorAll('.traveler-card');
+      let allSelected = true;
+      
+      travelerCards.forEach(card => {
+        const index = card.dataset.travelerIndex;
+        const nameInput = document.querySelector(`[data-traveler-index="${index}"].traveler-name-input`);
+        const idInput = document.querySelector(`[data-traveler-index="${index}"].traveler-id-input`);
+        
+        if (!nameInput.value || !idInput.value) {
+          allSelected = false;
+        }
+      });
+      
+      if (!allSelected) {
+        e.preventDefault();
+        if (window.showToast) {
+          window.showToast('请为所有游客选择出行人');
+        } else {
+          alert('请为所有游客选择出行人');
+        }
+        return false;
+      }
+    });
+  }
+});
+</script>
+
+<style>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

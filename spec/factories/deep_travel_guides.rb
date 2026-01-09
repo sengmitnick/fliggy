@@ -7,10 +7,10 @@ FactoryBot.define do
     follower_count { 1 }
     experience_years { 1 }
     specialties { "MyText" }
-    price { 9.99 }
+    price { 192 }
     served_count { 1 }
     rank { 1 }
-    rating { 9.99 }
+    rating { 4.5 }
     featured { true }
 
   end

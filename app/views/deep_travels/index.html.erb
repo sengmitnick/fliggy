@@ -73,7 +73,8 @@
         <% next unless guide %>
         
         <!-- 景点卡片 -->
-        <div class="bg-white rounded-xl mb-3 p-4 shadow-sm">
+        <%= link_to deep_travel_path(guide), class: "block" do %>
+        <div class="bg-white rounded-xl mb-3 p-4 shadow-sm hover:shadow-md transition-shadow">
           <!-- 标题行 -->
           <div class="flex items-center gap-1 mb-1">
             <h3 class="font-bold text-lg text-slate-900"><%= products.first.subtitle&.split(' ')&.first || products.first.title.split(/[【\[]/)[0].truncate(15) %></h3>
@@ -108,7 +109,7 @@
                 <div class="font-bold text-lg leading-none" style="color: #FF4D3F;">
                   <span class="text-xs">¥</span><%= guide.price.to_i %><span class="text-xs font-normal text-gray-400 ml-0.5">起</span>
                 </div>
-                <button class="text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full" style="background-color: #FFE855;">去预约</button>
+                <div class="text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full" style="background-color: #FFE855;">去预约</div>
               </div>
               <p class="text-[10px] text-gray-400 mt-1">已服务<%= guide.served_count %>+人</p>
             </div>
@@ -169,6 +170,7 @@
             </div>
           </div>
         </div>
+        <% end %>
       <% end %>
     <% else %>
       <!-- 空状态 -->
