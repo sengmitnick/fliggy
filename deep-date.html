@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期选择器复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义一些微调字体，使其更接近原生应用 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f3f4f6;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- 模拟手机容器 -->
+    <div class="w-full max-w-[375px] h-[812px] bg-white relative flex flex-col shadow-2xl overflow-hidden rounded-[20px]">
+        
+        <!-- 顶部 Header -->
+        <div class="px-4 py-3 flex items-center justify-between border-b border-gray-50 bg-white z-10">
+            <div class="w-6"></div> <!-- 占位 -->
+            <h1 class="text-lg font-medium text-gray-900">使用日期</h1>
+            <!-- 关闭图标 -->
+            <button class="w-6 h-6 flex items-center justify-center text-gray-500">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 星期表头 -->
+        <div class="grid grid-cols-7 text-center py-2 bg-white text-sm">
+            <div class="text-orange-400">日</div>
+            <div class="text-gray-500">一</div>
+            <div class="text-gray-500">二</div>
+            <div class="text-gray-500">三</div>
+            <div class="text-gray-500">四</div>
+            <div class="text-gray-500">五</div>
+            <div class="text-orange-400">六</div>
+        </div>
+
+        <!-- 可滚动日历区域 -->
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-10">
+            
+            <!-- 2026-01 -->
+            <div class="pt-2">
+                <div class="text-center text-xl font-medium text-gray-800 py-4">2026-01</div>
+                <div class="grid grid-cols-7 text-center gap-y-4 px-1">
+                    
+                    <!-- 空白占位 (周四开始，前4个空) -->
+                    <div></div><div></div><div></div><div></div>
+
+                    <!-- 1日 (元旦/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-500 mb-[-2px]">元旦</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">1</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                    </div>
+
+                    <!-- 2日 (休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <div class="h-[13px]"></div>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">2</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                    </div>
+
+                    <!-- 3日 (休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <div class="h-[13px]"></div>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">3</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                    </div>
+
+                    <!-- 4日 (班) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <div class="h-[13px]"></div>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">4</span>
+                            <span class="absolute -top-1 -right-3 bg-gray-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">班</span>
+                        </div>
+                    </div>
+
+                    <!-- 5-8日 (灰/空) -->
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">5</span></div>
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">6</span></div>
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">7</span></div>
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">8</span></div>
+
+                    <!-- 9日 (今天) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-500 mb-[-2px]">今天</span>
+                        <span class="text-lg font-medium text-gray-300">9</span>
+                    </div>
+
+                    <!-- 10-12日 -->
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">10</span></div>
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">11</span></div>
+                    <div class="flex flex-col items-center h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300">12</span></div>
+
+                    <!-- 13日 (选中状态) -->
+                    <div class="flex flex-col items-center justify-center h-[58px] w-[50px] mx-auto bg-yellow-400 rounded-md shadow-sm">
+                        <span class="text-lg font-bold text-gray-900 leading-none mt-1">13</span>
+                        <span class="text-[10px] text-gray-900 font-medium">¥192</span>
+                    </div>
+
+                    <!-- 14日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">14</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 15-16日 (不可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">15</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">16</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 17日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">17</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 18-19日 (不可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">18</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">19</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 20-21日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">20</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">21</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 22-23日 (不可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">22</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">23</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 24-25日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">24</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">25</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 26日 (腊八) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">腊八</span>
+                        <span class="text-lg font-medium text-gray-300 leading-none">26</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 27-29日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">27</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">28</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">29</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 30日 (不可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">30</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 31日 (可约) -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">31</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2026-02 -->
+            <div class="pt-4">
+                <div class="text-center text-xl font-medium text-gray-800 py-4">2026-02</div>
+                <div class="grid grid-cols-7 text-center gap-y-4 px-1">
+                    
+                    <!-- 1-5日 -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">1</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-300 leading-none">2</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">3</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">4</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <div class="h-[13px]"></div>
+                        <span class="text-lg font-medium text-gray-900 leading-none">5</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 6-8日 -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">十九</span>
+                        <span class="text-lg font-medium text-gray-300 leading-none">6</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">二十</span>
+                        <span class="text-lg font-medium text-gray-900 leading-none">7</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿一</span>
+                        <span class="text-lg font-medium text-gray-900 leading-none">8</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+
+                    <!-- 9-13日 -->
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿二</span>
+                        <span class="text-lg font-medium text-gray-300 leading-none">9</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿三</span>
+                        <span class="text-lg font-medium text-gray-900 leading-none">10</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿四</span>
+                        <span class="text-lg font-medium text-gray-900 leading-none">11</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿五</span>
+                        <span class="text-lg font-medium text-gray-900 leading-none">12</span>
+                        <span class="text-[10px] text-gray-500 scale-90">¥192</span>
+                    </div>
+                    <div class="flex flex-col items-center justify-start h-14">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿六</span>
+                        <span class="text-lg font-medium text-gray-300 leading-none">13</span>
+                        <span class="text-[10px] text-gray-300 scale-90">不可约</span>
+                    </div>
+
+                    <!-- 14日 (情人节/班) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-orange-500 mb-[-2px]">情人节</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">14</span>
+                            <span class="absolute -top-1 -right-3 bg-gray-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">班</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥192</span>
+                    </div>
+
+                    <!-- 15日 (廿八/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">廿八</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">15</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                    <!-- 16日 (除夕/休/不可约) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">除夕</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">16</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-300 scale-90 mt-[-2px]">不可约</span>
+                    </div>
+
+                    <!-- 17日 (春节/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-orange-500 mb-[-2px]">春节</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">17</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                    <!-- 18日 (初二/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">初二</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">18</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                    <!-- 19日 (初三/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">初三</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">19</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                    <!-- 20日 (初四/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">初四</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">20</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                    <!-- 21日 (初五/休) -->
+                    <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">初五</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">21</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                     <!-- 22日 (初六/休) -->
+                     <div class="flex flex-col items-center justify-start h-14 relative">
+                        <span class="text-[10px] text-gray-400 mb-[-2px]">初六</span>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">22</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥289.06</span>
+                    </div>
+
+                     <!-- 23日 (休) -->
+                     <div class="flex flex-col items-center justify-start h-14 relative">
+                        <div class="h-[13px]"></div>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-300">23</span>
+                            <span class="absolute -top-1 -right-3 bg-orange-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">休</span>
+                        </div>
+                        <span class="text-[10px] text-gray-300 scale-90 mt-[-2px]">不可约</span>
+                    </div>
+
+                    <!-- 24-27日 -->
+                    <div class="flex flex-col items-center justify-start h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-900 leading-none">24</span><span class="text-[10px] text-gray-500 scale-90">¥192</span></div>
+                    <div class="flex flex-col items-center justify-start h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-900 leading-none">25</span><span class="text-[10px] text-gray-500 scale-90">¥192</span></div>
+                    <div class="flex flex-col items-center justify-start h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-900 leading-none">26</span><span class="text-[10px] text-gray-500 scale-90">¥192</span></div>
+                    <div class="flex flex-col items-center justify-start h-14"><div class="h-[13px]"></div><span class="text-lg font-medium text-gray-300 leading-none">27</span><span class="text-[10px] text-gray-300 scale-90">不可约</span></div>
+
+                     <!-- 28日 (班) -->
+                     <div class="flex flex-col items-center justify-start h-14 relative">
+                        <div class="h-[13px]"></div>
+                        <div class="relative">
+                            <span class="text-lg font-medium text-gray-900">28</span>
+                            <span class="absolute -top-1 -right-3 bg-gray-400 text-white text-[9px] px-[2px] rounded-[2px] leading-tight">班</span>
+                        </div>
+                        <span class="text-[10px] text-gray-500 scale-90 mt-[-2px]">¥192</span>
+                    </div>
+
+                </div>
+            </div>
+
+             <!-- 底部留白 -->
+             <div class="h-10"></div>
+        </div>
+    </div>
+</body>
+</html>
