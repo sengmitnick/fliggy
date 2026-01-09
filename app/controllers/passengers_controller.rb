@@ -20,6 +20,11 @@ class PassengersController < ApplicationController
     @children = params[:children]
     @bus_ticket_id = params[:bus_ticket_id]
     @insurance_type = params[:insurance_type]
+    # Deep travel booking params
+    @guide_id = params[:guide_id]
+    @date = params[:date]
+    @adult_count = params[:adult_count]
+    @child_count = params[:child_count]
   end
 
   def create
@@ -53,6 +58,14 @@ class PassengersController < ApplicationController
           bus_ticket_id: params[:bus_ticket_id],
           insurance_type: params[:insurance_type]
         ), notice: "#{traveler_label}添加成功"
+      elsif params[:return_to] == 'deep_travel_booking_new'
+        Rails.logger.info "Redirecting to new_deep_travel_booking_path with guide_id and params"
+        redirect_to new_deep_travel_booking_path(
+          guide_id: params[:guide_id],
+          date: params[:date],
+          adult_count: params[:adult_count],
+          child_count: params[:child_count]
+        ), notice: "#{traveler_label}添加成功"
       else
         Rails.logger.info "Redirecting to passengers_path"
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
@@ -70,6 +83,11 @@ class PassengersController < ApplicationController
       @children = params[:children]
       @bus_ticket_id = params[:bus_ticket_id]
       @insurance_type = params[:insurance_type]
+      # Deep travel booking params
+      @guide_id = params[:guide_id]
+      @date = params[:date]
+      @adult_count = params[:adult_count]
+      @child_count = params[:child_count]
       render :new
     end
   end

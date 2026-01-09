@@ -22,6 +22,13 @@
             bus_ticket_id: @bus_ticket_id,
             insurance_type: @insurance_type
           )
+        elsif @return_to == 'deep_travel_booking_new'
+          new_deep_travel_booking_path(
+            guide_id: @guide_id,
+            date: @date,
+            adult_count: @adult_count,
+            child_count: @child_count
+          )
         else
           passengers_path(source: @traveler_type)
         end
@@ -52,7 +59,11 @@
       adults: @adults,
       children: @children,
       bus_ticket_id: @bus_ticket_id,
-      insurance_type: @insurance_type
+      insurance_type: @insurance_type,
+      guide_id: @guide_id,
+      date: @date,
+      adult_count: @adult_count,
+      child_count: @child_count
     ), method: :post, local: true, data: { turbo: false } do |f| %>
       <!-- Error Messages -->
       <% if @passenger.errors.any? %>

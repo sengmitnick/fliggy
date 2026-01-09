@@ -108,6 +108,7 @@ export default class extends Controller<HTMLElement> {
     // @ts-ignore - Turbo is available globally
     if (typeof Turbo !== 'undefined') {
       // @ts-ignore
+      // eslint-disable-next-line no-undef
       Turbo.visit(newUrl)
     } else {
       // Fallback to regular page reload
