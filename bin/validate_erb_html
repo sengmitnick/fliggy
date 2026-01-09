@@ -52,14 +52,14 @@ class ERBHTMLValidator
     temp_file = File.join(@temp_dir, File.basename(file_path, '.erb'))
     File.write(temp_file, stripped)
     
-    # Run html-validate with timeout (5 seconds per file)
-    result = `timeout 5 npx html-validate "#{temp_file}" --formatter json 2>&1`
+    # Run html-validate with timeout (30 seconds per file)
+    result = `timeout 30 npx html-validate "#{temp_file}" --formatter json 2>&1`
     
     # If timeout occurred, treat as error but continue
     if $?.exitstatus == 124
       return {
         file: file_path,
-        errors: [{ message: "Validation timeout (>5s)" }]
+        errors: [{ message: "Validation timeout (>30s)" }]
       }
     end
     

@@ -1,0 +1,110 @@
+<div class="min-h-screen bg-[#F7F8FA] flex flex-col">
+  <!-- 顶部状态栏 & 导航 -->
+  <div class="bg-[#FFD900] sticky top-0 z-50">
+    <div class="flex items-center h-12 px-4 relative">
+      <%= link_to deep_travels_path, class: "absolute left-4" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="w-full text-center text-lg font-bold">支付成功</h1>
+    </div>
+  </div>
+
+  <!-- 成功提示区域 -->
+  <div class="flex-1 flex flex-col items-center justify-center p-6">
+    <!-- 成功图标 -->
+    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+      <svg class="w-16 h-16 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-2">支付成功！</h2>
+    <p class="text-gray-600 text-center mb-8">预订已确认，讲师会尽快与您联系确认行程细节</p>
+
+    <!-- 订单信息卡片 -->
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="text-center mb-6">
+        <div class="text-sm text-gray-500 mb-1">订单金额</div>
+        <div class="text-3xl font-bold text-[#FF5000]">￥<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %></div>
+      </div>
+
+      <div class="border-t pt-4 space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">订单编号</span>
+          <span class="font-medium"><%= @booking.order_number %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">深度讲师</span>
+          <span class="font-medium"><%= @guide.name %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">行程目的地</span>
+          <span class="font-medium"><%= @product.location %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">出发日期</span>
+          <span class="font-medium"><%= @booking.travel_date.strftime('%Y年%m月%d日') %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">出行人数</span>
+          <span class="font-medium"><%= @booking.adult_count %>成人 <%= @booking.child_count %>儿童</span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">出行人</span>
+          <span class="font-medium"><%= @booking.traveler_name %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">联系电话</span>
+          <span class="font-medium"><%= @booking.traveler_phone %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 温馨提示 -->
+    <div class="w-full max-w-md bg-blue-50 rounded-xl p-4 mb-6">
+      <div class="flex items-start space-x-2">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div class="text-sm text-gray-700">
+          <div class="font-bold mb-2">出行须知</div>
+          <div class="text-xs leading-relaxed space-y-1">
+            <div>• 讲师会在24小时内与您电话联系确认行程</div>
+            <div>• 请保持手机畅通，注意查收短信和电话</div>
+            <div>• 行程包含的具体内容以讲师最终确认为准</div>
+            <div>• 如需退改，请提前7天联系客服：400-1234-567</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="w-full max-w-md flex space-x-3">
+      <%= link_to deep_travels_path, class: "flex-1 bg-white border-2 border-[#FF5000] text-[#FF5000] py-3 rounded-full text-center font-bold" do %>
+        返回首页
+      <% end %>
+      <%= link_to bookings_path, class: "flex-1 bg-[#FF5000] text-white py-3 rounded-full text-center font-bold" do %>
+        查看订单
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 底部品牌 -->
+  <div class="py-8 text-center">
+    <div class="flex items-center justify-center space-x-1 mb-2">
+      <div class="bg-yellow-400 rounded-full w-5 h-5 flex items-center justify-center">
+        <span class="text-[10px] font-bold">猪</span>
+      </div>
+      <span class="text-sm font-bold italic">飞猪旅行 · 深度旅游</span>
+    </div>
+    <div class="text-[10px] text-gray-400">
+      感谢您选择飞猪深度旅游服务
+    </div>
+  </div>
+</div>

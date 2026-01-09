@@ -28,6 +28,14 @@ class DeepTravelsController < ApplicationController
                                   .limit(20)
                 end
   end
+  
+  def show
+    @full_render = true
+    @guide = DeepTravelGuide.includes(:deep_travel_products, :avatar_attachment, :video_attachment)
+                           .find(params[:id])
+    @products = @guide.deep_travel_products.order(sales_count: :desc)
+    @selected_product = @products.first
+  end
 
   private
   # Write your private methods here
