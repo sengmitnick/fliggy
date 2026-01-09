@@ -37,7 +37,9 @@ export default class extends Controller<HTMLElement> {
     // stimulus-validator: disable-next-line
     "locatedCity",
     // stimulus-validator: disable-next-line
-    "locatedCityButton"
+    "locatedCityButton",
+    // stimulus-validator: disable-next-line
+    "currentRegionTab"
   ]
 
   static values = {
@@ -92,6 +94,10 @@ export default class extends Controller<HTMLElement> {
   declare readonly locatedCityTarget: HTMLElement
   // stimulus-validator: disable-next-line
   declare readonly locatedCityButtonTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line
+  declare readonly hasCurrentRegionTabTarget: boolean
+  // stimulus-validator: disable-next-line
+  declare readonly currentRegionTabTarget: HTMLElement
   declare departureCityValue: string
   declare destinationCityValue: string
   declare enableMultiSelectValue: boolean
@@ -176,8 +182,9 @@ export default class extends Controller<HTMLElement> {
   selectCity(event: Event): void {
     const button = event.currentTarget as HTMLElement
     const cityName = button.dataset.cityName || ''
+    const isInternational = button.dataset.international === 'true'
     
-    console.log('City selector: City selected:', cityName)
+    console.log('City selector: City selected:', cityName, 'international:', isInternational)
     
     // Multi-select mode
     if (this.isMultiSelectMode) {
@@ -227,6 +234,11 @@ export default class extends Controller<HTMLElement> {
         
         // Dispatch city-changed event for tour-group-filter to listen
         this.dispatchCityChangedEvent(cityName)
+        
+        // If international city selected in hotels context, switch to international tab
+        if (isInternational) {
+          this.switchToInternationalTab()
+        }
       } else {
         this.destinationCityValue = cityName
         if (this.hasDestinationTarget) {
@@ -648,6 +660,49 @@ export default class extends Controller<HTMLElement> {
     }
     if (confirmButton) {
       confirmButton.style.display = 'none'
+    }
+  }
+
+  // Switch to international tab in hotel context
+  private switchToInternationalTab(): void {
+    console.log('City selector: Switching to international hotel tab')
+    // Dispatch event to hotel-tabs controller
+    const event = new CustomEvent('city-selector:switch-to-international', {
+      detail: {},
+      bubbles: true
+    })
+    document.dispatchEvent(event)
+  }
+
+  // Scroll to region in international tab
+  scrollToRegion(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const regionId = button.dataset.region
+    
+    if (!regionId) return
+    
+    console.log('Scrolling to region:', regionId)
+    
+    // Update active tab styling
+    const allRegionTabs = this.internationalListTarget.querySelectorAll('[data-region]')
+    allRegionTabs.forEach(tab => {
+      tab.classList.remove('bg-white', 'font-bold', 'text-gray-900')
+      tab.classList.add('text-gray-500')
+    })
+    button.classList.add('bg-white', 'font-bold', 'text-gray-900')
+    button.classList.remove('text-gray-500')
+    
+    // Find and scroll to the content section
+    const contentArea = this.internationalListTarget.querySelector('.overflow-y-auto')
+    const targetSection = contentArea?.querySelector(`[data-region-section="${regionId}"]`)
+    
+    if (targetSection && contentArea) {
+      // Scroll the content area (not the whole window)
+      const offsetTop = (targetSection as HTMLElement).offsetTop - 20
+      contentArea.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      })
     }
   }
 }

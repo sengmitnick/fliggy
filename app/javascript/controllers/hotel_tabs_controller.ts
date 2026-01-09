@@ -10,6 +10,24 @@ export default class extends Controller {
     // 初始化时读取当前激活的标签
     const activeTab = this.element.querySelector('[data-tab-type].bg-white') as HTMLElement
     this.activeTabType = activeTab?.dataset.tabType || 'domestic'
+    
+    // Listen for city selector international switch event
+    document.addEventListener('city-selector:switch-to-international', this.handleInternationalSwitch.bind(this))
+  }
+  
+  disconnect() {
+    document.removeEventListener('city-selector:switch-to-international', this.handleInternationalSwitch.bind(this))
+  }
+  
+  // Handle international switch from city selector
+  private handleInternationalSwitch(): void {
+    console.log('Hotel tabs: Received switch to international event')
+    // Find and click the international tab
+    const internationalTab = this.tabTargets.find(tab => tab.dataset.tabType === 'international')
+    if (internationalTab && this.activeTabType !== 'international') {
+      // Simulate click to trigger tab switch
+      internationalTab.click()
+    }
   }
 
   switchTab(event: Event) {
@@ -80,6 +98,17 @@ export default class extends Controller {
     
     // 构建 URL 参数
     const currentParams = new URLSearchParams(window.location.search)
+    
+    // 从 city-selector 控制器获取当前选择的城市
+    const citySelectorElement = document.querySelector('[data-controller*="city-selector"]')
+    if (citySelectorElement) {
+      const departureCityInput = citySelectorElement.querySelector('[data-city-selector-target="departureCityInput"]') as HTMLInputElement
+      if (departureCityInput && departureCityInput.value) {
+        // 将选择的城市添加到 URL 参数中
+        currentParams.set('city', departureCityInput.value)
+        console.log(`保留选择的城市: ${departureCityInput.value}`)
+      }
+    }
     
     // 清除可能冲突的参数
     currentParams.delete('type')
