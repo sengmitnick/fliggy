@@ -1,0 +1,84 @@
+<!-- 排序弹窗 -->
+<div data-bus-ticket-search-target="sortModal" class="fixed inset-0 bg-black/50 z-[60] hidden" data-action="click->bus-ticket-search#closeSortModal">
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[430px] mx-auto" data-action="click->bus-ticket-search#stopPropagation">
+    <!-- 弹窗头部 -->
+    <div class="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="text-base font-semibold text-gray-900">排序方式</h3>
+      <button type="button" data-action="click->bus-ticket-search#closeSortModal" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 排序选项 -->
+    <div class="px-4 py-3 space-y-2">
+      <!-- 时间排序 -->
+      <div class="mb-4">
+        <div class="text-sm font-medium text-gray-700 mb-2">出发时间</div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button"
+            data-bus-ticket-search-target="sortOption"
+            data-sort-field="time"
+            data-sort-direction="asc"
+            data-action="click->bus-ticket-search#selectSort"
+            class="bg-[#F7F8FA] text-gray-900 rounded-lg px-4 py-3 text-sm text-center hover:bg-[#E8EAED] transition-colors">
+            早 → 晚
+          </button>
+          <button type="button"
+            data-bus-ticket-search-target="sortOption"
+            data-sort-field="time"
+            data-sort-direction="desc"
+            data-action="click->bus-ticket-search#selectSort"
+            class="bg-[#F7F8FA] text-gray-900 rounded-lg px-4 py-3 text-sm text-center hover:bg-[#E8EAED] transition-colors">
+            晚 → 早
+          </button>
+        </div>
+      </div>
+
+      <!-- 价格排序 -->
+      <div class="mb-4">
+        <div class="text-sm font-medium text-gray-700 mb-2">票价</div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button"
+            data-bus-ticket-search-target="sortOption"
+            data-sort-field="price"
+            data-sort-direction="asc"
+            data-action="click->bus-ticket-search#selectSort"
+            class="bg-[#F7F8FA] text-gray-900 rounded-lg px-4 py-3 text-sm text-center hover:bg-[#E8EAED] transition-colors">
+            低 → 高
+          </button>
+          <button type="button"
+            data-bus-ticket-search-target="sortOption"
+            data-sort-field="price"
+            data-sort-direction="desc"
+            data-action="click->bus-ticket-search#selectSort"
+            class="bg-[#F7F8FA] text-gray-900 rounded-lg px-4 py-3 text-sm text-center hover:bg-[#E8EAED] transition-colors">
+            高 → 低
+          </button>
+        </div>
+      </div>
+
+      <!-- 默认排序 -->
+      <div class="mb-4">
+        <button type="button"
+          data-bus-ticket-search-target="sortOption"
+          data-sort-field="default"
+          data-sort-direction=""
+          data-action="click->bus-ticket-search#selectSort"
+          class="w-full bg-[#F7F8FA] text-gray-900 rounded-lg px-4 py-3 text-sm text-center hover:bg-[#E8EAED] transition-colors">
+          默认排序（推荐）
+        </button>
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="px-4 py-3 border-t border-gray-100">
+      <button type="button"
+        data-action="click->bus-ticket-search#applySortAndClose"
+        class="w-full bg-[#FF6A00] text-white rounded-full py-3 text-base font-medium hover:bg-[#E55F00] transition-colors">
+        确定
+      </button>
+    </div>
+  </div>
+</div>

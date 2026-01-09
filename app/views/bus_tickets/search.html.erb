@@ -1,0 +1,213 @@
+<% content_for :head do %>
+  <style>
+    /* 自定义滚动条隐藏 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<% end %>
+
+<div class="w-full max-w-[430px] bg-[#f5f7fa] relative flex flex-col min-h-screen pb-20" 
+     data-controller="bus-ticket-search bus-date-picker"
+     data-bus-ticket-search-origin-value="<%= @origin %>"
+     data-bus-ticket-search-destination-value="<%= @destination %>"
+     data-bus-ticket-search-date-value="<%= @date.strftime('%Y-%m-%d') %>"
+     data-bus-date-picker-current-date-value="<%= @date.strftime('%Y-%m-%d') %>">
+
+  <!-- 导航栏 -->
+  <div class="bg-white px-3 py-2 flex items-center justify-between sticky top-0 z-20">
+    <%= link_to bus_tickets_path, class: "p-1" do %>
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    <% end %>
+    <div class="text-lg font-bold text-gray-900 flex items-center">
+      <%= @origin %> <span class="text-gray-300 mx-2">─</span> <%= @destination %>
+      <svg class="w-4 h-4 ml-1 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+    </div>
+    <button type="button" class="p-1" aria-label="更多选项">
+      <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 24 24"><path d="M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+    </button>
+  </div>
+
+  <!-- 日期选择 -->
+  <div class="bg-white pb-2">
+    <div class="flex overflow-x-auto no-scrollbar px-2 space-x-1">
+      <% @nearby_dates.each do |date_info| %>
+        <% 
+          date = date_info[:date]
+          is_selected = date == @date
+          day_label = if date == Date.today
+                        '今天'
+                      elsif date == Date.today + 1
+                        '明天'
+                      else
+                        date.strftime('%A').split('')[1..2].join # 周几
+                      end
+          day_label_map = {
+            'onday' => '周一',
+            'uesday' => '周二',
+            'ednesday' => '周三',
+            'hursday' => '周四',
+            'riday' => '周五',
+            'aturday' => '周六',
+            'unday' => '周日'
+          }
+          day_label = case date.wday
+                      when 0 then '周日'
+                      when 1 then '周一'
+                      when 2 then '周二'
+                      when 3 then '周三'
+                      when 4 then '周四'
+                      when 5 then '周五'
+                      when 6 then '周六'
+                      end
+          day_label = '今天' if date == Date.today
+          day_label = '明天' if date == Date.today + 1
+          day_label = '后天' if date == Date.today + 2
+        %>
+        <%= link_to search_bus_tickets_path(origin: @origin, destination: @destination, date: date), 
+          class: "flex-shrink-0 flex flex-col items-center justify-center w-[72px] h-[52px] rounded-lg #{ is_selected ? 'bg-[#fceea3] text-gray-900' : 'text-gray-800' }" do %>
+          <span class="text-xs font-medium"><%= date.strftime('%m-%d') %></span>
+          <span class="text-sm font-bold"><%= day_label %></span>
+        <% end %>
+      <% end %>
+      
+      <!-- 日历图标 -->
+      <button type="button" data-action="click->bus-date-picker#openModal" class="flex-shrink-0 flex flex-col items-center justify-center w-[40px] h-[52px] text-gray-600 bg-white/90 sticky right-0 shadow-[-10px_0_10px_white]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 列表内容 -->
+  <div class="flex-1 overflow-y-auto px-2 pt-2 space-y-2 pb-4">
+    <% if @bus_tickets.any? %>
+      <% @bus_tickets.each do |ticket| %>
+        <%= link_to bus_ticket_path(ticket, origin: @origin, destination: @destination, date: @date), 
+          class: "bg-white p-4 rounded-lg flex flex-col relative block" do %>
+          <div class="flex justify-between items-start">
+            <!-- 左侧：时间 -->
+            <div class="w-[80px]">
+              <div class="text-[26px] font-bold text-gray-900 leading-none"><%= ticket.departure_time %></div>
+              <% if ticket.duration_minutes %>
+                <div class="text-xs text-gray-400 mt-1 flex items-center">
+                  约<%= (ticket.duration_minutes / 60.0).round(1) %>小时
+                  <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- 中间：站点 -->
+            <div class="flex-1 flex flex-col justify-center space-y-2 relative">
+              <!-- 起点 -->
+              <div class="flex items-start">
+                <div class="w-2 h-2 bg-[#6b8af8] rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
+                <span class="text-[15px] font-medium text-gray-900 leading-snug"><%= ticket.departure_station %></span>
+              </div>
+              <!-- 终点 -->
+              <div class="flex items-start">
+                <div class="w-2 h-2 bg-[#ff8a65] rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
+                <span class="text-[15px] font-medium text-gray-900 leading-snug"><%= ticket.arrival_station %></span>
+              </div>
+            </div>
+            
+            <!-- 右侧：价格 -->
+            <div class="text-right pl-2">
+              <div class="text-[#ff5500] font-bold whitespace-nowrap">
+                <span class="text-sm">¥</span><span class="text-2xl"><%= ticket.price.to_i %></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 底部信息 -->
+          <div class="mt-2 pl-[80px]">
+            <div class="flex items-center text-gray-500 text-xs gap-1">
+              <% if ticket.seat_type.present? %>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                <%= ticket.seat_type %>
+              <% end %>
+              <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="bg-white p-8 rounded-lg flex flex-col items-center justify-center text-gray-500">
+        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-lg font-medium">暂无班次</p>
+        <p class="text-sm mt-1">请选择其他日期或路线</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-gray-100 flex justify-around items-center py-2 pb-4 z-10">
+    <!-- 筛选 -->
+    <button type="button" data-action="click->bus-ticket-search#openFilter" class="flex flex-col items-center gap-1" aria-label="筛选">
+      <span class="relative w-6 h-6">
+        <span class="w-6 h-6 border-2 border-gray-600 rounded-full flex items-center justify-center">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"></path>
+          </svg>
+        </span>
+        <!-- 角标 -->
+        <span data-bus-ticket-search-target="filterBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">0</span>
+      </span>
+      <span class="text-[11px] text-gray-700">筛选</span>
+    </button>
+
+    <!-- 排序 - 时间 -->
+    <button type="button" 
+      data-bus-ticket-search-target="timeButton"
+      data-action="click->bus-ticket-search#openSortModal" 
+      class="flex flex-col items-center gap-1" 
+      aria-label="时间排序">
+      <span class="w-6 h-6 border-2 border-gray-600 rounded-full flex items-center justify-center">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+        </svg>
+      </span>
+      <span class="text-[11px] text-gray-700">时间</span>
+    </button>
+
+    <!-- 排序 - 价格 -->
+    <button type="button" 
+      data-bus-ticket-search-target="priceButton"
+      data-action="click->bus-ticket-search#openSortModal" 
+      class="flex flex-col items-center gap-1" 
+      aria-label="价格排序">
+      <span class="w-6 h-6 border-2 border-gray-600 rounded-full flex items-center justify-center">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+        </svg>
+      </span>
+      <span class="text-[11px] text-gray-700">价格</span>
+    </button>
+
+    <!-- 站点地图 -->
+    <button type="button" class="flex flex-col items-center gap-1" aria-label="站点地图">
+      <span class="w-6 h-6 border-2 border-gray-600 rounded-full flex items-center justify-center">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path>
+        </svg>
+      </span>
+      <span class="text-[11px] text-gray-700">站点地图</span>
+    </button>
+  </div>
+
+  <!-- Filter Modal -->
+  <%= render 'bus_tickets/filter_modal' %>
+  
+  <!-- Sort Modal -->
+  <%= render 'bus_tickets/sort_modal' %>
+  
+  <!-- Bus Date Picker Modal -->
+  <%= render 'bus_tickets/bus_date_picker_modal' %>
+</div>

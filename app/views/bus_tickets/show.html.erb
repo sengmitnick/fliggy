@@ -1,0 +1,152 @@
+<div class="w-full max-w-[430px] bg-[#F5F5F5] min-h-screen relative flex flex-col">
+  
+  <!-- 导航栏 -->
+  <div class="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+    <%= link_to search_bus_tickets_path(origin: params[:origin], destination: params[:destination], date: params[:date]), class: "text-gray-800" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    <% end %>
+    <div class="text-lg font-medium text-gray-900"><%= @bus_ticket.origin %> ⇌ <%= @bus_ticket.destination %></div>
+    <div class="w-6"></div> <!-- 占位保持居中 -->
+  </div>
+
+  <!-- 内容区域 -->
+  <div class="flex-1 overflow-y-auto pb-20">
+    
+    <!-- 日期头 -->
+    <div class="px-4 py-3 text-sm text-gray-500">
+      <%= @bus_ticket.departure_date.strftime('%m月%d日') %> <%= ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][@bus_ticket.departure_date.wday] %>
+    </div>
+
+    <!-- 行程信息卡片 -->
+    <div class="mx-3 bg-white rounded-xl p-4 shadow-sm mb-3">
+      <div class="flex">
+        <!-- 左侧：时间 -->
+        <div class="flex flex-col items-start pt-1 w-16 flex-shrink-0">
+          <span class="text-2xl font-bold text-gray-900 leading-none"><%= @bus_ticket.departure_time %></span>
+          <div class="h-16 flex items-center">
+            <% if @bus_ticket.duration_minutes %>
+              <span class="text-xs text-gray-500 scale-90 origin-left whitespace-nowrap">约<%= (@bus_ticket.duration_minutes / 60.0).round(1) %>小时</span>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- 中间：视觉连接线 -->
+        <div class="flex flex-col items-center mx-2 pt-2 relative">
+          <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+          <div class="flex-1 w-[1px] border-l border-dotted border-gray-300 my-1"></div>
+          <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+        </div>
+
+        <!-- 右侧：地点 -->
+        <div class="flex-1 pt-0.5 ml-1">
+          <!-- 起点 -->
+          <div class="flex justify-between items-start h-[24px]">
+            <span class="text-[16px] font-medium text-gray-800"><%= @bus_ticket.departure_station %></span>
+          </div>
+
+          <!-- 途径信息 -->
+          <div class="my-5">
+            <% if @bus_ticket.route_description.present? %>
+              <span class="bg-gray-50 text-gray-500 text-xs px-2 py-1 rounded-full border border-gray-100 flex w-fit items-center">
+                <%= @bus_ticket.route_description %>
+              </span>
+            <% end %>
+          </div>
+
+          <!-- 终点 -->
+          <div class="flex justify-between items-end">
+            <span class="text-[16px] font-medium text-gray-800"><%= @bus_ticket.arrival_station %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分割虚线 -->
+      <div class="border-t border-dashed border-gray-200 my-4"></div>
+
+      <!-- 底部服务标签 -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center text-blue-600 text-xs">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>发车前可退</span>
+            <span class="text-gray-400 mx-1">|</span>
+            <span class="text-gray-800">手续费 ￥0.00起</span>
+          </div>
+          <div class="text-xs text-gray-500 flex items-center">
+            购票须知 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </div>
+        </div>
+        <div class="flex items-center text-gray-800 text-xs">
+          <svg class="w-3.5 h-3.5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>不支持在线改签</span>
+        </div>
+        <div class="flex items-center text-gray-800 text-xs">
+          <svg class="w-3.5 h-3.5 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>无需取票,可凭身份证/电子票二维码进站乘车</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡片 1: 退票无忧 (带米色底部) -->
+    <div class="mx-3 bg-white rounded-xl overflow-hidden shadow-sm mb-3">
+      <%= link_to new_bus_ticket_order_path(bus_ticket_id: @bus_ticket.id, insurance_type: 'refund', origin: params[:origin], destination: params[:destination], date: params[:date]), class: "block", data: { turbo: false } do %>
+        <div class="p-4 flex justify-between items-center">
+          <div>
+            <div class="flex items-baseline space-x-2">
+              <span class="text-[#FF5000] font-bold text-3xl"><span class="text-lg">¥</span><%= @bus_ticket.price.to_i + 9 %></span>
+              <span class="text-gray-900 text-sm font-medium">免退票手续费</span>
+            </div>
+          </div>
+          <div class="bg-[#FF5000] text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg font-medium shadow-md shadow-orange-200">
+            订
+          </div>
+        </div>
+        <!-- 底部米色条 -->
+        <div class="bg-[#FFF8F0] px-4 py-2.5 flex items-center justify-between text-xs">
+          <div class="flex items-center">
+            <span class="text-[#8B572A] font-bold italic mr-2 text-sm">退票无忧 <span class="text-[#FF5000]">+¥9</span></span>
+            <span class="text-[#8B572A] opacity-80 scale-90 origin-left">赔付退票手续费 | ¥2汽车券 ¥3火车券 ¥30租...</span>
+          </div>
+          <svg class="w-3 h-3 text-[#8B572A] opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 卡片 2: 安心推荐 -->
+    <div class="mx-3 bg-white rounded-xl overflow-hidden shadow-sm mb-3">
+      <%= link_to new_bus_ticket_order_path(bus_ticket_id: @bus_ticket.id, insurance_type: 'premium', origin: params[:origin], destination: params[:destination], date: params[:date]), class: "block p-4 flex justify-between items-center", data: { turbo: false } do %>
+        <div>
+          <div class="flex items-baseline space-x-1">
+            <span class="text-[#FF5000] font-bold text-3xl"><span class="text-lg">¥</span><%= @bus_ticket.price.to_i + 3 %></span>
+          </div>
+          <div class="text-[#FF5000] text-xs font-medium mt-0.5">+ ¥3 安心推荐</div>
+        </div>
+        <div class="flex-1 px-4">
+          <div class="text-sm text-gray-900 font-medium leading-tight">出行意外伤残最高保11万</div>
+          <div class="text-sm text-gray-900 font-medium leading-tight mt-1">尊享专业服务7x24小时</div>
+        </div>
+        <div class="bg-[#FF5000] text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg font-medium shadow-md shadow-orange-200">
+          订
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 卡片 3: 普通购票 -->
+    <div class="mx-3 bg-white rounded-xl overflow-hidden shadow-sm mb-6">
+      <%= link_to new_bus_ticket_order_path(bus_ticket_id: @bus_ticket.id, insurance_type: 'none', origin: params[:origin], destination: params[:destination], date: params[:date]), class: "block p-4 flex justify-between items-center", data: { turbo: false } do %>
+        <div>
+          <div class="flex items-baseline space-x-1">
+            <span class="text-[#FF5000] font-bold text-3xl"><span class="text-lg">¥</span><%= @bus_ticket.price.to_i %></span>
+          </div>
+        </div>
+        <div class="flex-1 px-4">
+          <div class="text-sm text-gray-900 font-medium">官方预订，普通购票</div>
+        </div>
+        <div class="bg-[#FF5000] text-white w-12 h-12 rounded-xl flex items-center justify-center text-lg font-medium shadow-md shadow-orange-200">
+          订
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

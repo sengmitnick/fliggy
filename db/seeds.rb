@@ -1144,6 +1144,9 @@ load Rails.root.join('db', 'seeds', 'hotels.rb')
 # ==================== 租车数据 ====================
 load Rails.root.join('db', 'seeds', 'cars.rb')
 
+# ==================== 汽车票数据 ====================
+load Rails.root.join('db', 'seeds', 'bus_tickets.rb')
+
 # ==================== 旅游产品（跟团游商城）数据 ====================
 load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
 # 跟团游产品详情已通过随机生成器自动创建
@@ -1158,6 +1161,7 @@ puts "  - 城市: #{City.count}"
 puts "  - 目的地: #{Destination.count}"
 puts "  - 酒店: #{Hotel.count}"
 puts "  - 租车: #{Car.count}"
+puts "  - 汽车票: #{BusTicket.count}"
 puts "  - 跟团游产品: #{TourGroupProduct.count}"
 puts "  - 酒店套餐: #{HotelPackage.count}"
 puts "  - 火车票: #{Train.count}"

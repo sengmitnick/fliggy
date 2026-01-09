@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_08_035331) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_08_055405) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -134,6 +134,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_08_035331) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "bus_ticket_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "bus_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "departure_station"
+    t.string "arrival_station"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bus_ticket_id"], name: "index_bus_ticket_orders_on_bus_ticket_id"
+    t.index ["user_id"], name: "index_bus_ticket_orders_on_user_id"
+  end
+
   create_table "bus_tickets", force: :cascade do |t|
     t.string "origin"
     t.string "destination"
@@ -145,6 +163,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_08_035331) do
     t.string "seat_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "departure_station"
+    t.string "arrival_station"
+    t.string "route_description"
   end
 
   create_table "car_orders", force: :cascade do |t|
