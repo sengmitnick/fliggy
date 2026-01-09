@@ -1,0 +1,229 @@
+<!-- 黑色半透明遮罩 -->
+<div data-bus-ticket-search-target="overlay" class="hidden fixed inset-0 bg-black/60 z-40"></div>
+
+<!-- 筛选弹窗主体 -->
+<div data-bus-ticket-search-target="modal" class="hidden fixed inset-0 z-50 flex items-end justify-center">
+  <div class="bg-white w-full max-w-[430px] h-[85%] rounded-t-2xl flex flex-col overflow-hidden">
+    
+    <!-- 弹窗头部 -->
+    <div class="relative h-14 flex items-center justify-center border-b border-gray-100 flex-shrink-0">
+      <h2 class="text-[17px] font-bold text-gray-900">筛选</h2>
+      <!-- 关闭按钮 -->
+      <button type="button" data-action="click->bus-ticket-search#closeModal" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500" aria-label="关闭">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- 弹窗中间内容区 (左右分栏) -->
+    <div class="flex flex-1 overflow-hidden">
+      
+      <!-- 左侧侧边栏 -->
+      <div class="w-[90px] bg-[#F7F8FA] overflow-y-auto no-scrollbar flex-shrink-0">
+        <button type="button" 
+          data-bus-ticket-search-target="departureTimeTab"
+          data-tab="departureTime"
+          data-action="click->bus-ticket-search#selectTab"
+          class="w-full py-4 px-3 text-[13px] font-medium text-gray-900 bg-white border-l-4 border-[#FFD900]">
+          发车时段
+        </button>
+        <button type="button"
+          data-bus-ticket-search-target="seatTypeTab"
+          data-tab="seatType"
+          data-action="click->bus-ticket-search#selectTab"
+          class="w-full py-4 px-3 text-[13px] text-gray-600">
+          车型
+        </button>
+        <button type="button"
+          data-bus-ticket-search-target="departureStationTab"
+          data-tab="departureStation"
+          data-action="click->bus-ticket-search#selectTab"
+          class="w-full py-4 px-3 text-[13px] text-gray-600">
+          出发车站
+        </button>
+        <button type="button"
+          data-bus-ticket-search-target="arrivalStationTab"
+          data-tab="arrivalStation"
+          data-action="click->bus-ticket-search#selectTab"
+          class="w-full py-4 px-3 text-[13px] text-gray-600">
+          到达车站
+        </button>
+      </div>
+
+      <!-- 右侧内容滚动区 -->
+      <div class="flex-1 bg-white overflow-y-auto no-scrollbar p-4 pb-24">
+        
+        <!-- Section 1: 发车时段 -->
+        <div data-bus-ticket-search-target="departureTimeSection">
+          <h3 class="text-[15px] font-bold mb-3 text-gray-900">发车时段</h3>
+          <div class="space-y-2">
+            <button type="button"
+              data-bus-ticket-search-target="departureTimeCard"
+              data-time="morning"
+              data-action="click->bus-ticket-search#toggleDepartureTime"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              凌晨 00:00-05:59
+            </button>
+            <button type="button"
+              data-bus-ticket-search-target="departureTimeCard"
+              data-time="morning2"
+              data-action="click->bus-ticket-search#toggleDepartureTime"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              上午 06:00-11:59
+            </button>
+            <button type="button"
+              data-bus-ticket-search-target="departureTimeCard"
+              data-time="afternoon"
+              data-action="click->bus-ticket-search#toggleDepartureTime"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              下午 12:00-17:59
+            </button>
+            <button type="button"
+              data-bus-ticket-search-target="departureTimeCard"
+              data-time="evening"
+              data-action="click->bus-ticket-search#toggleDepartureTime"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              晚上 18:00-23:59
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: 车型 -->
+        <div data-bus-ticket-search-target="seatTypeSection" class="hidden">
+          <h3 class="text-[15px] font-bold mb-3 text-gray-900">车型</h3>
+          <div class="space-y-2">
+            <button type="button"
+              data-bus-ticket-search-target="seatTypeCard"
+              data-seat-type="豪华座"
+              data-action="click->bus-ticket-search#toggleSeatType"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              豪华座
+            </button>
+            <button type="button"
+              data-bus-ticket-search-target="seatTypeCard"
+              data-seat-type="普通座"
+              data-action="click->bus-ticket-search#toggleSeatType"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              普通座
+            </button>
+            <button type="button"
+              data-bus-ticket-search-target="seatTypeCard"
+              data-seat-type="商务座"
+              data-action="click->bus-ticket-search#toggleSeatType"
+              class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+              商务座
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 3: 出发车站 -->
+        <div data-bus-ticket-search-target="departureStationSection" class="hidden">
+          <h3 class="text-[15px] font-bold mb-3 text-gray-900">出发车站</h3>
+          <div class="space-y-2">
+            <% if @departure_stations.present? %>
+              <% @departure_stations.each do |station| %>
+                <button type="button"
+                  data-bus-ticket-search-target="departureStationCard"
+                  data-station="<%= station %>"
+                  data-action="click->bus-ticket-search#toggleDepartureStation"
+                  class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                  <%= station %>
+                </button>
+              <% end %>
+            <% else %>
+              <button type="button"
+                data-bus-ticket-search-target="departureStationCard"
+                data-station="福田汽车站"
+                data-action="click->bus-ticket-search#toggleDepartureStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                福田汽车站
+              </button>
+              <button type="button"
+                data-bus-ticket-search-target="departureStationCard"
+                data-station="罗湖汽车站"
+                data-action="click->bus-ticket-search#toggleDepartureStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                罗湖汽车站
+              </button>
+              <button type="button"
+                data-bus-ticket-search-target="departureStationCard"
+                data-station="深圳北站"
+                data-action="click->bus-ticket-search#toggleDepartureStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                深圳北站
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Section 4: 到达车站 -->
+        <div data-bus-ticket-search-target="arrivalStationSection" class="hidden">
+          <h3 class="text-[15px] font-bold mb-3 text-gray-900">到达车站</h3>
+          <div class="space-y-2">
+            <% if @arrival_stations.present? %>
+              <% @arrival_stations.each do |station| %>
+                <button type="button"
+                  data-bus-ticket-search-target="arrivalStationCard"
+                  data-station="<%= station %>"
+                  data-action="click->bus-ticket-search#toggleArrivalStation"
+                  class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                  <%= station %>
+                </button>
+              <% end %>
+            <% else %>
+              <button type="button"
+                data-bus-ticket-search-target="arrivalStationCard"
+                data-station="广州天河客运站"
+                data-action="click->bus-ticket-search#toggleArrivalStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                广州天河客运站
+              </button>
+              <button type="button"
+                data-bus-ticket-search-target="arrivalStationCard"
+                data-station="广州省汽车站"
+                data-action="click->bus-ticket-search#toggleArrivalStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                广州省汽车站
+              </button>
+              <button type="button"
+                data-bus-ticket-search-target="arrivalStationCard"
+                data-station="广州南站"
+                data-action="click->bus-ticket-search#toggleArrivalStation"
+                class="w-full relative bg-[#F7F8FA] text-gray-900 rounded px-3 py-3 text-[13px] text-left">
+                广州南站
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 已选筛选项显示区 -->
+    <div data-bus-ticket-search-target="selectedTagsContainer" class="hidden absolute bottom-[60px] left-0 right-0 bg-white border-t border-gray-100 px-4 py-3 max-h-24 overflow-y-auto">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-[13px] text-gray-600 flex-shrink-0">已选:</span>
+        <div data-bus-ticket-search-target="selectedTagsList" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+
+    <!-- 底部按钮区 -->
+    <div class="absolute bottom-0 left-0 right-0 flex border-t border-gray-100 bg-white">
+      <button type="button"
+        data-action="click->bus-ticket-search#resetFilters"
+        class="flex-1 py-4 text-center text-gray-600 text-[15px] font-medium"
+        aria-label="重置">
+        重置
+      </button>
+      <button type="button"
+        data-action="click->bus-ticket-search#applyFilters"
+        data-bus-ticket-search-target="applyButton"
+        class="flex-1 py-4 text-center bg-[#FFD900] text-gray-900 text-[15px] font-bold"
+        aria-label="查看结果">
+        查看164条结果
+      </button>
+    </div>
+
+  </div>
+</div>

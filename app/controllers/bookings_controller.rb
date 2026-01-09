@@ -25,6 +25,10 @@ class BookingsController < ApplicationController
     hotel_package_orders = current_user.hotel_package_orders.includes(:hotel_package, :package_option)
                                        .order(created_at: :desc)
     
+    # Fetch bus ticket orders
+    bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
+                                    .order(created_at: :desc)
+    
     # Filter by status
     case @status_filter
     when 'pending'
@@ -33,6 +37,7 @@ class BookingsController < ApplicationController
       tour_group_bookings = tour_group_bookings.where(status: 'pending')
       car_orders = car_orders.where(status: 'pending')
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
+      bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -43,6 +48,9 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'paid')
                              .where('car_orders.pickup_datetime >= ?', DateTime.now)
       hotel_package_orders = hotel_package_orders.where(status: 'paid')
+      bus_ticket_orders = bus_ticket_orders.where(status: 'paid')
+                                           .joins(:bus_ticket)
+                                           .where('bus_tickets.departure_date >= ?', Date.today)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -50,16 +58,18 @@ class BookingsController < ApplicationController
       tour_group_bookings = tour_group_bookings.none
       car_orders = car_orders.none
       hotel_package_orders = hotel_package_orders.none
+      bus_ticket_orders = bus_ticket_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
       tour_group_bookings = tour_group_bookings.where(status: 'cancelled')
       car_orders = car_orders.where(status: 'cancelled')
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
+      bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a)
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a)
                     .sort_by(&:created_at).reverse
     
     # Manual pagination

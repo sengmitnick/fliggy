@@ -1,66 +1,15 @@
-<div class="bg-gray-100 min-h-screen flex justify-center">
-  <!-- 移动端容器限制 -->
-  <div class="w-full max-w-md bg-gray-50 relative min-h-screen flex flex-col">
+<div class="bg-gray-100 min-h-screen" data-controller="city-selector bus-date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
+  <!-- Header with Banner -->
+  <div class="relative pb-8">
+    <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 
-    <!-- 顶部红色渐变区域 -->
-    <div class="pb-4 bg-gradient-to-br from-red-500 via-red-400 to-orange-400">
-
-      <!-- 顶部导航栏 (返回 & 菜单) -->
-      <div class="flex justify-between items-center px-3 py-2 text-white">
-        <!-- Back Button -->
-        <%= link_to root_path, class: "w-8 h-8 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-sm" do %>
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-        <% end %>
-        <!-- Right Icons -->
-        <div class="flex space-x-3">
-          <div class="w-8 h-8 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-sm">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-          </div>
-          <div class="w-8 h-8 flex items-center justify-center rounded-full bg-black/10 backdrop-blur-sm">
-            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- 红包文案区域 -->
-      <div class="px-4 mt-1 flex justify-between items-end relative">
-        <div class="text-white mb-2">
-          <div class="inline-block bg-white/20 px-1.5 py-0.5 rounded text-[10px] mb-1">红包抽奖</div>
-          <div class="text-3xl font-bold italic tracking-wide font-sans">50元汽车票红包</div>
-          <div class="text-sm opacity-90 mt-0.5">全国通用 下单立减</div>
-        </div>
-        <!-- 模拟右侧3D手握红包图 -->
-        <div class="absolute right-0 bottom-[-10px] w-24 h-24">
-          <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-            <circle cx="50" cy="50" r="40" fill="#ffebcd" opacity="0.3" />
-            <rect x="30" y="30" width="40" height="50" rx="4" fill="#ff2244" transform="rotate(-15 50 50)" />
-            <circle cx="54" cy="55" r="8" fill="#ffd700" />
-            <text x="51" y="58" font-size="8" fill="#d35400" font-weight="bold">¥</text>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- 白色主体卡片区域 -->
-    <div class="bg-gray-50 flex-1 -mt-2 rounded-t-2xl overflow-hidden relative z-10">
-
-      <!-- 分类 Tab 栏 -->
-      <div class="bg-white pt-3 pb-2 px-2">
-        <div class="flex items-center space-x-6 overflow-x-auto no-scrollbar px-2">
-          <%= link_to "机票", flights_path, class: "text-gray-500 font-medium whitespace-nowrap text-base" %>
-          <%= link_to "特价机票", special_flights_path, class: "text-gray-500 font-medium whitespace-nowrap text-base" %>
-          <%= link_to "火车票", trains_path, class: "text-gray-500 font-medium whitespace-nowrap text-base" %>
-          <%= link_to "租车/接送", cars_path, class: "text-gray-500 font-medium whitespace-nowrap text-base" %>
-          <div class="relative">
-            <span class="text-gray-900 font-bold whitespace-nowrap text-lg relative z-10">汽车票</span>
-            <div class="absolute bottom-1 left-0 right-0 h-2 bg-yellow-300 -z-0 rounded-full opacity-60"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 搜索框卡片 -->
-      <div class="m-3 bg-white rounded-2xl p-4 shadow-sm">
-        <!-- 内部 Tab -->
+    <!-- Tabs Container with Gray Background -->
+    <div class="relative mx-4 -mt-3 overflow-hidden z-50">
+      <%= render 'shared/transport_tabs', active_tab: :bus %>
+  
+      <!-- White Card Container with Form -->
+      <div class="bg-white rounded-b-[24px] shadow-sm px-4 py-4">
+        <!-- Inner Tabs -->
         <div class="flex space-x-8 mb-6 relative">
           <div class="flex flex-col items-center">
             <span class="text-xl font-bold text-gray-900">汽车票</span>
@@ -75,117 +24,91 @@
 
         <!-- 始发地 / 目的地 -->
         <div class="flex justify-between items-center mb-4">
-          <div class="flex-1 text-left">
-            <div class="text-3xl font-bold text-gray-900">深圳</div>
-          </div>
+          <button type="button" data-action="click->city-selector#openDeparture" class="flex-1 text-left">
+            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="departure">深圳</span>
+          </button>
 
           <!-- 切换图标 -->
-          <div class="w-10 h-10 rounded-full flex items-center justify-center">
-            <%= image_tag "bus_tickets/切换.png", class: "w-full h-full object-contain", alt: "切换" %>
-          </div>
+          <button type="button" data-action="click->city-selector#switchCities" class="w-10 h-10 rounded-full flex items-center justify-center" aria-label="切换城市">
+            <img src="<%= asset_path('bus_tickets/切换.png') %>" class="w-full h-full object-contain" alt="切换">
+          </button>
 
-          <div class="flex-1 text-right">
-            <div class="text-3xl font-bold text-gray-900">广州市</div>
-          </div>
+          <button type="button" data-action="click->city-selector#openDestination" class="flex-1 text-right">
+            <span class="text-3xl font-bold text-gray-900" data-city-selector-target="destination">广州</span>
+          </button>
         </div>
 
         <!-- 日期选择 -->
-        <div class="flex items-end mb-8 border-b border-gray-100 pb-4">
-          <span class="text-2xl font-bold text-gray-900 mr-2"><%= Date.today.strftime("%-m月%-d日") %></span>
+        <button type="button" data-action="click->bus-date-picker#openModal" class="flex items-end mb-8 border-b border-gray-100 pb-4 text-left w-full">
+          <span class="text-2xl font-bold text-gray-900 mr-2" data-bus-date-picker-target="selectedDate"><%= Date.today.strftime("%-m月%-d日") %></span>
           <span class="text-gray-500 text-base mb-0.5">今天</span>
-        </div>
+        </button>
 
         <!-- 搜索按钮 -->
-        <button type="button" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
-          搜索汽车票
-        </button>
+        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false } do |f| %>
+          <%= f.hidden_field :origin, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
+          <%= f.hidden_field :destination, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
+          <%= f.hidden_field :date, value: Date.today, data: { 'bus-date-picker-target': 'dateInput' } %>
+          <button type="submit" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
+            搜索汽车票
+          </button>
+        <% end %>
 
         <!-- 历史记录 -->
         <div class="flex justify-between text-xs text-gray-400">
-          <span>深圳-广州市</span>
+          <span>深圳-广州</span>
           <span>清除</span>
         </div>
       </div>
-
-      <!-- 底部服务 Grid -->
-      <div class="mx-3 grid grid-cols-3 gap-3">
-
-        <!-- 顺风车 -->
-        <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-          <div>
-            <div class="font-bold text-gray-900 text-sm">顺风车</div>
-            <div class="text-xs text-gray-400 mt-0.5">助您出行</div>
-          </div>
-          <%= image_tag "bus_tickets/顺风车.png", class: "w-6 h-6 object-contain", alt: "顺风车" %>
-        </div>
-
-        <!-- 打车 -->
-        <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-          <div>
-            <div class="font-bold text-gray-900 text-sm">打车</div>
-            <div class="text-xs text-gray-400 mt-0.5">立即出发</div>
-          </div>
-          <%= image_tag "bus_tickets/打车.png", class: "w-6 h-6 object-contain", alt: "打车" %>
-        </div>
-
-        <!-- 租车 -->
-        <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
-          <div>
-            <div class="font-bold text-gray-900 text-sm">租车</div>
-            <div class="text-xs text-gray-400 mt-0.5">信用免押</div>
-          </div>
-          <div class="relative">
-            <%= image_tag "bus_tickets/租车.png", class: "w-6 h-6 object-contain", alt: "租车" %>
-            <div class="absolute -bottom-1 -right-1 bg-yellow-100 text-yellow-700 text-[8px] px-1 rounded-sm border border-yellow-200">租</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 底部 Logo 区域 (垫高) -->
-      <div class="mt-20 flex flex-col items-center justify-center pb-24 opacity-60">
-        <div class="flex items-center space-x-2 text-gray-800 font-bold text-lg">
-          <!-- 飞猪 Logo SVG 模拟 -->
-          <div class="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-black text-[10px]">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z"/>
-              <circle cx="8.5" cy="10" r="1.5"/>
-              <circle cx="15.5" cy="10" r="1.5"/>
-            </svg>
-          </div>
-          <span>飞猪旅行 · 安心票</span>
-        </div>
-        <div class="flex items-center space-x-2 mt-2 text-xs text-gray-500">
-          <span class="flex items-center"><span class="w-3 h-[1px] bg-gray-300 mr-2"></span>出票安心</span>
-          <span>·</span>
-          <span>出行安心</span>
-          <span>·</span>
-          <span class="flex items-center">服务安心<span class="w-3 h-[1px] bg-gray-300 ml-2"></span></span>
-        </div>
-      </div>
-
     </div>
-
-    <!-- 底部导航栏 -->
-    <div class="absolute bottom-6 left-0 right-0 flex justify-center items-center pointer-events-none">
-      <div class="bg-white shadow-lg rounded-full px-4 py-2 flex flex-col items-center pointer-events-auto cursor-pointer">
-        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-        </svg>
-        <span class="text-[10px] text-gray-800 font-medium mt-0.5">我的订单</span>
-      </div>
-    </div>
-
   </div>
-</div>
 
-<style>
-  /* 隐藏滚动条但保留功能 */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-</style>
+  <!-- Quick Links Section -->
+  <div class="mx-3 grid grid-cols-3 gap-3">
+    <!-- 顺风车 -->
+    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+      <div>
+        <div class="font-bold text-gray-900 text-sm">顺风车</div>
+        <div class="text-xs text-gray-400 mt-0.5">助您出行</div>
+      </div>
+      <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+      </svg>
+    </div>
+
+    <!-- 打车 -->
+    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+      <div>
+        <div class="font-bold text-gray-900 text-sm">打车</div>
+        <div class="text-xs text-gray-400 mt-0.5">立即出发</div>
+      </div>
+      <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+      </svg>
+    </div>
+
+    <!-- 租车 -->
+    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+      <div>
+        <div class="font-bold text-gray-900 text-sm">租车</div>
+        <div class="text-xs text-gray-400 mt-0.5">信用免押</div>
+      </div>
+      <div class="relative">
+        <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.08 3.11H5.77L6.85 7zM19 17H5v-5h14v5z"/>
+          <circle cx="7.5" cy="14.5" r="1.5" fill="#333"/>
+          <circle cx="16.5" cy="14.5" r="1.5" fill="#333"/>
+        </svg>
+        <div class="absolute -bottom-1 -right-1 bg-yellow-100 text-yellow-700 text-[8px] px-1 rounded-sm border border-yellow-200">租</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+
+  <!-- Bus Date Picker Modal -->
+  <%= render 'bus_tickets/bus_date_picker_modal' %>
+</div>

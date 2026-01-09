@@ -1,0 +1,114 @@
+<div class="min-h-screen bg-[#F7F8FA] flex flex-col">
+  <!-- 顶部状态栏 & 导航 -->
+  <div class="bg-[#FFD900] sticky top-0 z-50">
+    <div class="flex items-center h-12 px-4 relative">
+      <%= link_to bus_tickets_path, class: "absolute left-4" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="w-full text-center text-lg font-bold">支付成功</h1>
+    </div>
+  </div>
+
+  <!-- 成功提示区域 -->
+  <div class="flex-1 flex flex-col items-center justify-center p-6">
+    <!-- 成功图标 -->
+    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+      <svg class="w-16 h-16 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-2">支付成功！</h2>
+    <p class="text-gray-600 text-center mb-8">订单已提交，请按时前往乘车点上车</p>
+
+    <!-- 订单信息卡片 -->
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="text-center mb-6">
+        <div class="text-sm text-gray-500 mb-1">订单金额</div>
+        <div class="text-3xl font-bold text-[#FF5000]">￥<%= @orders.sum(&:total_price).to_i %></div>
+      </div>
+
+      <div class="border-t pt-4 space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">订单编号</span>
+          <span class="font-medium">#<%= @order.id %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">乘车人</span>
+          <span class="font-medium"><%= @orders.map(&:passenger_name).join('、') %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">乘车人数</span>
+          <span class="font-medium"><%= @orders.count %>人</span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">班次路线</span>
+          <span class="font-medium"><%= @bus_ticket.departure_station %> → <%= @bus_ticket.arrival_station %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">发车时间</span>
+          <span class="font-medium"><%= @bus_ticket.departure_date.strftime('%m月%d日') %> <%= @bus_ticket.departure_time %></span>
+        </div>
+
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">保险类型</span>
+          <span class="font-medium">
+            <% case @order.insurance_type %>
+            <% when 'refund' %>
+              退改无忧险（¥9/人）
+            <% when 'premium' %>
+              高额保障险（¥3/人）
+            <% else %>
+              不购买保险
+            <% end %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 温馨提示 -->
+    <div class="w-full max-w-md bg-blue-50 rounded-xl p-4 mb-6">
+      <div class="flex items-start space-x-2">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <div class="text-sm text-gray-700">
+          <div class="font-bold mb-2">乘车须知</div>
+          <div class="text-xs leading-relaxed space-y-1">
+            <div>• 请提前30分钟到达车站候车</div>
+            <div>• 乘车时请携带身份证原件</div>
+            <div>• 如需退改，请在发车前2小时操作</div>
+            <div>• 如有疑问，请联系客服：400-1234-567</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="w-full max-w-md flex space-x-3">
+      <%= link_to bus_tickets_path, class: "flex-1 bg-white border-2 border-[#FF5000] text-[#FF5000] py-3 rounded-full text-center font-bold" do %>
+        返回首页
+      <% end %>
+      <%= link_to bookings_path, class: "flex-1 bg-[#FF5000] text-white py-3 rounded-full text-center font-bold" do %>
+        查看订单
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 底部品牌 -->
+  <div class="py-8 text-center">
+    <div class="flex items-center justify-center space-x-1 mb-2">
+      <div class="bg-yellow-400 rounded-full w-5 h-5 flex items-center justify-center">
+        <span class="text-[10px] font-bold">猪</span>
+      </div>
+      <span class="text-sm font-bold italic">飞猪旅行 · 汽车票</span>
+    </div>
+    <div class="text-[10px] text-gray-400">
+      感谢您选择飞猪汽车票服务
+    </div>
+  </div>
+</div>

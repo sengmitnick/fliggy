@@ -17,6 +17,11 @@
             adults: @adults,
             children: @children
           )
+        elsif @return_to == 'bus_ticket_order_new'
+          new_bus_ticket_order_path(
+            bus_ticket_id: @bus_ticket_id,
+            insurance_type: @insurance_type
+          )
         else
           passengers_path(source: @traveler_type)
         end
@@ -45,7 +50,9 @@
       check_out: @check_out,
       rooms: @rooms,
       adults: @adults,
-      children: @children
+      children: @children,
+      bus_ticket_id: @bus_ticket_id,
+      insurance_type: @insurance_type
     ), method: :post, local: true, data: { turbo: false } do |f| %>
       <!-- Error Messages -->
       <% if @passenger.errors.any? %>
