@@ -45,7 +45,8 @@ class BusTicketsController < ApplicationController
     # Apply filters if present
     apply_filters
     
-    @bus_tickets = @bus_tickets.order(:departure_time)
+    # Apply sorting if present
+    apply_sorting
     
     # Get unique stations for filter options
     @departure_stations = BusTicket.where(
@@ -118,6 +119,31 @@ class BusTicketsController < ApplicationController
     if params[:arrival_stations].present?
       arrival_stations = params[:arrival_stations].is_a?(Array) ? params[:arrival_stations] : params[:arrival_stations].split(',')
       @bus_tickets = @bus_tickets.where(arrival_station: arrival_stations)
+    end
+  end
+  
+  def apply_sorting
+    sort_by = params[:sort_by]
+    sort_direction = params[:sort_direction] || 'asc'
+    
+    case sort_by
+    when 'time'
+      # 按时间排序
+      if sort_direction == 'asc'
+        @bus_tickets = @bus_tickets.order(departure_time: :asc)
+      else
+        @bus_tickets = @bus_tickets.order(departure_time: :desc)
+      end
+    when 'price'
+      # 按价格排序
+      if sort_direction == 'asc'
+        @bus_tickets = @bus_tickets.order(price: :asc)
+      else
+        @bus_tickets = @bus_tickets.order(price: :desc)
+      end
+    else
+      # 默认排序：按时间升序
+      @bus_tickets = @bus_tickets.order(departure_time: :asc)
     end
   end
 end

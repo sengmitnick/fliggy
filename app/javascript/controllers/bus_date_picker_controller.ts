@@ -85,7 +85,34 @@ export default class extends Controller<HTMLElement> {
     if (this.hasDateInputTarget) {
       this.dateInputTarget.value = dateStr
     }
-    this.closeModal()
+    
+    // Check if we're on the search page by checking URL path
+    const currentPath = window.location.pathname
+    if (currentPath.includes('/bus_tickets/search')) {
+      // On search page: close modal and refresh with new date
+      this.closeModal()
+      this.refreshSearchResults(dateStr)
+    } else {
+      // On index page: just close modal
+      this.closeModal()
+    }
+  }
+
+  // Refresh search results with new date (search page only)
+  private refreshSearchResults(dateStr: string): void {
+    const params = new URLSearchParams(window.location.search)
+    params.set('date', dateStr)
+    
+    // Use Turbo to navigate with new date parameter
+    const newUrl = `${window.location.pathname}?${params.toString()}`
+    // @ts-ignore - Turbo is available globally
+    if (typeof Turbo !== 'undefined') {
+      // @ts-ignore
+      Turbo.visit(newUrl)
+    } else {
+      // Fallback to regular page reload
+      window.location.href = newUrl
+    }
   }
 
   // Update the displayed date in the main view

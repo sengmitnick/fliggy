@@ -26,7 +26,11 @@ export default class extends Controller {
     "applyButton",
     "filterBadge",
     "selectedTagsContainer",
-    "selectedTagsList"
+    "selectedTagsList",
+    "sortModal",
+    "sortOption",
+    "timeButton",
+    "priceButton"
   ]
 
   declare readonly overlayTarget: HTMLElement
@@ -47,6 +51,10 @@ export default class extends Controller {
   declare readonly filterBadgeTarget: HTMLElement
   declare readonly selectedTagsContainerTarget: HTMLElement
   declare readonly selectedTagsListTarget: HTMLElement
+  declare readonly sortModalTarget: HTMLElement
+  declare readonly sortOptionTargets: HTMLElement[]
+  declare readonly timeButtonTarget: HTMLElement
+  declare readonly priceButtonTarget: HTMLElement
 
   declare readonly originValue: string
   declare readonly destinationValue: string
@@ -56,6 +64,8 @@ export default class extends Controller {
   selectedSeatTypes: Set<string> = new Set()
   selectedDepartureStations: Set<string> = new Set()
   selectedArrivalStations: Set<string> = new Set()
+  currentSortField: string = 'default'
+  currentSortDirection: string = ''
 
   // 映射关系：标识符 -> 显示文字
   timeSlotLabels: { [key: string]: string } = {
@@ -68,6 +78,7 @@ export default class extends Controller {
   connect(): void {
     // 页面加载时从 URL 参数恢复筛选状态
     this.restoreFiltersFromUrl()
+    this.restoreSortFromUrl()
   }
 
   // 从 URL 参数恢复筛选状态
@@ -525,6 +536,157 @@ export default class extends Controller {
       console.error('获取筛选结果数量失败:', error)
       // 错误时显示默认文字
       this.applyButtonTarget.textContent = '查看结果'
+    }
+  }
+
+  // ===== 排序功能 =====
+
+  // 从 URL 参数恢复排序状态
+  restoreSortFromUrl(): void {
+    const urlParams = new URLSearchParams(window.location.search)
+    const sortBy = urlParams.get('sort_by')
+    const sortDirection = urlParams.get('sort_direction')
+
+    if (sortBy) {
+      this.currentSortField = sortBy
+      this.currentSortDirection = sortDirection || ''
+      this.updateSortButtonsDisplay()
+    }
+  }
+
+  // 打开排序弹窗
+  openSortModal(): void {
+    this.sortModalTarget.classList.remove('hidden')
+    // 高亮当前选中的排序选项
+    this.highlightCurrentSort()
+  }
+
+  // 关闭排序弹窗
+  closeSortModal(): void {
+    this.sortModalTarget.classList.add('hidden')
+  }
+
+  // 阻止事件冒泡
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
+  }
+
+  // 选择排序选项
+  selectSort(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const sortField = button.dataset.sortField
+    const sortDirection = button.dataset.sortDirection
+
+    if (!sortField) return
+
+    // 取消所有选项的高亮
+    this.sortOptionTargets.forEach(option => {
+      option.classList.remove('bg-[#FFD900]', 'border-2', 'border-[#FF6A00]')
+      option.classList.add('bg-[#F7F8FA]')
+    })
+
+    // 高亮当前选项
+    button.classList.remove('bg-[#F7F8FA]')
+    button.classList.add('bg-[#FFD900]', 'border-2', 'border-[#FF6A00]')
+
+    // 保存当前选择
+    this.currentSortField = sortField
+    this.currentSortDirection = sortDirection || ''
+  }
+
+  // 应用排序并关闭弹窗
+  applySortAndClose(): void {
+    this.closeSortModal()
+    this.applySort()
+  }
+
+  // 应用排序
+  applySort(): void {
+    const params = new URLSearchParams(window.location.search)
+
+    // 移除旧的排序参数
+    params.delete('sort_by')
+    params.delete('sort_direction')
+
+    // 添加新的排序参数（如果不是默认排序）
+    if (this.currentSortField !== 'default') {
+      params.set('sort_by', this.currentSortField)
+      if (this.currentSortDirection) {
+        params.set('sort_direction', this.currentSortDirection)
+      }
+    }
+
+    // 更新按钮显示
+    this.updateSortButtonsDisplay()
+
+    // 使用 Turbo 刷新页面
+    Turbo.visit(`/bus_tickets/search?${params.toString()}`)
+  }
+
+  // 高亮当前排序选项
+  highlightCurrentSort(): void {
+    this.sortOptionTargets.forEach(option => {
+      const sortField = option.dataset.sortField
+      const sortDirection = option.dataset.sortDirection || ''
+
+      if (sortField === this.currentSortField && sortDirection === this.currentSortDirection) {
+        option.classList.remove('bg-[#F7F8FA]')
+        option.classList.add('bg-[#FFD900]', 'border-2', 'border-[#FF6A00]')
+      } else {
+        option.classList.remove('bg-[#FFD900]', 'border-2', 'border-[#FF6A00]')
+        option.classList.add('bg-[#F7F8FA]')
+      }
+    })
+  }
+
+  // 更新底部排序按钮显示
+  updateSortButtonsDisplay(): void {
+    // 重置所有按钮样式
+    if (this.hasTimeButtonTarget) {
+      this.resetButtonStyle(this.timeButtonTarget)
+    }
+    if (this.hasPriceButtonTarget) {
+      this.resetButtonStyle(this.priceButtonTarget)
+    }
+
+    // 根据当前排序高亮对应按钮
+    if (this.currentSortField === 'time' && this.hasTimeButtonTarget) {
+      this.highlightButton(this.timeButtonTarget, this.currentSortDirection === 'asc' ? '早→晚' : '晚→早')
+    } else if (this.currentSortField === 'price' && this.hasPriceButtonTarget) {
+      this.highlightButton(this.priceButtonTarget, this.currentSortDirection === 'asc' ? '低→高' : '高→低')
+    }
+  }
+
+  // 重置按钮样式
+  resetButtonStyle(button: HTMLElement): void {
+    const icon = button.querySelector('.w-6.h-6')
+    const text = button.querySelector('.text-\\[11px\\]')
+    
+    if (icon) {
+      icon.classList.remove('bg-[#FFD900]', 'border-[#FF6A00]')
+      icon.classList.add('border-gray-600')
+    }
+    
+    if (text) {
+      text.classList.remove('text-[#FF6A00]', 'font-semibold')
+      text.classList.add('text-gray-700')
+    }
+  }
+
+  // 高亮按钮
+  highlightButton(button: HTMLElement, label: string): void {
+    const icon = button.querySelector('.w-6.h-6')
+    const text = button.querySelector('.text-\\[11px\\]')
+    
+    if (icon) {
+      icon.classList.remove('border-gray-600')
+      icon.classList.add('bg-[#FFD900]', 'border-[#FF6A00]')
+    }
+    
+    if (text) {
+      text.classList.remove('text-gray-700')
+      text.classList.add('text-[#FF6A00]', 'font-semibold')
+      text.textContent = label
     }
   }
 }
