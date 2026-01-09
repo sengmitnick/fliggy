@@ -210,25 +210,84 @@
           <!-- 左侧侧边栏 -->
           <div class="w-[90px] bg-[#F7F8FA] overflow-y-auto shrink-0 pb-20" style="-ms-overflow-style: none; scrollbar-width: none;">
             <div class="flex flex-col text-xs text-gray-500">
-              <div class="py-4 text-center">历史/热门</div>
-              <div class="py-4 text-center bg-white font-bold text-gray-900">当前/历史</div>
-              <div class="py-4 text-center">中国港澳台</div>
-              <div class="py-4 text-center">日韩</div>
-              <div class="py-4 text-center">东南亚</div>
-              <div class="py-4 text-center">欧洲</div>
-              <div class="py-4 text-center">美洲</div>
-              <div class="py-4 text-center">亚洲其他</div>
-              <div class="py-4 text-center">大洋洲</div>
-              <div class="py-4 text-center">非洲</div>
-              <div class="py-4 text-center flex flex-col items-center gap-1">
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="history"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                历史/热门
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="current"
+                data-city-selector-target="currentRegionTab"
+                class="py-4 text-center bg-white font-bold text-gray-900">
+                当前/历史
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="hkmo"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                中国港澳台
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="japan-korea"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                日韩
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="southeast-asia"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                东南亚
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="europe"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                欧洲
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="america"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                美洲
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="asia-other"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                亚洲其他
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="oceania"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                大洋洲
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="africa"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                非洲
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="visa-free"
+                class="py-4 text-center flex flex-col items-center gap-1 hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
                 <div class="flex items-center gap-0.5 text-green-600 font-medium">
                   <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
                   <span>免签落地签</span>
                 </div>
-              </div>
-              <div class="py-4 text-center">精选海岛</div>
+              </button>
+              <button 
+                data-action="click->city-selector#scrollToRegion"
+                data-region="islands"
+                class="py-4 text-center hover:bg-white hover:font-bold hover:text-gray-900 transition-all">
+                精选海岛
+              </button>
             </div>
           </div>
 
@@ -236,7 +295,7 @@
           <div class="flex-1 overflow-y-auto bg-white p-3 pb-20" style="-ms-overflow-style: none; scrollbar-width: none;">
             
             <!-- 当前/历史 -->
-            <div class="mb-6">
+            <div class="mb-6" data-region-section="current">
               <h3 class="text-sm font-bold text-gray-900 mb-3">当前/历史</h3>
               <div class="flex flex-wrap gap-2">
                 <div class="bg-gray-50 px-4 py-2 rounded-md flex items-center gap-1 min-w-[80px] justify-center">
@@ -249,7 +308,7 @@
             </div>
 
             <!-- 热门推荐 (四宫格) -->
-            <div class="mb-6">
+            <div class="mb-6" data-region-section="history">
               <h3 class="text-sm font-bold text-gray-900 mb-3">热门推荐</h3>
               <div class="grid grid-cols-2 gap-2">
                 <!-- 全球低价 -->
@@ -286,34 +345,195 @@
               </div>
             </div>
 
-            <!-- 城市列表网格 (3列) -->
-            <div class="grid grid-cols-3 gap-2 mb-8">
-              <% [
-                {name: "首尔", country: "韩国", visa_free: false},
-                {name: "曼谷", country: "泰国", visa_free: true},
-                {name: "东京", country: "日本", visa_free: false},
-                {name: "吉隆坡", country: "马来西亚", visa_free: true},
-                {name: "新加坡", country: "", visa_free: true},
-                {name: "大阪", country: "日本", visa_free: false},
-                {name: "伊斯坦布尔", country: "土耳其", visa_free: false},
-                {name: "胡志明", country: "越南", visa_free: false},
-                {name: "济州岛", country: "韩国", visa_free: true},
-                {name: "河内", country: "越南", visa_free: false},
-                {name: "悉尼", country: "澳大利亚", visa_free: false},
-                {name: "清迈", country: "泰国", visa_free: true}
-              ].each do |city| %>
-                <button 
-                  data-action="click->city-selector#selectCity"
-                  data-city-name="<%= city[:name] %>"
-                  data-city-pinyin="<%= city[:name] %>"
-                  class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center relative <%= city[:visa_free] ? 'overflow-hidden' : '' %>">
-                  <% if city[:visa_free] %>
-                    <div class="absolute top-0 left-0 bg-[#46C068] text-white text-[9px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90 origin-top-left">免签</div>
-                  <% end %>
-                  <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
-                  <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
-                </button>
-              <% end %>
+            <!-- 中国港澳台 -->
+            <div class="mb-6" data-region-section="hkmo">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">中国港澳台</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "香港", country: ""},
+                  {name: "澳门", country: ""},
+                  {name: "台北", country: "台湾"},
+                  {name: "高雄", country: "台湾"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <% if city[:country].present? %>
+                      <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 日韩城市列表 -->
+            <div class="mb-6" data-region-section="japan-korea">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">日韩</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "东京", country: "日本"},
+                  {name: "大阪", country: "日本"},
+                  {name: "京都", country: "日本"},
+                  {name: "首尔", country: "韩国"},
+                  {name: "济州岛", country: "韩国"},
+                  {name: "释山", country: "韩国"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 东南亚城市列表 -->
+            <div class="mb-6" data-region-section="southeast-asia">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">东南亚</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "曼谷", country: "泰国"},
+                  {name: "清迈", country: "泰国"},
+                  {name: "新加坡", country: ""},
+                  {name: "吉隆坡", country: "马来西亚"},
+                  {name: "胡志明", country: "越南"},
+                  {name: "河内", country: "越南"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <% if city[:country].present? %>
+                      <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                    <% end %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 欧洲城市列表 -->
+            <div class="mb-6" data-region-section="europe">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">欧洲</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "伦敦", country: "英国"},
+                  {name: "巴黎", country: "法国"},
+                  {name: "罗马", country: "意大利"},
+                  {name: "巴塞罗那", country: "西班牙"},
+                  {name: "阿姆斯特丹", country: "荷兰"},
+                  {name: "慕尼黑", country: "德国"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 美洲城市列表 -->
+            <div class="mb-6" data-region-section="america">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">美洲</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "纽约", country: "美国"},
+                  {name: "洛杉矶", country: "美国"},
+                  {name: "旧金山", country: "美国"},
+                  {name: "多伦多", country: "加拿大"},
+                  {name: "温哥华", country: "加拿大"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 亚洲其他 -->
+            <div class="mb-6" data-region-section="asia-other">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">亚洲其他</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "伊斯坦布尔", country: "土耳其"},
+                  {name: "迪拜", country: "阿联酋"},
+                  {name: "曼谷", country: "印度"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 大洋洲 -->
+            <div class="mb-6" data-region-section="oceania">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">大洋洲</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "悉尼", country: "澳大利亚"},
+                  {name: "墨尔本", country: "澳大利亚"},
+                  {name: "奥克兰", country: "新西兰"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- 非洲 -->
+            <div class="mb-6" data-region-section="africa">
+              <h3 class="text-sm font-bold text-gray-900 mb-3">非洲</h3>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  {name: "开罗", country: "埃及"},
+                  {name: "内罗毕", country: "肯尼亚"}
+                ].each do |city| %>
+                  <button 
+                    data-action="click->city-selector#selectCity"
+                    data-city-name="<%= city[:name] %>"
+                    data-city-pinyin="<%= city[:name] %>"
+                    data-international="true"
+                    class="bg-gray-50 rounded-lg py-3 flex flex-col items-center justify-center">
+                    <span class="text-sm font-medium text-gray-900"><%= city[:name] %></span>
+                    <span class="text-[10px] text-gray-400"><%= city[:country] %></span>
+                  </button>
+                <% end %>
+              </div>
             </div>
 
             <!-- 热门地区 (2列大卡片) -->

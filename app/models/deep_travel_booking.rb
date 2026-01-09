@@ -14,13 +14,13 @@ class DeepTravelBooking < ApplicationRecord
   accepts_nested_attributes_for :booking_travelers, allow_destroy: true
   
   # 订单状态: pending(待支付), paid(已支付), confirmed(已确认), completed(已完成), cancelled(已取消)
-  enum status: {
+  enum :status, {
     pending: 'pending',
     paid: 'paid', 
     confirmed: 'confirmed',
     completed: 'completed',
     cancelled: 'cancelled'
-  }, _prefix: true
+  }, prefix: true
   
   # 生成订单编号
   before_create :generate_order_number

@@ -1,8 +1,6 @@
 FactoryBot.define do
   factory :hotel_booking do
-    association :hotel
     association :user
-    association :hotel_room
     check_in_date { Date.today }
     check_out_date { Date.today + 1.day }
     rooms_count { 1 }
@@ -17,5 +15,15 @@ FactoryBot.define do
     coupon_code { "" }
     special_requests { "" }
     status { "pending" }
+
+    # Create hotel and hotel_room with proper association
+    transient do
+      hotel { create(:hotel) }
+    end
+
+    after(:build) do |hotel_booking, evaluator|
+      hotel_booking.hotel ||= evaluator.hotel
+      hotel_booking.hotel_room ||= create(:hotel_room, hotel: evaluator.hotel)
+    end
   end
 end
