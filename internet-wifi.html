@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>境外上网订单页复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* 隐藏滚动条但保持滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 自定义选中态的黄色背景 */
+        .bg-brand-yellow {
+            background-color: #FFDD00;
+        }
+        .text-price-red {
+            color: #FF5035;
+        }
+        .bg-price-red {
+            background-color: #FF6856;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center min-h-screen">
+
+    <!-- 手机容器 -->
+    <div class="w-full max-w-[414px] bg-[#F7F8FA] relative shadow-xl min-h-screen flex flex-col">
+        
+        <!-- 1. 顶部状态栏与导航 (Fixed) -->
+        <div class="bg-brand-yellow sticky top-0 z-50">
+           
+            <!-- 导航栏 -->
+            <div class="flex justify-between items-center px-4 pb-3 pt-1">
+                <button>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex space-x-6 text-lg font-bold text-gray-800">
+                    <div class="relative">
+                        境外上网
+                        <div class="absolute -bottom-1 left-0 right-0 h-0.5 bg-black rounded-full w-2/3 mx-auto"></div>
+                    </div>
+                    <div class="text-gray-600 font-normal">境内流量</div>
+                </div>
+                <button>
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. 主要内容区域 (Scrollable) -->
+        <div class="flex-1 overflow-y-auto pb-24 no-scrollbar">
+            
+            <!-- 顶部黄色背景延伸 -->
+            <div class="bg-gradient-to-b from-brand-yellow to-[#F7F8FA] pb-4 px-4">
+                
+                <!-- 地区选择 -->
+                <div class="flex justify-between items-center mt-2 mb-4">
+                    <div class="flex items-center space-x-2 bg-transparent">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5MDAgNjAwIj48cGF0aCBmaWxsPSIjZGUyOTEwIiBkPSJNMCAwaDkwMHY2MDBIMHoiLz48cGF0aCBmaWxsPSIjZmRlNDAyIiBkPSJNMTE1LjYgNzkuN2wyMS4zIDY1LjQtNTUuNy00MC40aDY4LjhMOTQuMyAxNDV6Ii8+PHBhdGggZmlsbD0iI2ZmZGUwMCIgZD0iTTE4Ny44IDU4bC04LjIgMjUuMyAyNS4zLTguMnpNMjEwLjcgMTEwbC04LjMgMjUuMiAyNS4zLTguM3pNMjEwLjcgMTYybC04LjMgMjUuMyAyNS4zLTguM3pNMTg3LjggMjE0bC04LjIgMjUuMyAyNS4zLTguMnoiLz48L3N2Zz4=" class="w-6 h-4 object-cover rounded shadow-sm border border-white" alt="China Flag">
+                        <span class="text-lg font-bold text-gray-900">中国香港</span>
+                        <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="flex items-center bg-[#FFEB85] px-2 py-1 rounded-full text-xs font-medium">
+                        <span class="bg-black text-brand-yellow px-1 rounded mr-1">选购攻略</span>
+                        <span>境外上网怎么选</span>
+                        <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+
+                <!-- 三级Tab -->
+                <div class="flex justify-between items-center mt-4 px-2">
+                    <div class="flex flex-col items-center text-gray-600">
+                        <span class="text-base">境外电话卡</span>
+                    </div>
+                    <div class="flex flex-col items-center text-gray-600">
+                        <span class="text-base">境外流量包</span>
+                    </div>
+                    <div class="flex flex-col items-center text-gray-900 font-bold relative">
+                        <span class="text-lg">随身WiFi</span>
+                        <div class="absolute -bottom-2 w-8 h-1 bg-gray-800 rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="text-center text-gray-400 text-xs mt-3 mb-2">
+                    - 多网覆盖 · 信号稳定 · 多人共享 -
+                </div>
+            </div>
+
+            <!-- 内容卡片层 -->
+            <div class="px-3 -mt-2 space-y-3">
+                
+                <!-- 取件方式 -->
+                <div class="bg-white rounded-xl p-1 shadow-sm flex items-center justify-between">
+                    <div class="pl-3 font-medium text-gray-800">取件方式</div>
+                    <div class="flex bg-gray-50 rounded-lg p-1">
+                        <div class="px-6 py-1.5 text-sm text-gray-500">邮寄</div>
+                        <div class="px-6 py-1.5 text-sm font-bold bg-white rounded shadow-sm text-gray-800">自取</div>
+                    </div>
+                </div>
+
+                <!-- 套餐列表 -->
+                <div class="space-y-3">
+                    
+                    <!-- 套餐 1 (Selected) -->
+                    <div class="bg-[#FFFDF2] border border-[#FFDD00] rounded-xl p-4 relative shadow-sm">
+                        <div class="absolute top-0 left-0 bg-[#FF5035] text-white text-[10px] px-1.5 py-0.5 rounded-tl-xl rounded-br-lg">热销</div>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="font-bold text-gray-900">4G网·无限量</span>
+                            <div class="flex items-center">
+                                <span class="text-xs text-price-red font-medium">¥</span>
+                                <span class="text-xl font-bold text-price-red mr-1">17</span>
+                                <span class="text-xs text-gray-400">/天</span>
+                                <div class="w-5 h-5 ml-2 bg-brand-yellow rounded-full flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 套餐 2 -->
+                    <div class="bg-white rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-medium text-gray-900">5G网·无限量</span>
+                        <div class="flex items-center">
+                            <span class="text-xs text-price-red font-medium">¥</span>
+                            <span class="text-xl font-bold text-price-red mr-1">35</span>
+                            <span class="text-xs text-gray-400">/天</span>
+                            <div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 套餐 3 -->
+                    <div class="bg-white rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-medium text-gray-900">5G网·无限量·配转换插头</span>
+                        <div class="flex items-center">
+                            <span class="text-xs text-price-red font-medium">¥</span>
+                            <span class="text-xl font-bold text-price-red mr-1">37</span>
+                            <span class="text-xs text-gray-400">/天</span>
+                            <div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 套餐 4 -->
+                    <div class="bg-white rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-medium text-gray-900">4G网·无限量·配转换插头</span>
+                        <div class="flex items-center">
+                            <span class="text-xs text-price-red font-medium">¥</span>
+                            <span class="text-xl font-bold text-price-red mr-1">21</span>
+                            <span class="text-xs text-gray-400">/天</span>
+                            <div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 套餐 5 (From Screenshot 4, matching filled state) -->
+                     <div class="bg-white rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <span class="font-medium text-gray-900">4G网·500MB/天·用完即止</span>
+                        <div class="flex items-center">
+                            <span class="text-xs text-price-red font-medium">¥</span>
+                            <span class="text-xl font-bold text-price-red mr-1">13</span>
+                            <span class="text-xs text-gray-400">/天</span>
+                            <div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right text-[10px] text-gray-400 pr-1 pb-1">
+                        *套餐服务由漫游超人通讯旗舰店提供
+                    </div>
+                </div>
+
+                <!-- 预订信息表单 -->
+                <div class="bg-white rounded-xl px-4 py-2 shadow-sm space-y-5 mt-2">
+                    
+                    <!-- 租用台数 -->
+                    <div class="flex justify-between items-center pt-3">
+                        <span class="font-medium text-gray-900">租用台数</span>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300">-</div>
+                            <span class="text-gray-900">1</span>
+                            <div class="w-6 h-6 rounded-full border border-blue-500 flex items-center justify-center text-blue-500">+</div>
+                        </div>
+                    </div>
+
+                    <!-- 取还日期 -->
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-900">取还日期</span>
+                        <div class="flex items-center space-x-1 cursor-pointer">
+                            <span class="text-gray-900 text-sm">01月09日-01月30日(共22天)</span>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- 取件地址 -->
+                    <div class="flex justify-between items-start">
+                        <span class="font-medium text-gray-900 mt-1">取件地址</span>
+                        <div class="flex items-center space-x-1 text-right">
+                            <div>
+                                <div class="text-gray-900 text-sm">深圳 市区</div>
+                                <div class="text-gray-400 text-xs">(24小时 (北京时间) )</div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- 联系人姓名 -->
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-gray-900">联系人姓名</span>
+                        <div class="flex items-center space-x-1">
+                            <input type="text" value="张润胜" class="text-right text-sm text-gray-900 outline-none w-32" placeholder="请输入联系人姓名">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- 联系人电话 -->
+                    <div class="flex justify-between items-center pb-3">
+                        <span class="font-medium text-gray-900">联系人电话</span>
+                        <input type="tel" value="18027128600" class="text-right text-sm text-gray-900 outline-none w-40" placeholder="请输入联系人电话">
+                    </div>
+                </div>
+
+                <!-- 预订须知 -->
+                <div class="bg-[#F7F8FA] rounded-xl pt-4 pb-2 px-1">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium text-gray-900">预订须知</span>
+                        <div class="flex items-center text-blue-500 text-xs">
+                            <span>查看预订须知</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 space-y-2 leading-relaxed">
+                        <p>1.订单预定成功后，系统会自动下发短信通知发货日期、自取等信息。</p>
+                        <p>2.邮寄订单：当天16:00前拍下算入当天预订，超出算入次日；至少要提前3~7天预定，以顺丰快递配送时效为准；默认发顺丰...</p>
+                        <p>3.自取订单：当天至少提前2小时~24小时以上下单（以每个网点要求为准），方可在当天或提前1天取机。</p>
+                    </div>
+
+                    <div class="mt-4 mb-2">
+                        <span class="font-medium text-gray-900">退改规则</span>
+                    </div>
+                    <div class="text-xs text-gray-500 space-y-2 leading-relaxed">
+                        <p>1.邮寄退订：没有发货，可全额退款；如已发货，需扣取50元/台违约金(最高不超过订单租金总额)并归还设备。</p>
+                        <p>2.邮寄退订：若未签收，应要拒收退回后可退款；若已签收，应在2天内寄出，邮费由买家承担，否则按延迟归还赔偿标准处理。</p>
+                        <p>3.自取退订：未取设备并在取机日期提前1天告知，可全额退款；</p>
+                    </div>
+                </div>
+
+                <!-- 信用免押 -->
+                <div class="bg-[#FFF8F5] rounded-xl p-4 flex justify-between items-center mb-4">
+                    <div>
+                        <div class="flex items-center space-x-1">
+                            <span class="font-medium text-gray-900">信用免押</span>
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1 flex items-center">
+                            您已使用信用免押，无需另付押金(500元/台) 
+                            <span class="text-gray-800 ml-1">展开</span>
+                            <svg class="w-3 h-3 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                    <div class="w-5 h-5 bg-brand-yellow rounded-full flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 底部固定栏 (Fixed) -->
+        <div class="bg-white px-4 py-2 border-t border-gray-100 flex items-center justify-between fixed bottom-0 w-full max-w-[414px]">
+            <div class="flex space-x-6 pl-1">
+                <div class="flex flex-col items-center text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                    <span class="text-[10px] font-medium mt-0.5">客服</span>
+                </div>
+                <div class="flex flex-col items-center text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                    <span class="text-[10px] font-medium mt-0.5">分享</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <div class="text-right">
+                    <div class="flex items-end justify-end leading-none">
+                        <span class="text-xs text-price-red font-bold mb-1">¥</span>
+                        <span class="text-2xl text-price-red font-bold">374</span>
+                    </div>
+                    <div class="flex items-center justify-end text-xs text-gray-400 mt-1">
+                        <span>含押金 ¥500.00</span>
+                        <span class="ml-1 text-gray-400">明细</span>
+                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                    </div>
+                </div>
+                <button class="bg-price-red text-white font-bold text-base px-8 py-2.5 rounded-full shadow-lg">
+                    立即支付
+                </button>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

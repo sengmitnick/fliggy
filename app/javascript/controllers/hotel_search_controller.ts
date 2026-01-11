@@ -12,7 +12,13 @@ export default class extends Controller<HTMLElement> {
     "attractionContent", "attractionIcon",
     "themeContent", "themeIcon",
     "hospitalContent", "hospitalIcon",
-    "universityContent", "universityIcon"
+    "universityContent", "universityIcon",
+    "cityInput",
+    "checkInInput",
+    "checkOutInput",
+    "roomsInput",
+    "adultsInput",
+    "childrenInput"
   ]
 
   declare readonly searchModalTarget: HTMLElement
@@ -35,13 +41,40 @@ export default class extends Controller<HTMLElement> {
   declare readonly hospitalIconTarget: HTMLElement
   declare readonly universityContentTarget: HTMLElement
   declare readonly universityIconTarget: HTMLElement
+  declare readonly hasCityInputTarget: boolean
+  declare readonly cityInputTarget: HTMLInputElement
+  declare readonly hasCheckInInputTarget: boolean
+  declare readonly checkInInputTarget: HTMLInputElement
+  declare readonly hasCheckOutInputTarget: boolean
+  declare readonly checkOutInputTarget: HTMLInputElement
+  declare readonly hasRoomsInputTarget: boolean
+  declare readonly roomsInputTarget: HTMLInputElement
+  declare readonly hasAdultsInputTarget: boolean
+  declare readonly adultsInputTarget: HTMLInputElement
+  declare readonly hasChildrenInputTarget: boolean
+  declare readonly childrenInputTarget: HTMLInputElement
 
   connect(): void {
     console.log("HotelSearch connected")
+    // Listen for city-selector updates
+    document.addEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
   }
 
   disconnect(): void {
     console.log("HotelSearch disconnected")
+    document.removeEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
+  }
+
+  // Handle city selection update from city-selector
+  handleCityUpdate(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { cityName } = customEvent.detail
+    console.log('HotelSearch: Received city update:', cityName)
+    
+    if (this.hasCityInputTarget) {
+      this.cityInputTarget.value = cityName
+      console.log('HotelSearch: Updated city input to:', cityName)
+    }
   }
 
   openSearchModal(): void {

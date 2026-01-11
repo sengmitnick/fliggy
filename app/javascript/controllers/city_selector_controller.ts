@@ -235,6 +235,9 @@ export default class extends Controller<HTMLElement> {
         // Dispatch city-changed event for tour-group-filter to listen
         this.dispatchCityChangedEvent(cityName)
         
+        // Dispatch hotel-specific event for hotel-search controller
+        this.dispatchHotelCityUpdateEvent(cityName)
+        
         // If international city selected in hotels context, switch to international tab
         if (isInternational) {
           this.switchToInternationalTab()
@@ -261,6 +264,16 @@ export default class extends Controller<HTMLElement> {
     })
     this.element.dispatchEvent(cityChangedEvent)
     console.log('City selector: Dispatched city-changed event', cityName)
+  }
+
+  // Dispatch hotel-specific city update event
+  private dispatchHotelCityUpdateEvent(cityName: string): void {
+    const hotelCityEvent = new CustomEvent('city-selector:city-selected-for-hotel', {
+      detail: { cityName },
+      bubbles: true
+    })
+    document.dispatchEvent(hotelCityEvent)
+    console.log('City selector: Dispatched hotel city update event', cityName)
   }
 
   // Switch cities
