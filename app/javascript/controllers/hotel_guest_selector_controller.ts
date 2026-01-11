@@ -121,6 +121,8 @@ export default class extends Controller<HTMLElement> {
   // Confirm and close
   confirm(): void {
     this.updateDisplay()
+    // Dispatch event to notify hotel-search controller
+    this.dispatchGuestUpdateEvent()
     this.closeModal()
   }
 
@@ -138,5 +140,23 @@ export default class extends Controller<HTMLElement> {
   // Update display text
   private updateDisplay(): void {
     this.displayTextTarget.textContent = `${this.roomsValue}间房 ${this.adultsValue}成人 ${this.childrenValue}儿童`
+  }
+
+  // Dispatch event to notify hotel-search controller
+  private dispatchGuestUpdateEvent(): void {
+    const guestUpdateEvent = new CustomEvent('hotel-guest-selector:guests-updated', {
+      detail: {
+        rooms: this.roomsValue,
+        adults: this.adultsValue,
+        children: this.childrenValue
+      },
+      bubbles: true
+    })
+    document.dispatchEvent(guestUpdateEvent)
+    console.log('Hotel guest selector: Dispatched guest update event', {
+      rooms: this.roomsValue,
+      adults: this.adultsValue,
+      children: this.childrenValue
+    })
   }
 }

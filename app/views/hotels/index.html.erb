@@ -90,12 +90,12 @@
 
     <!-- Search Button -->
     <%= form_with url: search_hotels_path, method: :get, data: { turbo: false } do |f| %>
-      <%= f.hidden_field :city, value: @city %>
-      <%= f.hidden_field :check_in, value: @check_in %>
-      <%= f.hidden_field :check_out, value: @check_out %>
-      <%= f.hidden_field :rooms, value: @rooms %>
-      <%= f.hidden_field :adults, value: @adults %>
-      <%= f.hidden_field :children, value: @children %>
+      <%= f.hidden_field :city, value: @city, data: { hotel_search_target: "cityInput" } %>
+      <%= f.hidden_field :check_in, value: @check_in, data: { hotel_search_target: "checkInInput" } %>
+      <%= f.hidden_field :check_out, value: @check_out, data: { hotel_search_target: "checkOutInput" } %>
+      <%= f.hidden_field :rooms, value: @rooms, data: { hotel_search_target: "roomsInput" } %>
+      <%= f.hidden_field :adults, value: @adults, data: { hotel_search_target: "adultsInput" } %>
+      <%= f.hidden_field :children, value: @children, data: { hotel_search_target: "childrenInput" } %>
       <%= f.submit "搜索酒店", class: "block w-full text-center text-white font-bold py-3 rounded-full border-0 cursor-pointer", style: "background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);" %>
     <% end %>
 
@@ -217,11 +217,11 @@
                   <div class="flex items-end justify-between mt-2">
                     <div class="flex items-baseline gap-1">
                       <span class="text-xs" style="color: #F44336;">¥</span>
-                      <span class="text-2xl font-bold" style="color: #F44336;"><%= hotel.price.to_i %></span>
+                      <span class="text-2xl font-bold" style="color: #F44336;"><%= (hotel.price * @rooms).to_i %></span>
                       <span class="text-xs text-gray-400">起</span>
                     </div>
                     <div class="text-right">
-                      <div class="text-xs text-gray-400 line-through">¥<%= (hotel.price * 1.3).to_i %></div>
+                      <div class="text-xs text-gray-400 line-through">¥<%= ((hotel.price * @rooms) * 1.3).to_i %></div>
                       <div class="flex items-center gap-1 text-xs" style="color: #FF4444;">
                         <span>百亿神券</span>
                         <span>优惠¥39</span>
@@ -288,9 +288,9 @@
                 <!-- Price -->
                 <div class="flex items-baseline gap-1">
                   <span class="text-xs" style="color: #F44336;">¥</span>
-                  <span class="text-xl font-bold" style="color: #F44336;"><%= hotel.price.to_i %></span>
+                  <span class="text-xl font-bold" style="color: #F44336;"><%= (hotel.price * @rooms).to_i %></span>
                   <span class="text-xs text-gray-400">起</span>
-                  <span class="text-xs text-gray-400 line-through ml-1">¥<%= hotel.original_price&.to_i || (hotel.price * 1.3).to_i %></span>
+                  <span class="text-xs text-gray-400 line-through ml-1">¥<%= hotel.original_price&.to_i ? (hotel.original_price * @rooms).to_i : ((hotel.price * @rooms) * 1.3).to_i %></span>
                 </div>
                 
                 <!-- Optional: Featured Tag -->

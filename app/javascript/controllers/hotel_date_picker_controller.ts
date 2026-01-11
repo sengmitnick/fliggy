@@ -118,6 +118,10 @@ export default class extends Controller<HTMLElement> {
       this.checkInInputTarget.value = this.formatDate(this.checkInDate)
       this.checkOutInputTarget.value = this.formatDate(this.checkOutDate)
       this.updateDisplay()
+      
+      // Dispatch event to notify hotel-search controller
+      this.dispatchDateUpdateEvent()
+      
       this.closeModal()
     }
   }
@@ -380,5 +384,23 @@ export default class extends Controller<HTMLElement> {
       const nights = Math.floor((this.checkOutDate.getTime() - this.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
       this.nightsDisplayTarget.textContent = `${nights}晚`
     }
+  }
+
+  // Dispatch date update event for hotel-search controller
+  private dispatchDateUpdateEvent(): void {
+    if (!this.checkInDate || !this.checkOutDate) return
+    
+    const dateUpdateEvent = new CustomEvent('hotel-date-picker:dates-selected', {
+      detail: {
+        checkIn: this.formatDate(this.checkInDate),
+        checkOut: this.formatDate(this.checkOutDate)
+      },
+      bubbles: true
+    })
+    document.dispatchEvent(dateUpdateEvent)
+    console.log('Hotel date picker: Dispatched dates update event', {
+      checkIn: this.formatDate(this.checkInDate),
+      checkOut: this.formatDate(this.checkOutDate)
+    })
   }
 }

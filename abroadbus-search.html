@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Ticket App UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏滚动条但保留滚动功能 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            background-color: #f3f4f6; /* 接近原图的浅灰底色 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="flex justify-center min-h-screen bg-gray-100">
+
+    <!-- 手机容器 -->
+    <div class="w-full max-w-[430px] bg-[#F5F6FA] min-h-screen relative shadow-2xl flex flex-col">
+        
+       
+        <!-- App 头部导航 -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+            <button class="p-1">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="flex items-center gap-2 font-bold text-lg text-gray-900">
+                <span>东京站</span>
+                <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+                <span>新大阪站</span>
+                <svg class="w-3 h-3 text-gray-800 fill-current" viewBox="0 0 20 20">
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                </svg>
+            </div>
+            <button class="p-1">
+                <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="5" cy="12" r="2" />
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="19" cy="12" r="2" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- 日期选择栏 -->
+        <div class="bg-white pb-2 flex border-b border-gray-100">
+            <div class="flex-1 flex overflow-x-auto hide-scrollbar pl-2 pr-2 items-center">
+                <!-- 日期项 -->
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2">
+                    <span class="text-xs text-gray-400">01-11</span>
+                    <span class="text-sm font-medium text-gray-400">周日</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2">
+                    <span class="text-xs text-gray-400">01-12</span>
+                    <span class="text-sm font-medium text-gray-400">周一</span>
+                </div>
+                <!-- 选中项 -->
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2 bg-[#FFD900] rounded-lg mx-1 shadow-sm">
+                    <span class="text-xs text-gray-900 font-semibold">01-13</span>
+                    <span class="text-sm font-bold text-gray-900">周二</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2">
+                    <span class="text-xs text-gray-900">01-14</span>
+                    <span class="text-sm font-medium text-gray-900">周三</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2">
+                    <span class="text-xs text-gray-900">01-15</span>
+                    <span class="text-sm font-medium text-gray-900">周四</span>
+                </div>
+                <div class="flex-shrink-0 flex flex-col items-center justify-center w-[4.5rem] py-2">
+                    <span class="text-xs text-gray-900">01-16</span>
+                    <span class="text-sm font-medium text-gray-900">周五</span>
+                </div>
+            </div>
+            <!-- 日历按钮 -->
+            <div class="w-12 flex items-center justify-center border-l border-gray-100 shadow-[-5px_0_10px_-5px_rgba(0,0,0,0.05)] z-10 bg-white">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <circle cx="12" cy="15" r="1" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto pb-20">
+            
+            <!-- 提示语 -->
+            <div class="flex justify-between items-end px-4 py-3">
+                <h2 class="text-lg font-bold text-gray-900">选择当地<span class="text-[#5555FF]">意向出发时间段</span></h2>
+                <span class="text-[10px] text-gray-400">实际时间以票面为准</span>
+            </div>
+
+            <!-- 卡片列表容器 -->
+            <div class="px-3 space-y-3">
+
+                <!-- 卡片 1 (09:00 - 10:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <!-- 电子票标签 -->
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">
+                        电子票
+                    </div>
+                    
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    
+                    <div class="flex justify-between items-baseline mt-1">
+                        <!-- 左侧时间 -->
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">09:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">10:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <!-- 右侧价格 -->
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+
+                    <!-- 车站信息 -->
+                    <div class="flex justify-between items-start mt-1 pr-24"> <!-- pr-24 为了避开价格区域如果重叠 -->
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        
+                        <!-- 装饰线 -->
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5 relative"></div>
+
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片 2 (10:00 - 11:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">电子票</div>
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">10:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">11:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mt-1 pr-24">
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5"></div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片 3 (11:00 - 12:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">电子票</div>
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">11:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">12:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mt-1 pr-24">
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5"></div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片 4 (12:00 - 13:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">电子票</div>
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">12:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">13:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mt-1 pr-24">
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5"></div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片 5 (13:00 - 14:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">电子票</div>
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">13:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">14:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mt-1 pr-24">
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5"></div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片 6 (14:00 - 15:00) -->
+                <div class="bg-white rounded-xl p-4 relative shadow-sm">
+                    <div class="absolute top-4 right-4 border border-gray-300 rounded text-[10px] px-1 text-gray-500">电子票</div>
+                    <div class="text-sm text-gray-900 mb-1">出发时间段(当地时间)</div>
+                    <div class="flex justify-between items-baseline mt-1">
+                        <div class="flex items-baseline">
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">14:00</span>
+                            <span class="mx-2 text-sm font-medium text-gray-900">至</span>
+                            <span class="text-[28px] font-bold text-gray-900 font-sans tracking-tight">15:00</span>
+                            <span class="ml-2 text-sm text-gray-900">之间出发</span>
+                        </div>
+                        <div class="text-[#FF5500] font-bold">
+                            <span class="text-sm">¥</span><span class="text-xl">710</span><span class="text-sm">.85起</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mt-1 pr-24">
+                        <div class="flex flex-col">
+                            <span class="text-sm text-gray-800">东京站</span>
+                            <span class="text-[10px] text-gray-400">Tokyo Station</span>
+                        </div>
+                        <div class="flex-1 mx-4 h-[1px] bg-gray-200 mt-2.5"></div>
+                        <div class="flex flex-col text-right">
+                            <span class="text-sm text-gray-800">新大阪站</span>
+                            <span class="text-[10px] text-gray-400">Shin-Osaka Station</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 底部筛选栏 -->
+        <div class="bg-white border-t border-gray-200 px-6 py-3 flex justify-between items-center text-xs text-gray-600 fixed bottom-0 w-full max-w-[430px]">
+            <div class="flex flex-col items-center gap-1 cursor-pointer">
+                <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                    <path stroke-width="1.5" stroke-linecap="round" d="M12 6v6l4 2"/>
+                </svg>
+                <span>时间排序</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 cursor-pointer">
+                <div class="w-5 h-5 rounded-full border border-gray-800 flex items-center justify-center text-[10px] font-bold">¥</div>
+                <span>价格排序</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 cursor-pointer">
+                <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span>高级筛选</span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

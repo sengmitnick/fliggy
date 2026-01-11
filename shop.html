@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>签证页面复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 自定义字体设置，模拟手机系统字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+    <!-- 手机外壳容器 -->
+    <div class="w-full max-w-[375px] bg-white h-full min-h-[812px] relative shadow-2xl overflow-hidden pb-16">
+
+        <!-- 2. 导航栏 Header -->
+        <div class="flex justify-between items-end px-4 pb-3 bg-white sticky top-0 z-20">
+            <button>
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <div class="flex space-x-6 text-base relative">
+                <div class="flex flex-col items-center cursor-pointer">
+                    <span class="font-bold text-gray-900 text-lg">推荐</span>
+                    <div class="w-8 h-1 bg-yellow-400 rounded-full mt-1"></div>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer text-gray-500">
+                    <span class="font-normal text-lg">移民</span>
+                </div>
+            </div>
+            <button>
+                <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+        </div>
+
+        <!-- 内容滚动区域 -->
+        <div class="overflow-y-auto no-scrollbar pb-20 h-full">
+            
+            <!-- 3. 店铺信息 Shop Info -->
+            <div class="px-3 pt-2 pb-2 bg-white flex justify-between items-start">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <h1 class="font-bold text-lg text-gray-800">广东中青旅旅游专营店</h1>
+                        <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <div class="flex items-center mt-1 space-x-2 text-xs">
+                        <span class="text-gray-500">服务品质</span>
+                        <div class="flex text-yellow-400">
+                            ★ ★ ★ ★ ★
+                        </div>
+                        <span class="text-gray-400">|</span>
+                        <span class="text-gray-500">粉丝数6.6万</span>
+                    </div>
+                    <div class="flex mt-2 space-x-2 text-[10px]">
+                        <div class="bg-yellow-400 text-black px-1 py-0.5 rounded-sm font-bold flex items-center">
+                            <span class="mr-1">✈</span>飞猪旅行
+                        </div>
+                        <span class="text-gray-500 self-center">玩得酷 靠得住</span>
+                    </div>
+                </div>
+                <button class="bg-yellow-400 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-sm mt-1">关注</button>
+            </div>
+
+            <!-- 4. 红色横幅 Red Banner (China Visa) -->
+            <div class="px-3 py-2">
+                <div class="bg-gradient-to-b from-[#D32F2F] to-[#B71C1C] rounded-xl relative overflow-hidden h-[180px] text-white p-4 shadow-md">
+                    <!-- 背景装饰 (SVG模拟) -->
+                    <div class="absolute inset-0 opacity-20">
+                        <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <path d="M0 100 L50 50 L100 100 Z" fill="black"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- 顶部LOGO区域 -->
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-[10px]">logo</div>
+                        <span class="text-xs font-bold bg-white/20 px-1 rounded">中青旅签证</span>
+                    </div>
+
+                    <!-- 主标题 -->
+                    <div class="text-center mt-2">
+                        <h2 class="text-3xl font-black tracking-tight text-[#FFECB3] drop-shadow-md">中国签证行业领导者</h2>
+                    </div>
+
+                    <!-- 标签 -->
+                    <div class="flex justify-center space-x-2 mt-3">
+                        <span class="bg-[#FFE082] text-[#8B0000] text-[10px] font-bold px-2 py-0.5 rounded-full">上市公司</span>
+                        <span class="bg-[#FFE082] text-[#8B0000] text-[10px] font-bold px-2 py-0.5 rounded-full">央企品牌</span>
+                        <span class="bg-[#FFE082] text-[#8B0000] text-[10px] font-bold px-2 py-0.5 rounded-full">流程规范</span>
+                    </div>
+
+                    <!-- 次级标签 -->
+                    <div class="flex justify-center space-x-4 mt-2">
+                        <span class="bg-white text-red-700 text-xs font-bold px-3 py-1 rounded-full shadow">保护隐私</span>
+                        <span class="bg-white text-red-700 text-xs font-bold px-3 py-1 rounded-full shadow">出签率高</span>
+                    </div>
+
+                    <!-- 底部地标图片占位 -->
+                    <div class="absolute bottom-0 left-0 w-full flex justify-between items-end px-2 pointer-events-none">
+                        <!-- 自由女神像占位 -->
+                        <div class="w-12 h-16 bg-green-200 opacity-80 rounded-t-lg flex items-center justify-center text-[8px] text-green-800">NYC</div>
+                        <!-- 巴士占位 -->
+                        <div class="w-12 h-10 bg-red-400 rounded-t-lg flex items-center justify-center text-[8px] text-white">Bus</div>
+                        <!-- 人物占位 -->
+                        <div class="w-16 h-16 bg-gray-200 rounded-full border-2 border-white translate-y-2 z-10 flex items-center justify-center text-[8px]">Person</div>
+                        <!-- 地球仪占位 -->
+                        <div class="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center text-[8px] text-white">Earth</div>
+                        <!-- 鸟居占位 -->
+                        <div class="w-12 h-14 bg-red-600 rounded-t-lg flex items-center justify-center text-[8px] text-white">Gate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 蓝色横幅 Blue Banner (Japan Visa) -->
+            <div class="px-3 pb-2">
+                <div class="bg-gradient-to-r from-blue-100 to-blue-50 rounded-xl h-[160px] relative overflow-hidden flex items-center shadow-sm">
+                    <div class="pl-6 z-10 w-2/3">
+                        <h2 class="text-4xl font-black text-[#2E5CAA] tracking-tight">日本签证</h2>
+                        <div class="mt-2 bg-[#2E5CAA]/10 inline-block px-2 py-0.5 rounded text-[#2E5CAA] font-bold text-sm border border-[#2E5CAA]/20">
+                            一手送签资质有保障
+                        </div>
+                        <div class="mt-2 text-[#5B85C7] font-bold text-sm tracking-widest">
+                            流程 规范 &nbsp; 出签 稳定
+                        </div>
+                        <button class="mt-3 bg-[#C62828] text-white text-xs font-bold px-4 py-1 rounded-full flex items-center">
+                            立即前往 <span class="ml-1">»</span>
+                        </button>
+                    </div>
+                    <!-- 右侧人物图片占位 -->
+                    <div class="absolute right-0 bottom-0 w-[140px] h-full">
+                         <!-- 樱花背景 -->
+                         <div class="absolute top-0 right-0 w-full h-full bg-pink-100 opacity-50 rounded-l-full blur-xl"></div>
+                         <!-- 人物 -->
+                         <div class="absolute bottom-0 right-0 w-full h-[90%] bg-gray-300 rounded-tl-[40px] overflow-hidden">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiBmaWxsPSIjZTVlN2ViIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzllOWU5ZSI+5YW455yf5bCx5L2NPC90ZXh0Pjwvc3ZnPg==" class="w-full h-full object-cover" alt="Japanese Woman">
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 全球签证国家馆 Global Visa Pavilion -->
+            <div class="bg-white rounded-t-2xl px-3 pt-6 pb-4 mt-2">
+                <!-- 标题区 -->
+                <div class="text-center mb-6">
+                    <div class="text-[10px] text-orange-400 font-bold tracking-widest uppercase mb-1">GLOBAL VISA COUNTRY PAVILION</div>
+                    <h3 class="text-2xl font-black text-orange-400 tracking-wide">全球签证国家馆</h3>
+                    <div class="inline-block border border-orange-300 px-3 py-0.5 mt-1 text-[10px] text-orange-500 rounded-sm">
+                        各国签证，各类签证，一店办全
+                    </div>
+                </div>
+
+                <!-- 签证国家网格 -->
+                <div class="grid grid-cols-4 gap-2 text-center">
+                    
+                    <!-- 美国 -->
+                    <div class="flex flex-col items-center relative">
+                        <!-- Hot 标签 -->
+                        <div class="absolute -top-1 -left-1 z-10">
+                            <svg width="30" height="20" viewBox="0 0 40 25">
+                                <path d="M0 0 H35 L40 12.5 L35 25 H0 Z" fill="#FF5722"/>
+                                <text x="18" y="17" font-size="14" fill="white" font-weight="bold" text-anchor="middle">HOT</text>
+                            </svg>
+                        </div>
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="#B22234"/>
+                                <rect width="60" height="60" y="6" fill="white" height="4"/>
+                                <rect width="60" height="60" y="14" fill="white" height="4"/>
+                                <rect width="60" height="60" y="22" fill="white" height="4"/>
+                                <rect width="30" height="30" fill="#3C3B6E"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700 text-xs font-medium mb-0.5">美国</span>
+                        <div class="text-red-600 font-bold text-sm">899<span class="text-[10px] text-gray-400 font-normal">起</span></div>
+                    </div>
+
+                    <!-- 加拿大 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="#FF0000"/>
+                                <rect x="15" width="30" height="60" fill="white"/>
+                                <path d="M30 10 L40 25 H20 Z" fill="#FF0000" transform="translate(0, 10)"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700 text-xs font-medium mb-0.5">加拿大</span>
+                        <div class="text-red-600 font-bold text-sm">699<span class="text-[10px] text-gray-400 font-normal">起</span></div>
+                    </div>
+
+                    <!-- 澳大利亚 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="#00008B"/>
+                                <path d="M0 0 H30 V30 H0 Z" fill="rgba(255,255,255,0.2)"/>
+                                <circle cx="45" cy="20" r="3" fill="white"/>
+                                <circle cx="50" cy="30" r="1" fill="white"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700 text-xs font-medium mb-0.5">澳大利亚</span>
+                        <div class="text-red-600 font-bold text-sm">365<span class="text-[10px] text-gray-400 font-normal">起</span></div>
+                    </div>
+
+                    <!-- 新西兰 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="#00008B"/>
+                                <path d="M0 0 H30 V30 H0 Z" fill="rgba(255,255,255,0.2)"/>
+                                <path d="M45 20 L48 25 H42 Z" fill="#CC0000"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700 text-xs font-medium mb-0.5">新西兰</span>
+                        <div class="text-red-600 font-bold text-sm">256<span class="text-[10px] text-gray-400 font-normal">起</span></div>
+                    </div>
+
+                    <!-- 第二行 (截取部分) -->
+                    <!-- 日本 -->
+                    <div class="flex flex-col items-center mt-4 opacity-50">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="white"/>
+                                <circle cx="30" cy="30" r="15" fill="#BC002D"/>
+                            </svg>
+                        </div>
+                    </div>
+                     <!-- 韩国 -->
+                     <div class="flex flex-col items-center mt-4 opacity-50">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="white"/>
+                                <circle cx="30" cy="30" r="15" fill="#CD2E3A"/>
+                                <path d="M30 30 A15 15 0 0 1 45 30" fill="#0047A0"/>
+                            </svg>
+                        </div>
+                    </div>
+                     <!-- 英国 -->
+                     <div class="flex flex-col items-center mt-4 opacity-50">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="60" height="60" fill="#00247D"/>
+                                <path d="M0 0 L60 60 M60 0 L0 60" stroke="white" stroke-width="6"/>
+                                <path d="M0 0 L60 60 M60 0 L0 60" stroke="#CF142B" stroke-width="2"/>
+                                <path d="M30 0 V60 M0 30 H60" stroke="white" stroke-width="10"/>
+                                <path d="M30 0 V60 M0 30 H60" stroke="#CF142B" stroke-width="6"/>
+                            </svg>
+                        </div>
+                    </div>
+                     <!-- 法国 -->
+                     <div class="flex flex-col items-center mt-4 opacity-50">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100 mb-2">
+                            <svg viewBox="0 0 60 60" class="w-full h-full">
+                                <rect width="20" height="60" fill="#002395"/>
+                                <rect x="20" width="20" height="60" fill="white"/>
+                                <rect x="40" width="20" height="60" fill="#ED2939"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 底部导航栏 Bottom Navigation -->
+        <div class="absolute bottom-0 w-full bg-white border-t border-gray-100 flex justify-between items-center pb-5 pt-2 px-6 z-50">
+            <!-- 品牌logo/全部宝贝 -->
+            <div class="flex flex-col items-center cursor-pointer">
+                <!-- 模拟橘色火焰Logo -->
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 flex items-center justify-center text-white mb-1 shadow-orange-200 shadow-lg">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+            </div>
+
+            <!-- 全部宝贝 -->
+            <div class="flex flex-col items-center cursor-pointer text-gray-800">
+                <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <span class="text-[10px] font-medium">全部宝贝</span>
+            </div>
+
+            <!-- 店铺动态 -->
+            <div class="flex flex-col items-center cursor-pointer text-gray-500">
+                <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-10.71c3.896-4.05 10.246-4.05 14.142 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+                <span class="text-[10px]">店铺动态</span>
+            </div>
+
+            <!-- 会员中心 -->
+            <div class="flex flex-col items-center cursor-pointer text-gray-500">
+                <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-[10px]">会员中心</span>
+            </div>
+
+             <!-- 宝贝分类 -->
+             <div class="flex flex-col items-center cursor-pointer text-gray-500">
+                <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span class="text-[10px]">宝贝分类</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
