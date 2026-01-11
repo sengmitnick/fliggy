@@ -112,7 +112,7 @@
         <% left_pos, top_pos = positions[index] %>
         <div class="absolute flex flex-col items-center z-10" style="top: <%= top_pos %>px; left: <%= left_pos %>%;">
           <div class="bg-[#5c7cfa] text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg border border-white">
-            <span>¥<%= hotel.price %></span>
+            <span>¥<%= (hotel.price * @rooms).to_i %></span>
           </div>
           <div class="w-1.5 h-1.5 bg-[#5c7cfa] transform rotate-45 -mt-0.5"></div>
         </div>
@@ -207,10 +207,10 @@
             <span class="text-[10px] text-gray-400"><%= rand(50..500) %>+预订</span>
             <div class="text-right">
               <% if hotel.original_price.present? && hotel.original_price > hotel.price %>
-                <div class="text-[10px] text-gray-400 line-through">¥<%= hotel.original_price %></div>
+                <div class="text-[10px] text-gray-400 line-through">¥<%= (hotel.original_price * @rooms).to_i %></div>
               <% end %>
               <div class="text-[#ff4d4f] leading-none">
-                <span class="text-xs font-bold">¥</span><span class="text-2xl font-bold"><%= hotel.price %></span><span class="text-xs text-gray-500">起</span>
+                <span class="text-xs font-bold">¥</span><span class="text-2xl font-bold"><%= (hotel.price * @rooms).to_i %></span><span class="text-xs text-gray-500">起</span>
               </div>
               <% if hotel.is_featured %>
                 <div class="bg-[#ff4d4f] text-white text-[10px] px-1 rounded-sm inline-block mt-0.5 scale-90 origin-right">

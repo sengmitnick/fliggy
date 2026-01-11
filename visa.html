@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞猪全球签证复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义字体，模拟手机端 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #F4F6F8;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 飞猪黄 */
+        .bg-fliggy-yellow {
+            background-color: #FFD000;
+        }
+        .text-fliggy-yellow {
+            color: #FFD000;
+        }
+        
+        /* 地图点阵背景模拟 */
+        .dotted-map {
+            background-image: radial-gradient(#D1D5DB 1.5px, transparent 1.5px);
+            background-size: 10px 10px;
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        /* AI 按钮渐变 */
+        .ai-btn-gradient {
+            background: linear-gradient(135deg, #5B4EFF 0%, #8B5CF6 100%);
+        }
+    </style>
+</head>
+<body class="pb-24 text-slate-800">
+
+    <!-- 顶部状态栏与导航 -->
+    <header class="sticky top-0 z-50 bg-white">
+        
+
+        <!-- App 导航栏 -->
+        <div class="flex items-center justify-between px-4 py-3">
+            <button class="p-1">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h1 class="text-lg font-bold">飞猪全球签证</h1>
+            <button class="p-1">
+                <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 顶部数据与地图区域 (图2) -->
+    <section class="relative bg-white pt-2 pb-6 rounded-b-3xl shadow-sm overflow-hidden">
+        <!-- 四项服务保障 -->
+        <div class="flex justify-between px-6 mb-3 text-[10px] text-gray-600">
+            <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>产品丰富</div>
+            <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11z"/></svg>智慧办签</div>
+            <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>信息安全</div>
+            <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>服务保障 ></div>
+        </div>
+        
+        <p class="px-6 text-xs text-gray-500 mb-4">提供全球<span class="text-orange-600 font-bold">136</span>个国家地区的签证服务 · 累计服务<span class="text-orange-600 font-bold">3000万+</span>用户</p>
+
+        <!-- 地图背景区域 -->
+        <div class="relative h-48 w-full">
+            <div class="absolute inset-0 dotted-map opacity-50"></div>
+            <!-- 中国地图高亮示意 (SVG) -->
+            <svg class="absolute top-4 left-1/2 transform -translate-x-1/2 w-64 h-32 opacity-80" viewBox="0 0 200 100">
+                 <!-- 简化的大陆轮廓 -->
+                 <path d="M80,30 Q90,20 100,35 T120,40 T110,60 T90,55 Z" fill="#FDE047" stroke="white" stroke-width="1"/>
+            </svg>
+            
+            <!-- 用户浮窗 -->
+            <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm shadow-lg rounded-full p-2 pr-4 flex items-center gap-3 border border-gray-100 max-w-[90%]">
+                <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden flex-shrink-0">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-gray-900">我可通行全球84个国家地区</div>
+                    <div class="text-[10px] text-gray-500">快去上传签证点亮世界地图吧</div>
+                </div>
+                <div class="text-gray-400 text-xs">详情 ></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 搜索与筛选 (图2) -->
+    <section class="mt-4 px-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-extrabold text-gray-900">全球国家地区</h2>
+            <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 w-40">
+                <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <span class="text-xs text-gray-500">搜索国家/地区</span>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-6 overflow-x-auto no-scrollbar border-b border-gray-200/50 pb-2">
+            <div class="flex flex-col items-center flex-shrink-0">
+                <span class="text-lg font-bold text-gray-900">精选</span>
+                <div class="w-6 h-1 bg-gray-900 rounded-full mt-1"></div>
+            </div>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">亚洲</span>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">欧洲</span>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">大洋洲</span>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">北美洲</span>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">南美洲</span>
+            <span class="text-base text-gray-400 flex-shrink-0 font-medium">非洲</span>
+        </div>
+    </section>
+
+    <!-- 营销卡片区 (图2) -->
+    <section class="px-4 mt-4 grid grid-cols-2 gap-3">
+        <div class="bg-white p-3 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-gray-900">多国同办</span>
+                <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded border border-red-100">日本+美国</span>
+            </div>
+            <div class="text-[10px] text-gray-400">一份材料办多国，多年多国随心签</div>
+        </div>
+        <div class="bg-white p-3 rounded-xl shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-gray-900">家庭办签</span>
+            </div>
+            <div class="text-[10px] text-gray-400">一份材料办全家，价格更优惠</div>
+        </div>
+    </section>
+
+    <!-- 精选国家图标网格 (图2) -->
+    <section class="px-4 mt-4 grid grid-cols-4 gap-3 text-center">
+        <!-- Row 1 -->
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="white"/><circle cx="16" cy="12" r="6" fill="#BC002D"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">日本</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="white"/><circle cx="16" cy="12" r="4" fill="#C60C30"/><path d="M0 0h10v2H0zM0 22h10v2H0z" fill="black"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">韩国</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#B22234"/><rect width="14" height="12" fill="#3C3B6E"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">美国</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#DA251D"/><path d="M16 8l2 6h-4z" fill="#FFCD00"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">越南</span>
+        </div>
+        <!-- Row 2 -->
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                 <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#00008B"/><path d="M0 0l10 10m0-10L0 10" stroke="white" stroke-width="2"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">澳大利亚</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#012169"/><path d="M0 0l32 24m0-24L0 24" stroke="white" stroke-width="3"/><path d="M16 0v24M0 12h32" stroke="white" stroke-width="3"/><path d="M16 0v24M0 12h32" stroke="#C8102E" stroke-width="1.5"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">英国</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+            <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#00247D"/><path d="M20 4l2 3h-4z" fill="white"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">新西兰</span>
+        </div>
+        <div class="bg-white rounded-xl py-3 flex flex-col items-center shadow-sm">
+             <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200">
+                <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="10" height="24" fill="#002395"/><rect x="10" width="10" height="24" fill="#fff"/><rect x="20" width="12" height="24" fill="#ED2939"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-800">法国</span>
+        </div>
+    </section>
+
+    <!-- 亚洲 列表区域 (图1) -->
+    <section class="mt-6 px-4">
+        <h2 class="text-xl font-extrabold text-gray-900 mb-4">亚洲</h2>
+        
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Card 1: Japan -->
+            <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                            <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="white"/><circle cx="16" cy="12" r="6" fill="#BC002D"/></svg>
+                        </div>
+                        <span class="font-bold text-base">日本</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.9%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">6-15工作日</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-gray-500 mb-2">
+                        <span>额外可通行国家地区</span>
+                        <div class="flex items-center gap-1 font-bold text-gray-800">
+                            6个 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-gray-400 mb-2 truncate">格鲁吉亚、墨西哥、中国香港...</div>
+                    <div class="inline-block border border-gray-200 rounded px-1 py-0.5 text-[10px] text-gray-500 mb-4">支持家庭办签</div>
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数1112.7万+</div>
+                </div>
+            </div>
+
+            <!-- Card 2: Korea -->
+            <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                            <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="white"/><circle cx="16" cy="12" r="4" fill="#C60C30"/><path d="M0 0h10v2H0zM0 22h10v2H0z" fill="black"/></svg>
+                        </div>
+                        <span class="font-bold text-base">韩国</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.5%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">5-15工作日</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-gray-500 mb-2">
+                        <span>额外可通行国家地区</span>
+                        <div class="flex items-center gap-1 font-bold text-gray-800">
+                            2个 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-gray-400 mb-2 truncate">格鲁吉亚、巴拿马</div>
+                    <div class="inline-block border border-gray-200 rounded px-1 py-0.5 text-[10px] text-gray-500 mb-4">支持家庭办签</div>
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数252.9万+</div>
+                </div>
+            </div>
+
+            <!-- Card 3: Vietnam -->
+            <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                             <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="24" fill="#DA251D"/><path d="M16 8l2 6h-4z" fill="#FFCD00"/></svg>
+                        </div>
+                        <span class="font-bold text-base">越南</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.9%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">1-15工作日</span>
+                        </div>
+                    </div>
+                     <!-- Placeholder for layout alignment -->
+                    <div class="h-10"></div> 
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数195.4万+</div>
+                </div>
+            </div>
+
+            <!-- Card 4: Philippines -->
+            <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                            <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="12" fill="#0038A8" y="0"/><rect width="32" height="12" fill="#CE1126" y="12"/><path d="M0 0l14 12L0 24V0z" fill="white"/><circle cx="5" cy="12" r="2" fill="#FCD116"/></svg>
+                        </div>
+                        <span class="font-bold text-base">菲律宾</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.8%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">4-18工作日</span>
+                        </div>
+                    </div>
+                    <div class="inline-block border border-gray-200 rounded px-1 py-0.5 text-[10px] text-gray-500 mb-4">支持家庭办签</div>
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数71.6万+</div>
+                </div>
+            </div>
+             <!-- Card 5: Indonesia -->
+             <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                             <svg viewBox="0 0 32 24" class="w-full h-full"><rect width="32" height="12" fill="#CE1126"/><rect width="32" height="12" y="12" fill="white"/></svg>
+                        </div>
+                        <span class="font-bold text-base">印度尼西亚</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.8%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">2-10工作日</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数32.1万</div>
+                </div>
+            </div>
+
+             <!-- Card 6: Nepal -->
+             <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                             <svg viewBox="0 0 32 24" class="w-full h-full"><path d="M0 0l16 12-16 12z" fill="#DC143C"/><path d="M0 0v24" stroke="#003893" stroke-width="2"/></svg>
+                        </div>
+                        <span class="font-bold text-base">尼泊尔</span>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">出签率</span>
+                            <span class="font-bold">99.5%</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">办理时长</span>
+                            <span class="font-bold">1-7工作日</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="w-full bg-fliggy-yellow text-gray-900 font-bold py-2 rounded-full text-sm mb-2">去办理</button>
+                    <div class="text-[10px] text-gray-400 text-center">累计办理人数11.7万+</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部悬浮按钮 AI办签证 -->
+    <div class="fixed bottom-6 inset-x-0 flex justify-center z-50">
+        <button class="ai-btn-gradient text-white flex items-center gap-2 pl-2 pr-4 py-2 rounded-full shadow-lg transform transition active:scale-95">
+            <div class="bg-gray-900 rounded-full w-7 h-7 flex items-center justify-center border border-yellow-400">
+                <div class="w-4 h-4 rounded-full bg-yellow-400 relative overflow-hidden">
+                    <div class="absolute top-1 left-0.5 w-1 h-1 bg-black rounded-full"></div>
+                    <div class="absolute top-1 right-0.5 w-1 h-1 bg-black rounded-full"></div>
+                </div>
+            </div>
+            <span class="font-bold text-sm">AI办签证</span>
+            <!-- 闪光特效示意 -->
+            <div class="absolute top-0 right-2 w-1 h-1 bg-white rounded-full opacity-50 animate-ping"></div>
+        </button>
+    </div>
+
+</body>
+</html>

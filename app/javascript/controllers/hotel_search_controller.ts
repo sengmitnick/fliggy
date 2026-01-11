@@ -58,11 +58,17 @@ export default class extends Controller<HTMLElement> {
     console.log("HotelSearch connected")
     // Listen for city-selector updates
     document.addEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
+    // Listen for date-picker updates
+    document.addEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
+    // Listen for guest-selector updates
+    document.addEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
   }
 
   disconnect(): void {
     console.log("HotelSearch disconnected")
     document.removeEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
+    document.removeEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
+    document.removeEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
   }
 
   // Handle city selection update from city-selector
@@ -74,6 +80,45 @@ export default class extends Controller<HTMLElement> {
     if (this.hasCityInputTarget) {
       this.cityInputTarget.value = cityName
       console.log('HotelSearch: Updated city input to:', cityName)
+    }
+  }
+
+  // Handle date selection update from hotel-date-picker
+  handleDateUpdate(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { checkIn, checkOut } = customEvent.detail
+    console.log('HotelSearch: Received date update:', { checkIn, checkOut })
+    
+    if (this.hasCheckInInputTarget) {
+      this.checkInInputTarget.value = checkIn
+      console.log('HotelSearch: Updated check-in to:', checkIn)
+    }
+    
+    if (this.hasCheckOutInputTarget) {
+      this.checkOutInputTarget.value = checkOut
+      console.log('HotelSearch: Updated check-out to:', checkOut)
+    }
+  }
+
+  // Handle guest selection update from hotel-guest-selector
+  handleGuestUpdate(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { rooms, adults, children } = customEvent.detail
+    console.log('HotelSearch: Received guest update:', { rooms, adults, children })
+    
+    if (this.hasRoomsInputTarget) {
+      this.roomsInputTarget.value = rooms.toString()
+      console.log('HotelSearch: Updated rooms to:', rooms)
+    }
+    
+    if (this.hasAdultsInputTarget) {
+      this.adultsInputTarget.value = adults.toString()
+      console.log('HotelSearch: Updated adults to:', adults)
+    }
+    
+    if (this.hasChildrenInputTarget) {
+      this.childrenInputTarget.value = children.toString()
+      console.log('HotelSearch: Updated children to:', children)
     }
   }
 

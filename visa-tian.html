@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>填写订单 - 高保真复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 引入类似苹方字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", STHeiti, "Microsoft Yahei", Tahoma, Simsun, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-yellow': '#FFD900',
+                        'primary-orange': '#FF5000',
+                        'bg-gray': '#F4F5F7',
+                        'text-dark': '#111111',
+                        'text-gray': '#666666',
+                        'text-light': '#999999',
+                        'price-red': '#FF4A00',
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px rgba(0,0,0,0.02)',
+                        'footer': '0 -2px 10px rgba(0,0,0,0.05)'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-gray min-h-screen text-text-dark pb-24 max-w-[430px] mx-auto relative shadow-2xl">
+
+
+    <!-- 顶部导航栏 (Header) -->
+    <header class="relative z-10 px-4 pt-12 pb-4 flex items-center justify-between">
+        <button class="p-1">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <h1 class="text-lg font-bold">填写订单</h1>
+        <div class="w-6"></div> <!-- 占位保持标题居中 -->
+    </header>
+
+    <!-- 主内容滚动区域 -->
+    <main class="relative z-10 px-3 space-y-3">
+
+        <!-- 1. 商品详情卡片 -->
+        <div class="bg-white rounded-xl p-4 shadow-card">
+            <h2 class="font-bold text-base leading-snug mb-2">日本 · 单次旅游签证 · 广州送签 · 近期销量高 · 简化办理 · 免房产证 · 社保缴纳记录 · 银行对账单等</h2>
+            
+            <div class="flex items-center justify-between text-xs text-text-gray mb-3 bg-gray-50 p-2 rounded">
+                <span class="flex-1 truncate"><span class="text-text-light mr-2">套餐说明</span>需要6项材料，9个工作日</span>
+                <div class="flex items-center text-text-dark font-medium whitespace-nowrap">
+                    详情 
+                    <svg class="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs mb-3">
+                <div class="flex items-center text-blue-500">
+                    <svg class="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                    未办理全额退
+                </div>
+                <div class="flex items-center text-text-dark">
+                    详情 
+                    <svg class="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="flex items-center text-xs text-text-dark font-medium">
+                    <svg class="w-4 h-4 mr-1 text-text-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    广东中青旅旅游专营店 为你服务
+                </div>
+                <div class="flex items-center text-xs text-text-gray">
+                    咨询 
+                    <svg class="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 办签人数卡片 -->
+        <div class="bg-white rounded-xl p-4 shadow-card">
+            <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-base">办签人数</span>
+                <span class="font-bold text-base">¥ 299<span class="text-sm font-normal">/人</span></span>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center text-xs text-text-light">
+                    人群及材料详情 
+                    <svg class="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300">
+                        <svg width="12" height="2" viewBox="0 0 12 2"><rect width="12" height="2" fill="currentColor"/></svg>
+                    </button>
+                    <span class="font-bold text-lg w-4 text-center">1</span>
+                    <button class="w-6 h-6 rounded-full border border-primary-orange text-primary-orange flex items-center justify-center">
+                        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M5 0H7V5H12V7H7V12H5V7H0V5H5V0Z" fill="currentColor"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg p-3 flex justify-between items-center">
+                <div>
+                    <div class="text-blue-600 font-bold text-sm">家庭办签</div>
+                    <div class="text-blue-500 text-xs mt-0.5">材料共享 价格更优</div>
+                </div>
+                <div class="w-12 h-7 bg-gray-200 rounded-full p-1 cursor-pointer transition-colors duration-200 ease-in-out relative">
+                    <div class="bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out translate-x-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 流程时长 -->
+        <div class="bg-white rounded-xl p-4 shadow-card">
+            <h3 class="font-bold text-base mb-2">流程时长 <span class="text-xs font-normal text-text-light ml-1">商家收齐材料后次日起 预计9个工作日签证寄出</span></h3>
+            
+            <div class="flex items-center justify-between text-sm text-text-light py-2 border-b border-gray-50 mb-4">
+                <span>期望到手日期</span>
+                <div class="flex items-center text-gray-300">
+                    选填，用于预估材料准备时间
+                    <svg class="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+
+            <!-- 时间轴可视化 -->
+            <div class="relative flex justify-between items-start mb-2 px-2">
+                <!-- 连线背景 -->
+                <div class="absolute top-3 left-4 right-4 h-[1px] bg-gray-200 -z-10"></div>
+
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center z-10 mb-2">
+                        <span class="text-xs">¥</span>
+                    </div>
+                    <span class="text-xs text-text-dark font-medium">预订支付</span>
+                    <span class="text-[10px] text-text-light mt-0.5">现在</span>
+                </div>
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center">
+                     <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-400 flex items-center justify-center z-10 mb-2 border border-blue-100">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 10H2"/></svg>
+                    </div>
+                    <span class="text-xs text-text-dark">邮寄材料</span>
+                    <span class="text-[10px] text-text-light mt-0.5">自行安排</span>
+                </div>
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center">
+                     <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center z-10 mb-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
+                    <span class="text-xs text-text-dark">商家审核</span>
+                    <span class="text-[10px] text-text-light mt-0.5">3工作日</span>
+                </div>
+                <!-- Step 4 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center z-10 mb-2">
+                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+                    </div>
+                    <span class="text-xs text-text-dark">使领馆…</span>
+                    <span class="text-[10px] text-text-light mt-0.5">6工作日</span>
+                </div>
+                <!-- Step 5 -->
+                <div class="flex flex-col items-center">
+                    <div class="w-6 h-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center z-10 mb-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <span class="text-xs text-text-dark">寄回签证</span>
+                    <span class="text-[10px] text-text-light mt-0.5">0工作日</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded p-3 mt-4 text-xs text-text-gray leading-relaxed">
+                支付后按照指定地址邮寄纸质材料。最终以实际办理完成时间为准。
+            </div>
+        </div>
+
+        <!-- 4. 材料返还 -->
+        <div class="bg-white rounded-xl overflow-hidden shadow-card">
+            <div class="p-4 pb-2">
+                <h3 class="font-bold text-base">材料返还</h3>
+            </div>
+            
+            <div class="bg-red-50 px-4 py-2 mx-4 rounded text-xs text-price-red mb-2">
+                签证办理成功后，若涉及护照寄回，将按此地址寄送
+            </div>
+
+            <div class="px-4 py-3 flex justify-between items-center border-b border-gray-50">
+                <span class="text-text-light text-sm w-20">获取方式</span>
+                <div class="flex-1 text-sm font-medium flex justify-between items-center">
+                    <span>快递 免邮</span>
+                    <svg class="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+
+            <div class="px-4 py-3 flex justify-between items-start">
+                <span class="text-text-light text-sm w-20 pt-1">邮寄地址</span>
+                <div class="flex-1 text-sm flex justify-between items-center">
+                    <div>
+                        <div class="font-bold mb-1">张润胜 18027128600</div>
+                        <div class="text-text-dark leading-tight pr-4">广东省深圳市南山区中山南街二坊（南达街）30号楼 502</div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 留言备注 -->
+        <div class="bg-white rounded-xl p-4 shadow-card flex items-center">
+            <span class="font-bold text-base w-20">留言备注</span>
+            <span class="text-gray-300 text-sm">选填，请先和商家协商一致</span>
+        </div>
+
+        <!-- 6. 联系人 -->
+        <div class="bg-white rounded-xl p-4 shadow-card">
+            <h3 class="font-bold text-base mb-4">联系人</h3>
+            
+            <div class="flex items-center justify-between border-b border-gray-50 pb-4 mb-4">
+                <span class="text-text-light text-sm w-20">姓名</span>
+                <div class="flex-1 flex justify-between items-center">
+                    <span class="text-text-dark text-sm font-medium">张润胜</span>
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <span class="text-text-light text-sm w-20">手机号</span>
+                <span class="text-text-dark text-sm font-medium">18027128600</span>
+            </div>
+        </div>
+
+        <!-- 7. 保险 -->
+        <div class="bg-white rounded-xl overflow-hidden shadow-card">
+            <!-- 顶部 Banner -->
+            <div class="relative h-14 bg-blue-50 overflow-hidden">
+                <div class="absolute inset-0 flex items-center px-4 z-10">
+                    <svg class="w-4 h-4 text-price-red mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    <span class="text-price-red font-bold text-sm">境外出游，有保障更安心</span>
+                </div>
+                <!-- 模拟插画背景 -->
+                <div class="absolute right-0 bottom-0 w-32 h-full bg-contain bg-right bg-no-repeat" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxjaXJjbGUgY3g9IjkwIiBjeT0iNDAiIHI9IjE1IiBmaWxsPSIjRkZENzAwIi8+PHBhdGggZD0iTTAgNTBMMzAgMzBMMTYwIDUwWiIgZmlsbD0iI0E1RDhGRiIvPjwvc3ZnPg=='); opacity: 0.6;"></div>
+            </div>
+
+            <div class="p-4 space-y-6">
+                <!-- 保险项 1 -->
+                <div>
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex items-center">
+                            <h4 class="font-bold text-sm text-text-dark">签证拒签险</h4>
+                            <svg class="w-3 h-3 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-bold text-sm mr-2">¥12.79/人</span>
+                            <div class="w-5 h-5 rounded-full border border-gray-300"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-text-gray">保额299元，拒签即可线上申请理赔</p>
+                </div>
+
+                <!-- 保险项 2 -->
+                <div>
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex items-center">
+                            <h4 class="font-bold text-sm text-text-dark">拒签及关联行程损失保障</h4>
+                            <svg class="w-3 h-3 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-bold text-sm mr-2">¥68/人</span>
+                            <div class="w-5 h-5 rounded-full border border-gray-300"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-text-gray leading-tight">签证机酒境外玩乐订单损失全涵盖<br>扩展承保签证下单后7天内的目的地订单<br>飞猪订单，赔付70%，其他渠道订单，赔付50%</p>
+                </div>
+
+                <!-- 保险项 3 -->
+                <div>
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex items-center">
+                            <h4 class="font-bold text-sm text-text-dark">国际旅行险（日韩亚洲版）</h4>
+                            <svg class="w-3 h-3 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-xs text-text-gray mr-1">保5天</span>
+                            <span class="font-bold text-sm mr-2">¥165/人</span>
+                            <div class="w-5 h-5 rounded-full border border-gray-300"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-text-gray leading-tight">旅行意外（身故/伤残）保额¥150万<br>旅行医疗费用补偿（含门/急诊）保额¥12万<br>个人财物损失保额¥8000</p>
+                </div>
+
+                <!-- 保险说明 -->
+                <div class="pt-2 text-[10px] text-gray-400 leading-relaxed">
+                    浙江鼎宏保险代理有限公司 本模块为保险投保页面，由浙江鼎宏保险代理有限公司管理运营。请仔细阅读<span class="text-blue-500">客户通知书</span>、<span class="text-blue-500">保险代理/经纪协议</span>；<span class="text-blue-500">投保须知</span>、<span class="text-blue-500">责任除外</span>、<span class="text-blue-500">条款及投保声明</span>等重要内容。为保障你的权益，我们将会安全记录你的操作。
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. F1会员 -->
+        <div class="bg-white rounded-xl p-4 shadow-card mb-4">
+            <h3 class="font-bold text-base mb-3">F1会员 · 本单可享</h3>
+            
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center text-sm text-text-gray">
+                    优惠
+                    <svg class="w-3 h-3 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="text-sm text-gray-400">无优惠可用</div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-text-gray">返赠</span>
+                <div class="flex items-center text-sm text-text-dark">
+                    149飞猪里程等3项
+                    <svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部提示 -->
+        <div class="flex items-center text-xs text-blue-500 pb-4">
+            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            查看<span class="underline">签证预订须知</span>
+        </div>
+
+    </main>
+
+    <!-- 底部固定支付栏 (Sticky Footer) -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-2 flex items-center justify-between z-50 shadow-footer max-w-[430px] mx-auto">
+        <div class="flex items-center">
+            <span class="text-price-red text-xs font-bold mr-0.5">¥</span>
+            <span class="text-price-red text-2xl font-bold mr-2">299</span>
+            <div class="text-xs text-gray-400 flex items-center">
+                明细
+                <svg class="w-3 h-3 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 15l7-7 7 7"/></svg>
+            </div>
+        </div>
+        <button class="bg-gradient-to-r from-orange-400 to-primary-orange text-white font-bold text-base px-8 py-2.5 rounded-full shadow-lg shadow-orange-200">
+            立即支付
+        </button>
+    </footer>
+
+</body>
+</html>
