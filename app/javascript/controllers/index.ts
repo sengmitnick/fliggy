@@ -59,6 +59,13 @@ import BusDatePickerController from "./bus_date_picker_controller"
 import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
+import InternetServicesController from "./internet_services_controller"
+import SimCardFilterController from "./sim_card_filter_controller"
+import DataPlanController from "./data_plan_controller"
+import WifiBookingController from "./wifi_booking_controller"
+import InternetOrderFormController from "./internet_order_form_controller"
+import ProductCardController from "./product_card_controller"
+import SimCardBookingController from "./sim_card_booking_controller"
 
 const application = Application.start()
 
@@ -121,5 +128,12 @@ application.register("bus-date-picker", BusDatePickerController)
 application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
+application.register("internet-services", InternetServicesController)
+application.register("sim-card-filter", SimCardFilterController)
+application.register("data-plan", DataPlanController)
+application.register("wifi-booking", WifiBookingController)
+application.register("internet-order-form", InternetOrderFormController)
+application.register("product-card", ProductCardController)
+application.register("sim-card-booking", SimCardBookingController)
 
 window.Stimulus = application
