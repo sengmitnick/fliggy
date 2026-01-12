@@ -59,6 +59,7 @@ import BusDatePickerController from "./bus_date_picker_controller"
 import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
+import QrcodeModalController from "./qrcode_modal_controller"
 
 const application = Application.start()
 
@@ -121,5 +122,6 @@ application.register("bus-date-picker", BusDatePickerController)
 application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
+application.register("qrcode-modal", QrcodeModalController)
 
 window.Stimulus = application
