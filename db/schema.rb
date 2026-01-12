@@ -10,9 +10,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_11_075802) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "abroad_ticket_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "abroad_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "contact_email"
+    t.string "passenger_type", default: "1adult"
+    t.string "seat_category", default: "自由席"
+    t.decimal "total_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "order_number"
+    t.index ["abroad_ticket_id"], name: "index_abroad_ticket_orders_on_abroad_ticket_id"
+    t.index ["user_id"], name: "index_abroad_ticket_orders_on_user_id"
+  end
+
+  create_table "abroad_tickets", force: :cascade do |t|
+    t.string "region", default: "japan"
+    t.string "ticket_type", default: "train"
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "time_slot_start"
+    t.string "time_slot_end"
+    t.decimal "price", default: "0.0"
+    t.string "seat_type"
+    t.string "status", default: "available"
+    t.string "origin_en"
+    t.string "destination_en"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false

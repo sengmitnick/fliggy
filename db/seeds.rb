@@ -943,6 +943,9 @@ load Rails.root.join('db', 'seeds', 'cars.rb')
 # ==================== 汽车票数据 ====================
 load Rails.root.join('db', 'seeds', 'bus_tickets.rb')
 
+# ==================== 境外当地交通数据 ====================
+load Rails.root.join('db', 'seeds', 'abroad_tickets.rb')
+
 # ==================== 旅游产品（跟团游商城）数据 ====================
 load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
 # 跟团游产品详情已通过随机生成器自动创建
@@ -960,6 +963,7 @@ puts "  - 深度旅行产品: #{DeepTravelProduct.count}"
 puts "  - 酒店: #{Hotel.count}"
 puts "  - 租车: #{Car.count}"
 puts "  - 汽车票: #{BusTicket.count}"
+puts "  - 境外交通票: #{AbroadTicket.count}"
 puts "  - 跟团游产品: #{TourGroupProduct.count}"
 puts "  - 酒店套餐: #{HotelPackage.count}"
 puts "  - 火车票: #{Train.count}"

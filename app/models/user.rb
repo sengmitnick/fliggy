@@ -42,6 +42,7 @@ class User < ApplicationRecord
   has_many :train_bookings, dependent: :destroy
   has_many :tour_group_bookings, dependent: :destroy
   has_many :deep_travel_bookings, dependent: :destroy
+  has_many :abroad_ticket_orders, dependent: :destroy
   has_many :car_orders, dependent: :destroy
   has_many :bus_ticket_orders, dependent: :destroy
   has_one :membership, dependent: :destroy

@@ -59,6 +59,10 @@ import BusDatePickerController from "./bus_date_picker_controller"
 import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
+import AbroadRegionSelectorController from "./abroad_region_selector_controller"
+import AbroadDatePickerController from "./abroad_date_picker_controller"
+import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
+import AbroadOrderFormController from "./abroad_order_form_controller"
 
 const application = Application.start()
 
@@ -121,5 +125,9 @@ application.register("bus-date-picker", BusDatePickerController)
 application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
+application.register("abroad-region-selector", AbroadRegionSelectorController)
+application.register("abroad-date-picker", AbroadDatePickerController)
+application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
+application.register("abroad-order-form", AbroadOrderFormController)
 
 window.Stimulus = application
