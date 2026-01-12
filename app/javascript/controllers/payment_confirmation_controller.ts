@@ -189,7 +189,7 @@ export default class extends Controller {
 
   async processActualPayment(): Promise<void> {
     try {
-      const response = await fetch(this.paymentUrlValue + '.json', {
+      const response = await fetch(`${this.paymentUrlValue}.json`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

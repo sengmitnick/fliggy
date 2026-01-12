@@ -114,6 +114,7 @@
     <% passenger_types.each do |type| %>
       <div class="relative flex-shrink-0 <%= type == '1adult' ? 'bg-[#FFFBF0] border border-[#FFE5B5]' : 'bg-gray-100' %> text-gray-900 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer"
            data-action="click->abroad-passenger-selector#select"
+           data-abroad-passenger-selector-target="type"
            data-abroad-passenger-selector-type-param="<%= type %>">
         <%= type.gsub('adult', '成人').gsub('child', '儿童') %>
         <% if type == '1adult' %>
@@ -174,7 +175,7 @@
         <span class="text-xs text-accent">.<%= sprintf('%02d', (@ticket.price % 1 * 100).to_i) %></span>
       </div>
       <%= link_to new_abroad_ticket_order_path(abroad_ticket_id: @ticket.id, seat_category: '自由席', passenger_type: '1adult'), 
-                  class: "bg-accent text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>
+                  class: "bg-orange-600 text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>
         订
       <% end %>
     </div>
@@ -210,7 +211,7 @@
         <span class="text-xs text-accent">.<%= sprintf('%02d', ((@ticket.price * 1.06) % 1 * 100).to_i) %></span>
       </div>
       <%= link_to new_abroad_ticket_order_path(abroad_ticket_id: @ticket.id, seat_category: '指定席', passenger_type: '1adult'), 
-                  class: "bg-accent text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>
+                  class: "bg-orange-600 text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>
         订
       <% end %>
     </div>

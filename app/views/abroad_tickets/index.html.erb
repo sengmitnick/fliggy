@@ -21,7 +21,7 @@
   </div>
 
   <!-- 核心搜索卡片区域 (上移覆盖黄色背景) -->
-  <div class="mx-3 -mt-8 relative z-10" data-controller="abroad-ticket-search">
+  <div class="mx-3 -mt-[54px] relative z-10" data-controller="abroad-ticket-search abroad-date-picker" data-abroad-ticket-search-current-date-value="<%= @date.to_s %>" data-abroad-date-picker-current-date-value="<%= @date.to_s %>">
     <!-- 卡片式 Tab -->
     <div class="flex">
       <!-- 日本 Tab -->
@@ -45,20 +45,13 @@
     </div>
 
     <!-- 白色内容主体 -->
-    <div class="bg-white rounded-b-2xl rounded-tr-none p-4 shadow-sm pb-6">
+    <div class="bg-white rounded-b-2xl rounded-tr-none p-4 pb-6">
       
       <%= form_with url: search_abroad_tickets_path, method: :get, class: "space-y-6", data: { abroad_ticket_search_target: "form" } do |f| %>
         <%= f.hidden_field :region, value: @region, data: { abroad_ticket_search_target: "regionInput" } %>
         
-        <!-- 内部切换器 (火车票/通票) -->
-        <div class="bg-gray-100 p-1 rounded-lg flex mb-6">
-          <button type="button" class="flex-1 bg-white py-2 rounded-md text-sm font-bold shadow-sm text-center"
-                  data-action="click->abroad-ticket-search#selectTicketType"
-                  data-abroad-ticket-search-ticket-type-param="train">火车票</button>
-          <button type="button" class="flex-1 py-2 rounded-md text-sm font-medium text-gray-500 text-center"
-                  data-action="click->abroad-ticket-search#selectTicketType"
-                  data-abroad-ticket-search-ticket-type-param="pass">铁路通票/交通卡</button>
-        </div>
+        <!-- 内部切换器 (火车票) -->
+        
 
         <!-- 车站选择 -->
         <div class="flex justify-between items-center mb-8 px-1">
@@ -127,6 +120,48 @@
         <%= f.submit "搜索", class: "w-full bg-[#FFDD33] text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-[0_2px_10px_rgba(255,221,51,0.3)] hover:bg-[#ffc107] transition-colors tracking-wide cursor-pointer" %>
       <% end %>
     </div>
+    
+    <!-- Station Selection Modal -->
+    <div class="fixed inset-0 bg-black/50 z-50 hidden" data-abroad-ticket-search-target="stationModal">
+      <div class="absolute inset-0" data-action="click->abroad-ticket-search#closeStationModal"></div>
+      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] flex flex-col animate-slide-up">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100 flex-shrink-0">
+          <h2 class="text-lg font-bold text-gray-900">出发地选择</h2>
+          <button type="button" 
+                  class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                  data-action="click->abroad-ticket-search#closeStationModal">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="px-4 py-3 border-b border-gray-100 flex-shrink-0">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input type="text" 
+                   placeholder="城市中文/英语/拼音"
+                   class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-yellow-400"
+                   data-abroad-ticket-search-target="searchInput"
+                   data-action="input->abroad-ticket-search#searchStations">
+          </div>
+        </div>
+
+        <!-- Station List -->
+        <div class="flex-1 overflow-y-auto" data-abroad-ticket-search-target="stationList">
+          <!-- Content will be dynamically rendered by controller -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Date Picker Modal -->
+    <%= render 'date_picker_modal' %>
   </div>
 
   <!-- 热门区域车票 -->

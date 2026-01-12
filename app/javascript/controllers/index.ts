@@ -63,6 +63,7 @@ import AbroadRegionSelectorController from "./abroad_region_selector_controller"
 import AbroadDatePickerController from "./abroad_date_picker_controller"
 import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
 import AbroadOrderFormController from "./abroad_order_form_controller"
+import AbroadTicketSearchController from "./abroad_ticket_search_controller"
 
 const application = Application.start()
 
@@ -129,5 +130,6 @@ application.register("abroad-region-selector", AbroadRegionSelectorController)
 application.register("abroad-date-picker", AbroadDatePickerController)
 application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
 application.register("abroad-order-form", AbroadOrderFormController)
+application.register("abroad-ticket-search", AbroadTicketSearchController)
 
 window.Stimulus = application

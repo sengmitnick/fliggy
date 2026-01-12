@@ -28,9 +28,9 @@ module PlaywrightHelper
     end
   end
 
-  def with_page(url, &block)
+  def with_page(url, headless: true, &block)
     Playwright.create(playwright_cli_executable_path: 'npx playwright') do |playwright|
-      playwright.chromium.launch(headless: true) do |browser|
+      playwright.chromium.launch(headless: headless) do |browser|
         page = browser.new_page
         page.goto(url)
         yield page
