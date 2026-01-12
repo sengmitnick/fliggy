@@ -14,6 +14,45 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "abroad_brands", force: :cascade do |t|
+    t.string "name"
+    t.string "slug"
+    t.string "country"
+    t.string "logo_url"
+    t.text "description"
+    t.string "category", default: "duty_free"
+    t.boolean "featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "abroad_coupons", force: :cascade do |t|
+    t.string "title"
+    t.integer "abroad_brand_id"
+    t.integer "abroad_shop_id"
+    t.string "discount_type"
+    t.string "discount_value"
+    t.text "description"
+    t.date "valid_from"
+    t.date "valid_until"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "abroad_shops", force: :cascade do |t|
+    t.string "name"
+    t.integer "abroad_brand_id"
+    t.string "city"
+    t.text "address"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.string "image_url"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -977,6 +1016,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
     t.decimal "rating", default: "5.0"
     t.integer "sales_count", default: 0
     t.boolean "is_verified", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "user_coupons", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "abroad_coupon_id"
+    t.string "status", default: "unclaimed"
+    t.datetime "claimed_at"
+    t.datetime "used_at"
+    t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
