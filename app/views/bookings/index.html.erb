@@ -92,6 +92,8 @@
             <%= render partial: 'bookings/hotel_package_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(VisaOrder) %>
             <%= render partial: 'bookings/visa_order_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(InternetOrder) %>
+            <%= render partial: 'bookings/internet_order_card', locals: { booking: booking } %>
           <% end %>
         <% end %>
         

@@ -33,6 +33,10 @@ class BookingsController < ApplicationController
     visa_orders = current_user.visa_orders.includes(visa_product: :country)
                               .order(created_at: :desc)
     
+    # Fetch internet orders
+    internet_orders = current_user.internet_orders.includes(:orderable)
+                                  .order(created_at: :desc)
+    
     # Filter by status
     case @status_filter
     when 'pending'
@@ -43,6 +47,7 @@ class BookingsController < ApplicationController
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
       bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
       visa_orders = visa_orders.where(status: 'pending')
+      internet_orders = internet_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -57,6 +62,7 @@ class BookingsController < ApplicationController
                                            .joins(:bus_ticket)
                                            .where('bus_tickets.departure_date >= ?', Date.today)
       visa_orders = visa_orders.where(status: ['paid', 'processing'])
+      internet_orders = internet_orders.where(status: 'paid')
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -66,6 +72,7 @@ class BookingsController < ApplicationController
       hotel_package_orders = hotel_package_orders.none
       bus_ticket_orders = bus_ticket_orders.none
       visa_orders = visa_orders.none
+      internet_orders = internet_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
@@ -74,10 +81,11 @@ class BookingsController < ApplicationController
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
       bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
       visa_orders = visa_orders.where(status: 'cancelled')
+      internet_orders = internet_orders.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a + visa_orders.to_a)
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a + visa_orders.to_a + internet_orders.to_a)
                     .sort_by(&:created_at).reverse
     
     # Manual pagination
