@@ -1,0 +1,93 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden">
+  <!-- Order Header -->
+  <div class="px-4 py-3 bg-surface-secondary border-b border-border flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <span class="text-xs text-text-secondary">
+        <%= booking.created_at.strftime('%Y-%m-%d %H:%M') %>
+      </span>
+      <span class="text-xs text-text-muted">订单号: <%= booking.order_number %></span>
+    </div>
+    <span class="text-xs font-semibold whitespace-nowrap <%= booking.status == 'paid' ? 'text-success' : booking.status == 'pending' ? 'text-warning' : booking.status == 'cancelled' ? 'text-error' : 'text-text-secondary' %>">
+      <%= case booking.status
+          when 'paid' then '已支付'
+          when 'pending' then '待付款'
+          when 'completed' then '已完成'
+          when 'cancelled' then '已取消'
+          else booking.status
+          end %>
+    </span>
+  </div>
+
+  <!-- Order Content -->
+  <div class="px-4 py-4">
+    <div class="flex items-start space-x-3">
+      <!-- Order Type Icon -->
+      <div class="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+        <% case booking.order_type %>
+        <% when 'sim_card' %>
+          <span class="text-2xl">📱</span>
+        <% when 'data_plan' %>
+          <span class="text-2xl">⚡</span>
+        <% when 'wifi' %>
+          <span class="text-2xl">📶</span>
+        <% end %>
+      </div>
+
+      <!-- Order Details -->
+      <div class="flex-1 min-w-0">
+        <h3 class="text-base font-semibold text-text-primary mb-1">
+          <%= case booking.order_type
+              when 'sim_card' then '境外电话卡'
+              when 'data_plan' then '境外流量包'
+              when 'wifi' then '随身WiFi'
+              end %>
+        </h3>
+        
+        <div class="space-y-1 text-sm text-text-secondary">
+          <% if booking.orderable %>
+            <div class="flex items-center space-x-2">
+              <span class="text-text-muted">地区:</span>
+              <span><%= booking.orderable.region || '未指定' %></span>
+            </div>
+            
+            <% if booking.order_type == 'wifi' && booking.orderable.respond_to?(:rental_days) %>
+              <div class="flex items-center space-x-2">
+                <span class="text-text-muted">租用天数:</span>
+                <span><%= booking.orderable.rental_days %>天</span>
+              </div>
+            <% end %>
+            
+            <% if booking.delivery_method.present? %>
+              <div class="flex items-center space-x-2">
+                <span class="text-text-muted">配送方式:</span>
+                <span><%= booking.delivery_method == 'home_delivery' ? '快递送达' : booking.delivery_method == 'airport_pickup' ? '机场自取' : booking.delivery_method %></span>
+              </div>
+            <% end %>
+            
+            <% if booking.delivery_method == 'home_delivery' && booking.delivery_address.present? %>
+              <div class="flex items-center space-x-2">
+                <span class="text-text-muted">收货地址:</span>
+                <span class="truncate"><%= booking.delivery_address %></span>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="flex-shrink-0 text-right">
+        <div class="text-lg font-bold text-primary">¥<%= booking.total_price %></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-4 flex items-center justify-end space-x-2">
+      <% if booking.status == 'pending' %>
+        <%= link_to '去支付', new_internet_order_path(order_id: booking.id), class: 'btn-primary text-sm' %>
+        <%= link_to '取消订单', internet_order_path(booking), method: :delete, data: { confirm: '确认取消订单？' }, class: 'btn-outline text-sm' %>
+      <% elsif booking.status == 'paid' || booking.status == 'completed' %>
+        <%= link_to '查看详情', '#', class: 'btn-outline text-sm' %>
+      <% end %>
+    </div>
+  </div>
+</div>

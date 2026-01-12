@@ -1,0 +1,61 @@
+<div class="min-h-screen bg-surface">
+  <!-- Header -->
+  <div class="bg-surface border-b border-border sticky top-0 z-10">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center space-x-3">
+        <%= link_to profile_path, class: "text-text-primary" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        <% end %>
+        <h1 class="text-lg font-semibold text-text-primary">互联网服务订单</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="bg-surface border-b border-border sticky top-[56px] z-10">
+    <div class="flex justify-around px-4 py-3">
+      <%= link_to internet_orders_path, class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' unless params[:status]} #{'text-text-secondary' if params[:status]}" do %>
+        <span>全部</span>
+      <% end %>
+      <%= link_to internet_orders_path(status: 'paid'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if params[:status] == 'paid'} #{'text-text-secondary' unless params[:status] == 'paid'}" do %>
+        <span>已支付</span>
+      <% end %>
+      <%= link_to internet_orders_path(status: 'pending'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if params[:status] == 'pending'} #{'text-text-secondary' unless params[:status] == 'pending'}" do %>
+        <span>待付款</span>
+      <% end %>
+      <%= link_to internet_orders_path(status: 'completed'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if params[:status] == 'completed'} #{'text-text-secondary' unless params[:status] == 'completed'}" do %>
+        <span>已完成</span>
+      <% end %>
+      <%= link_to internet_orders_path(status: 'cancelled'), class: "flex flex-col items-center space-y-1 text-sm transition-colors #{'text-primary font-semibold' if params[:status] == 'cancelled'} #{'text-text-secondary' unless params[:status] == 'cancelled'}" do %>
+        <span>已取消</span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Orders List -->
+  <div class="px-4 py-3">
+    <% if @orders.any? %>
+      <div class="space-y-3">
+        <% @orders.each do |order| %>
+          <%= render partial: 'internet_orders/order_card', locals: { order: order } %>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center py-12">
+        <svg class="w-24 h-24 text-text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-text-muted text-base mb-2">暂无互联网服务订单</p>
+        <p class="text-text-muted text-sm">去选购您的第一个境外上网服务吧</p>
+        <div class="flex gap-2 mt-4">
+          <%= link_to '境外电话卡', internet_services_path(tab: 'sim_card'), class: 'btn-primary' %>
+          <%= link_to '境外流量包', internet_services_path(tab: 'data_plan'), class: 'btn-primary' %>
+          <%= link_to '随身WiFi', internet_services_path(tab: 'wifi'), class: 'btn-primary' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

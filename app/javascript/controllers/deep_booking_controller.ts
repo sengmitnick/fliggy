@@ -98,7 +98,7 @@ export default class extends Controller<HTMLElement> {
     console.log("Opening count modal")
     
     // Create modal HTML
-    /* eslint-disable indent */
+     
     const modalHTML = `
       <div class="fixed inset-0 bg-black/60 z-40" 
            data-action="click->deep-booking#closeCountModal" 
@@ -189,7 +189,7 @@ export default class extends Controller<HTMLElement> {
         </div>
       </div>
     `
-    /* eslint-enable indent */
+     
     
     this.element.insertAdjacentHTML('beforeend', modalHTML)
   }

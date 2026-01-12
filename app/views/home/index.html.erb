@@ -183,10 +183,10 @@
             <span class="text-[12px] text-gray-700">签证</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to internet_services_path(tab: 'data_plan'), class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/境外上网.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "境外上网" %>
             <span class="text-[12px] text-gray-700">境外上网</span>
-          </button>
+          <% end %>
 
           <%= link_to abroad_shops_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/旅行购物.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "旅行购物" %>

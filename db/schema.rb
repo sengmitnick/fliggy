@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_11_082003) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -79,6 +79,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_082003) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "addresses", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "name"
+    t.string "phone"
+    t.string "province"
+    t.string "city"
+    t.string "district"
+    t.string "detail"
+    t.boolean "is_default", default: false
+    t.string "address_type", default: "delivery"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
   create_table "admin_oplogs", force: :cascade do |t|
@@ -628,6 +643,67 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_11_082003) do
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
     t.index ["region"], name: "index_hotels_on_region"
+  end
+
+  create_table "internet_data_plans", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.string "phone_number"
+    t.string "carrier"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "internet_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "orderable_id"
+    t.string "order_type"
+    t.string "region"
+    t.integer "quantity", default: 1
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "delivery_method"
+    t.jsonb "delivery_info"
+    t.jsonb "contact_info"
+    t.jsonb "rental_info"
+    t.string "order_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "orderable_type"
+    t.index ["orderable_id"], name: "index_internet_orders_on_orderable_id"
+    t.index ["orderable_type", "orderable_id"], name: "index_internet_orders_on_orderable_type_and_orderable_id"
+    t.index ["user_id"], name: "index_internet_orders_on_user_id"
+  end
+
+  create_table "internet_sim_cards", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.text "features"
+    t.integer "sales_count", default: 0
+    t.string "shop_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "internet_wifis", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.string "network_type"
+    t.string "data_limit"
+    t.decimal "daily_price"
+    t.text "features"
+    t.integer "sales_count", default: 0
+    t.string "shop_name"
+    t.decimal "deposit", default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "itineraries", force: :cascade do |t|

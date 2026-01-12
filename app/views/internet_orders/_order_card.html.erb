@@ -1,0 +1,109 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden">
+  <!-- Order Header -->
+  <div class="px-4 py-3 bg-surface-secondary border-b border-border flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <span class="text-xs text-text-secondary">
+        <%= order.created_at.strftime('%Y-%m-%d %H:%M') %>
+      </span>
+      <span class="text-xs text-text-muted">订单号: <%= order.order_number %></span>
+    </div>
+    <span class="text-xs font-semibold <%= order.status == 'paid' ? 'text-success' : order.status == 'pending' ? 'text-warning' : order.status == 'cancelled' ? 'text-error' : 'text-text-secondary' %>">
+      <%= case order.status
+          when 'paid' then '已支付'
+          when 'pending' then '待付款'
+          when 'completed' then '已完成'
+          when 'cancelled' then '已取消'
+          else order.status
+          end %>
+    </span>
+  </div>
+
+  <!-- Order Content -->
+  <div class="p-4">
+    <div class="flex space-x-3">
+      <!-- Order Type Icon -->
+      <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+        <% if order.order_type == 'sim_card' %>
+          <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+          </svg>
+        <% elsif order.order_type == 'data_plan' %>
+          <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+          </svg>
+        <% elsif order.order_type == 'wifi' %>
+          <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.415-1.415 5 5 0 017.072 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/>
+          </svg>
+        <% end %>
+      </div>
+
+      <!-- Order Details -->
+      <div class="flex-1 min-w-0">
+        <h3 class="text-base font-semibold text-text-primary mb-1">
+          <%= case order.order_type
+              when 'sim_card' then '境外电话卡'
+              when 'data_plan' then '境外流量包'
+              when 'wifi' then '随身WiFi'
+              else order.order_type.titleize
+              end %>
+          <% if order.orderable %>
+            - <%= order.orderable.try(:name) || order.orderable.try(:title) || '商品' %>
+          <% end %>
+        </h3>
+        
+        <div class="space-y-1 text-sm text-text-secondary">
+          <div class="flex items-center">
+            <span class="text-text-muted mr-2">地区:</span>
+            <span><%= order.region %></span>
+          </div>
+          
+          <% if order.order_type == 'wifi' && order.rental_info.present? %>
+            <div class="flex items-center">
+              <span class="text-text-muted mr-2">租赁天数:</span>
+              <span><%= order.rental_info['days'] %>天</span>
+            </div>
+            <div class="flex items-center">
+              <span class="text-text-muted mr-2">取还日期:</span>
+              <span><%= order.rental_info['pickup_date'] %> 至 <%= order.rental_info['return_date'] %></span>
+            </div>
+          <% end %>
+          
+          <% if order.delivery_method.present? %>
+            <div class="flex items-center">
+              <span class="text-text-muted mr-2">配送方式:</span>
+              <span><%= order.delivery_method == 'mail' ? '邮寄到家' : '门店自取' %></span>
+            </div>
+          <% end %>
+          
+          <% if order.delivery_info.present? && order.delivery_info['full_address'].present? %>
+            <div class="flex items-start">
+              <span class="text-text-muted mr-2 flex-shrink-0">收货地址:</span>
+              <span class="flex-1"><%= order.delivery_info['full_address'] %></span>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Price and Actions -->
+        <div class="flex items-center justify-between mt-3 pt-3 border-t border-border">
+          <div class="flex items-baseline space-x-1">
+            <span class="text-xs text-text-muted">实付</span>
+            <span class="text-lg font-bold text-error">¥<%= order.total_price.to_f %></span>
+          </div>
+          
+          <div class="flex space-x-2">
+            <% if order.status == 'paid' || order.status == 'completed' %>
+              <%= link_to success_internet_order_path(order), class: 'px-4 py-1.5 text-sm border border-primary text-primary rounded-full hover:bg-primary/5 transition-colors' do %>
+                查看详情
+              <% end %>
+            <% elsif order.status == 'pending' %>
+              <%= link_to new_internet_order_path(orderable_type: order.orderable_type, orderable_id: order.orderable_id), class: 'px-4 py-1.5 text-sm bg-primary text-white rounded-full hover:bg-primary-dark transition-colors' do %>
+                去支付
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
