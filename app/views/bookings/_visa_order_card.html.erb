@@ -1,0 +1,98 @@
+<%= link_to visa_order_path(booking), class: "block" do %>
+  <div class="bg-surface border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+    <!-- Header -->
+    <div class="px-4 py-3 flex items-center justify-between border-b border-border">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span class="font-semibold text-text-primary">签证办理</span>
+      </div>
+      <span class="text-sm <%= booking_status_color(booking.status) %> font-medium">
+        <%= booking_status_text(booking.status) %>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4">
+      <div class="flex items-center mb-3">
+        <img src="<%= booking.visa_product.country.image_url %>" alt="<%= booking.visa_product.country.name %>" class="w-16 h-16 rounded-lg object-cover mr-3">
+        <div class="flex-1">
+          <h3 class="font-semibold text-text-primary mb-1"><%= booking.visa_product.country.name %></h3>
+          <p class="text-sm text-text-secondary"><%= booking.visa_product.name %></p>
+        </div>
+      </div>
+
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-text-secondary">办签人数</span>
+          <span class="text-text-primary"><%= booking.traveler_count %>人</span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-text-secondary">预计时长</span>
+          <span class="text-text-primary"><%= booking.visa_product.processing_days %>个工作日</span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-text-secondary">订单号</span>
+          <span class="text-text-primary font-mono text-xs"><%= booking.slug %></span>
+        </div>
+      </div>
+
+      <!-- Price and Actions -->
+      <div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+        <div>
+          <span class="text-xs text-text-secondary">实付金额</span>
+          <div class="text-primary text-xl font-bold">¥<%= booking.total_price.to_i %></div>
+        </div>
+        
+        <div class="flex space-x-2">
+          <% if booking.pending? %>
+            <button type="button" 
+                    class="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-full text-sm font-medium"
+                    data-controller="payment-modal"
+                    data-action="click->payment-modal#showConfirm"
+                    data-order-type="visa_order"
+                    data-order-id="<%= booking.id %>">
+              立即支付
+            </button>
+          <% elsif booking.paid? || booking.processing? %>
+            <span class="px-4 py-2 bg-surface-secondary rounded-full text-sm font-medium text-text-primary">
+              查看详情
+            </span>
+          <% elsif booking.completed? %>
+            <span class="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-medium">
+              已完成
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% content_for :helpers do %>
+  <%
+    def booking_status_text(status)
+      case status
+      when 'pending' then '待支付'
+      when 'paid' then '已支付'
+      when 'processing' then '办理中'
+      when 'completed' then '已完成'
+      when 'cancelled' then '已取消'
+      else status
+      end
+    end
+
+    def booking_status_color(status)
+      case status
+      when 'pending' then 'text-warning'
+      when 'paid', 'processing' then 'text-success'
+      when 'completed' then 'text-blue-600'
+      when 'cancelled' then 'text-text-muted'
+      else 'text-text-primary'
+      end
+    end
+  %>
+<% end %>

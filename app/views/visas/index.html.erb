@@ -1,0 +1,154 @@
+<div class="bg-surface min-h-screen pb-24">
+  <!-- 顶部导航 -->
+  <header class="sticky top-0 z-50 bg-white">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to root_path, class: "p-1" do %>
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="text-lg font-bold">飞猪全球签证</h1>
+      <button class="p-1">
+        <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 顶部数据与地图区域 -->
+  <section class="relative bg-white pt-2 pb-6 rounded-b-3xl shadow-sm overflow-hidden">
+    <!-- 四项服务保障 -->
+    <div class="flex justify-between px-6 mb-3 text-[10px] text-gray-600">
+      <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>产品丰富</div>
+      <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11z"/></svg>智慧办签</div>
+      <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>信息安全</div>
+      <div class="flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>服务保障 ></div>
+    </div>
+    
+    <p class="px-6 text-xs text-gray-500 mb-4">提供全球<span class="text-orange-600 font-bold"><%= @total_countries %></span>个国家地区的签证服务 · 累计服务<span class="text-orange-600 font-bold">3000万+</span>用户</p>
+
+    <!-- 地图背景区域 -->
+    <div class="relative h-48 w-full">
+      <div class="absolute inset-0" style="background-image: radial-gradient(#D1D5DB 1.5px, transparent 1.5px); background-size: 10px 10px; mask-image: linear-gradient(to bottom, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%); opacity: 0.5;"></div>
+      
+      <!-- 中国地图高亮示意 -->
+      <svg class="absolute top-4 left-1/2 transform -translate-x-1/2 w-64 h-32 opacity-80" viewBox="0 0 200 100">
+        <path d="M80,30 Q90,20 100,35 T120,40 T110,60 T90,55 Z" fill="#FDE047" stroke="white" stroke-width="1"/>
+      </svg>
+      
+      <!-- 用户浮窗 -->
+      <% if current_user %>
+      <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm shadow-lg rounded-full p-2 pr-4 flex items-center gap-3 border border-gray-100 max-w-[90%]">
+        <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden flex-shrink-0">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<%= current_user.id %>" alt="User" class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1">
+          <div class="text-sm font-bold text-gray-900">我可通行全球84个国家地区</div>
+          <div class="text-[10px] text-gray-500">快去上传签证点亮世界地图吧</div>
+        </div>
+        <div class="text-gray-400 text-xs">详情 ></div>
+      </div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 搜索与筛选 -->
+  <section class="mt-4 px-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-extrabold text-gray-900">全球国家地区</h2>
+      <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 w-40">
+        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <span class="text-xs text-gray-500">搜索国家/地区</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-6 overflow-x-auto no-scrollbar border-b border-gray-200/50 pb-2">
+      <div class="flex flex-col items-center flex-shrink-0">
+        <span class="text-lg font-bold text-gray-900">精选</span>
+        <div class="w-6 h-1 bg-gray-900 rounded-full mt-1"></div>
+      </div>
+      <% ['亚洲', '欧洲', '大洋洲', '北美洲', '南美洲', '非洲'].each do |region| %>
+        <span class="text-base text-gray-400 flex-shrink-0 font-medium"><%= region %></span>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 营销卡片区 -->
+  <section class="px-4 mt-4 grid grid-cols-2 gap-3">
+    <div class="bg-white p-3 rounded-xl shadow-sm">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-bold text-gray-900">多国同办</span>
+        <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded border border-red-100">日本+美国</span>
+      </div>
+      <div class="text-[10px] text-gray-400">一份材料办多国，多年多国随心签</div>
+    </div>
+    <div class="bg-white p-3 rounded-xl shadow-sm">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="font-bold text-gray-900">家庭办签</span>
+      </div>
+      <div class="text-[10px] text-gray-400">一份材料办全家，价格更优惠</div>
+    </div>
+  </section>
+
+  <!-- 精选国家图标网格 -->
+  <section class="px-4 mt-4 grid grid-cols-4 gap-3 text-center">
+    <% @featured_countries.each do |country| %>
+      <%= link_to visa_path(country), class: "bg-white rounded-xl py-3 flex flex-col items-center shadow-sm" do %>
+        <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200 flex items-center justify-center">
+          <% if country.image_url.present? %>
+            <img src="<%= country.image_url %>" alt="<%= country.name %>" class="w-full h-full object-cover">
+          <% else %>
+            <span class="text-xs"><%= country.code %></span>
+          <% end %>
+        </div>
+        <span class="text-xs font-bold text-gray-800"><%= country.name %></span>
+      <% end %>
+    <% end %>
+  </section>
+
+  <!-- 亚洲列表区域 -->
+  <% @regions.each do |region, countries| %>
+    <section class="mt-6 px-4">
+      <h2 class="text-xl font-extrabold text-gray-900 mb-4"><%= region %></h2>
+      
+      <div class="grid grid-cols-2 gap-3">
+        <% countries.each do |country| %>
+          <% product = country.visa_products.first %>
+          <% if product %>
+            <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-5 h-5 rounded-full border border-gray-100 overflow-hidden">
+                    <% if country.image_url.present? %>
+                      <img src="<%= country.image_url %>" alt="<%= country.name %>" class="w-full h-full object-cover">
+                    <% else %>
+                      <span class="text-[10px]"><%= country.code %></span>
+                    <% end %>
+                  </div>
+                  <span class="font-bold text-base"><%= country.name %></span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-xs">
+                    <span class="text-gray-500">出签率</span>
+                    <span class="font-bold"><%= product.success_rate %>%</span>
+                  </div>
+                  <div class="flex justify-between text-xs">
+                    <span class="text-gray-500">办理时长</span>
+                    <span class="font-bold"><%= product.processing_days %>工作日</span>
+                  </div>
+                </div>
+                <% if product.supports_family %>
+                  <div class="inline-block border border-gray-200 rounded px-1 py-0.5 text-[10px] text-gray-500 mb-4">支持家庭办签</div>
+                <% end %>
+              </div>
+              <div>
+                <%= link_to "去办理", visa_path(country), class: "block w-full bg-primary text-gray-900 font-bold py-2 rounded-full text-sm mb-2 text-center" %>
+                <div class="text-[10px] text-gray-400 text-center">累计办理人数<%= number_to_human(product.sales_count, precision: 1, significant: false, units: { thousand: '千', million: '万' }) %>+</div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>
+
+<%= render 'shared/bottom_navigation' %>
