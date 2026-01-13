@@ -131,32 +131,32 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-6">
         <div class="text-center">
-          <div class="text-sm text-gray-600">今天</div>
-          <div class="text-lg font-bold">12月26日</div>
-          <div class="w-8 h-8 mx-auto mt-1 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs">1晚</div>
+          <div class="text-sm text-gray-600"><%= date_label(@check_in) %></div>
+          <div class="text-lg font-bold"><%= @check_in.is_a?(String) ? Date.parse(@check_in).strftime('%m月%d日') : @check_in.strftime('%m月%d日') %></div>
+          <div class="w-8 h-8 mx-auto mt-1 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs"><%= (@check_out.to_date - @check_in.to_date).to_i %>晚</div>
         </div>
         <div class="text-center">
-          <div class="text-sm text-gray-600">明天</div>
-          <div class="text-lg font-bold">12月27日</div>
+          <div class="text-sm text-gray-600"><%= date_label(@check_out) %></div>
+          <div class="text-lg font-bold"><%= @check_out.is_a?(String) ? Date.parse(@check_out).strftime('%m月%d日') : @check_out.strftime('%m月%d日') %></div>
           <div class="text-xs text-gray-600 mt-1">看低价</div>
         </div>
       </div>
       <div class="flex items-center space-x-4">
         <div class="text-center">
           <div class="w-8 h-8 mx-auto bg-orange-100 rounded-full flex items-center justify-center">
-            <span class="text-orange-500 font-bold">1</span>
+            <span class="text-orange-500 font-bold"><%= @rooms %></span>
           </div>
           <div class="text-xs text-gray-600 mt-1">间</div>
         </div>
         <div class="text-center">
           <div class="w-8 h-8 mx-auto bg-orange-100 rounded-full flex items-center justify-center">
-            <span class="text-orange-500 font-bold">1</span>
+            <span class="text-orange-500 font-bold"><%= @adults %></span>
           </div>
           <div class="text-xs text-gray-600 mt-1">人</div>
         </div>
         <div class="text-center">
           <div class="w-8 h-8 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-            <span class="text-gray-500 font-bold">0</span>
+            <span class="text-gray-500 font-bold"><%= @children %></span>
           </div>
           <div class="text-xs text-gray-600 mt-1">儿童</div>
         </div>
