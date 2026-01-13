@@ -236,7 +236,7 @@ export default class extends Controller<HTMLElement> {
         this.dispatchCityChangedEvent(cityName)
         
         // Dispatch hotel-specific event for hotel-search controller
-        this.dispatchHotelCityUpdateEvent(cityName)
+        this.dispatchHotelCityUpdateEvent(cityName, isInternational)
         
         // If international city selected in hotels context, switch to international tab
         if (isInternational) {
@@ -267,13 +267,16 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Dispatch hotel-specific city update event
-  private dispatchHotelCityUpdateEvent(cityName: string): void {
+  private dispatchHotelCityUpdateEvent(cityName: string, isInternational: boolean = false): void {
     const hotelCityEvent = new CustomEvent('city-selector:city-selected-for-hotel', {
-      detail: { cityName },
+      detail: { 
+        cityName,
+        isInternational 
+      },
       bubbles: true
     })
     document.dispatchEvent(hotelCityEvent)
-    console.log('City selector: Dispatched hotel city update event', cityName)
+    console.log('City selector: Dispatched hotel city update event', { cityName, isInternational })
   }
 
   // Switch cities
