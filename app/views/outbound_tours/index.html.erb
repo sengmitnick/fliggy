@@ -47,37 +47,36 @@
   </div>
 
   <!-- 主要功能区 (左右分栏) -->
-  <div class="px-3 mt-4 flex gap-3">
+  <div class="px-3 mt-4 flex gap-1">
     <!-- 左侧：出境工具包 (占宽约 40%) -->
-    <div class="w-[40%] flex flex-col gap-2">
+    <div class="w-[40%] flex flex-col gap-1 bg-gray-200 rounded-sm p-2">
       <h2 class="text-sm font-bold text-gray-800 mb-1">出境工具包</h2>
       
       <!-- 办签证大按钮 -->
-      <%= link_to visas_path(ref: 'outbound_tours'), class: "bg-white rounded-xl p-3 flex flex-col items-center justify-center h-[88px] relative shadow-sm" do %>
-        <div class="absolute top-0 right-0 bg-[#FF5722] text-white text-[10px] px-2 py-0.5 rounded-bl-lg rounded-tr-xl">出签率高</div>
+      <%= link_to visas_path(ref: 'outbound_tours'), class: "bg-white rounded-sm p-3 flex flex-col items-center justify-center h-[88px] relative shadow-sm" do %>
         <%= image_tag "出境游/办签证.png", class: "w-8 h-8 mb-1", alt: "办签证" %>
         <span class="text-sm font-bold text-gray-800">办签证</span>
       <% end %>
 
       <!-- 小工具 Grid 2x2 -->
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-2 gap-1">
         <!-- 充流量 -->
-        <%= link_to internet_services_path(tab: 'data_plan'), class: "bg-white rounded-xl p-2 flex flex-col items-center justify-center h-20 shadow-sm" do %>
+        <%= link_to internet_services_path(tab: 'data_plan'), class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center h-20 shadow-sm" do %>
           <%= image_tag "出境游/充流量.png", class: "w-6 h-6 mb-1", alt: "充流量" %>
           <span class="text-[11px] text-gray-800">充流量</span>
         <% end %>
         <!-- 境外电话卡 -->
-        <%= link_to internet_services_path(tab: 'sim_card'), class: "bg-white rounded-xl p-2 flex flex-col items-center justify-center h-20 shadow-sm" do %>
+        <%= link_to internet_services_path(tab: 'sim_card'), class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center h-20 shadow-sm" do %>
           <%= image_tag "出境游/境外电话卡.png", class: "w-6 h-6 mb-1", alt: "境外电话卡" %>
           <span class="text-[11px] text-gray-800 text-center leading-none">境外<br>电话卡</span>
         <% end %>
         <!-- 接送机 -->
-        <button class="bg-white rounded-xl p-2 flex flex-col items-center justify-center h-20 shadow-sm" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center h-20 shadow-sm" onclick="window.showToast('精彩即将上线，敬请期待')">
           <svg class="w-6 h-6 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
           <span class="text-[11px] text-gray-800">接送机</span>
         </button>
         <!-- 包车 -->
-        <button class="bg-white rounded-xl p-2 flex flex-col items-center justify-center h-20 shadow-sm" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center h-20 shadow-sm" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/包车.png", class: "w-6 h-6 mb-1", alt: "包车" %>
           <span class="text-[11px] text-gray-800">包车</span>
         </button>
@@ -85,52 +84,52 @@
     </div>
 
     <!-- 右侧：出境游热门预订 (占宽约 60%) -->
-    <div class="flex-1 flex flex-col gap-2">
+    <div class="flex-1 flex flex-col gap-1 bg-gray-200 rounded-sm p-2">
       <h2 class="text-sm font-bold text-gray-800 mb-1">出境游热门预订</h2>
       
-      <div class="bg-white rounded-xl p-2 shadow-sm grid grid-cols-3 gap-y-4 gap-x-1 h-full">
+      <div class="grid grid-cols-3 gap-1 h-full">
         <!-- 跟团游 -->
-        <%= link_to tour_groups_path, class: "flex flex-col items-center justify-center" do %>
+        <%= link_to tour_groups_path, class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center" do %>
           <%= image_tag "出境游/跟团游.png", class: "w-6 h-6 mb-1", alt: "跟团游" %>
           <span class="text-[11px] text-gray-800">跟团游</span>
         <% end %>
         <!-- 邮轮游 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/邮轮游.png", class: "w-6 h-6 mb-1", alt: "邮轮游" %>
           <span class="text-[11px] text-gray-800">邮轮游</span>
         </button>
         <!-- 定制游 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/定制游.png", class: "w-6 h-6 mb-1", alt: "定制游" %>
           <span class="text-[11px] text-gray-800">定制游</span>
         </button>
         <!-- 自由行 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/自由行.png", class: "w-6 h-6 mb-1", alt: "自由行" %>
           <span class="text-[11px] text-gray-800">自由行</span>
         </button>
         <!-- 一日游 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/一日游.png", class: "w-6 h-6 mb-1", alt: "一日游" %>
           <span class="text-[11px] text-gray-800">一日游</span>
         </button>
         <!-- 门票 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/门票.png", class: "w-6 h-6 mb-1", alt: "门票" %>
           <span class="text-[11px] text-gray-800">门票</span>
         </button>
         <!-- 日本交通 -->
-        <%= link_to abroad_tickets_path(ref: 'outbound_tours'), class: "flex flex-col items-center justify-center" do %>
+        <%= link_to abroad_tickets_path(ref: 'outbound_tours'), class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center" do %>
           <%= image_tag "出境游/日本交通.png", class: "w-6 h-6 mb-1", alt: "日本交通" %>
           <span class="text-[11px] text-gray-800">日本交通</span>
         <% end %>
         <!-- 欧洲交通 -->
-        <%= link_to abroad_tickets_path(ref: 'outbound_tours'), class: "flex flex-col items-center justify-center" do %>
+        <%= link_to abroad_tickets_path(ref: 'outbound_tours'), class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center" do %>
           <%= image_tag "出境游/欧洲交通.png", class: "w-6 h-6 mb-1", alt: "欧洲交通" %>
           <span class="text-[11px] text-gray-800">欧洲交通</span>
         <% end %>
         <!-- 旅行保险 -->
-        <button class="flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
           <%= image_tag "出境游/旅行保险.png", class: "w-6 h-6 mb-1", alt: "旅行保险" %>
           <span class="text-[11px] text-gray-800">旅行保险</span>
         </button>
