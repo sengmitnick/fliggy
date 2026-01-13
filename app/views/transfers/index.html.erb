@@ -1,0 +1,304 @@
+<div class="min-h-screen bg-[#F9F9F9]" data-controller="location-selector">
+  <!-- Top background gradient -->
+  <div class="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-[#FFF5E3] to-[#F9F9F9] z-0"></div>
+
+  <!-- Top Navigation Bar -->
+  <div class="relative z-10 px-4 py-3 flex items-center justify-between">
+    <%= link_to profile_path, class: "text-text-secondary" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    
+    <div class="text-center">
+      <div class="flex items-center justify-center gap-1">
+        <span class="text-lg font-bold text-[#8B5C35]">平台保障 服务升级</span>
+      </div>
+      <div class="text-[10px] text-[#8B5C35] opacity-80 mt-0.5">无车退赔 航变无忧 一价全包</div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Shield icon -->
+      <div class="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center border border-orange-200">
+        <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <!-- Coupon icon -->
+      <div class="relative">
+        <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2 2v10h12V6H4z"/>
+        </svg>
+        <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-600 rounded-full"></div>
+      </div>
+      <!-- Menu dots -->
+      <svg class="w-6 h-6 text-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Service Type Tabs -->
+  <div class="relative z-10 flex justify-between items-end px-6 mt-4 pb-2">
+    <%= link_to '#', class: "text-text-muted text-sm pb-1" do %>
+      顺风车
+    <% end %>
+    <%= link_to transfers_path(type: 'airport_pickup'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type == 'airport_pickup'} #{'text-text-muted text-sm pb-1' unless @transfer_type == 'airport_pickup'}" do %>
+      <span>接送机</span>
+      <% if @transfer_type == 'airport_pickup' %>
+        <div class="w-6 h-1 bg-black rounded-full mt-1"></div>
+      <% end %>
+    <% end %>
+    <%= link_to transfers_path(type: 'train_pickup'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type == 'train_pickup'} #{'text-text-muted text-sm pb-1' unless @transfer_type == 'train_pickup'}" do %>
+      <span>接送火车</span>
+      <% if @transfer_type == 'train_pickup' %>
+        <div class="w-6 h-1 bg-black rounded-full mt-1"></div>
+      <% end %>
+    <% end %>
+    <%= link_to '#', class: "text-text-muted text-sm pb-1" do %>
+      打车
+    <% end %>
+  </div>
+
+  <!-- Service Direction Toggle (Pickup/Dropoff) -->
+  <div class="relative z-10 px-4 mt-2">
+    <div class="bg-gray-200/50 p-1 rounded-full flex">
+      <% if @transfer_type == 'airport_pickup' %>
+        <%= link_to transfers_path(type: @transfer_type, service: 'from_airport'), 
+          class: "flex-1 py-2 rounded-full text-sm font-semibold text-center #{@service_type == 'from_airport' ? 'bg-[#FFD800] shadow-sm' : 'text-text-secondary font-medium'}" do %>
+          到机场接我
+        <% end %>
+        <%= link_to transfers_path(type: @transfer_type, service: 'to_airport'),
+          class: "flex-1 py-2 rounded-full text-sm font-semibold text-center #{@service_type == 'to_airport' ? 'bg-[#FFD800] shadow-sm' : 'text-text-secondary font-medium'}" do %>
+          送我到机场
+        <% end %>
+      <% else %>
+        <%= link_to transfers_path(type: @transfer_type, service: 'from_station'),
+          class: "flex-1 py-2 rounded-full text-sm font-semibold text-center #{@service_type == 'from_station' ? 'bg-[#FFD800] shadow-sm' : 'text-text-secondary font-medium'}" do %>
+          到车站接我
+        <% end %>
+        <%= link_to transfers_path(type: @transfer_type, service: 'to_station'),
+          class: "flex-1 py-2 rounded-full text-sm font-semibold text-center #{@service_type == 'to_station' ? 'bg-[#FFD800] shadow-sm' : 'text-text-secondary font-medium'}" do %>
+          送我到车站
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Main Input Card -->
+  <div class="relative z-10 px-4 mt-4">
+    <div class="bg-surface rounded-xl shadow-sm p-4">
+      
+      <% if @transfer_type == 'airport_pickup' %>
+        <!-- Airport Section -->
+        <div class="flex items-start mb-6">
+          <div class="mt-1 mr-3">
+            <svg class="w-5 h-5 text-black transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+            </svg>
+          </div>
+          <div class="flex-1 border-b border-border pb-4">
+            <div class="text-xs text-text-muted mb-1">
+              <%= @service_type == 'from_airport' ? '降落机场' : '起飞机场' %>
+            </div>
+            <%= link_to search_flights_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
+              <div class="flex-1">
+                <% if @transfer_params && @transfer_params[:flight_id].present? %>
+                  <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
+                  <% if flight %>
+                    <h2 class="text-xl font-bold text-text-primary"><%= flight.arrival_airport %></h2>
+                    <div class="text-xs text-text-secondary mt-1">
+                      <%= flight.flight_number %> 预计当地<%= flight.arrival_time&.strftime('%m月%d日 %A %H:%M') %>到达后用车
+                    </div>
+                  <% else %>
+                    <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
+                  <% end %>
+                <% else %>
+                  <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
+                <% end %>
+              </div>
+              <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="flex items-start mb-6">
+          <div class="mt-1 mr-3">
+            <svg class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="flex-1 border-b border-border pb-4">
+            <div class="text-xs text-text-muted mb-1">
+              <%= @service_type == 'from_station' ? '到达火车站' : '出发火车站' %>
+            </div>
+            <%= link_to search_trains_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
+              <div class="flex-1">
+                <% if @transfer_params && @transfer_params[:train_id].present? %>
+                  <% train = Train.find_by(id: @transfer_params[:train_id]) %>
+                  <% if train %>
+                    <h2 class="text-xl font-bold text-text-primary"><%= train.arrival_station %></h2>
+                    <div class="text-xs text-text-secondary mt-1">
+                      <%= train.train_number %> 预计当地<%= train.arrival_time&.strftime('%m月%d日 %A %H:%M') %>到达后用车
+                    </div>
+                  <% else %>
+                    <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
+                  <% end %>
+                <% else %>
+                  <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
+                <% end %>
+              </div>
+              <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Dropoff/Pickup Location -->
+      <div class="flex items-start">
+        <div class="mt-1 mr-3">
+          <svg class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="text-xs text-text-muted mb-1">
+            <%= @service_type.in?(%w[from_airport from_station]) ? '下车点' : '上车点' %>
+          </div>
+          <button
+            type="button"
+            data-action="click->location-selector#openModal"
+            class="flex justify-between items-center w-full">
+            <div class="flex-1">
+              <% if @transfer_params && @transfer_params[:location_to].present? %>
+                <h2 class="text-lg font-bold text-text-primary leading-tight pr-2" data-location-selector-target="locationDisplay"><%= @transfer_params[:location_to] %></h2>
+                <div class="mt-2 inline-block bg-[#FFFBE0] text-[#8B5C35] text-[10px] px-2 py-1 rounded">
+                  <%= @transfer_params[:location_to] %>
+                </div>
+              <% else %>
+                <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="locationDisplay">请选择地点</h2>
+              <% end %>
+            </div>
+            <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+          <%= hidden_field_tag :location_to, @transfer_params&.dig(:location_to), data: { 'location-selector-target': 'locationInput' } %>
+        </div>
+      </div>
+
+      <!-- Estimated Distance -->
+      <% if @transfer_params && @transfer_params[:location_from].present? && @transfer_params[:location_to].present? %>
+        <div class="mt-4 text-xs text-text-muted pl-8">
+          预计行驶: 48公里/51分钟
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Coupon Notice & Search Button -->
+  <div class="px-4 mt-4">
+    <div class="flex items-center justify-center gap-1 text-xs text-text-secondary mb-3">
+      <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+      </svg>
+      您有<span class="text-red-500">5张优惠券</span>，今日下单最高<span class="text-red-500">可减88元</span>
+      <svg class="w-3 h-3 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+
+    <div class="relative">
+      <!-- Floating badge -->
+      <div class="absolute -top-3 right-0 bg-[#FF4D4F] text-white text-[10px] px-2 py-1 rounded-tl-lg rounded-tr-lg rounded-br-lg z-20 shadow-sm border border-white">
+        新客专享 至高减¥80
+      </div>
+      
+      <button
+        type="button"
+        id="search-transfer-btn"
+        data-controller="transfer-search"
+        data-transfer-search-transfer-type-value="<%= @transfer_type %>"
+        data-transfer-search-service-type-value="<%= @service_type %>"
+        data-transfer-search-flight-id-value="<%= @transfer_params&.dig(:flight_id) %>"
+        data-transfer-search-train-id-value="<%= @transfer_params&.dig(:train_id) %>"
+        data-action="click->transfer-search#handleSearch"
+        class="w-full block text-center bg-[#FFD800] text-black font-bold text-lg py-3 rounded-full shadow-md active:scale-95 transition-transform">
+        搜索<%= @transfer_type == 'airport_pickup' ? '接送机' : '接送站' %>
+      </button>
+    </div>
+    
+    <div class="text-center mt-3 flex items-center justify-center gap-2 text-[10px] text-text-muted">
+      <span class="font-bold text-text-primary">平台保障</span> 无车退赔 · 一价全包 · 航变无忧
+      <svg class="w-3 h-3 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Super Value Deals Card -->
+  <div class="px-4 mt-5">
+    <div class="bg-surface rounded-xl p-3 shadow-sm border border-red-50">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-red-600 italic font-black text-lg">超值优惠</h3>
+        <button class="text-xs text-red-500 border border-red-200 rounded-full px-2 py-0.5 bg-red-50">一键领取</button>
+      </div>
+      
+      <div class="bg-[#FFF8F8] border border-red-100 rounded-lg p-3 flex items-center">
+        <div class="flex flex-col items-center justify-center pr-3 border-r border-dashed border-red-200">
+          <div class="text-red-500 font-bold text-xl"><span class="text-xs">¥</span>80</div>
+          <div class="bg-[#FF4D4F] text-white text-[9px] px-1.5 rounded-sm">至高减</div>
+        </div>
+        <div class="pl-3">
+          <div class="text-text-primary font-bold text-sm">新客接送凭证券</div>
+          <div class="text-red-400 text-[10px] mt-0.5">下单享至高减 券未使用提醒</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Banner (Promo) -->
+  <div class="px-4 mt-4 pb-24">
+    <div class="w-full h-24 rounded-xl overflow-hidden relative bg-gradient-to-r from-blue-100 to-green-100 flex items-center justify-between px-4">
+      <div class="z-10">
+        <div class="text-[#8B5C35] font-black text-lg italic" style="-webkit-text-stroke: 1px white;">人身行李全保障</div>
+        <div class="flex items-center gap-1">
+          <div class="text-[#E67E22] font-black text-lg italic" style="-webkit-text-stroke: 1px white;">取消延误有赔偿</div>
+          <div class="bg-white text-[#E67E22] text-[9px] px-1 border border-[#E67E22] rounded">国内旅行险10元起</div>
+        </div>
+      </div>
+      
+      <div class="z-10">
+        <button class="bg-[#FF5500] text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow">点击查看 ></button>
+      </div>
+
+      <!-- Decorative background elements -->
+      <div class="absolute bottom-0 right-16 w-16 h-16 bg-yellow-400 rounded-full opacity-50 blur-xl"></div>
+      <div class="absolute bottom-[-10px] left-[50%] transform -translate-x-1/2">
+        <svg class="w-20 h-20 text-yellow-300 drop-shadow-lg" viewBox="0 0 100 100" fill="currentColor">
+          <circle cx="50" cy="50" r="40" />
+          <circle cx="35" cy="45" r="5" fill="black"/>
+          <circle cx="65" cy="45" r="5" fill="black"/>
+          <ellipse cx="50" cy="60" rx="15" ry="10" fill="#FFAB91"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border py-2 flex justify-center items-center z-50">
+    <%= link_to bookings_path, class: "flex flex-col items-center" do %>
+      <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+      </svg>
+      <span class="text-[10px] text-text-primary mt-1 font-medium">我的订单</span>
+    <% end %>
+  </div>
+
+  <!-- Include Location Selector Modal -->
+  <%= render 'shared/location_selector_modal' %>
+</div>

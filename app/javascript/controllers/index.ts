@@ -74,6 +74,8 @@ import InternetOrderFormController from "./internet_order_form_controller"
 import ProductCardController from "./product_card_controller"
 import SimCardBookingController from "./sim_card_booking_controller"
 import QrcodeModalController from "./qrcode_modal_controller"
+import LocationSelectorController from "./location_selector_controller"
+import TransferSearchController from "./transfer_search_controller"
 import AddressSelectorController from "./address_selector_controller"
 
 const application = Application.start()
@@ -152,6 +154,8 @@ application.register("internet-order-form", InternetOrderFormController)
 application.register("product-card", ProductCardController)
 application.register("sim-card-booking", SimCardBookingController)
 application.register("qrcode-modal", QrcodeModalController)
+application.register("location-selector", LocationSelectorController)
+application.register("transfer-search", TransferSearchController)
 application.register("address-selector", AddressSelectorController)
 
 window.Stimulus = application

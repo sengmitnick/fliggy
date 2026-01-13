@@ -1,5 +1,5 @@
 require 'rails_helper'
-require_relative '../../support/playwright_helper'
+require_relative '../../../support/playwright_helper'
 
 RSpec.describe "Bus Ticket Booking Flow", type: :system do
   include PlaywrightHelper
