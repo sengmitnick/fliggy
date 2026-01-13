@@ -1,9 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["totalPrice"]
+  static targets = ["totalPrice", "deliveryAddress"]
 
   declare readonly totalPriceTarget: HTMLElement
+  declare readonly deliveryAddressTarget: HTMLInputElement
 
   connect(): void {
     console.log("VisaOrder controller connected")

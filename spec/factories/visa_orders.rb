@@ -1,23 +1,22 @@
 FactoryBot.define do
   factory :visa_order do
-
-    user_id { 1 }
-    visa_product_id { 1 }
+    association :user
+    association :visa_product
     traveler_count { 1 }
-    total_price { 9.99 }
-    unit_price { 9.99 }
-    status { "MyString" }
-    expected_date { Date.today }
-    delivery_method { "MyString" }
-    delivery_address { "MyText" }
-    contact_name { "MyString" }
-    contact_phone { "MyString" }
-    notes { "MyText" }
-    insurance_selected { true }
-    insurance_price { 9.99 }
-    payment_status { "MyString" }
-    paid_at { Time.current }
-    slug { "MyString" }
-
+    total_price { 500.0 }
+    unit_price { 500.0 }
+    status { "pending" }
+    expected_date { Date.today + 7.days }
+    delivery_method { "courier" }
+    delivery_address { "广东省深圳市南山区科技园南区" }
+    contact_name { "张三" }
+    contact_phone { "13800138000" }
+    notes { "" }
+    insurance_type { "none" }
+    insurance_selected { false }
+    insurance_price { 0 }
+    payment_status { "unpaid" }
+    paid_at { nil }
+    slug { nil }
   end
 end

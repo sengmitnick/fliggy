@@ -17,8 +17,10 @@ RSpec.describe "Visa orders", type: :request do
   end
 
   describe "GET /visa_orders/new" do
+    let(:visa_product) { create(:visa_product) }
+    
     it "returns http success" do
-      get new_visa_order_path
+      get new_visa_order_path(visa_product_id: visa_product.id, traveler_count: 1, insurance_type: 'none')
       expect(response).to be_success_with_view_check('new')
     end
   end

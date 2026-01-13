@@ -304,4 +304,39 @@ class BookingsController < ApplicationController
   def booking_params
     params.require(:booking).permit(:passenger_name, :passenger_id_number, :contact_phone, :accept_terms, :insurance_type, :insurance_price, :trip_type, :return_flight_id, :return_date, :return_offer_id, :multi_city_flights_json)
   end
+  
+  # Helper methods for booking status display
+  helper_method :booking_status_color, :booking_status_text
+  
+  def booking_status_color(status)
+    case status
+    when 'pending'
+      'text-warning'
+    when 'paid', 'processing'
+      'text-success'
+    when 'completed'
+      'text-blue-600'
+    when 'cancelled'
+      'text-text-muted'
+    else
+      'text-text-primary'
+    end
+  end
+  
+  def booking_status_text(status)
+    case status
+    when 'pending'
+      '待支付'
+    when 'paid'
+      '已支付'
+    when 'processing'
+      '办理中'
+    when 'completed'
+      '已完成'
+    when 'cancelled'
+      '已取消'
+    else
+      status
+    end
+  end
 end

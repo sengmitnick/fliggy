@@ -24,9 +24,9 @@ class VisaOrder < ApplicationRecord
 
   # 支付状态
   enum :payment_status, {
-    unpaid: 'unpaid',       # 未支付
-    paid: 'paid',           # 已支付
-    refunded: 'refunded'    # 已退款
+    payment_unpaid: 'unpaid',       # 未支付
+    payment_paid: 'paid',           # 已支付
+    payment_refunded: 'refunded'    # 已退款
   }, default: 'unpaid'
 
   private

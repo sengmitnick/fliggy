@@ -26,7 +26,18 @@ class VisaOrdersController < ApplicationController
     # Get user's default contact info
     @contact_name = current_user.passengers.first&.name || ''
     @contact_phone = current_user.passengers.first&.phone || ''
-    @delivery_address = '' # 用户需要手动输入邮寄地址
+    
+    # Load user addresses
+    @addresses = current_user.addresses.delivery.order(is_default: :desc, created_at: :desc)
+    @default_address = @addresses.find(&:is_default) || @addresses.first
+    
+    if @default_address
+      @delivery_address = @default_address.full_address
+      @contact_name = @default_address.name if @contact_name.blank?
+      @contact_phone = @default_address.phone if @contact_phone.blank?
+    else
+      @delivery_address = ''
+    end
   end
 
   def create
@@ -93,5 +104,68 @@ class VisaOrdersController < ApplicationController
       :delivery_address, :contact_name, :contact_phone,
       :insurance_type, :insurance_price
     )
+  end
+  
+  # Helper methods for status display
+  helper_method :status_color, :status_text, :payment_status_color, :payment_status_text
+  
+  def status_color(status)
+    case status
+    when 'pending'
+      'text-orange-500'
+    when 'paid'
+      'text-blue-500'
+    when 'processing'
+      'text-purple-500'
+    when 'completed'
+      'text-green-500'
+    when 'cancelled'
+      'text-gray-500'
+    else
+      'text-gray-500'
+    end
+  end
+  
+  def status_text(status)
+    case status
+    when 'pending'
+      '待支付'
+    when 'paid'
+      '已支付'
+    when 'processing'
+      '处理中'
+    when 'completed'
+      '已完成'
+    when 'cancelled'
+      '已取消'
+    else
+      status
+    end
+  end
+  
+  def payment_status_color(status)
+    case status
+    when 'unpaid'
+      'text-orange-500'
+    when 'paid'
+      'text-green-500'
+    when 'refunded'
+      'text-gray-500'
+    else
+      'text-gray-500'
+    end
+  end
+  
+  def payment_status_text(status)
+    case status
+    when 'unpaid'
+      '未支付'
+    when 'paid'
+      '已支付'
+    when 'refunded'
+      '已退款'
+    else
+      status
+    end
   end
 end

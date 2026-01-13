@@ -49,50 +49,17 @@
         
         <div class="flex space-x-2">
           <% if booking.pending? %>
-            <button type="button" 
-                    class="px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-full text-sm font-medium"
-                    data-controller="payment-modal"
-                    data-action="click->payment-modal#showConfirm"
-                    data-order-type="visa_order"
-                    data-order-id="<%= booking.id %>">
-              立即支付
-            </button>
+            <%= link_to '取消订单', visa_order_path(booking), method: :delete, data: { confirm: '确定要取消这个订单吗？' }, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+            <%= link_to '立即支付', visa_order_path(booking), class: 'px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-full text-sm font-medium' %>
           <% elsif booking.paid? || booking.processing? %>
-            <span class="px-4 py-2 bg-surface-secondary rounded-full text-sm font-medium text-text-primary">
-              查看详情
-            </span>
+            <%= link_to '查看详情', visa_order_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
           <% elsif booking.completed? %>
-            <span class="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-medium">
-              已完成
-            </span>
+            <%= link_to '查看详情', visa_order_path(booking), class: 'px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm font-medium' %>
+          <% elsif booking.cancelled? %>
+            <%= link_to '重新预订', new_visa_order_path(visa_product_id: booking.visa_product_id), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
           <% end %>
         </div>
       </div>
     </div>
   </div>
-<% end %>
-
-<% content_for :helpers do %>
-  <%
-    def booking_status_text(status)
-      case status
-      when 'pending' then '待支付'
-      when 'paid' then '已支付'
-      when 'processing' then '办理中'
-      when 'completed' then '已完成'
-      when 'cancelled' then '已取消'
-      else status
-      end
-    end
-
-    def booking_status_color(status)
-      case status
-      when 'pending' then 'text-warning'
-      when 'paid', 'processing' then 'text-success'
-      when 'completed' then 'text-blue-600'
-      when 'cancelled' then 'text-text-muted'
-      else 'text-text-primary'
-      end
-    end
-  %>
 <% end %>
