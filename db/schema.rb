@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1009,6 +1009,50 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "transfer_packages", force: :cascade do |t|
+    t.string "name"
+    t.string "vehicle_category"
+    t.integer "seats"
+    t.integer "luggage"
+    t.integer "wait_time"
+    t.string "refund_policy"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.decimal "discount_amount", default: "0.0"
+    t.text "features"
+    t.string "provider"
+    t.integer "priority", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "transfers", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "transfer_type", default: "airport_pickup"
+    t.string "service_type", default: "to_airport"
+    t.string "location_from"
+    t.string "location_to"
+    t.datetime "pickup_datetime"
+    t.string "flight_number"
+    t.string "train_number"
+    t.string "passenger_name"
+    t.string "passenger_phone"
+    t.string "vehicle_type", default: "economy_5"
+    t.string "provider_name"
+    t.string "license_plate"
+    t.string "driver_name"
+    t.string "driver_status", default: "pending"
+    t.decimal "total_price", default: "0.0"
+    t.decimal "discount_amount", default: "0.0"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "transfer_package_id"
+    t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
+    t.index ["user_id"], name: "index_transfers_on_user_id"
+  end
+
   create_table "travel_agencies", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -1042,6 +1086,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
     t.datetime "updated_at", null: false
     t.jsonb "airline_memberships", default: {}
     t.string "pay_password_digest"
+    t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -1061,4 +1107,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_12_025350) do
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tour_group_products", "travel_agencies"
+  add_foreign_key "transfers", "transfer_packages"
 end

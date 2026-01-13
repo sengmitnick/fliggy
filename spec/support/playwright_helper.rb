@@ -149,4 +149,33 @@ module PlaywrightHelper
       end
     end
   end
+
+  # Create a page with authenticated session
+  def with_authenticated_page(url, user, options = {}, &block)
+    headless = options.fetch(:headless, true)
+    
+    # Create session for user
+    session = Session.create!(user: user)
+    
+    Playwright.create(playwright_cli_executable_path: 'npx playwright') do |playwright|
+      playwright.chromium.launch(headless: headless) do |browser|
+        context = browser.new_context
+        page = context.new_page
+        
+        # Set session cookie
+        page.context.add_cookies([
+          {
+            name: '_session_id',
+            value: session.id.to_s,
+            domain: 'localhost',
+            path: '/',
+            httpOnly: true
+          }
+        ])
+        
+        page.goto(url)
+        yield page
+      end
+    end
+  end
 end

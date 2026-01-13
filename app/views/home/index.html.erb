@@ -119,10 +119,10 @@
             <span class="text-[12px] text-gray-700">民宿/公寓</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to transfers_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/接送机.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "接送机" %>
             <span class="text-[12px] text-gray-700">接送机</span>
-          </button>
+          <% end %>
 
           <%= link_to tour_groups_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/跟团游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "跟团游" %>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打车支付页面复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 引入类似移动端的字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center min-h-screen">
+
+    <!-- 手机容器 -->
+    <div class="w-full max-w-md bg-gray-50 relative shadow-2xl overflow-hidden h-screen flex flex-col">
+        
+        <!-- 1. 顶部状态栏与导航 (模拟背景层) -->
+        <div class="bg-gray-800 text-white pb-4">
+            
+
+            <!-- 导航栏 -->
+            <div class="flex items-center px-4 py-2">
+                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                <div class="flex items-center mx-auto text-sm font-medium text-gray-200">
+                    <span>天河国际机场T3</span>
+                    <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <span class="truncate max-w-[120px]">维也纳国际酒店·武...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 中间选车区域 (模拟被遮罩覆盖的背景) -->
+        <div class="flex flex-1 overflow-hidden relative opacity-40 bg-black/10 pointer-events-none">
+            <!-- 左侧侧边栏 -->
+            <div class="w-24 bg-gray-100 flex-shrink-0 text-xs text-gray-600 flex flex-col">
+                <div class="py-4 px-2 text-center bg-white font-bold border-l-4 border-orange-500 text-gray-900">
+                    经济5座<br><span class="text-[10px] font-normal">¥80起</span>
+                </div>
+                <div class="py-4 px-2 text-center">舒适5座<br><span class="text-[10px]">¥91起</span></div>
+                <div class="py-4 px-2 text-center">经济7座<br><span class="text-[10px]">¥154起</span></div>
+                <div class="py-4 px-2 text-center">舒适7座<br><span class="text-[10px]">¥154起</span></div>
+                <div class="py-4 px-2 text-center">豪华5座<br><span class="text-[10px]">¥249起</span></div>
+            </div>
+
+            <!-- 右侧列表 -->
+            <div class="flex-1 bg-white p-3 overflow-y-auto no-scrollbar pb-32">
+                <!-- 顶部优惠条 -->
+                <div class="flex justify-between items-center bg-red-50 p-2 rounded mb-3">
+                    <div class="flex items-center text-xs text-red-500">
+                        <span class="font-bold border border-red-500 rounded px-1 mr-1">券包</span>
+                        下单享至高减 <span class="font-bold">¥80</span>
+                    </div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1 rounded-full scale-90">领取</button>
+                </div>
+
+                <div class="text-xs text-gray-500 mb-2">经济5座 4人·2行李</div>
+
+                <!-- 列表项：选中态 (阳光出行) -->
+                <div class="flex justify-between items-center p-3 mb-3 rounded-lg border border-yellow-200 bg-yellow-50 shadow-sm">
+                    <div class="flex items-start">
+                        <!-- Logo Placeholder -->
+                        <div class="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-[10px] mr-3 mt-1 flex-shrink-0">
+                           阳
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm mb-0.5">阳光出行</div>
+                            <div class="text-xs text-gray-400 mb-1">免费等60分钟 <span class="text-gray-300">|</span> 条件退</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-red-500">¥80</div>
+                        <div class="text-[10px] text-red-400 bg-red-100 px-1 rounded inline-block scale-90 origin-right">已优惠¥15</div>
+                    </div>
+                    <!-- 选中圆点 -->
+                    <div class="w-4 h-4 bg-yellow-400 rounded-full border-2 border-white shadow-sm ml-2"></div>
+                </div>
+
+                <!-- 列表项：普通态 (伙力专车) -->
+                <div class="flex justify-between items-center p-3 mb-3 rounded-lg border border-transparent">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[10px] mr-3 mt-1 flex-shrink-0">
+                           伙
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm mb-0.5">伙力专车</div>
+                            <div class="text-xs text-gray-400 mb-1">免费等60分钟 <span class="text-gray-300">|</span> 条件退</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-red-500">¥81</div>
+                        <div class="text-[10px] text-red-400 bg-red-100 px-1 rounded inline-block scale-90 origin-right">已优惠¥15 ></div>
+                    </div>
+                    <div class="w-4 h-4 border border-gray-300 rounded-full ml-2"></div>
+                </div>
+
+                <!-- 列表项：普通态 (风韵出行) -->
+                <div class="flex justify-between items-center p-3 mb-3 rounded-lg border border-transparent">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-yellow-600 flex items-center justify-center text-white text-[10px] mr-3 mt-1 flex-shrink-0">
+                           风
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm mb-0.5">风韵出行</div>
+                            <div class="text-xs text-gray-400 mb-1">免费等60分钟 <span class="text-gray-300">|</span> 条件退</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-red-500">¥82</div>
+                        <div class="text-[10px] text-red-400 bg-red-100 px-1 rounded inline-block scale-90 origin-right">已优惠¥15 ></div>
+                    </div>
+                    <div class="w-4 h-4 border border-gray-300 rounded-full ml-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 底部支付弹窗 (核心区域) -->
+        <!-- 遮罩背景 -->
+        <div class="absolute inset-0 bg-black/50 z-40"></div>
+
+        <!-- 弹窗主体 -->
+        <div class="absolute bottom-0 w-full bg-white z-50 rounded-t-2xl px-4 pt-4 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+            
+            <!-- 关闭按钮 -->
+            <div class="absolute right-4 top-4 text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </div>
+
+            <!-- 金额显示 -->
+            <div class="text-center mt-6 mb-8">
+                <span class="text-2xl font-medium text-gray-800 align-top mr-1">¥</span>
+                <span class="text-5xl font-bold text-gray-800 tracking-tighter">80.00</span>
+            </div>
+
+            <!-- 支付方式列表 -->
+            <div class="space-y-6 mb-8">
+                
+                <!-- 支付宝 (选中) -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <!-- 支付宝图标 -->
+                        <div class="w-6 h-6 mr-3 rounded bg-[#1677FF] flex items-center justify-center text-white">
+                            <svg class="w-4 h-4" viewBox="0 0 1024 1024" fill="currentColor">
+                                <path d="M789.6 408.4H587.2l26.8-97.6h176.4v-64H518c21.2-46.8 38.8-97.6 51.6-150.8H646v-64H382V0h-68v32H120v64h304.8c-12.8 54-32.4 106.8-56.8 150.8H183.2v64H442l-29.2 97.6H234.4c-129.2 0-149.2 102.8-149.2 110.4 0 94.4 102 142.4 196 142.4 82 0 148-36.4 179.6-96l24.4 78H317.2v62.8h464l-26.8-96h-172c-15.6 28.4-38.4 51.6-67.6 68.8 6.4-19.6 10.4-42.8 10.4-68.4 0-41.2-22.4-78.4-56.4-98.8h316.8l4 64z m-413.2 98.4c17.2 11.2 28 30.8 28 52.8 0 18-9.6 34.4-23.6 44.4-21.2-2.8-51.2-16.4-51.2-56 0-38 30.8-41.2 46.8-41.2z" />
+                            </svg>
+                        </div>
+                        <span class="text-base font-medium text-gray-800">支付宝</span>
+                    </div>
+                    <!-- 黄色选中对钩 -->
+                    <div class="w-5 h-5 rounded-full bg-[#FFD040] flex items-center justify-center">
+                        <svg class="w-3 h-3 text-gray-900" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+
+                <!-- 分期付款 -->
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col">
+                        <div class="flex items-center mb-1">
+                            <!-- 分期图标 (红蓝半圆) -->
+                            <div class="w-6 h-6 mr-3 rounded-full flex items-center justify-center relative overflow-hidden bg-gray-100">
+                                <div class="absolute inset-0 bg-blue-500 w-1/2"></div>
+                                <div class="absolute inset-0 bg-red-500 w-1/2 left-1/2"></div>
+                                <span class="relative text-white text-[10px] font-bold z-10">%</span>
+                            </div>
+                            <span class="text-base font-medium text-gray-800">分期付款</span>
+                        </div>
+                        <!-- 子选项标签 -->
+                        <div class="flex space-x-2 pl-9">
+                            <div class="flex items-center bg-gray-50 px-2 py-0.5 rounded text-xs text-gray-600">
+                                <div class="w-3 h-3 rounded-full bg-blue-400 mr-1 flex items-center justify-center text-[8px] text-white">花</div>
+                                花呗分期
+                            </div>
+                            <div class="flex items-center bg-gray-50 px-2 py-0.5 rounded text-xs text-gray-600">
+                                <div class="w-3 h-3 rounded-full bg-red-500 mr-1 flex items-center justify-center text-[8px] text-white">M</div>
+                                招商银行信用卡
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 未选中空心圆 -->
+                    <div class="w-5 h-5 rounded-full border border-gray-300 mt-1"></div>
+                </div>
+
+            </div>
+
+            <!-- 底部按钮 -->
+            <button class="w-full bg-gradient-to-r from-[#FF6B38] to-[#FF4520] text-white font-bold py-3.5 rounded-full text-lg shadow-lg active:scale-[0.99] transition-transform">
+                立即支付
+            </button>
+
+            <!-- 底部安全区留白 -->
+            <div class="h-2"></div>
+        </div>
+
+    </div>
+</body>
+</html>
