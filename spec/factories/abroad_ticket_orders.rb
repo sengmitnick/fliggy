@@ -3,15 +3,15 @@ FactoryBot.define do
 
     association :user
     association :abroad_ticket
-    passenger_name { "MyString" }
-    passenger_id_number { "MyString" }
-    contact_phone { "MyString" }
-    contact_email { "MyString" }
-    passenger_type { "MyString" }
-    seat_category { "MyString" }
-    total_price { 9.99 }
-    status { "MyString" }
-    notes { "MyText" }
+    passenger_name { "张三" }
+    passenger_id_number { "110101199001011234" }
+    contact_phone { "13800138000" }
+    contact_email { "test@example.com" }
+    passenger_type { "adult" }
+    seat_category { "普通座" }
+    total_price { 99.9 }
+    status { "pending" }
+    notes { "备注信息" }
 
   end
 end

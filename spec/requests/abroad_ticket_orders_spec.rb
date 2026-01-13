@@ -17,8 +17,10 @@ RSpec.describe "Abroad ticket orders", type: :request do
   end
 
   describe "GET /abroad_ticket_orders/new" do
+    let(:abroad_ticket) { create(:abroad_ticket) }
+
     it "returns http success" do
-      get new_abroad_ticket_order_path
+      get new_abroad_ticket_order_path(abroad_ticket_id: abroad_ticket.id)
       expect(response).to be_success_with_view_check('new')
     end
   end

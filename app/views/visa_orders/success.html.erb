@@ -1,0 +1,89 @@
+<div class="bg-bg-gray min-h-screen">
+  <!-- 顶部导航 -->
+  <header class="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
+    <%= link_to bookings_path, class: "text-sm text-primary" do %>
+      返回订单列表
+    <% end %>
+    <h1 class="text-lg font-bold">支付成功</h1>
+    <div class="w-20"></div>
+  </header>
+
+  <!-- 成功状态 -->
+  <div class="bg-white px-4 pt-8 pb-6 text-center">
+    <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+      <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <h2 class="text-xl font-bold mb-2">支付成功</h2>
+    <p class="text-text-gray text-sm">订单已提交，请按流程邮寄材料</p>
+  </div>
+
+  <!-- 订单信息 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+      <span class="text-text-gray text-sm">订单号</span>
+      <span class="text-text-dark text-sm font-medium"><%= @visa_order.slug %></span>
+    </div>
+    
+    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+      <span class="text-text-gray text-sm">签证产品</span>
+      <span class="text-text-dark text-sm font-medium"><%= @visa_order.visa_product.country.name %> · <%= @visa_order.visa_product.name %></span>
+    </div>
+    
+    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+      <span class="text-text-gray text-sm">办签人数</span>
+      <span class="text-text-dark text-sm font-medium"><%= @visa_order.traveler_count %>人</span>
+    </div>
+    
+    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+      <span class="text-text-gray text-sm">支付金额</span>
+      <span class="text-primary text-lg font-bold">¥<%= @visa_order.total_price.to_i %></span>
+    </div>
+    
+    <div class="flex items-center justify-between">
+      <span class="text-text-gray text-sm">支付时间</span>
+      <span class="text-text-dark text-sm"><%= @visa_order.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></span>
+    </div>
+  </div>
+
+  <!-- 下一步提示 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <h3 class="font-bold text-base mb-3">下一步</h3>
+    <div class="bg-blue-50 rounded-lg p-4">
+      <div class="flex items-start mb-3">
+        <div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mr-3">1</div>
+        <div class="flex-1">
+          <div class="font-medium text-sm mb-1">按照要求准备材料</div>
+          <div class="text-xs text-text-gray">需要<%= @visa_order.visa_product.material_count %>项材料</div>
+        </div>
+      </div>
+      <div class="flex items-start mb-3">
+        <div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mr-3">2</div>
+        <div class="flex-1">
+          <div class="font-medium text-sm mb-1">邮寄材料至商家</div>
+          <div class="text-xs text-text-gray">请尽快寄出以免影响办理进度</div>
+        </div>
+      </div>
+      <div class="flex items-start">
+        <div class="w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mr-3">3</div>
+        <div class="flex-1">
+          <div class="font-medium text-sm mb-1">等待签证办理完成</div>
+          <div class="text-xs text-text-gray">预计<%= @visa_order.visa_product.processing_days %>个工作日</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="px-4 py-6">
+    <%= link_to "查看订单详情", visa_order_path(@visa_order), class: "block w-full bg-primary text-center text-gray-900 font-bold py-3 rounded-full mb-3" %>
+    <%= link_to "返回首页", visas_path, class: "block w-full bg-white border border-gray-300 text-center text-text-dark font-medium py-3 rounded-full" %>
+  </div>
+</div>
+
+<style>
+.bg-bg-gray { background-color: #F4F5F7; }
+.text-text-dark { color: #111111; }
+.text-text-gray { color: #666666; }
+</style>

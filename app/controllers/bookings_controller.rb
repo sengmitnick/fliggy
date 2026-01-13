@@ -29,6 +29,10 @@ class BookingsController < ApplicationController
     bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
                                     .order(created_at: :desc)
     
+    # Fetch visa orders
+    visa_orders = current_user.visa_orders.includes(visa_product: :country)
+                              .order(created_at: :desc)
+    
     # Fetch abroad ticket orders
     abroad_ticket_orders = current_user.abroad_ticket_orders.includes(:abroad_ticket)
                                        .order(created_at: :desc)
@@ -46,6 +50,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'pending')
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
       bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
+      visa_orders = visa_orders.where(status: 'pending')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'pending')
       internet_orders = internet_orders.where(status: 'pending')
     when 'upcoming'
@@ -61,6 +66,7 @@ class BookingsController < ApplicationController
       bus_ticket_orders = bus_ticket_orders.where(status: 'paid')
                                            .joins(:bus_ticket)
                                            .where('bus_tickets.departure_date >= ?', Date.today)
+      visa_orders = visa_orders.where(status: ['paid', 'processing'])
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'paid')
                                                  .joins(:abroad_ticket)
                                                  .where('abroad_tickets.departure_date >= ?', Date.today)
@@ -73,6 +79,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.none
       hotel_package_orders = hotel_package_orders.none
       bus_ticket_orders = bus_ticket_orders.none
+      visa_orders = visa_orders.none
       abroad_ticket_orders = abroad_ticket_orders.none
       internet_orders = internet_orders.none
     when 'refund'
@@ -82,12 +89,13 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'cancelled')
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
       bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
+      visa_orders = visa_orders.where(status: 'cancelled')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'cancelled')
       internet_orders = internet_orders.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a + abroad_ticket_orders.to_a + internet_orders.to_a)
+    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a + visa_orders.to_a + abroad_ticket_orders.to_a + internet_orders.to_a)
                     .sort_by(&:created_at).reverse
     
     # Manual pagination
@@ -305,5 +313,40 @@ class BookingsController < ApplicationController
 
   def booking_params
     params.require(:booking).permit(:passenger_name, :passenger_id_number, :contact_phone, :accept_terms, :insurance_type, :insurance_price, :trip_type, :return_flight_id, :return_date, :return_offer_id, :multi_city_flights_json)
+  end
+  
+  # Helper methods for booking status display
+  helper_method :booking_status_color, :booking_status_text
+  
+  def booking_status_color(status)
+    case status
+    when 'pending'
+      'text-warning'
+    when 'paid', 'processing'
+      'text-success'
+    when 'completed'
+      'text-blue-600'
+    when 'cancelled'
+      'text-text-muted'
+    else
+      'text-text-primary'
+    end
+  end
+  
+  def booking_status_text(status)
+    case status
+    when 'pending'
+      '待支付'
+    when 'paid'
+      '已支付'
+    when 'processing'
+      '办理中'
+    when 'completed'
+      '已完成'
+    when 'cancelled'
+      '已取消'
+    else
+      status
+    end
   end
 end
