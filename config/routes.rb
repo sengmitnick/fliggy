@@ -167,6 +167,11 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
+    # 验证系统 API
+    get 'verify', to: 'verify#index'
+    match 'verify/:id/prepare', to: 'verify#prepare', via: :all
+    match 'verify/:execution_id/result', to: 'verify#result', via: :all
+    
     post 'geocoding/reverse', to: 'geocodings#reverse_geocode'
   end
 
