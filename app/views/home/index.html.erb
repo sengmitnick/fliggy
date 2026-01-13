@@ -114,10 +114,10 @@
 
         <!-- Row 2 -->
         <div class="grid grid-cols-5 mb-2 h-[60px]">
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to homestays_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/民宿公寓.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "民宿/公寓" %>
             <span class="text-[12px] text-gray-700">民宿/公寓</span>
-          </button>
+          <% end %>
 
           <%= link_to transfers_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/接送机.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "接送机" %>
@@ -178,10 +178,10 @@
             <span class="text-[12px] text-gray-700">国际酒店</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to visas_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/签证.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "签证" %>
             <span class="text-[12px] text-gray-700">签证</span>
-          </button>
+          <% end %>
 
           <%= link_to internet_services_path(tab: 'data_plan'), class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/境外上网.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "境外上网" %>
@@ -193,10 +193,10 @@
             <span class="text-[12px] text-gray-700">旅行购物</span>
           <% end %>
 
-          <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to abroad_tickets_path, class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/境外当地交通.png", class: "max-w-[50%] mb-1 h-auto object-contain", alt: "境外当地交通" %>
             <span class="text-[12px] text-gray-700 whitespace-nowrap">境外当地交通</span>
-          </button>
+          <% end %>
         </div>
 
         <!-- Row 2 -->

@@ -1,0 +1,138 @@
+<div class="bg-bg-gray min-h-screen pb-6">
+  <!-- 顶部导航 -->
+  <header class="bg-white px-4 py-3 flex items-center border-b border-gray-100">
+    <%= link_to bookings_path, class: "p-1" do %>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <% end %>
+    <h1 class="text-lg font-bold ml-4">订单详情</h1>
+  </header>
+
+  <!-- 订单状态卡片 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <div class="text-sm text-text-gray mb-1">订单状态</div>
+        <div class="text-lg font-bold <%= status_color(@visa_order.status) %>"><%= status_text(@visa_order.status) %></div>
+      </div>
+      <% if @visa_order.paid? || @visa_order.processing? || @visa_order.completed? %>
+        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+          <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+      <% elsif @visa_order.pending? %>
+        <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+          <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="text-sm text-text-gray">
+      订单号：<span class="text-text-dark"><%= @visa_order.slug %></span>
+    </div>
+    <div class="text-xs text-text-light mt-1">
+      下单时间：<%= @visa_order.created_at.strftime('%Y-%m-%d %H:%M:%S') %>
+    </div>
+  </div>
+
+  <!-- 签证产品信息 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <h3 class="font-bold text-base mb-3">签证产品</h3>
+    <div class="flex items-start">
+      <img src="<%= @visa_order.visa_product.country.image_url %>" alt="<%= @visa_order.visa_product.country.name %>" class="w-20 h-20 rounded-lg object-cover mr-3">
+      <div class="flex-1">
+        <div class="font-medium text-sm mb-1"><%= @visa_order.visa_product.country.name %> · <%= @visa_order.visa_product.name %></div>
+        <div class="text-xs text-text-gray mb-2">需要<%= @visa_order.visa_product.material_count %>项材料，<%= @visa_order.visa_product.processing_days %>个工作日</div>
+        <div class="flex items-center text-xs">
+          <span class="text-text-gray mr-2">办签人数：</span>
+          <span class="text-text-dark font-medium"><%= @visa_order.traveler_count %>人</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 费用明细 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <h3 class="font-bold text-base mb-3">费用明细</h3>
+    <div class="space-y-2">
+      <div class="flex justify-between text-sm">
+        <span class="text-text-gray">签证费用（<%= @visa_order.traveler_count %>人）</span>
+        <span class="text-text-dark">¥<%= (@visa_order.unit_price * @visa_order.traveler_count).to_i %></span>
+      </div>
+      <% if @visa_order.insurance_price > 0 %>
+      <div class="flex justify-between text-sm">
+        <span class="text-text-gray">保险费用</span>
+        <span class="text-text-dark">¥<%= @visa_order.insurance_price.to_i %></span>
+      </div>
+      <% end %>
+      <div class="h-px bg-gray-100 my-3"></div>
+      <div class="flex justify-between">
+        <span class="font-bold text-base">实付金额</span>
+        <span class="text-primary text-xl font-bold">¥<%= @visa_order.total_price.to_i %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系信息 -->
+  <div class="bg-white mt-3 px-4 py-4">
+    <h3 class="font-bold text-base mb-3">联系信息</h3>
+    <div class="space-y-3">
+      <div class="flex">
+        <span class="text-text-gray text-sm w-20">联系人</span>
+        <span class="text-text-dark text-sm flex-1"><%= @visa_order.contact_name %></span>
+      </div>
+      <div class="flex">
+        <span class="text-text-gray text-sm w-20">手机号</span>
+        <span class="text-text-dark text-sm flex-1"><%= @visa_order.contact_phone %></span>
+      </div>
+      <% if @visa_order.delivery_address.present? %>
+      <div class="flex">
+        <span class="text-text-gray text-sm w-20">邮寄地址</span>
+        <span class="text-text-dark text-sm flex-1"><%= @visa_order.delivery_address %></span>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <% if @visa_order.pending? %>
+  <div class="px-4 mt-6">
+    <%= link_to "取消订单", visa_order_path(@visa_order), method: :delete, data: { confirm: '确定要取消这个订单吗？' }, class: "block w-full bg-white border border-price-red text-center text-price-red font-medium py-3 rounded-full" %>
+  </div>
+  <% end %>
+</div>
+
+<style>
+.bg-bg-gray { background-color: #F4F5F7; }
+.text-text-dark { color: #111111; }
+.text-text-gray { color: #666666; }
+.text-text-light { color: #999999; }
+.text-price-red { color: #FF4A00; }
+</style>
+
+<% content_for :helpers do %>
+  <%
+    def status_text(status)
+      case status
+      when 'pending' then '待支付'
+      when 'paid' then '已支付'
+      when 'processing' then '办理中'
+      when 'completed' then '已完成'
+      when 'cancelled' then '已取消'
+      else status
+      end
+    end
+
+    def status_color(status)
+      case status
+      when 'pending' then 'text-yellow-600'
+      when 'paid', 'processing' then 'text-green-600'
+      when 'completed' then 'text-blue-600'
+      when 'cancelled' then 'text-gray-400'
+      else 'text-text-dark'
+      end
+    end
+  %>
+<% end %>

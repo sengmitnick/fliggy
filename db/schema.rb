@@ -53,6 +53,42 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "abroad_ticket_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "abroad_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "contact_email"
+    t.string "passenger_type", default: "1adult"
+    t.string "seat_category", default: "自由席"
+    t.decimal "total_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "order_number"
+    t.index ["abroad_ticket_id"], name: "index_abroad_ticket_orders_on_abroad_ticket_id"
+    t.index ["user_id"], name: "index_abroad_ticket_orders_on_user_id"
+  end
+
+  create_table "abroad_tickets", force: :cascade do |t|
+    t.string "region", default: "japan"
+    t.string "ticket_type", default: "train"
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "time_slot_start"
+    t.string "time_slot_end"
+    t.decimal "price", default: "0.0"
+    t.string "seat_type"
+    t.string "status", default: "available"
+    t.string "origin_en"
+    t.string "destination_en"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -277,6 +313,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "countries", force: :cascade do |t|
+    t.string "name"
+    t.string "code"
+    t.string "slug"
+    t.string "region"
+    t.boolean "visa_free", default: false
+    t.string "image_url"
+    t.text "description"
+    t.text "visa_requirements"
+    t.jsonb "statistics", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
@@ -1089,6 +1139,68 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
     t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "visa_order_travelers", force: :cascade do |t|
+    t.integer "visa_order_id"
+    t.string "name"
+    t.string "id_number"
+    t.string "phone"
+    t.string "relationship"
+    t.string "passport_number"
+    t.date "passport_expiry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "visa_orders", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "visa_product_id"
+    t.integer "traveler_count", default: 1
+    t.decimal "total_price", default: "0.0"
+    t.decimal "unit_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.date "expected_date"
+    t.string "delivery_method", default: "express"
+    t.text "delivery_address"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.text "notes"
+    t.boolean "insurance_selected", default: false
+    t.decimal "insurance_price", default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.datetime "paid_at"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "insurance_type"
+  end
+
+  create_table "visa_products", force: :cascade do |t|
+    t.integer "country_id"
+    t.string "name"
+    t.string "product_type"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.string "residence_area"
+    t.integer "processing_days"
+    t.string "visa_validity"
+    t.string "max_stay"
+    t.decimal "success_rate", default: "99.9"
+    t.jsonb "required_materials", default: []
+    t.integer "material_count", default: 0
+    t.boolean "can_simplify", default: false
+    t.boolean "home_pickup", default: false
+    t.boolean "refused_reapply", default: false
+    t.boolean "supports_family", default: false
+    t.jsonb "features", default: []
+    t.text "description"
+    t.string "slug"
+    t.integer "sales_count", default: 0
+    t.string "merchant_name"
+    t.string "merchant_avatar"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
