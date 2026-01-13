@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  has_many :user_coupons, dependent: :destroy
+  has_many :abroad_coupons, through: :user_coupons
+
   MIN_PASSWORD = 4
   GENERATED_EMAIL_SUFFIX = "@generated-mail.clacky.ai"
 
@@ -45,6 +48,8 @@ class User < ApplicationRecord
   has_many :abroad_ticket_orders, dependent: :destroy
   has_many :car_orders, dependent: :destroy
   has_many :bus_ticket_orders, dependent: :destroy
+  has_many :internet_orders, dependent: :destroy
+  has_many :addresses, dependent: :destroy
   has_one :membership, dependent: :destroy
   has_many :brand_memberships, dependent: :destroy
   has_many :notifications, dependent: :destroy

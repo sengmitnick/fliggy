@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white sticky top-0 z-40 border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to addresses_path, class: "flex items-center gap-2" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-medium flex-1 text-center">编辑收货地址</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <div class="pb-24">
+    <%= form_with model: @address, url: address_path(@address), method: :patch, class: "bg-white" do |f| %>
+      <%= render 'shared/form_error_message', model: @address %>
+      
+      <!-- Name Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <label class="text-sm text-gray-700 w-20">收货人</label>
+          <%= f.text_field :name, placeholder: "请输入收货人姓名", class: "flex-1 text-base outline-none" %>
+        </div>
+      </div>
+
+      <!-- Phone Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <label class="text-sm text-gray-700 w-20">手机号</label>
+          <%= f.text_field :phone, placeholder: "请输入手机号", class: "flex-1 text-base outline-none", type: "tel", maxlength: "11" %>
+        </div>
+      </div>
+
+      <!-- Province Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <label class="text-sm text-gray-700 w-20">省份</label>
+          <%= f.text_field :province, placeholder: "如：广东省", class: "flex-1 text-base outline-none" %>
+        </div>
+      </div>
+
+      <!-- City Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <label class="text-sm text-gray-700 w-20">城市</label>
+          <%= f.text_field :city, placeholder: "如：深圳市", class: "flex-1 text-base outline-none" %>
+        </div>
+      </div>
+
+      <!-- District Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <label class="text-sm text-gray-700 w-20">区县</label>
+          <%= f.text_field :district, placeholder: "如：南山区（选填）", class: "flex-1 text-base outline-none" %>
+        </div>
+      </div>
+
+      <!-- Detail Input -->
+      <div class="px-4 py-4 border-b border-gray-100">
+        <div class="flex items-start">
+          <label class="text-sm text-gray-700 w-20 pt-2">详细地址</label>
+          <%= f.text_area :detail, placeholder: "请输入详细地址（街道、门牌号等）", class: "flex-1 text-base outline-none resize-none", rows: 3 %>
+        </div>
+      </div>
+
+      <!-- Address Type (hidden) -->
+      <%= f.hidden_field :address_type %>
+
+      <!-- Default Address Toggle -->
+      <div class="px-4 py-4">
+        <div class="flex items-center justify-between">
+          <label class="text-sm text-gray-700">设为默认地址</label>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <%= f.check_box :is_default, class: "sr-only peer" %>
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-30">
+        <%= f.submit "保存", class: "w-full py-3 rounded-full text-white font-medium", style: "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -64,6 +64,15 @@ import AbroadDatePickerController from "./abroad_date_picker_controller"
 import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
 import AbroadOrderFormController from "./abroad_order_form_controller"
 import AbroadTicketSearchController from "./abroad_ticket_search_controller"
+import HomestaySearchController from "./homestay_search_controller"
+import InternetServicesController from "./internet_services_controller"
+import SimCardFilterController from "./sim_card_filter_controller"
+import DataPlanController from "./data_plan_controller"
+import WifiBookingController from "./wifi_booking_controller"
+import InternetOrderFormController from "./internet_order_form_controller"
+import ProductCardController from "./product_card_controller"
+import SimCardBookingController from "./sim_card_booking_controller"
+import QrcodeModalController from "./qrcode_modal_controller"
 
 const application = Application.start()
 
@@ -131,5 +140,14 @@ application.register("abroad-date-picker", AbroadDatePickerController)
 application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
 application.register("abroad-order-form", AbroadOrderFormController)
 application.register("abroad-ticket-search", AbroadTicketSearchController)
+application.register("homestay-search", HomestaySearchController)
+application.register("internet-services", InternetServicesController)
+application.register("sim-card-filter", SimCardFilterController)
+application.register("data-plan", DataPlanController)
+application.register("wifi-booking", WifiBookingController)
+application.register("internet-order-form", InternetOrderFormController)
+application.register("product-card", ProductCardController)
+application.register("sim-card-booking", SimCardBookingController)
+application.register("qrcode-modal", QrcodeModalController)
 
 window.Stimulus = application

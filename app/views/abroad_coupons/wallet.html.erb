@@ -1,0 +1,151 @@
+<% content_for :title, "卡券包" %>
+
+<div class="min-h-screen bg-[#f5f6f8] pb-16">
+  
+  <!-- 顶部导航栏 -->
+  <div class="bg-white px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+    <%= link_to abroad_shops_path, class: "p-1" do %>
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    <h1 class="text-lg font-bold text-gray-900">卡券包</h1>
+    <button class="p-1">
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="bg-white px-4 py-3 flex gap-6 border-b border-gray-200">
+    <button class="pb-2 border-b-2 border-[#ff5000] text-[#ff5000] font-medium" data-tab="usable">
+      可使用(<%= @usable_coupons.count %>)
+    </button>
+    <button class="pb-2 text-gray-500" data-tab="expired">
+      已失效(<%= @expired_coupons.count %>)
+    </button>
+  </div>
+
+  <!-- 可使用卡券 -->
+  <div id="usable-tab" class="p-3">
+    <% if @usable_coupons.any? %>
+      <% @usable_coupons.each do |user_coupon| %>
+        <% coupon = user_coupon.abroad_coupon %>
+        <div class="bg-white rounded-xl mb-3 overflow-hidden shadow-sm">
+          <!-- 卡券头部 -->
+          <div class="bg-gradient-to-r from-[#ff5722] to-[#ff7043] p-4 text-white">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="text-lg font-bold mb-1"><%= coupon.title %></h3>
+                <p class="text-sm opacity-90"><%= coupon.abroad_brand.name %></p>
+              </div>
+              <div class="bg-white/20 px-3 py-1 rounded-full text-xs">
+                <%= coupon.discount_type == 'percentage' ? "#{coupon.discount_value}折" : coupon.discount_value %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 卡券详情 -->
+          <div class="p-4">
+            <div class="text-sm text-gray-600 mb-3"><%= coupon.description %></div>
+            <div class="flex justify-between items-center text-xs text-gray-400">
+              <span>有效期至: <%= user_coupon.expires_at&.strftime('%Y-%m-%d') %></span>
+              <%= link_to "去使用", abroad_coupon_path(user_coupon), class: "bg-[#ffde33] hover:bg-[#fcd535] text-gray-900 text-sm font-medium py-1.5 px-4 rounded-full" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="flex flex-col items-center justify-center py-16">
+        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+        <p class="text-gray-500 mb-2">暂无可使用的卡券</p>
+        <%= link_to "去逛逛", abroad_shops_path, class: "text-[#ff5000] text-sm font-medium" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 已失效卡券 -->
+  <div id="expired-tab" class="p-3 hidden">
+    <% if @expired_coupons.any? %>
+      <% @expired_coupons.each do |user_coupon| %>
+        <% coupon = user_coupon.abroad_coupon %>
+        <div class="bg-white rounded-xl mb-3 overflow-hidden shadow-sm opacity-60">
+          <div class="bg-gradient-to-r from-gray-400 to-gray-500 p-4 text-white">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="text-lg font-bold mb-1"><%= coupon.title %></h3>
+                <p class="text-sm opacity-90"><%= coupon.abroad_brand.name %></p>
+              </div>
+              <div class="bg-white/20 px-3 py-1 rounded-full text-xs">已失效</div>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="text-sm text-gray-600 mb-3"><%= coupon.description %></div>
+            <div class="text-xs text-gray-400">
+              失效时间: <%= user_coupon.expires_at&.strftime('%Y-%m-%d') %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="flex flex-col items-center justify-center py-16">
+        <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-gray-500">暂无失效的卡券</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 底部Tab导航 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+    <div class="max-w-[480px] mx-auto flex justify-around items-center h-16">
+      <%= link_to abroad_shops_path, class: "flex flex-col items-center justify-center flex-1 text-xs" do %>
+        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        <span class="mt-1 text-gray-600">首页</span>
+      <% end %>
+      
+      <%= link_to wallet_abroad_coupons_path, class: "flex flex-col items-center justify-center flex-1 text-xs" do %>
+        <svg class="w-6 h-6 text-[#ff5000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+        <span class="mt-1 text-[#ff5000] font-medium">卡券</span>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('[data-tab]');
+    const usableTab = document.getElementById('usable-tab');
+    const expiredTab = document.getElementById('expired-tab');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // 更新按钮样式
+        tabs.forEach(t => {
+          t.classList.remove('border-[#ff5000]', 'text-[#ff5000]', 'border-b-2', 'font-medium');
+          t.classList.add('text-gray-500');
+        });
+        this.classList.add('border-[#ff5000]', 'text-[#ff5000]', 'border-b-2', 'font-medium');
+        this.classList.remove('text-gray-500');
+        
+        // 切换内容
+        if (this.dataset.tab === 'usable') {
+          usableTab.classList.remove('hidden');
+          expiredTab.classList.add('hidden');
+        } else {
+          usableTab.classList.add('hidden');
+          expiredTab.classList.remove('hidden');
+        }
+      });
+    });
+  });
+</script>
