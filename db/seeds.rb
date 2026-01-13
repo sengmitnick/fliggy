@@ -494,6 +494,13 @@ if canada
   puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
 end
 
+# ==================== 境外当地交通数据 ====================
+load Rails.root.join('db', 'seeds', 'abroad_tickets.rb')
+
+# ==================== 旅游产品（跟团游商城）数据 ====================
+load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
+# 跟团游产品详情已通过随机生成器自动创建
+
 # 为新西兰创建签证产品
 newzealand = Country.find_by(name: '新西兰')
 if newzealand
@@ -518,6 +525,7 @@ if newzealand
   puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
 end
 
+<<<<<<< HEAD
 # 为德国创建签证产品（申根签证）
 germany = Country.find_by(name: '德国')
 if germany
@@ -618,5 +626,21 @@ puts "\n签证数据初始化完成！"
 puts "创建了 #{Country.count} 个国家"
 puts "创建了 #{VisaProduct.count} 个签证产品"
 
-# ==================== 城市数据 ====================
-# (保留原有的城市数据代码...)
+puts "\n🎉 所有数据初始化完成！"
+puts "====================================="
+puts "数据统计："
+puts "  - 城市: #{City.count}"
+puts "  - 目的地: #{Destination.count}"
+puts "  - 深度旅行讲师: #{DeepTravelGuide.count}"
+puts "  - 深度旅行产品: #{DeepTravelProduct.count}"
+puts "  - 酒店: #{Hotel.count}"
+puts "  - 租车: #{Car.count}"
+puts "  - 汽车票: #{BusTicket.count}"
+puts "  - 境外交通票: #{AbroadTicket.count}"
+puts "  - 跟团游产品: #{TourGroupProduct.count}"
+puts "  - 酒店套餐: #{HotelPackage.count}"
+puts "  - 火车票: #{Train.count}"
+puts "  - 机票: #{Flight.count}"
+puts "  - 国家: #{Country.count}"
+puts "  - 签证产品: #{VisaProduct.count}"
+puts "====================================="

@@ -15,6 +15,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasRoomsInputTarget: boolean
   declare readonly hasAdultsInputTarget: boolean
   declare readonly hasChildrenInputTarget: boolean
+  declare readonly hasDisplayTextTarget: boolean
 
   static values = {
     rooms: Number,
@@ -139,7 +140,9 @@ export default class extends Controller<HTMLElement> {
 
   // Update display text
   private updateDisplay(): void {
-    this.displayTextTarget.textContent = `${this.roomsValue}间房 ${this.adultsValue}成人 ${this.childrenValue}儿童`
+    if (this.hasDisplayTextTarget) {
+      this.displayTextTarget.textContent = `${this.roomsValue}间房 ${this.adultsValue}成人 ${this.childrenValue}儿童`
+    }
   }
 
   // Dispatch event to notify hotel-search controller

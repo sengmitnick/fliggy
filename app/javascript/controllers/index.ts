@@ -60,6 +60,12 @@ import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
 import VisaOrderController from "./visa_order_controller"
+import AbroadRegionSelectorController from "./abroad_region_selector_controller"
+import AbroadDatePickerController from "./abroad_date_picker_controller"
+import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
+import AbroadOrderFormController from "./abroad_order_form_controller"
+import AbroadTicketSearchController from "./abroad_ticket_search_controller"
+import HomestaySearchController from "./homestay_search_controller"
 import InternetServicesController from "./internet_services_controller"
 import SimCardFilterController from "./sim_card_filter_controller"
 import DataPlanController from "./data_plan_controller"
@@ -132,6 +138,12 @@ application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
 application.register("visa-order", VisaOrderController)
+application.register("abroad-region-selector", AbroadRegionSelectorController)
+application.register("abroad-date-picker", AbroadDatePickerController)
+application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
+application.register("abroad-order-form", AbroadOrderFormController)
+application.register("abroad-ticket-search", AbroadTicketSearchController)
+application.register("homestay-search", HomestaySearchController)
 application.register("internet-services", InternetServicesController)
 application.register("sim-card-filter", SimCardFilterController)
 application.register("data-plan", DataPlanController)
