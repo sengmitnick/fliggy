@@ -1,6 +1,6 @@
 require 'rails_helper'
 require 'playwright'
-require_relative '../../support/playwright_helper'
+require_relative '../../../support/playwright_helper'
 
 RSpec.describe "Internet Data Plan Purchase Flow (with AI Vision Analysis)", type: :system do
   include PlaywrightHelper

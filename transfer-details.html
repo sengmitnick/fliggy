@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义字体设置，模拟移动端系统字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#F5F5F5] min-h-screen">
+
+    <!-- 整体容器限制宽度，模拟手机屏幕 -->
+    <div class="max-w-md mx-auto bg-[#F5F5F5] min-h-screen relative pb-24">
+        
+        <!-- 顶部黄色背景区域 -->
+        <div class="bg-gradient-to-b from-[#FFD821] to-[#FFE366] pb-16">
+            
+            <!-- 导航栏 -->
+            <div class="flex justify-between items-center px-4 py-2">
+                <!-- 返回按钮 -->
+                <button>
+                    <svg class="w-6 h-6 text-[#111]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                
+                <!-- 右侧图标组 -->
+                <div class="flex items-center space-x-4">
+                    <button>
+                        <svg class="w-6 h-6 text-[#111]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                        </svg>
+                    </button>
+                    <button>
+                        <svg class="w-6 h-6 text-[#111]" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="5" cy="12" r="2" />
+                            <circle cx="12" cy="12" r="2" />
+                            <circle cx="19" cy="12" r="2" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 标题区域 -->
+            <div class="px-4 mt-2">
+                <h1 class="text-2xl font-bold text-[#111] mb-1">司机已接单</h1>
+                <p class="text-sm text-[#333] opacity-80">司机将按时为您提供服务，用车前1小时可查看司机位置或状态</p>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 (卡片堆叠) -->
+        <div class="px-3 -mt-10 space-y-3 relative z-10">
+
+            <!-- 航班信息卡片 -->
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="flex items-center text-sm">
+                    <span class="bg-[#41AD65] text-white text-xs px-1.5 py-0.5 rounded mr-2">航班正常</span>
+                    <span class="font-bold text-[#333] text-base mr-1">MU2478</span>
+                    <span class="text-[#333]">预计01月16日10:55起飞</span>
+                </div>
+                <div class="mt-2 text-xs text-gray-500">
+                    司机将准时为您服务
+                </div>
+            </div>
+
+            <!-- 车辆司机信息卡片 -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <!-- 顶部绿色提示条 -->
+                <div class="bg-[#E7F7F0] px-4 py-2.5 flex justify-between items-center">
+                    <span class="text-[#00B578] text-xs font-medium">2026年01月16日 07:30前可以免费取消</span>
+                    <div class="flex items-center text-gray-500 text-xs">
+                        取消规则 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+
+                <div class="p-4 relative">
+                    <!-- 车辆信息 -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-baseline space-x-2 mb-1">
+                                <h2 class="text-xl font-bold text-[#111]">粤BAE8055 · 白色</h2>
+                            </div>
+                            <div class="text-sm text-[#333] font-medium mb-1">
+                                广汽埃安 埃安AION S-三厢 张师傅
+                            </div>
+                            <div class="text-xs text-gray-500 flex items-center mb-3">
+                                经济5座 · 4乘客(含儿童) · 2行李 
+                                <svg class="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <!-- 标签 -->
+                            <div class="inline-block border border-blue-200 text-blue-500 text-[10px] px-1 py-0.5 rounded bg-blue-50">
+                                免费等30分钟
+                            </div>
+                        </div>
+                        
+                        <!-- 车辆图片占位 -->
+                        <div class="w-24 flex flex-col items-end">
+                            <!-- 模拟车辆图片 -->
+                            <div class="w-24 h-12 relative mb-1">
+                                <!-- 使用 SVG 绘制一个简单的白色轿车轮廓 -->
+                                <svg viewBox="0 0 100 50" class="w-full h-full drop-shadow-sm">
+                                    <path d="M10,35 Q10,20 25,18 L35,10 L65,10 L75,18 Q90,20 90,35 H10 Z" fill="#F0F0F0" stroke="#DDD"/>
+                                    <circle cx="25" cy="35" r="5" fill="#555" />
+                                    <circle cx="75" cy="35" r="5" fill="#555" />
+                                    <!-- 窗户 -->
+                                    <path d="M36,12 L64,12 L72,18 L28,18 Z" fill="#333" opacity="0.2"/>
+                                </svg>
+                            </div>
+                            <div class="flex items-center bg-white border border-gray-100 shadow-sm rounded px-1 py-0.5">
+                                <span class="bg-[#FF6600] text-white text-[10px] font-bold px-0.5 rounded-sm mr-1">阳光</span>
+                                <span class="text-[10px] text-gray-600">阳光出行</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 虚线分割 -->
+                    <div class="h-px w-full bg-gray-100 my-4"></div>
+
+                    <!-- 操作按钮网格 -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <!-- 联系司机 -->
+                        <div class="flex flex-col items-center justify-center space-y-1">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#333]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            </div>
+                            <span class="text-xs text-[#333]">联系司机</span>
+                        </div>
+                        <!-- 修改订单 -->
+                        <div class="flex flex-col items-center justify-center space-y-1">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#333]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <span class="text-xs text-[#333]">修改订单</span>
+                        </div>
+                        <!-- 取消订单 -->
+                        <div class="flex flex-col items-center justify-center space-y-1">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#333]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <span class="text-xs text-[#333]">取消订单</span>
+                        </div>
+                        <!-- 我要发票 -->
+                        <div class="flex flex-col items-center justify-center space-y-1">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#333]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <span class="text-xs text-[#333]">我要发票</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 行程信息卡片 -->
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <div class="flex items-center mb-4">
+                    <span class="text-xl font-bold text-[#111] mr-2">01月16日08:30</span>
+                    <span class="text-base text-[#111]">深圳送机</span>
+                </div>
+                
+                <div class="relative pl-4 space-y-6">
+                    <!-- 连接线 -->
+                    <div class="absolute left-[5px] top-2 bottom-3 w-0.5 bg-gray-200"></div>
+
+                    <!-- 起点 -->
+                    <div class="relative">
+                        <div class="absolute -left-4 top-1.5 w-2.5 h-2.5 rounded-full bg-[#6D81F6] border-2 border-white shadow-sm"></div>
+                        <div class="text-[#333] text-[15px]">泰源装饰建材广场地面停车场(出入口)</div>
+                    </div>
+
+                    <!-- 终点 -->
+                    <div class="relative">
+                        <div class="absolute -left-4 top-1.5 w-2.5 h-2.5 rounded-full bg-[#FF9343] border-2 border-white shadow-sm"></div>
+                        <div class="text-[#333] text-[15px] font-medium">宝安国际机场T3</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 价格卡片 -->
+            <div class="bg-white rounded-xl p-4 shadow-sm flex justify-between items-center">
+                <div class="flex items-baseline">
+                    <span class="text-base font-bold text-[#333] mr-1">总额</span>
+                    <span class="text-xl font-bold text-[#FF5000]">¥55</span>
+                </div>
+                <div class="flex items-center text-xs text-gray-500">
+                    明细 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </div>
+
+            <!-- 乘客信息卡片 -->
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+                <h3 class="font-bold text-[#111] text-base mb-4">乘客信息</h3>
+                <div class="space-y-3">
+                    <div class="flex">
+                        <span class="w-24 text-gray-400 text-sm">乘车人</span>
+                        <span class="text-[#111] text-sm">张润胜</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-24 text-gray-400 text-sm">乘车人手机号</span>
+                        <span class="text-[#111] text-sm mr-2">18027128600</span>
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单信息标题 (仅占位) -->
+            <div class="bg-white rounded-t-xl p-4 shadow-sm mt-2 pb-10">
+                 <h3 class="font-bold text-[#111] text-base">订单信息</h3>
+                 <!-- 内容省略，图片截断了 -->
+                 <div class="h-4"></div>
+            </div>
+
+        </div>
+
+        <!-- 底部固定栏 -->
+        <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 flex items-center justify-between px-4 py-3 z-50 text-sm">
+            <button class="flex items-center justify-center space-x-2 flex-1 border-r border-gray-100">
+                <!-- 飞猪图标占位 -->
+                <span class="w-6 h-6 rounded-full border border-orange-300 flex items-center justify-center text-orange-400">
+                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                </span>
+                <span class="text-[#111] font-medium">联系飞猪</span>
+            </button>
+            <button class="flex items-center justify-center space-x-2 flex-1">
+                <!-- 客服耳机图标 -->
+                <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path></svg>
+                <span class="text-[#111] font-medium">联系商家</span>
+            </button>
+        </div>
+    </div>
+</body>
+</html>

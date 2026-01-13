@@ -1,0 +1,209 @@
+<% content_for :title, "Edit Transfer package" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_transfer_package_path(@transfer_package.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Transfer package
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Transfer package</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @transfer_package], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @transfer_package %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@transfer_package, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :name) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Vehicle category -->
+        <div class="mb-4">
+          <%= form.label :vehicle_category, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Vehicle category<% if field_required?(@transfer_package, :vehicle_category) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :vehicle_category, {
+            placeholder: "Enter vehicle category...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :vehicle_category) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:vehicle_category].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:vehicle_category].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Seats -->
+        <div class="mb-4">
+          <%= form.label :seats, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Seats<% if field_required?(@transfer_package, :seats) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :seats, {
+            placeholder: "Enter seats...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :seats) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:seats].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:seats].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Luggage -->
+        <div class="mb-4">
+          <%= form.label :luggage, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Luggage<% if field_required?(@transfer_package, :luggage) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :luggage, {
+            placeholder: "Enter luggage...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :luggage) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:luggage].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:luggage].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Wait time -->
+        <div class="mb-4">
+          <%= form.label :wait_time, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Wait time<% if field_required?(@transfer_package, :wait_time) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :wait_time, {
+            placeholder: "Enter wait time...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :wait_time) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:wait_time].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:wait_time].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Refund policy -->
+        <div class="mb-4">
+          <%= form.label :refund_policy, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Refund policy<% if field_required?(@transfer_package, :refund_policy) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :refund_policy, {
+            placeholder: "Enter refund policy...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :refund_policy) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:refund_policy].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:refund_policy].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+          <%= form.label :price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price<% if field_required?(@transfer_package, :price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price, {
+            placeholder: "Enter price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :price) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@transfer_package, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :original_price) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Discount amount -->
+        <div class="mb-4">
+          <%= form.label :discount_amount, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Discount amount<% if field_required?(@transfer_package, :discount_amount) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :discount_amount, {
+            placeholder: "Enter discount amount...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :discount_amount) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:discount_amount].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:discount_amount].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Features -->
+        <div class="mb-4">
+          <%= form.label :features, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Features<% if field_required?(@transfer_package, :features) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :features, {
+            rows: 5,
+            placeholder: "Enter features...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :features) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:features].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:features].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Provider -->
+        <div class="mb-4">
+          <%= form.label :provider, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Provider<% if field_required?(@transfer_package, :provider) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :provider, {
+            placeholder: "Enter provider...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :provider) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:provider].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:provider].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Priority -->
+        <div class="mb-4">
+          <%= form.label :priority, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Priority<% if field_required?(@transfer_package, :priority) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :priority, {
+            placeholder: "Enter priority...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@transfer_package, :priority) ? { required: true } : {}) %>
+          <% if @transfer_package.errors[:priority].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @transfer_package.errors[:priority].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Is active -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :is_active,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is active</span>
+          </label>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_transfer_package_path(@transfer_package.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Transfer package", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
