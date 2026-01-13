@@ -1,0 +1,107 @@
+<!-- Abroad Ticket Date Picker Modal -->
+<div data-abroad-date-picker-target="modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-gray-900/50">
+  <div class="min-h-screen flex items-end justify-center">
+    <!-- Modal Content -->
+    <div class="bg-white rounded-t-3xl w-full max-w-md max-h-[85vh] overflow-y-auto shadow-xl">
+      
+      <!-- Header -->
+      <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between z-10">
+        <button 
+          data-action="click->abroad-date-picker#closeModal" 
+          class="text-gray-600 hover:text-gray-800">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <h3 class="text-lg font-bold text-gray-900">选择出发日期</h3>
+        <div class="w-6"></div> <!-- Spacer -->
+      </div>
+
+      <!-- Calendar Container -->
+      <div class="px-4 py-4">
+        
+        <% 
+          # Generate calendar for next 60 days
+          today = Date.today
+          dates = (0...60).map { |i| today + i.days }
+          
+          # Group dates by month
+          dates_by_month = dates.group_by { |date| [date.year, date.month] }
+        %>
+
+        <% dates_by_month.each do |(year, month), month_dates| %>
+          <!-- Month Header -->
+          <div class="mb-4">
+            <h4 class="text-base font-bold text-gray-900 mb-3">
+              <%= year %>年<%= month %>月
+            </h4>
+
+            <!-- Week Days Header -->
+            <div class="grid grid-cols-7 gap-2 mb-2">
+              <% %w[日 一 二 三 四 五 六].each do |day| %>
+                <div class="text-center text-xs text-gray-500 font-medium"><%= day %></div>
+              <% end %>
+            </div>
+
+            <!-- Dates Grid -->
+            <div class="grid grid-cols-7 gap-2">
+              <% 
+                # Calculate the starting position (0 = Sunday, 1 = Monday, etc.)
+                first_date = month_dates.first
+                start_wday = first_date.wday
+                
+                # Add empty cells for days before the first date
+                start_wday.times do
+              %>
+                <div></div>
+              <% end %>
+
+              <% month_dates.each do |date| %>
+                <% 
+                  is_today = date == today
+                  is_past = date < today
+                  weekday_name = case date.wday
+                                 when 0 then '周日'
+                                 when 1 then '周一'
+                                 when 2 then '周二'
+                                 when 3 then '周三'
+                                 when 4 then '周四'
+                                 when 5 then '周五'
+                                 when 6 then '周六'
+                                 end
+                  
+                  day_label = if is_today
+                                '今天'
+                              elsif date == today + 1
+                                '明天'
+                              elsif date == today + 2
+                                '后天'
+                              else
+                                weekday_name
+                              end
+                %>
+                
+                <button
+                  type="button"
+                  data-abroad-date-picker-target="dateButton"
+                  data-date="<%= date.to_s %>"
+                  data-action="click->abroad-date-picker#selectDate"
+                  class="flex flex-col items-center justify-center py-2 rounded-lg transition-colors <%= is_past ? 'opacity-40 cursor-not-allowed' : 'hover:bg-blue-50 active:bg-blue-100' %>"
+                  <%= 'disabled' if is_past %>>
+                  <div class="text-lg font-semibold <%= is_today ? 'text-blue-600' : 'text-gray-900' %>">
+                    <%= date.day %>
+                  </div>
+                  <div class="text-xs <%= is_today ? 'text-blue-600' : 'text-gray-500' %> mt-0.5">
+                    <%= day_label %>
+                  </div>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+
+    </div>
+  </div>
+</div>

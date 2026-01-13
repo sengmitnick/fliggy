@@ -1,0 +1,223 @@
+<div class="bg-[#f5f6fa] min-h-screen pb-20">
+
+  <!-- 顶部导航栏 -->
+  <div class="bg-white sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-gray-100">
+    <%= link_to :back, class: "text-gray-800" do %>
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    <% end %>
+    <h1 class="text-lg font-medium text-gray-900">订单详情</h1>
+    <button class="text-gray-800">
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 6a2 2 0 110-4 2 2 0 010 4zm0 8a2 2 0 110-4 2 2 0 010 4zm-2 6a2 2 0 104 0 2 2 0 00-4 0z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 主要内容 -->
+  <div class="px-4 pt-3 space-y-3">
+
+    <!-- 订单状态卡片 -->
+    <div class="bg-white rounded-xl shadow-sm px-4 py-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 mb-1">
+            <%= case @order.status
+                when 'paid' then '已支付'
+                when 'pending' then '待支付'
+                when 'completed' then '已完成'
+                when 'cancelled' then '已取消'
+                else @order.status
+                end %>
+          </h2>
+          <p class="text-gray-500 text-sm">
+            <%= case @order.status
+                when 'paid' then '订单已支付，等待商家出票'
+                when 'pending' then '请尽快完成支付'
+                when 'completed' then '订单已完成，祝您旅途愉快'
+                when 'cancelled' then '订单已取消'
+                else '订单处理中'
+                end %>
+          </p>
+        </div>
+        <% if @order.status == 'paid' %>
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        <% elsif @order.status == 'completed' %>
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">订单编号</span>
+          <div class="flex items-center">
+            <span class="text-gray-900 mr-2"><%= @order.order_number %></span>
+            <button class="text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">下单时间</span>
+          <span class="text-gray-900"><%= @order.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 行程信息卡片 -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="px-4 py-3 bg-gradient-to-r from-primary/5 to-orange-50 border-b border-orange-100">
+        <h3 class="font-bold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+          </svg>
+          行程信息
+        </h3>
+      </div>
+
+      <div class="px-4 py-4 space-y-3">
+        <div>
+          <div class="text-gray-900 font-bold text-lg mb-1">
+            <%= @order.abroad_ticket.departure_date.strftime('%Y年%m月%d日') %>
+            <%= ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][@order.abroad_ticket.departure_date.wday] %>
+          </div>
+          <div class="text-gray-900 font-medium">
+            <%= @order.abroad_ticket.time_slot_start %> - <%= @order.abroad_ticket.time_slot_end %>
+            <span class="text-gray-500 text-sm ml-1">(当地时间)</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3 border-t border-b border-gray-100">
+          <div class="text-center flex-1">
+            <div class="text-xl font-bold text-gray-900"><%= @order.abroad_ticket.origin %></div>
+            <div class="text-xs text-gray-400 mt-1"><%= @order.abroad_ticket.origin_en %></div>
+          </div>
+          <div class="px-4">
+            <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </div>
+          <div class="text-center flex-1">
+            <div class="text-xl font-bold text-gray-900"><%= @order.abroad_ticket.destination %></div>
+            <div class="text-xs text-gray-400 mt-1"><%= @order.abroad_ticket.destination_en %></div>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-sm">
+          <div class="flex">
+            <span class="text-gray-500 w-20">座席类型</span>
+            <span class="text-gray-900 font-medium"><%= @order.seat_category %>|普通车厢(二等座)</span>
+          </div>
+          <div class="flex">
+            <span class="text-gray-500 w-20">乘客类型</span>
+            <span class="text-gray-900"><%= @order.passenger_type.gsub('adult', '成人').gsub('child', '儿童') %></span>
+          </div>
+          <div class="flex">
+            <span class="text-gray-500 w-20">车票类型</span>
+            <span class="text-gray-900">持出票二维码至指定地点换领实体票</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 联系人信息 -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-100">
+        <h3 class="font-bold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          联系人信息
+        </h3>
+      </div>
+      <div class="px-4 py-4 space-y-2 text-sm">
+        <div class="flex">
+          <span class="text-gray-500 w-16">姓名</span>
+          <span class="text-gray-900 font-medium"><%= @order.passenger_name %></span>
+        </div>
+        <div class="flex">
+          <span class="text-gray-500 w-16">手机号</span>
+          <span class="text-gray-900"><%= @order.contact_phone %></span>
+        </div>
+        <div class="flex">
+          <span class="text-gray-500 w-16">邮箱</span>
+          <span class="text-gray-900"><%= @order.contact_email %></span>
+        </div>
+        <% if @order.notes.present? %>
+          <div class="flex items-start pt-2 border-t border-gray-100">
+            <span class="text-gray-500 w-16">备注</span>
+            <span class="text-gray-900 flex-1"><%= @order.notes %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 费用明细 -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-100">
+        <h3 class="font-bold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          费用明细
+        </h3>
+      </div>
+      <div class="px-4 py-4">
+        <div class="space-y-2 text-sm mb-3">
+          <div class="flex justify-between">
+            <span class="text-gray-600">票面价</span>
+            <span class="text-gray-900">¥<%= sprintf('%.2f', @order.abroad_ticket.price) %></span>
+          </div>
+          <% if @order.seat_category == '指定席' %>
+            <div class="flex justify-between">
+              <span class="text-gray-600">指定席加价</span>
+              <span class="text-gray-900">¥<%= sprintf('%.2f', @order.abroad_ticket.price * 0.06) %></span>
+            </div>
+          <% end %>
+        </div>
+        <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+          <span class="text-gray-900 font-bold text-base">实付金额</span>
+          <div class="text-accent text-xl font-bold">
+            ¥<%= sprintf('%.2f', @order.total_price) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮区 -->
+    <% if @order.status == 'pending' %>
+      <div class="flex space-x-3">
+        <%= button_to "取消订单", abroad_ticket_order_path(@order), method: :delete, 
+            class: "flex-1 py-3 bg-gray-100 text-gray-900 rounded-full font-medium text-center",
+            data: { confirm: "确定要取消此订单吗？" } %>
+        <%= link_to "立即支付", pay_abroad_ticket_order_path(@order), 
+            class: "flex-1 py-3 bg-primary text-white rounded-full font-medium text-center" %>
+      </div>
+    <% elsif @order.status == 'paid' %>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"></path>
+          </svg>
+          <div class="flex-1">
+            <h4 class="text-amber-900 font-medium mb-1">等待出票中</h4>
+            <p class="text-amber-700 text-sm">商家正在为您出票，出票完成后将发送短信通知</p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+
+</div>
