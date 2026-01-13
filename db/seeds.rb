@@ -525,7 +525,6 @@ if newzealand
   puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
 end
 
-<<<<<<< HEAD
 # 为德国创建签证产品（申根签证）
 germany = Country.find_by(name: '德国')
 if germany
