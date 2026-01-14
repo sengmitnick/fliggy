@@ -145,25 +145,25 @@ class BaseValidator
     load data_pack_path
   end
   
-  # 确保数据库处于 checkpoint 状态（完整的 seeds 数据）
+  # 确保数据库处于 checkpoint 状态（基础数据已加载）
   # 
-  # Checkpoint = db/seeds.rb 加载完成后的状态
-  # - 包含 City、Destination、Flight（seeds中的）、Hotel（seeds中的）等
+  # Checkpoint = base.rb 加载完成后的状态
+  # - 包含 City、Destination（基础数据，永久保留）
+  # - 不包含 Flight、Hotel 等业务数据（由各验证器按需加载）
   # - 这是验证器的"干净起点"
   def ensure_checkpoint
-    # 检查是否已经有 checkpoint（City + Flight/Hotel 都有数据）
-    # 如果 City 或 Flight 为空，说明不是 checkpoint 状态
-    if City.count == 0 || Flight.count == 0
-      puts "\nℹ️  数据库不在 checkpoint 状态，正在加载 seeds..."
-      # 加载完整的 seeds（包括 City、Flight、Hotel 等）
-      load Rails.root.join('db/seeds.rb')
-      puts "✓ Checkpoint 已创建"
+    # 检查基础数据是否已加载
+    if City.count == 0
+      puts "\nℹ️  基础数据未加载，正在加载 base.rb..."
+      # 加载基础数据包（City + Destination）
+      load Rails.root.join('app/validators/support/data_packs/v1/base.rb')
+      puts "✓ 基础数据加载完成"
     else
-      puts "\nℹ️  数据库已在 checkpoint 状态，跳过 seeds 加载"
+      puts "\nℹ️  基础数据已存在，跳过加载"
     end
   end
   
-  # 回滚到 checkpoint（清空测试数据和订单，保留 seeds）
+  # 回滚到 checkpoint（清空测试数据和订单，保留基础数据）
   def rollback_to_checkpoint
     puts "\nℹ️  回滚到 checkpoint 状态..."
     # 清空所有验证相关的表（订单 + 测试数据）
@@ -173,7 +173,7 @@ class BaseValidator
       Booking, HotelBooking, TrainBooking, TourGroupBooking,
       CarOrder, BusTicketOrder, AbroadTicketOrder, InternetOrder,
       DeepTravelBooking, HotelPackageOrder,
-      # 测试数据（验证器加载的，非 seeds）
+      # 测试数据（验证器加载的）
       Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket
     ].each do |model|
       if defined?(model)
@@ -183,9 +183,7 @@ class BaseValidator
       end
     end
     
-    # 重新加载 seeds 中的 Flight/Hotel 等数据（恢复到 checkpoint）
-    load Rails.root.join('db/seeds.rb')
-    puts "✓ 已回滚到 checkpoint 状态"
+    puts "✓ 已回滚到 checkpoint 状态（仅保留基础数据：City, Destination）"
   end
   
   # 只清空测试数据表（Flight/Hotel等），保留订单和基础数据
