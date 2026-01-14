@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车站选择复刻</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义字体设置，模拟移动端系统字体 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fbf7f0',
+                            100: '#f5eadb',
+                            200: '#e8d3b3',
+                            300: '#dac29e', // Custom gradient start
+                            400: '#cbb38e', // Custom gradient end
+                        },
+                        gray: {
+                            50: '#f8f9fa',
+                            100: '#f5f6f8', // Station button bg
+                            400: '#9ca3af', // Placeholder text
+                            500: '#858b9c', // Subtext color
+                            800: '#1f2937', // Main text
+                        }
+                    },
+                    boxShadow: {
+                        'up': '0 -4px 6px -1px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-200 flex justify-center min-h-screen">
+
+    <!-- 手机容器 -->
+    <div class="w-full max-w-[414px] bg-white h-full min-h-screen relative flex flex-col overflow-hidden shadow-2xl">
+        
+        <!-- 顶部金色区域 (模拟 Header) -->
+        <div class="bg-gradient-to-r from-[#dccab1] to-[#e4d4bd] h-[180px] w-full relative p-4 pt-12">
+            <!-- 顶部导航栏 -->
+            <div class="flex justify-between items-center mb-6">
+                <!-- 返回箭头 -->
+                <button class="text-gray-700">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+                
+                <!-- 右侧图标组 -->
+                <div class="flex items-center space-x-3">
+                    <!-- 红包图标占位 -->
+                    <div class="relative">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="#f43f5e">
+                            <path d="M20 6h-16c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2zm-16 2h16v2h-16v-2zm0 8v-4h16v4h-16z"/>
+                            <circle cx="12" cy="12" r="3" fill="#fbbf24"/>
+                            <text x="12" y="13" font-size="4" text-anchor="middle" fill="red" font-weight="bold">¥</text>
+                        </svg>
+                    </div>
+                    <!-- 三点菜单 -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#374151">
+                        <circle cx="5" cy="12" r="2"/>
+                        <circle cx="12" cy="12" r="2"/>
+                        <circle cx="19" cy="12" r="2"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 平台保障文案 -->
+            <div class="relative z-10">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="bg-[#cba87c] text-white text-[10px] px-1 py-0.5 rounded-sm font-bold">平台保障</span>
+                    <h1 class="text-[#8c6b45] text-2xl font-bold italic tracking-wide">平台保障 服务升级</h1>
+                </div>
+                <p class="text-[#a68e6d] text-xs pl-0.5">无车退赔 航变无忧 一价全包</p>
+            </div>
+
+            <!-- 金色盾牌图标 (背景装饰) -->
+            <div class="absolute right-12 top-10 opacity-80">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" fill="url(#grad1)" stroke="#dcb786" stroke-width="1"/>
+                    <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ebcc9a;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#dcb786;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 (白色弹窗) -->
+        <div class="bg-white flex-1 -mt-6 rounded-t-3xl relative z-20 flex flex-col w-full overflow-hidden">
+            
+            <!-- 弹窗头部 -->
+            <div class="px-5 pt-5 pb-3">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="w-6"></div> <!-- Spacer for centering if needed, though design is left aligned title -->
+                    <h2 class="text-xl font-semibold text-gray-900 mx-auto transform translate-x-3">选择到达火车站</h2>
+                    <button class="text-gray-800 bg-gray-100 rounded-full p-1 hover:bg-gray-200">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" stroke="transparent" /> <!-- 隐形圆，仅占位 -->
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 搜索框 -->
+                <div class="bg-gray-100 rounded-xl flex items-center px-3 py-2.5 mb-2">
+                    <svg class="text-gray-400 w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="text-gray-400 text-[15px]">输入火车站名称/所在城市</span>
+                </div>
+            </div>
+
+            <!-- 可滚动的内容区域 -->
+            <div class="flex-1 overflow-y-auto no-scrollbar px-3 pb-4">
+                
+                <!-- 热门车站 标题 -->
+                <div class="mb-3 px-1">
+                    <h3 class="text-[17px] font-medium text-gray-900">热门车站</h3>
+                </div>
+
+                <!-- 车站网格 -->
+                <div class="grid grid-cols-2 gap-2 mb-6">
+                    <!-- Station Item Component -->
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">北京西站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">北京</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">北京南站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">北京</span>
+                    </div>
+                    
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">北京丰台站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">北京</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">上海虹桥站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">上海</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">杭州东站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">杭州</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">北京站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">北京</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">广州南站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">广州</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">上海站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">上海</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">练塘站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">上海</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">亦庄站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">北京</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">南京南站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">南京</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">长沙南站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">长沙</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer">
+                        <span class="text-base font-medium text-gray-800">武汉站</span>
+                        <span class="text-xs text-gray-500 mt-0.5">武汉</span>
+                    </div>
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer px-1">
+                        <span class="text-base font-medium text-gray-800">镇江关站</span>
+                        <span class="text-[10px] text-gray-400 mt-0.5 scale-90 whitespace-nowrap">阿坝藏族羌族自治州</span>
+                    </div>
+
+                    <div class="bg-gray-50/80 hover:bg-gray-100 rounded-lg py-3 flex flex-col items-center justify-center cursor-pointer px-1">
+                        <span class="text-base font-medium text-gray-800">松潘站</span>
+                        <span class="text-[10px] text-gray-400 mt-0.5 scale-90 whitespace-nowrap">阿坝藏族羌族自治州</span>
+                    </div>
+                </div>
+
+                <!-- 字母索引区域 -->
+                <div class="mb-2 px-1">
+                    <h3 class="text-[17px] font-medium text-gray-900 mb-3">字母索引</h3>
+                    <div class="grid grid-cols-8 gap-2">
+                        <!-- 生成 A-Z 按钮 -->
+                        <script>
+                            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z'];
+                            document.write(letters.map(l => `
+                                <div class="bg-gray-50 hover:bg-gray-100 h-10 flex items-center justify-center rounded text-sm text-gray-800 cursor-pointer">
+                                    ${l}
+                                </div>
+                            `).join(''));
+                        </script>
+                    </div>
+                </div>
+                
+                <!-- 底部留白，防止被圆角遮挡 -->
+                <div class="h-10"></div>
+            </div>
+
+            <!-- 右侧悬浮索引条 -->
+            <div class="absolute right-0.5 top-[140px] flex flex-col items-center justify-center space-y-[2px] z-50 bg-white/50 backdrop-blur-sm rounded-l-md py-1 pr-1">
+                <div class="text-[10px] text-gray-500 mb-0.5 scale-90">热门</div>
+                <script>
+                    const sideLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z'];
+                    document.write(sideLetters.map(l => `
+                        <div class="text-[10px] text-gray-500 font-medium h-3.5 w-4 flex items-center justify-center cursor-pointer hover:text-blue-500">
+                            ${l}
+                        </div>
+                    `).join(''));
+                </script>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

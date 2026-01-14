@@ -1,0 +1,195 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Top Background Gradient -->
+  <div class="relative bg-gradient-to-br from-[#dfd0b6] via-[#e2d3bb] to-[#dccab0] pb-8">
+    
+    <!-- Navigation Bar -->
+    <div class="flex justify-between items-center px-4 mt-4 mb-2">
+      <%= link_to :back, class: "text-[#5f503d]" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      <% end %>
+      
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-full border border-white/50 flex items-center justify-center bg-gradient-to-b from-orange-100 to-orange-200 shadow-sm">
+          <svg class="w-5 h-5 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+          </svg>
+        </div>
+        <div class="relative">
+          <svg class="w-7 h-7 text-red-500/80" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+          </svg>
+          <div class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1 rounded-full">券</div>
+        </div>
+        <button class="text-[#5f503d]">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="5" cy="12" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="19" cy="12" r="2" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner Text -->
+    <div class="px-14 mt-1">
+      <div class="bg-[#d28e5d] text-white text-[10px] inline-block px-1.5 py-0.5 rounded-[3px] mb-1">
+        平台保障
+      </div>
+      <div class="text-[#8b653e] text-2xl font-bold tracking-wide">
+        平台保障 服务升级
+      </div>
+      <div class="text-[#9e7d5b] text-xs mt-1 tracking-wide">
+        无车退赔 航变无忧 一价全包
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="flex-1 bg-surface rounded-t-[20px] -mt-4 relative z-10 pb-10 min-h-screen">
+    
+    <!-- Title Bar -->
+    <div class="relative pt-5 pb-3 px-4">
+      <h1 class="text-center text-lg font-bold text-text-primary">
+        <%= @service_type&.in?(%w[from_airport from_station]) ? '选择下车点' : '选择上车点' %>
+      </h1>
+      <%= link_to :back, class: "absolute right-4 top-5 text-text-primary" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6" />
+        </svg>
+      <% end %>
+    </div>
+
+    <!-- Search Box -->
+    <%= form_with url: packages_transfers_path, method: :get, local: true, class: "px-4 mb-6" do |f| %>
+      <div class="bg-gray-100 rounded-lg flex items-center p-3 h-12">
+        <div class="flex items-center mr-3">
+          <span class="text-text-primary font-medium text-base">武汉</span>
+          <svg class="w-4 h-4 text-text-muted ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <div class="w-[1px] h-4 bg-gray-300 mr-3"></div>
+        <div class="flex items-center text-text-muted flex-1">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35" />
+          </svg>
+          <%= text_field_tag :location_to, params[:location_to], placeholder: '请输入地址', class: 'w-full border-0 bg-transparent p-0 text-base focus:ring-0 placeholder-text-muted' %>
+        </div>
+      </div>
+
+      <%= hidden_field_tag :transfer_type, @transfer_type %>
+      <%= hidden_field_tag :service_type, @service_type %>
+      <%= hidden_field_tag :flight_id, @flight_id %>
+      <%= hidden_field_tag :train_id, @train_id %>
+      <%= hidden_field_tag :location_from, @flight&.arrival_airport || @train&.arrival_station %>
+    <% end %>
+
+    <!-- Common Addresses -->
+    <div class="px-4 mb-6">
+      <h2 class="text-base font-bold text-text-primary mb-3">常用地址</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-start">
+          <div>
+            <div class="flex items-center mb-1">
+              <svg class="w-4 h-4 text-text-muted mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <span class="text-text-primary font-medium text-sm">家</span>
+            </div>
+            <div class="text-text-muted text-xs ml-[22px]">设置家地址</div>
+          </div>
+          <svg class="w-4 h-4 text-text-muted mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-start">
+          <div>
+            <div class="flex items-center mb-1">
+              <svg class="w-4 h-4 text-text-muted mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd" />
+                <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
+              </svg>
+              <span class="text-text-primary font-medium text-sm">公司</span>
+            </div>
+            <div class="text-text-muted text-xs ml-[22px]">设置公司地址</div>
+          </div>
+          <svg class="w-4 h-4 text-text-muted mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Addresses -->
+    <% if @saved_addresses&.any? %>
+      <div class="px-4 mb-6">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-base font-bold text-text-primary">历史选择</h2>
+          <button class="flex items-center text-text-muted text-xs">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            清空
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <% @saved_addresses.each do |address| %>
+            <%= link_to packages_transfers_path(
+              location_to: address.full_address,
+              location_from: @flight&.arrival_airport || @train&.arrival_station,
+              transfer_type: @transfer_type,
+              service_type: @service_type,
+              flight_id: @flight_id,
+              train_id: @train_id
+            ), class: "bg-gray-50 px-4 py-3 rounded-lg text-sm text-text-primary max-w-[180px] truncate leading-tight" do %>
+              <%= address.full_address %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Train Stations -->
+    <div class="px-4 mb-6">
+      <h2 class="text-base font-bold text-text-primary mb-3">火车站</h2>
+      <div class="grid grid-cols-3 gap-3">
+        <% %w[武汉站 庙山站 纸坊东站 乌龙泉南站 左岭站 山坡东站 花山南站 土地堂东站 汤逊湖站 南湖东站 普安站 武昌站 汉口站].each do |station| %>
+          <%= link_to packages_transfers_path(
+            location_to: station,
+            location_from: @flight&.arrival_airport || @train&.arrival_station,
+            transfer_type: @transfer_type,
+            service_type: @service_type,
+            flight_id: @flight_id,
+            train_id: @train_id
+          ), class: "bg-gray-50 py-3 rounded-lg text-center text-sm text-text-primary hover:bg-gray-100 transition-colors" do %>
+            <%= station %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Bus Stations -->
+    <div class="px-4 mb-6">
+      <h2 class="text-base font-bold text-text-primary mb-3">汽车站</h2>
+      <div class="grid grid-cols-3 gap-3">
+        <% %w[新洲客运站 邾城客运站 青年路客运站 傅家坡汽车站 杨春湖长途客运站].each do |station| %>
+          <%= link_to packages_transfers_path(
+            location_to: station,
+            location_from: @flight&.arrival_airport || @train&.arrival_station,
+            transfer_type: @transfer_type,
+            service_type: @service_type,
+            flight_id: @flight_id,
+            train_id: @train_id
+          ), class: "bg-gray-50 py-3 rounded-lg text-center text-sm text-text-primary hover:bg-gray-100 transition-colors px-1 text-xs flex items-center justify-center" do %>
+            <%= station %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

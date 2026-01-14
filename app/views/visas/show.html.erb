@@ -1,0 +1,232 @@
+<div class="bg-gray-100 min-h-screen pb-24">
+  <!-- 顶部状态栏 & 导航栏 -->
+  <div class="bg-primary pb-2 sticky top-0 z-50">
+    <div class="flex justify-between items-center px-3 py-2">
+      <%= link_to visas_path, class: "" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+      <% end %>
+      <div class="text-lg font-bold tracking-wide italic">飞猪全球签证</div>
+      <div class="flex space-x-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <%= link_to bookings_path do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <% end %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+      </div>
+    </div>
+
+    <!-- 服务保障条 -->
+    <div class="flex justify-between px-4 text-[10px] mt-1 text-gray-800 opacity-90">
+      <span class="flex items-center"><svg class="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>产品丰富</span>
+      <span class="flex items-center"><svg class="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4"/></svg>智慧办签</span>
+      <span class="flex items-center"><svg class="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>信息安全</span>
+      <span class="flex items-center"><svg class="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>服务保障 <span class="ml-0.5">&gt;</span></span>
+    </div>
+  </div>
+
+  <!-- 国家卡片 -->
+  <div class="bg-white mx-3 mt-3 rounded-xl p-4 shadow-sm relative z-10">
+    <div class="flex justify-between items-start">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-full border border-gray-100 flex items-center justify-center bg-white overflow-hidden shadow-sm">
+          <% if @country.image_url.present? %>
+            <img src="<%= @country.image_url %>" alt="<%= @country.name %>" class="w-full h-full object-cover">
+          <% else %>
+            <span class="text-xs"><%= @country.code %></span>
+          <% end %>
+        </div>
+        <span class="text-xl font-bold"><%= @country.name %></span>
+      </div>
+      <!-- 常住地选择 -->
+      <div class="bg-gray-100 rounded-full px-3 py-1 text-xs text-gray-700 font-medium flex items-center">
+        常住地 · <%= @residence_area %> <svg class="w-3 h-3 ml-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+    </div>
+    
+    <!-- 商家数据 -->
+    <div class="flex items-center text-[10px] text-gray-500 mt-2 space-x-2">
+      <span class="bg-[#FFF1F0] text-[#FF5000] px-1 rounded-[2px]">飞猪甄选商家</span>
+      <% if @visa_products.any? %>
+        <span class="border-l border-gray-300 pl-2">累计服务人数<%= number_to_human(@visa_products.sum(&:sales_count), precision: 1) %>+</span>
+        <span class="border-l border-gray-300 pl-2">出签率<%= @visa_products.first.success_rate %>%</span>
+      <% end %>
+    </div>
+
+    <!-- 四个功能入口 -->
+    <div class="flex justify-between mt-4">
+      <div class="flex items-center bg-gray-50 px-2 py-1.5 rounded-lg flex-1 mr-2 justify-center">
+        <svg class="w-4 h-4 text-gray-700 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span class="text-xs font-bold">签证类型</span>
+      </div>
+      <div class="flex items-center bg-gray-50 px-2 py-1.5 rounded-lg flex-1 mr-2 justify-center">
+        <svg class="w-4 h-4 text-gray-700 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+        <span class="text-xs font-bold">送签地说明</span>
+      </div>
+      <div class="flex items-center bg-gray-50 px-2 py-1.5 rounded-lg flex-1 mr-2 justify-center">
+        <svg class="w-4 h-4 text-gray-700 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span class="text-xs font-bold">申请说明</span>
+      </div>
+      <div class="flex items-center justify-center flex-none">
+        <span class="text-xs font-bold">攻略</span>
+        <svg class="w-3 h-3 ml-0.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 签证类型 Tab -->
+  <div class="flex overflow-x-auto no-scrollbar px-3 mt-4 space-x-2 text-sm">
+    <% @products_by_type.keys.each_with_index do |type, index| %>
+      <div class="<%= index == 0 ? 'bg-selected border border-transparent' : 'bg-white border border-transparent' %> px-4 py-2.5 rounded <%= index == 0 ? 'font-bold' : 'text-gray-700' %> whitespace-nowrap">
+        <%= type %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 快捷标签 -->
+  <div class="flex px-3 mt-3 space-x-2 text-xs text-gray-600">
+    <div class="bg-white px-2 py-1.5 rounded">上门取件</div>
+    <div class="bg-white px-2 py-1.5 rounded">白本办理</div>
+    <div class="bg-white px-2 py-1.5 rounded">拒签再申请</div>
+  </div>
+
+  <!-- 主内容区 (侧边栏 + 列表) -->
+  <div class="flex mt-3 min-h-screen">
+    
+    <!-- 左侧侧边栏 -->
+    <div class="w-20 bg-[#f4f4f4] flex-none text-xs text-gray-500 pb-20">
+      <div class="sidebar-active py-4 flex flex-col items-center justify-center relative">
+        <div class="bg-orange-100 rounded-full p-1 mb-1">
+          <svg class="w-3 h-3 text-[#FF5000]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.45-.412-1.725a1 1 0 00-1.457-1.06c-1.004.667-1.521 1.87-1.487 3.085.015.534.13.882.32 1.348.092.23.218.497.387.816.63 1.192 1.517 2.232 2.636 2.946C8.618 19.333 10.233 20 12 20c2.308 0 4.168-1.082 5.068-2.593.585-.985.674-2.146.54-3.176-.113-.873-.547-2.226-1.565-3.567-.886-1.168-2.093-2.32-3.648-3.111z" clip-rule="evenodd"/></svg>
+        </div>
+        <span class="font-bold text-[#FF5000]">热销推荐</span>
+        <span class="text-[10px] text-[#FF5000]">¥<%= @visa_products.minimum(:price) %>起</span>
+        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#FF5000] rounded-r"></div>
+      </div>
+
+      <div class="py-4 flex flex-col items-center justify-center">
+        <div class="bg-red-100 rounded-full p-1 mb-1">
+          <span class="text-[#FF5000] font-bold text-[10px]">¥</span>
+        </div>
+        <span>低价之选</span>
+        <span class="text-[10px]">¥<%= @visa_products.minimum(:price) %>起</span>
+      </div>
+
+      <% if @visa_products.where(can_simplify: true).any? %>
+      <div class="py-4 flex flex-col items-center justify-center">
+        <span>简化办理</span>
+        <span class="text-[10px]">¥<%= @visa_products.where(can_simplify: true).minimum(:price) %>起</span>
+      </div>
+      <% end %>
+
+      <% if @visa_products.where(supports_family: true).any? %>
+      <div class="py-4 flex flex-col items-center justify-center">
+        <span>家庭办签</span>
+        <span class="text-[10px]">¥<%= @visa_products.where(supports_family: true).minimum(:price) %>起</span>
+      </div>
+      <% end %>
+    </div>
+
+    <!-- 右侧列表内容 -->
+    <div class="flex-1 bg-white p-3 pb-32">
+      
+      <!-- 推荐语 Banner -->
+      <div class="bg-orange-50 p-2 rounded-lg mb-3 flex items-start">
+        <span class="text-[#FF5000] font-bold text-xs italic mr-2 shrink-0">热销推荐</span>
+        <span class="text-xs text-gray-700">绝大部分用户的选择，跟着买就对了</span>
+      </div>
+
+      <!-- 商品卡片列表 -->
+      <% @visa_products.each do |product| %>
+        <div class="mb-6 border-b border-gray-100 pb-4">
+          <!-- 标题 -->
+          <h3 class="font-bold text-gray-800 text-sm leading-relaxed mb-2">
+            <%= product.name %>
+          </h3>
+
+          <!-- 标签行 -->
+          <div class="flex flex-wrap gap-1 mb-3">
+            <% if product.sales_count > 1000 %>
+              <span class="text-[10px] text-blue-500 bg-blue-50 px-1 rounded border border-blue-100"><%= product.sales_count %>+人已办理</span>
+            <% end %>
+            <% if product.can_simplify %>
+              <span class="text-[10px] text-blue-500 bg-blue-50 px-1 rounded border border-blue-100">可简化</span>
+            <% end %>
+            <% if product.home_pickup %>
+              <span class="text-[10px] text-gray-500 border border-gray-200 px-1 rounded">上门取件</span>
+            <% end %>
+            <svg class="w-3 h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+
+          <!-- 信息摘要 -->
+          <div class="flex items-baseline justify-between mb-3">
+            <div class="text-xs text-gray-800 font-bold">
+              <span class="text-base"><%= product.material_count %></span> 项材料 
+              <span class="mx-2">|</span> 
+              <span class="text-base"><%= product.processing_days %></span> 工作日
+            </div>
+            <div class="text-lg font-bold text-price">
+              <span class="text-xs">¥</span><%= product.price.to_i %>
+            </div>
+          </div>
+          <div class="text-[10px] text-gray-400 mb-3 flex items-center">
+            材料详情 <svg class="w-2.5 h-2.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7"/></svg>
+            <span class="ml-4">预计<%= (Date.today + product.processing_days.days).strftime('%m月%d日') %>寄回签证</span>
+            <svg class="w-2.5 h-2.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7"/></svg>
+          </div>
+
+          <!-- 材料清单 Grid -->
+          <% if product.required_materials.present? && product.required_materials.is_a?(Array) %>
+            <div class="bg-gray-50 rounded-lg p-3 grid grid-cols-3 gap-y-2 gap-x-1 text-[10px] mb-4">
+              <% product.required_materials.first(6).each do |material| %>
+                <div class="flex items-center text-gray-700">
+                  <svg class="w-3 h-3 text-purple-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <%= material %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+
+          <!-- 底部商家栏 -->
+          <div class="flex justify-between items-center">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden mr-2 relative">
+                <% if product.merchant_avatar.present? %>
+                  <img src="<%= product.merchant_avatar %>" alt="avatar" class="object-cover w-full h-full" />
+                <% else %>
+                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<%= product.id %>" alt="avatar" class="object-cover w-full h-full" />
+                <% end %>
+              </div>
+              <div class="text-xs">
+                <div class="font-bold text-gray-800"><%= product.merchant_name || '专业签证服务商' %></div>
+                <div class="text-[10px] text-gray-500">5.0 <span class="text-orange-400">★★★★★</span></div>
+              </div>
+            </div>
+            <%= link_to "定", new_visa_order_path(visa_product_id: product.id), class: "bg-primary text-gray-900 font-bold px-6 py-1.5 rounded-full text-sm", data: { turbo: false } %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @visa_products.empty? %>
+        <div class="text-center py-12 text-gray-500">
+          <p>暂无该地区的签证产品</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render 'shared/bottom_navigation' %>
+
+<style>
+.sidebar-active { 
+  background-color: #fff; 
+  font-weight: 700; 
+  color: #333; 
+}
+.bg-selected { 
+  background-color: #FFF8D6; 
+}
+.text-price { 
+  color: #FF5000; 
+}
+</style>

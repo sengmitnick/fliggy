@@ -1,0 +1,225 @@
+<div class="bg-gray-800 h-screen w-full overflow-hidden relative">
+  <!-- Top Map Background Area -->
+  <div class="absolute top-0 w-full h-1/3 bg-slate-700 z-0">
+    <div class="w-full h-full opacity-30"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <div class="fixed top-0 w-full z-10 text-white pt-2 px-4 pb-2 bg-gradient-to-b from-black/50 to-transparent">
+    <!-- Route Info -->
+    <div class="flex items-center gap-3">
+      <%= link_to :back do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      <% end %>
+      <div class="flex items-center gap-2 flex-1 text-lg font-medium shadow-sm">
+        <span class="whitespace-nowrap"><%= @location_from %></span>
+        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+        <div class="flex flex-col overflow-hidden">
+          <span class="truncate"><%= @location_to&.truncate(15) %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Handle -->
+  <div class="absolute top-[18%] left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-300 rounded-full z-20 opacity-80"></div>
+
+  <!-- Main White Card Container -->
+  <main class="absolute bottom-0 w-full h-[80%] bg-surface rounded-t-3xl z-10 flex flex-col overflow-hidden">
+    
+    <!-- Coupon Banner -->
+    <div class="px-4 py-3 border-b border-border">
+      <div class="bg-gradient-to-r from-red-50 to-white p-2 rounded-lg flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-[#FF4500] font-bold text-sm bg-red-100 px-1 rounded">券包</span>
+          <span class="text-sm text-text-primary">下单享至高减 <span class="text-[#FF4500] font-bold">¥80</span></span>
+        </div>
+        <button class="bg-[#FF5238] text-white text-xs px-3 py-1 rounded-full">领取</button>
+      </div>
+    </div>
+
+    <!-- Content Split: Sidebar + List -->
+    <div class="flex flex-1 overflow-hidden relative pb-[140px]">
+      
+      <!-- Left Sidebar -->
+      <aside class="w-24 bg-[#F5F5F5] h-full overflow-y-auto no-scrollbar">
+        <% TransferPackage::VEHICLE_CATEGORIES.each_with_index do |(category, details), index| %>
+          <% packages_in_category = @packages.select { |p| p.vehicle_category == category } %>
+          <% min_price = packages_in_category.map(&:price).min || 0 %>
+          <div class="py-4 pl-3 pr-1 <%= index == 0 ? 'bg-surface border-l-[3px] border-[#FF5238]' : 'text-text-muted' %>">
+            <div class="<%= index == 0 ? 'font-bold text-text-primary' : '' %> text-sm"><%= details[:name] %></div>
+            <div class="text-xs <%= index == 0 ? 'text-text-primary font-bold' : '' %> mt-0.5">¥<%= min_price %>起</div>
+          </div>
+        <% end %>
+      </aside>
+
+      <!-- Right List Content -->
+      <section class="flex-1 h-full overflow-y-auto p-3 no-scrollbar">
+        
+        <% TransferPackage::VEHICLE_CATEGORIES.each_with_index do |(category, details), cat_index| %>
+          <% packages_in_category = @packages.where(vehicle_category: category) %>
+          <% next if packages_in_category.empty? %>
+
+          <!-- Section Header -->
+          <div class="flex items-center text-xs text-text-muted mb-2 <%= cat_index > 0 ? 'mt-4' : '' %>">
+            <span><%= details[:name] %> <%= details[:seats] %>人·<%= details[:luggage] %>行李</span>
+            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+
+          <%= form_with url: transfers_path, method: :post, local: true, id: "transfer-form-#{category}" do |f| %>
+            <%= hidden_field_tag 'transfer[transfer_type]', @transfer_type %>
+            <%= hidden_field_tag 'transfer[service_type]', @service_type %>
+            <%= hidden_field_tag 'transfer[location_from]', @location_from %>
+            <%= hidden_field_tag 'transfer[location_to]', @location_to %>
+            <%= hidden_field_tag 'transfer[pickup_datetime]', @pickup_datetime %>
+            <%= hidden_field_tag 'transfer[flight_number]', @flight&.flight_number %>
+            <%= hidden_field_tag 'transfer[train_number]', @train&.train_number %>
+            <%= hidden_field_tag 'transfer[passenger_name]', current_user.name %>
+            <%= hidden_field_tag 'transfer[passenger_phone]', current_user.phone.presence || '13800138000' %>
+            <%= hidden_field_tag 'transfer[transfer_package_id]', packages_in_category.first&.id, id: "package_id_#{category}" %>
+
+            <% packages_in_category.each_with_index do |package, index| %>
+              <div class="package-card relative <%= index == 0 ? 'bg-[#FFFBF0] border border-yellow-300' : 'bg-transparent border border-transparent' %> rounded-lg p-3 mb-2.5 transition-all cursor-pointer" data-package-id="<%= package.id %>" data-category="<%= category %>">
+                
+                <!-- Checkmark (for first item only) -->
+                <% if index == 0 %>
+                  <div class="absolute right-0 top-0 bg-yellow-400 w-5 h-4 rounded-bl-lg rounded-tr-lg flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                <% end %>
+
+                <div class="flex justify-between items-start">
+                  <!-- Left -->
+                  <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <span class="scale-75"><%= package.provider&.first(2) %></span>
+                    </div>
+                    <div>
+                      <div class="font-bold text-text-primary text-base"><%= package.provider %></div>
+                      <div class="flex flex-wrap gap-1 mt-1">
+                        <% package.features_list.each do |feature| %>
+                          <span class="text-[10px] text-text-muted"><%= feature %></span>
+                          <span class="text-[10px] text-text-muted">|</span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Right -->
+                  <div class="text-right mt-1">
+                    <div class="flex items-baseline justify-end">
+                      <span class="text-[#FF4500] font-semibold text-lg">¥<%= package.price.to_i %></span>
+                    </div>
+                    <% if package.calculated_discount > 0 %>
+                      <div class="flex justify-end mt-0.5">
+                        <span class="text-[10px] text-[#FF4500] bg-[#FFF0ED] px-1 rounded transform scale-90 origin-right">已优惠¥<%= package.calculated_discount.to_i %> ></span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+
+      </section>
+    </div>
+
+    <!-- Fixed Bottom Button -->
+    <div class="absolute bottom-0 left-0 right-0 bg-surface border-t border-border p-4 z-20">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="text-xs text-text-muted">预计费用</div>
+          <div class="text-2xl font-bold text-[#FF4500]">¥<span id="selected-price">80</span></div>
+        </div>
+        <button type="button" id="book-now-btn" class="bg-[#FF5238] text-white font-bold text-lg px-8 py-3 rounded-full shadow-md active:scale-95 transition-transform">
+          立刻预约
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+document.addEventListener('turbo:load', function initPackageSelection() {
+  const packageCards = document.querySelectorAll('.package-card');
+  const bookNowBtn = document.getElementById('book-now-btn');
+  const selectedPriceEl = document.getElementById('selected-price');
+  let selectedPackageId = packageCards[0]?.dataset.packageId;
+  let selectedCategory = packageCards[0]?.dataset.category;
+  
+  console.log('Packages page loaded');
+  console.log('packageCards count:', packageCards.length);
+  console.log('Initial selectedPackageId:', selectedPackageId);
+  console.log('Initial selectedCategory:', selectedCategory);
+
+  packageCards.forEach(card => {
+    card.addEventListener('click', function() {
+      const packageId = this.dataset.packageId;
+      const category = this.dataset.category;
+      
+      // Remove selection from all cards in same category
+      document.querySelectorAll(`.package-card[data-category="${category}"]`).forEach(c => {
+        c.classList.remove('bg-[#FFFBF0]', 'border-yellow-300');
+        c.classList.add('bg-transparent', 'border-transparent');
+        c.querySelector('.absolute')?.remove();
+      });
+      
+      // Add selection to clicked card
+      this.classList.add('bg-[#FFFBF0]', 'border-yellow-300');
+      this.classList.remove('bg-transparent', 'border-transparent');
+      
+      // Add checkmark
+      const checkmark = document.createElement('div');
+      checkmark.className = 'absolute right-0 top-0 bg-yellow-400 w-5 h-4 rounded-bl-lg rounded-tr-lg flex items-center justify-center';
+      checkmark.innerHTML = '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>';
+      this.appendChild(checkmark);
+      
+      // Update selected package
+      selectedPackageId = packageId;
+      selectedCategory = category;
+      
+      // Update price display
+      const priceText = this.querySelector('.text-\\[\\#FF4500\\].font-semibold').textContent;
+      const price = priceText.replace('¥', '');
+      selectedPriceEl.textContent = price;
+      
+      // Update hidden field
+      document.getElementById(`package_id_${category}`).value = packageId;
+    });
+  });
+
+  bookNowBtn.addEventListener('click', function() {
+    console.log('Book now button clicked');
+    console.log('selectedPackageId:', selectedPackageId);
+    console.log('selectedCategory:', selectedCategory);
+    
+    if (selectedPackageId && selectedCategory) {
+      const formId = `transfer-form-${selectedCategory}`;
+      console.log('Looking for form with ID:', formId);
+      const form = document.getElementById(formId);
+      console.log('Form found:', !!form);
+      
+      if (form) {
+        console.log('Submitting form...');
+        form.submit();
+      } else {
+        console.error('Form not found!');
+      }
+    } else {
+      console.error('Missing selectedPackageId or selectedCategory');
+    }
+  });
+  
+  // Remove event listener after first execution to prevent duplicate registrations
+  document.removeEventListener('turbo:load', initPackageSelection);
+});
+</script>

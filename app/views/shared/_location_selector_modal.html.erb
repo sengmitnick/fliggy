@@ -1,0 +1,119 @@
+<!-- Location Selector Modal -->
+<div data-location-selector-target="modal"
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
+     data-action="click->location-selector#closeModal">
+  
+  <!-- Modal Content -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[80vh] flex flex-col"
+       data-action="click->location-selector#stopPropagation">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+      <button 
+        type="button"
+        data-action="click->location-selector#closeModal"
+        class="text-text-secondary">
+        取消
+      </button>
+      <h3 class="text-lg font-bold text-text-primary">选择地点</h3>
+      <button 
+        type="button"
+        data-action="click->location-selector#confirm"
+        class="text-primary font-semibold">
+        确定
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="px-6 py-4 border-b border-border">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input 
+          type="text"
+          data-location-selector-target="searchInput"
+          data-action="input->location-selector#search"
+          placeholder="搜索地点或地标"
+          class="w-full pl-10 pr-4 py-2 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+      </div>
+    </div>
+
+    <!-- Location List -->
+    <div class="flex-1 overflow-y-auto px-6 py-4" data-location-selector-target="locationList">
+      
+      <!-- Train Stations -->
+      <div class="mb-4">
+        <h4 class="text-xs text-text-muted mb-2">火车站</h4>
+        <div class="grid grid-cols-3 gap-2">
+          <% %w[武汉站 庙山站 纸坊东站 乌龙泉南站 左岭站 山坡东站 花山南站 土地堂东站 汤逊湖站 南湖东站 普安站 武昌站 汉口站].each do |station| %>
+            <button
+              type="button"
+              data-action="click->location-selector#selectLocation"
+              data-location-name="<%= station %>"
+              data-location-address="火车站"
+              class="w-full text-center p-2 rounded-lg hover:bg-surface-hover transition-colors text-sm">
+              <%= station %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Bus Stations -->
+      <div class="mb-4">
+        <h4 class="text-xs text-text-muted mb-2">汽车站</h4>
+        <div class="grid grid-cols-3 gap-2">
+          <% %w[新洲客运站 邾城客运站 青年路客运站 傅家坡汽车站 杨春湖长途客运站].each do |station| %>
+            <button
+              type="button"
+              data-action="click->location-selector#selectLocation"
+              data-location-name="<%= station %>"
+              data-location-address="汽车站"
+              class="w-full text-center p-2 rounded-lg hover:bg-surface-hover transition-colors text-xs">
+              <%= station %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Popular Locations -->
+      <div class="mb-4">
+        <h4 class="text-xs text-text-muted mb-2">热门地点</h4>
+        <div class="space-y-2">
+          <% popular_locations = [
+            { name: "市中心", address: "中央商务区" },
+            { name: "商业广场", address: "购物中心" },
+            { name: "会展中心", address: "展览馆" },
+            { name: "大学城", address: "教育园区" }
+          ] %>
+          <% popular_locations.each do |location| %>
+            <button
+              type="button"
+              data-action="click->location-selector#selectLocation"
+              data-location-name="<%= location[:name] %>"
+              data-location-address="<%= location[:address] %>"
+              class="w-full text-left p-3 rounded-lg hover:bg-surface-hover transition-colors">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-text-muted mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                </svg>
+                <div class="flex-1">
+                  <div class="text-text-primary font-medium"><%= location[:name] %></div>
+                  <div class="text-xs text-text-muted mt-0.5"><%= location[:address] %></div>
+                </div>
+              </div>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Recent Locations (if any) -->
+      <div class="mb-4 hidden" data-location-selector-target="recentSection">
+        <h4 class="text-xs text-text-muted mb-2">最近使用</h4>
+        <div class="space-y-2" data-location-selector-target="recentList">
+          <!-- Recent locations will be dynamically added here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

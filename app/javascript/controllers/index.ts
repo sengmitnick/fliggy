@@ -59,6 +59,7 @@ import BusDatePickerController from "./bus_date_picker_controller"
 import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
+import VisaOrderController from "./visa_order_controller"
 import AbroadRegionSelectorController from "./abroad_region_selector_controller"
 import AbroadDatePickerController from "./abroad_date_picker_controller"
 import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
@@ -73,6 +74,12 @@ import InternetOrderFormController from "./internet_order_form_controller"
 import ProductCardController from "./product_card_controller"
 import SimCardBookingController from "./sim_card_booking_controller"
 import QrcodeModalController from "./qrcode_modal_controller"
+import LocationSelectorController from "./location_selector_controller"
+import TransferSearchController from "./transfer_search_controller"
+import AddressSelectorController from "./address_selector_controller"
+import SearchController from "./search_controller"
+import SmartBackController from "./smart_back_controller"
+import TourGroupTabsController from "./tour_group_tabs_controller"
 
 const application = Application.start()
 
@@ -135,6 +142,7 @@ application.register("bus-date-picker", BusDatePickerController)
 application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
+application.register("visa-order", VisaOrderController)
 application.register("abroad-region-selector", AbroadRegionSelectorController)
 application.register("abroad-date-picker", AbroadDatePickerController)
 application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
@@ -149,5 +157,11 @@ application.register("internet-order-form", InternetOrderFormController)
 application.register("product-card", ProductCardController)
 application.register("sim-card-booking", SimCardBookingController)
 application.register("qrcode-modal", QrcodeModalController)
+application.register("location-selector", LocationSelectorController)
+application.register("transfer-search", TransferSearchController)
+application.register("address-selector", AddressSelectorController)
+application.register("search", SearchController)
+application.register("smart-back", SmartBackController)
+application.register("tour-group-tabs", TourGroupTabsController)
 
 window.Stimulus = application

@@ -89,6 +89,36 @@ class ProfilesController < ApplicationController
     end
   end
 
+  def wallet
+    @user = current_user
+  end
+
+  def recharge
+    amount = params[:amount].to_f
+    
+    if amount <= 0
+      flash[:alert] = "充值金额必须大于0"
+      redirect_to wallet_profile_path
+      return
+    end
+
+    if amount > 50000
+      flash[:alert] = "单次充值金额不能超过50000元"
+      redirect_to wallet_profile_path
+      return
+    end
+
+    # In real application, this would integrate with payment gateway
+    # For now, we directly add balance
+    if current_user.add_balance(amount)
+      flash[:notice] = "充值成功！已充值¥#{format('%.2f', amount)}"
+    else
+      flash[:alert] = "充值失败，请重试"
+    end
+    
+    redirect_to wallet_profile_path
+  end
+
   private
 
   def user_params

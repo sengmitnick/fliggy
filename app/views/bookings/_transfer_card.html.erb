@@ -1,0 +1,125 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden mb-3">
+  <!-- Transfer Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div class="flex items-center space-x-2">
+      <div class="w-6 h-6 bg-[#FFD800]/10 rounded flex items-center justify-center">
+        <svg class="w-4 h-4 text-[#FFD800]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+          <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/>
+        </svg>
+      </div>
+      <span class="text-sm font-semibold text-text-primary"><%= booking.service_name %></span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.cancelled? || booking.refunded? %>
+        <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded">已关闭</span>
+      <% elsif booking.pending? %>
+        <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded">待付款</span>
+      <% elsif booking.paid? %>
+        <% if booking.driver_accepted? %>
+          <span class="px-2 py-1 bg-success/10 text-success text-xs rounded">司机已接单</span>
+        <% else %>
+          <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">司机未接单</span>
+        <% end %>
+      <% elsif booking.completed? %>
+        <span class="px-2 py-1 bg-success/10 text-success text-xs rounded">已完成</span>
+      <% end %>
+      <button type="button" class="text-text-muted">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Transfer Details -->
+  <%= link_to transfer_path(booking), class: "block" do %>
+    <div class="px-4 py-4">
+      <!-- Service Info -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex-1">
+          <div class="text-text-primary text-base font-bold mb-2">
+            <%= booking.pickup_datetime&.strftime('%m月%d日 %H:%M') || '待确认' %>
+          </div>
+          
+          <!-- Route Display -->
+          <div class="relative pl-4 space-y-3">
+            <div class="absolute left-[5px] top-2 bottom-2 w-0.5 bg-border"></div>
+            
+            <!-- Start Point -->
+            <div class="relative">
+              <div class="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-[#6D81F6] border-2 border-white shadow-sm"></div>
+              <div class="text-text-primary text-sm"><%= booking.location_from %></div>
+            </div>
+            
+            <!-- End Point -->
+            <div class="relative">
+              <div class="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-[#FF9343] border-2 border-white shadow-sm"></div>
+              <div class="text-text-primary text-sm font-medium"><%= booking.location_to %></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flight/Train Info -->
+      <% if booking.flight_number.present? %>
+        <div class="flex items-center space-x-2 text-xs text-text-muted mb-2">
+          <span class="bg-[#41AD65] text-white px-1.5 py-0.5 rounded">航班</span>
+          <span><%= booking.flight_number %></span>
+        </div>
+      <% elsif booking.train_number.present? %>
+        <div class="flex items-center space-x-2 text-xs text-text-muted mb-2">
+          <span class="bg-[#3B82F6] text-white px-1.5 py-0.5 rounded">火车</span>
+          <span><%= booking.train_number %></span>
+        </div>
+      <% end %>
+
+      <!-- Passenger Info -->
+      <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
+        <span>乘车人: <%= booking.passenger_name %></span>
+        <span>|</span>
+        <span><%= booking.passenger_phone %></span>
+      </div>
+
+      <!-- Vehicle Info -->
+      <% if booking.transfer_package.present? %>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">
+            <%= booking.transfer_package.provider %>
+          </span>
+          <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">
+            <%= booking.transfer_package.category_name %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Price Section -->
+  <div class="px-4 py-3 bg-surface-elevated flex items-center justify-between">
+    <div>
+      <div class="text-text-muted text-xs mb-1">
+        <% if booking.cancelled? || booking.refunded? %>
+          未付款
+        <% else %>
+          实付款
+        <% end %>
+      </div>
+      <div class="flex items-baseline space-x-1">
+        <span class="text-xs text-text-primary">¥</span>
+        <span class="text-2xl font-bold text-primary"><%= booking.actual_price.to_i %></span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.paid? || booking.completed? %>
+        <%= link_to '查看详情', transfer_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '再来一单', transfers_path, class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% elsif booking.cancelled? || booking.refunded? %>
+        <%= link_to '重新预订', transfers_path, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+      <% elsif booking.pending? %>
+        <%= button_to '取消订单', cancel_transfer_path(booking), method: :patch, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium', form: { data: { turbo_confirm: '确认取消订单？' } } %>
+        <%= button_to '立即支付', pay_transfer_path(booking), method: :patch, class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold', form: { data: { controller: 'payment-modal', action: 'submit->payment-modal#showModal' } } %>
+      <% end %>
+    </div>
+  </div>
+</div>
