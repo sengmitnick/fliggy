@@ -315,6 +315,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.index ["pinyin"], name: "index_cities_on_pinyin"
   end
 
+  create_table "countries", force: :cascade do |t|
+    t.string "name"
+    t.string "code"
+    t.string "slug"
+    t.string "region"
+    t.boolean "visa_free", default: false
+    t.string "image_url"
+    t.text "description"
+    t.text "visa_requirements"
+    t.jsonb "statistics", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "deep_travel_bookings", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "deep_travel_guide_id"
@@ -1045,6 +1059,50 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "transfer_packages", force: :cascade do |t|
+    t.string "name"
+    t.string "vehicle_category"
+    t.integer "seats"
+    t.integer "luggage"
+    t.integer "wait_time"
+    t.string "refund_policy"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.decimal "discount_amount", default: "0.0"
+    t.text "features"
+    t.string "provider"
+    t.integer "priority", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "transfers", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "transfer_type", default: "airport_pickup"
+    t.string "service_type", default: "to_airport"
+    t.string "location_from"
+    t.string "location_to"
+    t.datetime "pickup_datetime"
+    t.string "flight_number"
+    t.string "train_number"
+    t.string "passenger_name"
+    t.string "passenger_phone"
+    t.string "vehicle_type", default: "economy_5"
+    t.string "provider_name"
+    t.string "license_plate"
+    t.string "driver_name"
+    t.string "driver_status", default: "pending"
+    t.decimal "total_price", default: "0.0"
+    t.decimal "discount_amount", default: "0.0"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "transfer_package_id"
+    t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
+    t.index ["user_id"], name: "index_transfers_on_user_id"
+  end
+
   create_table "travel_agencies", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -1078,6 +1136,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "updated_at", null: false
     t.jsonb "airline_memberships", default: {}
     t.string "pay_password_digest"
+    t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -1087,6 +1147,68 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["execution_id"], name: "index_validator_executions_on_execution_id", unique: true
+  end
+
+  create_table "visa_order_travelers", force: :cascade do |t|
+    t.integer "visa_order_id"
+    t.string "name"
+    t.string "id_number"
+    t.string "phone"
+    t.string "relationship"
+    t.string "passport_number"
+    t.date "passport_expiry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "visa_orders", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "visa_product_id"
+    t.integer "traveler_count", default: 1
+    t.decimal "total_price", default: "0.0"
+    t.decimal "unit_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.date "expected_date"
+    t.string "delivery_method", default: "express"
+    t.text "delivery_address"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.text "notes"
+    t.boolean "insurance_selected", default: false
+    t.decimal "insurance_price", default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.datetime "paid_at"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "insurance_type"
+  end
+
+  create_table "visa_products", force: :cascade do |t|
+    t.integer "country_id"
+    t.string "name"
+    t.string "product_type"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.string "residence_area"
+    t.integer "processing_days"
+    t.string "visa_validity"
+    t.string "max_stay"
+    t.decimal "success_rate", default: "99.9"
+    t.jsonb "required_materials", default: []
+    t.integer "material_count", default: 0
+    t.boolean "can_simplify", default: false
+    t.boolean "home_pickup", default: false
+    t.boolean "refused_reapply", default: false
+    t.boolean "supports_family", default: false
+    t.jsonb "features", default: []
+    t.text "description"
+    t.string "slug"
+    t.integer "sales_count", default: 0
+    t.string "merchant_name"
+    t.string "merchant_avatar"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -1105,4 +1227,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tour_group_products", "travel_agencies"
+  add_foreign_key "transfers", "transfer_packages"
 end
