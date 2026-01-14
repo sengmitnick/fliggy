@@ -98,15 +98,11 @@ class VerifyCLI
     puts "\n📦 准备阶段: 加载数据包..."
     
     begin
-      ActiveRecord::Base.transaction do
-        prepare_info = instance.execute_prepare
-        
-        puts "\n✅ 准备完成！任务信息："
-        puts JSON.pretty_generate(prepare_info)
-        
-        # 事务会自动回滚
-        raise ActiveRecord::Rollback
-      end
+      # execute_prepare 内部已经处理了事务和状态保存，不需要外层事务
+      prepare_info = instance.execute_prepare
+      
+      puts "\n✅ 准备完成！任务信息："
+      puts JSON.pretty_generate(prepare_info)
     rescue StandardError => e
       puts "\n❌ 准备阶段失败: #{e.message}"
       puts e.backtrace.first(5).join("\n")
@@ -127,12 +123,8 @@ class VerifyCLI
     puts "\n🔍 验证阶段: 检查结果..."
     
     begin
-      result = nil
-      ActiveRecord::Base.transaction do
-        result = instance.execute_verify
-        # 事务会自动回滚
-        raise ActiveRecord::Rollback
-      end
+      # execute_verify 内部已经处理了事务，不需要外层事务
+      result = instance.execute_verify
       
       # 显示结果
       display_result(result)

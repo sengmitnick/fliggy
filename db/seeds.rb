@@ -7,10 +7,12 @@
 #
 require 'open-uri'
 
-# Write your seed data here
+puts "================================"
+puts "开始加载基础数据 (Seeds)"
+puts "================================"
 
 # ==================== 城市数据 ====================
-puts "正在初始化城市数据..."
+puts "\n正在初始化城市数据..."
 
 # 中国主要城市数据（包含机场代码和主题标签）
 cities_data = [
@@ -265,7 +267,7 @@ puts "城市总数: #{City.count}"
 
 # ==================== 旅游目的地数据 ====================
 # 清理旧数据
-puts "正在清理旧数据..."
+puts "\n正在清理旧目的地数据..."
 TourProduct.destroy_all
 Destination.destroy_all
 
@@ -308,664 +310,61 @@ end
 puts "为城市创建了 #{created_count} 个新的 Destination 记录"
 puts "Destination 总数: #{Destination.count}"
 
-# 为深圳创建详细的旅游产品
-shenzhen = Destination.find_by(name: "深圳")
+# ==================== 加载分类数据文件 ====================
+puts "\n正在加载业务数据..."
 
-if shenzhen
-  puts "正在为深圳创建旅游产品..."
-  
-  # 必去景点榜
-  attractions = [
-    {
-      name: "深圳世界之窗",
-      product_type: "attraction",
-      category: "local",
-      price: 180,
-      original_price: 200,
-      sales_count: 15000,
-      rating: 4.5,
-      tags: ["必去景点", "世界缩影景观"],
-      description: "世界缩影景观，畅玩迪士尼",
-      image_url: "https://images.unsplash.com/photo-1549813069-f95e44d7f498?w=800",
-      rank: 1,
-      is_featured: true
-    },
-    {
-      name: "深圳野生动物园",
-      product_type: "attraction",
-      category: "local",
-      price: 240,
-      original_price: 260,
-      sales_count: 12000,
-      rating: 4.6,
-      tags: ["必去景点", "看可爱国宝萌萌"],
-      description: "看可爱国宝萌萌哒",
-      image_url: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800",
-      rank: 2,
-      is_featured: true
-    },
-    {
-      name: "深圳欢乐谷",
-      product_type: "attraction",
-      category: "local",
-      price: 230,
-      original_price: 250,
-      sales_count: 18000,
-      rating: 4.7,
-      tags: ["必去景点", "网红主题乐园"],
-      description: "网红主题乐园，大型摩天轮刺激项目",
-      image_url: "https://images.unsplash.com/photo-1594922009998-e5e0b9a9dbd6?w=800",
-      rank: 3,
-      is_featured: true
-    }
-  ]
-  
-  # 必住酒店榜
-  hotels = [
-    {
-      name: "榆溪居·高空城景房",
-      product_type: "hotel",
-      category: "local",
-      price: 457,
-      original_price: 600,
-      sales_count: 8000,
-      rating: 4.8,
-      tags: ["必住酒店", "多店通兑", "城市CBD"],
-      description: "深圳酒店预订端吉康莱德文华东方四季丽思卡尔顿洲际希尔顿凯悦",
-      image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-      rank: 1,
-      is_featured: true
-    },
-    {
-      name: "卡罗酒店(深圳机场店)",
-      product_type: "hotel",
-      category: "local",
-      price: 236,
-      original_price: 300,
-      sales_count: 6500,
-      rating: 4.5,
-      tags: ["必住酒店"],
-      description: "近机场，交通便利",
-      image_url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
-      rank: 2,
-      is_featured: true
-    },
-    {
-      name: "维也纳酒店(深圳北站店)",
-      product_type: "hotel",
-      category: "local",
-      price: 290,
-      original_price: 350,
-      sales_count: 7200,
-      rating: 4.6,
-      tags: ["必住酒店"],
-      description: "近高铁站，便捷出行",
-      image_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800",
-      rank: 3,
-      is_featured: true
-    }
-  ]
-  
-  # 当地体验
-  experiences = [
-    {
-      name: "深圳酒店预订瑞吉康莱德文华东方四季丽思卡尔顿洲际希尔顿凯悦",
-      product_type: "hotel",
-      category: "experience",
-      price: 100,
-      original_price: 150,
-      sales_count: 8000,
-      rating: 4.7,
-      tags: ["多店通兑", "城市CBD"],
-      description: "多店通兑，城市CBD",
-      image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-      rank: 1,
-      is_featured: false
-    },
-    {
-      name: "[光明农场大观园-大门票]光明农场大观园官方票",
-      product_type: "attraction",
-      category: "experience",
-      price: 68,
-      original_price: 80,
-      sales_count: 3000,
-      rating: 4.4,
-      tags: ["16:50前可订今日票"],
-      description: "生态农场体验，亲近自然",
-      image_url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
-      rank: 2,
-      is_featured: false
-    },
-    {
-      name: "深圳欢博索尼碗花园抗疲机场住宿新方式",
-      product_type: "attraction",
-      category: "experience",
-      price: 300,
-      original_price: 400,
-      sales_count: 2500,
-      rating: 4.3,
-      tags: ["机场住宿"],
-      description: "机场休息新体验",
-      image_url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-      rank: 3,
-      is_featured: false
-    }
-  ]
-  
-  # 当地跟团游
-  local_tours = [
-    {
-      name: "【深圳-广州长隆野生动物世界-广州长隆欢乐世界双园1日游】",
-      product_type: "tour",
-      category: "local",
-      price: 299,
-      original_price: 350,
-      sales_count: 5000,
-      rating: 4.6,
-      tags: ["双园通玩"],
-      description: "长隆双园畅玩一日游",
-      image_url: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800",
-      rank: 1,
-      is_featured: false
-    },
-    {
-      name: "深圳-香港海洋公园纯玩一日游",
-      product_type: "tour",
-      category: "local",
-      price: 450,
-      original_price: 550,
-      sales_count: 4200,
-      rating: 4.7,
-      tags: ["含门票", "纯玩"],
-      description: "香港海洋公园精华游",
-      image_url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
-      rank: 2,
-      is_featured: false
-    }
-  ]
-  
-  # 周边跟团游
-  nearby_tours = [
-    {
-      name: "【广州-珠海长隆海洋王国1日游】",
-      product_type: "tour",
-      category: "nearby",
-      price: 320,
-      original_price: 380,
-      sales_count: 6000,
-      rating: 4.7,
-      tags: ["海洋王国", "亲子"],
-      description: "珠海长隆海洋王国欢乐之旅",
-      image_url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
-      rank: 1,
-      is_featured: false
-    },
-    {
-      name: "【惠州-双月湾+巽寮湾2日游】",
-      product_type: "tour",
-      category: "nearby",
-      price: 580,
-      original_price: 680,
-      sales_count: 3500,
-      rating: 4.5,
-      tags: ["海边度假", "两日游"],
-      description: "惠州海滨风情两日游",
-      image_url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800",
-      rank: 2,
-      is_featured: false
-    }
-  ]
-  
-  # 四季游
-  seasonal_products = [
-    {
-      name: "深圳观澜山水田园温泉度假村门票",
-      product_type: "attraction",
-      category: "seasonal",
-      price: 120,
-      original_price: 168,
-      sales_count: 2800,
-      rating: 4.4,
-      tags: ["温泉", "度假"],
-      description: "温泉养生，田园风光",
-      image_url: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800",
-      rank: 1,
-      is_featured: false
-    }
-  ]
-  
-  # 创建所有产品
-  all_products = attractions + hotels + experiences + local_tours + nearby_tours + seasonal_products
-  
-  all_products.each do |product_data|
-    shenzhen.tour_products.create!(product_data)
-  end
-  
-  puts "为深圳创建了 #{all_products.count} 个旅游产品"
+# 航班数据（热门航线）
+load Rails.root.join('app/validators/support/data_packs/v1/flights.rb')
+
+# 酒店数据（深圳地区的酒店）
+load Rails.root.join('app/validators/support/data_packs/v1/hotels_seed.rb')
+
+puts "\n================================"
+puts "基础数据加载完成！"
+puts "================================"
+puts "\n数据说明："
+puts "- 城市数据: #{City.count} 个城市"
+puts "- 目的地数据: #{Destination.count} 个目的地"
+puts "- 航班数据: #{Flight.count} 个航班"
+puts "- 酒店数据: #{Hotel.count} 家酒店"
+puts "\n其他业务数据（深度旅行、汽车、巴士等）位于 app/validators/support/data_packs/v1/"
+puts "验证器测试时会按需加载这些数据包"
+
+# ====================  Demo用户默认数据 ====================
+puts "\n正在为demo用户设置默认数据..."
+
+# 查找或创建demo用户（与application_controller.rb中的自动登录用户保持一致）
+demo_user = User.find_or_create_by(email: 'demo@fliggy.com') do |u|
+  u.password = 'password123'
+  u.password_confirmation = 'password123'
+  u.name = 'Demo用户'
+  u.verified = true
 end
 
-puts "数据初始化完成！"
-
-# ==================== 酒店数据 ====================
-puts "正在创建酒店数据..."
-Hotel.destroy_all
-
-# 深圳酒店数据
-shenzhen_hotels = [
-  {
-    name: "深圳南山大道希尔顿花园酒店",
-    city: "深圳市",
-    address: "南山区前海路",
-    rating: 4.6,
-    price: 701,
-    original_price: 716,
-    distance: "距您直线3千米",
-    features: ["豪华", "高端", "商务"],
-    star_level: 5,
-    image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    is_featured: true,
-    display_order: 1,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '南山区'
-  },
-  {
-    name: "深圳湾科技园丽雅尔酒店",
-    city: "深圳市",
-    address: "南山区科苑路",
-    rating: 4.8,
-    price: 542,
-    original_price: 658,
-    distance: "距您直线269米",
-    features: ["豪华", "交通特别方便"],
-    star_level: 4,
-    image_url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
-    is_featured: true,
-    display_order: 2,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '南山区'
-  },
-  {
-    name: "深圳福田区威斯汀酒店",
-    city: "深圳市",
-    address: "福田区福华路",
-    rating: 4.5,
-    price: 386,
-    original_price: 480,
-    distance: "距福田高铁站1.5千米",
-    features: ["精选", "干净卫生"],
-    star_level: 4,
-    image_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=80",
-    is_featured: false,
-    display_order: 3,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '福田区'
-  },
-  {
-    name: "深圳罗湖区维也纳国际酒店",
-    city: "深圳市",
-    address: "罗湖区人民南路",
-    rating: 4.4,
-    price: 298,
-    original_price: 350,
-    distance: "距罗湖口岸1千米",
-    features: ["经济型", "交通便利"],
-    star_level: 3,
-    image_url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&q=80",
-    is_featured: false,
-    display_order: 4,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '罗湖区'
-  },
-  {
-    name: "深圳宝安机场凯悦酒店",
-    city: "深圳市",
-    address: "宝安区机场路",
-    rating: 4.7,
-    price: 458,
-    original_price: 580,
-    distance: "距宝安机场500米",
-    features: ["机场附近", "接送机服务"],
-    star_level: 4,
-    image_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80",
-    is_featured: false,
-    display_order: 5,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '宝安区'
-  },
-  {
-    name: "深圳欢乐港湾度假酒店",
-    city: "深圳市",
-    address: "宝安区海滨路",
-    rating: 4.6,
-    price: 520,
-    original_price: 650,
-    distance: "距欢乐港湾200米",
-    features: ["海景房", "度假休闲"],
-    star_level: 4,
-    image_url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80",
-    is_featured: false,
-    display_order: 6,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '宝安区'
-  },
-  {
-    name: "深圳东门商务酒店",
-    city: "深圳市",
-    address: "罗湖区东门老街",
-    rating: 4.3,
-    price: 256,
-    original_price: 320,
-    distance: "距东门老街100米",
-    features: ["经济型", "老街附近"],
-    star_level: 3,
-    image_url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
-    is_featured: false,
-    display_order: 7,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '罗湖区'
-  },
-  {
-    name: "深圳北站希尔顿酒店",
-    city: "深圳市",
-    address: "龙华区民治街道",
-    rating: 4.7,
-    price: 680,
-    original_price: 800,
-    distance: "距深圳北站300米",
-    features: ["高铁站附近", "国际品牌"],
-    star_level: 5,
-    image_url: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80",
-    is_featured: false,
-    display_order: 8,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '龙华区'
-  },
-  {
-    name: "深圳西乡塑望酽酒店",
-    city: "深圳市",
-    address: "南山区深南大道",
-    rating: 4.5,
-    price: 428,
-    original_price: 520,
-    distance: "距西乡塔千米",
-    features: ["商务酒店", "景观房"],
-    star_level: 4,
-    image_url: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80",
-    is_featured: false,
-    display_order: 9,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '南山区'
-  },
-  {
-    name: "深圳大棅湾海滨度假村",
-    city: "深圳市",
-    address: "龙岗区大棅湾",
-    rating: 4.8,
-    price: 880,
-    original_price: 1200,
-    distance: "距深圳市中心30千米",
-    features: ["海边度假", "别墅酒店"],
-    star_level: 5,
-    image_url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&q=80",
-    is_featured: true,
-    display_order: 10,
-    hotel_type: 'hotel',
-    is_domestic: true,
-    region: '龙岗区'
-  },
-  # 民宿
-  {
-    name: "深圳南山区海景民宿",
-    city: "深圳市",
-    address: "南山区蛇口海上世界",
-    rating: 4.9,
-    price: 380,
-    original_price: 450,
-    distance: "距海上世界300米",
-    features: ["民宿", "海景", "温馨"],
-    star_level: nil,
-    image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
-    is_featured: true,
-    display_order: 11,
-    hotel_type: 'homestay',
-    is_domestic: true,
-    region: '南山区'
-  },
-  {
-    name: "深圳大梅沙海边民宿",
-    city: "深圳市",
-    address: "盐田区大梅沙",
-    rating: 4.7,
-    price: 280,
-    original_price: 350,
-    distance: "距大梅沙海滨100米",
-    features: ["民宿", "海边", "亲子"],
-    star_level: nil,
-    image_url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80",
-    is_featured: false,
-    display_order: 12,
-    hotel_type: 'homestay',
-    is_domestic: true,
-    region: '盐田区'
-  },
-  {
-    name: "深圳华侨城艺术民宿",
-    city: "深圳市",
-    address: "南山区华侨城",
-    rating: 4.8,
-    price: 420,
-    original_price: 500,
-    distance: "距欢乐谷500米",
-    features: ["民宿", "艺术", "设计感"],
-    star_level: nil,
-    image_url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80",
-    is_featured: false,
-    display_order: 13,
-    hotel_type: 'homestay',
-    is_domestic: true,
-    region: '南山区'
-  }
-]
-
-shenzhen_hotels.each do |hotel_data|
-  # Prepare image for inline attachment
-  image_url = hotel_data.delete(:image_url) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
-  image_io = URI.open(image_url)
+# 设置支付密码
+if demo_user.persisted?
+  # 使用 has_secure_password 的方式设置支付密码
+  demo_user.pay_password = '222222'
+  demo_user.pay_password_confirmation = '222222'
+  demo_user.save!
+  puts "✓ 设置支付密码: 222222"
   
-  hotel = Hotel.create!(hotel_data.merge(
-    image: { io: image_io, filename: 'hotel.jpg' }
-  ))
-  
-  # 为每个酒店和民宿创建过夜房型
-  overnight_rooms = [
-    { room_type: "豪华大床房", bed_type: "大床", price: hotel.price, original_price: hotel.original_price, area: "35㎡", max_guests: 2, has_window: true, available_rooms: 5, room_category: 'overnight' },
-    { room_type: "高级双人房", bed_type: "双床", price: hotel.price + 50, original_price: hotel.original_price + 80, area: "38㎡", max_guests: 2, has_window: true, available_rooms: 8, room_category: 'overnight' }
-  ]
-  
-  overnight_rooms.each do |room_data|
-    hotel.hotel_rooms.create!(room_data)
+  # 添加默认乘机人（如果不存在）
+  if demo_user.passengers.where(name: '张三').none?
+    passenger = demo_user.passengers.create!(
+      name: '张三',
+      id_type: '身份证',
+      id_number: '110101199001011234',
+      phone: '13800138000'
+    )
+    puts "✓ 添加默认乘机人: 张三 (110101199001011234)"
+  else
+    puts "ℹ️  乘机人张三已存在，跳过创建"
   end
   
-  # 部分酒店和民宿提供钟点房（60%概率）
-  if rand < 0.6
-    hourly_rooms = [
-      { room_type: "2小时房", bed_type: "大床", price: (hotel.price * 0.3).round(0), original_price: (hotel.price * 0.35).round(0), area: "25㎡", max_guests: 2, has_window: true, available_rooms: 3, room_category: 'hourly' },
-      { room_type: "3小时房", bed_type: "大床", price: (hotel.price * 0.4).round(0), original_price: (hotel.price * 0.45).round(0), area: "28㎡", max_guests: 2, has_window: true, available_rooms: 2, room_category: 'hourly' }
-    ]
-    
-    hourly_rooms.each do |room_data|
-      hotel.hotel_rooms.create!(room_data)
-    end
-  end
+  puts "\n=== Demo用户信息 ==="
+  puts "邮箱: demo@fliggy.com"
+  puts "密码: password123"
+  puts "支付密码: 222222"
+  puts "乘机人: 张三 (110101199001011234, 13800138000)"
 end
-
-puts "创建了 #{Hotel.count} 个酒店和 #{HotelRoom.count} 个房型"
-
-puts "
-\n✅ 所有数据初始化完成！"
-puts "🏛  城市: #{City.count} 个"
-puts "🌍 目的地: #{Destination.count} 个"
-puts "🏞  旅游产品: #{TourProduct.count} 个"
-puts "🏨 酒店: #{Hotel.count} 个"
-puts "🚪 房型: #{HotelRoom.count} 个"
-# ==================== 火车票数据 ====================
-puts "正在初始化火车票数据..."
-Train.destroy_all
-
-# 使用自动生成功能为热门线路预生成今天和明天的数据
-# 其他日期和路线将在管理后台手动生成或通过 Train.generate_for_route 创建
-popular_routes = [
-  ['北京', '上海'],
-  ['上海', '北京'],
-  ['北京', '深圳'],
-  ['深圳', '北京'],
-  ['上海', '深圳'],
-  ['深圳', '上海'],
-  ['北京', '广州'],
-  ['广州', '北京'],
-  ['上海', '广州'],
-  ['广州', '上海'],
-  ['北京', '成都'],
-  ['成都', '北京'],
-  ['上海', '成都'],
-  ['成都', '上海'],
-  ['北京', '杭州'],
-  ['杭州', '北京'],
-  ['上海', '杭州'],
-  ['杭州', '上海'],
-  ['北京', '西安'],
-  ['西安', '北京'],
-  ['上海', '西安'],
-  ['西安', '上海'],
-  ['深圳', '成都'],
-  ['成都', '深圳'],
-  ['广州', '成都'],
-  ['成都', '广州']
-]
-
-trains_created = 0
-# 为每条热门线路生成未来7天的火车票
-(0..6).each do |day_offset|
-  target_date = Date.today + day_offset.days
-  popular_routes.each do |departure, arrival|
-    generated = Train.generate_for_route(departure, arrival, target_date)
-    trains_created += generated.count
-  end
-end
-
-puts "预生成了 #{trains_created} 条火车票记录 (#{popular_routes.count} 条热门线路，未来7天)"
-puts "其他线路和日期将在管理后台手动生成或通过 Train.generate_for_route 创建"
-puts "火车票数据初始化完成！"
-
-# ==================== 会员权益数据 ====================
-puts "正在初始化会员权益数据..."
-MembershipBenefit.destroy_all
-
-benefits_data = [
-  { name: "专属折扣", level_required: "F1", icon: "💰", description: "享受会员专属优惠价格" },
-  { name: "优先客服", level_required: "F1", icon: "🎧", description: "专属客服优先响应" },
-  { name: "积分翻倍", level_required: "F2", icon: "🎁", description: "订单积分双倍返还" },
-  { name: "免费升舱", level_required: "F3", icon: "✈️", description: "机票自动升舱机会" },
-  { name: "贵宾休息室", level_required: "F4", icon: "☕", description: "机场贵宾室免费使用" },
-  { name: "专属管家", level_required: "F5", icon: "👔", description: "7x24小时专属管家服务" }
-]
-
-benefits_data.each do |data|
-  MembershipBenefit.create!(data)
-end
-
-puts "创建了 #{MembershipBenefit.count} 个会员权益"
-puts "会员权益数据初始化完成！"
-
-# ==================== 示例用户和行程数据 ====================
-# 注：仅用于开发测试,生产环境请删除
-if Rails.env.development?
-  puts "正在创建示例用户和行程数据..."
-  
-  # 创建测试用户（如果不存在）
-  demo_user = User.find_or_create_by!(email: 'demo@example.com') do |u|
-    u.password = 'password123'
-    u.password_confirmation = 'password123'
-    u.verified = true
-  end
-  
-  # 确保用户有会员资格
-  unless demo_user.membership
-    demo_user.create_membership!(level: 'F2', points: 150, experience: 80)
-  end
-  
-  # 清理旧行程
-  demo_user.itineraries.destroy_all
-  
-  # 创建即将到来的行程
-  itinerary = demo_user.itineraries.create!(
-    title: '武汉之行',
-    start_date: Date.today + 10.days,
-    end_date: Date.today + 13.days,
-    destination: '武汉',
-    status: 'upcoming'
-  )
-  
-  # 创建航班项目
-  flight = itinerary.itinerary_items.create!(
-    item_type: 'flight',
-    item_date: Date.today + 10.days,
-    sequence: 1
-  )
-  
-  puts "创建了示例用户 (#{demo_user.email}) 和 1 条行程"
-  puts "示例数据初始化完成！"
-end
-
-puts "🚄 火车票: #{Train.count} 条"
-
-# ==================== 深度旅行数据 ====================
-load Rails.root.join('db', 'seeds', 'deep_travel.rb')
-
-# ==================== 机票数据 ====================
-load Rails.root.join('db', 'seeds', 'flights.rb')
-
-# ==================== 酒店数据 ====================
-load Rails.root.join('db', 'seeds', 'hotels.rb')
-
-# ==================== 租车数据 ====================
-load Rails.root.join('db', 'seeds', 'cars.rb')
-
-# ==================== 汽车票数据 ====================
-load Rails.root.join('db', 'seeds', 'bus_tickets.rb')
-
-# ==================== 境外当地交通数据 ====================
-load Rails.root.join('db', 'seeds', 'abroad_tickets.rb')
-
-# ==================== 旅游产品（跟团游商城）数据 ====================
-load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
-# 跟团游产品详情已通过随机生成器自动创建
-
-# ==================== 酒店套餐数据 ====================
-load Rails.root.join('db', 'seeds', 'hotel_packages.rb')
-
-puts "\n🎉 所有数据初始化完成！"
-puts "====================================="
-puts "数据统计："
-puts "  - 城市: #{City.count}"
-puts "  - 目的地: #{Destination.count}"
-puts "  - 深度旅行讲师: #{DeepTravelGuide.count}"
-puts "  - 深度旅行产品: #{DeepTravelProduct.count}"
-puts "  - 酒店: #{Hotel.count}"
-puts "  - 租车: #{Car.count}"
-puts "  - 汽车票: #{BusTicket.count}"
-puts "  - 境外交通票: #{AbroadTicket.count}"
-puts "  - 跟团游产品: #{TourGroupProduct.count}"
-puts "  - 酒店套餐: #{HotelPackage.count}"
-puts "  - 火车票: #{Train.count}"
-puts "  - 机票: #{Flight.count}"
-puts "====================================="

@@ -37,7 +37,8 @@ class SearchCheapestFlightValidator < BaseValidator
   # 准备阶段：插入测试数据
   def prepare
     # 数据已经通过 load_data_pack 自动加载
-    @target_date = Date.parse('2024-12-20')
+    # 使用动态日期，与数据包保持一致
+    @target_date = Date.current + 3.days
     @origin = '上海'
     @destination = '深圳'
     
