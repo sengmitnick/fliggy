@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1139,6 +1139,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_085853) do
     t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "validator_executions", force: :cascade do |t|
+    t.string "execution_id"
+    t.jsonb "state"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["execution_id"], name: "index_validator_executions_on_execution_id", unique: true
   end
 
   create_table "visa_order_travelers", force: :cascade do |t|

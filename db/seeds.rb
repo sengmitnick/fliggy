@@ -7,639 +7,364 @@
 #
 require 'open-uri'
 
-# Write your seed data here
+puts "================================"
+puts "开始加载基础数据 (Seeds)"
+puts "================================"
 
-# ==================== 国家和签证数据 ====================
-puts "正在初始化签证国家和产品数据..."
+# ==================== 城市数据 ====================
+puts "\n正在初始化城市数据..."
 
-# 国家数据（按地区分组）
-visa_countries_data = [
-  # 亚洲
-  { name: '日本', code: 'JP', region: '亚洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400', description: '富士山、樱花、寺庙', statistics: { success_rate: '98%', processing_time: '8工作日', travelers: '50万+' }},
-  { name: '韩国', code: 'KR', region: '亚洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=400', description: '首尔塔、济州岛、韩剧', statistics: { success_rate: '99%', processing_time: '7工作日', travelers: '40万+' }},
-  { name: '泰国', code: 'TH', region: '亚洲', visa_free: true, image_url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400', description: '曼谷、普吉岛、清迈', statistics: { success_rate: '100%', processing_time: '落地签', travelers: '80万+' }},
-  { name: '新加坡', code: 'SG', region: '亚洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400', description: '鱼尾狮、圣淘沙、环球影城', statistics: { success_rate: '97%', processing_time: '5工作日', travelers: '30万+' }},
-  { name: '马来西亚', code: 'MY', region: '亚洲', visa_free: true, image_url: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400', description: '双子塔、兰卡威、槟城', statistics: { success_rate: '100%', processing_time: '免签', travelers: '35万+' }},
-  { name: '越南', code: 'VN', region: '亚洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=400', description: '胡志明、下龙湾、芽庄', statistics: { success_rate: '99%', processing_time: '6工作日', travelers: '25万+' }},
-  { name: '印度', code: 'IN', region: '亚洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400', description: '泰姬陵、恒河、孟买', statistics: { success_rate: '95%', processing_time: '10工作日', travelers: '15万+' }},
-  { name: '印度尼西亚', code: 'ID', region: '亚洲', visa_free: true, image_url: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=400', description: '巴厘岛、雅加达、婆罗浮屠', statistics: { success_rate: '100%', processing_time: '落地签', travelers: '28万+' }},
+# 中国主要城市数据（包含机场代码和主题标签）
+cities_data = [
+  # 直辖市
+  { name: "北京市", pinyin: "beijing", airport_code: "PEK", region: "北京", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "上海市", pinyin: "shanghai", airport_code: "SHA", region: "上海", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "天津市", pinyin: "tianjin", airport_code: "TSN", region: "天津", is_hot: false, themes: ["海边度假"] },
+  { name: "重庆市", pinyin: "chongqing", airport_code: "CKG", region: "重庆", is_hot: true, themes: ["热门目的地"] },
   
+  # 广东省
+  { name: "广州市", pinyin: "guangzhou", airport_code: "CAN", region: "广东", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "深圳市", pinyin: "shenzhen", airport_code: "SZX", region: "广东", is_hot: true, themes: ["热门目的地", "海边度假"] },
+  { name: "珠海市", pinyin: "zhuhai", airport_code: "ZUH", region: "广东", is_hot: true, themes: ["海边度假", "亲子必去"] },
+  { name: "汕头市", pinyin: "shantou", airport_code: "SWA", region: "广东", is_hot: false, themes: ["海边度假"] },
+  { name: "湛江市", pinyin: "zhanjiang", airport_code: "ZHA", region: "广东", is_hot: false, themes: ["海边度假"] },
+  
+  # 浙江省
+  { name: "杭州市", pinyin: "hangzhou", airport_code: "HGH", region: "浙江", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "宁波市", pinyin: "ningbo", airport_code: "NGB", region: "浙江", is_hot: false, themes: ["海边度假"] },
+  { name: "温州市", pinyin: "wenzhou", airport_code: "WNZ", region: "浙江", is_hot: false, themes: [] },
+  { name: "舟山市", pinyin: "zhoushan", airport_code: "HSN", region: "浙江", is_hot: false, themes: ["海边度假"] },
+  { name: "台州市", pinyin: "taizhou", airport_code: "HYN", region: "浙江", is_hot: false, themes: ["海边度假"] },
+  
+  # 江苏省
+  { name: "南京市", pinyin: "nanjing", airport_code: "NKG", region: "江苏", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "苏州市", pinyin: "suzhou", airport_code: "SZV", region: "江苏", is_hot: false, themes: ["亲子必去"] },
+  { name: "无锡市", pinyin: "wuxi", airport_code: "WUX", region: "江苏", is_hot: false, themes: [] },
+  { name: "连云港市", pinyin: "lianyungang", airport_code: "LYG", region: "江苏", is_hot: false, themes: ["海边度假"] },
+  { name: "南通市", pinyin: "nantong", airport_code: "NTG", region: "江苏", is_hot: false, themes: ["海边度假"] },
+  
+  # 四川省
+  { name: "成都市", pinyin: "chengdu", airport_code: "CTU", region: "四川", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "乐山市", pinyin: "leshan", airport_code: "LMS", region: "四川", is_hot: false, themes: [] },
+  { name: "九寨沟", pinyin: "jiuzhaigou", airport_code: "JZH", region: "四川", is_hot: false, themes: [] },
+  
+  # 陕西省
+  { name: "西安市", pinyin: "xian", airport_code: "XIY", region: "陕西", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "延安市", pinyin: "yanan", airport_code: "ENY", region: "陕西", is_hot: false, themes: [] },
+  { name: "汉中市", pinyin: "hanzhong", airport_code: "HZG", region: "陕西", is_hot: false, themes: [] },
+  
+  # 湖北省
+  { name: "武汉市", pinyin: "wuhan", airport_code: "WUH", region: "湖北", is_hot: true, themes: ["热门目的地"] },
+  { name: "宜昌市", pinyin: "yichang", airport_code: "YIH", region: "湖北", is_hot: false, themes: [] },
+  { name: "襄阳市", pinyin: "xiangyang", airport_code: "XFN", region: "湖北", is_hot: false, themes: [] },
+  
+  # 湖南省
+  { name: "长沙市", pinyin: "changsha", airport_code: "CSX", region: "湖南", is_hot: false, themes: [] },
+  { name: "张家界市", pinyin: "zhangjiajie", airport_code: "DYG", region: "湖南", is_hot: false, themes: [] },
+  { name: "凤凰", pinyin: "fenghuang", airport_code: "TEN", region: "湖南", is_hot: false, themes: [] },
+  
+  # 福建省
+  { name: "厦门市", pinyin: "xiamen", airport_code: "XMN", region: "福建", is_hot: true, themes: ["热门目的地", "海边度假", "亲子必去"] },
+  { name: "福州市", pinyin: "fuzhou", airport_code: "FOC", region: "福建", is_hot: false, themes: ["海边度假"] },
+  { name: "泉州市", pinyin: "quanzhou", airport_code: "JJN", region: "福建", is_hot: false, themes: ["海边度假"] },
+  { name: "平潭", pinyin: "pingtan", airport_code: "FOC", region: "福建", is_hot: false, themes: ["海边度假"] },
+  
+  # 海南省
+  { name: "三亚市", pinyin: "sanya", airport_code: "SYX", region: "海南", is_hot: true, themes: ["热门目的地", "海边度假", "亲子必去"] },
+  { name: "海口市", pinyin: "haikou", airport_code: "HAK", region: "海南", is_hot: false, themes: ["海边度假"] },
+  { name: "万宁市", pinyin: "wanning", airport_code: "SYX", region: "海南", is_hot: false, themes: ["海边度假"] },
+  { name: "陵水", pinyin: "lingshui", airport_code: "SYX", region: "海南", is_hot: false, themes: ["海边度假"] },
+  
+  # 辽宁省
+  { name: "沈阳市", pinyin: "shenyang", airport_code: "SHE", region: "辽宁", is_hot: false, themes: [] },
+  { name: "大连市", pinyin: "dalian", airport_code: "DLC", region: "辽宁", is_hot: false, themes: ["海边度假"] },
+  { name: "丹东市", pinyin: "dandong", airport_code: "DDG", region: "辽宁", is_hot: false, themes: ["海边度假"] },
+  
+  # 黑龙江省
+  { name: "哈尔滨市", pinyin: "haerbin", airport_code: "HRB", region: "黑龙江", is_hot: true, themes: ["热门目的地"] },
+  { name: "齐齐哈尔市", pinyin: "qiqihaer", airport_code: "NDG", region: "黑龙江", is_hot: false, themes: [] },
+  { name: "牡丹江市", pinyin: "mudanjiang", airport_code: "MDG", region: "黑龙江", is_hot: false, themes: [] },
+  
+  # 吉林省
+  { name: "长春市", pinyin: "changchun", airport_code: "CGQ", region: "吉林", is_hot: false, themes: [] },
+  { name: "吉林市", pinyin: "jilin", airport_code: "JIL", region: "吉林", is_hot: false, themes: [] },
+  { name: "延边", pinyin: "yanbian", airport_code: "YNJ", region: "吉林", is_hot: false, themes: [] },
+  
+  # 山东省
+  { name: "青岛市", pinyin: "qingdao", airport_code: "TAO", region: "山东", is_hot: false, themes: ["海边度假", "亲子必去"] },
+  { name: "济南市", pinyin: "jinan", airport_code: "TNA", region: "山东", is_hot: false, themes: [] },
+  { name: "烟台市", pinyin: "yantai", airport_code: "YNT", region: "山东", is_hot: false, themes: ["海边度假"] },
+  { name: "威海市", pinyin: "weihai", airport_code: "WEH", region: "山东", is_hot: false, themes: ["海边度假"] },
+  { name: "日照市", pinyin: "rizhao", airport_code: "RIZ", region: "山东", is_hot: false, themes: ["海边度假"] },
+  
+  # 云南省
+  { name: "昆明市", pinyin: "kunming", airport_code: "KMG", region: "云南", is_hot: false, themes: [] },
+  { name: "丽江市", pinyin: "lijiang", airport_code: "LJG", region: "云南", is_hot: false, themes: [] },
+  { name: "大理", pinyin: "dali", airport_code: "DLU", region: "云南", is_hot: false, themes: [] },
+  { name: "西双版纳", pinyin: "xishuangbanna", airport_code: "JHG", region: "云南", is_hot: false, themes: [] },
+  { name: "香格里拉", pinyin: "xianggelila", airport_code: "DIG", region: "云南", is_hot: false, themes: [] },
+  
+  # 贵州省
+  { name: "贵阳市", pinyin: "guiyang", airport_code: "KWE", region: "贵州", is_hot: false, themes: [] },
+  { name: "安顺市", pinyin: "anshun", airport_code: "AVA", region: "贵州", is_hot: false, themes: [] },
+  { name: "凯里市", pinyin: "kaili", airport_code: "KWE", region: "贵州", is_hot: false, themes: [] },
+  
+  # 山西省
+  { name: "太原市", pinyin: "taiyuan", airport_code: "TYN", region: "山西", is_hot: false, themes: [] },
+  { name: "大同市", pinyin: "datong", airport_code: "DAT", region: "山西", is_hot: false, themes: [] },
+  { name: "平遥", pinyin: "pingyao", airport_code: "TYN", region: "山西", is_hot: false, themes: [] },
+  
+  # 河北省
+  { name: "石家庄市", pinyin: "shijiazhuang", airport_code: "SJW", region: "河北", is_hot: false, themes: [] },
+  { name: "秦皇岛市", pinyin: "qinhuangdao", airport_code: "SHP", region: "河北", is_hot: false, themes: ["海边度假"] },
+  { name: "承德市", pinyin: "chengde", airport_code: "CDE", region: "河北", is_hot: false, themes: [] },
+  
+  # 河南省
+  { name: "郑州市", pinyin: "zhengzhou", airport_code: "CGO", region: "河南", is_hot: false, themes: [] },
+  { name: "洛阳市", pinyin: "luoyang", airport_code: "LYA", region: "河南", is_hot: false, themes: [] },
+  { name: "开封市", pinyin: "kaifeng", airport_code: "CGO", region: "河南", is_hot: false, themes: [] },
+  
+  # 安徽省
+  { name: "合肥市", pinyin: "hefei", airport_code: "HFE", region: "安徽", is_hot: false, themes: [] },
+  { name: "黄山市", pinyin: "huangshan", airport_code: "TXN", region: "安徽", is_hot: false, themes: [] },
+  { name: "芜湖市", pinyin: "wuhu", airport_code: "WHU", region: "安徽", is_hot: false, themes: [] },
+  
+  # 江西省
+  { name: "南昌市", pinyin: "nanchang", airport_code: "KHN", region: "江西", is_hot: false, themes: [] },
+  { name: "景德镇市", pinyin: "jingdezhen", airport_code: "JDZ", region: "江西", is_hot: false, themes: [] },
+  { name: "九江市", pinyin: "jiujiang", airport_code: "JIU", region: "江西", is_hot: false, themes: [] },
+  
+  # 广西省
+  { name: "南宁市", pinyin: "nanning", airport_code: "NNG", region: "广西", is_hot: false, themes: [] },
+  { name: "桂林市", pinyin: "guilin", airport_code: "KWL", region: "广西", is_hot: false, themes: [] },
+  { name: "北海市", pinyin: "beihai", airport_code: "BHY", region: "广西", is_hot: false, themes: ["海边度假"] },
+  { name: "防城港市", pinyin: "fangchenggang", airport_code: "BHY", region: "广西", is_hot: false, themes: ["海边度假"] },
+  
+  # 新疆自治区
+  { name: "乌鲁木齐市", pinyin: "wulumuqi", airport_code: "URC", region: "新疆", is_hot: false, themes: [] },
+  { name: "喀什市", pinyin: "kashi", airport_code: "KHG", region: "新疆", is_hot: false, themes: [] },
+  { name: "伊犁", pinyin: "yili", airport_code: "YIN", region: "新疆", is_hot: false, themes: [] },
+  
+  # 西藏自治区
+  { name: "拉萨市", pinyin: "lasa", airport_code: "LXA", region: "西藏", is_hot: false, themes: [] },
+  { name: "林芝市", pinyin: "linzhi", airport_code: "LZY", region: "西藏", is_hot: false, themes: [] },
+  { name: "日喀则市", pinyin: "rikaze", airport_code: "RKZ", region: "西藏", is_hot: false, themes: [] },
+  
+  # 内蒙古自治区
+  { name: "呼和浩特市", pinyin: "huhehaote", airport_code: "HET", region: "内蒙古", is_hot: false, themes: [] },
+  { name: "呼伦贝尔市", pinyin: "hulunbeier", airport_code: "HLD", region: "内蒙古", is_hot: false, themes: [] },
+  { name: "鄂尔多斯市", pinyin: "eerduosi", airport_code: "DSN", region: "内蒙古", is_hot: false, themes: [] },
+  
+  # 宁夏自治区
+  { name: "银川市", pinyin: "yinchuan", airport_code: "INC", region: "宁夏", is_hot: false, themes: [] },
+  { name: "中卫市", pinyin: "zhongwei", airport_code: "ZHY", region: "宁夏", is_hot: false, themes: [] },
+  { name: "固原市", pinyin: "guyuan", airport_code: "GYU", region: "宁夏", is_hot: false, themes: [] },
+  
+  # 青海省
+  { name: "西宁市", pinyin: "xining", airport_code: "XNN", region: "青海", is_hot: false, themes: [] },
+  { name: "格尔木市", pinyin: "geermu", airport_code: "GOQ", region: "青海", is_hot: false, themes: [] },
+  { name: "德令哈市", pinyin: "delingha", airport_code: "HXD", region: "青海", is_hot: false, themes: [] },
+  
+  # 甘肃省
+  { name: "兰州市", pinyin: "lanzhou", airport_code: "LHW", region: "甘肃", is_hot: false, themes: [] },
+  { name: "敦煌市", pinyin: "dunhuang", airport_code: "DNH", region: "甘肃", is_hot: false, themes: [] },
+  { name: "嘉峪关市", pinyin: "jiayuguan", airport_code: "JGN", region: "甘肃", is_hot: false, themes: [] },
+  
+  # 特别行政区
+  { name: "香港", pinyin: "xianggang", airport_code: "HKG", region: "香港", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "澳门", pinyin: "aomen", airport_code: "MFM", region: "澳门", is_hot: true, themes: ["热门目的地"] },
+  
+  # 台湾省
+  { name: "台北", pinyin: "taibei", airport_code: "TPE", region: "台湾", is_hot: false, themes: [] },
+  { name: "高雄", pinyin: "gaoxiong", airport_code: "KHH", region: "台湾", is_hot: false, themes: [] },
+  { name: "台中", pinyin: "taizhong", airport_code: "RMQ", region: "台湾", is_hot: false, themes: [] },
+
+  # 日本
+  { name: "东京", pinyin: "dongjing", airport_code: "NRT", region: "日本", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "大阪", pinyin: "daban", airport_code: "KIX", region: "日本", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "京都", pinyin: "jingdu", airport_code: "KIX", region: "日本", is_hot: false, themes: ["亲子必去"] },
+  { name: "札幌", pinyin: "zhahuan", airport_code: "CTS", region: "日本", is_hot: false, themes: [] },
+  { name: "福冈", pinyin: "fugang", airport_code: "FUK", region: "日本", is_hot: false, themes: [] },
+  { name: "冲绳", pinyin: "chongsheng", airport_code: "OKA", region: "日本", is_hot: false, themes: ["海边度假"] },
+
+  # 韩国
+  { name: "首尔", pinyin: "shouer", airport_code: "ICN", region: "韩国", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "济州岛", pinyin: "jizhoudao", airport_code: "CJU", region: "韩国", is_hot: true, themes: ["海边度假", "热门目的地"] },
+  { name: "釜山", pinyin: "fushan", airport_code: "PUS", region: "韩国", is_hot: false, themes: ["海边度假"] },
+
+  # 泰国
+  { name: "曼谷", pinyin: "mangu", airport_code: "BKK", region: "泰国", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+  { name: "清迈", pinyin: "qingmai", airport_code: "CNX", region: "泰国", is_hot: false, themes: [] },
+  { name: "普吉岛", pinyin: "pujidao", airport_code: "HKT", region: "泰国", is_hot: true, themes: ["海边度假", "热门目的地"] },
+  { name: "芭提雅", pinyin: "batiya", airport_code: "BKK", region: "泰国", is_hot: false, themes: ["海边度假"] },
+
+  # 马来西亚
+  { name: "吉隆坡", pinyin: "jilongpo", airport_code: "KUL", region: "马来西亚", is_hot: true, themes: ["热门目的地"] },
+  { name: "槟城", pinyin: "bincheng", airport_code: "PEN", region: "马来西亚", is_hot: false, themes: ["海边度假"] },
+
+  # 新加坡
+  { name: "新加坡", pinyin: "xinjiapo", airport_code: "SIN", region: "新加坡", is_hot: true, themes: ["热门目的地", "亲子必去"] },
+
+  # 越南
+  { name: "胡志明", pinyin: "huzhiming", airport_code: "SGN", region: "越南", is_hot: false, themes: [] },
+  { name: "河内", pinyin: "henei", airport_code: "HAN", region: "越南", is_hot: false, themes: [] },
+  { name: "芽庄", pinyin: "yazhuang", airport_code: "CXR", region: "越南", is_hot: false, themes: ["海边度假"] },
+
   # 欧洲
-  { name: '法国', code: 'FR', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400', description: '埃菲尔铁塔、卢浮宫、普罗旺斯', statistics: { success_rate: '96%', processing_time: '12工作日', travelers: '20万+' }},
-  { name: '德国', code: 'DE', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400', description: '柏林、慕尼黑、新天鹅堡', statistics: { success_rate: '97%', processing_time: '10工作日', travelers: '18万+' }},
-  { name: '意大利', code: 'IT', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400', description: '罗马、威尼斯、佛罗伦萨', statistics: { success_rate: '96%', processing_time: '12工作日', travelers: '22万+' }},
-  { name: '英国', code: 'GB', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400', description: '大本钟、伦敦眼、剑桥', statistics: { success_rate: '95%', processing_time: '15工作日', travelers: '16万+' }},
-  { name: '西班牙', code: 'ES', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400', description: '巴塞罗那、马德里、塞维利亚', statistics: { success_rate: '97%', processing_time: '12工作日', travelers: '19万+' }},
-  { name: '瑞士', code: 'CH', region: '欧洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', description: '少女峰、日内瓦湖、苏黎世', statistics: { success_rate: '98%', processing_time: '10工作日', travelers: '12万+' }},
-  
+  { name: "伦敦", pinyin: "lundun", airport_code: "LHR", region: "英国", is_hot: true, themes: ["热门目的地"] },
+  { name: "巴黎", pinyin: "bali", airport_code: "CDG", region: "法国", is_hot: true, themes: ["热门目的地"] },
+  { name: "罗马", pinyin: "luoma", airport_code: "FCO", region: "意大利", is_hot: true, themes: ["热门目的地"] },
+  { name: "巴塞罗那", pinyin: "basailuona", airport_code: "BCN", region: "西班牙", is_hot: false, themes: [] },
+  { name: "阿姆斯特丹", pinyin: "amusitedan", airport_code: "AMS", region: "荷兰", is_hot: false, themes: [] },
+  { name: "慕尼黑", pinyin: "munihei", airport_code: "MUC", region: "德国", is_hot: false, themes: [] },
+
   # 美洲
-  { name: '美国', code: 'US', region: '美洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=400', description: '自由女神、大峡谷、黄石公园', statistics: { success_rate: '92%', processing_time: '20工作日', travelers: '30万+' }},
-  { name: '加拿大', code: 'CA', region: '美洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1517935706615-2717063c2225?w=400', description: '落基山脉、尼亚加拉瀑布、温哥华', statistics: { success_rate: '94%', processing_time: '18工作日', travelers: '15万+' }},
-  { name: '巴西', code: 'BR', region: '美洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=400', description: '里约热内卢、亚马逊雨林、伊瓜苏瀑布', statistics: { success_rate: '96%', processing_time: '15工作日', travelers: '8万+' }},
-  
+  { name: "纽约", pinyin: "niuyue", airport_code: "JFK", region: "美国", is_hot: true, themes: ["热门目的地"] },
+  { name: "洛杉矶", pinyin: "luoshanji", airport_code: "LAX", region: "美国", is_hot: true, themes: ["热门目的地"] },
+  { name: "旧金山", pinyin: "jiujinshan", airport_code: "SFO", region: "美国", is_hot: false, themes: [] },
+  { name: "多伦多", pinyin: "duolunduo", airport_code: "YYZ", region: "加拿大", is_hot: false, themes: [] },
+  { name: "温哥华", pinyin: "wengehua", airport_code: "YVR", region: "加拿大", is_hot: false, themes: [] },
+
   # 大洋洲
-  { name: '澳大利亚', code: 'AU', region: '大洋洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=400', description: '悉尼歌剧院、大堡礁、墨尔本', statistics: { success_rate: '95%', processing_time: '14工作日', travelers: '20万+' }},
-  { name: '新西兰', code: 'NZ', region: '大洋洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1469521669194-babb72ee7e55?w=400', description: '皇后镇、霍比特村、米尔福德峡湾', statistics: { success_rate: '96%', processing_time: '12工作日', travelers: '12万+' }},
-  
+  { name: "悉尼", pinyin: "xini", airport_code: "SYD", region: "澳大利亚", is_hot: true, themes: ["热门目的地", "海边度假"] },
+  { name: "墨尔本", pinyin: "moerben", airport_code: "MEL", region: "澳大利亚", is_hot: false, themes: [] },
+  { name: "奥克兰", pinyin: "aokeland", airport_code: "AKL", region: "新西兰", is_hot: false, themes: [] },
+
+  # 中东
+  { name: "迪拜", pinyin: "dibai", airport_code: "DXB", region: "阿联酋", is_hot: true, themes: ["热门目的地"] },
+  { name: "伊斯坦布尔", pinyin: "yisitanbuer", airport_code: "IST", region: "土耳其", is_hot: false, themes: [] },
+
   # 非洲
-  { name: '南非', code: 'ZA', region: '非洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=400', description: '开普敦、桌山、克鲁格国家公园', statistics: { success_rate: '97%', processing_time: '10工作日', travelers: '6万+' }},
-  { name: '埃及', code: 'EG', region: '非洲', visa_free: false, image_url: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=400', description: '金字塔、尼罗河、红海', statistics: { success_rate: '98%', processing_time: '8工作日', travelers: '10万+' }},
+  { name: "开罗", pinyin: "kailuo", airport_code: "CAI", region: "埃及", is_hot: false, themes: [] },
+  { name: "内罗毕", pinyin: "neiluobi", airport_code: "NBO", region: "肯尼亚", is_hot: false, themes: [] },
 ]
 
-Country.find_or_create_by!(name: '日本', code: 'JP') do |country|
-  country.region = '亚洲'
-  country.visa_free = false
-  country.image_url = 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400'
-  country.description = '富士山、樱花、寺庙'
-  country.statistics = { success_rate: '98%', processing_time: '8工作日', travelers: '50万+' }
-end
+# 使用 find_or_create_by 避免重复创建
+created_count = 0
+updated_count = 0
 
-visa_countries_data.each do |data|
-  country = Country.find_or_create_by!(name: data[:name], code: data[:code]) do |c|
+cities_data.each do |data|
+  city = City.find_or_create_by(name: data[:name]) do |c|
+    c.pinyin = data[:pinyin]
+    c.airport_code = data[:airport_code]
     c.region = data[:region]
-    c.visa_free = data[:visa_free]
-    c.image_url = data[:image_url]
-    c.description = data[:description]
-    c.statistics = data[:statistics]
+    c.is_hot = data[:is_hot]
+    c.themes = data[:themes]
+    created_count += 1
   end
-  puts "✓ 国家: #{country.name}"
-end
-
-# 为日本创建签证产品（作为示例）
-japan = Country.find_by(name: '日本')
-if japan
-  visa_products_data = [
-    {
-      name: '日本单次旅游签证',
-      product_type: 'single',
-      price: 299,
-      processing_days: 8,
-      material_count: 6,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '户口本'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '户口本'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资产证明', '户口本'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '户口本']
-      },
-      can_simplify: true,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '携程签证',
-      success_rate: 99,
-      features: ['拒签全退', '上门取件', '材料简化', '加急办理']
-    },
-    {
-      name: '日本三年多次往返签证',
-      product_type: 'multiple_3year',
-      price: 699,
-      processing_days: 10,
-      material_count: 8,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '户口本', '资产证明', '纳税证明'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '户口本', '房产证', '车辆行驶证'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资产证明', '户口本', '父母在职证明', '家庭资产'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '户口本', '资产证明', '房产证']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '携程签证',
-      success_rate: 98,
-      features: ['三年多次', '上门取件', '专业服务']
-    },
-    {
-      name: '日本五年多次往返签证',
-      product_type: 'multiple_5year',
-      price: 999,
-      processing_days: 12,
-      material_count: 10,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '户口本', '资产证明', '纳税证明', '房产证', '车辆行驶证'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '户口本', '房产证', '车辆行驶证', '营业执照', '股权证明'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资产证明', '户口本', '父母在职证明', '家庭资产', '房产证', '学习成绩'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '户口本', '资产证明', '房产证', '养老金证明', '医疗保险']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '携程签证',
-      success_rate: 97,
-      features: ['五年多次', '上门取件', '专家指导', 'VIP服务']
-    }
-  ]
   
-  visa_products_data.each do |data|
-    product = japan.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
+  # 如果城市已存在，更新其他属性
+  unless city.new_record? || city.id.nil?
+    if city.update(data.except(:name))
+      updated_count += 1
     end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
   end
 end
 
-# 为韩国创建签证产品
-korea = Country.find_by(name: '韩国')
-if korea
-  visa_products_data = [
-    {
-      name: '韩国单次旅游签证',
-      product_type: 'single',
-      price: 259,
-      processing_days: 7,
-      material_count: 5,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资产证明'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水']
-      },
-      can_simplify: true,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '途牛签证',
-      success_rate: 99,
-      features: ['拒签全退', '上门取件', '快速办理']
-    },
-    {
-      name: '韩国五年多次往返签证',
-      product_type: 'multiple_5year',
-      price: 599,
-      processing_days: 9,
-      material_count: 7,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '资产证明', '纳税证明'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '房产证', '营业执照'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资产证明', '父母在职证明', '家庭资产'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '资产证明', '养老金证明']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '途牛签证',
-      success_rate: 98,
-      features: ['五年多次', '上门取件', '专业服务']
-    }
-  ]
+puts "创建了 #{created_count} 个新城市"
+puts "更新了 #{updated_count} 个已存在的城市"
+puts "城市总数: #{City.count}"
+
+# ==================== 旅游目的地数据 ====================
+# 清理旧数据
+puts "\n正在清理旧目的地数据..."
+TourProduct.destroy_all
+Destination.destroy_all
+
+puts "正在创建旅游目的地..."
+
+# 创建热门目的地
+destinations_data = [
+  { name: "深圳", region: "广东", is_hot: true, description: "创新之都，现代化滨海城市" },
+  { name: "北京", region: "北京", is_hot: true, description: "千年古都，文化名城" },
+  { name: "上海", region: "上海", is_hot: true, description: "魔都，国际化大都市" },
+  { name: "广州", region: "广东", is_hot: true, description: "千年商都，美食之城" },
+  { name: "成都", region: "四川", is_hot: true, description: "天府之国,休闲之都" },
+  { name: "杭州", region: "浙江", is_hot: true, description: "人间天堂，西湖美景" },
+  { name: "西安", region: "陕西", is_hot: true, description: "十三朝古都，历史名城" },
+  { name: "三亚", region: "海南", is_hot: true, description: "东方夏威夷，热带海滨" },
+  { name: "珠海", region: "广东", is_hot: true, description: "浪漫之城，海滨花园" },
+  { name: "中国香港", region: "香港", is_hot: true, description: "东方之珠，购物天堂" },
+  { name: "中国澳门", region: "澳门", is_hot: true, description: "赌城，中西文化交汇" },
+  { name: "哈尔滨", region: "黑龙江", is_hot: true, description: "冰城，冬季奇观" }
+]
+
+destinations = destinations_data.map do |data|
+  Destination.create!(data)
+end
+
+puts "创建了 #{destinations.count} 个热门目的地"
+
+# 为所有城市自动创建 Destination 记录（如果尚未存在）
+puts "正在为所有城市创建 Destination 记录..."
+created_count = 0
+City.find_each do |city|
+  # 使用 find_or_create_by 避免重复创建
+  destination = Destination.find_or_create_by(name: city.name) do |dest|
+    dest.region = city.region
+    dest.is_hot = city.is_hot
+    dest.description = "探索#{city.name}的美好"
+    created_count += 1
+  end
+end
+puts "为城市创建了 #{created_count} 个新的 Destination 记录"
+puts "Destination 总数: #{Destination.count}"
+
+# ==================== 加载分类数据文件 ====================
+puts "\n正在加载业务数据..."
+
+# 航班数据（热门航线）
+load Rails.root.join('app/validators/support/data_packs/v1/flights.rb')
+
+# 酒店数据（深圳地区的酒店）
+load Rails.root.join('app/validators/support/data_packs/v1/hotels_seed.rb')
+
+puts "\n================================"
+puts "基础数据加载完成！"
+puts "================================"
+puts "\n数据说明："
+puts "- 城市数据: #{City.count} 个城市"
+puts "- 目的地数据: #{Destination.count} 个目的地"
+puts "- 航班数据: #{Flight.count} 个航班"
+puts "- 酒店数据: #{Hotel.count} 家酒店"
+puts "\n其他业务数据（深度旅行、汽车、巴士等）位于 app/validators/support/data_packs/v1/"
+puts "验证器测试时会按需加载这些数据包"
+
+# ====================  Demo用户默认数据 ====================
+puts "\n正在为demo用户设置默认数据..."
+
+# 查找或创建demo用户（与application_controller.rb中的自动登录用户保持一致）
+demo_user = User.find_or_create_by(email: 'demo@fliggy.com') do |u|
+  u.password = 'password123'
+  u.password_confirmation = 'password123'
+  u.name = 'Demo用户'
+  u.verified = true
+end
+
+# 设置支付密码
+if demo_user.persisted?
+  # 使用 has_secure_password 的方式设置支付密码
+  demo_user.pay_password = '222222'
+  demo_user.pay_password_confirmation = '222222'
+  demo_user.save!
+  puts "✓ 设置支付密码: 222222"
   
-  visa_products_data.each do |data|
-    product = korea.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
-    end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
+  # 添加默认乘机人（如果不存在）
+  if demo_user.passengers.where(name: '张三').none?
+    passenger = demo_user.passengers.create!(
+      name: '张三',
+      id_type: '身份证',
+      id_number: '110101199001011234',
+      phone: '13800138000'
+    )
+    puts "✓ 添加默认乘机人: 张三 (110101199001011234)"
+  else
+    puts "ℹ️  乘机人张三已存在，跳过创建"
   end
-end
-
-# 为新加坡创建签证产品
-singapore = Country.find_by(name: '新加坡')
-if singapore
-  product = singapore.visa_products.find_or_create_by!(name: '新加坡电子签证') do |p|
-    p.product_type = 'single'
-    p.price = 299
-    p.processing_days = 5
-    p.material_count = 4
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '在职证明', '银行流水'],
-      '自由职业' => ['护照', '照片', '资产证明', '银行流水'],
-      '在校学生' => ['护照', '照片', '在读证明', '父母资产证明'],
-      '退休人员' => ['护照', '照片', '退休证', '银行流水']
-    }
-    p.can_simplify = true
-    p.home_pickup = false
-    p.supports_family = true
-    p.merchant_name = '飞猪签证'
-    p.success_rate = 99
-    p.features = ['电子签', '出签快', '材料简单']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为泰国创建签证产品
-thailand = Country.find_by(name: '泰国')
-if thailand
-  product = thailand.visa_products.find_or_create_by!(name: '泰国落地签证') do |p|
-    p.product_type = 'single'
-    p.price = 259
-    p.processing_days = 3
-    p.material_count = 3
-    p.required_materials = {
-      '所有人员' => ['护照', '照片', '往返机票']
-    }
-    p.can_simplify = true
-    p.home_pickup = false
-    p.supports_family = true
-    p.merchant_name = '飞猪签证'
-    p.success_rate = 100
-    p.features = ['落地签', '办理快', '材料简单']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为马来西亚创建签证产品
-malaysia = Country.find_by(name: '马来西亚')
-if malaysia
-  product = malaysia.visa_products.find_or_create_by!(name: '马来西亚电子签证') do |p|
-    p.product_type = 'single'
-    p.price = 199
-    p.processing_days = 3
-    p.material_count = 3
-    p.required_materials = {
-      '所有人员' => ['护照', '照片', '往返机票']
-    }
-    p.can_simplify = true
-    p.home_pickup = false
-    p.supports_family = true
-    p.merchant_name = '携程签证'
-    p.success_rate = 100
-    p.features = ['电子签', '免签待遇', '快速出签']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为越南创建签证产品
-vietnam = Country.find_by(name: '越南')
-if vietnam
-  visa_products_data = [
-    {
-      name: '越南单次旅游签证',
-      product_type: 'single',
-      price: 299,
-      processing_days: 6,
-      material_count: 4,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证']
-      },
-      can_simplify: true,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '途牛签证',
-      success_rate: 99,
-      features: ['拒签全退', '上门取件', '材料简单']
-    }
-  ]
   
-  visa_products_data.each do |data|
-    product = vietnam.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
-    end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-  end
+  puts "\n=== Demo用户信息 ==="
+  puts "邮箱: demo@fliggy.com"
+  puts "密码: password123"
+  puts "支付密码: 222222"
+  puts "乘机人: 张三 (110101199001011234, 13800138000)"
 end
-
-# 为法国创建签证产品（申根签证）
-france = Country.find_by(name: '法国')
-if france
-  visa_products_data = [
-    {
-      name: '法国申根旅游签证',
-      product_type: 'single',
-      price: 899,
-      processing_days: 12,
-      material_count: 8,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '行程单', '酒店预订', '机票预订'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '行程单', '酒店预订', '机票预订']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '携程签证',
-      success_rate: 96,
-      features: ['申根签证', '上门取件', '专家指导', '畅游26国']
-    }
-  ]
-  
-  visa_products_data.each do |data|
-    product = france.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
-    end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-  end
-end
-
-# 为美国创建签证产品
-usa = Country.find_by(name: '美国')
-if usa
-  visa_products_data = [
-    {
-      name: '美国B1/B2旅游签证',
-      product_type: 'multiple_10year',
-      price: 1699,
-      processing_days: 20,
-      material_count: 10,
-      required_materials: {
-        '在职人员' => ['护照', '照片', 'DS-160表', '在职证明', '银行流水', '资产证明', '行程计划', '面签预约', '户口本', '结婚证'],
-        '自由职业' => ['护照', '照片', 'DS-160表', '资产证明', '银行流水', '营业执照', '行程计划', '面签预约', '户口本', '结婚证'],
-        '在校学生' => ['护照', '照片', 'DS-160表', '在读证明', '父母资助声明', '父母资产', '行程计划', '面签预约', '户口本', '学习成绩'],
-        '退休人员' => ['护照', '照片', 'DS-160表', '退休证', '银行流水', '资产证明', '行程计划', '面签预约', '户口本', '子女证明']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '携程签证',
-      success_rate: 92,
-      features: ['十年多次', '面签辅导', '专家指导', '拒签重办']
-    }
-  ]
-  
-  visa_products_data.each do |data|
-    product = usa.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
-    end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-  end
-end
-
-# 为澳大利亚创建签证产品
-australia = Country.find_by(name: '澳大利亚')
-if australia
-  visa_products_data = [
-    {
-      name: '澳大利亚旅游签证',
-      product_type: 'multiple_1year',
-      price: 1299,
-      processing_days: 14,
-      material_count: 8,
-      required_materials: {
-        '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '资产证明', '行程单', '户口本'],
-        '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '营业执照', '行程单', '户口本'],
-        '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '父母资产', '行程单', '户口本'],
-        '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '资产证明', '行程单', '户口本']
-      },
-      can_simplify: false,
-      home_pickup: true,
-      supports_family: true,
-      merchant_name: '飞猪签证',
-      success_rate: 95,
-      features: ['电子签', '一年多次', '专家审核', '快速出签']
-    }
-  ]
-  
-  visa_products_data.each do |data|
-    product = australia.visa_products.find_or_create_by!(name: data[:name]) do |p|
-      p.product_type = data[:product_type]
-      p.price = data[:price]
-      p.processing_days = data[:processing_days]
-      p.material_count = data[:material_count]
-      p.required_materials = data[:required_materials]
-      p.can_simplify = data[:can_simplify]
-      p.home_pickup = data[:home_pickup]
-      p.supports_family = data[:supports_family]
-      p.merchant_name = data[:merchant_name]
-      p.success_rate = data[:success_rate]
-      p.features = data[:features]
-    end
-    puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-  end
-end
-
-# 为英国创建签证产品
-uk = Country.find_by(name: '英国')
-if uk
-  product = uk.visa_products.find_or_create_by!(name: '英国旅游签证') do |p|
-    p.product_type = 'multiple_2year'
-    p.price = 1499
-    p.processing_days = 15
-    p.material_count = 9
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '资产证明', '行程单', '酒店预订', '机票预订'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '营业执照', '行程单', '酒店预订', '机票预订'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '父母资产', '行程单', '酒店预订', '机票预订'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '资产证明', '行程单', '酒店预订', '机票预订']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '途牛签证'
-    p.success_rate = 95
-    p.features = ['两年多次', '上门取件', '专家指导', '材料翻译']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为加拿大创建签证产品
-canada = Country.find_by(name: '加拿大')
-if canada
-  product = canada.visa_products.find_or_create_by!(name: '加拿大旅游签证') do |p|
-    p.product_type = 'multiple_10year'
-    p.price = 1399
-    p.processing_days = 18
-    p.material_count = 9
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '资产证明', '行程单', '户口本', '结婚证'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '营业执照', '行程单', '户口本', '结婚证'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '父母资产', '行程单', '户口本', '出生证明'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '资产证明', '行程单', '户口本', '子女证明']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '携程签证'
-    p.success_rate = 94
-    p.features = ['十年多次', '上门取件', '专家审核', '材料指导']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# ==================== 境外当地交通数据 ====================
-load Rails.root.join('db', 'seeds', 'abroad_tickets.rb')
-
-# ==================== 旅游产品（跟团游商城）数据 ====================
-load Rails.root.join('db', 'seeds', 'tour_group_products.rb')
-# 跟团游产品详情已通过随机生成器自动创建
-
-# 为新西兰创建签证产品
-newzealand = Country.find_by(name: '新西兰')
-if newzealand
-  product = newzealand.visa_products.find_or_create_by!(name: '新西兰旅游签证') do |p|
-    p.product_type = 'multiple_2year'
-    p.price = 1199
-    p.processing_days = 12
-    p.material_count = 7
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '资产证明', '行程单'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '营业执照', '行程单'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '父母资产', '行程单'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '资产证明', '行程单']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '飞猪签证'
-    p.success_rate = 96
-    p.features = ['电子签', '两年多次', '快速出签', '材料简化']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为德国创建签证产品（申根签证）
-germany = Country.find_by(name: '德国')
-if germany
-  product = germany.visa_products.find_or_create_by!(name: '德国申根旅游签证') do |p|
-    p.product_type = 'single'
-    p.price = 899
-    p.processing_days = 10
-    p.material_count = 8
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '行程单', '酒店预订', '机票预订'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '行程单', '酒店预订', '机票预订']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '途牛签证'
-    p.success_rate = 97
-    p.features = ['申根签证', '上门取件', '专家审核', '畅游26国']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为意大利创建签证产品（申根签证）
-italy = Country.find_by(name: '意大利')
-if italy
-  product = italy.visa_products.find_or_create_by!(name: '意大利申根旅游签证') do |p|
-    p.product_type = 'single'
-    p.price = 899
-    p.processing_days = 12
-    p.material_count = 8
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '行程单', '酒店预订', '机票预订'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '行程单', '酒店预订', '机票预订']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '携程签证'
-    p.success_rate = 96
-    p.features = ['申根签证', '上门取件', '专家指导', '畅游26国']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为西班牙创建签证产品（申根签证）
-spain = Country.find_by(name: '西班牙')
-if spain
-  product = spain.visa_products.find_or_create_by!(name: '西班牙申根旅游签证') do |p|
-    p.product_type = 'single'
-    p.price = 899
-    p.processing_days = 12
-    p.material_count = 8
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水', '行程单', '酒店预订', '机票预订'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明', '行程单', '酒店预订', '机票预订'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水', '行程单', '酒店预订', '机票预订']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '飞猪签证'
-    p.success_rate = 97
-    p.features = ['申根签证', '上门取件', '专家审核', '畅游26国']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-# 为印度创建签证产品
-india = Country.find_by(name: '印度')
-if india
-  product = india.visa_products.find_or_create_by!(name: '印度电子旅游签证') do |p|
-    p.product_type = 'single'
-    p.price = 599
-    p.processing_days = 10
-    p.material_count = 5
-    p.required_materials = {
-      '在职人员' => ['护照', '照片', '签证申请表', '在职证明', '银行流水'],
-      '自由职业' => ['护照', '照片', '签证申请表', '资产证明', '银行流水'],
-      '在校学生' => ['护照', '照片', '签证申请表', '在读证明', '父母资助声明'],
-      '退休人员' => ['护照', '照片', '签证申请表', '退休证', '银行流水']
-    }
-    p.can_simplify = false
-    p.home_pickup = true
-    p.supports_family = true
-    p.merchant_name = '途牛签证'
-    p.success_rate = 95
-    p.features = ['电子签', '快速出签', '上门取件', '材料简化']
-  end
-  puts "  ✓ 签证产品: #{product.name} - ¥#{product.price}"
-end
-
-puts "\n签证数据初始化完成！"
-puts "创建了 #{Country.count} 个国家"
-puts "创建了 #{VisaProduct.count} 个签证产品"
-
-puts "\n🎉 所有数据初始化完成！"
-puts "====================================="
-puts "数据统计："
-puts "  - 城市: #{City.count}"
-puts "  - 目的地: #{Destination.count}"
-puts "  - 深度旅行讲师: #{DeepTravelGuide.count}"
-puts "  - 深度旅行产品: #{DeepTravelProduct.count}"
-puts "  - 酒店: #{Hotel.count}"
-puts "  - 租车: #{Car.count}"
-puts "  - 汽车票: #{BusTicket.count}"
-puts "  - 境外交通票: #{AbroadTicket.count}"
-puts "  - 跟团游产品: #{TourGroupProduct.count}"
-puts "  - 酒店套餐: #{HotelPackage.count}"
-puts "  - 火车票: #{Train.count}"
-puts "  - 机票: #{Flight.count}"
-puts "  - 国家: #{Country.count}"
-puts "  - 签证产品: #{VisaProduct.count}"
-puts "====================================="

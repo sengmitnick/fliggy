@@ -77,10 +77,12 @@ export default class extends Controller<HTMLElement> {
     const { cityName } = customEvent.detail
     console.log('HotelSearch: Received city update:', cityName)
     
-    if (this.hasCityInputTarget) {
-      this.cityInputTarget.value = cityName
-      console.log('HotelSearch: Updated city input to:', cityName)
-    }
+    // Update URL with new city and reload page to fetch city-specific data
+    const url = new URL(window.location.href)
+    url.searchParams.set('city', cityName)
+    
+    console.log('HotelSearch: Reloading page with new city:', cityName)
+    window.location.href = url.toString()
   }
 
   // Handle date selection update from hotel-date-picker

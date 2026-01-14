@@ -1,0 +1,258 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Verify - 验证系统命令行工具
+# 
+# 用法:
+#   bin/verify list                        # 列出所有验证器
+#   bin/verify run <validator_id>          # 运行验证器（交互模式）
+#   bin/verify show <validator_id>         # 显示验证器详情
+
+require_relative '../config/environment'
+
+class VerifyCLI
+  def initialize(args)
+    @args = args
+    @command = args[0]
+  end
+  
+  def run
+    case @command
+    when 'list'
+      list_validators
+    when 'show'
+      show_validator(@args[1])
+    when 'run'
+      run_validator(@args[1])
+    when 'help', '-h', '--help', nil
+      show_help
+    else
+      puts "未知命令: #{@command}"
+      show_help
+      exit 1
+    end
+  end
+  
+  private
+  
+  # 列出所有验证器
+  def list_validators
+    validators = load_all_validators
+    
+    if validators.empty?
+      puts "❌ 未找到任何验证器"
+      puts "提示: 验证器应放在 app/validators/*_validator.rb"
+      return
+    end
+    
+    puts "\n📋 可用的验证器 (共 #{validators.size} 个):\n\n"
+    
+    validators.each do |validator|
+      meta = validator.metadata
+      puts "  🔹 ID: #{meta[:id]}"
+      puts "     标题: #{meta[:title]}"
+      puts "     描述: #{meta[:description]}"
+      puts "     数据包: #{meta[:data_pack_version]}"
+      puts "     超时: #{meta[:timeout]}秒"
+      puts ""
+    end
+  end
+  
+  # 显示验证器详情
+  def show_validator(validator_id)
+    unless validator_id
+      puts "❌ 错误: 请指定验证器 ID"
+      puts "用法: bin/verify show <validator_id>"
+      exit 1
+    end
+    
+    validator = find_validator(validator_id)
+    meta = validator.metadata
+    
+    puts "\n📄 验证器详情:\n\n"
+    puts "  ID:          #{meta[:id]}"
+    puts "  标题:        #{meta[:title]}"
+    puts "  描述:        #{meta[:description]}"
+    puts "  数据包版本:  #{meta[:data_pack_version]}"
+    puts "  超时时间:    #{meta[:timeout]}秒"
+    puts ""
+  end
+  
+  # 运行验证器（交互模式）
+  def run_validator(validator_id)
+    unless validator_id
+      puts "❌ 错误: 请指定验证器 ID"
+      puts "用法: bin/verify run <validator_id>"
+      exit 1
+    end
+    
+    validator_class = find_validator(validator_id)
+    execution_id = SecureRandom.uuid
+    instance = validator_class.new(execution_id)
+    
+    puts "\n" + "="*60
+    puts "🚀 开始执行验证: #{validator_class.title}"
+    puts "="*60
+    
+    # === 准备阶段 ===
+    puts "\n📦 准备阶段: 加载数据包..."
+    
+    begin
+      # execute_prepare 内部已经处理了事务和状态保存，不需要外层事务
+      prepare_info = instance.execute_prepare
+      
+      puts "\n✅ 准备完成！任务信息："
+      puts JSON.pretty_generate(prepare_info)
+    rescue StandardError => e
+      puts "\n❌ 准备阶段失败: #{e.message}"
+      puts e.backtrace.first(5).join("\n")
+      exit 1
+    end
+    
+    # === 等待用户操作 ===
+    puts "\n" + "-"*60
+    puts "⏸️  请手动完成以下操作:"
+    puts "   1. 启动项目: bin/dev"
+    puts "   2. 在浏览器中完成任务"
+    puts "   3. 完成后按回车继续验证..."
+    puts "-"*60
+    
+    $stdin.gets
+    
+    # === 验证阶段 ===
+    puts "\n🔍 验证阶段: 检查结果..."
+    
+    begin
+      # execute_verify 内部已经处理了事务，不需要外层事务
+      result = instance.execute_verify
+      
+      # 显示结果
+      display_result(result)
+      
+    rescue StandardError => e
+      puts "\n❌ 验证阶段失败: #{e.message}"
+      puts e.backtrace.first(5).join("\n")
+      exit 1
+    end
+  end
+  
+  # 显示验证结果
+  def display_result(result)
+    puts "\n" + "="*60
+    puts "📊 验证结果"
+    puts "="*60
+    
+    status_icon = case result[:status]
+                  when 'passed' then '✅'
+                  when 'failed' then '❌'
+                  else '⚠️'
+                  end
+    
+    puts "\n#{status_icon} 状态: #{result[:status].upcase}"
+    puts "🎯 得分: #{result[:score]}/100"
+    puts ""
+    
+    # 显示断言结果
+    if result[:assertions].any?
+      puts "📋 断言详情:\n\n"
+      result[:assertions].each do |assertion|
+        icon = assertion[:passed] ? '✓' : '✗'
+        status = assertion[:passed] ? '通过' : '失败'
+        
+        puts "  #{icon} #{assertion[:name]} (权重: #{assertion[:weight]}) - #{status}"
+        
+        if assertion[:error]
+          puts "     错误: #{assertion[:error]}"
+        end
+      end
+      puts ""
+    end
+    
+    # 显示错误列表
+    if result[:errors].any?
+      puts "❌ 错误列表:\n\n"
+      result[:errors].each do |error|
+        puts "  • #{error}"
+      end
+      puts ""
+    end
+    
+    # 最终评价
+    case result[:score]
+    when 90..100
+      puts "🏆 优秀！完美完成任务！"
+    when 70..89
+      puts "👍 良好！大部分要求已达成。"
+    when 60..69
+      puts "✅ 及格，但还有改进空间。"
+    else
+      puts "💪 继续努力！请仔细检查任务要求。"
+    end
+    
+    puts "="*60 + "\n"
+  end
+  
+  # 加载所有验证器类
+  def load_all_validators
+    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    
+    validator_files.map do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      class_name = File.basename(file, '.rb').camelize
+      require file
+      class_name.constantize
+    end.compact.select { |klass| klass < BaseValidator }
+  end
+  
+  # 根据 ID 查找验证器
+  def find_validator(id)
+    validators = load_all_validators
+    validator = validators.find { |v| v.validator_id == id }
+    
+    unless validator
+      puts "❌ 错误: 验证器 '#{id}' 不存在"
+      puts "\n可用的验证器:"
+      validators.each { |v| puts "  - #{v.validator_id}" }
+      exit 1
+    end
+    
+    validator
+  end
+  
+  # 显示帮助信息
+  def show_help
+    puts <<~HELP
+      
+      📘 Verify - 验证系统命令行工具
+      
+      用法:
+        bin/verify <command> [options]
+      
+      命令:
+        list                     列出所有可用的验证器
+        show <validator_id>      显示验证器详细信息
+        run <validator_id>       运行验证器（交互模式）
+        help, -h, --help         显示此帮助信息
+      
+      示例:
+        # 查看所有验证器
+        bin/verify list
+        
+        # 查看特定验证器详情
+        bin/verify show book_flight_sz_to_bj
+        
+        # 运行验证器
+        bin/verify run book_flight_sz_to_bj
+      
+      验证器开发:
+        验证器文件应放在: app/validators/*_validator.rb
+        继承自: BaseValidator
+        实现方法: prepare, verify
+      
+    HELP
+  end
+end
+
+# 运行 CLI
+VerifyCLI.new(ARGV).run

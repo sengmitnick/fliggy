@@ -42,19 +42,18 @@
       departure_city = params[:destination_city] || '杭州' # Return is reversed
       destination_city = params[:departure_city] || '北京'
       
-      # Query or generate flight data for each date
+      # Query flight data for each date (no auto-generation)
       (start_date..end_date).each do |date|
-        # Check if flights exist for this route and date
-        flights = Flight.by_route(departure_city, destination_city).by_date(date)
+        # Check if flights exist for this route and date (using available scope)
+        flights = Flight.by_route(departure_city, destination_city).by_date(date).available
         
-        # If no flights exist, generate them
-        if flights.empty?
-          flights = Flight.generate_for_route(departure_city, destination_city, date)
+        # Get minimum offer price from flight_offers (nil if no flights)
+        min_price = if flights.any?
+          flights.map(&:min_offer_price).min
+        else
+          nil
         end
-        
-        # Get minimum price
-        min_price = flights.minimum(:price)
-        date_prices[date] = min_price || 0
+        date_prices[date] = min_price
       end
       
       # Build calendar grid
@@ -148,7 +147,9 @@
                 is_holiday = date.wday == 0 || date.wday == 6 || special_label
                 
                 # Price color based on value
-                price_class = if price < 250
+                price_class = if price.nil?
+                  'text-gray-400'
+                elsif price < 250
                   'text-red-500'
                 elsif price < 350
                   'text-orange-500'
@@ -179,7 +180,11 @@
                 
                 <!-- Price -->
                 <div class="text-xs <%= is_selected ? 'text-red-600 font-bold' : price_class %> mt-1">
-                  ¥<%= price %>
+                  <% if price %>
+                    ¥<%= price %>
+                  <% else %>
+                    <span class="text-gray-400">--</span>
+                  <% end %>
                 </div>
                 
                 <!-- Special day label -->

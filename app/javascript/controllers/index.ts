@@ -77,6 +77,9 @@ import QrcodeModalController from "./qrcode_modal_controller"
 import LocationSelectorController from "./location_selector_controller"
 import TransferSearchController from "./transfer_search_controller"
 import AddressSelectorController from "./address_selector_controller"
+import SearchController from "./search_controller"
+import SmartBackController from "./smart_back_controller"
+import TourGroupTabsController from "./tour_group_tabs_controller"
 
 const application = Application.start()
 
@@ -157,5 +160,8 @@ application.register("qrcode-modal", QrcodeModalController)
 application.register("location-selector", LocationSelectorController)
 application.register("transfer-search", TransferSearchController)
 application.register("address-selector", AddressSelectorController)
+application.register("search", SearchController)
+application.register("smart-back", SmartBackController)
+application.register("tour-group-tabs", TourGroupTabsController)
 
 window.Stimulus = application
