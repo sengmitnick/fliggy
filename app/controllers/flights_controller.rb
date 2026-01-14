@@ -284,8 +284,28 @@ class FlightsController < ApplicationController
 
   def get_date_prices(departure_city, destination_city, center_date)
     prices = []
-    (-2..2).each do |offset|
-      date = center_date + offset.days
+    today = Date.today
+    
+    # 确保中心日期不早于今天
+    center_date = [center_date, today].max
+    
+    # 显示4天的日期，确保日历按钮能在屏幕内显示
+    # 如果选中的日期是今天，从今天开始显示4天
+    # 如果选中的日期较远，显示选中日期前1天和后2天
+    start_offset = if center_date == today
+      0  # 从今天开始
+    else
+      -1  # 显示选中日期前1天
+    end
+    
+    # 计算起始日期，确保不早于今天
+    start_date = center_date + start_offset.days
+    start_date = [start_date, today].max
+    
+    # 从起始日期开始，连续显示4天
+    4.times do |i|
+      date = start_date + i.days
+      
       flights = Flight.search(departure_city, destination_city, date).includes(:flight_offers)
       # Get minimum offer price from all flights on this date
       min_price = if flights.any?

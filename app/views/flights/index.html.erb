@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="<%= params[:departure_city] || '北京' %>" data-city-selector-destination-city-value="<%= params[:destination_city] || '杭州' %>" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -60,7 +60,7 @@
         <button 
           data-action="click->city-selector#openDeparture"
           class="flex-1 text-left">
-          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="departure">北京</div>
+          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="departure"><%= params[:departure_city] || '北京' %></div>
         </button>
         
         <button 
@@ -72,7 +72,7 @@
         <button 
           data-action="click->city-selector#openDestination"
           class="flex-1 text-right">
-          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="destination">杭州</div>
+          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="destination"><%= params[:destination_city] || '杭州' %></div>
         </button>
       </div>
 
@@ -140,9 +140,9 @@
       </div>
 
       <!-- Search Button -->
-      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
-        <%= f.hidden_field :departure_city, value: '北京', data: { 'city-selector-target': 'departureCityInput' } %>
-        <%= f.hidden_field :destination_city, value: '杭州', data: { 'city-selector-target': 'destinationCityInput' } %>
+      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false, controller: 'flight-search', action: 'submit->flight-search#validateForm' } do |f| %>
+        <%= f.hidden_field :departure_city, value: params[:departure_city] || '北京', data: { 'city-selector-target': 'departureCityInput', 'flight-search-target': 'departureInput' } %>
+        <%= f.hidden_field :destination_city, value: params[:destination_city] || '杭州', data: { 'city-selector-target': 'destinationCityInput', 'flight-search-target': 'destinationInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
         <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
         <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>

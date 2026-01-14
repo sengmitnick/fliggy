@@ -5,7 +5,7 @@
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 py-3">
-        <%= link_to flights_path, class: "flex items-center gap-2" do %>
+        <%= link_to flights_path(departure_city: @departure_city, destination_city: @destination_city), class: "flex items-center gap-2" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -222,7 +222,7 @@
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 py-3">
-        <%= link_to flights_path, class: "flex items-center gap-2" do %>
+        <%= link_to flights_path(departure_city: @departure_city, destination_city: @destination_city), class: "flex items-center gap-2" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
