@@ -81,7 +81,7 @@
 </div>
 
 <!-- 预订信息区域 -->
-<div class="bg-white mt-2 p-4" data-controller="sim-card-booking">
+<div class="bg-white mt-2 p-4" data-controller="sim-card-booking" data-sim-card-booking-orderable-type-value="InternetSimCard">
   <!-- 数量 -->
   <div class="flex justify-between items-center mb-6">
     <span class="font-bold text-base">预订数量</span>
@@ -129,9 +129,9 @@
     <span class="text-xs text-[#FF4400]">¥</span>
     <span class="text-2xl font-bold text-[#FF4400]" data-sim-card-booking-target="totalPrice">9.9</span>
   </div>
-  <%= button_to "立即支付", new_internet_order_path, method: :get, 
-      params: { orderable_type: 'InternetSimCard', orderable_id: @sim_cards.first&.id },
-      class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700]",
-      data: { turbo: false } %>
+  <button data-action="sim-card-booking#checkout"
+      class="bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700]">
+    立即支付
+  </button>
   </div>
 </div>

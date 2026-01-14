@@ -3,10 +3,19 @@ class HomeController < ApplicationController
 
   def index
     # 获取用户上次选择的城市，如果没有则默认为深圳
-    if session[:last_destination_slug].present?
-      @current_destination = Destination.friendly.find(session[:last_destination_slug])
-    else
-      @current_destination = Destination.friendly.find('shen-zhen')
+    begin
+      if session[:last_destination_slug].present?
+        @current_destination = Destination.friendly.find(session[:last_destination_slug])
+      else
+        @current_destination = Destination.friendly.find('shen-zhen')
+      end
+    rescue ActiveRecord::RecordNotFound
+      # 如果找不到目的地，尝试查找第一个或创建默认目的地
+      @current_destination = Destination.first || Destination.create!(
+        name: '深圳',
+        slug: 'shen-zhen',
+        description: '深圳市'
+      )
     end
 
     # 随机搜索建议

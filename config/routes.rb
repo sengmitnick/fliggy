@@ -329,6 +329,8 @@ Rails.application.routes.draw do
       get :edit_pay_password
       patch :update_pay_password
       post :verify_pay_password
+      get :wallet
+      post :recharge
     end
   end
 

@@ -625,8 +625,13 @@ puts "\n签证数据初始化完成！"
 puts "创建了 #{Country.count} 个国家"
 puts "创建了 #{VisaProduct.count} 个签证产品"
 
+# ==================== 接送机套餐数据 ====================
+puts "\n正在创建接送机套餐数据..."
+TransferPackage.generate_default_packages
+puts "✓ 创建了 #{TransferPackage.count} 个接送机套餐"
+
 puts "\n🎉 所有数据初始化完成！"
-puts "====================================="
+puts "===================================="
 puts "数据统计："
 puts "  - 城市: #{City.count}"
 puts "  - 目的地: #{Destination.count}"
@@ -642,4 +647,5 @@ puts "  - 火车票: #{Train.count}"
 puts "  - 机票: #{Flight.count}"
 puts "  - 国家: #{Country.count}"
 puts "  - 签证产品: #{VisaProduct.count}"
+puts "  - 接送机套餐: #{TransferPackage.count}"
 puts "====================================="

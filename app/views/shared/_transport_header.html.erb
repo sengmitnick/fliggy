@@ -8,10 +8,10 @@
   <%= image_tag background_image, class: "w-full h-auto object-cover object-center", alt: "背景" %>
 
   <!-- Top Bar -->
-  <div class="absolute top-4 left-0 w-full flex items-center justify-between px-4 py-3">
-    <%= link_to return_path, class: "w-10 h-10 flex items-center justify-center" do %>
+  <div class="absolute top-4 left-0 w-full flex items-center justify-between px-4 py-3" data-controller="smart-back" data-smart-back-fallback-value="<%= return_path %>">
+    <a href="#" data-action="click->smart-back#goBack" class="w-10 h-10 flex items-center justify-center">
       <%= image_tag "返回.png", class: "w-10 h-10", alt: "返回" %>
-    <% end %>
+    </a>
     
     <div class="flex items-center gap-3">
       <button class="w-10 h-10 flex items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">

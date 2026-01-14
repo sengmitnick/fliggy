@@ -297,12 +297,12 @@
       <p class="text-lg font-bold text-gray-700">20<span class="text-sm font-normal">万</span></p>
       <p class="text-[10px] text-gray-500">借钱精选</p>
     </div>
-    <div class="px-4">
+    <%= link_to wallet_profile_path, class: "px-4" do %>
       <div class="w-8 h-8 mx-auto mb-1">
         <%= image_tag 'profile/我的钱包.png', class: 'w-full h-full object-contain', alt: '我的钱包' %>
       </div>
       <p class="text-[10px] text-gray-500">我的钱包</p>
-    </div>
+    <% end %>
   </div>
 
   <!-- 超值福利 -->
