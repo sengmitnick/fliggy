@@ -56,11 +56,7 @@
         <!-- Passenger List -->
         <% current_user.passengers.order(created_at: :desc).each_with_index do |passenger, index| %>
           <div 
-            class="px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
-            data-action="click->hotel-traveler-selector#selectPassenger"
-            data-passenger-id="<%= passenger.id %>"
-            data-passenger-name="<%= passenger.name %>"
-            data-passenger-phone="<%= passenger.phone %>">
+            class="px-4 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center flex-1">
                 <!-- Pencil Icon -->
@@ -84,10 +80,15 @@
                 </div>
               </div>
 
-              <!-- Checkmark (always yellow) -->
-              <svg class="w-6 h-6 flex-shrink-0 ml-3" style="color: #FFD700;" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
+              <!-- Checkbox instead of checkmark -->
+              <input 
+                type="checkbox" 
+                class="w-6 h-6 flex-shrink-0 ml-3 rounded border-2 border-gray-300 text-yellow-500 focus:ring-2 focus:ring-yellow-500 cursor-pointer"
+                data-action="change->hotel-traveler-selector#togglePassenger"
+                data-passenger-id="<%= passenger.id %>"
+                data-passenger-name="<%= passenger.name %>"
+                data-passenger-phone="<%= passenger.phone %>"
+                data-hotel-traveler-selector-target="checkbox">
             </div>
           </div>
         <% end %>
