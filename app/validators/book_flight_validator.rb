@@ -26,12 +26,11 @@ class BookFlightValidator < BaseValidator
   self.validator_id = 'book_flight_sz_to_bj'
   self.title = '预订深圳到北京的低价机票'
   self.description = '在今天的航班中找到价格最低的机票并完成预订'
-  self.data_pack_version = 'v1/flights'  # 使用 v1 数据包
   self.timeout_seconds = 300
   
-  # 准备阶段：插入测试数据
+  # 准备阶段：设置任务参数
   def prepare
-    # 数据已经通过 load_data_pack 自动加载
+    # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
     # 设置任务参数（使用动态日期，与数据包保持一致）
     @target_date = Date.current + 3.days
     @origin = '深圳市'

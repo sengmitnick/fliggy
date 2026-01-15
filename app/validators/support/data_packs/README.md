@@ -2,17 +2,25 @@
 
 ## 🎯 统一数据管理策略
 
-**所有数据通过 data_packs 版本化管理，降低维护成本**
+**所有数据通过 data_packs 版本化管理，prepare 阶段自动加载最新版本下的所有数据包**
 
 ```
 app/validators/support/data_packs/v1/
-├── base.rb          # 基础数据：City, Destination, Demo用户（永久保留）
-├── flights.rb       # 航班测试数据（6个航班）
-├── hotels_seed.rb   # 酒店测试数据
-├── trains.rb        # 火车测试数据（待创建）
-└── ...              # 其他业务数据包
+├── base.rb                    # 基础数据（City, Destination, Demo用户）
+├── flights.rb                 # 航班数据
+├── hotels.rb                  # 酒店数据
+├── hotels_seed.rb             # 酒店种子数据
+├── trains.rb                  # 火车数据（如需要可创建）
+├── cars.rb                    # 汽车租赁数据
+├── bus_tickets.rb             # 巴士票数据
+├── tour_group_products.rb     # 跟团游数据
+├── abroad_tickets.rb          # 境外票务数据
+├── abroad_shopping.rb         # 境外购物数据
+├── deep_travel.rb             # 深度游数据
+├── hotel_packages.rb          # 酒店套餐数据
+└── internet_services.rb       # 互联网服务数据
 
-db/seeds.rb          # 空入口，仅提供使用说明
+db/seeds.rb                    # 空入口，仅提供使用说明
 ```
 
 ## 核心理念
@@ -21,46 +29,401 @@ db/seeds.rb          # 空入口，仅提供使用说明
 
 项目启动后，数据库默认为空，无任何预置数据。
 
-### 2. 按需加载策略
+### 2. 自动全量加载策略
 
-- **基础数据**（City, Destination）：验证器运行时自动加载
-- **业务数据**（Flight, Hotel 等）：各验证器根据需要加载对应的 data_pack
+- **基础数据**（City, Destination）：验证器运行时自动加载（`ensure_checkpoint`）
+- **业务数据**（所有其他数据包）：prepare 阶段自动加载 v1 目录下的所有 .rb 文件
 - **用户数据**（订单、乘客等）：验证过程中产生，验证后清除
 
 ### 3. 版本化管理
 
-所有数据包采用版本化命名：
-- `v1/base.rb` - 基础数据版本 1
-- `v1/flights.rb` - 航班数据版本 1
-- `v2/flights.rb` - 航班数据版本 2（当需要修改时创建新版本）
+当前使用版本：`v1`（定义在 `BaseValidator::DATA_PACK_VERSION`）
+
+- 所有验证器共享相同版本的数据包
+- 需要升级时，创建 v2 目录，修改常量即可全局切换
+- 旧版本数据包保留，保持向后兼容
 
 ### 4. 数据隔离
 
 - **基础数据**（City, Destination）：永久保留，所有验证器共享
-- **测试数据**（Flight, Hotel 等）：验证器独占，验证后清除
+- **测试数据**（Flight, Hotel 等）：prepare 时全量加载，verify 后清除
 - **订单数据**（Booking, HotelBooking 等）：验证过程产生，验证后清除
 
-## 目录结构
+## 核心流程
+
+### 数据加载顺序
 
 ```
-app/validators/support/data_packs/
-├── ARCHITECTURE.md     # 架构详细文档
-├── README.md           # 本说明文档
-├── MIGRATION_SUMMARY.md # 迁移总结（历史记录）
-└── v1/
-    ├── base.rb         # 基础数据：City (240个), Destination, Demo用户
-    ├── flights.rb      # 航班数据：6个测试航班
-    ├── hotels_seed.rb  # 酒店数据：深圳地区酒店
-    └── ...             # 其他业务数据包
+1. ensure_checkpoint()
+   ↓ 检查 City 表是否有数据
+   ↓ 如果为空，加载 v1/base.rb
+   ↓ 确保基础数据存在（City, Destination, Demo用户）
+
+2. reset_test_data_only()
+   ↓ 清空所有测试相关的表（Flight, Hotel, Train 等）
+   ↓ 保留基础数据（City, Destination）
+   ↓ 保留订单数据（Booking 等，会在验证后清理）
+   ↓ 重置 ID 序列
+
+3. load_all_data_packs()
+   ↓ 扫描 v1 目录下所有 .rb 文件（排除 base.rb）
+   ↓ 按文件名排序后依次加载
+   ↓ 输出加载日志，便于调试
+   ↓ 所有测试数据持久化到数据库，供用户操作使用
 ```
+
+### execute_prepare() 流程
+
+```ruby
+# 1. 确保基础数据存在（持久化）
+ensure_checkpoint()          # 加载 v1/base.rb（如果需要）
+
+# 2. 清空测试数据表（持久化）
+reset_test_data_only()       # 清空 Flight 等测试表
+
+# 3. 加载所有业务数据包（持久化）
+load_all_data_packs()        # 自动加载 v1 目录下所有数据包
+                             # flights.rb, hotels.rb, cars.rb, ...
+
+# 4. 执行自定义准备逻辑
+prepare()                    # 验证器自定义准备
+
+# 5. 保存执行状态
+save_execution_state()       # 持久化执行状态
+
+# 结果：
+# - City 表有数据（永久保留）
+# - Flight, Hotel, Train 等表有测试数据（供用户操作）
+# - 执行状态已保存
+```
+
+### execute_verify() 流程
+
+```ruby
+# 1. 恢复执行状态
+restore_execution_state()  # 恢复准备阶段保存的状态
+
+# 2. 执行验证
+verify()                   # 验证用户操作结果
+
+# 3. 清理执行状态
+cleanup_execution_state()  # 删除执行状态
+
+# 4. 回滚到 checkpoint
+rollback_to_checkpoint()   # 清空测试数据和订单，保留基础数据
+
+# 结果：
+# - City 表有数据（保留）
+# - Flight, Hotel 等表为空（已清除）
+# - Booking 表为空（已清除）
+# - 数据库恢复干净状态
+```
+
+## 数据分类
+
+### 基础数据（永久保留）
+
+**位置**: `v1/base.rb`
+
+- **City**: 240+ 城市数据，包含机场代码、主题标签
+- **Destination**: 目的地数据，与 City 关联
+- **Demo用户**: demo@fliggy.com，用于演示和测试
+
+**特点**:
+- 所有验证器共享
+- 永久保留，不被清除
+- 在 `reset_test_data_only()` 和 `rollback_to_checkpoint()` 中跳过
+
+### 测试数据（全量加载）
+
+**位置**: `v1/*.rb`（除 base.rb 外的所有文件）
+
+当前包含的数据包：
+- **flights.rb**: 航班数据（深圳→北京、上海→深圳）
+- **hotels.rb / hotels_seed.rb**: 酒店数据
+- **cars.rb**: 汽车租赁数据
+- **bus_tickets.rb**: 巴士票数据
+- **tour_group_products.rb**: 跟团游数据
+- **abroad_tickets.rb**: 境外票务数据
+- **abroad_shopping.rb**: 境外购物数据
+- **deep_travel.rb**: 深度游数据
+- **hotel_packages.rb**: 酒店套餐数据
+- **internet_services.rb**: 互联网服务数据
+
+**特点**:
+- prepare 阶段自动全量加载
+- 验证后清除（rollback_to_checkpoint）
+- 验证器无需指定加载哪些数据包
+
+### 订单数据（验证过程产生）
+
+**来源**: 用户操作产生
+
+- **Booking**: 机票订单
+- **HotelBooking**: 酒店订单
+- **TrainBooking**: 火车票订单
+- **其他订单**: CarOrder, BusTicketOrder 等
+
+**特点**:
+- 验证过程中产生
+- 验证后清除（rollback_to_checkpoint）
+
+## Checkpoint 机制
+
+### 什么是 Checkpoint？
+
+Checkpoint = `v1/base.rb` 加载完成后的数据库状态
+
+- ✅ 包含：City, Destination, Demo用户
+- ❌ 不包含：Flight, Hotel, Train 等业务数据
+- ❌ 不包含：Booking, HotelBooking 等订单数据
+
+### 为什么需要 Checkpoint？
+
+**问题场景**：
+```
+初始状态: 数据库为空
+验证器要求: 需要 City 数据（Flight 关联 departure_city）
+```
+
+**解决方案**：
+```ruby
+def ensure_checkpoint
+  if City.count == 0
+    load Rails.root.join('app/validators/support/data_packs/v1/base.rb')
+  end
+end
+```
+
+**执行时机**：
+- 在 `execute_prepare()` 开始时调用
+- 确保基础数据存在后再加载测试数据
+
+### 回滚到 Checkpoint
+
+**目的**：验证完成后恢复数据库到干净状态
+
+```ruby
+def rollback_to_checkpoint
+  # 1. 清空测试数据（Flight, Hotel, Train 等）
+  # 2. 清空订单数据（Booking, HotelBooking 等）
+  # 3. 保留基础数据（City, Destination）
+end
+```
+
+**结果**：
+- City 表有数据（保留）
+- Flight 表为空（清除）
+- Booking 表为空（清除）
+- 数据库状态 = Checkpoint 状态
+
+## 实际执行示例
+
+### 场景：BookFlightValidator 完整流程
+
+```bash
+# === 初始状态 ===
+City.count      # => 0
+Flight.count    # => 0
+Hotel.count     # => 0
+Booking.count   # => 0
+
+# === 1. execute_prepare ===
+validator = BookFlightValidator.new
+validator.execute_prepare
+
+# → ensure_checkpoint(): City 为空，加载 base.rb
+City.count      # => 240 (基础数据)
+Destination.count # => 240+
+
+# → reset_test_data_only(): 清空测试表（已经是空的）
+Flight.count    # => 0
+Hotel.count     # => 0
+
+# → load_all_data_packs(): 加载 v1 下所有数据包
+# 📦 正在加载 v1 数据包...
+#   → 加载 abroad_shopping.rb
+#   → 加载 abroad_tickets.rb
+#   → 加载 bus_tickets.rb
+#   → 加载 cars.rb
+#   → 加载 deep_travel.rb
+#   → 加载 flights.rb
+#   → 加载 hotel_packages.rb
+#   → 加载 hotels.rb
+#   → 加载 hotels_seed.rb
+#   → 加载 internet_services.rb
+#   → 加载 tour_group_products.rb
+# ✓ 所有数据包加载完成
+
+Flight.count    # => 6 (测试航班)
+Hotel.count     # => N (酒店数据)
+Car.count       # => M (汽车租赁数据)
+# ... 其他业务数据
+
+# → prepare(): 验证器自定义准备逻辑
+# 返回任务信息给 Agent
+
+# === 2. Agent 操作 ===
+# Agent 通过界面搜索航班、创建订单
+Booking.count   # => 1 (Agent 创建的订单)
+
+# === 3. execute_verify ===
+result = validator.execute_verify
+
+# → restore_execution_state(): 恢复准备阶段的状态
+# → verify(): 验证订单是否正确
+# → cleanup_execution_state(): 清理执行状态
+# → rollback_to_checkpoint(): 回滚到 checkpoint
+
+# === 最终状态 ===
+City.count      # => 240 (保留)
+Flight.count    # => 0 (清除)
+Hotel.count     # => 0 (清除)
+Booking.count   # => 0 (清除)
+```
+
+## 设计优势
+
+### 1. 降低维护成本
+
+- ✅ 所有数据统一在 data_packs 管理
+- ✅ 版本化命名，修改时创建新版本
+- ✅ 无需在验证器中指定加载哪些数据包
+
+### 2. 自动化加载
+
+- ✅ prepare 阶段自动加载所有数据包
+- ✅ 新增数据包无需修改代码，自动识别
+- ✅ 验证器专注业务逻辑，无需关心数据加载
+
+### 3. 数据隔离
+
+- ✅ 基础数据（City）和测试数据（Flight）分离
+- ✅ 验证器只修改测试数据，不影响基础数据
+- ✅ 每次验证前清空测试表，确保干净环境
+
+### 4. 可重复性
+
+- ✅ 每次验证前清空测试表
+- ✅ 每次验证后回滚到 checkpoint
+- ✅ 确保验证器可重复执行
+
+### 5. 性能优化
+
+- ✅ 使用 `delete_all` 而不是 `destroy_all`（跳过回调）
+- ✅ 重置 ID 序列避免冲突
+- ✅ 批量加载，减少单次加载开销
+
+### 6. 版本管理
+
+- ✅ 数据包版本化（v1, v2, v3）
+- ✅ 修改数据时创建新版本，保持向后兼容
+- ✅ 全局切换版本，所有验证器同步更新
+
+## 使用方式
+
+### 方式 1: 通过验证器自动加载（推荐）
+
+```ruby
+validator = BookFlightValidator.new
+validator.execute_prepare  # 自动加载 base.rb + v1 下所有数据包
+```
+
+### 方式 2: 手动加载基础数据
+
+```bash
+rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"
+```
+
+### 方式 3: 手动加载完整演示数据
+
+```bash
+# 加载基础数据
+rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"
+
+# 加载所有业务数据包
+rails runner "Dir.glob(Rails.root.join('app/validators/support/data_packs/v1/*.rb')).reject { |f| File.basename(f) == 'base.rb' }.sort.each { |f| load f }"
+```
+
+### 方式 4: 通过 db:seed 加载（会显示使用说明）
+
+```bash
+rails db:seed
+# 输出使用说明和手动加载命令
+```
+
+## 创建新数据包
+
+### 步骤
+
+1. **创建文件**：`app/validators/support/data_packs/v1/<domain>.rb`
+2. **编写数据**：参考现有数据包的结构
+3. **无需配置**：新文件会自动被 `load_all_data_packs` 识别和加载
+4. **测试验证**：运行任意验证器，新数据包会自动加载
+
+### 示例：创建 trains.rb 数据包
+
+```ruby
+# app/validators/support/data_packs/v1/trains.rb
+# frozen_string_literal: true
+
+# trains_v1 数据包
+# 用于火车票预订验证任务
+
+puts "正在加载 trains_v1 数据包..."
+
+base_date = Date.current + 3.days
+
+[
+  {
+    train_number: "G1234",
+    departure_city: "深圳市",
+    destination_city: "北京市",
+    departure_time: base_date.to_time.in_time_zone.change(hour: 8, min: 0),
+    arrival_time: base_date.to_time.in_time_zone.change(hour: 17, min: 30),
+    price: 933.5,
+    available_seats: 100,
+    train_date: base_date
+  }
+].each do |attrs|
+  Train.create!(attrs)
+end
+
+puts "✓ trains_v1 数据包加载完成（1个车次）"
+```
+
+创建文件后，无需任何配置，下次运行任何验证器时会自动加载。
+
+## 版本迭代
+
+当需要修改数据时：
+
+1. **创建新版本目录**: `mkdir app/validators/support/data_packs/v2`
+2. **复制所有文件**: `cp app/validators/support/data_packs/v1/* app/validators/support/data_packs/v2/`
+3. **修改数据**: 在 v2 目录中修改需要更新的数据包
+4. **切换版本**: 修改 `BaseValidator::DATA_PACK_VERSION = 'v2'`
+5. **保留旧版本**: v1 目录保留，保持向后兼容
+
+示例：
+
+```ruby
+# app/validators/base_validator.rb
+class BaseValidator
+  # 数据包版本（当前使用 v2）
+  DATA_PACK_VERSION = 'v2'  # 修改这一行即可全局切换
+  
+  # ...
+end
+```
+
+所有验证器会自动使用 v2 版本的数据包。
 
 ## 数据包规范
 
 ### 文件命名
 
-- 格式：`v<version>/<domain>.rb`
-- 示例：`v1/flights.rb`, `v1/hotels.rb`, `v2/trains.rb`
-- version：版本号（v1, v2, v3...）
+- 格式：`<domain>.rb`
+- 示例：`flights.rb`, `hotels.rb`, `trains.rb`
 - domain：业务领域（flights, hotels, trains等）
 
 ### 文件结构
@@ -102,280 +465,32 @@ puts "✓ <domain>_v<version> 数据包加载完成（<数量>条记录）"
 3. **输出清晰日志**：加载开始和结束时输出日志，便于调试
 4. **数据关联正确**：确保外键关联正确（如 Flight 的 departure_city 必须在 City 表中存在）
 5. **不使用显式 ID**：让数据库自动生成 ID，避免冲突
-
-#### 动态日期示例
-
-```ruby
-# ✅ 正确：使用动态日期
-base_date = Date.current + 3.days
-base_datetime = base_date.to_time.in_time_zone
-
-Flight.create!(
-  departure_time: base_datetime.change(hour: 8, min: 0),
-  arrival_time: base_datetime.change(hour: 11, min: 30),
-  flight_date: base_date
-)
-
-# ❌ 错误：使用固定日期（会过期）
-Flight.create!(
-  departure_time: Time.zone.parse("2024-12-20 08:00:00"),
-  arrival_time: Time.zone.parse("2024-12-20 11:30:00"),
-  flight_date: Date.parse("2024-12-20")
-)
-```
-
-**重要：** 验证器的 `prepare` 方法也必须使用相同的动态日期逻辑！
-
-```ruby
-# 在验证器中
-class YourValidator < BaseValidator
-  def prepare
-    @target_date = Date.current + 3.days  # 与数据包保持一致
-    # ...
-  end
-end
-```
-
-## 现有数据包
-
-### base.rb（基础数据包）
-
-**用途**：所有验证器的依赖数据
-
-**数据内容**：
-- City：240+ 城市（中国 + 国际热门城市）
-- Destination：目的地数据，与 City 关联
-- Demo用户：demo@fliggy.com（密码：password123，支付密码：222222）
-- 默认乘客：张三（身份证：110101199001011234）
-
-**加载时机**：
-- BaseValidator#ensure_checkpoint 自动检查并加载
-- 或手动运行：`rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"`
-
-### flights.rb（航班数据包）
-
-**用途**：航班预订验证任务
-
-**数据内容**：
-- 深圳市→北京市：4个航班，价格区间 550-1200 元（最低价 550 元）
-- 上海市→深圳市：2个航班，价格区间 450-520 元（最低价 450 元）
-- 使用动态日期：今天+3天
-
-**适用验证**：
-- `BookFlightValidator`：预订最低价航班
-- `SearchCheapestFlightValidator`：搜索折扣后最低价
-
-### hotels_seed.rb（酒店数据包）
-
-**用途**：酒店预订演示数据
-
-**数据内容**：
-- 深圳地区的酒店数据
-- 包含房间、设施、政策等信息
-
-**注意**：此文件待迁移整合到 `hotels.rb`
-
-## 使用方式
-
-### 方式 1: 通过验证器自动加载（推荐）
-
-```ruby
-# 验证器会自动加载所需数据包
-validator = BookFlightValidator.new
-validator.execute_prepare  # 自动加载 base.rb + v1/flights.rb
-```
-
-### 方式 2: 手动加载基础数据
-
-```bash
-# 只加载基础数据（City + Destination）
-rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"
-```
-
-### 方式 3: 手动加载完整演示数据
-
-```bash
-# 1. 加载基础数据
-rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"
-
-# 2. 加载航班数据
-rails runner "load Rails.root.join('app/validators/support/data_packs/v1/flights.rb')"
-
-# 3. 加载酒店数据
-rails runner "load Rails.root.join('app/validators/support/data_packs/v1/hotels_seed.rb')"
-```
-
-### 方式 4: 通过 db:seed 加载（会显示使用说明）
-
-```bash
-rails db:seed
-# 输出使用说明和手动加载命令
-```
-
-## 创建新数据包
-
-### 步骤
-
-1. **创建文件**：`app/validators/support/data_packs/v1/<domain>.rb`
-2. **编写数据**：参考上述文件结构和最佳实践
-3. **创建验证器**：在 `app/validators/` 中创建对应的验证器类
-4. **指定版本**：在验证器中设置 `self.data_pack_version = 'v1/<domain>'`
-5. **测试验证**：使用 CLI 或 API 测试完整流程
-
-### 示例：创建 trains.rb 数据包
-
-```ruby
-# app/validators/support/data_packs/v1/trains.rb
-# frozen_string_literal: true
-
-# trains_v1 数据包
-# 用于火车票预订验证任务
-#
-# 数据说明：
-# - 深圳市→北京市：2个车次
-# - 使用动态日期：今天+3天
-
-puts "正在加载 trains_v1 数据包..."
-
-base_date = Date.current + 3.days
-
-[
-  {
-    train_number: "G1234",
-    departure_city: "深圳市",
-    destination_city: "北京市",
-    departure_time: base_date.to_time.in_time_zone.change(hour: 8, min: 0),
-    arrival_time: base_date.to_time.in_time_zone.change(hour: 17, min: 30),
-    price: 933.5,
-    available_seats: 100,
-    train_date: base_date
-  }
-].each do |attrs|
-  Train.create!(attrs)
-end
-
-puts "✓ trains_v1 数据包加载完成（1个车次）"
-```
-
-### 在验证器中使用
-
-```ruby
-class BookTrainValidator < BaseValidator
-  self.validator_id = 'book_train'
-  self.title = '预订火车票'
-  self.data_pack_version = 'v1/trains'  # 指定数据包版本
-  self.timeout_seconds = 300
-  
-  def prepare
-    # 数据已通过 load_data_pack 自动加载
-    @target_date = Date.current + 3.days
-    @origin = '深圳市'
-    @destination = '北京市'
-    
-    {
-      task: "请预订一张#{@origin}到#{@destination}的火车票",
-      departure_city: @origin,
-      destination_city: @destination,
-      date: @target_date.to_s
-    }
-  end
-  
-  def verify
-    # 验证逻辑
-    add_assertion "订单已创建", weight: 50 do
-      booking = TrainBooking.order(created_at: :desc).first
-      expect(booking).not_to be_nil
-    end
-  end
-  
-  private
-  
-  def execution_state_data
-    { target_date: @target_date.to_s, origin: @origin, destination: @destination }
-  end
-  
-  def restore_from_state(data)
-    @target_date = Date.parse(data['target_date'])
-    @origin = data['origin']
-    @destination = data['destination']
-  end
-end
-```
-
-## 版本迭代
-
-当需要修改数据时：
-
-1. **创建新版本**：复制为 `v2/<domain>.rb`
-2. **修改数据**：在新文件中进行修改
-3. **更新验证器**：修改 `data_pack_version = 'v2/<domain>'`
-4. **保留旧版本**：不删除旧文件，保持向后兼容
-
-示例：
-
-```ruby
-# v1/flights.rb - 旧版本，6个航班
-# v2/flights.rb - 新版本，10个航班，增加了更多航线
-
-# 新验证器使用 v2
-class BookFlightV2Validator < BaseValidator
-  self.data_pack_version = 'v2/flights'
-end
-
-# 旧验证器仍使用 v1
-class BookFlightValidator < BaseValidator
-  self.data_pack_version = 'v1/flights'
-end
-```
-
-## 数据包工作流程
-
-### 验证器执行流程
-
-```
-1. execute_prepare
-   ├─ ensure_checkpoint()        # 确保基础数据存在（base.rb）
-   ├─ reset_test_data_only()     # 清空测试数据表
-   ├─ load_data_pack()           # 加载验证器专用数据包
-   ├─ prepare()                  # 验证器自定义准备
-   └─ save_execution_state()     # 保存执行状态
-
-2. [Agent 操作]
-   用户通过界面完成任务（如创建订单）
-
-3. execute_verify
-   ├─ restore_execution_state()  # 恢复执行状态
-   ├─ verify()                   # 验证结果
-   ├─ cleanup_execution_state()  # 清理执行状态
-   └─ rollback_to_checkpoint()   # 回滚到 checkpoint
-```
-
-### Checkpoint 机制
-
-**Checkpoint = base.rb 加载完成后的数据库状态**
-
-- ✅ 包含：City, Destination, Demo用户
-- ❌ 不包含：Flight, Hotel, Train 等业务数据
-- ❌ 不包含：Booking, HotelBooking 等订单数据
-
-**作用**：
-- 验证前：确保基础数据存在（ensure_checkpoint）
-- 验证后：清除测试数据和订单，保留基础数据（rollback_to_checkpoint）
+6. **数据量适中**：测试数据应足够但不过多，避免影响性能
 
 ## 注意事项
 
 1. **不要修改已发布的数据包**：创建新版本而非修改现有版本
-2. **确保数据完整性**：外键关联必须正确（如 Flight 的 departure_city 必须在 City 表中存在）
-3. **必须使用动态日期**：使用 `Date.current + N.days` 而不是 `Date.parse('2024-12-20')`
+2. **确保数据完整性**：外键关联必须正确
+3. **必须使用动态日期**：使用 `Date.current + N.days` 而不是固定日期
 4. **测试数据真实性**：数据应接近真实场景
-5. **验证器日期一致性**：验证器的 `prepare` 方法必须使用与数据包相同的日期逻辑
-6. **不要在 db/seeds.rb 中添加数据**：所有数据统一在 data_packs 管理
+5. **不要在 db/seeds.rb 中添加数据**：所有数据统一在 data_packs 管理
+6. **新增数据包无需配置**：创建文件后会自动加载
 
 ## 常见问题
 
+### Q: 为什么自动加载所有数据包？
+
+A: 简化验证器开发。验证器无需关心加载哪些数据包，专注业务逻辑。新增数据包无需修改代码。
+
+### Q: 如何只加载特定数据包？
+
+A: 当前架构不支持选择性加载。如需此功能，可以：
+1. 将不需要的数据包移出 v1 目录
+2. 或创建单独的版本目录（如 v1_minimal）仅包含需要的数据包
+
 ### Q: 为什么不在 db/seeds.rb 中加载数据？
 
-A: 统一管理降低维护成本。所有数据通过 data_packs 版本化管理，避免 seeds.rb 和 data_packs 重复维护。
+A: 统一管理降低维护成本。所有数据通过 data_packs 版本化管理，避免重复维护。
 
 ### Q: 如何查看当前数据库状态？
 
@@ -386,7 +501,7 @@ Flight.count       # 测试数据
 Booking.count      # 订单数据
 ```
 
-### Q: prepare 后为什么 Flight.count != 0？
+### Q: prepare 后为什么所有表都有数据？
 
 A: 这是正确的。prepare 加载的数据是持久化的，供用户操作使用。verify 完成后会通过 rollback_to_checkpoint 清除。
 
@@ -398,27 +513,19 @@ A:
 rails db:reset
 
 # 方式2: 手动清空
-rails runner "Flight.delete_all; Booking.delete_all; City.delete_all; Destination.delete_all"
+rails runner "Flight.delete_all; Hotel.delete_all; Booking.delete_all; City.delete_all; Destination.delete_all"
 
 # 然后重新加载基础数据
 rails runner "load Rails.root.join('app/validators/support/data_packs/v1/base.rb')"
 ```
 
-### Q: 能否在一个验证器中使用多个数据包？
+### Q: 如何升级数据包版本？
 
-A: 可以。重写 `load_data_pack` 方法：
-
-```ruby
-class ComplexValidator < BaseValidator
-  self.data_pack_version = 'v1/complex'
-  
-  def load_data_pack
-    load Rails.root.join('app/validators/support/data_packs/v1/flights.rb')
-    load Rails.root.join('app/validators/support/data_packs/v1/hotels.rb')
-    load Rails.root.join('app/validators/support/data_packs/v1/trains.rb')
-  end
-end
-```
+A: 
+1. 创建新版本目录：`mkdir app/validators/support/data_packs/v2`
+2. 复制并修改数据包
+3. 修改 `BaseValidator::DATA_PACK_VERSION = 'v2'`
+4. 所有验证器自动切换到 v2
 
 ## 相关文件
 

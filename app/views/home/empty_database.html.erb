@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4">
+  <div class="max-w-md w-full text-center">
+    <!-- Icon -->
+    <div class="mb-8">
+      <svg class="mx-auto h-24 w-24 text-[var(--color-text-tertiary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-[var(--color-text-primary)] mb-4">
+      数据库为空
+    </h1>
+
+    <!-- Description -->
+    <p class="text-[var(--color-text-secondary)] mb-8">
+      当前数据库中没有任何数据。您可以通过以下方式加载测试数据：
+    </p>
+
+    <!-- Instructions -->
+    <div class="bg-[var(--color-surface)] rounded-lg p-6 text-left mb-8 shadow-sm">
+      <h2 class="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
+        加载测试数据
+      </h2>
+      
+      <div class="space-y-4">
+        <div>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-2">
+            方法1: 运行命令加载所有数据包
+          </p>
+          <code class="block bg-[var(--color-background)] text-[var(--color-primary)] px-3 py-2 rounded text-sm font-mono">
+            rails runner "Dir.glob(Rails.root.join('app/validators/support/data_packs/v1/*.rb')).sort.each { |f| load f }"
+          </code>
+        </div>
+
+        <div>
+          <p class="text-sm text-[var(--color-text-secondary)] mb-2">
+            方法2: 运行验证器（推荐）
+          </p>
+          <code class="block bg-[var(--color-background)] text-[var(--color-primary)] px-3 py-2 rounded text-sm font-mono">
+            bin/verify prepare book_flight_sz_to_bj
+          </code>
+          <p class="text-xs text-[var(--color-text-tertiary)] mt-2">
+            验证器 prepare 阶段会自动加载所需数据
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-sm text-[var(--color-text-tertiary)]">
+      详细文档请参考: 
+      <a href="https://docs.clacky.ai/" class="text-[var(--color-primary)] hover:underline">
+        数据包管理系统文档
+      </a>
+    </p>
+  </div>
+</div>

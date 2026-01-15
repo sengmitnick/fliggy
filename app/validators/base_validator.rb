@@ -25,7 +25,7 @@ class BaseValidator
   attr_reader :execution_id, :errors, :score, :assertions
   
   class << self
-    attr_accessor :validator_id, :title, :description, :data_pack_version, :timeout_seconds
+    attr_accessor :validator_id, :title, :description, :timeout_seconds
     
     # 返回验证器元信息
     def metadata
@@ -33,11 +33,13 @@ class BaseValidator
         id: validator_id,
         title: title,
         description: description,
-        data_pack_version: data_pack_version,
         timeout: timeout_seconds
       }
     end
   end
+  
+  # 数据包版本（当前使用 v1）
+  DATA_PACK_VERSION = 'v1'
   
   def initialize(execution_id = SecureRandom.uuid)
     @execution_id = execution_id
@@ -58,19 +60,16 @@ class BaseValidator
   
   # 执行准备阶段（加载测试数据）
   def execute_prepare
-    # 1. 确保数据库处于 checkpoint 状态（有完整的 seeds 数据）
-    ensure_checkpoint
-    
-    # 2. 清空测试数据表（Flight/Hotel等），保留 seeds 的基础数据（City等）
+    # 1. 清空测试数据表（Flight/Hotel等），保留基础数据（City等）
     reset_test_data_only
     
-    # 3. 加载验证器专有的数据包（持久化，供用户操作）
-    load_data_pack
+    # 2. 加载当前版本下的所有数据包（包括 base.rb，全量加载）
+    load_all_data_packs
     
-    # 4. 执行自定义准备逻辑
+    # 3. 执行自定义准备逻辑
     @prepare_result = prepare
     
-    # 5. 保存执行状态（用于验证阶段恢复）
+    # 4. 保存执行状态（用于验证阶段恢复）
     save_execution_state
     
     @prepare_result
@@ -116,65 +115,46 @@ class BaseValidator
   
   private
   
-  # 从 Ruby seed 文件加载数据包到数据库
-  # 注意：ensure_seed_loaded 和 reset_test_tables 已在 execute_prepare/execute_verify 中调用
-  # 这个方法只负责执行数据包脚本
-  def load_data_pack
-    return unless self.class.data_pack_version
+  # 加载当前版本下的所有数据包（包括 base.rb）
+  def load_all_data_packs
+    data_packs_dir = Rails.root.join('app/validators/support/data_packs', DATA_PACK_VERSION)
     
-    # 支持两种格式：
-    # 1. 版本化格式: "v1/flights" -> app/validators/support/data_packs/v1/flights.rb
-    # 2. 直接文件格式: "flights_v1" -> app/validators/support/data_packs/flights_v1.rb（向后兼容）
-    data_pack_path = if self.class.data_pack_version.include?('/')
-                       Rails.root.join(
-                         'app/validators/support/data_packs',
-                         "#{self.class.data_pack_version}.rb"
-                       )
-                     else
-                       Rails.root.join(
-                         'app/validators/support/data_packs',
-                         "#{self.class.data_pack_version}.rb"
-                       )
-                     end
-    
-    unless File.exist?(data_pack_path)
-      raise "Data pack not found: #{data_pack_path}"
+    unless Dir.exist?(data_packs_dir)
+      puts "\n⚠️  数据包目录不存在: #{data_packs_dir}"
+      return
     end
     
-    # 执行数据包脚本
-    load data_pack_path
-  end
-  
-  # 确保数据库处于 checkpoint 状态（基础数据已加载）
-  # 
-  # Checkpoint = base.rb 加载完成后的状态
-  # - 包含 City、Destination（基础数据，永久保留）
-  # - 不包含 Flight、Hotel 等业务数据（由各验证器按需加载）
-  # - 这是验证器的"干净起点"
-  def ensure_checkpoint
-    # 检查基础数据是否已加载
-    if City.count == 0
-      puts "\nℹ️  基础数据未加载，正在加载 base.rb..."
-      # 加载基础数据包（City + Destination）
-      load Rails.root.join('app/validators/support/data_packs/v1/base.rb')
-      puts "✓ 基础数据加载完成"
-    else
-      puts "\nℹ️  基础数据已存在，跳过加载"
+    # 获取所有 .rb 文件（包括 base.rb）
+    data_pack_files = Dir.glob(data_packs_dir.join('*.rb')).sort
+    
+    if data_pack_files.empty?
+      puts "\n⚠️  未找到数据包文件（#{DATA_PACK_VERSION}）"
+      return
     end
+    
+    puts "\n📦 正在加载 #{DATA_PACK_VERSION} 数据包..."
+    data_pack_files.each do |file|
+      puts "  → 加载 #{File.basename(file)}"
+      load file
+    end
+    puts "✓ 所有数据包加载完成（#{data_pack_files.size} 个文件）"
   end
   
-  # 回滚到 checkpoint（清空测试数据和订单，保留基础数据）
+
+  
+  # 回滚到初始状态（清空所有数据）
   def rollback_to_checkpoint
-    puts "\nℹ️  回滚到 checkpoint 状态..."
-    # 清空所有验证相关的表（订单 + 测试数据）
-    # 保留 City、Destination 等基础表
+    puts "\nℹ️  回滚到初始状态（清空所有数据）..."
+    # 清空所有表（订单 + 测试数据 + 基础数据）
     [
       # 订单相关（用户操作产生的）
       Booking, HotelBooking, TrainBooking, TourGroupBooking,
       CarOrder, BusTicketOrder, AbroadTicketOrder, InternetOrder,
       DeepTravelBooking, HotelPackageOrder,
       # 测试数据（验证器加载的）
-      Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket
+      Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket,
+      # 基础数据（也需要清空）
+      City, Destination
     ].each do |model|
       if defined?(model)
         model.delete_all
@@ -183,15 +163,17 @@ class BaseValidator
       end
     end
     
-    puts "✓ 已回滚到 checkpoint 状态（仅保留基础数据：City, Destination）"
+    puts "✓ 已回滚到初始状态（数据库为空）"
   end
   
-  # 只清空测试数据表（Flight/Hotel等），保留订单和基础数据
+  # 清空所有测试数据表（包括基础数据），保留订单
   def reset_test_data_only
-    # 清空业务数据（Flight/Hotel等），为加载验证器专有数据做准备
+    # 清空所有测试相关的数据（包括 City/Destination/Flight/Hotel 等）
     # 不清空订单（会在验证后统一清理）
-    # 不清空 City/Destination（属于 checkpoint 的一部分）
     [
+      # 基础数据（也需要清空，因为会重新加载）
+      City, Destination,
+      # 业务数据
       Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket
     ].each do |model|
       if defined?(model)
