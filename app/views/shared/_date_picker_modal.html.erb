@@ -43,25 +43,8 @@
       calendar_weeks = []
       current_week = []
       
-      # Get prices for dates from database
-      date_prices = {}
-      departure_city = params[:departure_city] || '北京'
-      destination_city = params[:destination_city] || '杭州'
-      
-      # Query or generate flight data for each date
-      (start_date..end_date).each do |date|
-        # Check if flights exist for this route and date
-        flights = Flight.by_route(departure_city, destination_city).by_date(date)
-        
-        # If no flights exist, generate them
-        if flights.empty?
-          flights = Flight.generate_for_route(departure_city, destination_city, date)
-        end
-        
-        # Get minimum price
-        min_price = flights.minimum(:price)
-        date_prices[date] = min_price || 0
-      end
+      # Use preloaded prices from controller (batch query optimization)
+      date_prices = @departure_date_prices || {}
       
       # Build calendar grid
       current_date = start_date
@@ -139,7 +122,7 @@
                 # For initial render, use server timezone; JavaScript will disable buttons dynamically
                 is_past = date < Date.today
                 is_selected = date.to_s == (params[:date] || Date.today.to_s)
-                price = date_prices[date]
+                price = date_prices[date] || 0
                 
                 # Check for special days
                 special_label = nil

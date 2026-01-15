@@ -17,6 +17,7 @@ export default class extends Controller {
   declare readonly modalTarget: HTMLElement
   declare readonly modalTitleTarget: HTMLElement
   declare readonly selectedDisplayTarget: HTMLElement
+  declare readonly selectedDisplayTargets: HTMLElement[]
   declare readonly passengerTabTarget: HTMLElement
   declare readonly countTabTarget: HTMLElement
   declare readonly passengerListPanelTarget: HTMLElement
@@ -29,6 +30,7 @@ export default class extends Controller {
   private children: number = 0
   private infants: number = 0
   private selectedPassengerIds: Set<number> = new Set()
+  private selectedPassengerNames: Map<number, string> = new Map()
   private hasSelection: boolean = false
 
   // Backup of confirmed state
@@ -36,9 +38,15 @@ export default class extends Controller {
   private confirmedChildren: number = 0
   private confirmedInfants: number = 0
   private confirmedPassengerIds: Set<number> = new Set()
+  private confirmedPassengerNames: Map<number, string> = new Map()
 
   connect(): void {
-    // Don't update display on initial load - keep the default "选择乘机人" text
+    // Load saved state from localStorage
+    this.loadFromLocalStorage()
+    // Update display if there's a saved selection
+    if (this.hasSelection) {
+      this.updateDisplay()
+    }
   }
 
   openModal(event: Event): void {
@@ -60,6 +68,7 @@ export default class extends Controller {
     this.children = this.confirmedChildren
     this.infants = this.confirmedInfants
     this.selectedPassengerIds = new Set(this.confirmedPassengerIds)
+    this.selectedPassengerNames = new Map(this.confirmedPassengerNames)
     
     // Restore checkbox states
     const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
@@ -113,11 +122,14 @@ export default class extends Controller {
   togglePassenger(event: Event): void {
     const checkbox = event.target as HTMLInputElement
     const passengerId = parseInt(checkbox.value)
+    const passengerName = checkbox.dataset.passengerName || ''
     
     if (checkbox.checked) {
       this.selectedPassengerIds.add(passengerId)
+      this.selectedPassengerNames.set(passengerId, passengerName)
     } else {
       this.selectedPassengerIds.delete(passengerId)
+      this.selectedPassengerNames.delete(passengerId)
     }
   }
 
@@ -189,6 +201,7 @@ export default class extends Controller {
     this.children = 0
     this.infants = 0
     this.selectedPassengerIds.clear()
+    this.selectedPassengerNames.clear()
     this.hasSelection = false
     
     // Also reset confirmed state
@@ -196,6 +209,10 @@ export default class extends Controller {
     this.confirmedChildren = 0
     this.confirmedInfants = 0
     this.confirmedPassengerIds.clear()
+    this.confirmedPassengerNames.clear()
+    
+    // Clear localStorage
+    localStorage.removeItem('passenger_selection')
     
     // Uncheck all checkboxes
     const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
@@ -216,10 +233,15 @@ export default class extends Controller {
     this.confirmedChildren = this.children
     this.confirmedInfants = this.infants
     this.confirmedPassengerIds = new Set(this.selectedPassengerIds)
+    this.confirmedPassengerNames = new Map(this.selectedPassengerNames)
     
     this.hasSelection = true
+    this.saveToLocalStorage()
     this.updateDisplay()
-    this.closeModal(event)
+    
+    // Close modal directly without triggering restore logic
+    this.modalTarget.classList.add("hidden")
+    document.body.style.overflow = ""
   }
 
   private updateCounters(): void {
@@ -234,20 +256,60 @@ export default class extends Controller {
   }
 
   private updateDisplay(): void {
-    const total = this.adults + this.children + this.infants
+    const total = this.confirmedAdults + this.confirmedChildren + this.confirmedInfants
     
-    // Update the button display
-    const displayDiv = this.selectedDisplayTarget.querySelector('.text-base') as HTMLElement
-    if (displayDiv) {
-      // If user hasn't made a selection or is back to initial state (1 adult, 0 children, 0 infants)
-      // show the default text
-      if (!this.hasSelection || (this.adults === 1 && this.children === 0 && this.infants === 0)) {
-        displayDiv.textContent = '选择乘机人'
-      } else {
-        displayDiv.textContent = `${total}位乘机人`
+    // Update all button displays on the page
+    this.selectedDisplayTargets.forEach((displayContainer) => {
+      const displayDiv = displayContainer.querySelector('.text-base') as HTMLElement
+      if (displayDiv) {
+        // If user selected specific passengers, show their names
+        if (this.confirmedPassengerNames.size > 0) {
+          const names = Array.from(this.confirmedPassengerNames.values())
+          displayDiv.textContent = names.join('、')
+        } 
+        // If no specific passengers but count is selected, show count
+        else if (!this.hasSelection || (this.confirmedAdults === 1 && this.confirmedChildren === 0 && this.confirmedInfants === 0)) {
+          displayDiv.textContent = '选择乘机人'
+        } else {
+          displayDiv.textContent = `${total}位乘机人`
+        }
       }
-    }
+    })
     
     this.updateModalTitle()
+  }
+
+  private saveToLocalStorage(): void {
+    const state = {
+      adults: this.confirmedAdults,
+      children: this.confirmedChildren,
+      infants: this.confirmedInfants,
+      passengerIds: Array.from(this.confirmedPassengerIds),
+      passengerNames: Array.from(this.confirmedPassengerNames.entries()),
+      hasSelection: this.hasSelection
+    }
+    localStorage.setItem('passenger_selection', JSON.stringify(state))
+  }
+
+  private loadFromLocalStorage(): void {
+    const savedState = localStorage.getItem('passenger_selection')
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState)
+        this.adults = state.adults || 1
+        this.children = state.children || 0
+        this.infants = state.infants || 0
+        this.confirmedAdults = state.adults || 1
+        this.confirmedChildren = state.children || 0
+        this.confirmedInfants = state.infants || 0
+        this.selectedPassengerIds = new Set(state.passengerIds || [])
+        this.confirmedPassengerIds = new Set(state.passengerIds || [])
+        this.selectedPassengerNames = new Map(state.passengerNames || [])
+        this.confirmedPassengerNames = new Map(state.passengerNames || [])
+        this.hasSelection = state.hasSelection || false
+      } catch (e) {
+        console.error('Failed to load passenger selection from localStorage:', e)
+      }
+    }
   }
 }

@@ -119,7 +119,7 @@
 
       <!-- Cabin Class Selection -->
       <div class="w-full flex">
-        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1">
+        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1 w-full">
           <button 
             type="button"
             data-cabin-selector-target="button"
@@ -140,7 +140,7 @@
       </div>
 
       <!-- Search Button -->
-      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false, controller: 'flight-search', action: 'submit->flight-search#validateForm' } do |f| %>
+      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false, controller: 'flight-search flight-history', action: 'submit->flight-search#validateForm submit->flight-history#saveSearch' } do |f| %>
         <%= f.hidden_field :departure_city, value: params[:departure_city] || '北京', data: { 'city-selector-target': 'departureCityInput', 'flight-search-target': 'departureInput' } %>
         <%= f.hidden_field :destination_city, value: params[:destination_city] || '杭州', data: { 'city-selector-target': 'destinationCityInput', 'flight-search-target': 'destinationInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
@@ -151,6 +151,22 @@
           搜索机票
         </button>
       <% end %>
+
+      <!-- Search History Section -->
+      <div class="mt-4" data-controller="flight-history" data-flight-history-target="container">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">历史搜索</h3>
+          <button 
+            type="button"
+            data-action="click->flight-history#clearHistory"
+            class="text-xs text-blue-500 hover:text-blue-700">
+            清空记录
+          </button>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar" data-flight-history-target="list">
+          <!-- History items will be rendered dynamically -->
+        </div>
+      </div>
     </div>
 
     <!-- Multi-City Form (hidden by default) -->

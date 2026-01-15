@@ -6,6 +6,7 @@ import SdkIntegrationController from "./sdk_integration_controller"
 import ClipboardController from "./clipboard_controller"
 import CitySelectorController from "./city_selector_controller"
 import FlightSearchController from "./flight_search_controller"
+import FlightHistoryController from "./flight_history_controller"
 import DatePickerController from "./date_picker_controller"
 import BookingController from "./booking_controller"
 import CouponController from "./coupon_controller"
@@ -71,6 +72,7 @@ application.register("sdk-integration", SdkIntegrationController)
 application.register("clipboard", ClipboardController)
 application.register("city-selector", CitySelectorController)
 application.register("flight-search", FlightSearchController)
+application.register("flight-history", FlightHistoryController)
 application.register("date-picker", DatePickerController)
 application.register("booking", BookingController)
 application.register("coupon", CouponController)
