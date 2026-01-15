@@ -19,7 +19,10 @@ export default class extends Controller<HTMLElement> {
     "checkOutInput",
     "roomsInput",
     "adultsInput",
-    "childrenInput"
+    "childrenInput",
+    "minPriceInput",
+    "maxPriceInput",
+    "starsInput"
   ]
 
   declare readonly searchModalTarget: HTMLElement
@@ -56,6 +59,12 @@ export default class extends Controller<HTMLElement> {
   declare readonly adultsInputTarget: HTMLInputElement
   declare readonly hasChildrenInputTarget: boolean
   declare readonly childrenInputTarget: HTMLInputElement
+  declare readonly hasMinPriceInputTarget: boolean
+  declare readonly minPriceInputTarget: HTMLInputElement
+  declare readonly hasMaxPriceInputTarget: boolean
+  declare readonly maxPriceInputTarget: HTMLInputElement
+  declare readonly hasStarsInputTarget: boolean
+  declare readonly starsInputTarget: HTMLInputElement
 
   connect(): void {
     console.log("HotelSearch connected")
@@ -65,6 +74,8 @@ export default class extends Controller<HTMLElement> {
     document.addEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
     // Listen for guest-selector updates
     document.addEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
+    // Listen for price-filter updates
+    document.addEventListener('hotel-price-filter:filter-updated', this.handlePriceFilterUpdate.bind(this))
   }
 
   disconnect(): void {
@@ -72,6 +83,7 @@ export default class extends Controller<HTMLElement> {
     document.removeEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
     document.removeEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
     document.removeEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
+    document.removeEventListener('hotel-price-filter:filter-updated', this.handlePriceFilterUpdate.bind(this))
   }
 
   // Handle city selection update from city-selector
@@ -124,6 +136,29 @@ export default class extends Controller<HTMLElement> {
     if (this.hasChildrenInputTarget) {
       this.childrenInputTarget.value = children.toString()
       console.log('HotelSearch: Updated children to:', children)
+    }
+  }
+
+  // Handle price/star filter update from hotel-price-filter
+  handlePriceFilterUpdate(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { minPrice, maxPrice, stars } = customEvent.detail
+    console.log('HotelSearch: Received price filter update:', { minPrice, maxPrice, stars })
+    
+    if (this.hasMinPriceInputTarget) {
+      this.minPriceInputTarget.value = minPrice > 0 ? minPrice.toString() : ''
+      console.log('HotelSearch: Updated minPrice to:', minPrice)
+    }
+    
+    if (this.hasMaxPriceInputTarget) {
+      // Only set maxPrice if it's less than 3000 (not the default max value)
+      this.maxPriceInputTarget.value = (maxPrice > 0 && maxPrice < 3000) ? maxPrice.toString() : ''
+      console.log('HotelSearch: Updated maxPrice to:', maxPrice < 3000 ? maxPrice : 'empty (no limit)')
+    }
+    
+    if (this.hasStarsInputTarget) {
+      this.starsInputTarget.value = stars > 0 ? stars.toString() : ''
+      console.log('HotelSearch: Updated stars to:', stars)
     }
   }
 
