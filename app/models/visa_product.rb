@@ -1,4 +1,5 @@
 class VisaProduct < ApplicationRecord
+  include DataVersionable
   extend FriendlyId
   friendly_id :name, use: :slugged
 

@@ -1,4 +1,5 @@
 class TrainBooking < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :train
 

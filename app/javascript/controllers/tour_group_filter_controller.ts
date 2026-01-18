@@ -30,9 +30,13 @@ export default class extends Controller<HTMLElement> {
   declare groupSizeValue: string
 
   connect(): void {
-    console.log("TourGroupFilter connected")
     // Listen for city selection changes from city-selector
     this.element.addEventListener('city-selector:city-changed', this.handleCityChanged.bind(this))
+    
+    // Auto-select group size if provided via URL parameter
+    if (this.groupSizeValue) {
+      this.autoSelectGroupSize(this.groupSizeValue)
+    }
   }
 
   disconnect(): void {
@@ -115,6 +119,22 @@ export default class extends Controller<HTMLElement> {
     this.groupSizeInputTarget.value = groupSize
     
     // 更新单选按钮样式
+    this.updateGroupSizeButtons(groupSize)
+  }
+  
+  // Auto-select group size on page load
+  private autoSelectGroupSize(groupSize: string): void {
+    // Set the hidden input value
+    if (this.groupSizeInputTarget) {
+      this.groupSizeInputTarget.value = groupSize
+    }
+    
+    // Update button styles
+    this.updateGroupSizeButtons(groupSize)
+  }
+  
+  // Update group size button styles
+  private updateGroupSizeButtons(groupSize: string): void {
     this.groupSizeButtonTargets.forEach(btn => {
       const radio = btn.querySelector('.radio-circle') as HTMLElement
       if (btn.dataset.groupSize === groupSize) {

@@ -1,4 +1,5 @@
 class TravelAgency < ApplicationRecord
+  include DataVersionable
   has_many :tour_group_products, dependent: :destroy
 
   validates :name, presence: true

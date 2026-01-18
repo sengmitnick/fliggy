@@ -1,4 +1,5 @@
 class ItineraryItem < ApplicationRecord
+  include DataVersionable
   belongs_to :itinerary
   belongs_to :bookable, polymorphic: true, optional: true
   

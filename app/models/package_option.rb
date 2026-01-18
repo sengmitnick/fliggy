@@ -1,4 +1,5 @@
 class PackageOption < ApplicationRecord
+  include DataVersionable
   belongs_to :hotel_package
   
   validates :name, presence: true

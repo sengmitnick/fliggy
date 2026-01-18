@@ -1,4 +1,5 @@
 class Itinerary < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   has_many :itinerary_items, dependent: :destroy
   

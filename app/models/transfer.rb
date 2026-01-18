@@ -1,4 +1,5 @@
 class Transfer < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :transfer_package, optional: true
 

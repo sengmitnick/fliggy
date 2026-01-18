@@ -1,4 +1,5 @@
 class HotelPackage < ApplicationRecord
+  include DataVersionable
   extend FriendlyId
   friendly_id :title, use: :slugged
   

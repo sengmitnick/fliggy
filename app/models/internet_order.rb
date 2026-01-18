@@ -1,4 +1,5 @@
 class InternetOrder < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :orderable, polymorphic: true
 

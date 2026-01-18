@@ -1,5 +1,6 @@
 # encoding: utf-8
 class TourGroupProduct < ApplicationRecord
+  include DataVersionable
   belongs_to :travel_agency
   has_many :tour_packages, dependent: :destroy
   has_many :tour_itinerary_days, -> { order(day_number: :asc) }, dependent: :destroy

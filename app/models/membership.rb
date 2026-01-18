@@ -1,4 +1,5 @@
 class Membership < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   
   LEVELS = %w[F1 F2 F3 F4 F5].freeze

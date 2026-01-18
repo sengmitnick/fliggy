@@ -1,4 +1,5 @@
 class Address < ApplicationRecord
+  include DataVersionable
   belongs_to :user
 
   validates :name, presence: true

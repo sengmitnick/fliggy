@@ -1,4 +1,5 @@
 class Flight < ApplicationRecord
+  include DataVersionable
   has_many :flight_offers, dependent: :destroy
   has_many :bookings, dependent: :destroy
 

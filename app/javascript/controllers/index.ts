@@ -88,6 +88,8 @@ import HotelSearchFilterController from "./hotel_search_filter_controller"
 import BlindBoxController from "./blind_box_controller"
 import HotelMapToggleController from "./hotel_map_toggle_controller"
 import HotelMapController from "./hotel_map_controller"
+import SmartBackController from "./smart_back_controller"
+import TourGroupTabsController from "./tour_group_tabs_controller"
 
 const application = Application.start()
 
@@ -179,5 +181,7 @@ application.register("hotel-search-filter", HotelSearchFilterController)
 application.register("blind-box", BlindBoxController)
 application.register("hotel-map-toggle", HotelMapToggleController)
 application.register("hotel-map", HotelMapController)
+application.register("smart-back", SmartBackController)
+application.register("tour-group-tabs", TourGroupTabsController)
 
 window.Stimulus = application

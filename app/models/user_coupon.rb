@@ -1,4 +1,5 @@
 class UserCoupon < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :abroad_coupon
 

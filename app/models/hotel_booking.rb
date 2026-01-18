@@ -1,4 +1,5 @@
 class HotelBooking < ApplicationRecord
+  include DataVersionable
   belongs_to :hotel
   belongs_to :user, optional: true
   belongs_to :hotel_room
