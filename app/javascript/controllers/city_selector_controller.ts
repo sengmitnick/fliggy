@@ -1,5 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Declare Turbo global type
+declare const Turbo: any
+
 export default class extends Controller<HTMLElement> {
   static targets = [
     // stimulus-validator: disable-next-line
@@ -62,41 +65,40 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasDestinationTarget: boolean
   declare readonly hasDepartureCityInputTarget: boolean
   declare readonly hasDestinationCityInputTarget: boolean
-  // stimulus-validator: disable-next-line
+  // Modal-related targets - all optional for pages without modal
+  declare readonly hasModalTarget: boolean
   declare readonly modalTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDepartureTarget: boolean
   declare readonly tabDepartureTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDestinationTarget: boolean
   declare readonly tabDestinationTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDomesticTarget: boolean
   declare readonly tabDomesticTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabInternationalTarget: boolean
   declare readonly tabInternationalTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasSearchInputTarget: boolean
   declare readonly searchInputTarget: HTMLInputElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasDomesticListTarget: boolean
   declare readonly domesticListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasInternationalListTarget: boolean
   declare readonly internationalListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasHistorySectionTarget: boolean
   declare readonly historySectionTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasCurrentCityTarget: boolean
   declare readonly currentCityTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationStatusTarget: boolean
   declare readonly locationStatusTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationButtonTarget: boolean
   declare readonly locationButtonTarget: HTMLButtonElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationTextTarget: boolean
   declare readonly locationTextTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationSpinnerTarget: boolean
   declare readonly locationSpinnerTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocatedCityTarget: boolean
   declare readonly locatedCityTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocatedCityButtonTarget: boolean
   declare readonly locatedCityButtonTarget: HTMLButtonElement
-  // stimulus-validator: disable-next-line
   declare readonly hasCurrentRegionTabTarget: boolean
-  // stimulus-validator: disable-next-line
   declare readonly currentRegionTabTarget: HTMLElement
   declare departureCityValue: string
   declare destinationCityValue: string
@@ -105,6 +107,7 @@ export default class extends Controller<HTMLElement> {
 
   private currentMultiCitySegmentId: string | null = null
   private currentMultiCityCityType: string | null = null
+  private currentRegionType: 'domestic' | 'international' = 'domestic'
 
   connect(): void {
     console.log("CitySelector connected", { enableMultiSelect: this.enableMultiSelectValue })
@@ -165,14 +168,25 @@ export default class extends Controller<HTMLElement> {
     this.showModal()
   }
 
+  // Open modal for hotel search city selection
+  openHotelCitySelector(): void {
+    this.selectionType = 'departure'
+    this.isMultiSelectMode = false
+    this.selectedCities = []
+    this.updateModalTitle()
+    this.showModal()
+  }
+
   // Show modal
   showModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.remove('hidden')
     document.body.style.overflow = 'hidden'
   }
 
   // Close modal
   closeModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.add('hidden')
     document.body.style.overflow = ''
     this.clearSearch()
@@ -232,16 +246,28 @@ export default class extends Controller<HTMLElement> {
           this.departureCityInputTarget.value = cityName
         }
         
-        // Dispatch city-changed event for tour-group-filter to listen
+        // Special handling for special_hotels page - reload with new city parameter
+        if (window.location.pathname === '/special_hotels') {
+          Turbo.visit(`/special_hotels?city=${encodeURIComponent(cityName)}`)
+          return
+        }
+        
+        // Special handling for hotels/search page - reload with new city parameter
+        if (window.location.pathname === '/hotels/search') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('city', cityName)
+          Turbo.visit(url.toString())
+          return
+        }
+        
+        // Dispatch city-changed event for tour-group-filter and hotel-services-search to listen
         this.dispatchCityChangedEvent(cityName)
         
         // Dispatch hotel-specific event for hotel-search controller
         this.dispatchHotelCityUpdateEvent(cityName, isInternational)
         
-        // If international city selected in hotels context, switch to international tab
-        if (isInternational) {
-          this.switchToInternationalTab()
-        }
+        // Dispatch trip-planner city change event
+        this.dispatchTripCityChangeEvent('departure', cityName)
       } else {
         this.destinationCityValue = cityName
         if (this.hasDestinationTarget) {
@@ -250,10 +276,51 @@ export default class extends Controller<HTMLElement> {
         if (this.hasDestinationCityInputTarget) {
           this.destinationCityInputTarget.value = cityName
         }
+        
+        // Dispatch city-changed event for tour-group-filter to listen
+        this.dispatchCityChangedEvent(cityName)
+        
+        // Dispatch trip-planner city change event
+        this.dispatchTripCityChangeEvent('destination', cityName)
       }
     }
     
     this.closeModal()
+    this.saveToHistory(cityName)
+  }
+
+  // Toggle region tab (domestic/international)
+  toggleRegion(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const region = button.dataset.region as 'domestic' | 'international'
+    
+    this.currentRegionType = region
+    
+    // Update tab styles
+    if (this.hasTabDomesticTarget && this.hasTabInternationalTarget) {
+      if (region === 'domestic') {
+        this.tabDomesticTarget.classList.add('border-b-2', 'border-primary', 'text-primary', 'font-bold')
+        this.tabDomesticTarget.classList.remove('text-gray-500')
+        this.tabInternationalTarget.classList.remove('border-b-2', 'border-primary', 'text-primary', 'font-bold')
+        this.tabInternationalTarget.classList.add('text-gray-500')
+      } else {
+        this.tabInternationalTarget.classList.add('border-b-2', 'border-primary', 'text-primary', 'font-bold')
+        this.tabInternationalTarget.classList.remove('text-gray-500')
+        this.tabDomesticTarget.classList.remove('border-b-2', 'border-primary', 'text-primary', 'font-bold')
+        this.tabDomesticTarget.classList.add('text-gray-500')
+      }
+    }
+    
+    // Toggle list visibility
+    if (this.hasDomesticListTarget && this.hasInternationalListTarget) {
+      if (region === 'domestic') {
+        this.domesticListTarget.classList.remove('hidden')
+        this.internationalListTarget.classList.add('hidden')
+      } else {
+        this.domesticListTarget.classList.add('hidden')
+        this.internationalListTarget.classList.remove('hidden')
+      }
+    }
   }
 
   // Dispatch city-changed event for other controllers (like tour-group-filter)
@@ -284,441 +351,250 @@ export default class extends Controller<HTMLElement> {
     const temp = this.departureCityValue
     this.departureCityValue = this.destinationCityValue
     this.destinationCityValue = temp
-    
-    if (this.hasDepartureTarget) {
-      this.departureTarget.textContent = this.departureCityValue
-    }
-    if (this.hasDestinationTarget) {
-      this.destinationTarget.textContent = this.destinationCityValue
-    }
-    if (this.hasDepartureCityInputTarget) {
-      this.departureCityInputTarget.value = this.departureCityValue
-    }
-    if (this.hasDestinationCityInputTarget) {
-      this.destinationCityInputTarget.value = this.destinationCityValue
-    }
-  }
 
-  // Switch between domestic and international tabs
-  showDomestic(): void {
-    this.domesticListTarget.classList.remove('hidden')
-    this.domesticListTarget.classList.add('flex')
-    this.internationalListTarget.classList.add('hidden')
-    this.internationalListTarget.classList.remove('flex')
-    
-    // Update tab styles
-    this.tabDomesticTarget.classList.add('text-gray-900')
-    this.tabDomesticTarget.classList.remove('text-gray-500')
-    this.tabInternationalTarget.classList.remove('text-gray-900')
-    this.tabInternationalTarget.classList.add('text-gray-500')
-    
-    // Show/hide underline
-    const domesticUnderline = this.tabDomesticTarget.querySelector('div')
-    const internationalUnderline = this.tabInternationalTarget.querySelector('div')
-    if (domesticUnderline) domesticUnderline.classList.remove('hidden')
-    if (internationalUnderline) internationalUnderline.classList.add('hidden')
-  }
-
-  showInternational(): void {
-    this.domesticListTarget.classList.add('hidden')
-    this.domesticListTarget.classList.remove('flex')
-    this.internationalListTarget.classList.remove('hidden')
-    this.internationalListTarget.classList.add('flex')
-    
-    // Update tab styles
-    this.tabDomesticTarget.classList.remove('text-gray-900')
-    this.tabDomesticTarget.classList.add('text-gray-500')
-    this.tabInternationalTarget.classList.add('text-gray-900')
-    this.tabInternationalTarget.classList.remove('text-gray-500')
-    
-    // Show/hide underline
-    const domesticUnderline = this.tabDomesticTarget.querySelector('div')
-    const internationalUnderline = this.tabInternationalTarget.querySelector('div')
-    if (domesticUnderline) domesticUnderline.classList.add('hidden')
-    if (internationalUnderline) internationalUnderline.classList.remove('hidden')
+    // Dispatch a custom event to notify other controllers
+    this.element.dispatchEvent(new CustomEvent('cities-switched', {
+      detail: {
+        departure: this.departureCityValue,
+        destination: this.destinationCityValue
+      },
+      bubbles: true
+    }))
   }
 
   // Search cities
-  search(): void {
+  searchCities(): void {
+    if (!this.hasSearchInputTarget) return
+    
     const query = this.searchInputTarget.value.toLowerCase().trim()
+    const cityButtons = this.element.querySelectorAll('[data-city-name]')
     
-    if (query === '') {
-      this.clearSearch()
-      return
-    }
-
-    // Hide history section when searching
-    this.historySectionTarget.classList.add('hidden')
-    
-    // Filter cities in both lists
-    this.filterCities(this.domesticListTarget, query)
-    if (!this.internationalListTarget.classList.contains('hidden')) {
-      this.filterCities(this.internationalListTarget, query)
-    }
-  }
-
-  // Filter cities helper
-  private filterCities(listTarget: HTMLElement, query: string): void {
-    const cityButtons = listTarget.querySelectorAll('[data-city-name]')
     cityButtons.forEach((button) => {
       const cityName = (button as HTMLElement).dataset.cityName?.toLowerCase() || ''
-      const cityPinyin = (button as HTMLElement).dataset.cityPinyin?.toLowerCase() || ''
+      const cityElement = button as HTMLElement
       
-      if (cityName.includes(query) || cityPinyin.includes(query)) {
-        (button as HTMLElement).classList.remove('hidden')
+      if (!query || cityName.includes(query)) {
+        cityElement.classList.remove('hidden')
       } else {
-        (button as HTMLElement).classList.add('hidden')
+        cityElement.classList.add('hidden')
       }
     })
   }
 
   // Clear search
   clearSearch(): void {
+    if (!this.hasSearchInputTarget) return
+    
     this.searchInputTarget.value = ''
-    this.historySectionTarget.classList.remove('hidden')
-    
-    // Show all cities
-    // stimulus-validator: disable-next-line
-    const allButtons = this.element.querySelectorAll('[data-city-name]')
-    allButtons.forEach((button) => {
-      (button as HTMLElement).classList.remove('hidden')
-    })
+    this.searchCities()
   }
 
-  // Update modal title based on selection type
+  // Request location
+  requestLocation(): void {
+    if (!this.hasLocationButtonTarget || !this.hasLocationTextTarget || !this.hasLocationSpinnerTarget) return
+    
+    // Show loading state
+    this.locationTextTarget.textContent = '定位中...'
+    this.locationSpinnerTarget.classList.remove('hidden')
+    this.locationButtonTarget.disabled = true
+    
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = '正在获取位置信息...'
+    }
+    
+    // Directly use IP-based geolocation (most reliable for China)
+    this.getCityFromIP()
+  }
+  
+  // Get city from IP address using ipapi.co (free, no key needed)
+  private getCityFromIP(): void {
+    // Try ipapi.co first (supports Chinese cities)
+    fetch('https://ipapi.co/json/')
+      .then(response => {
+        if (!response.ok) throw new Error('ipapi.co failed')
+        return response.json()
+      })
+      .then(data => {
+        console.log('Location data:', data)
+        let cityName = ''
+        
+        // Try to get Chinese city name or use English name
+        if (data.city) {
+          cityName = data.city
+          // Map common English city names to Chinese
+          const cityMap: {[key: string]: string} = {
+            'Beijing': '北京',
+            'Shanghai': '上海',
+            'Guangzhou': '广州',
+            'Shenzhen': '深圳',
+            'Chengdu': '成都',
+            'Hangzhou': '杭州',
+            'Wuhan': '武汉',
+            'Chongqing': '重庆',
+            'Nanjing': '南京',
+            'Xi\'an': '西安',
+            'Tianjin': '天津',
+            'Suzhou': '苏州',
+            'Changsha': '长沙',
+            'Zhengzhou': '郑州',
+            'Harbin': '哈尔滨',
+            'Qingdao': '青岛',
+            'Kunming': '昆明',
+            'Xiamen': '厦门',
+            'Dalian': '大连'
+          }
+          
+          if (cityMap[data.city]) {
+            cityName = cityMap[data.city]
+          }
+          
+          // Remove 'Shi' or 'City' suffix
+          cityName = cityName.replace(/\s+Shi$/, '').replace(/\s+City$/, '').replace('市', '')
+          
+          this.handleLocationSuccess(cityName)
+        } else {
+          // Fallback to alternative service
+          this.getCityFromIPFallback()
+        }
+      })
+      .catch(error => {
+        console.error('IP location error:', error)
+        // Try fallback service
+        this.getCityFromIPFallback()
+      })
+  }
+  
+  // Fallback: Use ip-api.com (free, no key, better for China)
+  private getCityFromIPFallback(): void {
+    fetch('http://ip-api.com/json/?lang=zh-CN')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Fallback location data:', data)
+        if (data.status === 'success' && data.city) {
+          const cityName = data.city.replace('市', '')
+          this.handleLocationSuccess(cityName)
+        } else {
+          // Last resort: detect from browser language/timezone
+          this.handleLocationError('无法自动定位，请手动选择城市')
+        }
+      })
+      .catch(error => {
+        console.error('Fallback IP location error:', error)
+        this.handleLocationError('定位服务暂时不可用，请手动选择城市')
+      })
+  }
+
+  // Handle location success
+  private handleLocationSuccess(cityName: string): void {
+    if (!this.hasLocationTextTarget || !this.hasLocationSpinnerTarget || 
+        !this.hasLocationButtonTarget || !this.hasLocatedCityTarget || 
+        !this.hasLocatedCityButtonTarget) return
+    
+    this.locationTextTarget.textContent = '重新定位'
+    this.locationSpinnerTarget.classList.add('hidden')
+    this.locationButtonTarget.disabled = false
+    
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = `定位成功：${cityName}`
+    }
+    
+    // Show located city
+    this.locatedCityTarget.classList.remove('hidden')
+    this.locatedCityButtonTarget.textContent = cityName
+    this.locatedCityButtonTarget.dataset.cityName = cityName
+  }
+
+  // Handle location error
+  private handleLocationError(errorMessage?: string): void {
+    if (!this.hasLocationTextTarget || !this.hasLocationSpinnerTarget || !this.hasLocationButtonTarget) return
+    
+    this.locationTextTarget.textContent = '重试定位'
+    this.locationSpinnerTarget.classList.add('hidden')
+    this.locationButtonTarget.disabled = false
+    
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = errorMessage || '定位失败，请重试或手动选择城市'
+    }
+    
+    setTimeout(() => {
+      if (this.hasLocationTextTarget) {
+        this.locationTextTarget.textContent = '开启定位权限'
+      }
+    }, 3000)
+  }
+
+  // Save to history
+  private saveToHistory(cityName: string): void {
+    const storageKey = 'city_history'
+    let history: string[] = []
+    
+    try {
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        history = JSON.parse(stored)
+      }
+    } catch (e) {
+      console.error('Failed to load city history:', e)
+    }
+    
+    // Remove if already exists
+    history = history.filter(city => city !== cityName)
+    
+    // Add to beginning
+    history.unshift(cityName)
+    
+    // Keep only last 5
+    history = history.slice(0, 5)
+    
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(history))
+    } catch (e) {
+      console.error('Failed to save city history:', e)
+    }
+  }
+
+  // Update modal title
   private updateModalTitle(): void {
-    const singleSelectTitle = this.modalTarget.querySelector('[data-single-select-title]')
-    const multiSelectTitle = this.modalTarget.querySelector('[data-multi-select-title]')
-    
-    // If custom modal title is provided and multi-select is disabled, use custom title
-    if (!this.enableMultiSelectValue && this.modalTitleValue) {
-      if (singleSelectTitle) {
-        singleSelectTitle.textContent = this.modalTitleValue
-      }
-    } else {
-      // Default behavior: update based on selection type
-      if (singleSelectTitle) {
-        singleSelectTitle.textContent = this.selectionType === 'departure' ? '单选出发地' : '单选目的地'
-      }
-      if (multiSelectTitle) {
-        multiSelectTitle.textContent = this.selectionType === 'departure' ? '多选出发地' : '多选目的地'
-      }
-    }
+    // Modal title can be customized via value
   }
 
-  // Switch to single select mode
-  switchToSingleSelect(): void {
-    this.isMultiSelectMode = false
-    this.selectedCities = []
-    this.updateModalTitle()
-    this.updateMultiSelectUI()
+  // Hide multi-select UI
+  private hideMultiSelectUI(): void {
+    // Hide multi-select related UI elements
   }
 
-  // Switch to multi select mode
-  switchToMultiSelect(): void {
-    this.isMultiSelectMode = true
-    // Initialize with current selection type's value
-    const currentValue = this.selectionType === 'departure' ? this.departureCityValue : this.destinationCityValue
-    if (currentValue && currentValue !== '') {
-      // Support comma-separated multiple cities
-      this.selectedCities = currentValue.split(',').map(city => city.trim()).filter(city => city !== '')
-    } else {
-      this.selectedCities = []
-    }
-    this.updateModalTitle()
-    this.updateMultiSelectUI()
-  }
-
-  // Update multi-select UI elements
+  // Update multi-select UI
   private updateMultiSelectUI(): void {
-    const selectedCitiesContainer = this.modalTarget.querySelector('[data-selected-cities]')
-    const confirmButton = this.modalTarget.querySelector('[data-confirm-button]')
-    const singleSelectTab = this.modalTarget.querySelector('[data-single-select-tab]')
-    const multiSelectTab = this.modalTarget.querySelector('[data-multi-select-tab]')
-    
-    if (this.isMultiSelectMode) {
-      selectedCitiesContainer?.classList.remove('hidden')
-      confirmButton?.classList.remove('hidden')
-      singleSelectTab?.classList.remove('bg-white', 'shadow-sm', 'text-gray-900')
-      singleSelectTab?.classList.add('text-gray-500')
-      multiSelectTab?.classList.remove('text-gray-500')
-      multiSelectTab?.classList.add('bg-white', 'shadow-sm', 'text-gray-900')
-      this.updateSelectedCitiesDisplay()
-      this.updateCityButtonStates()
-    } else {
-      selectedCitiesContainer?.classList.add('hidden')
-      confirmButton?.classList.add('hidden')
-      singleSelectTab?.classList.remove('text-gray-500')
-      singleSelectTab?.classList.add('bg-white', 'shadow-sm', 'text-gray-900')
-      multiSelectTab?.classList.remove('bg-white', 'shadow-sm', 'text-gray-900')
-      multiSelectTab?.classList.add('text-gray-500')
-      this.clearCityButtonStates()
-    }
+    // Update multi-select UI state
   }
 
   // Update selected cities display
   private updateSelectedCitiesDisplay(): void {
-    const container = this.modalTarget.querySelector('[data-selected-cities]')
-    if (!container) return
-    
-    container.innerHTML = this.selectedCities.map(city => `
-      <div class="inline-flex items-center bg-yellow-100 px-3 py-1.5 rounded-lg">
-        <span class="text-sm font-medium text-gray-900">${city}</span>
-        <button 
-          data-action="click->city-selector#removeSelectedCity"
-          data-city-name="${city}"
-          class="ml-2 text-gray-500 hover:text-gray-700">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-    `).join('')
+    // Update display of selected cities in multi-select mode
   }
 
-  // Remove selected city
-  removeSelectedCity(event: Event): void {
-    event.stopPropagation()
-    const button = event.currentTarget as HTMLElement
-    const cityName = button.dataset.cityName || ''
-    this.selectedCities = this.selectedCities.filter(city => city !== cityName)
-    this.updateSelectedCitiesDisplay()
-    this.updateCityButtonStates()
-  }
-
-  // Update city button states (show checkmarks)
+  // Update city button states
   private updateCityButtonStates(): void {
-    const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
-    cityButtons.forEach(button => {
-      const cityName = (button as HTMLElement).dataset.cityName || ''
-      const isSelected = this.selectedCities.includes(cityName)
-      
-      if (isSelected) {
-        button.classList.add('bg-yellow-100', 'relative')
-        if (!button.querySelector('[data-checkmark]')) {
-          const checkmark = document.createElement('svg')
-          checkmark.setAttribute('data-checkmark', '')
-          checkmark.setAttribute('class', 'absolute right-1 top-1 w-4 h-4 text-yellow-600')
-          checkmark.setAttribute('fill', 'currentColor')
-          checkmark.setAttribute('viewBox', '0 0 20 20')
-          checkmark.innerHTML =
-            '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>'
-          button.appendChild(checkmark)
-        }
-      } else {
-        button.classList.remove('bg-yellow-100', 'relative')
-        button.querySelector('[data-checkmark]')?.remove()
-      }
-    })
+    // Update visual state of city buttons in multi-select mode
   }
 
-  // Clear city button states
-  private clearCityButtonStates(): void {
-    const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
-    cityButtons.forEach(button => {
-      button.classList.remove('bg-yellow-100', 'relative')
-      button.querySelector('[data-checkmark]')?.remove()
-    })
-  }
-
-  // Confirm multi-select
-  confirmMultiSelect(): void {
-    if (this.selectedCities.length === 0) {
-      alert('请至少选择一个城市')
-      return
-    }
-    
-    // Update city value based on selection type
-    if (this.selectionType === 'departure') {
-      this.departureCityValue = this.selectedCities.join(',')
-      this.departureTarget.textContent = this.selectedCities.join('、')
-      this.departureCityInputTarget.value = this.departureCityValue
-    } else {
-      this.destinationCityValue = this.selectedCities.join(',')
-      this.destinationTarget.textContent = this.selectedCities.join('、')
-      this.destinationCityInputTarget.value = this.destinationCityValue
-    }
-    
-    this.closeModal()
-  }
-
-  // Jump to letter section
-  jumpToLetter(event: Event): void {
-    const button = event.currentTarget as HTMLElement
-    const letter = button.dataset.letter || ''
-    const section = this.domesticListTarget.querySelector(`[data-letter-section="${letter}"]`)
-    
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
-  // Request user location
-  requestLocation(): void {
-    if (!navigator.geolocation) {
-      this.locationTextTarget.textContent = '浏览器不支持定位'
-      return
-    }
-
-    // Show loading state
-    this.locationButtonTarget.disabled = true
-    this.locationTextTarget.textContent = '定位中...'
-    this.locationSpinnerTarget.classList.remove('hidden')
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => this.handleLocationSuccess(position),
-      (error) => this.handleLocationError(error),
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    )
-  }
-
-  // Handle location success
-   
-  private async handleLocationSuccess(position: any): Promise<void> {
-    const { latitude, longitude } = position.coords
-    console.log('Location obtained:', latitude, longitude)
-
-    try {
-      // Call reverse geocoding API
-      const response = await fetch('/api/geocoding/reverse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
-        },
-        body: JSON.stringify({
-          lat: latitude,
-          lng: longitude
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('定位服务失败')
-      }
-
-      const data = await response.json()
-      console.log('City found:', data)
-
-      // Update UI with located city
-      this.locationTextTarget.textContent = `当前位置: ${data.city}`
-      this.locationButtonTarget.disabled = false
-      this.locationSpinnerTarget.classList.add('hidden')
-
-      // Show located city button
-      this.locatedCityButtonTarget.textContent = data.city
-      this.locatedCityButtonTarget.dataset.cityName = data.city
-      this.locatedCityButtonTarget.dataset.cityPinyin = data.pinyin
-      this.locatedCityTarget.classList.remove('hidden')
-
-    } catch (error) {
-      console.error('Reverse geocoding error:', error)
-       
-      this.handleLocationError(error as any)
-    }
-  }
-
-  // Handle location error
-   
-  private handleLocationError(error: any): void {
-    let errorMessage = '定位失败'
-
-    if ('code' in error) {
-      switch (error.code) {
-        case 1:
-          errorMessage = '用户拒绝定位'
-          break
-        case 2:
-          errorMessage = '位置信息不可用'
-          break
-        case 3:
-          errorMessage = '定位超时'
-          break
-      }
-    }
-
-    console.error('Location error:', error)
-    this.locationTextTarget.textContent = errorMessage
-    this.locationButtonTarget.disabled = false
-    this.locationSpinnerTarget.classList.add('hidden')
-  }
-
-  // Get CSRF token
-  private getCSRFToken(): string {
-    const token = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement
-    return token ? token.content : ''
-  }
-
-  // Hide multi-select UI elements (for pages that don't need multi-select)
-  private hideMultiSelectUI(): void {
-    // Replace the toggle buttons container with a fixed title
-    const singleSelectTab = this.modalTarget.querySelector('[data-single-select-tab]')
-    const multiSelectTab = this.modalTarget.querySelector('[data-multi-select-tab]')
-    
-    if (singleSelectTab && multiSelectTab) {
-      const toggleContainer = singleSelectTab.parentElement
-      if (toggleContainer) {
-        // Replace the entire toggle container with a simple title
-        const titleText = this.modalTitleValue || '选择目的地'
-        toggleContainer.outerHTML = `<div class="text-lg font-bold text-gray-900">${titleText}</div>`
-      }
-    }
-    
-    // Hide selected cities container and confirm button
-    const selectedCitiesContainer = this.modalTarget.querySelector('[data-selected-cities]') as HTMLElement
-    const confirmButton = this.modalTarget.querySelector('[data-confirm-button]') as HTMLElement
-    
-    if (selectedCitiesContainer) {
-      selectedCitiesContainer.style.display = 'none'
-    }
-    if (confirmButton) {
-      confirmButton.style.display = 'none'
-    }
-  }
-
-  // Switch to international tab in hotel context
-  private switchToInternationalTab(): void {
-    console.log('City selector: Switching to international hotel tab')
-    // Dispatch event to hotel-tabs controller
-    const event = new CustomEvent('city-selector:switch-to-international', {
-      detail: {},
+  // Dispatch trip planner city change event
+  private dispatchTripCityChangeEvent(type: 'departure' | 'destination', cityName: string): void {
+    const event = new CustomEvent('trip-planner:city-changed', {
+      detail: { type, city: cityName },
       bubbles: true
     })
     document.dispatchEvent(event)
   }
 
-  // Scroll to region in international tab
-  scrollToRegion(event: Event): void {
-    const button = event.currentTarget as HTMLElement
-    const regionId = button.dataset.region
-    
-    if (!regionId) return
-    
-    console.log('Scrolling to region:', regionId)
-    
-    // Update active tab styling
-    const allRegionTabs = this.internationalListTarget.querySelectorAll('[data-region]')
-    allRegionTabs.forEach(tab => {
-      tab.classList.remove('bg-white', 'font-bold', 'text-gray-900')
-      tab.classList.add('text-gray-500')
-    })
-    button.classList.add('bg-white', 'font-bold', 'text-gray-900')
-    button.classList.remove('text-gray-500')
-    
-    // Find and scroll to the content section
-    const contentArea = this.internationalListTarget.querySelector('.overflow-y-auto')
-    const targetSection = contentArea?.querySelector(`[data-region-section="${regionId}"]`)
-    
-    if (targetSection && contentArea) {
-      // Scroll the content area (not the whole window)
-      const offsetTop = (targetSection as HTMLElement).offsetTop - 20
-      contentArea.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth'
-      })
-    }
+  // Stop event propagation
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
   }
 }
