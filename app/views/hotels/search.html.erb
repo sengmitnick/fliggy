@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100 max-w-[450px] mx-auto relative">
+<div class="min-h-screen bg-gray-100 max-w-[450px] mx-auto relative" data-controller="city-selector">
 
   <!-- 搜索栏区域 -->
   <div class="bg-white px-3 pb-2 pt-3 flex items-center gap-2 sticky top-0 z-40">
@@ -13,7 +13,7 @@
     <%= form_with url: search_hotels_path, method: :get, data: { turbo: false }, class: "flex-1" do |f| %>
       <div class="flex-1 flex items-center border-[1.5px] border-[#ffd000] rounded-full h-10 px-3 bg-white shadow-sm overflow-hidden">
         <!-- 城市 -->
-        <span class="font-bold text-gray-800 text-sm mr-1"><%= @city.gsub('市', '') %></span>
+        <span class="font-bold text-gray-800 text-sm mr-1 cursor-pointer" data-action="click->city-selector#openHotelCitySelector"><%= @city.gsub('市', '') %></span>
         <!-- 日期 -->
         <div class="flex flex-col justify-center leading-none text-[9px] text-gray-500 mr-2 border-r border-gray-200 pr-2 h-6">
           <span><%= @check_in.strftime('%m-%d') %> <span class="text-gray-400"><%= @rooms %>间</span></span>
@@ -346,16 +346,7 @@
           <% elsif hotel.image_url.present? %>
             <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'" %>
           <% else %>
-            <svg class="w-full h-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-              <rect width="24" height="24" fill="#e5e7eb"/>
-              <path d="M2 22h20V10l-10-8-10 8v12z" fill="#9ca3af" opacity="0.5"/>
-              <circle cx="5" cy="18" r="1" fill="#fff"/>
-              <circle cx="9" cy="18" r="1" fill="#fff"/>
-              <circle cx="13" cy="18" r="1" fill="#fff"/>
-              <circle cx="5" cy="14" r="1" fill="#fff"/>
-              <circle cx="9" cy="14" r="1" fill="#fff"/>
-              <circle cx="13" cy="14" r="1" fill="#fff"/>
-            </svg>
+            <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80", class: "w-full h-full object-cover", alt: "酒店占位图" %>
           <% end %>
           <!-- 促销标签 -->
           <% if hotel.is_featured %>
@@ -429,6 +420,163 @@
 
   <!-- 底部导航 -->
   <%= render 'shared/bottom_navigation' %>
+
+  <!-- 城市选择弹窗 -->
+  <div data-city-selector-target="modal" class="hidden fixed inset-0 bg-black/50 z-50" data-action="click->city-selector#closeModal">
+    <div class="absolute inset-0 max-w-[450px] mx-auto bg-white" data-action="click->city-selector#stopPropagation">
+      <!-- 标题栏 -->
+      <div class="flex items-center justify-between p-4 border-b">
+        <h2 class="text-lg font-bold">选择目的地</h2>
+        <button type="button" data-action="click->city-selector#closeModal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 搜索框 -->
+      <div class="p-4 border-b">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" 
+                 data-city-selector-target="searchInput" 
+                 data-action="input->city-selector#searchCities"
+                 placeholder="搜索国家或城市的中英文名" 
+                 class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg border-none outline-none focus:ring-2 focus:ring-primary">
+        </div>
+      </div>
+
+      <!-- 国内/国际选项卡 -->
+      <div class="flex border-b">
+        <button type="button" 
+                data-city-selector-target="tabDomestic"
+                data-region="domestic"
+                data-action="click->city-selector#toggleRegion"
+                class="flex-1 py-3 text-center font-medium border-b-2 border-primary text-primary">
+          国内 (含港澳台)
+        </button>
+        <button type="button" 
+                data-city-selector-target="tabInternational"
+                data-region="international"
+                data-action="click->city-selector#toggleRegion"
+                class="flex-1 py-3 text-center font-medium text-gray-500">
+          国际
+        </button>
+      </div>
+
+      <!-- 内容区域 -->
+      <div class="overflow-y-auto" style="height: calc(100vh - 220px);">
+        <!-- 国内城市列表 -->
+        <div data-city-selector-target="domesticList">
+          <!-- 当前定位 -->
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-bold text-gray-700">当前定位</h3>
+              <button type="button" 
+                      data-city-selector-target="locationButton"
+                      data-action="click->city-selector#requestLocation"
+                      class="flex items-center gap-1 text-sm text-primary">
+                <span data-city-selector-target="locationText">开启定位权限</span>
+                <svg data-city-selector-target="locationSpinner" class="hidden animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </button>
+            </div>
+            <div data-city-selector-target="locatedCity" class="hidden">
+              <button type="button" 
+                      data-city-selector-target="locatedCityButton"
+                      data-action="click->city-selector#selectCity"
+                      class="px-3 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">
+              </button>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              </svg>
+              <span>定位失败</span>
+            </div>
+          </div>
+
+          <!-- 热门城市 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">热门城市</h3>
+            <div class="grid grid-cols-4 gap-2">
+              <% ['上海', '北京', '杭州', '成都', '广州', '深圳', '武汉', '重庆', '西安', '香港', '南京', '三亚', '厦门', '长沙', '苏州', '天津', '澳门', '郑州', '哈尔滨', '宁波'].each do |city| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-action="click->city-selector#selectCity"
+                        class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200 <%= @city.gsub('市', '') == city ? 'bg-yellow-100 ring-2 ring-yellow-400' : '' %>">
+                  <%= city %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 字母索引 -->
+          <div class="p-4">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">字母索引</h3>
+            <div class="grid grid-cols-7 gap-2 mb-4">
+              <% ('A'..'Z').each do |letter| %>
+                <button type="button" class="px-2 py-1 text-sm text-center text-gray-600 hover:text-primary">
+                  <%= letter %>
+                </button>
+              <% end %>
+            </div>
+
+            <!-- A开头的城市示例 -->
+            <div class="mb-4">
+              <h4 class="text-xs font-bold text-gray-500 mb-2">A</h4>
+              <div class="grid grid-cols-4 gap-2">
+                <% ['阿坝', '阿克苏', '阿拉善', '阿勒泰', '安康', '安庆', '鞍山', '安顺', '安阳'].each do |city| %>
+                  <button type="button" 
+                          data-city-name="<%= city %>"
+                          data-action="click->city-selector#selectCity"
+                          class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
+                    <%= city %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- B开头的城市示例 -->
+            <div class="mb-4">
+              <h4 class="text-xs font-bold text-gray-500 mb-2">B</h4>
+              <div class="grid grid-cols-4 gap-2">
+                <% ['保定', '宝鸡', '保山', '包头', '巴中', '北海', '蚌埠', '本溪', '滨州'].each do |city| %>
+                  <button type="button" 
+                          data-city-name="<%= city %>"
+                          data-action="click->city-selector#selectCity"
+                          class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
+                    <%= city %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 国际城市列表 -->
+        <div data-city-selector-target="internationalList" class="hidden">
+          <div class="p-4">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">热门国际城市</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% ['东京', '首尔', '曼谷', '新加坡', '伦敦', '巴黎', '纽约', '洛杉矶', '悉尼', '墨尔本', '迪拜', '罗马'].each do |city| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
+                  <%= city %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
