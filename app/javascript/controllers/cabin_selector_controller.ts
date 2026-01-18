@@ -15,13 +15,9 @@ export default class extends Controller<HTMLElement> {
     // Check if there's a previously selected value from form
     // Use the first hiddenInput to get the value (they should all have the same value)
     const currentValue = this.hiddenInputTargets[0]?.value
-    if (currentValue) {
-      // Restore previous selection when returning from search
-      this.selectCabin(currentValue)
-    } else {
-      // Default to 'all' on first load
-      this.selectCabin("all")
-    }
+    // Handle both empty string and undefined - default to 'all'
+    const cabinValue = currentValue && currentValue !== '' ? currentValue : 'all'
+    this.selectCabin(cabinValue)
   }
 
   selectCabin(cabinType: string): void {

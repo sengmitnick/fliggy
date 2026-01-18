@@ -85,8 +85,12 @@ class FlightsController < ApplicationController
       @flights = @flights.order(:departure_time)
     end
 
-    # Get prices for nearby dates (5 days)
+    # Get prices for nearby dates (5 days) - always show all cabin classes
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    
+    # Preload flight prices for date picker modals (batch query optimization)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
+    @return_date_prices = preload_date_prices(@destination_city, @departure_city)
 
     # For round trip, also get return flights
     if @trip_type == 'round_trip' && @return_date
@@ -187,6 +191,9 @@ class FlightsController < ApplicationController
     end
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    
+    # Preload flight prices for date picker modal (batch query optimization)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     render :multi_city_results
   end
@@ -273,6 +280,9 @@ class FlightsController < ApplicationController
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
     
+    # Preload flight prices for date picker modal (batch query optimization)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
+    
     render :multi_city_results
   end
 
@@ -337,7 +347,8 @@ class FlightsController < ApplicationController
       date = start_date + i.days
       
       flights = Flight.search(departure_city, destination_city, date).includes(:flight_offers)
-      # Get minimum offer price from all flights on this date
+      
+      # Get minimum offer price from all flights on this date (all cabin classes)
       min_price = if flights.any?
         flights.map(&:min_offer_price).min
       else
@@ -359,9 +370,10 @@ class FlightsController < ApplicationController
   def preload_date_prices(departure_city, destination_city, start_date = Date.today, days = 61)
     end_date = start_date + days.days
     
-    # Batch query: get all flights for this route in the date range
+    # Batch query: get all flights for this route in the date range with flight_offers
     flights = Flight.by_route(departure_city, destination_city)
                     .where(flight_date: start_date..end_date)
+                    .includes(:flight_offers)
     
     # If no flights exist, generate them in batch
     if flights.empty?
@@ -371,11 +383,12 @@ class FlightsController < ApplicationController
       # Re-query after generation
       flights = Flight.by_route(departure_city, destination_city)
                       .where(flight_date: start_date..end_date)
+                      .includes(:flight_offers)
     end
     
-    # Group flights by date and find minimum price for each date
+    # Group flights by date and find minimum offer price for each date
     flights.group_by(&:flight_date).transform_values do |date_flights|
-      date_flights.map(&:price).min || 0
+      date_flights.map(&:min_offer_price).min || 0
     end
   end
 end

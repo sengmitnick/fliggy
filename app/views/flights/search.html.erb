@@ -241,6 +241,9 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
             </svg>
           </div>
+          <div class="text-xs text-gray-500 mt-1" data-controller="flight-info-display" data-flight-info-display-cabin-class-value="<%= @cabin_class %>">
+            <span data-flight-info-display-target="info">1成人</span>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -269,7 +272,7 @@
       <!-- Date Selector -->
       <div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
         <% @date_prices.each do |date_info| %>
-          <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date), 
+          <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date, cabin_class: @cabin_class), 
               data: { turbo: false },
               class: "flex-shrink-0 px-4 py-2 rounded-lg text-center #{date_info[:is_today] ? 'bg-yellow-400' : 'bg-gray-100'}" do %>
             <div class="text-xs <%= date_info[:is_today] ? 'text-gray-800' : 'text-gray-600' %>"><%= date_info[:weekday] %></div>
@@ -374,6 +377,18 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
                   </svg>
+                </div>
+                <!-- 舱位类型 -->
+                <div class="mt-1 text-[11px] text-gray-500">
+                  <% 
+                    seat_class_text = case flight.seat_class
+                    when 'economy' then '经济舱'
+                    when 'business' then '公务舱'
+                    when 'first_class' then '头等舱'
+                    else '经济舱'
+                    end
+                  %>
+                  <%= seat_class_text %>
                 </div>
               </div>
             </div>

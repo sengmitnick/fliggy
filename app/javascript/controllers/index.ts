@@ -17,6 +17,7 @@ import HotelSearchController from "./hotel_search_controller"
 import HotelDetailController from "./hotel_detail_controller"
 import ServiceGridController from "./service_grid_controller"
 import PassengerSelectorController from "./passenger_selector_controller"
+import FlightInfoDisplayController from "./flight_info_display_controller"
 import CabinSelectorController from "./cabin_selector_controller"
 import TripTypeController from "./trip_type_controller"
 import ReturnDatePickerController from "./return_date_picker_controller"
@@ -85,6 +86,7 @@ application.register("hotel-search", HotelSearchController)
 application.register("hotel-detail", HotelDetailController)
 application.register("service-grid", ServiceGridController)
 application.register("passenger-selector", PassengerSelectorController)
+application.register("flight-info-display", FlightInfoDisplayController)
 application.register("cabin-selector", CabinSelectorController)
 application.register("trip-type", TripTypeController)
 application.register("return-date-picker", ReturnDatePickerController)

@@ -146,7 +146,7 @@
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
         <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
         <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
-        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || 'all', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back my-2" style="background: #FFD700;">
           搜索机票
         </button>
@@ -228,7 +228,7 @@
       <%= form_with url: multi_city_search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
         <%= f.hidden_field :trip_type, value: 'multi_city', data: { 'trip-type-target': 'tripTypeInput' } %>
         <%= f.hidden_field :segments, value: '', data: { 'multi-city-target': 'hiddenSegmentsInput' } %>
-        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || 'all', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black my-2" style="background: #FFD700;">
           搜索机票
         </button>

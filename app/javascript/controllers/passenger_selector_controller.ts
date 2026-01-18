@@ -26,7 +26,7 @@ export default class extends Controller {
   declare readonly childrenCountTarget: HTMLElement
   declare readonly infantsCountTarget: HTMLElement
 
-  private adults: number = 1
+  private adults: number = 0
   private children: number = 0
   private infants: number = 0
   private selectedPassengerIds: Set<number> = new Set()
@@ -34,7 +34,7 @@ export default class extends Controller {
   private hasSelection: boolean = false
 
   // Backup of confirmed state
-  private confirmedAdults: number = 1
+  private confirmedAdults: number = 0
   private confirmedChildren: number = 0
   private confirmedInfants: number = 0
   private confirmedPassengerIds: Set<number> = new Set()
@@ -131,6 +131,13 @@ export default class extends Controller {
       this.selectedPassengerIds.delete(passengerId)
       this.selectedPassengerNames.delete(passengerId)
     }
+    
+    // Auto-update adults count based on number of selected passengers
+    const selectedCount = this.selectedPassengerNames.size
+    this.adults = selectedCount
+    
+    // Update modal title and counters to reflect current selection
+    this.updateCounters()
   }
 
   incrementAdults(event: Event): void {
@@ -147,7 +154,7 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     
-    if (this.adults > 1) {
+    if (this.adults > 0) {
       this.adults--
       this.updateCounters()
     }
@@ -197,7 +204,7 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     
-    this.adults = 1
+    this.adults = 0
     this.children = 0
     this.infants = 0
     this.selectedPassengerIds.clear()
@@ -205,7 +212,7 @@ export default class extends Controller {
     this.hasSelection = false
     
     // Also reset confirmed state
-    this.confirmedAdults = 1
+    this.confirmedAdults = 0
     this.confirmedChildren = 0
     this.confirmedInfants = 0
     this.confirmedPassengerIds.clear()
@@ -227,6 +234,27 @@ export default class extends Controller {
   confirm(event: Event): void {
     event.preventDefault()
     event.stopPropagation()
+    
+    // Check if we're on the count panel (not passenger list panel)
+    const isCountPanelActive = !this.countPanelTarget.classList.contains("hidden")
+    
+    // Mutually exclusive modes: clear opposite mode data
+    if (isCountPanelActive) {
+      // Count mode: clear passenger names/IDs
+      this.selectedPassengerIds.clear()
+      this.selectedPassengerNames.clear()
+      
+      // Uncheck all checkboxes in passenger list
+      const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+      checkboxes.forEach((checkbox: Element) => {
+        (checkbox as HTMLInputElement).checked = false
+      })
+    } else {
+      // Passenger name mode: clear counts
+      this.adults = 0
+      this.children = 0
+      this.infants = 0
+    }
     
     // Save current state as confirmed state
     this.confirmedAdults = this.adults
@@ -260,18 +288,25 @@ export default class extends Controller {
     
     // Update all button displays on the page
     this.selectedDisplayTargets.forEach((displayContainer) => {
-      const displayDiv = displayContainer.querySelector('.text-base') as HTMLElement
-      if (displayDiv) {
-        // If user selected specific passengers, show their names
+      const mainDiv = displayContainer.querySelector('.text-base') as HTMLElement
+      const subtitleDiv = displayContainer.querySelector('.text-sm') as HTMLElement
+      
+      if (mainDiv && subtitleDiv) {
+        // Mode 1: Passenger Name Mode - show names, hide count
         if (this.confirmedPassengerNames.size > 0) {
           const names = Array.from(this.confirmedPassengerNames.values())
-          displayDiv.textContent = names.join('、')
+          mainDiv.textContent = names.join('、')
+          subtitleDiv.textContent = `${names.length}位乘机人` // Hide detailed count breakdown
         } 
-        // If no specific passengers but count is selected, show count
-        else if (!this.hasSelection || (this.confirmedAdults === 1 && this.confirmedChildren === 0 && this.confirmedInfants === 0)) {
-          displayDiv.textContent = '选择乘机人'
-        } else {
-          displayDiv.textContent = `${total}位乘机人`
+        // Mode 2: Count Mode - show count breakdown, no names
+        else if (this.hasSelection && total > 0) {
+          mainDiv.textContent = `${this.confirmedAdults}成人 ${this.confirmedChildren}儿童 ${this.confirmedInfants}婴儿`
+          subtitleDiv.textContent = `共${total}位乘机人`
+        }
+        // Default: No selection
+        else {
+          mainDiv.textContent = '选择乘机人'
+          subtitleDiv.textContent = '快速找到低价票'
         }
       }
     })
@@ -296,10 +331,10 @@ export default class extends Controller {
     if (savedState) {
       try {
         const state = JSON.parse(savedState)
-        this.adults = state.adults || 1
+        this.adults = state.adults || 0
         this.children = state.children || 0
         this.infants = state.infants || 0
-        this.confirmedAdults = state.adults || 1
+        this.confirmedAdults = state.adults || 0
         this.confirmedChildren = state.children || 0
         this.confirmedInfants = state.infants || 0
         this.selectedPassengerIds = new Set(state.passengerIds || [])
