@@ -200,6 +200,34 @@ class HotelsController < ApplicationController
     render :search
   end
 
+  def map
+    # Map view for hotels in a specific city/region
+    @city = params[:city] || '深圳市'
+    @check_in = params[:check_in].present? ? Date.parse(params[:check_in].to_s) : Time.zone.today
+    @check_out = params[:check_out].present? ? Date.parse(params[:check_out].to_s) : (Time.zone.today + 1.day)
+    @rooms = params[:rooms]&.to_i || 1
+    @adults = params[:adults]&.to_i || 1
+    @children = params[:children]&.to_i || 0
+    @location_type = params[:location_type] || 'domestic'
+    
+    @hotels = Hotel.all
+    
+    # Filter by location type
+    if @location_type == 'international'
+      @hotels = @hotels.international
+    else
+      @hotels = @hotels.domestic
+    end
+    
+    # Filter by city
+    @hotels = @hotels.by_city(@city)
+    
+    # Load all hotels for map (no pagination)
+    @hotels = @hotels.ordered.limit(100)
+    
+    render :map
+  end
+
   private
   
   # 从城市名称中提取区级信息

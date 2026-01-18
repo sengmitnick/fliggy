@@ -17,7 +17,6 @@ import HotelSearchController from "./hotel_search_controller"
 import HotelDetailController from "./hotel_detail_controller"
 import ServiceGridController from "./service_grid_controller"
 import PassengerSelectorController from "./passenger_selector_controller"
-import FlightInfoDisplayController from "./flight_info_display_controller"
 import CabinSelectorController from "./cabin_selector_controller"
 import TripTypeController from "./trip_type_controller"
 import ReturnDatePickerController from "./return_date_picker_controller"
@@ -87,6 +86,8 @@ import SpecialHotelSearchController from "./special_hotel_search_controller"
 import SpecialHotelFilterController from "./special_hotel_filter_controller"
 import HotelSearchFilterController from "./hotel_search_filter_controller"
 import BlindBoxController from "./blind_box_controller"
+import HotelMapToggleController from "./hotel_map_toggle_controller"
+import HotelMapController from "./hotel_map_controller"
 import SmartBackController from "./smart_back_controller"
 import TourGroupTabsController from "./tour_group_tabs_controller"
 
@@ -109,7 +110,6 @@ application.register("hotel-search", HotelSearchController)
 application.register("hotel-detail", HotelDetailController)
 application.register("service-grid", ServiceGridController)
 application.register("passenger-selector", PassengerSelectorController)
-application.register("flight-info-display", FlightInfoDisplayController)
 application.register("cabin-selector", CabinSelectorController)
 application.register("trip-type", TripTypeController)
 application.register("return-date-picker", ReturnDatePickerController)
@@ -179,6 +179,8 @@ application.register("special-hotel-search", SpecialHotelSearchController)
 application.register("special-hotel-filter", SpecialHotelFilterController)
 application.register("hotel-search-filter", HotelSearchFilterController)
 application.register("blind-box", BlindBoxController)
+application.register("hotel-map-toggle", HotelMapToggleController)
+application.register("hotel-map", HotelMapController)
 application.register("smart-back", SmartBackController)
 application.register("tour-group-tabs", TourGroupTabsController)
 

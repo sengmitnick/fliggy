@@ -131,9 +131,7 @@
                 is_holiday = date.wday == 0 || date.wday == 6 || special_label
                 
                 # Price color based on value
-                price_class = if price.nil?
-                  'text-gray-400'
-                elsif price < 250
+                price_class = if price < 250
                   'text-red-500'
                 elsif price < 350
                   'text-orange-500'
@@ -164,11 +162,7 @@
                 
                 <!-- Price -->
                 <div class="text-xs <%= is_selected ? 'text-red-600 font-bold' : price_class %> mt-1">
-                  <% if price %>
-                    ¥<%= price %>
-                  <% else %>
-                    <span class="text-gray-400">--</span>
-                  <% end %>
+                  ¥<%= price %>
                 </div>
                 
                 <!-- Special day label -->
