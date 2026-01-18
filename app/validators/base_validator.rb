@@ -58,6 +58,11 @@ class BaseValidator
     raise NotImplementedError, "Subclass must implement #verify"
   end
   
+  # 子类必须实现：模拟 AI Agent 操作
+  def simulate
+    raise NotImplementedError, "Subclass must implement #simulate"
+  end
+  
   # 执行准备阶段（设置 data_version）
   def execute_prepare
     # 生成唯一的 data_version（使用时间戳 + 随机数确保唯一性）
@@ -121,7 +126,99 @@ class BaseValidator
     result
   end
   
+  # 执行完整的自动化测试流程（prepare -> simulate -> verify）
+  def execute_simulate
+    result = {
+      validator_id: self.class.validator_id,
+      title: self.class.title,
+      status: 'unknown',
+      prepare_info: nil,
+      simulate_info: nil,
+      verify_result: nil,
+      timestamp: Time.current.iso8601
+    }
+    
+    begin
+      # 0. 确保基线数据已加载
+      ensure_baseline_data_loaded
+      
+      # 1. 准备阶段
+      result[:prepare_info] = execute_prepare
+      
+      # 2. 模拟操作阶段
+      result[:simulate_info] = simulate
+      
+      # 3. 验证阶段
+      result[:verify_result] = execute_verify
+      
+      # 判断最终状态
+      result[:status] = result[:verify_result][:status]
+      
+    rescue StandardError => e
+      result[:status] = 'error'
+      result[:error] = e.message
+      result[:backtrace] = e.backtrace.first(10)
+      
+      # 确保即使出错也回滚数据
+      rollback_to_baseline if @data_version
+    end
+    
+    result
+  end
+  
   private
+  
+  # 确保基线数据已加载
+  def ensure_baseline_data_loaded
+    # 检查是否已存在基线数据（使用City作为标志）
+    return if City.where(data_version: 0).exists?
+    
+    puts "\n" + "=" * 80
+    puts "🚀 正在初始化验证器基线数据 (data_version=0)"
+    puts "=" * 80
+    
+    # 设置 PostgreSQL 会话变量 app.data_version='0'
+    ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
+    
+    # 获取数据包目录
+    data_packs_dir = Rails.root.join('app/validators/support/data_packs/v1')
+    
+    unless Dir.exist?(data_packs_dir)
+      raise "Data packs directory not found: #{data_packs_dir}"
+    end
+    
+    # 获取所有 .rb 文件并按文件名排序
+    data_pack_files = Dir.glob(data_packs_dir.join('*.rb')).sort
+    
+    # 确保 base.rb 优先加载（如果存在）
+    base_file = data_packs_dir.join('base.rb')
+    if File.exist?(base_file)
+      data_pack_files.delete(base_file.to_s)
+      data_pack_files.unshift(base_file.to_s)
+    end
+    
+    # 加载所有数据包
+    data_pack_files.each do |file|
+      filename = File.basename(file)
+      puts "  → 加载 #{filename}"
+      begin
+        load file
+      rescue StandardError => e
+        puts "  ✗ 加载失败: #{filename}"
+        puts "    错误: #{e.message}"
+        raise e  # 在 simulate 阶段应该直接失败，而不是忽略错误
+      end
+    end
+    
+    puts "=" * 80
+    puts "✓ 基线数据初始化完成 (data_version=0)"
+    puts "  - 共加载 #{data_pack_files.size} 个数据包"
+    puts "  - City 数量: #{City.where(data_version: 0).count}"
+    puts "  - Flight 数量: #{Flight.where(data_version: 0).count}"
+    puts "  - User 数量: #{User.where(data_version: 0).count}"
+    puts "=" * 80
+    puts ""
+  end
   
   # 回滚到基线状态（删除当前 data_version 的所有数据）
   def rollback_to_baseline

@@ -31,16 +31,17 @@ class BookFlightValidator < BaseValidator
   # 准备阶段：设置任务参数
   def prepare
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    # 设置任务参数（使用动态日期，与数据包保持一致）
-    @target_date = Date.current + 3.days
     @origin = '深圳市'
     @destination = '北京市'
+    @target_date = Date.current + 3.days
     
     # 计算最低价（用于后续验证）
+    # 注意：查询基线数据 (data_version=0)
     @lowest_price = Flight.where(
       departure_city: @origin,
       destination_city: @destination,
-      flight_date: @target_date
+      flight_date: @target_date,
+      data_version: 0
     ).minimum(:price)
     
     # 返回给 Agent 的任务信息
@@ -53,7 +54,8 @@ class BookFlightValidator < BaseValidator
       available_flights_count: Flight.where(
         departure_city: @origin,
         destination_city: @destination,
-        flight_date: @target_date
+        flight_date: @target_date,
+        data_version: 0
       ).count,
       lowest_price: @lowest_price
     }
@@ -119,5 +121,44 @@ class BookFlightValidator < BaseValidator
     @origin = data['origin']
     @destination = data['destination']
     @lowest_price = data['lowest_price']
+  end
+  
+  # 模拟 AI Agent 操作：预订深圳到北京的最低价航班
+  def simulate
+    # 1. 查找测试用户（数据包中已创建）
+    user = User.find_by!(email: 'demo@fliggy.com', data_version: 0)
+    
+    # 2. 查找乘客（数据包中已创建）
+    passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)
+    
+    # 3. 查找目标航班（数据包固定，直接查最低价）
+    target_flight = Flight.where(
+      departure_city: @origin,
+      destination_city: @destination,
+      flight_date: @target_date,
+      data_version: 0
+    ).order(:price).first
+    
+    # 4. 创建订单（固定参数）
+    booking = Booking.create!(
+      flight_id: target_flight.id,
+      user_id: user.id,
+      passenger_name: passenger.name,
+      passenger_id_number: passenger.id_number,
+      contact_phone: passenger.phone,
+      total_price: target_flight.price,
+      status: 'pending',
+      accept_terms: true
+    )
+    
+    # 返回操作信息
+    {
+      action: 'create_booking',
+      booking_id: booking.id,
+      flight_number: target_flight.flight_number,
+      flight_price: target_flight.price,
+      passenger_name: passenger.name,
+      user_email: user.email
+    }
   end
 end
