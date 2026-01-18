@@ -4,6 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = [
     "searchModal",
     "searchInput",
+    "searchDisplay",
     "hotSearchContent", "hotSearchIcon",
     "hotBrandContent", "hotBrandIcon",
     "hotLocationContent", "hotLocationIcon",
@@ -18,11 +19,16 @@ export default class extends Controller<HTMLElement> {
     "checkOutInput",
     "roomsInput",
     "adultsInput",
-    "childrenInput"
+    "childrenInput",
+    "minPriceInput",
+    "maxPriceInput",
+    "starsInput"
   ]
 
   declare readonly searchModalTarget: HTMLElement
   declare readonly searchInputTarget: HTMLInputElement
+  declare readonly hasSearchDisplayTarget: boolean
+  declare readonly searchDisplayTarget: HTMLInputElement
   declare readonly hotSearchContentTarget: HTMLElement
   declare readonly hotSearchIconTarget: HTMLElement
   declare readonly hotBrandContentTarget: HTMLElement
@@ -53,6 +59,12 @@ export default class extends Controller<HTMLElement> {
   declare readonly adultsInputTarget: HTMLInputElement
   declare readonly hasChildrenInputTarget: boolean
   declare readonly childrenInputTarget: HTMLInputElement
+  declare readonly hasMinPriceInputTarget: boolean
+  declare readonly minPriceInputTarget: HTMLInputElement
+  declare readonly hasMaxPriceInputTarget: boolean
+  declare readonly maxPriceInputTarget: HTMLInputElement
+  declare readonly hasStarsInputTarget: boolean
+  declare readonly starsInputTarget: HTMLInputElement
 
   connect(): void {
     console.log("HotelSearch connected")
@@ -62,6 +74,8 @@ export default class extends Controller<HTMLElement> {
     document.addEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
     // Listen for guest-selector updates
     document.addEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
+    // Listen for price-filter updates
+    document.addEventListener('hotel-price-filter:filter-updated', this.handlePriceFilterUpdate.bind(this))
   }
 
   disconnect(): void {
@@ -69,6 +83,7 @@ export default class extends Controller<HTMLElement> {
     document.removeEventListener('city-selector:city-selected-for-hotel', this.handleCityUpdate.bind(this))
     document.removeEventListener('hotel-date-picker:dates-selected', this.handleDateUpdate.bind(this))
     document.removeEventListener('hotel-guest-selector:guests-updated', this.handleGuestUpdate.bind(this))
+    document.removeEventListener('hotel-price-filter:filter-updated', this.handlePriceFilterUpdate.bind(this))
   }
 
   // Handle city selection update from city-selector
@@ -121,6 +136,29 @@ export default class extends Controller<HTMLElement> {
     if (this.hasChildrenInputTarget) {
       this.childrenInputTarget.value = children.toString()
       console.log('HotelSearch: Updated children to:', children)
+    }
+  }
+
+  // Handle price/star filter update from hotel-price-filter
+  handlePriceFilterUpdate(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { minPrice, maxPrice, stars } = customEvent.detail
+    console.log('HotelSearch: Received price filter update:', { minPrice, maxPrice, stars })
+    
+    if (this.hasMinPriceInputTarget) {
+      this.minPriceInputTarget.value = minPrice > 0 ? minPrice.toString() : ''
+      console.log('HotelSearch: Updated minPrice to:', minPrice)
+    }
+    
+    if (this.hasMaxPriceInputTarget) {
+      // Only set maxPrice if it's less than 3000 (not the default max value)
+      this.maxPriceInputTarget.value = (maxPrice > 0 && maxPrice < 3000) ? maxPrice.toString() : ''
+      console.log('HotelSearch: Updated maxPrice to:', maxPrice < 3000 ? maxPrice : 'empty (no limit)')
+    }
+    
+    if (this.hasStarsInputTarget) {
+      this.starsInputTarget.value = stars > 0 ? stars.toString() : ''
+      console.log('HotelSearch: Updated stars to:', stars)
     }
   }
 
@@ -184,5 +222,86 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.set('children', children || '0')
       window.location.href = url.toString()
     }
+  }
+
+  getCurrentLocation(): void {
+    if (!navigator.geolocation) {
+      alert('您的浏览器不支持地理定位功能')
+      return
+    }
+
+    const button = event?.currentTarget as HTMLButtonElement
+    if (button) {
+      button.disabled = true
+      button.classList.add('opacity-50')
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        console.log('Got location:', { latitude, longitude })
+        
+        // In a real app, you would reverse geocode these coordinates to get the city name
+        // For now, we'll show the coordinates and alert the user
+        alert(`获取到您的位置：\n纬度: ${latitude.toFixed(6)}\n经度: ${longitude.toFixed(6)}\n\n在完整版本中，这里会自动选择最近的城市`)
+        
+        if (button) {
+          button.disabled = false
+          button.classList.remove('opacity-50')
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error)
+        let message = '无法获取您的位置'
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = '您拒绝了位置权限请求。请在浏览器设置中允许访问位置信息。'
+            break
+          case error.POSITION_UNAVAILABLE:
+            message = '位置信息不可用，请检查您的网络连接。'
+            break
+          case error.TIMEOUT:
+            message = '获取位置信息超时，请重试。'
+            break
+        }
+        
+        alert(message)
+        
+        if (button) {
+          button.disabled = false
+          button.classList.remove('opacity-50')
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  }
+
+  selectOption(event: Event): void {
+    const button = event.currentTarget as HTMLButtonElement
+    const searchTerm = button.dataset.searchTerm
+    
+    if (!searchTerm) return
+
+    console.log('HotelSearch: Selected option:', searchTerm)
+
+    // Update the search input value
+    this.searchInputTarget.value = searchTerm
+
+    // Update the search display input if it exists
+    if (this.hasSearchDisplayTarget) {
+      this.searchDisplayTarget.value = searchTerm
+      console.log('HotelSearch: Updated search display to:', searchTerm)
+    }
+
+    // Close the search modal
+    this.closeSearchModal()
+
+    // Submit the search form directly
+    this.submitSearch()
   }
 }

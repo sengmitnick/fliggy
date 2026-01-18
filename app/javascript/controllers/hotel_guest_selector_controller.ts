@@ -38,11 +38,22 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("HotelGuestSelector connected")
+    
+    // Try to read initial values from URL parameters first
+    const urlParams = new URLSearchParams(window.location.search)
+    const roomsParam = urlParams.get('rooms')
+    const adultsParam = urlParams.get('adults')
+    const childrenParam = urlParams.get('children')
+    
     // Only initialize if input targets exist (modal view)
     if (this.hasRoomsInputTarget && this.hasAdultsInputTarget && this.hasChildrenInputTarget) {
-      this.roomsValue = parseInt(this.roomsInputTarget.value) || 1
-      this.adultsValue = parseInt(this.adultsInputTarget.value) || 1
-      this.childrenValue = parseInt(this.childrenInputTarget.value) || 0
+      // Prioritize URL parameters, fall back to hidden input values
+      this.roomsValue = roomsParam && roomsParam !== '' ? parseInt(roomsParam) : (parseInt(this.roomsInputTarget.value) || 1)
+      this.adultsValue = adultsParam && adultsParam !== '' ? parseInt(adultsParam) : (parseInt(this.adultsInputTarget.value) || 1)
+      this.childrenValue = childrenParam && childrenParam !== '' ? parseInt(childrenParam) : (parseInt(this.childrenInputTarget.value) || 0)
+      
+      // Update modal display and hidden inputs
+      this.updateCounts()
       this.updateDisplay()
     }
   }

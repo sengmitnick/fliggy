@@ -19,7 +19,7 @@ class DeepTravelBookingsController < ApplicationController
     @final_price = @total_price
     
     # Get user's existing passengers
-    @passengers = current_user.passengers.order(created_at: :desc)
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     
     # Initialize booking object with booking_travelers
     @booking = DeepTravelBooking.new(
@@ -59,7 +59,7 @@ class DeepTravelBookingsController < ApplicationController
       @final_price = @total_price
       
       # Get user's existing passengers
-      @passengers = current_user.passengers.order(created_at: :desc)
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
       
       render :new, status: :unprocessable_entity
     end

@@ -143,27 +143,89 @@ class HotelsController < ApplicationController
       @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
     end
     
+    # District filtering (same as special_hotels)
+    if params[:district].present?
+      @hotels = @hotels.where('address LIKE ?', "%#{params[:district]}%")
+    end
+    
+    # Price range filtering (same as special_hotels)
+    if params[:price_range].present?
+      case params[:price_range]
+      when '0-100'
+        @hotels = @hotels.where('price < ?', 100)
+      when '100-200'
+        @hotels = @hotels.where('price >= ? AND price < ?', 100, 200)
+      when '200-300'
+        @hotels = @hotels.where('price >= ? AND price < ?', 200, 300)
+      when '300+'
+        @hotels = @hotels.where('price >= ?', 300)
+      end
+    end
+    
     @hotels = @hotels.by_star_level(@star_level) if @star_level.present?
     @hotels = @hotels.by_price_range(@price_min, @price_max) if @price_min.present? || @price_max.present?
     
-    # 如果有区级信息，按地址匹配度排序（地址包含区名的排在前面）
-    if district.present?
-      @hotels = @hotels.order(
-        Arel.sql("CASE WHEN address ILIKE '%#{district}%' THEN 0 ELSE 1 END"),
-        :display_order, 
-        created_at: :desc
-      ).page(params[:page]).per(10)
+    # Sorting (updated to match special_hotels pattern)
+    case params[:sort]
+    when 'rating'
+      @hotels = @hotels.order(rating: :desc, price: :asc)
+    when 'distance'
+      @hotels = @hotels.order(distance: :asc, price: :asc)
+    when 'price'
+      @hotels = @hotels.order(price: :asc)
     else
-      @hotels = @hotels.ordered.page(params[:page]).per(10)
+      # 如果有区级信息，按地址匹配度排序（地址包含区名的排在前面）
+      if district.present?
+        @hotels = @hotels.order(
+          Arel.sql("CASE WHEN address ILIKE '%#{district}%' THEN 0 ELSE 1 END"),
+          :display_order, 
+          created_at: :desc
+        )
+      else
+        @hotels = @hotels.ordered
+      end
     end
+    
+    @hotels = @hotels.page(params[:page]).per(10)
 
     @featured_hotels = Hotel.featured.limit(3)
     
     # 获取搜索模态框的动态数据
     @search_modal_data = get_search_modal_data(@city)
     
+    # Extract districts for filter bar
+    @districts = extract_districts_from_hotels(@city)
+    
     # Render the dedicated search results view
     render :search
+  end
+
+  def map
+    # Map view for hotels in a specific city/region
+    @city = params[:city] || '深圳市'
+    @check_in = params[:check_in].present? ? Date.parse(params[:check_in].to_s) : Time.zone.today
+    @check_out = params[:check_out].present? ? Date.parse(params[:check_out].to_s) : (Time.zone.today + 1.day)
+    @rooms = params[:rooms]&.to_i || 1
+    @adults = params[:adults]&.to_i || 1
+    @children = params[:children]&.to_i || 0
+    @location_type = params[:location_type] || 'domestic'
+    
+    @hotels = Hotel.all
+    
+    # Filter by location type
+    if @location_type == 'international'
+      @hotels = @hotels.international
+    else
+      @hotels = @hotels.domestic
+    end
+    
+    # Filter by city
+    @hotels = @hotels.by_city(@city)
+    
+    # Load all hotels for map (no pagination)
+    @hotels = @hotels.ordered.limit(100)
+    
+    render :map
   end
 
   private
@@ -191,25 +253,28 @@ class HotelsController < ApplicationController
   
   # 根据城市获取搜索模态框的动态数据（包含9个分类）
   def get_search_modal_data(city)
+    return default_search_modal_data if city.blank?
+    
     # 移除"市"字符以获取基础城市名
     base_city = city.gsub(/市.*$/, '')
     
-    # 城市数据映射表
+    # 获取该城市实际存在的酒店品牌（基于酒店名称）
+    actual_brands = get_actual_hotel_brands(city)
+    
+    # 城市数据映射表（景点/医院/大学等保持静态，品牌动态生成）
     city_data = {
       '深圳' => {
-        hot_searches: ['深圳北站', '深圳南山区', '深圳湾', '福田口岸', '福田站', '罗湖口岸', '深圳宝安国际机场', '罗湖区'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
-        hot_locations: ['宝安机场商圈', '南澳', '田贝/水贝珠宝城', '华强北商业区', '坂田', '龙岗中心区/大运新城', '较场尾大鹏所城', '观澜'],
-        metro: ['布吉站', '坂田站', '南山站', '国贸站', '光明城站', '平湖站', '碧海湾站', '固戍站'],
-        airport: ['深圳宝安国际机场', '深圳站', '深圳东站', '深圳坪山站', '龙华汽车站', '深圳宝安国际机场-T3航站楼', '坂田站', '光明城站'],
-        attraction: ['皇岗口岸', '深圳湾口岸', '深圳国际会展中心', '深圳大运中心体育馆', '深圳会展中心', '深圳湾公园', '莲塘口岸', '海上世界'],
+        hot_searches: ['深圳北站', '宝安机场', '深圳湾', '华强北', '罗湖口岸', '福田口岸', '世界之窗', '欢乐谷'],
+        hot_locations: ['宝安机场商圈', '罗湖商圈', '福田商圈', '南山商圈', '深圳湾商圈', '华强北商圈', '蛇口商圈', '龙岗商圈'],
+        metro: ['深圳北站', '福田站', '罗湖站', '会展中心站', '市民中心站', '车公庙站', '科学馆站', '大剧院站'],
+        airport: ['宝安国际机场', '深圳北站', '深圳站', '福田站', '宝安机场T3航站楼', '深圳东站', '深圳西站', '深圳北站'],
+        attraction: ['世界之窗', '欢乐谷', '深圳湾公园', '东部华侨城', '大梅沙', '小梅沙', '莲花山公园', '深圳野生动物园'],
         theme: ['酒店', '电竞酒店', '公寓', '电竞房', '麻将房', '亲子酒店', '别墅', '海景房'],
-        hospital: ['北京大学深圳医院', '深圳市人民医院', '深圳市第二人民医院', '深圳市第三人民医院', '深圳市中医院', '深圳市儿童医院', '宝安人民医院', '南方医科大学深圳医院'],
-        university: ['深圳大学粤海校区', '南方科技大学', '深圳信息职业技术学院', '深圳技术大学', '深圳大学丽湖校区', '哈尔滨工业大学深圳校区', '广东新安职业技术学院', '香港中文大学(深圳)']
+        hospital: ['北京大学深圳医院', '深圳市人民医院', '深圳市第二人民医院', '南方医科大学深圳医院', '深圳市儿童医院', '深圳市中医院', '香港大学深圳医院', '深圳市妇幼保健院'],
+        university: ['深圳大学', '南方科技大学', '深圳技术大学', '香港中文大学（深圳）', '哈尔滨工业大学（深圳）', '中山大学（深圳）', '北京大学深圳研究生院', '清华大学深圳国际研究生院']
       },
       '北京' => {
         hot_searches: ['北京西站', '天安门', '故宫', '首都机场', '北京南站', '王府井', '三里屯', '国贸'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['首都机场商圈', '王府井商圈', '国贸商圈', '三里屯商圈', '中关村', '西单商圈', '金融街', '望京'],
         metro: ['国贸站', '三里屯站', '王府井站', '西单站', '天安门东站', '中关村站', '朝阳门站', '建国门站'],
         airport: ['首都国际机场', '北京大兴国际机场', '北京西站', '北京南站', '北京站', '北京北站', '首都机场T3航站楼', '大兴机场'],
@@ -220,7 +285,6 @@ class HotelsController < ApplicationController
       },
       '上海' => {
         hot_searches: ['外滩', '浦东机场', '虹桥火车站', '东方明珠', '南京路', '人民广场', '陆家嘴', '迪士尼'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['浦东机场商圈', '虹桥商圈', '人民广场商圈', '南京路商圈', '陆家嘴商圈', '外滩', '静安寺商圈', '徐家汇商圈'],
         metro: ['人民广场站', '陆家嘴站', '南京东路站', '静安寺站', '徐家汇站', '虹桥火车站', '上海火车站', '世纪大道站'],
         airport: ['浦东国际机场', '虹桥国际机场', '上海虹桥站', '上海站', '上海南站', '浦东机场T1航站楼', '浦东机场T2航站楼', '虹桥火车站'],
@@ -231,7 +295,6 @@ class HotelsController < ApplicationController
       },
       '广州' => {
         hot_searches: ['广州塔', '白云机场', '珠江新城', '广州南站', '北京路', '天河城', '上下九', '长隆'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['白云机场商圈', '珠江新城商圈', '天河城商圈', '北京路商圈', '上下九商圈', '广州塔商圈', '琶洲会展中心', '长隆商圈'],
         metro: ['珠江新城站', '广州塔站', '天河客运站', '体育西路站', '北京路站', '公园前站', '客村站', '广州南站'],
         airport: ['白云国际机场', '广州南站', '广州站', '广州东站', '广州北站', '白云机场T1航站楼', '白云机场T2航站楼', '广州南站'],
@@ -242,7 +305,6 @@ class HotelsController < ApplicationController
       },
       '杭州' => {
         hot_searches: ['西湖', '萧山机场', '西溪湿地', '雷峰塔', '杭州东站', '武林广场', '钱江新城', '河坊街'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['西湖景区', '武林广场商圈', '钱江新城商圈', '萧山机场商圈', '西溪湿地商圈', '河坊街商圈', '滨江高教园区', '城西银泰城'],
         metro: ['西湖文化广场站', '武林广场站', '钱江路站', '火车东站', '定安路站', '近江站', '滨和路站', '市民中心站'],
         airport: ['杭州萧山国际机场', '杭州东站', '杭州站', '杭州南站', '杭州城站', '萧山机场T1航站楼', '萧山机场T2航站楼', '杭州东站'],
@@ -253,7 +315,6 @@ class HotelsController < ApplicationController
       },
       '成都' => {
         hot_searches: ['春熙路', '双流机场', '宽窄巷子', '成都东站', '太古里', '锦里', '天府广场', '熊猫基地'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['春熙路商圈', '太古里商圈', '天府广场商圈', '宽窄巷子商圈', '双流机场商圈', '锦里商圈', '金融城商圈', '高新区'],
         metro: ['春熙路站', '天府广场站', '骡马市站', '火车南站', '火车东站', '太古里站', '金融城站', '世纪城站'],
         airport: ['成都双流国际机场', '成都天府国际机场', '成都东站', '成都站', '成都南站', '双流机场T1航站楼', '双流机场T2航站楼', '天府机场T1航站楼'],
@@ -264,7 +325,6 @@ class HotelsController < ApplicationController
       },
       '西安' => {
         hot_searches: ['钟楼', '西安北站', '兵马俑', '大雁塔', '回民街', '大唐芙蓉园', '华清池', '城墙'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['钟楼商圈', '小寨商圈', '高新区', '曲江新区', '大雁塔商圈', '城墙商圈', '回民街商圈', '咸阳机场商圈'],
         metro: ['钟楼站', '小寨站', '大雁塔站', '北大街站', '五路口站', '火车站', '行政中心站', '韦曲南站'],
         airport: ['西安咸阳国际机场', '西安北站', '西安站', '西安南站', '咸阳机场T1航站楼', '咸阳机场T2航站楼', '咸阳机场T3航站楼', '西安北站'],
@@ -275,7 +335,6 @@ class HotelsController < ApplicationController
       },
       '南京' => {
         hot_searches: ['新街口', '南京南站', '夫子庙', '中山陵', '玄武湖', '总统府', '南京站', '禄口机场'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['新街口商圈', '夫子庙商圈', '河西万达商圈', '江宁万达商圈', '禄口机场商圈', '南京南站商圈', '玄武湖商圈', '鼓楼商圈'],
         metro: ['新街口站', '夫子庙站', '南京南站', '南京站', '河西万达站', '仙林中心站', '新模范马路站', '玄武门站'],
         airport: ['南京禄口国际机场', '南京南站', '南京站', '南京东站', '禄口机场T1航站楼', '禄口机场T2航站楼', '南京南站', '南京北站'],
@@ -286,7 +345,6 @@ class HotelsController < ApplicationController
       },
       '武汉' => {
         hot_searches: ['武汉站', '光谷', '江汉路', '户部巷', '黄鹤楼', '武汉大学', '东湖', '汉口'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['光谷商圈', '江汉路商圈', '楚河汉街商圈', '武汉天地商圈', '黄鹤楼商圈', '户部巷商圈', '东湖商圈', '武广商圈'],
         metro: ['光谷广场站', '江汉路站', '武汉站', '汉口站', '楚河汉街站', '街道口站', '中南路站', '武昌火车站'],
         airport: ['武汉天河国际机场', '武汉站', '汉口站', '武昌站', '天河机场T1航站楼', '天河机场T2航站楼', '天河机场T3航站楼', '武汉站'],
@@ -297,7 +355,6 @@ class HotelsController < ApplicationController
       },
       '重庆' => {
         hot_searches: ['解放碑', '洪崖洞', '磁器口', '重庆北站', '江北机场', '观音桥', '南坪', '李子坝'],
-        hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
         hot_locations: ['解放碑商圈', '观音桥商圈', '南坪商圈', '沙坪坝商圈', '江北嘴商圈', '洪崖洞商圈', '磁器口商圈', '江北机场商圈'],
         metro: ['解放碑站', '观音桥站', '南坪站', '沙坪坝站', '红旗河沟站', '江北机场站', '重庆北站', '两路口站'],
         airport: ['重庆江北国际机场', '重庆北站', '重庆西站', '重庆站', '江北机场T2航站楼', '江北机场T3航站楼', '重庆北站南广场', '重庆北站北广场'],
@@ -308,8 +365,42 @@ class HotelsController < ApplicationController
       }
     }
     
-    # 返回对应城市的数据，如果没有找到则返回默认数据
-    city_data[base_city] || {
+    # 获取对应城市的数据，如果没有则返回默认数据
+    result = city_data[base_city] || default_search_modal_data
+    
+    # 将品牌部分替换为实际存在的品牌
+    result[:hot_brands] = actual_brands.any? ? actual_brands : result.fetch(:hot_brands, ['希尔顿', '万豪', '亚朵'])
+    
+    result
+  end
+  
+  # 获取该城市实际存在的酒店品牌（基于酒店名称提取品牌）
+  def get_actual_hotel_brands(city)
+    return [] if city.blank?
+    
+    # 常见品牌关键词列表
+    brand_keywords = ['希尔顿', '万豪', '万丽', '凯悦', '雅高', '香格里拉', '洲际', '喜来登', 
+                      '威斯汀', '丽思卡尔顿', '亚朵', '全季', '维也纳', '如家', '汉庭', 
+                      '锦江', '华住', '格林', '7天', '桔子', '山海居', '菲住']
+    
+    # 获取该城市所有酒店名称
+    hotel_names = Hotel.by_city(city).pluck(:name)
+    
+    # 提取品牌（检查酒店名称中是否包含品牌关键词）
+    brands = []
+    brand_keywords.each do |keyword|
+      if hotel_names.any? { |name| name.include?(keyword) }
+        brands << keyword
+      end
+    end
+    
+    # 返回前8个品牌，如果不足8个则返回全部
+    brands.take(8)
+  end
+  
+  # 默认搜索模态框数据
+  def default_search_modal_data
+    {
       hot_searches: ['火车站', '机场', '市中心', '商业区', '景区', '会展中心', '汽车站', '体育馆'],
       hot_brands: ['希尔顿花园', '万丽', '菲住', '万豪', '希尔顿', '亚朵', '全季', '维也纳'],
       hot_locations: ['机场商圈', '火车站商圈', '市中心商圈', '商业区', '景区商圈', '会展中心商圈', '高新区', '大学城'],
@@ -320,5 +411,20 @@ class HotelsController < ApplicationController
       hospital: ['市人民医院', '市中心医院', '市第一人民医院', '市第二人民医院', '市中医院', '市儿童医院', '市妇幼保健院', '中医院'],
       university: ['综合大学', '理工大学', '师范大学', '医科大学', '财经大学', '科技大学', '外国语大学', '职业技术学院']
     }
+  end
+  
+  # Extract districts from hotel addresses for filter bar
+  def extract_districts_from_hotels(city)
+    addresses = Hotel.by_city(city).pluck(:address).compact
+    districts = addresses.map do |address|
+      if address.match?(/（\w+区）/)
+        address.match(/（\w+区）/)[1]
+      elsif address.match?(/（\w+新区）/)
+        address.match(/（\w+新区）/)[1]
+      else
+        address.split(/[路街道号]/).first
+      end
+    end.compact.uniq.sort
+    districts
   end
 end

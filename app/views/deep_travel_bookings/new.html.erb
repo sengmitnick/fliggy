@@ -261,7 +261,9 @@
               <div class="flex-1">
                 <div class="flex items-center">
                   <span class="font-medium text-base text-[#111111]"><%= passenger.name %></span>
-                  <span class="ml-2 text-xs text-gray-500">本人</span>
+                  <% if passenger.is_self? %>
+                    <span class="ml-2 text-xs text-gray-500">本人</span>
+                  <% end %>
                 </div>
                 <div class="text-sm text-gray-500 mt-1">身份证 <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1 ********\2') %></div>
               </div>

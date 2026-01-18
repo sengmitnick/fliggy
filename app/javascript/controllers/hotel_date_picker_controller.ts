@@ -36,6 +36,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly checkOutInputTarget: HTMLInputElement
   declare readonly checkInDisplayTarget: HTMLElement
   declare readonly checkOutDisplayTarget: HTMLElement
+  declare readonly hasNightsDisplayTarget: boolean
   declare readonly nightsDisplayTarget: HTMLElement
 
   declare checkInValue: string
@@ -114,6 +115,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   confirm(): void {
+    // Always allow confirm - even if dates are reset/cleared
     if (this.checkInDate && this.checkOutDate) {
       this.checkInInputTarget.value = this.formatDate(this.checkInDate)
       this.checkOutInputTarget.value = this.formatDate(this.checkOutDate)
@@ -121,9 +123,27 @@ export default class extends Controller<HTMLElement> {
       
       // Dispatch event to notify hotel-search controller
       this.dispatchDateUpdateEvent()
+    } else {
+      // If dates are cleared (after reset), clear the inputs
+      if (this.hasCheckInInputTarget) {
+        this.checkInInputTarget.value = ''
+      }
+      if (this.hasCheckOutInputTarget) {
+        this.checkOutInputTarget.value = ''
+      }
       
-      this.closeModal()
+      // Dispatch event with empty dates to clear filter
+      const dateUpdateEvent = new CustomEvent('hotel-date-picker:dates-selected', {
+        detail: {
+          checkIn: '',
+          checkOut: ''
+        },
+        bubbles: true
+      })
+      document.dispatchEvent(dateUpdateEvent)
     }
+    
+    this.closeModal()
   }
 
   reset(): void {
@@ -131,7 +151,17 @@ export default class extends Controller<HTMLElement> {
     this.checkOutDate = null
     this.selectingCheckInValue = true
     this.promptTextTarget.textContent = "请选择入住日期"
+    
+    // Clear the input fields
+    if (this.hasCheckInInputTarget) {
+      this.checkInInputTarget.value = ''
+    }
+    if (this.hasCheckOutInputTarget) {
+      this.checkOutInputTarget.value = ''
+    }
+    
     this.renderMultiMonthCalendar()
+    this.updateDisplay()
   }
 
   previousMonth(): void {
@@ -380,7 +410,7 @@ export default class extends Controller<HTMLElement> {
       }
     }
     
-    if (this.checkInDate && this.checkOutDate) {
+    if (this.checkInDate && this.checkOutDate && this.hasNightsDisplayTarget) {
       const nights = Math.floor((this.checkOutDate.getTime() - this.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
       this.nightsDisplayTarget.textContent = `${nights}晚`
     }

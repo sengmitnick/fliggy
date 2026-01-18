@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# 酒店筛选条件保留功能 - 手动测试脚本
+# 用于快速验证功能是否正常工作
+
+set -e
+
+echo "=============================================="
+echo "🎯 酒店筛选条件保留功能 - 测试验证"
+echo "=============================================="
+echo ""
+
+# 检查服务器是否运行
+if ! curl -s http://localhost:3000 > /dev/null; then
+  echo "❌ 错误: Rails服务器未运行"
+  echo "请先运行: bin/dev"
+  exit 1
+fi
+
+echo "✅ Rails服务器运行中..."
+echo ""
+
+# 1. 检查酒店页面是否包含 controller
+echo "📋 步骤 1: 检查 hotel-filter-persistence controller 是否已集成..."
+if curl -s 'http://localhost:3000/hotels' | grep -q 'hotel-filter-persistence'; then
+  echo "   ✅ Controller 已正确集成到页面"
+else
+  echo "   ❌ Controller 未找到"
+  exit 1
+fi
+echo ""
+
+# 2. 检查 JavaScript 是否已编译
+echo "📋 步骤 2: 检查 JavaScript 编译状态..."
+if [ -f "app/assets/builds/application.js" ] && grep -q "HotelFilterPersistence" app/assets/builds/application.js; then
+  echo "   ✅ JavaScript 已编译"
+else
+  echo "   ❌ JavaScript 未编译或不包含 HotelFilterPersistence"
+  exit 1
+fi
+echo ""
+
+# 3. 检查 TypeScript 源文件
+echo "📋 步骤 3: 检查 TypeScript 源文件..."
+if [ -f "app/javascript/controllers/hotel_filter_persistence_controller.ts" ]; then
+  echo "   ✅ Controller 源文件存在"
+  
+  # 检查关键方法
+  if grep -q "saveFilters" app/javascript/controllers/hotel_filter_persistence_controller.ts; then
+    echo "   ✅ saveFilters 方法存在"
+  fi
+  
+  if grep -q "restoreFilters" app/javascript/controllers/hotel_filter_persistence_controller.ts; then
+    echo "   ✅ restoreFilters 方法存在"
+  fi
+  
+  if grep -q "sessionStorage" app/javascript/controllers/hotel_filter_persistence_controller.ts; then
+    echo "   ✅ sessionStorage 集成正确"
+  fi
+else
+  echo "   ❌ Controller 源文件不存在"
+  exit 1
+fi
+echo ""
+
+# 4. 检查文档
+echo "📋 步骤 4: 检查相关文档..."
+if [ -f "FILTER_PERSISTENCE_TEST.md" ]; then
+  echo "   ✅ FILTER_PERSISTENCE_TEST.md 存在"
+fi
+
+if [ -f "HOTEL_FILTER_PERSISTENCE_SUMMARY.md" ]; then
+  echo "   ✅ HOTEL_FILTER_PERSISTENCE_SUMMARY.md 存在"
+fi
+echo ""
+
+# 5. 模拟用户流程测试
+echo "📋 步骤 5: 模拟用户流程测试..."
+echo "   ⚠️  需要手动在浏览器中测试："
+echo ""
+echo "   1. 访问 http://localhost:3000/hotels"
+echo "   2. 修改筛选条件（城市、日期、房间数等）"
+echo "   3. 点击搜索按钮"
+echo "   4. 点击返回按钮回到首页"
+echo "   5. 再次点击酒店按钮"
+echo "   6. 验证筛选条件是否自动恢复"
+echo ""
+
+# 6. 浏览器控制台验证命令
+echo "📋 步骤 6: 浏览器控制台验证命令..."
+echo "   打开浏览器开发者工具（F12），在控制台执行："
+echo ""
+echo "   // 查看保存的筛选条件"
+echo "   JSON.parse(sessionStorage.getItem('hotel_filters_state'))"
+echo ""
+echo "   // 手动清除筛选条件"
+echo "   sessionStorage.removeItem('hotel_filters_state')"
+echo ""
+
+echo "=============================================="
+echo "✅ 所有自动检查通过！"
+echo "=============================================="
+echo ""
+echo "📖 功能说明："
+echo "   当用户在酒店页面设置筛选条件后，返回首页再进入酒店页面时，"
+echo "   之前的筛选条件会自动恢复。"
+echo ""
+echo "🔧 技术实现："
+echo "   - Controller: hotel-filter-persistence (Stimulus)"
+echo "   - 存储方式: sessionStorage"
+echo "   - 存储键: hotel_filters_state"
+echo "   - 过期时间: 24小时"
+echo ""
+echo "📚 详细文档："
+echo "   - FILTER_PERSISTENCE_TEST.md (测试指南)"
+echo "   - HOTEL_FILTER_PERSISTENCE_SUMMARY.md (功能总结)"
+echo ""

@@ -43,7 +43,15 @@ class Hotel < ApplicationRecord
     )
   }
   scope :by_region, ->(region) { where(region: region) if region.present? }
-  scope :by_price_range, ->(min, max) { where(price: min..max) if min.present? && max.present? }
+  scope :by_price_range, ->(min, max) {
+    if min.present? && max.present? && min.to_i >= 0 && max.to_i > 0
+      where(price: min.to_i..max.to_i)
+    elsif min.present? && min.to_i >= 0
+      where('price >= ?', min.to_i)
+    elsif max.present? && max.to_i > 0
+      where('price <= ?', max.to_i)
+    end
+  }
   scope :by_star_level, ->(level) { where(star_level: level) if level.present? }
   scope :by_type, ->(type) { where(hotel_type: type) if type.present? && HOTEL_TYPES.include?(type) }
   scope :domestic, -> { where(is_domestic: true) }

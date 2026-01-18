@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-white" data-controller="city-selector hotel-search hotel-date-picker hotel-guest-selector" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-destination-city-value="" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
+<div class="min-h-screen bg-white" data-controller="city-selector hotel-search hotel-date-picker hotel-guest-selector hotel-price-filter hotel-filter-persistence" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-destination-city-value="" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
   <!-- Header Banner -->
   <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 
@@ -27,11 +27,11 @@
         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input type="text" placeholder="位置/品牌/酒店" class="w-full bg-transparent border-none outline-none text-sm" readonly value="<%= params[:q] %>">
+        <input type="text" placeholder="位置/品牌/酒店" class="w-full bg-transparent border-none outline-none text-sm" readonly value="<%= params[:q] %>" data-hotel-search-target="searchDisplay">
       </div>
 
       <!-- Location Button -->
-      <button class="text-blue-500">
+      <button class="text-blue-500" data-action="click->hotel-search#getCurrentLocation">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
         </svg>
@@ -63,16 +63,24 @@
     <input type="hidden" data-hotel-date-picker-target="checkInInput" value="<%= @check_in %>">
     <input type="hidden" data-hotel-date-picker-target="checkOutInput" value="<%= @check_out %>">
 
-    <!-- Room and Guest Selector -->
-    <button class="w-full flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-guest-selector#openModal">
-      <span class="text-base" data-hotel-guest-selector-target="displayText"><%= @rooms %>间房 <%= @adults %>成人 <%= @children %>儿童</span>
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-500">价格/星级</span>
-        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+    <!-- Room/Guest Selector and Price/Star Filter - Inline Layout -->
+    <div class="flex gap-2">
+      <!-- Room and Guest Selector Button -->
+      <button class="flex-1 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-guest-selector#openModal">
+        <span class="text-sm" data-hotel-guest-selector-target="displayText"><%= @rooms %>间房 <%= @adults %>成人 <%= @children %>儿童</span>
+        <svg class="w-4 h-4 text-gray-400 flex-shrink-0 ml-1" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
         </svg>
-      </div>
-    </button>
+      </button>
+
+      <!-- Price/Star Filter Button -->
+      <button class="flex-1 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-3" data-action="click->hotel-price-filter#openModal">
+        <span class="text-sm text-gray-700" data-hotel-price-filter-target="displayText">价格/星级</span>
+        <svg class="w-4 h-4 text-gray-400 flex-shrink-0 ml-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    </div>
 
     <!-- Hidden inputs for guest selector -->
     <input type="hidden" data-hotel-guest-selector-target="roomsInput" value="<%= @rooms %>">
@@ -81,11 +89,21 @@
 
     <!-- Quick Filters -->
     <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-      <button class="px-4 py-1.5 text-sm whitespace-nowrap rounded-full border border-red-500 text-red-500 font-medium">亲子出游</button>
-      <button class="px-4 py-1.5 text-sm whitespace-nowrap rounded-full border border-gray-300 text-gray-700">福田站</button>
-      <button class="px-4 py-1.5 text-sm whitespace-nowrap rounded-full border border-gray-300 text-gray-700">宝安机场</button>
-      <button class="px-4 py-1.5 text-sm whitespace-nowrap rounded-full border border-gray-300 text-gray-700">欢乐港湾</button>
-      <button class="px-4 py-1.5 text-sm whitespace-nowrap rounded-full border border-gray-300 text-gray-700">罗湖口岸</button>
+      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '亲子'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '亲子' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'} font-medium" do %>
+        亲子出游
+      <% end %>
+      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '福田站'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '福田站' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
+        福田站
+      <% end %>
+      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '宝安机场'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '宝安机场' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
+        宝安机场
+      <% end %>
+      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '欢乐港湾'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '欢乐港湾' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
+        欢乐港湾
+      <% end %>
+      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '罗湖口岸'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '罗湖口岸' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
+        罗湖口岸
+      <% end %>
     </div>
 
     <!-- Search Button -->
@@ -96,11 +114,14 @@
       <%= f.hidden_field :rooms, value: @rooms, data: { hotel_search_target: "roomsInput" } %>
       <%= f.hidden_field :adults, value: @adults, data: { hotel_search_target: "adultsInput" } %>
       <%= f.hidden_field :children, value: @children, data: { hotel_search_target: "childrenInput" } %>
+      <%= f.hidden_field :price_min, value: @price_min, data: { hotel_search_target: "minPriceInput" } %>
+      <%= f.hidden_field :price_max, value: @price_max, data: { hotel_search_target: "maxPriceInput" } %>
+      <%= f.hidden_field :star_level, value: @star_level, data: { hotel_search_target: "starsInput" } %>
       <%= f.submit "搜索酒店", class: "block w-full text-center text-white font-bold py-3 rounded-full border-0 cursor-pointer", style: "background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);" %>
     <% end %>
 
     <!-- Service Features -->
-    <div class="flex items-center justify-between text-xs text-gray-600 pt-2">
+    <div data-controller="hotel-guarantee" class="flex items-center justify-between text-xs text-gray-600 pt-2 cursor-pointer" data-action="click->hotel-guarantee#open">
       <span>7×24小时服务</span>
       <span>•</span>
       <span>品牌直营 双重积分</span>
@@ -109,34 +130,148 @@
       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
       </svg>
+
+      <!-- Guarantee Modal -->
+      <div data-hotel-guarantee-target="modal" data-action="click->hotel-guarantee#closeOnBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end hidden">
+        <div data-hotel-guarantee-target="content" data-action="click->hotel-guarantee#stopPropagation" class="bg-white w-full rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <!-- Modal Header -->
+          <div class="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+            <h3 class="text-lg font-bold">多重保障安心入住</h3>
+            <button type="button" data-action="click->hotel-guarantee#close" class="p-1 hover:bg-gray-100 rounded-full transition-colors">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Modal Content -->
+          <div class="px-4 py-6 space-y-6">
+            <!-- 酒店无忧退 -->
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #E8F4FD;">
+                <svg class="w-6 h-6" style="color: #1E88E5;" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-base font-bold mb-2">酒店无忧退</h4>
+                <div class="text-sm text-gray-600 space-y-2">
+                  <p>• 支持免费取消：入住前一天18:00前可免费取消订单，全额退款</p>
+                  <p>• 快速退款：取消后1-3个工作日原路退回支付账户</p>
+                  <p>• 特殊情况保障：如遇突发情况（如疫情、自然灾害等），提供灵活退改政策</p>
+                  <p>• 部分酒店支持当天18:00前免费取消</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 信用住 先住后付 -->
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #FFF3E0;">
+                <svg class="w-6 h-6" style="color: #FF9800;" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-base font-bold mb-2">信用住 先住后付</h4>
+                <div class="text-sm text-gray-600 space-y-2">
+                  <p>• 无需预付：预订时无需支付任何费用，离店后再结算</p>
+                  <p>• 信用保障：根据您的信用评分，享受先住后付特权</p>
+                  <p>• 灵活支付：支持支付宝、微信、银行卡等多种支付方式</p>
+                  <p>• 自动扣款：离店后自动从您的账户扣款，无需手动操作</p>
+                  <p>• 账单透明：消费明细清晰可查，保障您的消费权益</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 品牌直营 双重积分 -->
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #FFF3E0;">
+                <svg class="w-6 h-6" style="color: #FF9800;" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-base font-bold mb-2">品牌直营 双重积分</h4>
+                <div class="text-sm text-gray-600 space-y-2">
+                  <p>• 平台积分：每次预订可获得平台积分，积分可用于抵扣房费</p>
+                  <p>• 品牌积分：同时累积酒店品牌会员积分（如希尔顿荣誉客会、万豪旅享家等）</p>
+                  <p>• 双倍奖励：部分酒店支持双倍积分活动，累积更快</p>
+                  <p>• 会员专享：品牌会员可享受专属价格、房型升级、延迟退房等特权</p>
+                  <p>• 积分永久有效：平台积分永久有效，随时可用</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7×24小时服务 -->
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #E8F5E9;">
+                <svg class="w-6 h-6" style="color: #4CAF50;" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-base font-bold mb-2">7×24小时客户服务</h4>
+                <div class="text-sm text-gray-600 space-y-2">
+                  <p>• 全天候在线：7天24小时客服在线，随时解答您的疑问</p>
+                  <p>• 多渠道支持：支持在线客服、电话、邮件等多种联系方式</p>
+                  <p>• 快速响应：平均响应时间<30秒，问题解决及时高效</p>
+                  <p>• 专业团队：经验丰富的客服团队，为您提供专业建议</p>
+                  <p>• 紧急协助：如遇紧急情况（如入住问题、订单异常等），提供即时协助</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 价格保障 -->
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #FFEBEE;">
+                <svg class="w-6 h-6" style="color: #F44336;" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-base font-bold mb-2">价格保障</h4>
+                <div class="text-sm text-gray-600 space-y-2">
+                  <p>• 最低价承诺：承诺提供市场最优价格，如发现更低价，差价赔付</p>
+                  <p>• 价格透明：无隐藏费用，价格明细清晰展示</p>
+                  <p>• 优惠叠加：支持使用优惠券、红包、积分等多种优惠方式叠加使用</p>
+                  <p>• 会员特惠：会员专享价格，比普通用户更优惠</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Marketing Cards -->
   <div class="px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar">
-    <div class="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden" style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);">
-      <div class="p-3 text-white">
-        <div class="text-xs mb-1">品牌闪促</div>
-        <div class="text-lg font-bold mb-1">大额积分</div>
-        <div class="text-xs opacity-90">MARRIOTT BONVOY</div>
+    <%= link_to hotel_services_path(city: @city), class: "block flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden" do %>
+      <div class="w-full h-full" style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);">
+        <div class="p-3 text-white">
+          <div class="text-xs mb-1">品牌闪促</div>
+          <div class="text-lg font-bold mb-1">大额积分</div>
+          <div class="text-xs opacity-90">MARRIOTT BONVOY</div>
+        </div>
       </div>
-    </div>
+    <% end %>
 
-    <div class="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
-      <div class="p-3 text-white">
+    <%= link_to special_hotels_path, class: "flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden block" do %>
+      <div class="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 p-3 text-white">
         <div class="text-xs mb-1">特价酒店</div>
         <div class="text-lg font-bold mb-1">5折起</div>
         <div class="text-xs opacity-90">限时抢购</div>
       </div>
-    </div>
+    <% end %>
 
-    <div class="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500">
-      <div class="p-3 text-white">
+    <%= link_to live_rooms_path, class: "flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden block" do %>
+      <div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 p-3 text-white">
         <div class="text-xs mb-1">爆款直播</div>
         <div class="text-lg font-bold mb-1">周周低价</div>
         <div class="text-xs opacity-90">立即观看</div>
       </div>
-    </div>
+    <% end %>
   </div>
 
   <!-- Hotel Listings -->
@@ -314,12 +449,40 @@
         <%= paginate @hotels %>
       </div>
     <% else %>
-      <div class="text-center py-12 text-gray-500">
-        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center py-12 px-6 text-gray-500">
+        <svg class="w-20 h-20 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
         </svg>
-        <p class="text-base">暂无酒店数据</p>
-        <p class="text-sm mt-2">请尝试其他筛选条件</p>
+        <p class="text-lg font-medium text-gray-700 mb-2">未找到符合条件的酒店</p>
+        
+        <div class="text-sm text-gray-500 space-y-1.5 mb-4">
+          <% if @query.present? %>
+            <p>搜索「<%= @query %>」暂无结果</p>
+          <% end %>
+          <% if @city.present? %>
+            <p>城市：<%= @city %></p>
+          <% end %>
+          <% if @star_level.present? %>
+            <p>星级：<%= @star_level %>星</p>
+          <% end %>
+          <% if @price_min.present? || @price_max.present? %>
+            <p>价格：¥<%= @price_min || 0 %>-<%= @price_max || '不限' %></p>
+          <% end %>
+        </div>
+        
+        <div class="space-y-2">
+          <p class="text-sm text-gray-600">建议您：</p>
+          <div class="flex flex-col gap-2">
+            <% if @star_level.present? || @price_min.present? || @price_max.present? %>
+              <%= link_to "清除筛选条件", hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "inline-block px-6 py-2.5 rounded-full text-sm font-medium transition-colors mx-auto", style: "background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%); color: black;" %>
+            <% end %>
+            <% if @query.present? %>
+              <%= link_to "尝试其他关键词", "javascript:void(0)", data: { action: "click->hotel-search#openSearchModal" }, class: "text-blue-500 text-sm underline" %>
+            <% else %>
+              <%= link_to "浏览全部酒店", hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "text-blue-500 text-sm underline" %>
+            <% end %>
+          </div>
+        </div>
       </div>
     <% end %>
   </div>
@@ -390,7 +553,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotSearchContent">
             <% @search_modal_data[:hot_searches].each do |search_term| %>
-              <%= link_to search_term, hotels_path(q: search_term, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= search_term %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= search_term %></button>
             <% end %>
           </div>
         </div>
@@ -410,7 +573,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotBrandContent">
             <% @search_modal_data[:hot_brands].each do |brand| %>
-              <%= link_to brand, hotels_path(q: brand, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= brand %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= brand %></button>
             <% end %>
           </div>
         </div>
@@ -430,7 +593,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hotLocationContent">
             <% @search_modal_data[:hot_locations].each do |location| %>
-              <%= link_to location, hotels_path(q: location, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= location %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= location %></button>
             <% end %>
           </div>
         </div>
@@ -450,7 +613,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="metroContent">
             <% @search_modal_data[:metro].each do |metro| %>
-              <%= link_to metro, hotels_path(q: metro, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= metro %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= metro %></button>
             <% end %>
           </div>
         </div>
@@ -470,7 +633,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="airportContent">
             <% @search_modal_data[:airport].each do |airport| %>
-              <%= link_to airport, hotels_path(q: airport, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= airport %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= airport %></button>
             <% end %>
           </div>
         </div>
@@ -490,7 +653,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="attractionContent">
             <% @search_modal_data[:attraction].each do |attraction| %>
-              <%= link_to attraction, hotels_path(q: attraction, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= attraction %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= attraction %></button>
             <% end %>
           </div>
         </div>
@@ -510,7 +673,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="themeContent">
             <% @search_modal_data[:theme].each do |theme| %>
-              <%= link_to theme, hotels_path(q: theme, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= theme %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= theme %></button>
             <% end %>
           </div>
         </div>
@@ -530,7 +693,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="hospitalContent">
             <% @search_modal_data[:hospital].each do |hospital| %>
-              <%= link_to hospital, hotels_path(q: hospital, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= hospital %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= hospital %></button>
             <% end %>
           </div>
         </div>
@@ -550,7 +713,7 @@
           </div>
           <div class="grid grid-cols-4 gap-2" data-hotel-search-target="universityContent">
             <% @search_modal_data[:university].each do |university| %>
-              <%= link_to university, hotels_path(q: university, city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center" %>
+              <button data-action="click->hotel-search#selectOption" data-search-term="<%= university %>" class="px-3 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 text-center"><%= university %></button>
             <% end %>
           </div>
         </div>
@@ -606,6 +769,9 @@
   
   <!-- City Selector Modal -->
   <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Hotel Price Filter Modal -->
+  <%= render 'shared/hotel_price_filter_modal' %>
 </div>
 
 <style>
