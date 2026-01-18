@@ -1,4 +1,5 @@
 class Destination < ApplicationRecord
+  include DataVersionable
   extend FriendlyId
   friendly_id :slug_candidates, use: :slugged
 

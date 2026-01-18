@@ -1,4 +1,5 @@
 class AbroadTicketOrder < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :abroad_ticket
 

@@ -31,7 +31,6 @@ class SearchCheapestFlightValidator < BaseValidator
   self.validator_id = 'search_cheapest_sh_to_sz'
   self.title = '搜索上海到深圳的最便宜航班'
   self.description = '搜索上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣）'
-  self.data_pack_version = 'flights_v1'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据

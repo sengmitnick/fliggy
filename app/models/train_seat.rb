@@ -1,4 +1,5 @@
 class TrainSeat < ApplicationRecord
+  include DataVersionable
   belongs_to :train
   
   validates :seat_type, presence: true, inclusion: { in: %w[second_class first_class business_class no_seat] }

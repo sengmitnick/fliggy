@@ -1,4 +1,5 @@
 class VisaOrderTraveler < ApplicationRecord
+  include DataVersionable
   belongs_to :visa_order
 
   validates :name, presence: true

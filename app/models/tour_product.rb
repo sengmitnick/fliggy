@@ -1,4 +1,5 @@
 class TourProduct < ApplicationRecord
+  include DataVersionable
   belongs_to :destination
 
   serialize :tags, coder: JSON

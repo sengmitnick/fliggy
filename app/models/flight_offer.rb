@@ -1,4 +1,5 @@
 class FlightOffer < ApplicationRecord
+  include DataVersionable
   belongs_to :flight
 
   # Serialize arrays for services, tags, and discount_items

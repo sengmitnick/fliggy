@@ -1,4 +1,5 @@
 class DeepTravelProduct < ApplicationRecord
+  include DataVersionable
   # Associations
   belongs_to :deep_travel_guide
   

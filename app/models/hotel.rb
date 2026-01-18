@@ -1,4 +1,5 @@
 class Hotel < ApplicationRecord
+  include DataVersionable
   has_one_attached :image
   has_many :hotel_rooms, dependent: :destroy
   has_many :rooms, dependent: :destroy

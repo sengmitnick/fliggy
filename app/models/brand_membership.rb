@@ -1,4 +1,5 @@
 class BrandMembership < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   
   BRANDS = {

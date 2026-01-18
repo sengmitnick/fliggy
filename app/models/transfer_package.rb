@@ -1,4 +1,5 @@
 class TransferPackage < ApplicationRecord
+  include DataVersionable
   has_many :transfers, dependent: :nullify
 
   validates :name, :vehicle_category, :price, presence: true

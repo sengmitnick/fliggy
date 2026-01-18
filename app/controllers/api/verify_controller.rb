@@ -32,6 +32,20 @@ module Api
         instance = validator_class.new(execution_id)
         prepare_info = instance.execute_prepare
         
+        # 获取当前用户（支持认证用户和默认用户）
+        user = current_user || get_default_user
+        
+        # 查找刚刚创建的 ValidatorExecution 记录（在 execute_prepare 中创建）
+        execution = ValidatorExecution.find_by(execution_id: execution_id)
+        
+        if execution && user
+          # 设置为活跃会话（同时取消同一用户的其他活跃会话）
+          execution.update!(user_id: user.id)
+          execution.activate!
+          
+          Rails.logger.info "[Validator] Started validation session #{execution_id} for user #{user.id}"
+        end
+        
         render json: {
           execution_id: execution_id,
           validator_id: validator_class.validator_id,
@@ -51,19 +65,20 @@ module Api
         execution_id = params[:execution_id]
         
         # 从数据库获取 validator 类型
-        result_row = ActiveRecord::Base.connection.execute(
-          "SELECT state FROM validator_executions WHERE execution_id = #{ActiveRecord::Base.connection.quote(execution_id)}"
-        ).first
+        execution = ValidatorExecution.find_by(execution_id: execution_id)
         
-        unless result_row
+        unless execution
           return render json: { error: "验证会话不存在或已过期: #{execution_id}" }, status: :not_found
         end
         
-        state = JSON.parse(result_row['state'])
-        validator_class = state['validator_class'].constantize
+        state_data = execution.state_data
+        validator_class = state_data['validator_class'].constantize
         
         instance = validator_class.new(execution_id)
         verify_result = instance.execute_verify
+        
+        # 验证完成后取消活跃状态
+        execution.deactivate!
         
         render json: verify_result
       end
@@ -93,6 +108,11 @@ module Api
       raise "验证器不存在: '#{id}'" unless validator
       
       validator
+    end
+    
+    # 获取默认用户（用于未认证的 API 请求）
+    def get_default_user
+      User.find_by(email: 'demo@fliggy.com')
     end
   end
 end

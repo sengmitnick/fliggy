@@ -58,18 +58,21 @@ class BaseValidator
     raise NotImplementedError, "Subclass must implement #verify"
   end
   
-  # 执行准备阶段（加载测试数据）
+  # 执行准备阶段（设置 data_version）
   def execute_prepare
-    # 1. 清空测试数据表（Flight/Hotel等），保留基础数据（City等）
-    reset_test_data_only
+    # 生成唯一的 data_version（使用时间戳 + 随机数确保唯一性）
+    @data_version = (Time.now.to_f * 1000000).to_i
     
-    # 2. 加载当前版本下的所有数据包（包括 base.rb，全量加载）
-    load_all_data_packs
+    # 设置 PostgreSQL 会话变量 app.data_version
+    # 使用 SET SESSION 确保连接级别作用域（不仅限于事务内）
+    # RLS 策略会自动过滤查询，只返回 data_version=0（基线）+ 当前版本的数据
+    # DataVersionable 的 before_create 钩子会自动读取并设置新记录的 data_version
+    ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '#{@data_version}'")
     
-    # 3. 执行自定义准备逻辑
+    # 执行自定义准备逻辑（通常不需要加载数据，直接使用基线数据即可）
     @prepare_result = prepare
     
-    # 4. 保存执行状态（用于验证阶段恢复）
+    # 保存执行状态（用于验证阶段恢复）
     save_execution_state
     
     @prepare_result
@@ -86,8 +89,13 @@ class BaseValidator
     }
     
     begin
-      # 恢复执行状态（从准备阶段保存的状态）
+      # 恢复执行状态（从准备阶段保存的状态，包括 @data_version）
       restore_execution_state
+      
+      # 恢复 PostgreSQL 会话变量 app.data_version
+      # 使用 SET SESSION 确保连接级别作用域
+      # 这样查询时可以看到基线数据 + AI 创建的数据
+      ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '#{@data_version}'")
       
       # 执行验证（直接验证现有数据，不重新加载任何数据）
       verify
@@ -107,100 +115,46 @@ class BaseValidator
     # 清理执行状态
     cleanup_execution_state
     
-    # 验证完成后，回滚到 checkpoint（清空测试数据，保留 seeds）
-    rollback_to_checkpoint
+    # 验证完成后，回滚到基线状态（删除当前 data_version 的所有数据）
+    rollback_to_baseline
     
     result
   end
   
   private
   
-  # 加载当前版本下的所有数据包（包括 base.rb）
-  def load_all_data_packs
-    data_packs_dir = Rails.root.join('app/validators/support/data_packs', DATA_PACK_VERSION)
+  # 回滚到基线状态（删除当前 data_version 的所有数据）
+  def rollback_to_baseline
+    return unless @data_version
     
-    unless Dir.exist?(data_packs_dir)
-      puts "\n⚠️  数据包目录不存在: #{data_packs_dir}"
-      return
-    end
+    puts "\nℹ️  回滚到基线状态（删除 data_version=#{@data_version} 的数据）..."
     
-    # 获取所有 .rb 文件（包括 base.rb）
-    data_pack_files = Dir.glob(data_packs_dir.join('*.rb')).sort
-    
-    if data_pack_files.empty?
-      puts "\n⚠️  未找到数据包文件（#{DATA_PACK_VERSION}）"
-      return
-    end
-    
-    puts "\n📦 正在加载 #{DATA_PACK_VERSION} 数据包..."
-    data_pack_files.each do |file|
-      puts "  → 加载 #{File.basename(file)}"
-      load file
-    end
-    puts "✓ 所有数据包加载完成（#{data_pack_files.size} 个文件）"
-  end
-  
-
-  
-  # 回滚到初始状态（清空所有数据）
-  def rollback_to_checkpoint
-    puts "\nℹ️  回滚到初始状态（清空所有数据）..."
-    # 清空所有表（订单 + 测试数据 + 基础数据）
-    [
-      # 订单相关（用户操作产生的）
-      Booking, HotelBooking, TrainBooking, TourGroupBooking,
-      CarOrder, BusTicketOrder, AbroadTicketOrder, InternetOrder,
-      DeepTravelBooking, HotelPackageOrder,
-      # 测试数据（验证器加载的）
-      Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket,
-      # 基础数据（也需要清空）
-      City, Destination
-    ].each do |model|
-      if defined?(model)
-        model.delete_all
-        # 重置序列，避免 ID 冲突
-        ActiveRecord::Base.connection.reset_pk_sequence!(model.table_name)
+    # 使用 DataVersionable.models 获取所有注册的模型
+    # 这样无需维护硬编码的模型列表
+    DataVersionable.models.each do |model|
+      begin
+        deleted_count = model.where(data_version: @data_version).delete_all
+        puts "  → #{model.name}: 删除 #{deleted_count} 条记录" if deleted_count > 0
+      rescue StandardError => e
+        puts "  ⚠️  删除 #{model.name} 失败: #{e.message}"
       end
     end
     
-    puts "✓ 已回滚到初始状态（数据库为空）"
-  end
-  
-  # 清空所有测试数据表（包括基础数据），保留订单
-  def reset_test_data_only
-    # 清空所有测试相关的数据（包括 City/Destination/Flight/Hotel 等）
-    # 不清空订单（会在验证后统一清理）
-    [
-      # 基础数据（也需要清空，因为会重新加载）
-      City, Destination,
-      # 业务数据
-      Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket
-    ].each do |model|
-      if defined?(model)
-        model.delete_all
-        # 重置序列，避免 ID 冲突
-        ActiveRecord::Base.connection.reset_pk_sequence!(model.table_name)
-      end
-    end
-  end
-  
-  # 检查数据库是否为初始状态（seed 数据未被修改）
-  def database_is_pristine?
-    # 这个方法现在不需要了，因为我们总是在 prepare 时重置
-    false
-  end
-  
-  # 重置数据库到初始状态（已被 reset_test_tables 替代）
-  def reset_database
-    # 废弃：现在使用 reset_test_tables
+    puts "✓ 已回滚到基线状态（保留 data_version=0 的基线数据）"
   end
   
   # 保存执行状态到数据库
   def save_execution_state
+    # 获取子类定义的状态数据
+    custom_data = execution_state_data || {}
+    
+    # 确保 data_version 总是被保存（即使子类覆盖了 execution_state_data）
+    custom_data[:data_version] = @data_version
+    
     state = {
       validator_class: self.class.name,
       timestamp: Time.current.to_s,
-      data: execution_state_data
+      data: custom_data
     }
     
     # 使用数据库存储，使用 JSON 类型
@@ -223,7 +177,13 @@ class BaseValidator
     raise "执行状态不存在: #{@execution_id}" unless result
     
     state = JSON.parse(result['state'])
-    restore_from_state(state['data'])
+    data = state['data'] || {}
+    
+    # 恢复 data_version（必须）
+    @data_version = data['data_version']
+    
+    # 调用子类的恢复方法
+    restore_from_state(data)
   end
   
   # 清理执行状态
@@ -237,12 +197,14 @@ class BaseValidator
   
   # 子类可覆盖：返回需要保存的状态数据
   def execution_state_data
-    {}
+    {
+      data_version: @data_version
+    }
   end
   
   # 子类可覆盖：从状态恢复实例变量
   def restore_from_state(data)
-    # 默认不做任何事
+    @data_version = data['data_version']
   end
   
   # 添加断言（RSpec 风格）

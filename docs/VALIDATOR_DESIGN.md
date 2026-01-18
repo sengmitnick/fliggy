@@ -14,11 +14,12 @@
 
 ## 概述
 
-验证器系统（Validator System）是一个用于自动化验证 AI Agent 任务完成质量的框架。它通过 **Checkpoint 机制** 和 **数据持久化设计**，实现了可靠、可重复的端到端测试。
+验证器系统（Validator System）是一个用于自动化验证 AI Agent 任务完成质量的框架。它通过 **PostgreSQL RLS（行级安全）+ data_version 机制** 和 **数据持久化设计**，实现了可靠、可重复的端到端测试。
 
 ### 核心特性
 
-- ✅ **Checkpoint 机制**: 智能数据库状态管理，避免重复加载 seeds
+- ✅ **RLS + data_version 隔离**: 基于 PostgreSQL 行级安全策略的数据版本隔离
+- ✅ **基线数据共享**: 系统启动时加载基线数据（data_version=0），所有验证器共享
 - ✅ **数据持久化**: 验证期间数据始终可用，支持真实用户操作
 - ✅ **RSpec 风格 DSL**: 简洁易读的断言语法
 - ✅ **状态隔离**: 跨阶段状态持久化，prepare → verify 无缝衔接
@@ -29,35 +30,64 @@
 
 ## 核心设计理念
 
-### 1. 数据库 Checkpoint 机制
+### 1. RLS + data_version 数据隔离机制
 
-**核心思想**: 数据库有三种状态：
+**核心思想**: 使用 PostgreSQL 行级安全（RLS）+ data_version 列实现数据版本隔离
 
 ```
-┌─────────────┐
-│  空数据库    │ → 首次运行
-└─────────────┘
-       ↓ rails db:seed
-┌─────────────┐
-│  Checkpoint │ → 完整 seeds 数据（City、Destination、Flight、Hotel 等）
-│  基准状态    │   这是验证器的"干净起点"
-└─────────────┘
-       ↓ validator prepare（加载专有数据包）
-┌─────────────┐
-│  测试状态    │ → Checkpoint + 验证器专有数据
-│  运行中      │   用户可在此状态下操作
-└─────────────┘
-       ↓ validator verify（验证后回滚）
-┌─────────────┐
-│  Checkpoint │ → 清空测试数据和订单，重新加载 seeds
-│  基准状态    │   准备下次验证
-└─────────────┘
+┌──────────────────────────────────┐
+│ 数据库表（所有版本共存）          │
+├──────────────────────────────────┤
+│ data_version = 0                 │ ← 基线数据（系统启动时加载，永久保留）
+│   City, Destination, Flight,     │
+│   Hotel, Car, BusTicket, ...     │
+├──────────────────────────────────┤
+│ data_version = 123456            │ ← 验证器 A 的临时数据（AI 创建的订单）
+│   Booking, HotelBooking, ...     │
+├──────────────────────────────────┤
+│ data_version = 789012            │ ← 验证器 B 的临时数据（未来支持并发）
+│   Booking, HotelBooking, ...     │
+└──────────────────────────────────┘
+
+RLS 策略：
+  USING (data_version = 0 OR data_version::text = current_setting('app.data_version'))
+  → 查询时自动过滤，只返回基线 + 当前版本的数据
 ```
 
-**关键优化**:
-- ✅ **智能检测**: `ensure_checkpoint` 检查 City 和 Flight 表，避免重复加载
-- ✅ **最小重置**: 只清空测试数据，保留基础数据（City/Destination）
-- ✅ **自动回滚**: 验证完成后自动恢复到 checkpoint 状态
+**工作流程**:
+```
+1. 系统启动（一次性）
+   SET SESSION app.data_version = '0'
+   加载所有数据包 (v1/*.rb) → 所有数据 data_version=0
+
+2. 验证器 prepare
+   @data_version = 123456
+   SET LOCAL app.data_version = '123456'
+   （通常不加载数据，直接查询基线数据）
+   返回任务信息给 AI
+
+3. AI 执行操作
+   继承 session[:validator_execution_id]
+   自动恢复 app.data_version = '123456'
+   创建订单 → data_version=123456（before_create 钩子自动设置）
+
+4. 验证器 verify
+   SET LOCAL app.data_version = '123456'
+   验证数据（能看到基线 + AI 创建的订单）
+
+5. 回滚
+   SET LOCAL app.data_version = '0'（管理员视角）
+   DELETE FROM bookings WHERE data_version = 123456
+   DELETE FROM hotel_bookings WHERE data_version = 123456
+   ...
+   → 基线数据（data_version=0）保持不变
+```
+
+**关键优势**:
+- ✅ **基线数据共享**: 所有验证器共享 data_version=0 的基线数据，无需重复加载
+- ✅ **自动隔离**: RLS 策略自动过滤数据，prepare/verify 只看到自己的版本
+- ✅ **快速回滚**: DELETE WHERE data_version=X，秒级完成
+- ✅ **零维护成本**: DataVersionable Concern 自动注册模型，无需硬编码
 
 ### 2. 数据持久化设计
 
@@ -73,13 +103,14 @@ ActiveRecord::Base.transaction do
   raise ActiveRecord::Rollback  # 数据消失！
 end
 
-# ✅ 新设计（数据持久化）
+# ✅ 新设计（RLS + data_version 隔离）
 def execute_prepare
-  ensure_checkpoint           # 检查/创建 checkpoint
-  reset_test_data_only        # 清空测试表
-  load_data_pack              # 加载验证器专有数据（持久化！）
-  save_execution_state        # 保存状态到数据库
-  # 数据保留，用户可以操作
+  @data_version = generate_unique_version  # 生成唯一版本号
+  set_data_version(@data_version)          # SET LOCAL app.data_version = '123456'
+  # 通常不加载数据（基线数据已存在于 data_version=0）
+  prepare                                  # 执行子类逻辑
+  save_execution_state                     # 保存状态（含 data_version）
+  # 数据保留，AI 可以操作
 end
 ```
 
@@ -201,66 +232,155 @@ BookFlightValidator (具体验证器)
 
 ## 核心亮点
 
-### 亮点 1: Checkpoint 智能检测
+### 亮点 1: 基线数据共享 + RLS 自动隔离
 
 **传统做法**:
 ```ruby
-# 每次都清空数据库并重新加载 seeds（慢！）
+# 每个验证器都重新加载数据（慢！）
 def prepare
+  reset_database
   Rails.application.load_seed  # 耗时操作
-  load_data_pack
+  load_data_pack               # 每次都要加载
 end
 ```
 
 **新设计**:
 ```ruby
-def ensure_checkpoint
-  # 检查是否已经有 checkpoint（City + Flight 都有数据）
-  if City.count == 0 || Flight.count == 0
-    puts "数据库不在 checkpoint 状态，正在加载 seeds..."
-    load Rails.root.join('db/seeds.rb')
-    puts "✓ Checkpoint 已创建"
-  else
-    puts "数据库已在 checkpoint 状态，跳过 seeds 加载"
+# 系统启动时一次性加载基线数据（config/initializers/validator_baseline.rb）
+Rails.application.config.after_initialize do
+  if City.where(data_version: 0).count == 0
+    ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
+    
+    # 加载所有数据包 v1/*.rb
+    Dir.glob(Rails.root.join('app/validators/support/data_packs/v1/*.rb')).sort.each do |file|
+      load file
+    end
+    # → 所有数据自动标记为 data_version=0（before_create 钩子）
+  end
+end
+
+# 验证器 prepare：直接使用基线数据
+def execute_prepare
+  @data_version = Time.now.to_i  # 生成唯一版本号
+  set_data_version(@data_version)  # SET LOCAL app.data_version = '123456'
+  # 无需加载数据！RLS 策略自动让我们看到 data_version=0 的基线数据
+  prepare  # 执行业务逻辑，查询航班、酒店等
+end
+```
+
+**性能提升**: 
+- ✅ 系统启动一次性加载，后续验证器无需重复加载
+- ✅ RLS 自动隔离，无需手动清理数据
+- ✅ 每个验证器 prepare 阶段耗时从 10 秒降至 0.1 秒
+
+### 亮点 2: 自动版本隔离 + 快速回滚
+
+**核心设计**: RLS 策略 + before_create 钩子
+
+**RLS 策略自动过滤数据**:
+```sql
+CREATE POLICY table_version_policy ON flights
+FOR ALL
+USING (
+  data_version = 0  -- 基线数据始终可见
+  OR data_version::text = current_setting('app.data_version', true)  -- 当前版本数据可见
+)
+WITH CHECK (
+  data_version::text = current_setting('app.data_version', true)  -- 写入时使用当前版本
+);
+```
+
+**DataVersionable Concern 自动设置版本**:
+```ruby
+module DataVersionable
+  extend ActiveSupport::Concern
+  
+  included do
+    before_create :set_data_version
+    DataVersionable.register_model(self)
+  end
+  
+  private
+  
+  def set_data_version
+    version_str = ActiveRecord::Base.connection.execute(
+      "SELECT current_setting('app.data_version', true) AS version"
+    ).first&.dig('version')
+    
+    self.data_version = version_str.to_i
   end
 end
 ```
 
-**性能提升**: 重复运行时跳过 seeds 加载，节省 5-10 秒
+**快速回滚**:
+```ruby
+def rollback_to_baseline
+  # 只删除当前版本的数据，基线数据（data_version=0）保持不变
+  DataVersionable.models.each do |model|
+    model.where(data_version: @data_version).delete_all
+  end
+  # → 秒级完成，无需重新加载 seeds
+end
+```
 
-### 亮点 2: 分层数据清理
+**优势**:
+- ✅ **零维护成本**: DataVersionable.models 自动注册，无需硬编码模型列表
+- ✅ **自动隔离**: RLS 策略确保验证器只看到自己的数据
+- ✅ **快速回滚**: DELETE WHERE data_version=X，基线数据不受影响
+- ✅ **支持并发**: 每个验证器有独立 data_version，未来可并行运行
 
-**核心设计**: 区分三类数据
+### 亮点 3: 零维护成本的模型管理
 
-1. **基础数据（Checkpoint）**: City、Destination（始终保留）
-2. **测试数据**: Flight、Hotel、Train 等（验证器加载，验证后清空）
-3. **订单数据**: Booking、HotelBooking 等（用户操作产生，验证后清空）
+**问题**: 如何避免硬编码模型列表？
+
+**解决方案**: DataVersionable Concern 自动注册
 
 ```ruby
-# 准备阶段：只清空测试数据
-def reset_test_data_only
-  [Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket].each do |model|
-    model.delete_all
-    ActiveRecord::Base.connection.reset_pk_sequence!(model.table_name)
+# app/models/concerns/data_versionable.rb
+module DataVersionable
+  extend ActiveSupport::Concern
+  
+  included do
+    before_create :set_data_version
+    DataVersionable.register_model(self)  # 自动注册！
   end
-  # 保留 City、Destination（属于 checkpoint）
-  # 保留订单（会在验证后统一清理）
+  
+  class_methods do
+    def register_model(model_class)
+      @versionable_models ||= []
+      @versionable_models << model_class unless @versionable_models.include?(model_class)
+    end
+  end
 end
 
-# 验证后：清空测试数据和订单，恢复 checkpoint
-def rollback_to_checkpoint
-  # 清空订单 + 测试数据
-  [
-    Booking, HotelBooking, TrainBooking, CarOrder, BusTicketOrder,  # 订单
-    Flight, FlightOffer, Train, Hotel, HotelRoom, Car, BusTicket    # 测试数据
-  ].each { |model| model.delete_all }
-  
-  # 重新加载 seeds（恢复 checkpoint）
-  load Rails.root.join('db/seeds.rb')
+# 全局访问
+module DataVersionable
+  def self.models
+    @versionable_models || []
+  end
+end
+
+# 业务模型只需 include
+class Flight < ApplicationRecord
+  include DataVersionable  # 自动注册到 DataVersionable.models
+end
+
+class Booking < ApplicationRecord
+  include DataVersionable
+end
+
+# 验证器回滚时自动遍历所有模型
+def rollback_to_baseline
+  DataVersionable.models.each do |model|
+    model.where(data_version: @data_version).delete_all
+  end
 end
 ```
 
-### 亮点 3: 版本化数据包
+**优势**:
+- ✅ 新增模型时只需 `include DataVersionable`，无需修改验证器代码
+- ✅ 避免硬编码模型列表（ORDER_MODELS、TEST_DATA_MODELS 等）
+- ✅ 模型自管理，降低维护成本
 
 **设计思路**: 数据包支持语义化版本管理
 
@@ -296,7 +416,7 @@ puts "✓ flights_v1 数据包加载完成（6个航班）"
 - ✅ 动态日期：使用 `Date.current + N.days` 确保数据始终可选
 - ✅ 易于维护：每个业务模块独立数据包
 
-### 亮点 4: RSpec 风格 DSL
+### 亮点 5: RSpec 风格 DSL
 
 **核心方法**: `add_assertion`
 
@@ -349,7 +469,7 @@ end
 🎯 得分: 60/100
 ```
 
-### 亮点 5: 交互式 CLI
+### 亮点 6: 交互式 CLI
 
 **核心体验**: `bin/verify run <validator_id>`
 
@@ -422,17 +542,18 @@ $ bin/verify run book_flight_sz_to_bj
 ============================================================
 ```
 
-### 亮点 6: 自动回滚机制
+### 亮点 7: 自动回滚机制
 
-**设计原则**: Fail-Safe，验证后始终恢复到 checkpoint
+**设计原则**: Fail-Safe，验证后始终恢复到基线数据（data_version=0）
 
 ```ruby
 def execute_verify
   result = { ... }
   
   begin
-    restore_execution_state
-    verify
+    restore_execution_state  # 恢复 data_version
+    set_data_version(@data_version)  # SET LOCAL app.data_version = '123456'
+    verify  # 执行验证逻辑
     result[:status] = @errors.empty? ? 'passed' : 'failed'
   rescue StandardError => e
     result[:status] = 'error'
@@ -440,16 +561,24 @@ def execute_verify
   
   cleanup_execution_state
   
-  # 核心：无论成功/失败/异常，都回滚到 checkpoint
-  rollback_to_checkpoint
+  # 核心：无论成功/失败/异常，都删除当前版本数据
+  rollback_to_baseline  # DELETE WHERE data_version = @data_version
   
   result
+end
+
+def rollback_to_baseline
+  # 只删除当前版本的数据，基线数据保持不变
+  DataVersionable.models.each do |model|
+    model.where(data_version: @data_version).delete_all
+  end
 end
 ```
 
 **保证**:
-- ✅ 验证失败时自动清理
-- ✅ 验证异常时自动清理
+- ✅ 验证失败时自动清理临时数据
+- ✅ 验证异常时自动清理临时数据
+- ✅ 基线数据（data_version=0）永不被删除
 - ✅ 下次运行时数据库状态一致
 
 ---

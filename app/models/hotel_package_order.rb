@@ -1,4 +1,5 @@
 class HotelPackageOrder < ApplicationRecord
+  include DataVersionable
   belongs_to :hotel_package
   belongs_to :package_option
   belongs_to :user

@@ -1,4 +1,5 @@
 class InternetSimCard < ApplicationRecord
+  include DataVersionable
   serialize :features, coder: JSON
 
   has_many :internet_orders, as: :orderable, dependent: :destroy

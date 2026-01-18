@@ -1,4 +1,5 @@
 class VisaOrder < ApplicationRecord
+  include DataVersionable
   extend FriendlyId
   friendly_id :generate_slug, use: :slugged
 

@@ -1,4 +1,5 @@
 class Passenger < ApplicationRecord
+  include DataVersionable
   belongs_to :user
 
   validates :name, :id_type, :id_number, presence: true

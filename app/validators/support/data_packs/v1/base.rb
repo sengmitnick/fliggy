@@ -315,37 +315,6 @@ end
 puts "     为城市自动创建了 #{auto_created_count} 个 Destination 记录"
 puts "     Destination 总数: #{Destination.count}"
 
-# ==================== Demo 用户数据 ====================
-puts "  → 正在设置 Demo 用户..."
-
-demo_user = User.find_or_create_by(email: 'demo@fliggy.com') do |u|
-  u.password = 'password123'
-  u.password_confirmation = 'password123'
-  u.name = 'Demo用户'
-  u.verified = true
-end
-
-if demo_user.persisted?
-  # 设置支付密码
-  demo_user.pay_password = '222222'
-  demo_user.pay_password_confirmation = '222222'
-  demo_user.save!
-  
-  # 添加默认乘机人
-  if demo_user.passengers.where(name: '张三').none?
-    demo_user.passengers.create!(
-      name: '张三',
-      id_type: '身份证',
-      id_number: '110101199001011234',
-      phone: '13800138000'
-    )
-    puts "     ✓ 添加默认乘机人: 张三"
-  end
-  
-  puts "     ✓ Demo用户: demo@fliggy.com (密码: password123, 支付密码: 222222)"
-end
-
 puts "\n✓ base_v1 数据包加载完成"
 puts "  - 城市: #{City.count} 个"
 puts "  - 目的地: #{Destination.count} 个"
-puts "  - Demo用户: demo@fliggy.com"

@@ -1,4 +1,5 @@
 class City < ApplicationRecord
+  include DataVersionable
   serialize :themes, coder: JSON
   
   validates :name, presence: true, uniqueness: true
