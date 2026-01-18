@@ -155,6 +155,7 @@ Rails.application.routes.draw do
     resources :hotel_bookings, only: [:new]
     collection do
       get :search
+      get :map
     end
     member do
       get :policy

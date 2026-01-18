@@ -40,10 +40,15 @@
 
     <!-- 右侧图标 -->
     <div class="flex gap-3 text-gray-800">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-      </svg>
+      <button type="button"
+              data-controller="hotel-map-toggle"
+              data-action="click->hotel-map-toggle#toggleAndScroll"
+              class="cursor-pointer hover:text-primary transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </button>
       <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
         <circle cx="5" cy="12" r="2"/>
         <circle cx="12" cy="12" r="2"/>
@@ -292,18 +297,26 @@
   </div>
 
   <!-- 地图模块 -->
-  <div class="relative w-full h-32 overflow-hidden" style="background-color: #eef4f9; background-image: linear-gradient(#dcebf5 2px, transparent 2px), linear-gradient(90deg, #dcebf5 2px, transparent 2px); background-size: 40px 40px;">
+  <div class="relative w-full h-32 overflow-hidden transition-all duration-300" 
+       style="background-color: #eef4f9; background-image: linear-gradient(#dcebf5 2px, transparent 2px), linear-gradient(90deg, #dcebf5 2px, transparent 2px); background-size: 40px 40px;"
+       data-controller="hotel-map-toggle"
+       data-hotel-map-toggle-target="mapContainer">
     <!-- 地图内容模拟 -->
     <div class="absolute top-0 left-0 w-1/3 h-full bg-blue-100 opacity-50 transform -skew-x-12"></div>
     <div class="absolute bottom-4 left-4 text-xs font-bold text-gray-400">高德地图</div>
     
     <!-- 价格气泡 -->
     <% if @hotels.present? %>
-      <% @hotels.first(3).each_with_index do |hotel, index| %>
-        <% positions = [[45, 32], [55, 48], [65, 24]] %>
-        <% left_pos, top_pos = positions[index] %>
+      <% @hotels.first(20).each_with_index do |hotel, index| %>
+        <% 
+          # 为前20个酒店生成分散的位置
+          row = (index / 5).to_i
+          col = index % 5
+          left_pos = 15 + col * 18
+          top_pos = 20 + row * 140
+        %>
         <div class="absolute flex flex-col items-center z-10" style="top: <%= top_pos %>px; left: <%= left_pos %>%;">
-          <div class="bg-[#5c7cfa] text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg border border-white">
+          <div class="bg-[#5c7cfa] text-white text-[10px] px-1.5 py-0.5 rounded shadow-lg border border-white hover:bg-[#4c6ce8] transition-colors cursor-pointer">
             <span>¥<%= (hotel.price * @rooms).to_i %></span>
           </div>
           <div class="w-1.5 h-1.5 bg-[#5c7cfa] transform rotate-45 -mt-0.5"></div>
@@ -319,7 +332,10 @@
     </div>
 
     <!-- 浮动按钮 -->
-    <div class="absolute bottom-3 right-3 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 flex items-center gap-1 border border-gray-200">
+    <button type="button"
+            data-hotel-map-toggle-target="expandButton"
+            data-action="click->hotel-map-toggle#toggle"
+            class="absolute bottom-3 right-3 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 flex items-center gap-1 border border-gray-200 hover:bg-gray-50 transition-colors">
       <div class="bg-indigo-500 p-0.5 rounded-sm">
         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 13a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2z"/>
@@ -329,10 +345,13 @@
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
       </svg>
-    </div>
-    <div class="absolute bottom-3 right-28 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 border border-gray-200">
-      关闭
-    </div>
+    </button>
+    <button type="button"
+            data-hotel-map-toggle-target="closeButton"
+            data-action="click->hotel-map-toggle#toggle"
+            class="hidden absolute bottom-3 right-3 bg-white px-2 py-1 rounded shadow text-xs text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors z-20">
+      关闭地图
+    </button>
   </div>
 
   <!-- 酒店列表 -->
@@ -559,19 +578,171 @@
 
         <!-- 国际城市列表 -->
         <div data-city-selector-target="internationalList" class="hidden">
-          <div class="p-4">
-            <h3 class="text-sm font-bold text-gray-700 mb-3">热门国际城市</h3>
+          <!-- 当前定位 -->
+          <div class="px-4 py-3 border-b">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-gray-700">当前定位</h3>
+              <button type="button" 
+                      data-action="click->city-selector#requestLocation"
+                      data-city-selector-target="locationButton"
+                      class="text-xs text-primary hover:underline">
+                开启定位权限
+              </button>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+              <svg class="w-4 h-4 animate-spin hidden" data-city-selector-target="locationSpinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              </svg>
+              <span data-city-selector-target="locationText">点击上方按钮开启定位</span>
+            </div>
+          </div>
+
+          <!-- 历史/推荐 -->
+          <div class="px-4 py-3 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">历史/推荐</h3>
+            <div class="text-sm text-gray-400">暂无历史记录</div>
+          </div>
+
+          <!-- 热门城市 -->
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-gray-700">热门城市</h3>
+              <button type="button" 
+                      class="text-xs text-primary hover:underline"
+                      data-action="click->city-selector#expandHotCities">
+                展开 ›
+              </button>
+            </div>
             <div class="grid grid-cols-3 gap-2">
-              <% ['东京', '首尔', '曼谷', '新加坡', '伦敦', '巴黎', '纽约', '洛杉矶', '悉尼', '墨尔本', '迪拜', '罗马'].each do |city| %>
+              <% [['曼谷', '泰国'], ['普吉岛', '泰国'], ['新加坡', '新加坡'], ['首尔', '韩国'], ['清迈', '泰国'], ['亚庇', '马来西亚'], ['芭堤雅', '泰国'], ['吉隆坡', '马来西亚'], ['济州岛', '韩国'], ['东京', '日本'], ['苏梅岛', '泰国'], ['甲米', '泰国']].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
+                        data-country="<%= country %>"
                         data-international="true"
                         data-action="click->city-selector#selectCity"
-                        class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
-                  <%= city %>
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
                 </button>
               <% end %>
             </div>
+          </div>
+
+          <!-- 东南亚 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">东南亚</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['曼谷', '泰国'], ['普吉岛', '泰国'], ['新加坡', '新加坡'], ['清迈', '泰国'], ['亚庇', '马来西亚'], ['芭堤雅', '泰国'], ['吉隆坡', '马来西亚'], ['济州岛', '韩国'], ['苏梅岛', '泰国']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 日韩 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">日韩</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['首尔', '韩国'], ['东京', '日本'], ['大阪', '日本']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 欧洲 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">欧洲</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['伦敦', '英国'], ['巴黎', '法国'], ['罗马', '意大利'], ['巴塞罗那', '西班牙'], ['阿姆斯特丹', '荷兰'], ['布拉格', '捷克']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 美洲 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">美洲</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['纽约', '美国'], ['洛杉矶', '美国'], ['旧金山', '美国'], ['拉斯维加斯', '美国'], ['多伦多', '加拿大'], ['温哥华', '加拿大']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 大洋洲 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">大洋洲</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['悉尼', '澳大利亚'], ['墨尔本', '澳大利亚'], ['黄金海岸', '澳大利亚'], ['奥克兰', '新西兰'], ['凯恩斯', '澳大利亚'], ['布里斯班', '澳大利亚']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 中东非洲 -->
+          <div class="p-4 border-b">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">中东非洲</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <% [['迪拜', '阿联酋'], ['阿布扎比', '阿联酋'], ['开罗', '埃及'], ['伊斯坦布尔', '土耳其'], ['特拉维夫', '以色列'], ['约翰内斯堡', '南非']].each do |city, country| %>
+                <button type="button" 
+                        data-city-name="<%= city %>"
+                        data-country="<%= country %>"
+                        data-international="true"
+                        data-action="click->city-selector#selectCity"
+                        class="flex flex-col items-center justify-center px-2 py-2 bg-gray-50 rounded-lg text-sm hover:bg-gray-100">
+                  <span class="font-medium"><%= city %></span>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= country %></span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 字母索引 -->
+          <div class="p-4">
+            <h3 class="text-sm font-bold text-gray-700 mb-3">字母索引</h3>
+            <div class="text-sm text-gray-400">点击上方城市快速选择</div>
           </div>
         </div>
       </div>

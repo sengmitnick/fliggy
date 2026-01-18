@@ -1,0 +1,137 @@
+<div class="min-h-screen bg-gray-100 max-w-[450px] mx-auto relative" data-controller="hotel-map">
+  <!-- 顶部搜索栏 -->
+  <div class="bg-white px-3 pb-2 pt-3 flex items-center gap-2 sticky top-0 z-40">
+    <!-- 返回按钮 -->
+    <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "flex-shrink-0" do %>
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    
+    <!-- 标题 -->
+    <div class="flex-1 text-center">
+      <h1 class="text-lg font-bold text-gray-800"><%= @city.gsub('市', '') %> 酒店地图</h1>
+      <p class="text-xs text-gray-500">共 <%= @hotels.size %> 家酒店</p>
+    </div>
+    
+    <!-- 占位符保持居中 -->
+    <div class="w-6"></div>
+  </div>
+
+  <!-- 地图区域 -->
+  <div class="relative bg-white" style="height: 400px;">
+    <!-- 简化的地图背景 -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+      <div class="text-center text-gray-400">
+        <svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        <p class="text-sm"><%= @city.gsub('市', '') %>区域地图</p>
+      </div>
+    </div>
+    
+    <!-- 地图上的酒店标记点 -->
+    <% @hotels.each_with_index do |hotel, index| %>
+      <% 
+        # 计算随机位置(模拟不同区域)
+        left_position = 10 + (index % 6) * 15 
+        top_position = 10 + (index / 6).to_i * 15
+      %>
+      <button 
+        data-hotel-map-target="marker"
+        data-hotel-id="<%= hotel.id %>"
+        data-action="click->hotel-map#showHotelInfo"
+        class="absolute transform -translate-x-1/2 -translate-y-full transition-all hover:scale-110 z-10"
+        style="left: <%= left_position %>%; top: <%= top_position %>%;">
+        <!-- 价格标签 -->
+        <div class="bg-primary text-white px-2 py-1 rounded-lg shadow-lg text-xs font-bold whitespace-nowrap">
+          ¥<%= hotel.price %>
+        </div>
+        <!-- 指示箭头 -->
+        <div class="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-primary mx-auto"></div>
+      </button>
+    <% end %>
+  </div>
+
+  <!-- 酒店列表 -->
+  <div class="bg-white mt-3">
+    <!-- 列表标题 -->
+    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="text-base font-bold text-gray-800">酒店列表</h2>
+      <span class="text-sm text-gray-500"><%= @hotels.size %> 家</span>
+    </div>
+    
+    <!-- 酒店卡片列表 -->
+    <div class="divide-y divide-gray-100">
+      <% @hotels.each do |hotel| %>
+        <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), 
+                    class: "block px-4 py-3 hover:bg-gray-50 transition-colors",
+                    data: { 
+                      hotel_map_target: "hotelCard",
+                      hotel_id: hotel.id
+                    } do %>
+          <div class="flex gap-3">
+            <!-- 酒店图片 -->
+            <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+              <% if hotel.image_url.present? %>
+                <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
+              <% elsif hotel.image.attached? %>
+                <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                  <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V6H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/>
+                  </svg>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- 酒店信息 -->
+            <div class="flex-1 min-w-0">
+              <!-- 酒店名称 -->
+              <h3 class="text-sm font-bold text-gray-800 truncate mb-1"><%= hotel.name %></h3>
+              
+              <!-- 星级和评分 -->
+              <div class="flex items-center gap-2 mb-1">
+                <% if hotel.star_level.present? %>
+                  <div class="flex items-center">
+                    <% hotel.star_level.times do %>
+                      <svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                      </svg>
+                    <% end %>
+                  </div>
+                <% end %>
+                <% if hotel.rating.present? %>
+                  <span class="text-xs text-primary font-bold"><%= hotel.rating %></span>
+                <% end %>
+              </div>
+              
+              <!-- 地址 -->
+              <p class="text-xs text-gray-500 truncate mb-2">
+                <svg class="w-3 h-3 inline-block mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2C6.69 2 4 4.69 4 8c0 4.5 6 11 6 11s6-6.5 6-11c0-3.31-2.69-6-6-6zm0 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                </svg>
+                <%= hotel.address %>
+              </p>
+              
+              <!-- 价格 -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-primary text-lg font-bold">¥<%= hotel.price %></span>
+                  <span class="text-xs text-gray-500">起</span>
+                </div>
+                <% if hotel.region.present? %>
+                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"><%= hotel.region %></span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- 底部占位 -->
+  <div class="h-20"></div>
+</div>
