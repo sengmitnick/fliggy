@@ -10269,6 +10269,11 @@ html, body {
   left: 2px;
 }
 
+.after\:top-0\.5::after {
+  content: var(--tw-content);
+  top: 0.125rem;
+}
+
 .after\:top-\[2px\]::after {
   content: var(--tw-content);
   top: 2px;

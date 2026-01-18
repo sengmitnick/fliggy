@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_18_105101) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_18_145815) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -345,6 +345,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_18_105101) do
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "contacts", force: :cascade do |t|
+    t.string "name"
+    t.string "phone"
+    t.string "email"
+    t.boolean "is_default", default: false
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 1
+    t.index ["user_id"], name: "index_contacts_on_user_id"
   end
 
   create_table "countries", force: :cascade do |t|
@@ -1392,6 +1404,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_18_105101) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
+  add_foreign_key "contacts", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"

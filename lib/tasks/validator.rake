@@ -1,33 +1,49 @@
 # frozen_string_literal: true
 
 namespace :validator do
-  desc "Reset baseline data (delete data_version=0 and reload data packs)"
+  desc "Reset baseline data (clear entire database and reload data packs)"
   task reset_baseline: :environment do
     puts "\n" + "="*80
-    puts "🔄 重置验证器基线数据 (data_version=0)"
+    puts "🔄 重置验证器基线数据 - 模拟甲方交付新环境初始化"
     puts "="*80
     
-    # Step 1: 删除所有 data_version=0 的数据
-    puts "\n📦 Step 1: 删除现有基线数据..."
-    deleted_counts = {}
+    # Step 1: 完全清空整个数据库
+    puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
-    DataVersionable.models.each do |model|
-      begin
-        count = model.where(data_version: 0).count
+    begin
+      # 禁用外键约束检查
+      ActiveRecord::Base.connection.execute("SET session_replication_role = 'replica';")
+      
+      # 获取所有表名（排除 schema_migrations, ar_internal_metadata, good_jobs 相关表）
+      tables = ActiveRecord::Base.connection.tables - [
+        'schema_migrations', 
+        'ar_internal_metadata',
+        'good_jobs',
+        'good_job_batches',
+        'good_job_executions',
+        'good_job_processes',
+        'good_job_settings'
+      ]
+      
+      deleted_total = 0
+      tables.each do |table|
+        count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
         if count > 0
-          deleted = model.where(data_version: 0).delete_all
-          deleted_counts[model.name] = deleted
-          puts "  → #{model.name}: 删除 #{deleted} 条记录"
+          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} CASCADE")
+          deleted_total += count
+          puts "  → #{table}: 清空 #{count} 条记录"
         end
-      rescue StandardError => e
-        puts "  ⚠️  删除 #{model.name} 失败: #{e.message}"
       end
-    end
-    
-    if deleted_counts.empty?
-      puts "  ℹ️  没有需要删除的基线数据"
-    else
-      puts "\n✓ 已删除 #{deleted_counts.values.sum} 条基线数据记录"
+      
+      # 恢复外键约束检查
+      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';")
+      
+      puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
+    rescue StandardError => e
+      puts "\n❌ 清空数据库失败: #{e.message}"
+      # 确保恢复外键约束检查
+      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';") rescue nil
+      exit 1
     end
     
     # Step 2: 重新加载数据包
@@ -101,11 +117,13 @@ namespace :validator do
     # 最终汇总
     puts "\n" + "="*80
     if verification_passed
-      puts "✅ 基线数据重置成功"
+      puts "✅ 基线数据重置成功（新环境初始化完成）"
+      puts "  - 数据库已完全清空并重新初始化"
       puts "  - 共加载 #{loaded_files.size} 个数据包"
       puts "  - 当前时间: #{Date.current}"
       puts "  - 航班日期: #{Date.current + 3.days}（Date.current + 3.days）"
-      puts "\n💡 提示: 请在每天开始工作时运行此命令，确保数据包日期与当前日期同步"
+      puts "\n💡 提示: 此命令模拟甲方交付新环境的初始化过程"
+      puts "   请在每天开始工作时运行此命令，确保数据包日期与当前日期同步"
     else
       puts "❌ 基线数据验证失败，请检查数据包文件"
       exit 1
