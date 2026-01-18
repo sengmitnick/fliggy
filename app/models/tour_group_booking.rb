@@ -1,4 +1,5 @@
 class TourGroupBooking < ApplicationRecord
+  include DataVersionable
   belongs_to :tour_group_product
   belongs_to :tour_package
   belongs_to :user

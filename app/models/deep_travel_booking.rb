@@ -1,4 +1,5 @@
 class DeepTravelBooking < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :deep_travel_guide
   belongs_to :deep_travel_product

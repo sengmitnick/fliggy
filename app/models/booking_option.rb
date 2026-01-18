@@ -1,4 +1,5 @@
 class BookingOption < ApplicationRecord
+  include DataVersionable
   belongs_to :train
 
   serialize :benefits, coder: JSON

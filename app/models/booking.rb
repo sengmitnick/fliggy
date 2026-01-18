@@ -1,4 +1,5 @@
 class Booking < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   belongs_to :flight
   belongs_to :return_flight, class_name: 'Flight', optional: true

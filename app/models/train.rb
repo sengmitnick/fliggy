@@ -1,4 +1,5 @@
 class Train < ApplicationRecord
+  include DataVersionable
   has_many :train_bookings, dependent: :destroy
   has_many :train_seats, dependent: :destroy
   has_many :booking_options, dependent: :destroy

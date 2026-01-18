@@ -181,6 +181,12 @@ class BookingsController < ApplicationController
   end
 
   def create
+    # DEBUG: Log current session variable state
+    current_data_version = ActiveRecord::Base.connection.execute(
+      "SELECT current_setting('app.data_version', true) AS version"
+    ).first&.dig('version')
+    Rails.logger.info "[BookingsController#create] Current app.data_version = #{current_data_version || 'NOT SET'}"
+    
     @trip_type = params[:booking][:trip_type] || 'one_way'
     
     # Handle multi-city booking

@@ -1,4 +1,5 @@
 class HotelRoom < ApplicationRecord
+  include DataVersionable
   belongs_to :hotel
 
   # 房型分类: overnight(过夜), hourly(钟点房)

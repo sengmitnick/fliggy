@@ -1,4 +1,5 @@
 class InternetDataPlan < ApplicationRecord
+  include DataVersionable
   has_many :internet_orders, as: :orderable, dependent: :destroy
 
   validates :name, presence: true

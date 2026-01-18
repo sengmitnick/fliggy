@@ -1,4 +1,5 @@
 class TourItineraryDay < ApplicationRecord
+  include DataVersionable
   belongs_to :tour_group_product
 
   serialize :attractions, coder: JSON

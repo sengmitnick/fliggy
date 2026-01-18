@@ -1,4 +1,5 @@
 class BookingTraveler < ApplicationRecord
+  include DataVersionable
   belongs_to :tour_group_booking, optional: true
   belongs_to :deep_travel_booking, optional: true
 

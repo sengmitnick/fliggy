@@ -1,4 +1,5 @@
 class AbroadCoupon < ApplicationRecord
+  include DataVersionable
   belongs_to :abroad_brand
   belongs_to :abroad_shop, optional: true
   has_many :user_coupons, dependent: :destroy

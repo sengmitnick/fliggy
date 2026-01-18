@@ -1,4 +1,5 @@
 class TourPackage < ApplicationRecord
+  include DataVersionable
   belongs_to :tour_group_product
 
   validates :name, presence: true

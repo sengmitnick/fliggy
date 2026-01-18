@@ -1,4 +1,5 @@
 class BusTicket < ApplicationRecord
+  include DataVersionable
   has_many :bus_ticket_orders, dependent: :destroy
   
   validates :origin, :destination, :departure_date, :departure_time, :price, presence: true

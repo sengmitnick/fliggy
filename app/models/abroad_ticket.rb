@@ -1,4 +1,5 @@
 class AbroadTicket < ApplicationRecord
+  include DataVersionable
   has_many :abroad_ticket_orders, dependent: :destroy
 
   validates :region, presence: true, inclusion: { in: %w[japan europe] }

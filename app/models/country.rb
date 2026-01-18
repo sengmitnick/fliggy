@@ -1,4 +1,5 @@
 class Country < ApplicationRecord
+  include DataVersionable
   extend FriendlyId
   friendly_id :name, use: [:slugged, :history]
 

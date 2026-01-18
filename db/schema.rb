@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_16_085412) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,6 +24,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_abroad_brands_on_data_version"
   end
 
   create_table "abroad_coupons", force: :cascade do |t|
@@ -38,6 +40,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_abroad_coupons_on_data_version"
   end
 
   create_table "abroad_shops", force: :cascade do |t|
@@ -51,6 +55,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_abroad_shops_on_data_version"
   end
 
   create_table "abroad_ticket_orders", force: :cascade do |t|
@@ -68,7 +74,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "order_number"
+    t.bigint "data_version", default: 0, null: false
     t.index ["abroad_ticket_id"], name: "index_abroad_ticket_orders_on_abroad_ticket_id"
+    t.index ["data_version"], name: "index_abroad_ticket_orders_on_data_version"
     t.index ["user_id"], name: "index_abroad_ticket_orders_on_user_id"
   end
 
@@ -87,6 +95,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "destination_en"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_abroad_tickets_on_data_version"
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -129,6 +139,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "address_type", default: "delivery"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_addresses_on_data_version"
     t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
@@ -159,6 +171,1150 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.index ["role"], name: "index_administrators_on_role"
   end
 
+  create_table "baseline_abroad_brands", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "slug"
+    t.string "country"
+    t.string "logo_url"
+    t.text "description"
+    t.string "category"
+    t.boolean "featured"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_abroad_brands_on_data_version"
+  end
+
+  create_table "baseline_abroad_coupons", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "title"
+    t.integer "abroad_brand_id"
+    t.integer "abroad_shop_id"
+    t.string "discount_type"
+    t.string "discount_value"
+    t.text "description"
+    t.date "valid_from"
+    t.date "valid_until"
+    t.boolean "active"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_abroad_coupons_on_data_version"
+  end
+
+  create_table "baseline_abroad_shops", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.integer "abroad_brand_id"
+    t.string "city"
+    t.text "address"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.string "image_url"
+    t.text "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_abroad_shops_on_data_version"
+  end
+
+  create_table "baseline_abroad_ticket_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "abroad_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "contact_email"
+    t.string "passenger_type"
+    t.string "seat_category"
+    t.decimal "total_price"
+    t.string "status"
+    t.text "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "order_number"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_abroad_ticket_orders_on_data_version"
+  end
+
+  create_table "baseline_abroad_tickets", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "region"
+    t.string "ticket_type"
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "time_slot_start"
+    t.string "time_slot_end"
+    t.decimal "price"
+    t.string "seat_type"
+    t.string "status"
+    t.string "origin_en"
+    t.string "destination_en"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_abroad_tickets_on_data_version"
+  end
+
+  create_table "baseline_addresses", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "name"
+    t.string "phone"
+    t.string "province"
+    t.string "city"
+    t.string "district"
+    t.string "detail"
+    t.boolean "is_default"
+    t.string "address_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_addresses_on_data_version"
+  end
+
+  create_table "baseline_administrators", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "password_digest"
+    t.string "role"
+    t.boolean "first_login"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_administrators_on_data_version"
+  end
+
+  create_table "baseline_booking_options", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "train_id"
+    t.string "title"
+    t.text "description"
+    t.decimal "extra_fee"
+    t.text "benefits"
+    t.integer "priority"
+    t.boolean "is_active"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_booking_options_on_data_version"
+  end
+
+  create_table "baseline_booking_travelers", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "tour_group_booking_id"
+    t.string "traveler_name"
+    t.string "id_number"
+    t.string "traveler_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer "deep_travel_booking_id"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_booking_travelers_on_data_version"
+  end
+
+  create_table "baseline_bookings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "flight_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.decimal "total_price"
+    t.string "status"
+    t.boolean "accept_terms"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.string "trip_type"
+    t.integer "return_flight_id"
+    t.date "return_date"
+    t.integer "return_offer_id"
+    t.jsonb "multi_city_flights"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_bookings_on_data_version"
+  end
+
+  create_table "baseline_brand_memberships", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "brand_name"
+    t.string "member_number"
+    t.string "member_level"
+    t.string "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_brand_memberships_on_data_version"
+  end
+
+  create_table "baseline_bus_routes", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "origin"
+    t.string "destination"
+    t.integer "duration"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_bus_routes_on_data_version"
+  end
+
+  create_table "baseline_bus_ticket_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "bus_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "departure_station"
+    t.string "arrival_station"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.decimal "total_price"
+    t.string "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_bus_ticket_orders_on_data_version"
+  end
+
+  create_table "baseline_bus_tickets", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "departure_time"
+    t.string "arrival_time"
+    t.decimal "price"
+    t.string "status"
+    t.string "seat_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "departure_station"
+    t.string "arrival_station"
+    t.string "route_description"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_bus_tickets_on_data_version"
+  end
+
+  create_table "baseline_car_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "car_id"
+    t.string "driver_name"
+    t.string "driver_id_number"
+    t.string "contact_phone"
+    t.datetime "pickup_datetime"
+    t.datetime "return_datetime"
+    t.string "pickup_location"
+    t.string "status"
+    t.decimal "total_price"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_car_orders_on_data_version"
+  end
+
+  create_table "baseline_cars", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "brand"
+    t.string "car_model"
+    t.string "category"
+    t.integer "seats"
+    t.integer "doors"
+    t.string "transmission"
+    t.string "fuel_type"
+    t.string "engine"
+    t.decimal "price_per_day"
+    t.decimal "total_price"
+    t.decimal "discount_amount"
+    t.string "location"
+    t.string "pickup_location"
+    t.text "features"
+    t.text "tags"
+    t.boolean "is_featured"
+    t.boolean "is_available"
+    t.integer "sales_rank"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "image_url"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_cars_on_data_version"
+  end
+
+  create_table "baseline_cities", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "pinyin"
+    t.string "airport_code"
+    t.string "region"
+    t.boolean "is_hot"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.text "themes"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_cities_on_data_version"
+  end
+
+  create_table "baseline_countries", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "code"
+    t.string "slug"
+    t.string "region"
+    t.boolean "visa_free"
+    t.string "image_url"
+    t.text "description"
+    t.text "visa_requirements"
+    t.jsonb "statistics"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_countries_on_data_version"
+  end
+
+  create_table "baseline_deep_travel_bookings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "deep_travel_guide_id"
+    t.bigint "deep_travel_product_id"
+    t.date "travel_date"
+    t.integer "adult_count"
+    t.integer "child_count"
+    t.string "traveler_name"
+    t.string "traveler_id_number"
+    t.string "traveler_phone"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.decimal "total_price", precision: 10, scale: 2
+    t.decimal "insurance_price", precision: 10, scale: 2
+    t.string "status"
+    t.string "order_number"
+    t.text "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_deep_travel_bookings_on_data_version"
+  end
+
+  create_table "baseline_deep_travel_guides", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "title"
+    t.text "description"
+    t.integer "follower_count"
+    t.integer "experience_years"
+    t.text "specialties"
+    t.decimal "price", precision: 10, scale: 2
+    t.integer "served_count"
+    t.integer "rank"
+    t.decimal "rating", precision: 3, scale: 2
+    t.boolean "featured"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_deep_travel_guides_on_data_version"
+  end
+
+  create_table "baseline_deep_travel_products", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "title"
+    t.string "subtitle"
+    t.string "location"
+    t.bigint "deep_travel_guide_id"
+    t.decimal "price", precision: 10, scale: 2
+    t.integer "sales_count"
+    t.text "description"
+    t.text "itinerary"
+    t.boolean "featured"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_deep_travel_products_on_data_version"
+  end
+
+  create_table "baseline_destinations", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "region"
+    t.text "description"
+    t.string "image_url"
+    t.boolean "is_hot"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_destinations_on_data_version"
+  end
+
+  create_table "baseline_flight_offers", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "flight_id"
+    t.string "provider_name"
+    t.string "offer_type"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.decimal "cashback_amount"
+    t.text "discount_items"
+    t.string "seat_class"
+    t.text "services"
+    t.text "tags"
+    t.string "baggage_info"
+    t.boolean "meal_included"
+    t.string "refund_policy"
+    t.boolean "is_featured"
+    t.integer "display_order"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_flight_offers_on_data_version"
+  end
+
+  create_table "baseline_flights", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "departure_city"
+    t.string "destination_city"
+    t.datetime "departure_time"
+    t.datetime "arrival_time"
+    t.string "departure_airport"
+    t.string "arrival_airport"
+    t.string "airline"
+    t.string "flight_number"
+    t.string "aircraft_type"
+    t.decimal "price"
+    t.decimal "discount_price"
+    t.string "seat_class"
+    t.integer "available_seats"
+    t.date "flight_date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_flights_on_data_version"
+  end
+
+  create_table "baseline_hotel_bookings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_id"
+    t.bigint "user_id"
+    t.bigint "hotel_room_id"
+    t.date "check_in_date"
+    t.date "check_out_date"
+    t.integer "rooms_count"
+    t.integer "adults_count"
+    t.integer "children_count"
+    t.string "guest_name"
+    t.string "guest_phone"
+    t.decimal "total_price"
+    t.decimal "original_price"
+    t.decimal "discount_amount"
+    t.string "payment_method"
+    t.string "coupon_code"
+    t.text "special_requests"
+    t.string "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.datetime "locked_until"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_bookings_on_data_version"
+  end
+
+  create_table "baseline_hotel_facilities", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_id"
+    t.string "name"
+    t.string "icon"
+    t.string "description"
+    t.string "category"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_facilities_on_data_version"
+  end
+
+  create_table "baseline_hotel_package_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_package_id"
+    t.bigint "user_id"
+    t.string "order_number"
+    t.integer "quantity"
+    t.decimal "total_price"
+    t.string "status"
+    t.string "payment_method"
+    t.datetime "purchased_at"
+    t.integer "used_count"
+    t.datetime "valid_until"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "package_option_id"
+    t.bigint "passenger_id"
+    t.string "booking_type"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_package_orders_on_data_version"
+  end
+
+  create_table "baseline_hotel_packages", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "brand_name"
+    t.string "title"
+    t.text "description"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.integer "sales_count"
+    t.boolean "is_featured"
+    t.integer "valid_days"
+    t.text "terms"
+    t.string "brand_logo_url"
+    t.string "region"
+    t.string "package_type"
+    t.integer "display_order"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "hotel_id"
+    t.string "brand"
+    t.string "city"
+    t.integer "night_count"
+    t.boolean "refundable"
+    t.boolean "instant_booking"
+    t.boolean "luxury"
+    t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_packages_on_data_version"
+  end
+
+  create_table "baseline_hotel_policies", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_id"
+    t.string "check_in_time"
+    t.string "check_out_time"
+    t.string "pet_policy"
+    t.string "breakfast_type"
+    t.string "breakfast_hours"
+    t.decimal "breakfast_price"
+    t.text "payment_methods"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_policies_on_data_version"
+  end
+
+  create_table "baseline_hotel_reviews", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_id"
+    t.bigint "user_id"
+    t.decimal "rating"
+    t.text "comment"
+    t.integer "helpful_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_reviews_on_data_version"
+  end
+
+  create_table "baseline_hotel_rooms", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "hotel_id"
+    t.string "room_type"
+    t.string "bed_type"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.string "area"
+    t.integer "max_guests"
+    t.boolean "has_window"
+    t.integer "available_rooms"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "room_category"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotel_rooms_on_data_version"
+  end
+
+  create_table "baseline_hotels", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "city"
+    t.text "address"
+    t.decimal "rating"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.string "distance"
+    t.text "features"
+    t.integer "star_level"
+    t.string "image_url"
+    t.boolean "is_featured"
+    t.integer "display_order"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "hotel_type"
+    t.string "region"
+    t.boolean "is_domestic"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_hotels_on_data_version"
+  end
+
+  create_table "baseline_internet_data_plans", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.string "phone_number"
+    t.string "carrier"
+    t.text "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_internet_data_plans_on_data_version"
+  end
+
+  create_table "baseline_internet_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "orderable_id"
+    t.string "order_type"
+    t.string "region"
+    t.integer "quantity"
+    t.decimal "total_price"
+    t.string "status"
+    t.string "delivery_method"
+    t.jsonb "delivery_info"
+    t.jsonb "contact_info"
+    t.jsonb "rental_info"
+    t.string "order_number"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "orderable_type"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_internet_orders_on_data_version"
+  end
+
+  create_table "baseline_internet_sim_cards", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.text "features"
+    t.integer "sales_count"
+    t.string "shop_name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_internet_sim_cards_on_data_version"
+  end
+
+  create_table "baseline_internet_wifis", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "region"
+    t.string "network_type"
+    t.string "data_limit"
+    t.decimal "daily_price"
+    t.text "features"
+    t.integer "sales_count"
+    t.string "shop_name"
+    t.decimal "deposit"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_internet_wifis_on_data_version"
+  end
+
+  create_table "baseline_itineraries", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "title"
+    t.date "start_date"
+    t.date "end_date"
+    t.string "destination"
+    t.string "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_itineraries_on_data_version"
+  end
+
+  create_table "baseline_itinerary_items", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "itinerary_id"
+    t.string "item_type"
+    t.string "bookable_type"
+    t.integer "bookable_id"
+    t.date "item_date"
+    t.integer "sequence"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_itinerary_items_on_data_version"
+  end
+
+  create_table "baseline_membership_benefits", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "level_required"
+    t.string "icon"
+    t.text "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_membership_benefits_on_data_version"
+  end
+
+  create_table "baseline_memberships", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "level"
+    t.integer "points"
+    t.integer "experience"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_memberships_on_data_version"
+  end
+
+  create_table "baseline_notification_settings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "category"
+    t.boolean "enabled"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_notification_settings_on_data_version"
+  end
+
+  create_table "baseline_notifications", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "category"
+    t.string "title"
+    t.text "content"
+    t.boolean "read"
+    t.integer "badge_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_notifications_on_data_version"
+  end
+
+  create_table "baseline_package_options", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_package_id"
+    t.string "name"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.integer "night_count"
+    t.text "description"
+    t.boolean "can_split"
+    t.integer "display_order"
+    t.boolean "is_active"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_package_options_on_data_version"
+  end
+
+  create_table "baseline_passengers", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "id_type"
+    t.string "id_number"
+    t.string "phone"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "user_id"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_passengers_on_data_version"
+  end
+
+  create_table "baseline_rooms", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "hotel_id"
+    t.string "name"
+    t.string "size"
+    t.string "bed_type"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.text "amenities"
+    t.boolean "breakfast_included"
+    t.string "cancellation_policy"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_rooms_on_data_version"
+  end
+
+  create_table "baseline_tour_group_bookings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "tour_group_product_id"
+    t.integer "tour_package_id"
+    t.integer "user_id"
+    t.date "travel_date"
+    t.integer "adult_count"
+    t.integer "child_count"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.string "insurance_type"
+    t.string "status"
+    t.decimal "total_price"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_group_bookings_on_data_version"
+  end
+
+  create_table "baseline_tour_group_products", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "title"
+    t.string "subtitle"
+    t.string "tour_category"
+    t.string "destination"
+    t.integer "duration"
+    t.string "departure_city"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.decimal "rating"
+    t.string "rating_desc"
+    t.text "highlights"
+    t.text "tags"
+    t.string "provider"
+    t.integer "sales_count"
+    t.string "badge"
+    t.string "departure_label"
+    t.string "image_url"
+    t.boolean "is_featured"
+    t.integer "display_order"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "travel_agency_id"
+    t.integer "reward_points"
+    t.boolean "requires_merchant_confirm"
+    t.integer "merchant_confirm_hours"
+    t.boolean "success_rate_high"
+    t.text "description"
+    t.text "cost_includes"
+    t.text "cost_excludes"
+    t.text "safety_notice"
+    t.text "booking_notice"
+    t.text "insurance_notice"
+    t.text "cancellation_policy"
+    t.text "price_explanation"
+    t.text "group_tour_notice"
+    t.boolean "custom_tour_available"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_group_products_on_data_version"
+  end
+
+  create_table "baseline_tour_itinerary_days", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "tour_group_product_id"
+    t.integer "day_number"
+    t.string "title"
+    t.text "attractions"
+    t.text "assembly_point"
+    t.text "assembly_details"
+    t.text "disassembly_point"
+    t.text "disassembly_details"
+    t.string "transportation"
+    t.text "service_info"
+    t.integer "duration_minutes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_itinerary_days_on_data_version"
+  end
+
+  create_table "baseline_tour_packages", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "tour_group_product_id"
+    t.string "name"
+    t.decimal "price"
+    t.decimal "child_price"
+    t.integer "purchase_count"
+    t.text "description"
+    t.boolean "is_featured"
+    t.integer "display_order"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_packages_on_data_version"
+  end
+
+  create_table "baseline_tour_products", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "destination_id"
+    t.string "name"
+    t.string "product_type"
+    t.string "category"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.integer "sales_count"
+    t.decimal "rating"
+    t.text "tags"
+    t.text "description"
+    t.string "image_url"
+    t.integer "rank"
+    t.boolean "is_featured"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "tour_type"
+    t.integer "duration"
+    t.string "departure_city"
+    t.string "rating_desc"
+    t.text "highlights"
+    t.string "provider"
+    t.string "badge"
+    t.string "departure_label"
+    t.string "price_suffix"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_products_on_data_version"
+  end
+
+  create_table "baseline_tour_reviews", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "tour_group_product_id"
+    t.bigint "user_id"
+    t.decimal "rating"
+    t.decimal "guide_attitude"
+    t.decimal "meal_quality"
+    t.decimal "itinerary_arrangement"
+    t.decimal "travel_transportation"
+    t.text "comment"
+    t.boolean "is_featured"
+    t.integer "helpful_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_tour_reviews_on_data_version"
+  end
+
+  create_table "baseline_train_bookings", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.bigint "train_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "seat_type"
+    t.string "carriage_number"
+    t.string "seat_number"
+    t.decimal "total_price"
+    t.string "insurance_type"
+    t.decimal "insurance_price"
+    t.string "status"
+    t.boolean "accept_terms"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_train_bookings_on_data_version"
+  end
+
+  create_table "baseline_train_seats", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "train_id"
+    t.string "seat_type"
+    t.decimal "price"
+    t.integer "available_count"
+    t.integer "total_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_train_seats_on_data_version"
+  end
+
+  create_table "baseline_trains", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "departure_city"
+    t.string "arrival_city"
+    t.datetime "departure_time"
+    t.datetime "arrival_time"
+    t.integer "duration"
+    t.string "train_number"
+    t.text "seat_types"
+    t.decimal "price_second_class"
+    t.decimal "price_first_class"
+    t.decimal "price_business_class"
+    t.integer "available_seats"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_trains_on_data_version"
+  end
+
+  create_table "baseline_transfer_packages", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "vehicle_category"
+    t.integer "seats"
+    t.integer "luggage"
+    t.integer "wait_time"
+    t.string "refund_policy"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.decimal "discount_amount"
+    t.text "features"
+    t.string "provider"
+    t.integer "priority"
+    t.boolean "is_active"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_transfer_packages_on_data_version"
+  end
+
+  create_table "baseline_transfers", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.bigint "user_id"
+    t.string "transfer_type"
+    t.string "service_type"
+    t.string "location_from"
+    t.string "location_to"
+    t.datetime "pickup_datetime"
+    t.string "flight_number"
+    t.string "train_number"
+    t.string "passenger_name"
+    t.string "passenger_phone"
+    t.string "vehicle_type"
+    t.string "provider_name"
+    t.string "license_plate"
+    t.string "driver_name"
+    t.string "driver_status"
+    t.decimal "total_price"
+    t.decimal "discount_amount"
+    t.string "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer "transfer_package_id"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_transfers_on_data_version"
+  end
+
+  create_table "baseline_travel_agencies", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.text "description"
+    t.string "logo_url"
+    t.decimal "rating"
+    t.integer "sales_count"
+    t.boolean "is_verified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_travel_agencies_on_data_version"
+  end
+
+  create_table "baseline_user_coupons", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "user_id"
+    t.integer "abroad_coupon_id"
+    t.string "status"
+    t.datetime "claimed_at"
+    t.datetime "used_at"
+    t.datetime "expires_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_user_coupons_on_data_version"
+  end
+
+  create_table "baseline_users", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.string "name"
+    t.string "email"
+    t.string "password_digest"
+    t.boolean "verified"
+    t.string "provider"
+    t.string "uid"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.jsonb "airline_memberships"
+    t.string "pay_password_digest"
+    t.decimal "balance", precision: 10, scale: 2
+    t.string "phone"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_users_on_data_version"
+  end
+
+  create_table "baseline_visa_order_travelers", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "visa_order_id"
+    t.string "name"
+    t.string "id_number"
+    t.string "phone"
+    t.string "relationship"
+    t.string "passport_number"
+    t.date "passport_expiry"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_visa_order_travelers_on_data_version"
+  end
+
+  create_table "baseline_visa_orders", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "user_id"
+    t.integer "visa_product_id"
+    t.integer "traveler_count"
+    t.decimal "total_price"
+    t.decimal "unit_price"
+    t.string "status"
+    t.date "expected_date"
+    t.string "delivery_method"
+    t.text "delivery_address"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.text "notes"
+    t.boolean "insurance_selected"
+    t.decimal "insurance_price"
+    t.string "payment_status"
+    t.datetime "paid_at"
+    t.string "slug"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "insurance_type"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_visa_orders_on_data_version"
+  end
+
+  create_table "baseline_visa_products", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.integer "country_id"
+    t.string "name"
+    t.string "product_type"
+    t.decimal "price"
+    t.decimal "original_price"
+    t.string "residence_area"
+    t.integer "processing_days"
+    t.string "visa_validity"
+    t.string "max_stay"
+    t.decimal "success_rate"
+    t.jsonb "required_materials"
+    t.integer "material_count"
+    t.boolean "can_simplify"
+    t.boolean "home_pickup"
+    t.boolean "refused_reapply"
+    t.boolean "supports_family"
+    t.jsonb "features"
+    t.text "description"
+    t.string "slug"
+    t.integer "sales_count"
+    t.string "merchant_name"
+    t.string "merchant_avatar"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_baseline_visa_products_on_data_version"
+  end
+
   create_table "booking_options", force: :cascade do |t|
     t.bigint "train_id"
     t.string "title"
@@ -169,6 +1325,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_booking_options_on_data_version"
     t.index ["train_id"], name: "index_booking_options_on_train_id"
   end
 
@@ -180,6 +1338,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "deep_travel_booking_id"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_booking_travelers_on_data_version"
     t.index ["deep_travel_booking_id"], name: "index_booking_travelers_on_deep_travel_booking_id"
     t.index ["tour_group_booking_id"], name: "index_booking_travelers_on_tour_group_booking_id"
   end
@@ -202,6 +1362,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.date "return_date"
     t.integer "return_offer_id"
     t.jsonb "multi_city_flights"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_bookings_on_data_version"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
@@ -215,6 +1377,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_brand_memberships_on_data_version"
     t.index ["user_id"], name: "index_brand_memberships_on_user_id"
   end
 
@@ -224,6 +1388,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "duration"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_bus_routes_on_data_version"
   end
 
   create_table "bus_ticket_orders", force: :cascade do |t|
@@ -240,7 +1406,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["bus_ticket_id"], name: "index_bus_ticket_orders_on_bus_ticket_id"
+    t.index ["data_version"], name: "index_bus_ticket_orders_on_data_version"
     t.index ["user_id"], name: "index_bus_ticket_orders_on_user_id"
   end
 
@@ -258,6 +1426,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "departure_station"
     t.string "arrival_station"
     t.string "route_description"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_bus_tickets_on_data_version"
   end
 
   create_table "car_orders", force: :cascade do |t|
@@ -273,7 +1443,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.decimal "total_price", default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["car_id"], name: "index_car_orders_on_car_id"
+    t.index ["data_version"], name: "index_car_orders_on_data_version"
     t.index ["user_id"], name: "index_car_orders_on_user_id"
   end
 
@@ -299,6 +1471,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image_url"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cars_on_data_version"
   end
 
   create_table "cities", force: :cascade do |t|
@@ -310,6 +1484,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "themes"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cities_on_data_version"
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
@@ -327,6 +1503,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.jsonb "statistics", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_countries_on_data_version"
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
@@ -348,6 +1526,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_deep_travel_bookings_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_bookings_on_deep_travel_guide_id"
     t.index ["deep_travel_product_id"], name: "index_deep_travel_bookings_on_deep_travel_product_id"
     t.index ["user_id"], name: "index_deep_travel_bookings_on_user_id"
@@ -367,6 +1547,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_deep_travel_guides_on_data_version"
   end
 
   create_table "deep_travel_products", force: :cascade do |t|
@@ -381,6 +1563,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_deep_travel_products_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_products_on_deep_travel_guide_id"
   end
 
@@ -393,6 +1577,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_destinations_on_data_version"
     t.index ["slug"], name: "index_destinations_on_slug", unique: true
   end
 
@@ -414,6 +1600,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_flight_offers_on_data_version"
     t.index ["flight_id"], name: "index_flight_offers_on_flight_id"
   end
 
@@ -434,6 +1622,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.date "flight_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -560,6 +1750,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "insurance_type"
     t.decimal "insurance_price"
     t.datetime "locked_until"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_bookings_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_bookings_on_hotel_id"
     t.index ["hotel_room_id"], name: "index_hotel_bookings_on_hotel_room_id"
     t.index ["user_id"], name: "index_hotel_bookings_on_user_id"
@@ -573,6 +1765,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_facilities_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_facilities_on_hotel_id"
   end
 
@@ -594,6 +1788,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "booking_type", default: "stockup"
     t.string "contact_name"
     t.string "contact_phone"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_package_orders_on_data_version"
     t.index ["hotel_package_id"], name: "index_hotel_package_orders_on_hotel_package_id"
     t.index ["order_number"], name: "index_hotel_package_orders_on_order_number"
     t.index ["package_option_id"], name: "index_hotel_package_orders_on_package_option_id"
@@ -625,7 +1821,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "instant_booking", default: false
     t.boolean "luxury", default: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
     t.index ["brand_name"], name: "index_hotel_packages_on_brand_name"
+    t.index ["data_version"], name: "index_hotel_packages_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_packages_on_hotel_id"
     t.index ["slug"], name: "index_hotel_packages_on_slug", unique: true
   end
@@ -641,6 +1839,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "payment_methods"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_policies_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_policies_on_hotel_id"
   end
 
@@ -652,6 +1852,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "helpful_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_reviews_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_reviews_on_hotel_id"
     t.index ["user_id"], name: "index_hotel_reviews_on_user_id"
   end
@@ -669,6 +1871,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "room_category", default: "overnight"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotel_rooms_on_data_version"
     t.index ["room_category"], name: "index_hotel_rooms_on_room_category"
   end
 
@@ -690,6 +1894,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "hotel_type", default: "hotel"
     t.string "region"
     t.boolean "is_domestic", default: true
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_hotels_on_data_version"
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
     t.index ["region"], name: "index_hotels_on_region"
@@ -706,6 +1912,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_internet_data_plans_on_data_version"
   end
 
   create_table "internet_orders", force: :cascade do |t|
@@ -724,6 +1932,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "orderable_type"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_internet_orders_on_data_version"
     t.index ["orderable_id"], name: "index_internet_orders_on_orderable_id"
     t.index ["orderable_type", "orderable_id"], name: "index_internet_orders_on_orderable_type_and_orderable_id"
     t.index ["user_id"], name: "index_internet_orders_on_user_id"
@@ -740,6 +1950,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "shop_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_internet_sim_cards_on_data_version"
   end
 
   create_table "internet_wifis", force: :cascade do |t|
@@ -754,6 +1966,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.decimal "deposit", default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_internet_wifis_on_data_version"
   end
 
   create_table "itineraries", force: :cascade do |t|
@@ -765,6 +1979,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "status", default: "upcoming"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_itineraries_on_data_version"
     t.index ["user_id", "start_date"], name: "index_itineraries_on_user_id_and_start_date"
     t.index ["user_id", "status"], name: "index_itineraries_on_user_id_and_status"
     t.index ["user_id"], name: "index_itineraries_on_user_id"
@@ -779,7 +1995,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "sequence", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["bookable_type", "bookable_id"], name: "index_itinerary_items_on_bookable_type_and_bookable_id"
+    t.index ["data_version"], name: "index_itinerary_items_on_data_version"
     t.index ["itinerary_id", "sequence"], name: "index_itinerary_items_on_itinerary_id_and_sequence"
     t.index ["itinerary_id"], name: "index_itinerary_items_on_itinerary_id"
   end
@@ -791,6 +2009,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_membership_benefits_on_data_version"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -800,6 +2020,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "experience", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_memberships_on_data_version"
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
 
@@ -809,6 +2031,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "enabled", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_notification_settings_on_data_version"
     t.index ["user_id", "category"], name: "index_notification_settings_on_user_id_and_category", unique: true
     t.index ["user_id"], name: "index_notification_settings_on_user_id"
   end
@@ -822,6 +2046,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "badge_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_notifications_on_data_version"
     t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
     t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
     t.index ["user_id"], name: "index_notifications_on_user_id"
@@ -839,6 +2065,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_package_options_on_data_version"
     t.index ["hotel_package_id"], name: "index_package_options_on_hotel_package_id"
   end
 
@@ -850,6 +2078,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_passengers_on_data_version"
     t.index ["user_id"], name: "index_passengers_on_user_id"
   end
 
@@ -865,6 +2095,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "cancellation_policy"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_rooms_on_data_version"
     t.index ["hotel_id"], name: "index_rooms_on_hotel_id"
   end
 
@@ -891,6 +2123,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.decimal "total_price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_group_bookings_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_group_bookings_on_tour_group_product_id"
     t.index ["tour_package_id"], name: "index_tour_group_bookings_on_tour_package_id"
     t.index ["user_id"], name: "index_tour_group_bookings_on_user_id"
@@ -933,6 +2167,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.text "price_explanation"
     t.text "group_tour_notice"
     t.boolean "custom_tour_available", default: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
   end
 
@@ -950,6 +2186,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "duration_minutes", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_itinerary_days_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_itinerary_days_on_tour_group_product_id"
   end
 
@@ -964,6 +2202,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_packages_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_packages_on_tour_group_product_id"
   end
 
@@ -992,6 +2232,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "badge"
     t.string "departure_label"
     t.string "price_suffix", default: "起"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_products_on_data_version"
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
   end
 
@@ -1008,6 +2250,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "helpful_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_tour_reviews_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_reviews_on_tour_group_product_id"
     t.index ["user_id"], name: "index_tour_reviews_on_user_id"
   end
@@ -1028,6 +2272,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "accept_terms", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_train_bookings_on_data_version"
     t.index ["train_id"], name: "index_train_bookings_on_train_id"
     t.index ["user_id"], name: "index_train_bookings_on_user_id"
   end
@@ -1040,6 +2286,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "total_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_train_seats_on_data_version"
     t.index ["train_id"], name: "index_train_seats_on_train_id"
   end
 
@@ -1057,6 +2305,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.integer "available_seats"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_trains_on_data_version"
   end
 
   create_table "transfer_packages", force: :cascade do |t|
@@ -1075,6 +2325,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_transfer_packages_on_data_version"
   end
 
   create_table "transfers", force: :cascade do |t|
@@ -1099,6 +2351,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "transfer_package_id"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_transfers_on_data_version"
     t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
     t.index ["user_id"], name: "index_transfers_on_user_id"
   end
@@ -1112,6 +2366,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.boolean "is_verified", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_travel_agencies_on_data_version"
   end
 
   create_table "user_coupons", force: :cascade do |t|
@@ -1123,6 +2379,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_user_coupons_on_data_version"
   end
 
   create_table "users", force: :cascade do |t|
@@ -1138,6 +2396,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "pay_password_digest"
     t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.string "phone"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_users_on_data_version"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -1146,7 +2406,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.jsonb "state"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_active", default: false
+    t.bigint "user_id"
     t.index ["execution_id"], name: "index_validator_executions_on_execution_id", unique: true
+    t.index ["is_active"], name: "index_validator_executions_on_is_active"
+    t.index ["user_id", "is_active"], name: "index_validator_executions_on_user_id_and_is_active"
   end
 
   create_table "visa_order_travelers", force: :cascade do |t|
@@ -1159,6 +2423,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.date "passport_expiry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_visa_order_travelers_on_data_version"
   end
 
   create_table "visa_orders", force: :cascade do |t|
@@ -1182,6 +2448,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "insurance_type"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_visa_orders_on_data_version"
   end
 
   create_table "visa_products", force: :cascade do |t|
@@ -1209,6 +2477,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_13_090014) do
     t.string "merchant_avatar"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_visa_products_on_data_version"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
