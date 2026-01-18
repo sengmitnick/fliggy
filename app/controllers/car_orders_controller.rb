@@ -3,7 +3,7 @@ class CarOrdersController < ApplicationController
 
   def new
     @car = Car.find(params[:car_id])
-    @passengers = current_user.passengers.order(created_at: :desc)
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
   end
 
   def create

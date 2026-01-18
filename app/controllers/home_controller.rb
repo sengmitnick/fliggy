@@ -9,6 +9,31 @@ class HomeController < ApplicationController
       @current_destination = Destination.friendly.find('shen-zhen')
     end
 
+    # 随机搜索建议
+    search_suggestions = [
+      '泰国签证',
+      '汉庭酒店',
+      '深圳的酒店',
+      '玉龙雪山',
+      '郑州',
+      '乐高乐园',
+      '上海迪士尼',
+      '三亚海滩',
+      '北京故宫',
+      '杭州西湖',
+      '成都熊猫基地',
+      '西安兵马俑',
+      '桂林山水',
+      '厦门鼓浪屿',
+      '丽江古城',
+      '张家界',
+      '九寨沟',
+      '黄山',
+      '稻城亚丁',
+      '青海湖'
+    ]
+    @search_placeholder = search_suggestions.sample
+
     @full_render = true
   end
 end

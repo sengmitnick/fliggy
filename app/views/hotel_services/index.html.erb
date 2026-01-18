@@ -1,0 +1,259 @@
+<div class="min-h-screen bg-white" data-controller="city-selector hotel-date-picker hotel-services-search" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
+  <!-- Header -->
+  <div class="relative h-48 overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+      <%= image_tag "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80", class: "w-full h-full object-cover brightness-75", alt: "Banner" %>
+    </div>
+    
+    <!-- Overlay Content -->
+    <div class="relative z-10 px-4 py-3">
+      <!-- Top Navigation -->
+      <div class="flex items-center justify-between mb-6">
+        <%= link_to root_path, class: "text-white" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+        <h1 class="text-white text-lg font-bold">高星闪促会场</h1>
+        <div class="flex items-center gap-2 text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+          <svg class="w-1 h-1 fill-current" viewBox="0 0 4 4"><circle cx="2" cy="2" r="2"/></svg>
+          <svg class="w-1 h-1 fill-current" viewBox="0 0 4 4"><circle cx="2" cy="2" r="2"/></svg>
+          <svg class="w-1 h-1 fill-current" viewBox="0 0 4 4"><circle cx="2" cy="2" r="2"/></svg>
+        </div>
+      </div>
+
+      <!-- Timeline Navigation -->
+      <div class="relative bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-4 mb-4">
+        <!-- Timeline Dots -->
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex-1 flex items-center">
+            <div class="w-3 h-3 bg-white rounded-full"></div>
+            <div class="flex-1 h-0.5 bg-white bg-opacity-30 mx-2"></div>
+          </div>
+          <div class="flex-1 flex items-center">
+            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+            <div class="flex-1 h-0.5 bg-white bg-opacity-30 mx-2"></div>
+          </div>
+          <div class="flex-1 flex items-center">
+            <div class="w-3 h-3 bg-white rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Timeline Labels -->
+        <div class="flex justify-between text-white text-xs">
+          <div class="flex-1 text-center">
+            <div class="font-bold mb-1">1.7 - 1.9</div>
+            <div class="opacity-80 text-[10px]">希尔顿欢朋 亚朵</div>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="font-bold mb-1 text-yellow-400">1.14 - 1.17</div>
+            <div class="text-yellow-400 text-[10px]">希尔顿欢朋 亚朵 凯悦 万达酒店 凯悦 君澜 不棉花</div>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="font-bold mb-1">1.21 - 1.23</div>
+            <div class="opacity-80 text-[10px]">希尔顿 凯悦 万达</div>
+          </div>
+        </div>
+
+        <!-- More Info Button -->
+        <div class="absolute top-2 right-2">
+          <div class="bg-white rounded-lg px-3 py-2 text-right">
+            <div class="text-orange-600 font-bold text-xs">查看更多</div>
+            <div class="text-orange-600 text-[10px]">积分攻略</div>
+            <div class="text-orange-600 text-xs mt-1">点击进入 &gt;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brand Filter Tabs -->
+  <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 overflow-x-auto scrollbar-hide">
+    <div class="flex gap-2 min-w-max">
+      <% @brands.each do |brand| %>
+        <%= link_to hotel_services_path(city: @city, brand: brand), class: "flex-shrink-0 px-6 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap #{@selected_brand == brand ? 'bg-yellow-100 text-yellow-800 font-bold' : 'bg-gray-100 text-gray-700'}" do %>
+          <%= brand %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- City and Date Selector -->
+  <div class="px-4 py-3 bg-gray-50">
+    <div class="flex items-center gap-3">
+      <!-- City Selector -->
+      <button type="button" class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1" data-action="click->city-selector#openDeparture">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span class="text-gray-900 font-medium" data-city-selector-target="departure"><%= @city %></span>
+        <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      
+      <!-- Hidden input for city -->
+      <input type="hidden" data-city-selector-target="departureCityInput" data-hotel-services-search-target="cityInput" value="<%= @city %>">
+
+      <!-- Date Selector -->
+      <button type="button" class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1" data-action="click->hotel-date-picker#openModal">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="flex items-center gap-1 text-sm">
+          <span class="text-gray-900 font-medium" data-hotel-date-picker-target="checkInDisplay"><%= @check_in.is_a?(String) ? Date.parse(@check_in).month : @check_in.month %>月<%= @check_in.is_a?(String) ? Date.parse(@check_in).day : @check_in.day %>日</span>
+          <span class="text-xs text-gray-500"><%= date_label(@check_in) %></span>
+          <span class="text-gray-400 mx-1">-</span>
+          <span class="text-gray-900 font-medium" data-hotel-date-picker-target="checkOutDisplay"><%= @check_out.is_a?(String) ? Date.parse(@check_out).month : @check_out.month %>月<%= @check_out.is_a?(String) ? Date.parse(@check_out).day : @check_out.day %>日</span>
+          <span class="text-xs text-gray-500"><%= date_label(@check_out) %></span>
+        </span>
+      </button>
+      
+      <!-- Hidden inputs for dates -->
+      <input type="hidden" data-hotel-date-picker-target="checkInInput" data-hotel-services-search-target="checkInInput" value="<%= @check_in %>">
+      <input type="hidden" data-hotel-date-picker-target="checkOutInput" data-hotel-services-search-target="checkOutInput" value="<%= @check_out %>">
+    </div>
+  </div>
+
+  <!-- Hotel List -->
+  <div class="px-4 pb-20 space-y-3 bg-gray-50">
+    <% if @hotels.any? %>
+      <% @hotels.each_with_index do |hotel, index| %>
+        <%= link_to hotel_service_path(hotel), class: "block" do %>
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+            <div class="flex p-3 gap-3">
+              <!-- Hotel Image -->
+              <div class="relative w-32 h-40 flex-shrink-0 rounded-lg overflow-hidden">
+                <% if hotel.image.attached? %>
+                  <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+                <% elsif hotel.image_url.present? %>
+                  <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
+                <% else %>
+                  <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14,6L10.25,11L13.1,14.8L11.5,16C9.81,13.75 7,10 7,10L1,18H23L14,6Z"/>
+                    </svg>
+                  </div>
+                <% end %>
+                
+                <!-- AI帮选价 Badge -->
+                <% if index == 0 %>
+                  <div class="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold text-center py-1.5 rounded">
+                    ✦ AI帮选价
+                  </div>
+                <% end %>
+                
+                <!-- Video Play Button -->
+                <div class="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Hotel Info -->
+              <div class="flex-1 flex flex-col justify-between min-w-0">
+                <div>
+                  <!-- Hotel Name -->
+                  <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-1"><%= hotel.name %></h3>
+                  <div class="text-xs text-gray-500 mb-1">高档</div>
+                  
+                  <!-- Rating -->
+                  <div class="flex items-center gap-2 mb-2">
+                    <div class="flex items-center gap-1">
+                      <span class="bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded"><%= number_with_precision(hotel.rating, precision: 1) %></span>
+                      <span class="text-xs text-gray-700 font-medium">
+                        <% if hotel.rating >= 4.5 %>
+                          超棒
+                        <% elsif hotel.rating >= 4.0 %>
+                          好
+                        <% else %>
+                          不错
+                        <% end %>
+                      </span>
+                    </div>
+                    <span class="text-xs text-gray-500"><%= hotel.reviews_count %>条评价</span>
+                  </div>
+                  
+                  <!-- Location -->
+                  <div class="text-xs text-gray-600 mb-2 line-clamp-1">
+                    <% if hotel.address.present? %>
+                      <%= hotel.address %>
+                    <% else %>
+                      <%= hotel.city %>市中心
+                    <% end %>
+                  </div>
+                  
+                  <!-- Features Badge -->
+                  <div class="flex items-center gap-1 mb-2">
+                    <div class="flex items-center gap-1 text-xs text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded">
+                      <span>🏆</span>
+                      <span class="font-medium">入选高档设计酒店榜</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Tags -->
+                  <div class="flex flex-wrap gap-1">
+                    <span class="text-[10px] px-2 py-0.5 border border-gray-200 text-gray-600 rounded">四合院</span>
+                    <span class="text-[10px] px-2 py-0.5 border border-gray-200 text-gray-600 rounded">落日美景</span>
+                    <span class="text-[10px] px-2 py-0.5 border border-gray-200 text-gray-600 rounded">设计酒店</span>
+                    <span class="text-[10px] px-2 py-0.5 border border-gray-200 text-gray-600 rounded">免费洗衣</span>
+                  </div>
+                </div>
+                
+                <!-- Price -->
+                <div class="flex items-end justify-end mt-2">
+                  <div class="text-right">
+                    <div class="flex items-baseline">
+                      <span class="text-red-600 text-xs">¥</span>
+                      <span class="text-red-600 text-2xl font-bold"><%= hotel.price.to_i %></span>
+                      <span class="text-xs text-gray-500 ml-1">起</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div class="text-center py-20">
+        <div class="text-gray-500 text-lg mb-2">暂无酒店数据</div>
+        <div class="text-gray-400 text-sm">请稍后再试</div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Hotel Date Picker Modal -->
+  <%= render 'shared/hotel_date_picker_modal' %>
+</div>
+
+<style>
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

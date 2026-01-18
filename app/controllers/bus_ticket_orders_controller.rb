@@ -4,7 +4,7 @@ class BusTicketOrdersController < ApplicationController
   def new
     @bus_ticket = BusTicket.find(params[:bus_ticket_id])
     @insurance_type = params[:insurance_type] || 'none'
-    @passengers = current_user.passengers
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     
     # Calculate insurance price
     @insurance_price = case @insurance_type

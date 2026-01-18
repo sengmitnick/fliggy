@@ -33,16 +33,22 @@
       </div>
 
       <!-- Search Bar -->
-      <div class="relative">
-        <div class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+      <div class="relative" data-controller="search">
+        <form data-action="submit->search#search" class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
           <div class="flex items-center gap-2 flex-1">
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
-            <span class="text-base text-gray-700 font-medium">泰国签证</span>
+            <input 
+              type="text" 
+              data-search-target="input"
+              placeholder="<%= @search_placeholder %>" 
+              class="flex-1 text-base text-gray-700 font-medium bg-transparent border-none outline-none" 
+              style="min-width: 0;"
+            />
           </div>
-          <button class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <button type="submit" class="text-white font-bold px-3 py-2 rounded-[8px] whitespace-nowrap" style="background: #6B7FFF; font-size: 16px;">
             搜索
           </button>
-        </div>
+        </form>
       </div>
 
       <!-- Quick Links -->
@@ -86,7 +92,7 @@
       <div data-service-grid-target="page">
         <!-- Row 1 -->
         <div class="grid grid-cols-5 mb-2 h-[80px]">
-          <%= link_to hotels_path, class: "flex flex-col items-center justify-end h-full" do %>
+          <%= link_to hotels_path(city: @current_destination&.name || '深圳'), class: "flex flex-col items-center justify-end h-full" do %>
             <%= image_tag "home/酒店.png", class: "max-w-[60%] mb-1 h-auto object-contain", alt: "酒店" %>
             <span class="text-[12px] text-gray-700">酒店</span>
           <% end %>

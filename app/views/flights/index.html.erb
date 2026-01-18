@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="北京" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
+<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker return-date-picker trip-type passenger-selector cabin-selector multi-city" data-city-selector-departure-city-value="<%= params[:departure_city] || '北京' %>" data-city-selector-destination-city-value="<%= params[:destination_city] || '杭州' %>" data-date-picker-current-date-value="<%= Date.today.to_s %>" data-return-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>" data-return-date-picker-min-date-value="<%= Date.today.to_s %>" data-multi-city-switch-icon-url-value="<%= asset_path('airfare/切换.png') %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -60,7 +60,7 @@
         <button 
           data-action="click->city-selector#openDeparture"
           class="flex-1 text-left">
-          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="departure">北京</div>
+          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="departure"><%= params[:departure_city] || '北京' %></div>
         </button>
         
         <button 
@@ -72,7 +72,7 @@
         <button 
           data-action="click->city-selector#openDestination"
           class="flex-1 text-right">
-          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="destination">杭州</div>
+          <div class="text-[32px] font-bold leading-tight" data-city-selector-target="destination"><%= params[:destination_city] || '杭州' %></div>
         </button>
       </div>
 
@@ -119,7 +119,7 @@
 
       <!-- Cabin Class Selection -->
       <div class="w-full flex">
-        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1">
+        <div class="flex gap-1 rounded-sm bg-gray-950/5 px-1 py-1 w-full">
           <button 
             type="button"
             data-cabin-selector-target="button"
@@ -140,17 +140,33 @@
       </div>
 
       <!-- Search Button -->
-      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
-        <%= f.hidden_field :departure_city, value: '北京', data: { 'city-selector-target': 'departureCityInput' } %>
-        <%= f.hidden_field :destination_city, value: '杭州', data: { 'city-selector-target': 'destinationCityInput' } %>
+      <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false, controller: 'flight-search flight-history', action: 'submit->flight-search#validateForm submit->flight-history#saveSearch' } do |f| %>
+        <%= f.hidden_field :departure_city, value: params[:departure_city] || '北京', data: { 'city-selector-target': 'departureCityInput', 'flight-search-target': 'departureInput' } %>
+        <%= f.hidden_field :destination_city, value: params[:destination_city] || '杭州', data: { 'city-selector-target': 'destinationCityInput', 'flight-search-target': 'destinationInput' } %>
         <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
         <%= f.hidden_field :return_date, value: '', data: { 'return-date-picker-target': 'dateInput', 'trip-type-target': 'returnDateInput' } %>
         <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
-        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || 'all', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-back my-2" style="background: #FFD700;">
           搜索机票
         </button>
       <% end %>
+
+      <!-- Search History Section -->
+      <div class="mt-4" data-controller="flight-history" data-flight-history-target="container">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">历史搜索</h3>
+          <button 
+            type="button"
+            data-action="click->flight-history#clearHistory"
+            class="text-xs text-blue-500 hover:text-blue-700">
+            清空记录
+          </button>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar" data-flight-history-target="list">
+          <!-- History items will be rendered dynamically -->
+        </div>
+      </div>
     </div>
 
     <!-- Multi-City Form (hidden by default) -->
@@ -212,7 +228,7 @@
       <%= form_with url: multi_city_search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
         <%= f.hidden_field :trip_type, value: 'multi_city', data: { 'trip-type-target': 'tripTypeInput' } %>
         <%= f.hidden_field :segments, value: '', data: { 'multi-city-target': 'hiddenSegmentsInput' } %>
-        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || '', data: { 'cabin-selector-target': 'hiddenInput' } %>
+        <%= f.hidden_field :cabin_class, value: params[:cabin_class] || 'all', data: { 'cabin-selector-target': 'hiddenInput' } %>
         <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black my-2" style="background: #FFD700;">
           搜索机票
         </button>
@@ -231,15 +247,21 @@
       <% end %>
 
       <div class="flex flex-1 flex-col items-center gap-1.5 relative">
-        <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
+        <%= link_to flight_packages_path do %>
+          <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">
-        <%= image_tag "airfare/低价提醒.png", class: "w-full h-auto", alt: "低价提醒" %>
+        <%= link_to price_alerts_path do %>
+          <%= image_tag "airfare/低价提醒.png", class: "w-full h-auto", alt: "低价提醒" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">
-        <%= image_tag "airfare/家庭认证.png", class: "w-full h-auto", alt: "家庭认证" %>
+        <%= link_to family_benefits_path do %>
+          <%= image_tag "airfare/家庭认证.png", class: "w-full h-auto", alt: "家庭认证" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">

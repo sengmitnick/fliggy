@@ -1,12 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["insuranceModal", "confirmModal", "form", "totalPriceAmount"]
+  static targets = ["insuranceModal", "confirmModal", "form", "totalPriceAmount", "roomsCount", "roomsInput"]
 
   declare readonly insuranceModalTarget: HTMLElement
   declare readonly confirmModalTarget: HTMLElement
   declare readonly formTarget: HTMLFormElement
   declare readonly totalPriceAmountTarget: HTMLElement
+  declare readonly roomsCountTarget: HTMLElement
+  declare readonly roomsInputTarget: HTMLInputElement
 
   // Handle insurance option selection in form
   selectInsuranceOption(event: Event): void {
@@ -41,16 +43,8 @@ export default class extends Controller<HTMLElement> {
 
   // Update total price display
   private updateTotalPrice(): void {
-    if (!this.totalPriceAmountTarget) return
-    
-    const basePrice = parseFloat(this.totalPriceAmountTarget.dataset.basePrice || '0')
-    const insurancePriceField = document.getElementById('hotel_booking_insurance_price') as HTMLInputElement
-    const insurancePrice = parseFloat(insurancePriceField?.value || '0')
-    
-    // Calculate total price: base price + insurance price
-    const totalPrice = basePrice + insurancePrice
-    
-    this.totalPriceAmountTarget.textContent = totalPrice.toFixed(2)
+    // Reuse the updateTotalPriceWithRooms method for consistency
+    this.updateTotalPriceWithRooms()
   }
 
   setInsuranceValues(insuranceType: string, insurancePrice: string): void {
@@ -165,5 +159,62 @@ export default class extends Controller<HTMLElement> {
     
     // Submit form normally - let Rails handle the redirect
     this.formTarget.submit()
+  }
+
+  // Increase room count
+  increaseRooms(event: Event): void {
+    event.preventDefault()
+    const currentCount = parseInt(this.roomsInputTarget.value || '1')
+    const newCount = currentCount + 1
+    
+    // Update hidden input and display
+    this.roomsInputTarget.value = newCount.toString()
+    this.roomsCountTarget.textContent = `${newCount}间`
+    
+    // Update total price
+    this.updateTotalPriceWithRooms()
+  }
+
+  // Decrease room count
+  decreaseRooms(event: Event): void {
+    event.preventDefault()
+    const currentCount = parseInt(this.roomsInputTarget.value || '1')
+    
+    // Minimum 1 room
+    if (currentCount <= 1) return
+    
+    const newCount = currentCount - 1
+    
+    // Update hidden input and display
+    this.roomsInputTarget.value = newCount.toString()
+    this.roomsCountTarget.textContent = `${newCount}间`
+    
+    // Update total price
+    this.updateTotalPriceWithRooms()
+  }
+
+  // Update total price considering rooms count
+  private updateTotalPriceWithRooms(): void {
+    if (!this.totalPriceAmountTarget) return
+    
+    // Get room price per night from data attribute
+    const roomPrice = parseFloat(this.totalPriceAmountTarget.dataset.roomPrice || '0')
+    const nights = parseInt(this.totalPriceAmountTarget.dataset.nights || '1')
+    
+    // Get room count
+    const roomsCount = parseInt(this.roomsInputTarget.value || '1')
+    
+    // Get insurance price
+    const insurancePriceField = document.getElementById('hotel_booking_insurance_price') as HTMLInputElement
+    const insurancePrice = parseFloat(insurancePriceField?.value || '0')
+    
+    // Calculate: (room price * nights * rooms) + insurance
+    const basePrice = roomPrice * nights * roomsCount
+    const totalPrice = basePrice + insurancePrice
+    
+    this.totalPriceAmountTarget.textContent = totalPrice.toFixed(2)
+    
+    // Update base price data attribute for future insurance calculations
+    this.totalPriceAmountTarget.dataset.basePrice = basePrice.toFixed(2)
   }
 }

@@ -1,0 +1,177 @@
+
+<div data-hotel-price-filter-target="modal" class="hidden fixed inset-0 z-50 overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5);">
+  <div class="flex items-end justify-center min-h-screen">
+    <div class="bg-white rounded-t-2xl w-full max-w-md shadow-xl transform transition-all">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-4 border-b">
+        <button data-action="click->hotel-price-filter#closeModal" class="text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <h3 class="text-lg font-semibold">价格和星级</h3>
+        <button data-action="click->hotel-price-filter#reset" class="text-sm text-gray-600">
+          重置
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="px-4 py-6 space-y-6 max-h-[70vh] overflow-y-auto">
+        <!-- Price Range Slider Section -->
+        <div>
+          <h4 class="text-base font-semibold mb-2">价格区间</h4>
+          
+          <!-- Price Display -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-sm">
+              <span class="text-gray-600">最低价</span>
+              <span class="ml-2 font-semibold text-yellow-600">¥<span data-hotel-price-filter-target="minPriceDisplay">0</span></span>
+            </div>
+            <div class="text-sm">
+              <span class="text-gray-600">最高价</span>
+              <span class="ml-2 font-semibold text-yellow-600">¥<span data-hotel-price-filter-target="maxPriceDisplay">3000</span></span>
+            </div>
+          </div>
+
+          <!-- Dual Range Slider -->
+          <div class="relative h-8 mb-6">
+            <!-- Track Background -->
+            <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
+            
+            <!-- Active Track -->
+            <div 
+              data-hotel-price-filter-target="sliderTrack"
+              class="absolute top-1/2 h-1 rounded-full transform -translate-y-1/2"
+              style="background: linear-gradient(90deg, #FFD700 0%, #FFC700 100%); left: 0%; right: 0%;"></div>
+            
+            <!-- Min Slider -->
+            <input 
+              type="range" 
+              min="0" 
+              max="3000" 
+              step="50"
+              value="0"
+              data-hotel-price-filter-target="minSlider"
+              data-action="input->hotel-price-filter#updateMinPrice"
+              class="absolute w-full h-8 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-yellow-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-yellow-500 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer">
+            
+            <!-- Max Slider -->
+            <input 
+              type="range" 
+              min="0" 
+              max="3000" 
+              step="50"
+              value="3000"
+              data-hotel-price-filter-target="maxSlider"
+              data-action="input->hotel-price-filter#updateMaxPrice"
+              class="absolute w-full h-8 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-yellow-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-yellow-500 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer">
+          </div>
+
+          <!-- Quick Price Presets -->
+          <div class="grid grid-cols-3 gap-2">
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="0"
+              data-max="300"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥0-300</span>
+            </button>
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="300"
+              data-max="600"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥300-600</span>
+            </button>
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="600"
+              data-max="1000"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥600-1000</span>
+            </button>
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="1000"
+              data-max="1500"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥1000-1500</span>
+            </button>
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="1500"
+              data-max="2000"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥1500-2000</span>
+            </button>
+            <button 
+              data-hotel-price-filter-target="pricePreset"
+              data-action="click->hotel-price-filter#setQuickPrice"
+              data-min="2000"
+              data-max="3000"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">¥2000+</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Star Rating Section -->
+        <div>
+          <h4 class="text-base font-semibold mb-2">星级筛选</h4>
+          <div class="grid grid-cols-4 gap-2">
+            <!-- 二星/经济 -->
+            <button 
+              data-hotel-price-filter-target="starRating"
+              data-action="click->hotel-price-filter#selectStarRating"
+              data-stars="2"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">二星/经济</span>
+            </button>
+
+            <!-- 三星/舒适 -->
+            <button 
+              data-hotel-price-filter-target="starRating"
+              data-action="click->hotel-price-filter#selectStarRating"
+              data-stars="3"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">三星/舒适</span>
+            </button>
+
+            <!-- 四星/高档 -->
+            <button 
+              data-hotel-price-filter-target="starRating"
+              data-action="click->hotel-price-filter#selectStarRating"
+              data-stars="4"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">四星/高档</span>
+            </button>
+
+            <!-- 五星/豪华 -->
+            <button 
+              data-hotel-price-filter-target="starRating"
+              data-action="click->hotel-price-filter#selectStarRating"
+              data-stars="5"
+              class="px-3 py-2 text-xs border border-gray-300 rounded-lg text-gray-700 hover:border-yellow-500 hover:bg-yellow-50 transition-colors group">
+              <span class="group-[.selected]:text-yellow-600">五星/豪华</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 py-4 border-t bg-gray-50">
+        <button 
+          data-action="click->hotel-price-filter#confirm"
+          class="w-full text-white font-bold py-3 rounded-full border-0 cursor-pointer"
+          style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);">
+          确定
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

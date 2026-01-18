@@ -6,6 +6,7 @@ import SdkIntegrationController from "./sdk_integration_controller"
 import ClipboardController from "./clipboard_controller"
 import CitySelectorController from "./city_selector_controller"
 import FlightSearchController from "./flight_search_controller"
+import FlightHistoryController from "./flight_history_controller"
 import DatePickerController from "./date_picker_controller"
 import BookingController from "./booking_controller"
 import CouponController from "./coupon_controller"
@@ -77,6 +78,16 @@ import QrcodeModalController from "./qrcode_modal_controller"
 import LocationSelectorController from "./location_selector_controller"
 import TransferSearchController from "./transfer_search_controller"
 import AddressSelectorController from "./address_selector_controller"
+import SearchController from "./search_controller"
+import HotelFilterPersistenceController from "./hotel_filter_persistence_controller"
+import HotelServicesSearchController from "./hotel_services_search_controller"
+import LiveRoomController from "./live_room_controller"
+import SpecialHotelSearchController from "./special_hotel_search_controller"
+import SpecialHotelFilterController from "./special_hotel_filter_controller"
+import HotelSearchFilterController from "./hotel_search_filter_controller"
+import BlindBoxController from "./blind_box_controller"
+import HotelMapToggleController from "./hotel_map_toggle_controller"
+import HotelMapController from "./hotel_map_controller"
 
 const application = Application.start()
 
@@ -86,6 +97,7 @@ application.register("sdk-integration", SdkIntegrationController)
 application.register("clipboard", ClipboardController)
 application.register("city-selector", CitySelectorController)
 application.register("flight-search", FlightSearchController)
+application.register("flight-history", FlightHistoryController)
 application.register("date-picker", DatePickerController)
 application.register("booking", BookingController)
 application.register("coupon", CouponController)
@@ -157,5 +169,15 @@ application.register("qrcode-modal", QrcodeModalController)
 application.register("location-selector", LocationSelectorController)
 application.register("transfer-search", TransferSearchController)
 application.register("address-selector", AddressSelectorController)
+application.register("search", SearchController)
+application.register("hotel-filter-persistence", HotelFilterPersistenceController)
+application.register("hotel-services-search", HotelServicesSearchController)
+application.register("live-room", LiveRoomController)
+application.register("special-hotel-search", SpecialHotelSearchController)
+application.register("special-hotel-filter", SpecialHotelFilterController)
+application.register("hotel-search-filter", HotelSearchFilterController)
+application.register("blind-box", BlindBoxController)
+application.register("hotel-map-toggle", HotelMapToggleController)
+application.register("hotel-map", HotelMapController)
 
 window.Stimulus = application

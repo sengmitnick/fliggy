@@ -1,0 +1,427 @@
+<div class="min-h-screen bg-gray-50" data-controller="city-selector special-hotel-search" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市" data-special-hotel-search-city-value="<%= @city %>" data-special-hotel-search-query-value="<%= params[:query] || '' %>">
+  <!-- Top Banner -->
+  <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #FF3B30 0%, #FF6B6B 50%, #FFA07A 100%);">
+    <!-- Back Button -->
+    <div class="absolute top-4 left-4 z-10">
+      <%= link_to hotels_path, class: "flex items-center justify-center w-10 h-10 rounded-full bg-white/20" do %>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+    </div>
+    
+    <!-- Menu Button -->
+    <div class="absolute top-4 right-4 z-10">
+      <button class="flex items-center justify-center w-10 h-10">
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Banner Content -->
+    <div class="relative h-full flex items-center px-6 pt-4">
+      <!-- Title -->
+      <div class="flex-1">
+        <div class="text-white text-3xl font-black mb-2">特价酒店</div>
+        <div class="text-white">
+          <span class="text-2xl font-bold">全网低价</span>
+          <span class="text-4xl font-black mx-2" style="color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">29元</span>
+          <span class="text-2xl font-bold">住酒店</span>
+        </div>
+      </div>
+      
+      <!-- Character Illustration -->
+      <div class="absolute right-6 top-8">
+        <div class="w-32 h-32 flex items-center justify-center">
+          <div class="text-6xl">🏨</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="bg-white mx-4 -mt-8 relative z-10 rounded-xl shadow-lg p-4">
+    <!-- City and Location -->
+    <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+      <!-- City Selector - Fixed width to accommodate city name -->
+      <button type="button" class="flex items-center gap-1 min-w-[90px]" data-action="click->city-selector#openDeparture">
+        <span class="text-base font-bold" data-city-selector-target="departure"><%= @city %></span>
+        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+      
+      <!-- Hidden input for city -->
+      <input type="hidden" data-city-selector-target="departureCityInput" value="<%= @city %>">
+      
+      <!-- Location Button - Fixed width -->
+      
+      
+      <!-- Search Input - Takes remaining space -->
+      <div class="flex items-center gap-2 flex-1 bg-gray-50 rounded-lg px-3 py-2">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="位置/品牌/酒店" class="flex-1 bg-transparent text-sm outline-none border-none" data-special-hotel-search-target="searchInput" data-action="input->special-hotel-search#search" value="<%= params[:query] || '' %>">
+      </div>
+    </div>
+    
+    <!-- Date Range -->
+    <div class="flex items-center justify-between text-sm">
+      <div class="flex items-center gap-2">
+        <span class="font-bold">1月16日</span>
+        <span class="text-gray-500">今天</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="text-gray-400">一</span>
+        <div class="px-3 py-1 rounded-full border border-gray-300">
+          <span class="font-bold">6晚</span>
+        </div>
+        <span class="text-gray-400">一</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="font-bold">1月22日</span>
+        <span class="text-gray-500">周四</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-white mt-3 px-4 py-3 flex items-center gap-3 border-b border-gray-100" data-controller="special-hotel-filter" data-special-hotel-filter-city-value="<%= @city %>" data-special-hotel-filter-query-value="<%= params[:query] || '' %>" data-special-hotel-filter-sort-value="<%= params[:sort] || 'price' %>" data-special-hotel-filter-district-value="<%= params[:district] || '' %>" data-special-hotel-filter-price-range-value="<%= params[:price_range] || '' %>" data-special-hotel-filter-stars-value="<%= params[:stars] || '' %>">
+    <!-- Sort Button -->
+    <button data-special-hotel-filter-target="sortButton" data-action="click->special-hotel-filter#openSortModal" class="flex items-center gap-1 text-sm <%= params[:sort].present? && params[:sort] != 'price' ? 'text-primary font-bold' : '' %>">
+      <span class="font-medium">
+        <% if params[:sort] == 'rating' %>
+          好评优先
+        <% elsif params[:sort] == 'distance' %>
+          距离优先
+        <% else %>
+          推荐排序
+        <% end %>
+      </span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <!-- District/Area Button -->
+    <% if @districts.any? %>
+      <button data-special-hotel-filter-target="districtButton" data-action="click->special-hotel-filter#openDistrictModal" class="flex items-center gap-1 text-sm <%= params[:district].present? ? 'text-primary font-bold' : '' %>">
+        <span class="font-medium">
+          <%= params[:district].present? ? params[:district] : '位置商圈' %>
+        </span>
+        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+    <% end %>
+    
+    <!-- Price Range Button -->
+    <button data-special-hotel-filter-target="priceButton" data-action="click->special-hotel-filter#openPriceModal" class="flex items-center gap-1 text-sm <%= params[:price_range].present? ? 'text-primary font-bold' : '' %>">
+      <span class="font-medium">
+        <% if params[:price_range] == '0-100' %>
+          ¥100以下
+        <% elsif params[:price_range] == '100-200' %>
+          ¥100-200
+        <% elsif params[:price_range] == '200-300' %>
+          ¥200-300
+        <% elsif params[:price_range] == '300+' %>
+          ¥300以上
+        <% else %>
+          价格区间
+        <% end %>
+      </span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <!-- Star Rating Button -->
+    <button data-special-hotel-filter-target="filterButton" data-action="click->special-hotel-filter#openFilterModal" class="flex items-center gap-1 text-sm <%= params[:stars].present? ? 'text-primary font-bold' : '' %>">
+      <span class="font-medium">
+        <% if params[:stars].present? %>
+          <%= params[:stars] %>星级
+        <% else %>
+          星级筛选
+        <% end %>
+      </span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <!-- Sort Modal -->
+    <div data-special-hotel-filter-target="sortModal" data-action="click->special-hotel-filter#closeAllModals" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+      <div data-action="click->special-hotel-filter#stopPropagation" class="bg-white w-full rounded-t-2xl p-4 animate-slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">排序方式</h3>
+          <button data-action="click->special-hotel-filter#closeAllModals" class="text-gray-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-2">
+          <button data-action="click->special-hotel-filter#selectSort" data-value="price" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort].blank? || params[:sort] == 'price' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            价格优先（默认）
+          </button>
+          <button data-action="click->special-hotel-filter#selectSort" data-value="rating" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'rating' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            好评优先
+          </button>
+          <button data-action="click->special-hotel-filter#selectSort" data-value="distance" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'distance' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            距离优先
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- District Modal -->
+    <% if @districts.any? %>
+      <div data-special-hotel-filter-target="districtModal" data-action="click->special-hotel-filter#closeAllModals" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div data-action="click->special-hotel-filter#stopPropagation" class="bg-white w-full rounded-t-2xl p-4 animate-slide-up max-h-[70vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">选择商圈</h3>
+            <button data-action="click->special-hotel-filter#closeAllModals" class="text-gray-400">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button data-action="click->special-hotel-filter#selectDistrict" data-value="" class="px-4 py-3 rounded-lg text-center <%= params[:district].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
+              全部
+            </button>
+            <% @districts.each do |district| %>
+              <button data-action="click->special-hotel-filter#selectDistrict" data-value="<%= district %>" class="px-4 py-3 rounded-lg text-center <%= params[:district] == district ? 'bg-primary text-white' : 'bg-gray-50' %>">
+                <%= district %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <!-- Price Range Modal -->
+    <div data-special-hotel-filter-target="priceModal" data-action="click->special-hotel-filter#closeAllModals" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+      <div data-action="click->special-hotel-filter#stopPropagation" class="bg-white w-full rounded-t-2xl p-4 animate-slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">价格区间</h3>
+          <button data-action="click->special-hotel-filter#closeAllModals" class="text-gray-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-2">
+          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            不限价格
+          </button>
+          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="0-100" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '0-100' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            ¥100以下
+          </button>
+          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="100-200" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '100-200' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            ¥100-200
+          </button>
+          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="200-300" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '200-300' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            ¥200-300
+          </button>
+          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="300+" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '300+' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            ¥300以上
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Star Rating Modal -->
+    <div data-special-hotel-filter-target="filterModal" data-action="click->special-hotel-filter#closeAllModals" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+      <div data-action="click->special-hotel-filter#stopPropagation" class="bg-white w-full rounded-t-2xl p-4 animate-slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">星级筛选</h3>
+          <button data-action="click->special-hotel-filter#closeAllModals" class="text-gray-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-3">
+          <div class="flex flex-wrap gap-2">
+            <button data-special-hotel-filter-target="starOption" data-action="click->special-hotel-filter#toggleStar" data-value="" class="px-4 py-2 rounded-lg <%= params[:stars].blank? ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' %>">
+              不限
+            </button>
+            <button data-special-hotel-filter-target="starOption" data-action="click->special-hotel-filter#toggleStar" data-value="2" class="px-4 py-2 rounded-lg <%= params[:stars] == '2' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' %>">
+              ⭐⭐ 经济型
+            </button>
+            <button data-special-hotel-filter-target="starOption" data-action="click->special-hotel-filter#toggleStar" data-value="3" class="px-4 py-2 rounded-lg <%= params[:stars] == '3' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' %>">
+              ⭐⭐⭐ 舒适型
+            </button>
+            <button data-special-hotel-filter-target="starOption" data-action="click->special-hotel-filter#toggleStar" data-value="4" class="px-4 py-2 rounded-lg <%= params[:stars] == '4' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' %>">
+              ⭐⭐⭐⭐ 高档型
+            </button>
+            <button data-special-hotel-filter-target="starOption" data-action="click->special-hotel-filter#toggleStar" data-value="5" class="px-4 py-2 rounded-lg <%= params[:stars] == '5' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' %>">
+              ⭐⭐⭐⭐⭐ 豪华型
+            </button>
+          </div>
+          <div class="flex gap-2 pt-4">
+            <button data-action="click->special-hotel-filter#clearFilters" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700">
+              清空筛选
+            </button>
+            <button data-action="click->special-hotel-filter#applyFilters" class="flex-1 px-4 py-3 rounded-lg bg-primary text-white">
+              确定
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Pills -->
+  <div class="bg-white px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+    <button class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded text-sm" style="background-color: #FFF3E0; color: #F57C00;">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+      </svg>
+      <span class="font-bold">全网低价</span>
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      距离优先
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      ¥100以下
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      ¥100-300
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      钟点房
+    </button>
+  </div>
+
+  <!-- Promo Banner -->
+  <div class="mx-4 mt-3 bg-gradient-to-r from-pink-50 to-red-50 rounded-lg p-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-sm font-bold" style="color: #E91E63;">特价酒店专享</span>
+      <span class="text-xs" style="color: #F44336;">新人特惠券9折封顶减20</span>
+      <span class="text-xs text-gray-500">·</span>
+      <span class="text-xs" style="color: #F44336;">酒店专享券92折起</span>
+    </div>
+    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+    </svg>
+  </div>
+
+  <!-- Hotel List -->
+  <div class="px-4 pb-20 space-y-3 mt-3">
+    <% if @hotels.any? %>
+      <% @hotels.each_with_index do |hotel, index| %>
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+          <div class="flex">
+            <!-- Hotel Image -->
+            <div class="relative w-32 h-40 flex-shrink-0">
+              <% if hotel.image.attached? %>
+                <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+              <% else %>
+                <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80", class: "w-full h-full object-cover", alt: hotel.name %>
+              <% end %>
+              <div class="absolute bottom-2 left-2 right-2 bg-red-600 text-white text-xs font-bold text-center py-1.5 rounded">
+                全网低价
+              </div>
+            </div>
+            
+            <!-- Hotel Info -->
+            <div class="flex-1 p-3 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between mb-1">
+                  <%= link_to hotel_path(hotel), class: "flex-1" do %>
+                    <h3 class="text-base font-bold leading-tight"><%= hotel.name %></h3>
+                  <% end %>
+                </div>
+                
+                <div class="flex items-center gap-1 mb-1">
+                  <span class="px-2 py-0.5 text-xs font-bold rounded text-white" style="background-color: #5C6BC0;">
+                    <%= hotel.rating || 4.5 %>
+                  </span>
+                  <span class="text-xs text-gray-600"><%= hotel.brand || hotel.star_level || '舒适温馨' %></span>
+                </div>
+                
+                <div class="text-xs text-gray-500 mb-2">
+                  <%= hotel.address&.truncate(30) || hotel.city %>
+                </div>
+                
+                <% if hotel.features.present? && hotel.features.is_a?(Array) %>
+                  <div class="flex gap-1 flex-wrap mb-2">
+                    <% hotel.features.first(4).each do |feature| %>
+                      <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;"><%= feature %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+                
+                <div class="flex items-center gap-2 text-xs mb-1">
+                  <% if index < 3 %>
+                    <span class="text-red-600 font-bold">热卖！</span>
+                    <span class="text-gray-600">低价房仅剩<%= rand(1..5) %>间</span>
+                  <% else %>
+                    <span class="text-gray-600"><%= rand(1..2) %>小时前有人预订</span>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- Price Section -->
+              <div class="flex items-end justify-between">
+                <div class="flex items-baseline gap-1">
+                  <% if hotel.original_price && hotel.original_price > hotel.price %>
+                    <span class="text-xs line-through text-gray-400">¥<%= hotel.original_price %></span>
+                  <% end %>
+                  <span class="text-xs" style="color: #FF5722;">¥</span>
+                  <span class="text-2xl font-black" style="color: #FF5722;"><%= hotel.price.to_i %></span>
+                  <span class="text-xs text-gray-500">起</span>
+                </div>
+                
+                <div class="relative">
+                  <% if hotel.original_price && hotel.original_price > hotel.price %>
+                    <% discount_percent = ((hotel.original_price - hotel.price) / hotel.original_price * 100).to_i %>
+                    <div class="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-xs font-black px-2 py-1 rounded-tl-xl rounded-br-xl" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);">
+                      <div class="text-center">
+                        <div>大幅降价</div>
+                        <div class="text-base"><%= discount_percent %>%</div>
+                      </div>
+                    </div>
+                  <% end %>
+                  <%= link_to "抢", hotel_path(hotel), class: "bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg" %>
+                </div>
+              </div>
+              
+              <% if hotel.original_price && hotel.original_price > hotel.price %>
+                <% days_ago = rand(10..30) %>
+                <% saved_percent = ((hotel.original_price - hotel.price) / hotel.original_price * 100).to_i %>
+                <div class="text-xs text-gray-400 text-right mt-1">
+                  比过去<%= days_ago %>天降<%= saved_percent %>%
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <!-- No Hotels Found -->
+      <div class="bg-white rounded-xl p-8 text-center">
+        <div class="text-4xl mb-4">🏨</div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">暂无特价酒店</h3>
+        <p class="text-gray-500 text-sm">该城市暂时没有特价酒店，请选择其他城市查看</p>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+</div>

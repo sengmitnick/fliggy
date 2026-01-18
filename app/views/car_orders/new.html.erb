@@ -112,7 +112,9 @@
           <div data-passenger-selector-target="display">
             <div class="flex items-center space-x-2">
               <span class="font-bold" data-passenger-selector-target="name"><%= first_passenger.name %></span>
-              <span class="text-[10px] bg-yellow-100 text-yellow-700 px-1 rounded">本人</span>
+              <% if first_passenger.is_self? %>
+                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-1 rounded">本人</span>
+              <% end %>
             </div>
             <div class="text-xs text-gray-500 mt-1">
               <span data-passenger-selector-target="idType"><%= first_passenger.id_type %></span> 

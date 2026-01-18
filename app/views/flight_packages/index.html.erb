@@ -1,0 +1,210 @@
+<div class="min-h-screen bg-gradient-to-b from-blue-400 to-blue-300">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-blue-400">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to flights_path, class: "w-10 h-10 rounded-full bg-gray-600/50 flex items-center justify-center" do %>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      
+      <h1 class="text-xl font-bold text-white">飞猪旅行卡</h1>
+      
+      <div class="flex items-center gap-3">
+        <button class="w-10 h-10 rounded-full bg-gray-600/50 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <button class="w-10 h-10 rounded-full bg-gray-600/50 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Benefits Banner -->
+    <div class="flex items-center justify-center gap-8 py-3 text-white text-sm">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>提前囤更省钱</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>不预约随时退</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo Cards -->
+  <div class="px-4 py-4">
+    <div class="flex gap-3 overflow-x-auto no-scrollbar">
+      <!-- Daily Flash Sale Card -->
+      <div class="flex-shrink-0 w-[180px] bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">666元飞全球</div>
+          <div class="h-24 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+            <div class="text-white text-center">
+              <div class="text-2xl font-bold">每日秒杀</div>
+              <div class="text-sm">国际机票盲盒</div>
+              <div class="text-lg font-bold mt-1">16点开抢</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="flex items-baseline gap-1">
+            <span class="text-xs text-gray-500">¥</span>
+            <span class="text-2xl font-bold text-red-500">666</span>
+            <button class="ml-auto bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-bold">预约</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stream Card -->
+      <div class="flex-shrink-0 w-[340px] bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="flex items-center gap-2 p-2">
+          <div class="relative flex-1">
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold z-10">5折起</span>
+            <div class="text-white text-sm font-bold absolute top-2 right-2 z-10">直播</div>
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" alt="Mountain" class="w-full h-24 object-cover rounded-xl">
+            <div class="absolute bottom-2 left-2 right-2">
+              <div class="bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-xs">
+                <span class="font-bold">🔴 进直播</span>
+              </div>
+            </div>
+          </div>
+          <div class="relative flex-1">
+            <span class="text-white text-sm font-bold absolute top-2 right-2 z-10">新品情报站</span>
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" alt="Snow" class="w-full h-24 object-cover rounded-xl">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destination Navigation -->
+  <div class="px-4 pb-3">
+    <div class="flex items-center justify-between mb-3">
+      <button class="px-6 py-2 bg-black text-white text-sm font-bold rounded-full flex items-center gap-1">
+        去昆明
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+      <button class="px-6 py-2 text-sm text-gray-700">去全国</button>
+      <button class="px-6 py-2 text-sm text-gray-700">去海南</button>
+    </div>
+
+    <!-- Destination Cards Carousel -->
+    <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+      <% @hot_destinations.each_with_index do |destination, index| %>
+        <% 
+          images = [
+            "https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=400",
+            "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400",
+            "https://images.unsplash.com/photo-1561814053-c52db5e102e2?w=400",
+            "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400",
+            "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400",
+            "https://images.unsplash.com/photo-1529551739587-e242c564e1c9?w=400"
+          ]
+          prices = [2999, 60, 299, 499, 399, 599]
+        %>
+        <div class="flex-shrink-0 w-32 relative">
+          <div class="relative rounded-2xl overflow-hidden h-40">
+            <% if index == 0 %>
+              <span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded z-10">1.3折</span>
+            <% end %>
+            <img src="<%= images[index] %>" alt="<%= destination %>" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-3 text-white">
+              <div class="text-lg font-bold mb-1">
+                <%= index == 0 ? '畅飞全国' : destination %>
+                <br>
+                <%= index == 0 ? '不限飞次数' : '' %>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs mr-1">¥</span>
+                <span class="text-2xl font-bold"><%= prices[index] %></span>
+                <span class="text-xs ml-1">起</span>
+              </div>
+              <% if index == 0 %>
+                <button class="absolute bottom-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">GO></button>
+              <% else %>
+                <button class="absolute bottom-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">GO></button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Section Tabs -->
+  <div class="bg-white mt-4">
+    <div class="flex items-center justify-around border-b border-gray-200">
+      <button class="flex-1 py-4 text-center border-b-2 border-black font-bold">
+        机票专区
+      </button>
+      <button class="flex-1 py-4 text-center text-gray-500">
+        租车专区
+      </button>
+    </div>
+
+    <!-- Sub Tabs -->
+    <div class="flex items-center justify-around py-3 border-b border-gray-100">
+      <button class="text-sm font-bold border-b-2 border-red-500 pb-1 text-red-500">
+        超值低价
+      </button>
+      <button class="text-sm text-gray-600">
+        盲盒卡
+      </button>
+    </div>
+
+    <!-- Flight Packages List -->
+    <div class="px-4 pb-20">
+      <% @flight_packages.each do |package| %>
+        <%= link_to flight_package_path(package), class: "block mb-4" do %>
+          <div class="flex items-center gap-3 py-3 border-b border-gray-100">
+            <div class="w-32 h-32 flex-shrink-0 relative rounded-xl overflow-hidden">
+              <img src="<%= package.image_url %>" alt="<%= package.title %>" class="w-full h-full object-cover">
+              <% if package.badge_text.present? %>
+                <span class="absolute top-2 left-2 text-white text-xs px-2 py-0.5 rounded font-bold" style="background-color: <%= package.badge_color %>;">
+                  <%= package.badge_text %>
+                </span>
+              <% end %>
+            </div>
+            
+            <div class="flex-1 min-w-0">
+              <h3 class="text-base font-bold text-gray-900 mb-1"><%= package.title %></h3>
+              <p class="text-sm text-gray-500 mb-2"><%= package.subtitle %></p>
+              
+              <div class="flex items-end justify-between">
+                <div>
+                  <div class="flex items-baseline">
+                    <span class="text-red-500 text-xs">¥</span>
+                    <span class="text-red-500 text-2xl font-bold"><%= package.price.to_i %></span>
+                    <% if package.original_price.present? && package.original_price > package.price %>
+                      <span class="text-gray-400 text-sm line-through ml-2">¥<%= package.original_price.to_i %></span>
+                    <% end %>
+                  </div>
+                  <% if package.discount_label.present? %>
+                    <div class="text-xs text-red-500 font-medium"><%= package.discount_label %></div>
+                  <% end %>
+                </div>
+                
+                <button class="bg-red-500 text-white text-sm px-4 py-1.5 rounded-full font-bold whitespace-nowrap">
+                  抢
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

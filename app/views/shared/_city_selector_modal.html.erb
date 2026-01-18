@@ -99,7 +99,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                <span data-city-selector-target="locationText">定位未开启</span>
+                <span data-city-selector-target="locationText">自动定位</span>
               </button>
             </div>
             <!-- Located city will be shown here -->
@@ -137,7 +137,7 @@
                   </button>
                 <% end %>
               <% else %>
-                <% [{name: "北京", pinyin: "beijing"}, {name: "上海", pinyin: "shanghai"}, {name: "广州", pinyin: "guangzhou"}, {name: "杭州", pinyin: "hangzhou"}, {name: "成都", pinyin: "chengdu"}, {name: "深圳", pinyin: "shenzhen"}, {name: "重庆", pinyin: "chongqing"}, {name: "西安", pinyin: "xian"}, {name: "郑州", pinyin: "zhengzhou"}, {name: "昆明", pinyin: "kunming"}, {name: "哈尔滨", pinyin: "haerbin"}, {name: "南京", pinyin: "nanjing"}, {name: "武汉", pinyin: "wuhan"}, {name: "沈阳", pinyin: "shenyang"}, {name: "海口", pinyin: "haikou"}, {name: "长沙", pinyin: "changsha"}].each do |city| %>
+                <% [{name: "北京市", pinyin: "beijing"}, {name: "上海市", pinyin: "shanghai"}, {name: "广州市", pinyin: "guangzhou"}, {name: "杭州市", pinyin: "hangzhou"}, {name: "成都市", pinyin: "chengdu"}, {name: "深圳市", pinyin: "shenzhen"}, {name: "重庆市", pinyin: "chongqing"}, {name: "西安市", pinyin: "xian"}, {name: "郑州市", pinyin: "zhengzhou"}, {name: "昆明市", pinyin: "kunming"}, {name: "哈尔滨市", pinyin: "haerbin"}, {name: "南京市", pinyin: "nanjing"}, {name: "武汉市", pinyin: "wuhan"}, {name: "沈阳市", pinyin: "shenyang"}, {name: "海口市", pinyin: "haikou"}, {name: "长沙市", pinyin: "changsha"}].each do |city| %>
                   <button 
                     data-action="click->city-selector#selectCity"
                     data-city-name="<%= city[:name] %>"

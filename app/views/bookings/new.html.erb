@@ -211,7 +211,9 @@
               <div class="flex-1">
                 <div class="flex items-center">
                   <span class="font-bold text-lg"><%= passenger.name %></span>
-                  <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">本人</span>
+                  <% if passenger.is_self? %>
+                    <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">本人</span>
+                  <% end %>
                 </div>
                 <div class="text-sm text-gray-600 mt-1">
                   <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>

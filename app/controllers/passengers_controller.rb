@@ -4,7 +4,7 @@ class PassengersController < ApplicationController
   before_action :set_traveler_type, only: [:index, :new, :edit]
 
   def index
-    @passengers = current_user.passengers.order(created_at: :desc)
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
   end
 
   def new
@@ -135,7 +135,7 @@ class PassengersController < ApplicationController
   end
 
   def passenger_params
-    params.require(:passenger).permit(:name, :id_type, :id_number, :phone)
+    params.require(:passenger).permit(:name, :id_type, :id_number, :phone, :is_self)
   end
 
   def authenticate_user!

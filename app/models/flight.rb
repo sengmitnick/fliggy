@@ -41,7 +41,7 @@ class Flight < ApplicationRecord
     flights = []
     base_price = 200 + rand(100)
     
-    # Generate 8-10 flights for the day
+    # Generate 8-10 flights for the day with different cabin classes
     (8..10).to_a.sample.times do |i|
       airline_info = airlines.sample
       hour = 7 + (i * 1.5).to_i
@@ -51,7 +51,21 @@ class Flight < ApplicationRecord
       flight_duration = 2 + rand(0.5..1.5) # 2-3.5 hours
       arrival_time = departure_time + flight_duration.hours
 
-      price = base_price + rand(-50..200)
+      # Randomly assign cabin class with weighted distribution (70% economy, 20% business, 10% first_class)
+      cabin_class = case rand(10)
+                    when 0 then 'first_class'
+                    when 1..2 then 'business'
+                    else 'economy'
+                    end
+      
+      # Adjust base price based on cabin class
+      cabin_multiplier = case cabin_class
+                         when 'first_class' then 5.0
+                         when 'business' then 3.0
+                         else 1.0
+                         end
+      
+      price = (base_price * cabin_multiplier).to_i + rand(-50..200)
       discount = [0, 20, 30, 50, 80, 90, 130].sample
       
       flight = create!(
@@ -66,7 +80,7 @@ class Flight < ApplicationRecord
         aircraft_type: airline_info[:aircraft],
         price: price,
         discount_price: discount,
-        seat_class: 'economy',
+        seat_class: cabin_class,
         available_seats: rand(50..200),
         flight_date: date
       )

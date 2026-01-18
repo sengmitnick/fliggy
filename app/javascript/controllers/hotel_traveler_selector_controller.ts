@@ -5,7 +5,8 @@ export default class extends Controller<HTMLElement> {
     "modal",
     "guestNameInput",
     "guestPhoneInput",
-    "selectedPassenger"
+    "selectedPassenger",
+    "checkbox"
   ]
 
   static values = {
@@ -19,6 +20,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly guestPhoneInputTarget: HTMLInputElement
   declare readonly selectedPassengerTarget: HTMLElement
   declare readonly hasSelectedPassengerTarget: boolean
+  declare readonly checkboxTargets: HTMLInputElement[]
 
   declare selectedPassengerIdValue: string
   declare selectedPassengerNameValue: string
@@ -41,31 +43,56 @@ export default class extends Controller<HTMLElement> {
     document.body.style.overflow = ''
   }
 
-  // Select a passenger from the list
-  selectPassenger(event: Event): void {
-    const target = event.currentTarget as HTMLElement
-    const passengerId = target.dataset.passengerId || ''
-    const passengerName = target.dataset.passengerName || ''
-    const passengerPhone = target.dataset.passengerPhone || ''
+  // Toggle passenger selection via checkbox
+  togglePassenger(event: Event): void {
+    const checkbox = event.currentTarget as HTMLInputElement
+    const passengerId = checkbox.dataset.passengerId || ''
+    const passengerName = checkbox.dataset.passengerName || ''
+    const passengerPhone = checkbox.dataset.passengerPhone || ''
 
-    console.log("Selected passenger:", { passengerId, passengerName, passengerPhone })
+    if (checkbox.checked) {
+      // Uncheck all other checkboxes (only allow one selection)
+      this.checkboxTargets.forEach(cb => {
+        if (cb !== checkbox) {
+          cb.checked = false
+        }
+      })
 
-    // Store selected values
-    this.selectedPassengerIdValue = passengerId
-    this.selectedPassengerNameValue = passengerName
-    this.selectedPassengerPhoneValue = passengerPhone
+      console.log("Selected passenger:", { passengerId, passengerName, passengerPhone })
 
-    // Update form inputs
-    this.guestNameInputTarget.value = passengerName
-    this.guestPhoneInputTarget.value = passengerPhone
+      // Store selected values
+      this.selectedPassengerIdValue = passengerId
+      this.selectedPassengerNameValue = passengerName
+      this.selectedPassengerPhoneValue = passengerPhone
 
-    // Update selected display if exists
-    if (this.hasSelectedPassengerTarget) {
-      this.selectedPassengerTarget.textContent = passengerName
+      // Update form inputs
+      this.guestNameInputTarget.value = passengerName
+      this.guestPhoneInputTarget.value = passengerPhone
+
+      // Update selected display if exists
+      if (this.hasSelectedPassengerTarget) {
+        this.selectedPassengerTarget.textContent = passengerName
+      }
+
+      // Close modal after selection
+      this.closeModal()
+    } else {
+      // Unchecked - clear form inputs
+      console.log("Unselected passenger")
+      
+      this.selectedPassengerIdValue = ''
+      this.selectedPassengerNameValue = ''
+      this.selectedPassengerPhoneValue = ''
+
+      // Clear form inputs
+      this.guestNameInputTarget.value = ''
+      this.guestPhoneInputTarget.value = ''
+
+      // Clear selected display if exists
+      if (this.hasSelectedPassengerTarget) {
+        this.selectedPassengerTarget.textContent = ''
+      }
     }
-
-    // Close modal
-    this.closeModal()
   }
 
   // Manual input - clear selection

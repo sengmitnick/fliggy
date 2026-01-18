@@ -6,7 +6,12 @@
   <!-- Header -->
   <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
     <div class="px-4 py-3 flex items-center justify-between">
-      <%= link_to search_flights_path(departure_city: @flight.departure_city, destination_city: @flight.destination_city, date: @flight.flight_date), 
+      <% back_url = if params[:source] == 'special_flights'
+        special_flights_path
+      else
+        search_flights_path(departure_city: @flight.departure_city, destination_city: @flight.destination_city, date: @flight.flight_date)
+      end %>
+      <%= link_to back_url, 
           data: { turbo: false },
           class: "text-gray-700" do %>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

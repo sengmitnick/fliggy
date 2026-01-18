@@ -1,0 +1,146 @@
+<div class="min-h-screen bg-gradient-to-b from-yellow-50 to-purple-50">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to flights_path, class: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center" do %>
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      
+      <h1 class="text-lg font-bold text-gray-900">关注的低价列表</h1>
+      
+      <div class="w-10"></div>
+    </div>
+  </div>
+
+  <% if @price_alerts.empty? %>
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center px-6 pt-32">
+      <!-- Yellow Character Illustration -->
+      <div class="mb-8">
+        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Yellow character body -->
+          <ellipse cx="100" cy="120" rx="60" ry="70" fill="#FFD700"/>
+          
+          <!-- White shirt -->
+          <path d="M70 130 L130 130 L130 170 Q100 175 70 170 Z" fill="white"/>
+          
+          <!-- Black shorts -->
+          <rect x="85" y="165" width="30" height="20" rx="3" fill="#333333"/>
+          
+          <!-- Yellow tag/badge on shirt -->
+          <rect x="95" y="140" width="10" height="15" rx="2" fill="#FFD700"/>
+          
+          <!-- Head -->
+          <circle cx="100" cy="80" r="45" fill="#FFD700"/>
+          
+          <!-- Headphones -->
+          <path d="M55 70 Q50 80 55 90" stroke="#333333" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <circle cx="55" cy="80" r="8" fill="white" stroke="#333333" stroke-width="2"/>
+          <path d="M145 70 Q150 80 145 90" stroke="#333333" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <circle cx="145" cy="80" r="8" fill="white" stroke="#333333" stroke-width="2"/>
+          <path d="M60 65 Q100 55 140 65" stroke="#333333" stroke-width="4" stroke-linecap="round" fill="none"/>
+          
+          <!-- Closed eyes (sleeping/tired) -->
+          <path d="M75 75 Q80 78 85 75" stroke="#333333" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M115 75 Q120 78 125 75" stroke="#333333" stroke-width="3" stroke-linecap="round" fill="none"/>
+          
+          <!-- Blush -->
+          <ellipse cx="70" cy="85" rx="8" ry="6" fill="#FFB6C1" opacity="0.6"/>
+          <ellipse cx="130" cy="85" rx="8" ry="6" fill="#FFB6C1" opacity="0.6"/>
+          
+          <!-- Small sparkle near face -->
+          <circle cx="60" cy="60" r="2" fill="#FFD700"/>
+          <path d="M60 55 L60 65 M55 60 L65 60" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>
+          
+          <!-- Hand holding magnifying glass -->
+          <ellipse cx="145" cy="110" rx="12" ry="18" fill="#FFD700" transform="rotate(-30 145 110)"/>
+          <circle cx="155" cy="125" r="15" fill="none" stroke="#FFD700" stroke-width="4"/>
+          <circle cx="155" cy="125" r="12" fill="rgba(255,255,255,0.3)"/>
+          
+          <!-- Other hand pointing -->
+          <ellipse cx="55" cy="115" rx="12" ry="18" fill="#FFD700" transform="rotate(30 55 115)"/>
+          <path d="M50 110 L45 105" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+          
+          <!-- Shoes -->
+          <ellipse cx="85" cy="188" rx="12" ry="8" fill="#333333"/>
+          <ellipse cx="115" cy="188" rx="12" ry="8" fill="#333333"/>
+          
+          <!-- Motion lines (searching) -->
+          <path d="M40 100 Q35 105 40 110" stroke="#FFD700" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M160 100 Q165 105 160 110" stroke="#FFD700" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+        </svg>
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 mb-2">您还没有关注的航线</h2>
+      <p class="text-gray-500 text-center mb-12">赶快点击下方，添加低价提醒吧</p>
+    </div>
+  <% else %>
+    <!-- Price Alerts List -->
+    <div class="px-4 py-4 space-y-3">
+      <% @price_alerts.each do |alert| %>
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div class="p-4">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-lg font-bold text-gray-900"><%= alert.departure %></span>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                  </svg>
+                  <span class="text-lg font-bold text-gray-900"><%= alert.destination %></span>
+                </div>
+                
+                <% if alert.departure_date.present? %>
+                  <div class="flex items-center gap-1 text-sm text-gray-500 mb-1">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                    </svg>
+                    <span><%= alert.departure_date.strftime('%Y年%m月%d日') %></span>
+                  </div>
+                <% end %>
+                
+                <div class="flex items-baseline gap-1">
+                  <span class="text-xs text-gray-500">期望价格</span>
+                  <span class="text-red-500 text-xs">¥</span>
+                  <span class="text-red-500 text-xl font-bold"><%= alert.expected_price.to_i %></span>
+                  <span class="text-xs text-gray-500">以下</span>
+                </div>
+              </div>
+              
+              <%= button_to price_alert_path(alert), method: :delete, data: { turbo_confirm: '确定要删除这个提醒吗？' }, class: "text-gray-400 hover:text-red-500 transition-colors" do %>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              <% end %>
+            </div>
+            
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                </svg>
+                <span>创建于 <%= alert.created_at.strftime('%m月%d日') %></span>
+              </div>
+              
+              <div class="flex items-center gap-1">
+                <span class="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+                <span class="text-xs text-green-600 font-medium">监控中</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Fixed Bottom Button -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 pb-8">
+    <%= link_to new_price_alert_path, class: "block w-full" do %>
+      <button class="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 text-lg font-bold py-4 rounded-full shadow-lg transition-all">
+        新增低价提醒
+      </button>
+    <% end %>
+  </div>
+</div>
