@@ -264,7 +264,7 @@ export default class extends Controller<HTMLElement> {
         this.dispatchCityChangedEvent(cityName)
         
         // Dispatch hotel-specific event for hotel-search controller
-        this.dispatchHotelCityUpdateEvent(cityName)
+        this.dispatchHotelCityUpdateEvent(cityName, isInternational)
         
         // Dispatch trip-planner city change event
         this.dispatchTripCityChangeEvent('departure', cityName)
@@ -321,6 +321,45 @@ export default class extends Controller<HTMLElement> {
         this.internationalListTarget.classList.remove('hidden')
       }
     }
+  }
+
+  // Dispatch city-changed event for other controllers (like tour-group-filter)
+  private dispatchCityChangedEvent(cityName: string): void {
+    const cityChangedEvent = new CustomEvent('city-selector:city-changed', {
+      detail: { cityName },
+      bubbles: true
+    })
+    this.element.dispatchEvent(cityChangedEvent)
+    console.log('City selector: Dispatched city-changed event', cityName)
+  }
+
+  // Dispatch hotel-specific city update event
+  private dispatchHotelCityUpdateEvent(cityName: string, isInternational: boolean = false): void {
+    const hotelCityEvent = new CustomEvent('city-selector:city-selected-for-hotel', {
+      detail: { 
+        cityName,
+        isInternational 
+      },
+      bubbles: true
+    })
+    document.dispatchEvent(hotelCityEvent)
+    console.log('City selector: Dispatched hotel city update event', { cityName, isInternational })
+  }
+
+  // Switch cities
+  switchCities(): void {
+    const temp = this.departureCityValue
+    this.departureCityValue = this.destinationCityValue
+    this.destinationCityValue = temp
+
+    // Dispatch a custom event to notify other controllers
+    this.element.dispatchEvent(new CustomEvent('cities-switched', {
+      detail: {
+        departure: this.departureCityValue,
+        destination: this.destinationCityValue
+      },
+      bubbles: true
+    }))
   }
 
   // Search cities

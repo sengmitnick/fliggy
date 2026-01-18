@@ -1,4 +1,5 @@
 class TourReview < ApplicationRecord
+  include DataVersionable
   belongs_to :tour_group_product
   belongs_to :user
   has_many_attached :images

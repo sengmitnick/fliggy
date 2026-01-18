@@ -61,6 +61,24 @@ import BusDatePickerController from "./bus_date_picker_controller"
 import BusTicketSearchController from "./bus_ticket_search_controller"
 import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
+import VisaOrderController from "./visa_order_controller"
+import AbroadRegionSelectorController from "./abroad_region_selector_controller"
+import AbroadDatePickerController from "./abroad_date_picker_controller"
+import AbroadPassengerSelectorController from "./abroad_passenger_selector_controller"
+import AbroadOrderFormController from "./abroad_order_form_controller"
+import AbroadTicketSearchController from "./abroad_ticket_search_controller"
+import HomestaySearchController from "./homestay_search_controller"
+import InternetServicesController from "./internet_services_controller"
+import SimCardFilterController from "./sim_card_filter_controller"
+import DataPlanController from "./data_plan_controller"
+import WifiBookingController from "./wifi_booking_controller"
+import InternetOrderFormController from "./internet_order_form_controller"
+import ProductCardController from "./product_card_controller"
+import SimCardBookingController from "./sim_card_booking_controller"
+import QrcodeModalController from "./qrcode_modal_controller"
+import LocationSelectorController from "./location_selector_controller"
+import TransferSearchController from "./transfer_search_controller"
+import AddressSelectorController from "./address_selector_controller"
 import SearchController from "./search_controller"
 import HotelFilterPersistenceController from "./hotel_filter_persistence_controller"
 import HotelServicesSearchController from "./hotel_services_search_controller"
@@ -69,6 +87,8 @@ import SpecialHotelSearchController from "./special_hotel_search_controller"
 import SpecialHotelFilterController from "./special_hotel_filter_controller"
 import HotelSearchFilterController from "./hotel_search_filter_controller"
 import BlindBoxController from "./blind_box_controller"
+import SmartBackController from "./smart_back_controller"
+import TourGroupTabsController from "./tour_group_tabs_controller"
 
 const application = Application.start()
 
@@ -133,6 +153,24 @@ application.register("bus-date-picker", BusDatePickerController)
 application.register("bus-ticket-search", BusTicketSearchController)
 application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
+application.register("visa-order", VisaOrderController)
+application.register("abroad-region-selector", AbroadRegionSelectorController)
+application.register("abroad-date-picker", AbroadDatePickerController)
+application.register("abroad-passenger-selector", AbroadPassengerSelectorController)
+application.register("abroad-order-form", AbroadOrderFormController)
+application.register("abroad-ticket-search", AbroadTicketSearchController)
+application.register("homestay-search", HomestaySearchController)
+application.register("internet-services", InternetServicesController)
+application.register("sim-card-filter", SimCardFilterController)
+application.register("data-plan", DataPlanController)
+application.register("wifi-booking", WifiBookingController)
+application.register("internet-order-form", InternetOrderFormController)
+application.register("product-card", ProductCardController)
+application.register("sim-card-booking", SimCardBookingController)
+application.register("qrcode-modal", QrcodeModalController)
+application.register("location-selector", LocationSelectorController)
+application.register("transfer-search", TransferSearchController)
+application.register("address-selector", AddressSelectorController)
 application.register("search", SearchController)
 application.register("hotel-filter-persistence", HotelFilterPersistenceController)
 application.register("hotel-services-search", HotelServicesSearchController)
@@ -141,5 +179,7 @@ application.register("special-hotel-search", SpecialHotelSearchController)
 application.register("special-hotel-filter", SpecialHotelFilterController)
 application.register("hotel-search-filter", HotelSearchFilterController)
 application.register("blind-box", BlindBoxController)
+application.register("smart-back", SmartBackController)
+application.register("tour-group-tabs", TourGroupTabsController)
 
 window.Stimulus = application

@@ -189,16 +189,19 @@ export default class extends Controller {
 
   async processActualPayment(): Promise<void> {
     try {
-      const response = await fetch(this.paymentUrlValue, {
+      const response = await fetch(`${this.paymentUrlValue}.json`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
         },
         body: JSON.stringify({}) // Password already verified, just trigger payment
       })
 
-      if (response.ok) {
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         // Show success status
         this.showPaymentSuccess()
         // Redirect after showing success
@@ -206,7 +209,6 @@ export default class extends Controller {
           window.location.href = this.successUrlValue
         }, 2000)
       } else {
-        const data = await response.json()
         throw new Error(data.message || '支付失败')
       }
     } catch (error) {

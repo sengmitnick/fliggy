@@ -1,4 +1,5 @@
 class DeepTravelGuide < ApplicationRecord
+  include DataVersionable
   # ActiveStorage attachments
   has_one_attached :avatar
   has_one_attached :video

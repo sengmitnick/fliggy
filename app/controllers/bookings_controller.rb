@@ -5,28 +5,45 @@ class BookingsController < ApplicationController
   def index
     @status_filter = params[:status] || 'all'
     
-    # Fetch flight bookings
-    flight_bookings = current_user.bookings.includes(:flight, :return_flight)
-                                  .order(created_at: :desc)
-    
-    # Fetch hotel bookings
-    hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
-                                 .order(created_at: :desc)
-    
-    # Fetch tour group bookings
-    tour_group_bookings = current_user.tour_group_bookings.includes(:tour_group_product, :tour_package)
+    begin
+      # Fetch flight bookings
+      flight_bookings = current_user.bookings.includes(:flight, :return_flight)
+                                    .order(created_at: :desc)
+      
+      # Fetch hotel bookings
+      hotel_bookings = current_user.hotel_bookings.includes(:hotel, :hotel_room)
+                                   .order(created_at: :desc)
+      
+      # Fetch tour group bookings
+      tour_group_bookings = current_user.tour_group_bookings.includes(:tour_group_product, :tour_package)
+                                        .order(created_at: :desc)
+      
+      # Fetch car orders
+      car_orders = current_user.car_orders.includes(:car)
+                               .order(created_at: :desc)
+      
+      # Fetch hotel package orders
+      hotel_package_orders = current_user.hotel_package_orders.includes(:hotel_package, :package_option)
+                                         .order(created_at: :desc)
+      
+      # Fetch bus ticket orders
+      bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
                                       .order(created_at: :desc)
-    
-    # Fetch car orders
-    car_orders = current_user.car_orders.includes(:car)
-                             .order(created_at: :desc)
-    
-    # Fetch hotel package orders
-    hotel_package_orders = current_user.hotel_package_orders.includes(:hotel_package, :package_option)
-                                       .order(created_at: :desc)
-    
-    # Fetch bus ticket orders
-    bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
+      
+      # Fetch visa orders
+      visa_orders = current_user.visa_orders.includes(visa_product: :country)
+                                .order(created_at: :desc)
+      
+      # Fetch abroad ticket orders
+      abroad_ticket_orders = current_user.abroad_ticket_orders.includes(:abroad_ticket)
+                                         .order(created_at: :desc)
+      
+      # Fetch internet orders
+      internet_orders = current_user.internet_orders.includes(:orderable)
+                                    .order(created_at: :desc)
+      
+      # Fetch transfer orders
+      transfer_orders = current_user.transfers.includes(:transfer_package)
                                     .order(created_at: :desc)
     
     # Filter by status
@@ -38,6 +55,10 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'pending')
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
       bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
+      visa_orders = visa_orders.where(status: 'pending')
+      abroad_ticket_orders = abroad_ticket_orders.where(status: 'pending')
+      internet_orders = internet_orders.where(status: 'pending')
+      transfer_orders = transfer_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -51,6 +72,13 @@ class BookingsController < ApplicationController
       bus_ticket_orders = bus_ticket_orders.where(status: 'paid')
                                            .joins(:bus_ticket)
                                            .where('bus_tickets.departure_date >= ?', Date.today)
+      visa_orders = visa_orders.where(status: ['paid', 'processing'])
+      abroad_ticket_orders = abroad_ticket_orders.where(status: 'paid')
+                                                 .joins(:abroad_ticket)
+                                                 .where('abroad_tickets.departure_date >= ?', Date.today)
+      internet_orders = internet_orders.where(status: 'paid')
+      transfer_orders = transfer_orders.where(status: 'paid')
+                                       .where('transfers.pickup_datetime >= ?', DateTime.now)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -59,6 +87,10 @@ class BookingsController < ApplicationController
       car_orders = car_orders.none
       hotel_package_orders = hotel_package_orders.none
       bus_ticket_orders = bus_ticket_orders.none
+      visa_orders = visa_orders.none
+      abroad_ticket_orders = abroad_ticket_orders.none
+      internet_orders = internet_orders.none
+      transfer_orders = transfer_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
@@ -66,11 +98,25 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'cancelled')
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
       bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
+      visa_orders = visa_orders.where(status: 'cancelled')
+      abroad_ticket_orders = abroad_ticket_orders.where(status: 'cancelled')
+      internet_orders = internet_orders.where(status: 'cancelled')
+      transfer_orders = transfer_orders.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
-    @all_bookings = (flight_bookings.to_a + hotel_bookings.to_a + tour_group_bookings.to_a + car_orders.to_a + hotel_package_orders.to_a + bus_ticket_orders.to_a)
-                    .sort_by(&:created_at).reverse
+    @all_bookings = [
+      flight_bookings.to_a,
+      hotel_bookings.to_a,
+      tour_group_bookings.to_a,
+      car_orders.to_a,
+      hotel_package_orders.to_a,
+      bus_ticket_orders.to_a,
+      visa_orders.to_a,
+      abroad_ticket_orders.to_a,
+      internet_orders.to_a,
+      transfer_orders.to_a
+    ].flatten.compact.sort_by(&:created_at).reverse
     
     # Manual pagination
     @page = (params[:page] || 1).to_i
@@ -78,6 +124,18 @@ class BookingsController < ApplicationController
     @total_count = @all_bookings.length
     @total_pages = (@total_count.to_f / @per_page).ceil
     @bookings = @all_bookings[(@page - 1) * @per_page, @per_page] || []
+    
+    rescue => e
+      Rails.logger.error "Bookings index error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      @all_bookings = []
+      @bookings = []
+      @page = 1
+      @per_page = 10
+      @total_count = 0
+      @total_pages = 0
+      flash.now[:alert] = '加载订单列表时出现问题，请稍后重试'
+    end
   end
 
   def new
@@ -123,6 +181,12 @@ class BookingsController < ApplicationController
   end
 
   def create
+    # DEBUG: Log current session variable state
+    current_data_version = ActiveRecord::Base.connection.execute(
+      "SELECT current_setting('app.data_version', true) AS version"
+    ).first&.dig('version')
+    Rails.logger.info "[BookingsController#create] Current app.data_version = #{current_data_version || 'NOT SET'}"
+    
     @trip_type = params[:booking][:trip_type] || 'one_way'
     
     # Handle multi-city booking
@@ -287,5 +351,40 @@ class BookingsController < ApplicationController
 
   def booking_params
     params.require(:booking).permit(:passenger_name, :passenger_id_number, :contact_phone, :accept_terms, :insurance_type, :insurance_price, :trip_type, :return_flight_id, :return_date, :return_offer_id, :multi_city_flights_json)
+  end
+  
+  # Helper methods for booking status display
+  helper_method :booking_status_color, :booking_status_text
+  
+  def booking_status_color(status)
+    case status
+    when 'pending'
+      'text-warning'
+    when 'paid', 'processing'
+      'text-success'
+    when 'completed'
+      'text-blue-600'
+    when 'cancelled'
+      'text-text-muted'
+    else
+      'text-text-primary'
+    end
+  end
+  
+  def booking_status_text(status)
+    case status
+    when 'pending'
+      '待支付'
+    when 'paid'
+      '已支付'
+    when 'processing'
+      '办理中'
+    when 'completed'
+      '已完成'
+    when 'cancelled'
+      '已取消'
+    else
+      status
+    end
   end
 end

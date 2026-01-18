@@ -2,6 +2,7 @@ class TourGroupsController < ApplicationController
   def index
     # Default destination
     @destination = params[:destination].presence || '上海'
+    @group_size = params[:group_size].presence
     
     # Hot destinations - 从数据库获取
     @hot_destinations = TourGroupProduct.select(:destination)

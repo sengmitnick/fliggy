@@ -1,0 +1,105 @@
+<div class="max-w-[390px] mx-auto bg-white min-h-screen flex flex-col items-center justify-center p-8">
+  
+  <!-- 成功图标 -->
+  <div class="mb-6">
+    <svg class="w-20 h-20 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+  </div>
+
+  <!-- 标题 -->
+  <h1 class="text-2xl font-bold text-gray-900 mb-2">支付成功</h1>
+  <p class="text-gray-600 mb-8">您的订单已支付成功</p>
+
+  <!-- 订单信息 -->
+  <div class="w-full bg-gray-50 rounded-lg p-4 mb-6">
+    <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
+      <span class="text-gray-600">订单号</span>
+      <span class="font-medium text-gray-900"><%= @order.order_number %></span>
+    </div>
+    
+    <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
+      <span class="text-gray-600">商品名称</span>
+      <span class="font-medium text-gray-900"><%= @order.orderable.name %></span>
+    </div>
+
+    <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
+      <span class="text-gray-600">目的地</span>
+      <span class="font-medium text-gray-900"><%= @order.region %></span>
+    </div>
+
+    <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
+      <span class="text-gray-600">数量</span>
+      <span class="font-medium text-gray-900"><%= @order.quantity %></span>
+    </div>
+
+    <div class="flex justify-between items-center">
+      <span class="text-gray-600">支付金额</span>
+      <span class="font-bold text-[#FF4400] text-xl">¥<%= @order.total_price %></span>
+    </div>
+  </div>
+
+  <!-- 配送/联系信息 -->
+  <% if @order.delivery_info.present? %>
+    <div class="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <h3 class="font-bold text-blue-900 mb-2">📦 收货信息</h3>
+      <% delivery = @order.delivery_info.is_a?(String) ? JSON.parse(@order.delivery_info) : @order.delivery_info %>
+      <p class="text-blue-800 text-sm">
+        <%= delivery['name'] %> <%= delivery['phone'] %><br>
+        <%= delivery['full_address'] %>
+      </p>
+    </div>
+  <% end %>
+
+  <% if @order.contact_info.present? %>
+    <div class="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <h3 class="font-bold text-blue-900 mb-2">👤 联系人信息</h3>
+      <% contact = @order.contact_info.is_a?(String) ? JSON.parse(@order.contact_info) : @order.contact_info %>
+      <p class="text-blue-800 text-sm">
+        <%= contact['name'] %> <%= contact['phone'] %>
+      </p>
+    </div>
+  <% end %>
+
+  <!-- WiFi租用信息 -->
+  <% if @order.rental_info.present? %>
+    <div class="w-full bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <h3 class="font-bold text-yellow-900 mb-2">📅 租用信息</h3>
+      <% rental = @order.rental_info.is_a?(String) ? JSON.parse(@order.rental_info) : @order.rental_info %>
+      <p class="text-yellow-800 text-sm">
+        取件日期: <%= rental['pickup_date'] %><br>
+        归还日期: <%= rental['return_date'] %><br>
+        租用天数: <%= rental['days'] %>天
+      </p>
+    </div>
+  <% end %>
+
+  <!-- 温馨提示 -->
+  <div class="w-full bg-gray-50 rounded-lg p-4 mb-8">
+    <h3 class="font-bold text-gray-900 mb-2">温馨提示</h3>
+    <ul class="text-sm text-gray-600 space-y-1">
+      <% if @order.sim_card? %>
+        <li>• 预计3-5个工作日送达</li>
+        <li>• 请保持手机畅通,以便接收物流信息</li>
+        <li>• 收到卡后请按照说明激活使用</li>
+      <% elsif @order.data_plan? %>
+        <li>• 流量包已充值到您的手机号</li>
+        <li>• 到达目的地后自动激活</li>
+        <li>• 如有疑问请联系客服</li>
+      <% else %>
+        <li>• 请按时到指定地点取件</li>
+        <li>• 使用完毕后请及时归还设备</li>
+        <li>• 押金将在归还后7个工作日内退回</li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="w-full space-y-3">
+    <%= link_to "返回首页", root_path, 
+        class: "block w-full py-3 text-center bg-[#FFDD00] text-black font-bold rounded-full" %>
+    <%= link_to "查看订单", "#", 
+        class: "block w-full py-3 text-center border-2 border-gray-300 text-gray-700 font-bold rounded-full" %>
+  </div>
+
+</div>

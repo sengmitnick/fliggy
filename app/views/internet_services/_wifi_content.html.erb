@@ -1,0 +1,205 @@
+<div data-controller="wifi-booking">
+<!-- 内容卡片层 -->
+<div class="px-3 pt-2 space-y-3">
+  
+  <!-- 取件方式 -->
+  <div class="bg-white rounded-xl p-1 shadow-sm flex items-center justify-between">
+    <div class="pl-3 font-medium text-gray-800">取件方式</div>
+    <div class="flex bg-gray-50 rounded-lg p-1">
+      <div data-action="click->wifi-booking#selectDelivery" data-method="mail" 
+           data-wifi-booking-target="mailTab"
+           class="px-6 py-1.5 text-sm text-gray-500 cursor-pointer">邮寄</div>
+      <div data-action="click->wifi-booking#selectDelivery" data-method="pickup" 
+           data-wifi-booking-target="pickupTab"
+           class="px-6 py-1.5 text-sm font-bold bg-white rounded shadow-sm text-gray-800 cursor-pointer">自取</div>
+    </div>
+  </div>
+
+  <!-- 套餐列表 -->
+  <div class="space-y-3">
+    <% @wifis.each_with_index do |wifi, index| %>
+      <div class="<%= index == 0 ? 'bg-[#FFFDF2] border border-[#FFDD00]' : 'bg-white' %> rounded-xl p-4 relative shadow-sm"
+           data-action="click->wifi-booking#selectPlan" 
+           data-wifi-id="<%= wifi.id %>" 
+           data-wifi-price="<%= wifi.daily_price %>">
+        <% if index == 0 %>
+          <div class="absolute top-0 left-0 bg-[#FF5035] text-white text-[10px] px-1.5 py-0.5 rounded-tl-xl rounded-br-lg">热销</div>
+        <% end %>
+        <div class="flex justify-between items-center <%= 'mt-1' if index == 0 %>">
+          <span class="font-bold text-gray-900"><%= wifi.name %></span>
+          <div class="flex items-center">
+            <span class="text-xs text-[#FF5035] font-medium">¥</span>
+            <span class="text-xl font-bold text-[#FF5035] mr-1"><%= wifi.daily_price.to_i %></span>
+            <span class="text-xs text-gray-400">/天</span>
+            <% if index == 0 %>
+              <div class="w-5 h-5 ml-2 bg-[#FFDD00] rounded-full flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              </div>
+            <% else %>
+              <div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <div class="text-right text-[10px] text-gray-400 pr-1 pb-1">
+      *套餐服务由漫游超人通讯旗舰店提供
+    </div>
+  </div>
+
+  <!-- 预订信息表单 -->
+  <div class="bg-white rounded-xl px-4 py-2 shadow-sm space-y-5 mt-2">
+    
+    <!-- 租用台数 -->
+    <div class="flex justify-between items-center pt-3">
+      <span class="font-medium text-gray-900">租用台数</span>
+      <div class="flex items-center space-x-3">
+        <div data-action="click->wifi-booking#decrease" 
+             class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300 cursor-pointer">-</div>
+        <span class="text-gray-900" data-wifi-booking-target="quantity">1</span>
+        <div data-action="click->wifi-booking#increase" 
+             class="w-6 h-6 rounded-full border border-blue-500 flex items-center justify-center text-blue-500 cursor-pointer">+</div>
+      </div>
+    </div>
+
+    <!-- 取还日期 -->
+    <div class="flex justify-between items-center">
+      <span class="font-medium text-gray-900">取还日期</span>
+      <div class="flex items-center space-x-1 cursor-pointer">
+        <span class="text-gray-900 text-sm" data-wifi-booking-target="dateRange">
+          <%= Date.today.strftime('%m月%d日') %>-<%= (Date.today + 7).strftime('%m月%d日') %>(共7天)
+        </span>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 收货/取件地址 -->
+    <div class="flex justify-between items-start" data-wifi-booking-target="addressSection">
+      <span class="font-medium text-gray-900 mt-1">取件地址</span>
+      <div class="flex items-center space-x-1 text-right cursor-pointer">
+        <div>
+          <div class="text-gray-900 text-sm">深圳 市区</div>
+          <div class="text-gray-400 text-xs">(24小时 (北京时间) )</div>
+        </div>
+        <svg class="w-4 h-4 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
+    </div>
+    
+    <!-- 邮寄收货地址 (默认隐藏) -->
+    <div class="hidden" data-wifi-booking-target="mailAddress">
+      <div class="flex items-start">
+        <span class="font-medium text-gray-900 mr-4 whitespace-nowrap pt-1">收货地址</span>
+        <div class="flex-1">
+          <% if current_user.addresses.delivery.default.first %>
+            <% address = current_user.addresses.delivery.default.first %>
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="text-sm font-medium mb-1"><%= address.name %> <%= address.phone %></div>
+                <div class="text-gray-500 text-xs leading-snug">
+                  <%= address.full_address %>
+                </div>
+              </div>
+              <%= link_to addresses_path, class: "text-gray-400 mt-1" do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              <% end %>
+            </div>
+          <% else %>
+            <%= link_to new_address_path, class: "flex items-center text-blue-500" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              添加收货地址
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 联系人姓名 -->
+    <div class="flex justify-between items-center">
+      <span class="font-medium text-gray-900">联系人姓名</span>
+      <div class="flex items-center space-x-1">
+        <% if current_user.passengers.any? %>
+          <input type="text" value="<%= current_user.passengers.first.name %>" 
+                 class="text-right text-sm text-gray-900 outline-none w-32" 
+                 placeholder="请输入联系人姓名"
+                 data-wifi-booking-target="contactName">
+        <% else %>
+          <input type="text" value="" 
+                 class="text-right text-sm text-gray-900 outline-none w-32" 
+                 placeholder="请输入联系人姓名"
+                 data-wifi-booking-target="contactName">
+        <% end %>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 联系人电话 -->
+    <div class="flex justify-between items-center pb-3">
+      <span class="font-medium text-gray-900">联系人电话</span>
+      <% if current_user.passengers.any? %>
+        <input type="tel" value="<%= current_user.passengers.first.phone %>" 
+               class="text-right text-sm text-gray-900 outline-none w-40" 
+               placeholder="请输入联系人电话"
+               data-wifi-booking-target="contactPhone">
+      <% else %>
+        <input type="tel" value="" 
+               class="text-right text-sm text-gray-900 outline-none w-40" 
+               placeholder="请输入联系人电话"
+               data-wifi-booking-target="contactPhone">
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 预订须知 -->
+  <div class="bg-[#F7F8FA] rounded-xl pt-4 pb-2 px-4">
+    <div class="flex justify-between items-center mb-2">
+      <span class="font-medium text-gray-900">预订须知</span>
+      <div class="flex items-center text-blue-500 text-xs cursor-pointer">
+        <span>查看预订须知</span>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="text-xs text-gray-500 space-y-2 leading-relaxed">
+      <p>1.订单预定成功后，系统会自动下发短信通知发货日期、自取等信息。</p>
+      <p>2.邮寄订单：当天16:00前拍下算入当天预订，超出算入次日；至少要提前3~7天预定，以顺丰快递配送时效为准；默认发顺丰...</p>
+      <p>3.自取订单：当天至少提前2小时~24小时以上下单（以每个网点要求为准），方可在当天或提前1天取机。</p>
+    </div>
+
+    <div class="mt-4 mb-2">
+      <span class="font-medium text-gray-900">退改规则</span>
+    </div>
+    <div class="text-xs text-gray-500 space-y-2 leading-relaxed pb-2">
+      <p>1. 预订日前2天18:00前可免费取消；</p>
+      <p>2. 预订日前2天18:00后不可取消，不可改期。</p>
+    </div>
+  </div>
+</div>
+
+  <!-- 底部支付栏 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center z-50 max-w-[390px] mx-auto">
+  <div class="flex flex-col">
+    <div class="flex items-baseline">
+      <span class="text-sm text-gray-600 mr-2">总计:</span>
+      <span class="text-xs text-[#FF4400]">¥</span>
+      <span class="text-2xl font-bold text-[#FF4400]" data-wifi-booking-target="totalPrice"><%= (@wifis.first&.daily_price&.to_i || 17) * 7 %></span>
+    </div>
+    <div class="text-[10px] text-gray-400">押金¥<%= @wifis.first&.deposit&.to_i || 500 %>将在归还后7个工作日内退回</div>
+  </div>
+  <%= link_to "立即支付", new_internet_order_path(orderable_type: 'InternetWifi', orderable_id: @wifis.first&.id),
+      id: "wifi-payment-link",
+      class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700] inline-block",
+      data: { turbo: false } %>
+  </div>
+</div>

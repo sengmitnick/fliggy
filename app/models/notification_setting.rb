@@ -1,4 +1,5 @@
 class NotificationSetting < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   
   CATEGORIES = Notification::CATEGORIES.keys

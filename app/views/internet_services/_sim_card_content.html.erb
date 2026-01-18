@@ -1,0 +1,137 @@
+<!-- 筛选区域 -->
+<div class="bg-white px-4 py-2 space-y-4" data-controller="sim-card-filter">
+  
+  <!-- 取卡方式 -->
+  <div class="flex items-center">
+    <span class="font-medium mr-4 whitespace-nowrap">取卡方式</span>
+    <div class="flex space-x-3 w-full">
+      <button data-action="sim-card-filter#selectDelivery" data-method="mail" 
+              class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700 font-medium">邮寄</button>
+      <button data-action="sim-card-filter#selectDelivery" data-method="pickup"
+              class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700">自取</button>
+    </div>
+  </div>
+
+  <!-- 天数 -->
+  <div class="flex items-start">
+    <span class="font-medium mr-4 mt-1.5 whitespace-nowrap">天数</span>
+    <div class="grid grid-cols-4 gap-2 w-full">
+      <% [1, 2, 3, 4, 5, 7, 10, 15].each do |days| %>
+        <button data-action="sim-card-filter#selectDays" data-days="<%= days %>"
+                class="relative py-1.5 bg-gray-50 rounded text-sm text-gray-700">
+          <%= days %>天
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 流量 -->
+  <div class="flex items-start">
+    <span class="font-medium mr-4 mt-1.5 whitespace-nowrap">流量</span>
+    <div class="flex space-x-3 flex-wrap gap-2">
+      <% ['3GB/天', '5GB/天', '无限量'].each do |data| %>
+        <button data-action="sim-card-filter#selectData" data-data="<%= data %>"
+                class="px-5 py-1.5 bg-gray-50 rounded text-sm text-gray-700"><%= data %></button>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- 商品列表 -->
+<div class="bg-white px-3 pb-2">
+  <% @sim_cards.each_with_index do |card, index| %>
+    <div class="border <%= index == 0 ? 'border-[#FFCC00] bg-[#FFFEF8]' : 'border-gray-100 bg-white' %> rounded-lg p-3 mt-3 relative" 
+         data-controller="product-card" data-product-id="<%= card.id %>" data-product-type="InternetSimCard">
+      <% if index == 0 %>
+        <div class="absolute top-0 left-0 bg-[#FF6633] text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">热销</div>
+      <% end %>
+      <div class="flex justify-between items-start">
+        <div class="flex-1">
+          <div class="font-bold text-base mb-1 <%= 'pt-3' if index == 0 %>"><%= card.name %></div>
+          <div class="flex flex-wrap gap-1 mb-2">
+            <% card.features&.each do |feature| %>
+              <span class="text-[10px] text-gray-500 border border-gray-200 px-1 rounded"><%= feature %></span>
+            <% end %>
+          </div>
+          <div class="text-xs text-gray-500 flex items-center">
+            已售<%= card.sales_count %>+ <span class="mx-1">|</span> 深圳游小匠旅游专营店 咨询 >
+          </div>
+        </div>
+        <div class="flex flex-col items-end justify-between h-full min-h-[70px]">
+          <span class="text-xs text-gray-400 flex items-center">详情 
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </span>
+          <div class="flex items-center mt-4">
+            <span class="text-xs text-[#FF4400] mr-0.5">¥</span>
+            <span class="text-xl font-bold text-[#FF4400] mr-2"><%= card.price %></span>
+            <% if index == 0 %>
+              <svg class="w-5 h-5 text-[#FFCC00] fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 12.17l7.59-7.59L19 6l-9 9z"/>
+              </svg>
+            <% else %>
+              <div class="w-5 h-5 rounded-full border border-gray-300" data-action="click->product-card#select"></div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- 预订信息区域 -->
+<div class="bg-white mt-2 p-4" data-controller="sim-card-booking" data-sim-card-booking-orderable-type-value="InternetSimCard">
+  <!-- 数量 -->
+  <div class="flex justify-between items-center mb-6">
+    <span class="font-bold text-base">预订数量</span>
+    <div class="flex items-center space-x-3">
+      <button data-action="sim-card-booking#decrease" class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300 font-bold">-</button>
+      <span class="font-medium text-lg" data-sim-card-booking-target="quantity">1</span>
+      <button data-action="sim-card-booking#increase" class="w-6 h-6 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center font-bold">+</button>
+    </div>
+  </div>
+
+  <!-- 收货地址 -->
+  <div class="flex items-start">
+    <span class="font-bold text-base mr-4 whitespace-nowrap pt-1">收货地址</span>
+    <div class="flex-1">
+      <% if current_user.addresses.delivery.default.first %>
+        <% address = current_user.addresses.delivery.default.first %>
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="text-base font-medium mb-1"><%= address.name %> <%= address.phone %></div>
+            <div class="text-gray-500 text-sm leading-snug">
+              <%= address.full_address %>
+            </div>
+          </div>
+          <%= link_to addresses_path, class: "text-gray-400 mt-1" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          <% end %>
+        </div>
+      <% else %>
+        <%= link_to new_address_path, class: "flex items-center text-blue-500" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          添加收货地址
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 底部支付栏 -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center z-50 max-w-[390px] mx-auto">
+  <div class="flex items-baseline">
+    <span class="text-sm text-gray-600 mr-2">总计:</span>
+    <span class="text-xs text-[#FF4400]">¥</span>
+    <span class="text-2xl font-bold text-[#FF4400]" data-sim-card-booking-target="totalPrice">9.9</span>
+  </div>
+  <button data-action="sim-card-booking#checkout"
+      class="bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700]">
+    立即支付
+  </button>
+  </div>
+</div>

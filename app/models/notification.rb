@@ -1,4 +1,5 @@
 class Notification < ApplicationRecord
+  include DataVersionable
   belongs_to :user
   
   CATEGORIES = {

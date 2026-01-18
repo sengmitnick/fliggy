@@ -1,0 +1,188 @@
+<div data-controller="qrcode-modal">
+<div class="min-h-screen bg-gray-50 pb-20">
+  <!-- 顶部导航栏 -->
+  <div class="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-4 flex items-center shadow-md">
+    <%= link_to wallet_abroad_coupons_path, class: "mr-3" do %>
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    <% end %>
+    <h1 class="text-lg font-medium">优惠券详情</h1>
+  </div>
+
+  <!-- 卡券卡片 -->
+  <div class="p-4">
+    <div class="bg-white rounded-2xl overflow-hidden shadow-lg">
+      <!-- 卡券头部：渐变背景 + 品牌logo + 信息 -->
+      <div class="bg-gradient-to-r from-purple-500 to-blue-500 p-6 text-white relative">
+        <div class="flex items-start space-x-4">
+          <!-- 品牌Logo（圆形） -->
+          <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <% if @brand.logo_url.present? %>
+              <%= image_tag @brand.logo_url, alt: @brand.name, class: "w-14 h-14 object-cover" %>
+            <% else %>
+              <span class="text-2xl font-bold text-purple-500"><%= @brand.name[0] %></span>
+            <% end %>
+          </div>
+          
+          <!-- 卡券信息 -->
+          <div class="flex-1">
+            <h2 class="text-xl font-bold mb-1"><%= @brand.name %></h2>
+            <h3 class="text-2xl font-bold mb-1"><%= @coupon.title %></h3>
+            <p class="text-sm opacity-90">
+              <% if @coupon.discount_type == 'percentage' %>
+                购物金额的 <%= @coupon.discount_value %>% 折扣
+              <% elsif @coupon.discount_type == 'fixed' %>
+                减 ¥<%= @coupon.discount_value %>
+              <% else %>
+                <%= @coupon.discount_value %>
+              <% end %>
+            </p>
+          </div>
+        </div>
+        
+        <!-- "去使用"按钮 -->
+        <div class="mt-6 flex justify-center">
+          <button type="button" 
+                  data-action="click->qrcode-modal#show"
+                  class="bg-[#ffde33] hover:bg-[#fcd535] text-gray-900 text-base font-semibold py-3 px-16 rounded-full shadow-lg transform transition hover:scale-105">
+            去使用
+          </button>
+        </div>
+      </div>
+      
+      <!-- 虚线分隔符 -->
+      <div class="relative h-6 bg-white">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-full border-t-2 border-dashed border-gray-300"></div>
+        </div>
+        <!-- 左右两侧的半圆 -->
+        <div class="absolute -left-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-gray-50 rounded-full"></div>
+        <div class="absolute -right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-gray-50 rounded-full"></div>
+      </div>
+      
+      <!-- 卡券详细信息 -->
+      <div class="p-6 space-y-6">
+        <!-- 有效期 -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            有效期
+          </h4>
+          <p class="text-gray-600 pl-7">
+            <%= @coupon.valid_from.strftime('%Y年%m月%d日') %> 至 <%= @coupon.valid_until.strftime('%Y年%m月%d日') %>
+          </p>
+          <p class="text-sm text-gray-400 pl-7 mt-1">
+            剩余 <%= (@coupon.valid_until - Date.today).to_i %> 天
+          </p>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            使用说明
+          </h4>
+          <div class="text-gray-600 pl-7 space-y-2">
+            <p><%= @coupon.description %></p>
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-3 mt-3">
+              <p class="text-sm text-amber-800 font-medium mb-1">注意事项：</p>
+              <ul class="text-sm text-amber-700 space-y-1 list-disc list-inside">
+                <li>请在有效期内使用，过期自动失效</li>
+                <li>本券不可兑换现金，不设找零</li>
+                <li>如有疑问，请咨询门店工作人员</li>
+                <li>本券最终解释权归商家所有</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 适用门店 -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            适用门店
+            <span class="ml-auto text-gray-400 text-xs">共 <%= @shops.count %> 家</span>
+          </h4>
+          
+          <div class="space-y-3 pl-7">
+            <% @shops.each do |shop| %>
+              <div class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h5 class="font-medium text-gray-800 mb-1"><%= shop.name %></h5>
+                    <p class="text-sm text-gray-500 flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <%= shop.city %>・<%= shop.address %>
+                    </p>
+                  </div>
+                  <svg class="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 二维码弹窗模态框 -->
+  <div data-qrcode-modal-target="modal"
+       data-action="click->qrcode-modal#backdropClick"
+       class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl transform transition-all"
+         data-qrcode-modal-target="content">
+    <!-- 弹窗头部 -->
+    <div class="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-6 text-center">
+      <h3 class="text-xl font-bold mb-2">使用优惠券</h3>
+      <p class="text-sm opacity-90">请向店员出示此二维码</p>
+    </div>
+    
+    <!-- 二维码区域 -->
+    <div class="p-8">
+      <div class="bg-white border-4 border-gray-200 rounded-xl p-4 flex items-center justify-center">
+        <div class="text-center">
+          <!-- 这里使用占位图，实际项目可集成 qrcode.js 库生成真实二维码 -->
+          <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-32 h-32 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm4 4H7V7h2v2zm6-6h8v8h-8V3zm2 2v4h4V5h-4zm4 4h-2V7h2v2zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm4 4H7v-2h2v2zm6-6h2v2h-2v-2zm0 4h2v2h-2v-2zm4 0h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2v-2zm-4 0h2v2h-2v-2zm0 8h2v2h-2v-2z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-gray-500">券码: <%= @user_coupon.id.to_s.rjust(8, '0') %></p>
+        </div>
+      </div>
+      
+      <!-- 提示信息 -->
+      <div class="mt-6 bg-blue-50 rounded-lg p-4">
+        <p class="text-sm text-blue-800 text-center">
+          <svg class="w-5 h-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          请在有效期内使用，过期自动失效
+        </p>
+      </div>
+    </div>
+    
+    <!-- 关闭按钮 -->
+    <div class="p-4 border-t border-gray-200">
+      <button type="button"
+              data-action="click->qrcode-modal#hide"
+              class="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-6 rounded-full transition">
+        关闭
+      </button>
+    </div>
+  </div>
+</div>

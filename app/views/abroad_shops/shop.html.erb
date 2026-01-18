@@ -1,0 +1,83 @@
+<% content_for :title, @shop.name %>
+
+<div class="min-h-screen bg-[#f7f8fa] pb-4">
+  
+  <!-- 顶部导航栏 -->
+  <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm px-4 py-3 flex justify-between items-center border-b border-gray-100">
+    <%= link_to brand_abroad_shop_path(@brand), class: "text-gray-800" do %>
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    <% end %>
+    <h1 class="text-[17px] font-bold text-gray-900 tracking-wide"><%= @shop.name %></h1>
+    <button class="text-gray-800">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- 门店图片 -->
+  <div class="relative w-full h-56 bg-gray-200 overflow-hidden">
+    <% if @shop.image_url.present? %>
+      <%= image_tag @shop.image_url, class: "w-full h-full object-cover", alt: @shop.name %>
+    <% else %>
+      <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+        <span class="text-white text-4xl font-bold"><%= @brand.name[0] %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 门店信息 -->
+  <div class="bg-white px-4 py-4 mb-3">
+    <h2 class="text-xl font-bold text-gray-900 mb-2"><%= @shop.name %></h2>
+    <div class="text-sm text-gray-600 mb-2">
+      <div class="flex items-start mb-1">
+        <svg class="w-4 h-4 mr-2 mt-0.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <span><%= @shop.address %></span>
+      </div>
+    </div>
+    <% if @shop.description.present? %>
+      <p class="text-sm text-gray-500 leading-relaxed mt-3"><%= @shop.description %></p>
+    <% end %>
+  </div>
+
+  <!-- 优惠卡券 -->
+  <% if @coupons.any? %>
+    <div class="px-4 mb-2">
+      <h3 class="text-lg font-bold text-gray-900 mb-3">优惠卡券</h3>
+      
+      <% @coupons.each do |coupon| %>
+        <% user_coupon = current_user&.user_coupons&.find_by(abroad_coupon_id: coupon.id) %>
+        <div class="bg-white rounded-xl p-4 mb-3 flex justify-between items-center shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="bg-red-50 p-1 rounded mt-0.5">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-red-500">
+                <path fill-rule="evenodd" d="M1.5 7.125c0-1.036.84-1.875 1.875-1.875h6c1.036 0 1.875.84 1.875 1.875v3.75c0 1.036-.84 1.875-1.875 1.875h-6A1.875 1.875 0 011.5 10.875v-3.75zm12 1.5c0-1.036.84-1.875 1.875-1.875h5.25c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-5.25A1.875 1.875 0 0113.5 13.125v-4.5z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <div class="font-medium text-gray-900 text-[15px]"><%= coupon.title %></div>
+              <div class="text-xs text-gray-400 mt-1"><%= coupon.description %></div>
+            </div>
+          </div>
+          
+          <% if user_coupon %>
+            <%= link_to "去使用", wallet_abroad_coupons_path, class: "bg-gray-300 text-gray-600 text-sm font-medium py-1.5 px-5 rounded-full shadow-sm whitespace-nowrap cursor-not-allowed" %>
+          <% else %>
+            <%= button_to "免费领", claim_abroad_coupon_path(coupon), method: :post, class: "bg-[#ffde33] hover:bg-[#fcd535] text-gray-900 text-sm font-medium py-1.5 px-5 rounded-full shadow-sm whitespace-nowrap" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- 底部 -->
+  <div class="text-center pb-8 pt-4">
+    <span class="text-gray-300 text-xs tracking-wider">— 没有更多了 —</span>
+  </div>
+
+</div>
