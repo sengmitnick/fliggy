@@ -584,24 +584,6 @@ export default class extends Controller<HTMLElement> {
     // Update visual state of city buttons in multi-select mode
   }
 
-  // Dispatch city-changed event
-  private dispatchCityChangedEvent(cityName: string): void {
-    const event = new CustomEvent('city-changed', {
-      detail: { city: cityName },
-      bubbles: true
-    })
-    this.element.dispatchEvent(event)
-  }
-
-  // Dispatch hotel city update event
-  private dispatchHotelCityUpdateEvent(cityName: string): void {
-    const event = new CustomEvent('hotel:city-updated', {
-      detail: { city: cityName },
-      bubbles: true
-    })
-    document.dispatchEvent(event)
-  }
-
   // Dispatch trip planner city change event
   private dispatchTripCityChangeEvent(type: 'departure' | 'destination', cityName: string): void {
     const event = new CustomEvent('trip-planner:city-changed', {
