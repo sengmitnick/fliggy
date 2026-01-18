@@ -1,0 +1,346 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Top Banner -->
+  <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #FF3B30 0%, #FF6B6B 50%, #FFA07A 100%);">
+    <!-- Back Button -->
+    <div class="absolute top-4 left-4 z-10">
+      <%= link_to hotels_path, class: "flex items-center justify-center w-10 h-10 rounded-full bg-white/20" do %>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+    </div>
+    
+    <!-- Menu Button -->
+    <div class="absolute top-4 right-4 z-10">
+      <button class="flex items-center justify-center w-10 h-10">
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Banner Content -->
+    <div class="relative h-full flex items-center px-6 pt-4">
+      <!-- Title -->
+      <div class="flex-1">
+        <div class="text-white text-3xl font-black mb-2">特价酒店</div>
+        <div class="text-white">
+          <span class="text-2xl font-bold">全网低价</span>
+          <span class="text-4xl font-black mx-2" style="color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">29元</span>
+          <span class="text-2xl font-bold">住酒店</span>
+        </div>
+      </div>
+      
+      <!-- Character Illustration -->
+      <div class="absolute right-6 top-8">
+        <div class="w-32 h-32 flex items-center justify-center">
+          <div class="text-6xl">🏨</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="bg-white mx-4 -mt-8 relative z-10 rounded-xl shadow-lg p-4">
+    <!-- City and Location -->
+    <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+      <div class="flex items-center gap-1 flex-1">
+        <span class="text-base font-bold">北京</span>
+        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      
+      <button class="flex items-center justify-center w-8 h-8 rounded-full" style="background-color: #E3F2FD;">
+        <svg class="w-5 h-5" style="color: #2196F3;" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+      
+      <div class="flex items-center gap-2 flex-1 bg-gray-50 rounded-lg px-3 py-2">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="位置/品牌/酒店" class="flex-1 bg-transparent text-sm outline-none border-none">
+      </div>
+    </div>
+    
+    <!-- Date Range -->
+    <div class="flex items-center justify-between text-sm">
+      <div class="flex items-center gap-2">
+        <span class="font-bold">1月16日</span>
+        <span class="text-gray-500">今天</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="text-gray-400">一</span>
+        <div class="px-3 py-1 rounded-full border border-gray-300">
+          <span class="font-bold">6晚</span>
+        </div>
+        <span class="text-gray-400">一</span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="font-bold">1月22日</span>
+        <span class="text-gray-500">周四</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-white mt-3 px-4 py-3 flex items-center gap-3 border-b border-gray-100">
+    <button class="flex items-center gap-1 text-sm">
+      <span class="font-medium">推荐排序</span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <button class="flex items-center gap-1 text-sm">
+      <span class="font-medium">位置距离</span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <button class="flex items-center gap-1 text-sm">
+      <span class="font-medium">价格/星级</span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <button class="flex items-center gap-1 text-sm">
+      <span class="font-medium">筛选</span>
+      <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Tag Pills -->
+  <div class="bg-white px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+    <button class="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded text-sm" style="background-color: #FFF3E0; color: #F57C00;">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+      </svg>
+      <span class="font-bold">全网低价</span>
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      距离优先
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      ¥100以下
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      ¥100-300
+    </button>
+    
+    <button class="flex-shrink-0 px-3 py-1.5 rounded text-sm text-gray-700" style="background-color: #F5F5F5;">
+      钟点房
+    </button>
+  </div>
+
+  <!-- Promo Banner -->
+  <div class="mx-4 mt-3 bg-gradient-to-r from-pink-50 to-red-50 rounded-lg p-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-sm font-bold" style="color: #E91E63;">特价酒店专享</span>
+      <span class="text-xs" style="color: #F44336;">新人特惠券9折封顶减20</span>
+      <span class="text-xs text-gray-500">·</span>
+      <span class="text-xs" style="color: #F44336;">酒店专享券92折起</span>
+    </div>
+    <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+    </svg>
+  </div>
+
+  <!-- Hotel List -->
+  <div class="px-4 pb-20 space-y-3 mt-3">
+    <!-- Hotel Card 1 -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div class="flex">
+        <!-- Hotel Image -->
+        <div class="relative w-32 h-40 flex-shrink-0">
+          <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80", class: "w-full h-full object-cover", alt: "Hotel" %>
+          <div class="absolute bottom-2 left-2 right-2 bg-red-600 text-white text-xs font-bold text-center py-1.5 rounded">
+            全网低价
+          </div>
+        </div>
+        
+        <!-- Hotel Info -->
+        <div class="flex-1 p-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-1">
+              <h3 class="text-base font-bold leading-tight flex-1">橘子酒店（北京鸟巢北沙滩地铁站店）</h3>
+            </div>
+            
+            <div class="flex items-center gap-1 mb-1">
+              <span class="px-2 py-0.5 text-xs font-bold rounded text-white" style="background-color: #5C6BC0;">4.8</span>
+              <span class="text-xs text-gray-600">装修风格现代温馨</span>
+            </div>
+            
+            <div class="text-xs text-gray-500 mb-2">
+              近国家会议中心·国家体育馆
+            </div>
+            
+            <div class="flex gap-1 flex-wrap mb-2">
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">打印/复印服务</span>
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">公共休息区</span>
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">公共洗衣房</span>
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">信用住</span>
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs mb-1">
+              <span class="text-red-600 font-bold">热卖！</span>
+              <span class="text-gray-600">低价房仅剩2间</span>
+            </div>
+          </div>
+          
+          <!-- Price Section -->
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1">
+              <span class="text-xs line-through text-gray-400">¥140</span>
+              <span class="text-xs" style="color: #FF5722;">¥</span>
+              <span class="text-2xl font-black" style="color: #FF5722;">80</span>
+              <span class="text-xs text-gray-500">起</span>
+            </div>
+            
+            <div class="relative">
+              <div class="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-xs font-black px-2 py-1 rounded-tl-xl rounded-br-xl" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);">
+                <div class="text-center">
+                  <div>大幅降价</div>
+                  <div class="text-base">43%</div>
+                </div>
+              </div>
+              <button class="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
+                抢
+              </button>
+            </div>
+          </div>
+          
+          <div class="text-xs text-gray-400 text-right mt-1">
+            比过去30天降37%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotel Card 2 -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div class="flex">
+        <div class="relative w-32 h-40 flex-shrink-0">
+          <%= image_tag "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&q=80", class: "w-full h-full object-cover", alt: "Hotel" %>
+          <div class="absolute bottom-2 left-2 right-2 bg-red-600 text-white text-xs font-bold text-center py-1.5 rounded">
+            全网低价
+          </div>
+        </div>
+        
+        <div class="flex-1 p-3 flex flex-col justify-between">
+          <div>
+            <h3 class="text-base font-bold leading-tight mb-1">北京橘子民宿</h3>
+            
+            <div class="flex items-center gap-1 mb-1">
+              <span class="px-2 py-0.5 text-xs font-bold rounded text-white" style="background-color: #5C6BC0;">4.9</span>
+              <span class="text-xs text-gray-600">性价比不错</span>
+            </div>
+            
+            <div class="text-xs text-gray-500 mb-2">
+              近古城地铁站·绿地环球文化金融城
+            </div>
+            
+            <div class="flex gap-1 flex-wrap mb-2">
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">儿童政策</span>
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">信用住</span>
+            </div>
+            
+            <div class="text-xs text-gray-600 mb-1">
+              1小时前有人预订
+            </div>
+          </div>
+          
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1">
+              <span class="text-xs line-through text-gray-400">¥48</span>
+              <span class="text-xs" style="color: #FF5722;">¥</span>
+              <span class="text-2xl font-black" style="color: #FF5722;">43</span>
+              <span class="text-xs text-gray-500">起</span>
+            </div>
+            
+            <div class="relative">
+              <div class="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-xs font-black px-2 py-1 rounded-tl-xl rounded-br-xl">
+                <div class="text-center">
+                  <div>大幅降价</div>
+                  <div class="text-base">10%</div>
+                </div>
+              </div>
+              <button class="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
+                抢
+              </button>
+            </div>
+          </div>
+          
+          <div class="text-xs text-gray-400 text-right mt-1">
+            比过去30天降85%
+          </div>
+        </div>
+      </div>
+      
+      <!-- Special Badge -->
+      <div class="absolute bottom-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded">
+        今夜甩卖 13:32:51
+      </div>
+    </div>
+
+    <!-- Hotel Card 3 -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div class="flex">
+        <div class="relative w-32 h-40 flex-shrink-0">
+          <%= image_tag "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80", class: "w-full h-full object-cover", alt: "Hotel" %>
+          <div class="absolute bottom-2 left-2 right-2 bg-red-600 text-white text-xs font-bold text-center py-1.5 rounded">
+            全网低价
+          </div>
+        </div>
+        
+        <div class="flex-1 p-3 flex flex-col justify-between">
+          <div>
+            <h3 class="text-base font-bold leading-tight mb-1">wohkoon者行孙青年酒店(北京奥森公园北苑店)</h3>
+            
+            <div class="flex items-center gap-1 mb-1">
+              <span class="px-2 py-0.5 text-xs font-bold rounded text-white" style="background-color: #5C6BC0;">4.7</span>
+              <span class="text-xs text-gray-600">特别喜欢这种风格</span>
+            </div>
+            
+            <div class="text-xs text-gray-500 mb-2">
+              近立水桥南站·北苑路北站
+            </div>
+            
+            <div class="flex gap-1 flex-wrap mb-2">
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">公共休息区</span>
+              <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">免费停车</span>
+            </div>
+          </div>
+          
+          <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-1">
+              <span class="text-xs line-through text-gray-400">¥78</span>
+              <span class="text-xs" style="color: #FF5722;">¥</span>
+              <span class="text-2xl font-black" style="color: #FF5722;">65</span>
+              <span class="text-xs text-gray-500">起</span>
+            </div>
+            
+            <button class="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
+              抢
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

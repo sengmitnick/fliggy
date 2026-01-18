@@ -62,41 +62,40 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasDestinationTarget: boolean
   declare readonly hasDepartureCityInputTarget: boolean
   declare readonly hasDestinationCityInputTarget: boolean
-  // stimulus-validator: disable-next-line
+  // Modal-related targets - all optional for pages without modal
+  declare readonly hasModalTarget: boolean
   declare readonly modalTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDepartureTarget: boolean
   declare readonly tabDepartureTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDestinationTarget: boolean
   declare readonly tabDestinationTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabDomesticTarget: boolean
   declare readonly tabDomesticTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasTabInternationalTarget: boolean
   declare readonly tabInternationalTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasSearchInputTarget: boolean
   declare readonly searchInputTarget: HTMLInputElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasDomesticListTarget: boolean
   declare readonly domesticListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasInternationalListTarget: boolean
   declare readonly internationalListTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasHistorySectionTarget: boolean
   declare readonly historySectionTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasCurrentCityTarget: boolean
   declare readonly currentCityTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationStatusTarget: boolean
   declare readonly locationStatusTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationButtonTarget: boolean
   declare readonly locationButtonTarget: HTMLButtonElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationTextTarget: boolean
   declare readonly locationTextTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocationSpinnerTarget: boolean
   declare readonly locationSpinnerTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocatedCityTarget: boolean
   declare readonly locatedCityTarget: HTMLElement
-  // stimulus-validator: disable-next-line
+  declare readonly hasLocatedCityButtonTarget: boolean
   declare readonly locatedCityButtonTarget: HTMLButtonElement
-  // stimulus-validator: disable-next-line
   declare readonly hasCurrentRegionTabTarget: boolean
-  // stimulus-validator: disable-next-line
   declare readonly currentRegionTabTarget: HTMLElement
   declare departureCityValue: string
   declare destinationCityValue: string
@@ -167,12 +166,14 @@ export default class extends Controller<HTMLElement> {
 
   // Show modal
   showModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.remove('hidden')
     document.body.style.overflow = 'hidden'
   }
 
   // Close modal
   closeModal(): void {
+    if (!this.hasModalTarget) return
     this.modalTarget.classList.add('hidden')
     document.body.style.overflow = ''
     this.clearSearch()
@@ -298,6 +299,8 @@ export default class extends Controller<HTMLElement> {
 
   // Switch between domestic and international tabs
   showDomestic(): void {
+    if (!this.hasDomesticListTarget || !this.hasInternationalListTarget || !this.hasTabDomesticTarget || !this.hasTabInternationalTarget) return
+    
     this.domesticListTarget.classList.remove('hidden')
     this.domesticListTarget.classList.add('flex')
     this.internationalListTarget.classList.add('hidden')
@@ -317,6 +320,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   showInternational(): void {
+    if (!this.hasDomesticListTarget || !this.hasInternationalListTarget || !this.hasTabDomesticTarget || !this.hasTabInternationalTarget) return
+    
     this.domesticListTarget.classList.add('hidden')
     this.domesticListTarget.classList.remove('flex')
     this.internationalListTarget.classList.remove('hidden')
@@ -337,6 +342,8 @@ export default class extends Controller<HTMLElement> {
 
   // Search cities
   search(): void {
+    if (!this.hasSearchInputTarget || !this.hasHistorySectionTarget || !this.hasDomesticListTarget || !this.hasInternationalListTarget) return
+    
     const query = this.searchInputTarget.value.toLowerCase().trim()
     
     if (query === '') {
@@ -371,11 +378,12 @@ export default class extends Controller<HTMLElement> {
 
   // Clear search
   clearSearch(): void {
+    if (!this.hasSearchInputTarget || !this.hasHistorySectionTarget) return
+    
     this.searchInputTarget.value = ''
     this.historySectionTarget.classList.remove('hidden')
     
     // Show all cities
-    // stimulus-validator: disable-next-line
     const allButtons = this.element.querySelectorAll('[data-city-name]')
     allButtons.forEach((button) => {
       (button as HTMLElement).classList.remove('hidden')
@@ -384,6 +392,8 @@ export default class extends Controller<HTMLElement> {
 
   // Update modal title based on selection type
   private updateModalTitle(): void {
+    if (!this.hasModalTarget) return
+    
     const singleSelectTitle = this.modalTarget.querySelector('[data-single-select-title]')
     const multiSelectTitle = this.modalTarget.querySelector('[data-multi-select-title]')
     
@@ -428,6 +438,8 @@ export default class extends Controller<HTMLElement> {
 
   // Update multi-select UI elements
   private updateMultiSelectUI(): void {
+    if (!this.hasModalTarget) return
+    
     const selectedCitiesContainer = this.modalTarget.querySelector('[data-selected-cities]')
     const confirmButton = this.modalTarget.querySelector('[data-confirm-button]')
     const singleSelectTab = this.modalTarget.querySelector('[data-single-select-tab]')
@@ -455,6 +467,8 @@ export default class extends Controller<HTMLElement> {
 
   // Update selected cities display
   private updateSelectedCitiesDisplay(): void {
+    if (!this.hasModalTarget) return
+    
     const container = this.modalTarget.querySelector('[data-selected-cities]')
     if (!container) return
     
@@ -485,6 +499,8 @@ export default class extends Controller<HTMLElement> {
 
   // Update city button states (show checkmarks)
   private updateCityButtonStates(): void {
+    if (!this.hasModalTarget) return
+    
     const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
     cityButtons.forEach(button => {
       const cityName = (button as HTMLElement).dataset.cityName || ''
@@ -511,6 +527,8 @@ export default class extends Controller<HTMLElement> {
 
   // Clear city button states
   private clearCityButtonStates(): void {
+    if (!this.hasModalTarget) return
+    
     const cityButtons = this.modalTarget.querySelectorAll('[data-city-name]')
     cityButtons.forEach(button => {
       button.classList.remove('bg-yellow-100', 'relative')
@@ -541,6 +559,8 @@ export default class extends Controller<HTMLElement> {
 
   // Jump to letter section
   jumpToLetter(event: Event): void {
+    if (!this.hasDomesticListTarget) return
+    
     const button = event.currentTarget as HTMLElement
     const letter = button.dataset.letter || ''
     const section = this.domesticListTarget.querySelector(`[data-letter-section="${letter}"]`)
@@ -552,6 +572,8 @@ export default class extends Controller<HTMLElement> {
 
   // Request user location
   requestLocation(): void {
+    if (!this.hasLocationTextTarget || !this.hasLocationButtonTarget || !this.hasLocationSpinnerTarget) return
+    
     if (!navigator.geolocation) {
       this.locationTextTarget.textContent = '浏览器不支持定位'
       return

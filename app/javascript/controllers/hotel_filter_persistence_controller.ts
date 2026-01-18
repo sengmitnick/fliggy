@@ -176,7 +176,6 @@ export default class extends Controller<HTMLElement> {
       // Check if user came from homepage or another internal page
       // If they came from homepage (with default city param only), restore saved filters
       const urlParams = new URLSearchParams(window.location.search)
-      const urlCity = urlParams.get('city')
       const hasOtherParams = Array.from(urlParams.keys()).filter(k => k !== 'city').length > 0
       
       // Only restore if:
@@ -223,8 +222,14 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.set('q', filterState.query)
     }
     
-    console.log('Redirecting with restored filters:', url.toString())
-    window.location.href = url.toString()
+    // Only redirect if URL would actually change
+    const newURL = url.toString()
+    if (newURL !== window.location.href) {
+      console.log('Redirecting with restored filters:', newURL)
+      window.location.href = newURL
+    } else {
+      console.log('URL already matches stored filters, skipping redirect')
+    }
   }
 
   /**

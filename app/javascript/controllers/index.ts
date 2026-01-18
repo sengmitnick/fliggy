@@ -33,6 +33,7 @@ import DateLinkController from "./date_link_controller"
 import HotelGuestSelectorController from "./hotel_guest_selector_controller"
 import HotelDatePickerController from "./hotel_date_picker_controller"
 import HotelPriceFilterController from "./hotel_price_filter_controller"
+import HotelGuaranteeController from "./hotel_guarantee_controller"
 import PaymentModalController from "./payment_modal_controller"
 import PaymentConfirmationController from "./payment_confirmation_controller"
 import HotelTabsController from "./hotel_tabs_controller"
@@ -63,6 +64,7 @@ import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
 import SearchController from "./search_controller"
 import HotelFilterPersistenceController from "./hotel_filter_persistence_controller"
+import LiveRoomController from "./live_room_controller"
 
 const application = Application.start()
 
@@ -99,6 +101,7 @@ application.register("date-link", DateLinkController)
 application.register("hotel-guest-selector", HotelGuestSelectorController)
 application.register("hotel-date-picker", HotelDatePickerController)
 application.register("hotel-price-filter", HotelPriceFilterController)
+application.register("hotel-guarantee", HotelGuaranteeController)
 application.register("payment-modal", PaymentModalController)
 application.register("payment-confirmation", PaymentConfirmationController)
 application.register("hotel-tabs", HotelTabsController)
@@ -129,5 +132,6 @@ application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
 application.register("search", SearchController)
 application.register("hotel-filter-persistence", HotelFilterPersistenceController)
+application.register("live-room", LiveRoomController)
 
 window.Stimulus = application

@@ -10,9 +10,84 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_16_100826) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "abroad_brands", force: :cascade do |t|
+    t.string "name"
+    t.string "slug"
+    t.string "country"
+    t.string "logo_url"
+    t.text "description"
+    t.string "category", default: "duty_free"
+    t.boolean "featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "abroad_coupons", force: :cascade do |t|
+    t.string "title"
+    t.integer "abroad_brand_id"
+    t.integer "abroad_shop_id"
+    t.string "discount_type"
+    t.string "discount_value"
+    t.text "description"
+    t.date "valid_from"
+    t.date "valid_until"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "abroad_shops", force: :cascade do |t|
+    t.string "name"
+    t.integer "abroad_brand_id"
+    t.string "city"
+    t.text "address"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.string "image_url"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "abroad_ticket_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "abroad_ticket_id"
+    t.string "passenger_name"
+    t.string "passenger_id_number"
+    t.string "contact_phone"
+    t.string "contact_email"
+    t.string "passenger_type", default: "1adult"
+    t.string "seat_category", default: "自由席"
+    t.decimal "total_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "order_number"
+    t.index ["abroad_ticket_id"], name: "index_abroad_ticket_orders_on_abroad_ticket_id"
+    t.index ["user_id"], name: "index_abroad_ticket_orders_on_user_id"
+  end
+
+  create_table "abroad_tickets", force: :cascade do |t|
+    t.string "region", default: "japan"
+    t.string "ticket_type", default: "train"
+    t.string "origin"
+    t.string "destination"
+    t.date "departure_date"
+    t.string "time_slot_start"
+    t.string "time_slot_end"
+    t.decimal "price", default: "0.0"
+    t.string "seat_type"
+    t.string "status", default: "available"
+    t.string "origin_en"
+    t.string "destination_en"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -40,6 +115,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "addresses", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "name"
+    t.string "phone"
+    t.string "province"
+    t.string "city"
+    t.string "district"
+    t.string "detail"
+    t.boolean "is_default", default: false
+    t.string "address_type", default: "delivery"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
   create_table "admin_oplogs", force: :cascade do |t|
@@ -223,6 +313,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
     t.index ["pinyin"], name: "index_cities_on_pinyin"
+  end
+
+  create_table "countries", force: :cascade do |t|
+    t.string "name"
+    t.string "code"
+    t.string "slug"
+    t.string "region"
+    t.boolean "visa_free", default: false
+    t.string "image_url"
+    t.text "description"
+    t.text "visa_requirements"
+    t.jsonb "statistics", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
@@ -586,9 +690,71 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.string "hotel_type", default: "hotel"
     t.string "region"
     t.boolean "is_domestic", default: true
+    t.string "brand"
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
     t.index ["region"], name: "index_hotels_on_region"
+  end
+
+  create_table "internet_data_plans", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.string "phone_number"
+    t.string "carrier"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "internet_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "orderable_id"
+    t.string "order_type"
+    t.string "region"
+    t.integer "quantity", default: 1
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "delivery_method"
+    t.jsonb "delivery_info"
+    t.jsonb "contact_info"
+    t.jsonb "rental_info"
+    t.string "order_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "orderable_type"
+    t.index ["orderable_id"], name: "index_internet_orders_on_orderable_id"
+    t.index ["orderable_type", "orderable_id"], name: "index_internet_orders_on_orderable_type_and_orderable_id"
+    t.index ["user_id"], name: "index_internet_orders_on_user_id"
+  end
+
+  create_table "internet_sim_cards", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.integer "validity_days"
+    t.string "data_limit"
+    t.decimal "price"
+    t.text "features"
+    t.integer "sales_count", default: 0
+    t.string "shop_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "internet_wifis", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.string "network_type"
+    t.string "data_limit"
+    t.decimal "daily_price"
+    t.text "features"
+    t.integer "sales_count", default: 0
+    t.string "shop_name"
+    t.decimal "deposit", default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "itineraries", force: :cascade do |t|
@@ -894,6 +1060,50 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "transfer_packages", force: :cascade do |t|
+    t.string "name"
+    t.string "vehicle_category"
+    t.integer "seats"
+    t.integer "luggage"
+    t.integer "wait_time"
+    t.string "refund_policy"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.decimal "discount_amount", default: "0.0"
+    t.text "features"
+    t.string "provider"
+    t.integer "priority", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "transfers", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "transfer_type", default: "airport_pickup"
+    t.string "service_type", default: "to_airport"
+    t.string "location_from"
+    t.string "location_to"
+    t.datetime "pickup_datetime"
+    t.string "flight_number"
+    t.string "train_number"
+    t.string "passenger_name"
+    t.string "passenger_phone"
+    t.string "vehicle_type", default: "economy_5"
+    t.string "provider_name"
+    t.string "license_plate"
+    t.string "driver_name"
+    t.string "driver_status", default: "pending"
+    t.decimal "total_price", default: "0.0"
+    t.decimal "discount_amount", default: "0.0"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "transfer_package_id"
+    t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
+    t.index ["user_id"], name: "index_transfers_on_user_id"
+  end
+
   create_table "travel_agencies", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -901,6 +1111,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.decimal "rating", default: "5.0"
     t.integer "sales_count", default: 0
     t.boolean "is_verified", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "user_coupons", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "abroad_coupon_id"
+    t.string "status", default: "unclaimed"
+    t.datetime "claimed_at"
+    t.datetime "used_at"
+    t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -916,7 +1137,71 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
     t.datetime "updated_at", null: false
     t.jsonb "airline_memberships", default: {}
     t.string "pay_password_digest"
+    t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "phone"
     t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "visa_order_travelers", force: :cascade do |t|
+    t.integer "visa_order_id"
+    t.string "name"
+    t.string "id_number"
+    t.string "phone"
+    t.string "relationship"
+    t.string "passport_number"
+    t.date "passport_expiry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "visa_orders", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "visa_product_id"
+    t.integer "traveler_count", default: 1
+    t.decimal "total_price", default: "0.0"
+    t.decimal "unit_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.date "expected_date"
+    t.string "delivery_method", default: "express"
+    t.text "delivery_address"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.text "notes"
+    t.boolean "insurance_selected", default: false
+    t.decimal "insurance_price", default: "0.0"
+    t.string "payment_status", default: "unpaid"
+    t.datetime "paid_at"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "insurance_type"
+  end
+
+  create_table "visa_products", force: :cascade do |t|
+    t.integer "country_id"
+    t.string "name"
+    t.string "product_type"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price"
+    t.string "residence_area"
+    t.integer "processing_days"
+    t.string "visa_validity"
+    t.string "max_stay"
+    t.decimal "success_rate", default: "99.9"
+    t.jsonb "required_materials", default: []
+    t.integer "material_count", default: 0
+    t.boolean "can_simplify", default: false
+    t.boolean "home_pickup", default: false
+    t.boolean "refused_reapply", default: false
+    t.boolean "supports_family", default: false
+    t.jsonb "features", default: []
+    t.text "description"
+    t.string "slug"
+    t.integer "sales_count", default: 0
+    t.string "merchant_name"
+    t.string "merchant_avatar"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -935,4 +1220,5 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_09_174000) do
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tour_group_products", "travel_agencies"
+  add_foreign_key "transfers", "transfer_packages"
 end
