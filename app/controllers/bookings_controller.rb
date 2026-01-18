@@ -82,7 +82,7 @@ class BookingsController < ApplicationController
 
   def new
     @booking = Booking.new
-    @passengers = current_user.passengers
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     @trip_type = params[:trip_type] || 'one_way'
     
     # 多城市预订：从 selected_flights 参数中解析航班
@@ -160,13 +160,13 @@ class BookingsController < ApplicationController
           end
         rescue JSON::ParserError => e
           flash.now[:alert] = '航班数据格式错误'
-          @passengers = current_user.passengers
+          @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
           render :new, status: :unprocessable_entity
           return
         end
       else
         flash.now[:alert] = '请选择航班'
-        @passengers = current_user.passengers
+        @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
         render :new, status: :unprocessable_entity
         return
       end
@@ -213,7 +213,7 @@ class BookingsController < ApplicationController
     if @booking.save
       redirect_to booking_path(@booking), notice: '订单创建成功'
     else
-      @passengers = current_user.passengers
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
       
       if @trip_type == 'multi_city' && params[:booking][:multi_city_flights_json].present?
         # Reload multi-city flights for re-rendering

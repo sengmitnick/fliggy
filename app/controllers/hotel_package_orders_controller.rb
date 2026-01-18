@@ -4,7 +4,7 @@ class HotelPackageOrdersController < ApplicationController
   def new
     @package_option = PackageOption.find(params[:package_option_id])
     @package = @package_option.hotel_package
-    @passengers = current_user.passengers
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     @order = HotelPackageOrder.new(quantity: 1)
   end
 
@@ -21,7 +21,7 @@ class HotelPackageOrdersController < ApplicationController
     if @order.save
       redirect_to success_hotel_package_order_path(@order)
     else
-      @passengers = current_user.passengers
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
       render :new, status: :unprocessable_entity
     end
   end

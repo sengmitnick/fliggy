@@ -54,7 +54,7 @@
         </div>
 
         <!-- Passenger List -->
-        <% current_user.passengers.order(created_at: :desc).each_with_index do |passenger, index| %>
+        <% current_user.passengers.order(is_self: :desc, created_at: :desc).each_with_index do |passenger, index| %>
           <div 
             class="px-4 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
@@ -68,7 +68,7 @@
                   <!-- Name with badge -->
                   <div class="flex items-center mb-1">
                     <span class="font-bold text-base text-gray-900"><%= passenger.name %></span>
-                    <% if index == 0 %>
+                    <% if passenger.is_self? %>
                       <span class="ml-2 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-600">本人</span>
                     <% end %>
                   </div>

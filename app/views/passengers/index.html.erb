@@ -42,7 +42,7 @@
               <div class="flex-1">
                 <div class="flex items-center mb-2">
                   <span class="text-lg font-bold"><%= passenger.name %></span>
-                  <% if index == 0 %>
+                  <% if passenger.is_self? %>
                     <span class="ml-2 px-2 py-0.5 text-xs rounded" style="background: #FFE8CC; color: #FF6B35;">本人</span>
                   <% end %>
                 </div>

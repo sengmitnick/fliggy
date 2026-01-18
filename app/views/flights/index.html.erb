@@ -247,15 +247,21 @@
       <% end %>
 
       <div class="flex flex-1 flex-col items-center gap-1.5 relative">
-        <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
+        <%= link_to flight_packages_path do %>
+          <%= image_tag "airfare/机票次卡.png", class: "w-full h-auto", alt: "机票次卡" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">
-        <%= image_tag "airfare/低价提醒.png", class: "w-full h-auto", alt: "低价提醒" %>
+        <%= link_to price_alerts_path do %>
+          <%= image_tag "airfare/低价提醒.png", class: "w-full h-auto", alt: "低价提醒" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">
-        <%= image_tag "airfare/家庭认证.png", class: "w-full h-auto", alt: "家庭认证" %>
+        <%= link_to family_benefits_path do %>
+          <%= image_tag "airfare/家庭认证.png", class: "w-full h-auto", alt: "家庭认证" %>
+        <% end %>
       </div>
 
       <div class="flex flex-1 flex-col items-center gap-1.5">

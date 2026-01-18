@@ -5,11 +5,18 @@
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 py-3">
-        <button onclick="window.history.back()" class="flex items-center gap-2" aria-label="返回">
+        <% back_url = params[:source] == 'special_flights' ? special_flights_path : flights_path(
+          departure_city: @departure_city, 
+          destination_city: @destination_city,
+          cabin_class: @cabin_class,
+          trip_type: @trip_type,
+          return_date: @return_date
+        ) %>
+        <%= link_to back_url, class: "flex items-center gap-2", "aria-label": "返回" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
-        </button>
+        <% end %>
 
         <div class="flex-1 text-center">
           <div class="text-lg font-bold">
@@ -49,7 +56,7 @@
         <!-- Outbound Date Selector -->
         <div class="flex gap-1 px-2 py-2 overflow-x-auto no-scrollbar bg-white border-b border-gray-100">
           <% @date_prices.each do |date_info| %>
-            <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date), 
+            <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date, source: params[:source]), 
                 data: { turbo: false },
                 class: "flex-shrink-0 px-2 py-1 rounded text-center text-xs #{date_info[:is_today] ? 'bg-yellow-400 text-gray-900' : 'bg-gray-100 text-gray-600'}" do %>
               <div class="font-bold"><%= I18n.l(date_info[:date], format: "%m-%d") %></div>
@@ -127,7 +134,7 @@
         <!-- Return Date Selector -->
         <div class="flex gap-1 px-2 py-2 overflow-x-auto no-scrollbar bg-white border-b border-gray-100">
           <% @return_date_prices.each do |date_info| %>
-            <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: @date, trip_type: @trip_type, return_date: date_info[:date]), 
+            <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: @date, trip_type: @trip_type, return_date: date_info[:date], source: params[:source]), 
                 data: { turbo: false },
                 class: "flex-shrink-0 px-2 py-1 rounded text-center text-xs #{date_info[:is_today] ? 'bg-yellow-400 text-gray-900' : 'bg-gray-100 text-gray-600'}" do %>
               <div class="font-bold"><%= I18n.l(date_info[:date], format: "%m-%d") %></div>
@@ -222,13 +229,14 @@
     <div class="sticky top-0 z-50 bg-white border-b border-gray-200">
       <!-- Top Bar -->
       <div class="flex items-center justify-between px-4 py-3">
-        <%= link_to flights_path(
+        <% back_url = params[:source] == 'special_flights' ? special_flights_path : flights_path(
           departure_city: @departure_city, 
           destination_city: @destination_city,
           cabin_class: @cabin_class,
           trip_type: @trip_type,
           return_date: @return_date
-        ), class: "flex items-center gap-2" do %>
+        ) %>
+        <%= link_to back_url, class: "flex items-center gap-2" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -272,7 +280,7 @@
       <!-- Date Selector -->
       <div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
         <% @date_prices.each do |date_info| %>
-          <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date, cabin_class: @cabin_class), 
+          <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date, cabin_class: @cabin_class, source: params[:source]), 
               data: { turbo: false },
               class: "flex-shrink-0 px-4 py-2 rounded-lg text-center #{date_info[:is_today] ? 'bg-yellow-400' : 'bg-gray-100'}" do %>
             <div class="text-xs <%= date_info[:is_today] ? 'text-gray-800' : 'text-gray-600' %>"><%= date_info[:weekday] %></div>
@@ -322,7 +330,7 @@
     <!-- Flight List -->
     <div class="w-full space-y-3" data-flight-sort-target="flightList">
       <% @flights.each do |flight| %>
-        <%= link_to flight_path(flight), data: { turbo: false }, class: "block w-full" do %>
+        <%= link_to flight_path(flight, source: params[:source]), data: { turbo: false }, class: "block w-full" do %>
           <div class="bg-white p-3 relative border-b border-gray-100 w-full max-w-full">
             <!-- 右上角收藏星标 -->
             <div class="absolute top-1 right-4 text-gray-300">

@@ -27,7 +27,7 @@
     <!-- Passenger List Container (Scrollable) -->
     <div class="flex-1 overflow-y-auto hidden" data-passenger-selector-target="passengerListPanel">
       <% if current_user&.passengers&.any? %>
-        <% current_user.passengers.each do |passenger| %>
+        <% current_user.passengers.order(is_self: :desc, created_at: :desc).each do |passenger| %>
           <label class="flex items-center justify-between px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50">
             <div class="flex items-center flex-1">
               <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -36,7 +36,9 @@
               <div class="flex-1">
                 <div class="flex items-center">
                   <span class="font-bold text-base"><%= passenger.name %></span>
-                  <span class="ml-2 px-2 py-0.5 text-xs rounded" style="background: #F0F0F0; color: #666;">本人</span>
+                  <% if passenger.is_self? %>
+                    <span class="ml-2 px-2 py-0.5 text-xs rounded" style="background: #F0F0F0; color: #666;">本人</span>
+                  <% end %>
                 </div>
                 <div class="text-sm text-gray-500 mt-1">
                   <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>

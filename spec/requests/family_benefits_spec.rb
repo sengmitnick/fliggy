@@ -1,14 +1,14 @@
 require 'rails_helper'
 
-RSpec.describe "Special flights", type: :request do
+RSpec.describe "Family benefits", type: :request do
 
   # Uncomment this if controller need authentication
   # let(:user) { create(:user) }
   # before { sign_in_as(user) }
 
-  describe "GET /special_flights" do
+  describe "GET /family_benefits" do
     it "returns http success" do
-      get special_flights_path
+      get family_benefits_path
       expect(response).to be_success_with_view_check('index')
     end
   end

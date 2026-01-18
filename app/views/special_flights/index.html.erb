@@ -1,129 +1,201 @@
-<div class="min-h-screen bg-gray-100" data-controller="city-selector date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
-  <!-- Header with Banner -->
-  <div class="relative pb-8">
-    <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
+<div class="min-h-screen" style="background: linear-gradient(180deg, #FFD700 0%, #FFF4D6 30%, #FFFFFF 100%);" data-controller="city-selector date-picker trip-type" data-city-selector-departure-city-value="<%= @departure_city %>" data-city-selector-destination-city-value="<%= @destination_city %>">
+  <!-- Header -->
+  <div class="relative">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to flights_path, class: "w-10 h-10 flex items-center justify-center" do %>
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+        </svg>
+      <% end %>
+      
+      <div class="text-center flex-1">
+        <h1 class="text-xl font-bold">特价机票</h1>
+        
+      </div>
+      
+      <%= link_to "#", class: "w-10 h-10 flex items-center justify-center" do %>
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+        </svg>
+      <% end %>
+    </div>
 
-    <!-- Tabs Container with Gray Background -->
-    <div class="relative mx-4 -mt-3 overflow-hidden z-50">
-      <%= render 'shared/transport_tabs', active_tab: :special_flight %>
-  
-      <!-- White Card Container with Form -->
-      <div class="bg-white rounded-b-[24px] shadow-sm">
-        <div class="px-4 py-4">
-          <!-- Banner Section -->
-          <div class="mb-4 p-4 rounded-xl" style="background: linear-gradient(135deg, #FFD93D 0%, #FFB347 100%);">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-xl font-bold text-gray-900 mb-1">特价机票进群领</div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full font-bold">特价机票</span>
-                  <span class="text-xs text-gray-700">随心飞 特价机票 不错过</span>
-                </div>
-              </div>
-              <%= image_tag "home/特价机票.png", class: "w-16 h-16", alt: "特价机票" %>
-            </div>
-          </div>
+    <!-- Title -->
+    <div class="text-center py-6">
+      <h2 class="text-3xl font-bold mb-2">特价机票</h2>
+      <p class="text-sm text-gray-600">机票5折起 · 多城更省钱 · 拼假更精明</p>
+    </div>
 
-          <!-- Search Form -->
-          <%= form_with url: search_flights_path, method: :get, data: { turbo: false, controller: "special-flights-form", action: "submit->special-flights-form#handleSubmit" }, class: "space-y-3" do |f| %>
-            
-            <!-- Departure City -->
-            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-              <div class="text-sm text-gray-500">出发</div>
-              <div class="flex items-center gap-2">
-                <button type="button" 
-                        data-action="click->city-selector#openDeparture"
-                        class="text-lg font-bold text-gray-900">
-                  <span data-city-selector-target="departure">深圳</span>
-                </button>
-                <%= f.hidden_field :departure_city, value: '深圳', data: { city_selector_target: "departureCityInput" } %>
-              </div>
-            </div>
+    <!-- Search Card -->
+    <div class="mx-4 bg-white rounded-[24px] shadow-lg overflow-hidden mb-4">
+      <!-- Trip Type Tabs -->
+      <div class="flex items-center justify-center gap-12 py-4 border-b border-gray-100">
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="one_way"
+          data-action="click->trip-type#selectType"
+          class="text-base font-bold border-b-2 border-black pb-1">
+          单程
+        </button>
+        <button 
+          type="button"
+          data-trip-type-target="tab" 
+          data-trip-type="round_trip"
+          data-action="click->trip-type#selectType"
+          class="text-base text-gray-500">
+          往返
+        </button>
+      </div>
 
-            <!-- Destination Cities (Multi-select) -->
-            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-              <div class="text-sm text-gray-500">目的地</div>
-              <div class="flex items-center gap-2">
-                <button type="button" 
-                        data-action="click->city-selector#openDestination click->city-selector#switchToMultiSelect"
-                        class="text-lg font-bold text-gray-900 flex items-center gap-1">
-                  <span data-city-selector-target="destination">杭州</span>
-                  <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                  </svg>
-                </button>
-                <%= f.hidden_field :destination_cities, value: '杭州', data: { city_selector_target: "destinationCityInput" } %>
-              </div>
-            </div>
-
-            <!-- Date Selection -->
-            <div class="flex items-center justify-between py-3 border-b border-gray-100">
-              <div class="text-sm text-gray-500">出发时间</div>
-              <div class="flex items-center gap-2">
-                <button type="button" 
-                        data-action="click->date-picker#openModal"
-                        class="text-base font-medium text-gray-900">
-                  <span data-date-picker-target="selectedDate">
-                    <%= Date.today.month %>月<%= Date.today.day %>日 <span class="text-sm text-gray-600">今天</span>
-                  </span>
-                </button>
-                <%= f.hidden_field :date, value: Date.today, data: { date_picker_target: "dateInput" } %>
-              </div>
-            </div>
-
-            <!-- Hidden fields for routing -->
-            <%= f.hidden_field :sort_by, value: 'price' %>
-            <%= f.hidden_field :trip_type, value: 'one_way' %>
-
-            <!-- Search Button -->
-            <div class="pt-2">
-              <%= f.submit "搜索特价机票", class: "w-full py-4 rounded-full text-lg font-bold text-black", style: "background: #FFD700;" %>
-            </div>
-          <% end %>
+      <!-- Search Form -->
+      <div class="p-4">
+        <!-- Cities -->
+        <div class="flex items-center gap-3 mb-4">
+          <button 
+            data-action="click->city-selector#openDeparture"
+            class="flex-1 text-left">
+            <div class="text-2xl font-bold" data-city-selector-target="departure"><%= @departure_city %></div>
+          </button>
+          
+          <button 
+            data-action="click->city-selector#switchCities"
+            class="flex-shrink-0">
+            <%= image_tag "airfare/切换.png", class: "w-8 h-8", alt: "切换" %>
+          </button>
+          
+          <button 
+            data-action="click->city-selector#openDestination"
+            class="flex-1 text-right">
+            <div class="text-2xl font-bold" data-city-selector-target="destination"><%= @destination_city %></div>
+          </button>
         </div>
+
+        <!-- Date -->
+        <button 
+          type="button"
+          data-action="click->date-picker#openModal"
+          class="w-full text-left mb-4">
+          <div class="text-2xl font-bold" data-date-picker-target="selectedDate">
+            <%= @departure_date %> <span class="text-base text-gray-500">出发</span>
+          </div>
+        </button>
+
+        <!-- Search Button -->
+        <%= form_with url: search_flights_path, method: :get, local: true, data: { turbo: false } do |f| %>
+          <%= f.hidden_field :departure_city, value: @departure_city, data: { 'city-selector-target': 'departureCityInput' } %>
+          <%= f.hidden_field :destination_city, value: @destination_city, data: { 'city-selector-target': 'destinationCityInput' } %>
+          <%= f.hidden_field :date, value: Date.today, data: { 'date-picker-target': 'dateInput' } %>
+          <%= f.hidden_field :trip_type, value: 'one_way', data: { 'trip-type-target': 'tripTypeInput' } %>
+          <button type="submit" class="w-full py-4 rounded-full text-lg font-bold text-black" style="background: #FFD700;">
+            搜索机票
+          </button>
+        <% end %>
       </div>
     </div>
   </div>
 
   <!-- Special Offers Section -->
-  <div class="px-4 py-6">
-    <h2 class="text-lg font-bold text-gray-900 mb-4">精选特价推荐</h2>
+  <div class="px-4 pb-8">
+    <h3 class="text-2xl font-bold mb-4" style="font-weight: 900;">精选特价推荐</h3>
     
+    <!-- Tab Filters -->
+    <div class="flex gap-3 mb-4 overflow-x-auto no-scrollbar pb-2">
+      <button class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex items-center gap-1" style="background: linear-gradient(135deg, #FFE5B4 0%, #FFD700 100%); color: #8B4513;">
+        <span class="text-lg">👍</span>
+        <span>精选特价推荐</span>
+      </button>
+      <button class="px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-white border border-gray-200 whitespace-nowrap flex items-center gap-1">
+        <span class="text-lg">💯</span>
+        <span>百元任意飞</span>
+      </button>
+      <button class="px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-white border border-gray-200 whitespace-nowrap flex items-center gap-1">
+        <span class="text-lg">✈️</span>
+        <span>航司特价</span>
+      </button>
+      <button class="px-4 py-2 rounded-full text-sm font-medium text-gray-700 bg-white border border-gray-200 whitespace-nowrap flex items-center gap-1">
+        <span class="text-lg">🔄</span>
+        <span>爱旅行</span>
+      </button>
+    </div>
+
+    <!-- Special Offers List -->
     <div class="space-y-3">
-      <%
-        sample_offers = [
-          { from: '深圳', to: '武汉', date: '02.25 周三', price: 320, discount: '超低1.6折' },
-          { from: '深圳', to: '杭州', date: '01.06 周二', price: 247, discount: '超低1.3折' },
-          { from: '深圳', to: '新加坡', date: '02.03 周二', price: 606, discount: '特价' },
-          { from: '深圳', to: '曼谷', date: '02.25 周三', price: 414, discount: '特价' }
-        ]
-      %>
-      
-      <% sample_offers.each do |offer| %>
-        <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <%= image_tag "home/机票.png", class: "w-12 h-12 rounded", alt: "机票" %>
-              <div>
-                <div class="text-base font-bold text-gray-900">
-                  <%= offer[:from] %> → <%= offer[:to] %>
+      <% @special_offers.each do |offer| %>
+        <%= link_to search_flights_path(departure_city: offer[:route].split('→').first, destination_city: offer[:route].split('→').last&.split(' ').first, source: 'special_flights'), 
+          class: "block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" do %>
+          <div class="flex items-center gap-3 p-3">
+            <!-- Image -->
+            <div class="flex-shrink-0 relative">
+              <%= image_tag offer[:image], class: "w-24 h-24 object-cover rounded-xl", alt: offer[:route] %>
+              <% if offer[:tag] %>
+                <div class="absolute top-1 left-1 bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded">
+                  <%= offer[:tag] %>
                 </div>
-                <div class="text-xs text-gray-500"><%= offer[:date] %></div>
-              </div>
+              <% end %>
             </div>
-            <div class="text-right">
-              <div class="text-sm text-red-500 font-bold mb-1"><%= offer[:discount] %></div>
-              <div class="text-xl font-bold text-red-500">¥<%= offer[:price] %></div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <h4 class="text-base font-bold mb-1 truncate"><%= offer[:route] %></h4>
+              <p class="text-sm text-gray-500 mb-1"><%= offer[:date] %></p>
+              <% if offer[:discount] %>
+                <span class="inline-block px-2 py-0.5 text-xs rounded" style="background: #FFE8CC; color: #FF6B35;">
+                  <%= offer[:discount] %>
+                </span>
+              <% end %>
+            </div>
+
+            <!-- Price -->
+            <div class="flex-shrink-0 text-right">
+              <div class="flex items-baseline">
+                <span class="text-xs" style="color: #FF6B35;">¥</span>
+                <span class="text-2xl font-bold" style="color: #FF6B35;"><%= offer[:price] %></span>
+              </div>
+              <% if offer[:tag] %>
+                <span class="text-xs" style="color: #FF6B35;"><%= offer[:discount] %></span>
+              <% end %>
             </div>
           </div>
-        </div>
+        <% end %>
       <% end %>
+    </div>
+  </div>
+
+  <!-- Bottom Filter Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+    <div class="flex items-center gap-1">
+      <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-base font-medium">春节飞哪儿便宜</span>
+    </div>
+    
+    <button class="px-6 py-2 rounded-full text-sm font-medium" style="background: #FFD700; color: #000;">
+      北京出发 <span class="ml-1">▼</span>
+    </button>
+  </div>
+
+  <!-- Additional Bottom Section -->
+  <div class="fixed bottom-16 left-0 right-0 bg-gray-50 px-4 py-2">
+    <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+      <button class="px-3 py-1 rounded-full bg-white border border-gray-200">
+        春节02.15-02.23
+      </button>
+      <span>▼</span>
+      <button class="px-3 py-1 rounded-full bg-white border border-gray-200">
+        最多请假2天
+      </button>
+      <button class="px-3 py-1 rounded-full bg-white border border-gray-200">
+        玩5~11天
+      </button>
+      <span>▼</span>
     </div>
   </div>
 
   <!-- City Selector Modal -->
   <%= render 'shared/city_selector_modal' %>
-  
+
   <!-- Date Picker Modal -->
   <%= render 'shared/date_picker_modal' %>
 </div>

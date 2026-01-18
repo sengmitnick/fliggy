@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_16_100826) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_18_105101) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -396,6 +396,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_16_100826) do
     t.index ["slug"], name: "index_destinations_on_slug", unique: true
   end
 
+  create_table "family_benefits", force: :cascade do |t|
+    t.string "verification_status", default: "unverified"
+    t.integer "family_members", default: 0
+    t.integer "adult_count", default: 0
+    t.integer "child_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "family_coupons", force: :cascade do |t|
+    t.string "title"
+    t.string "coupon_type"
+    t.decimal "amount"
+    t.date "valid_until"
+    t.string "status", default: "available"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "flight_offers", force: :cascade do |t|
     t.bigint "flight_id"
     t.string "provider_name"
@@ -415,6 +435,24 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_16_100826) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["flight_id"], name: "index_flight_offers_on_flight_id"
+  end
+
+  create_table "flight_packages", force: :cascade do |t|
+    t.string "title"
+    t.string "subtitle"
+    t.decimal "price", default: "0.0"
+    t.decimal "original_price", default: "0.0"
+    t.string "discount_label"
+    t.string "badge_text"
+    t.string "badge_color", default: "#FF5722"
+    t.string "destination"
+    t.string "image_url"
+    t.integer "valid_days", default: 365
+    t.text "description"
+    t.text "features"
+    t.string "status", default: "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "flights", force: :cascade do |t|
@@ -851,7 +889,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_16_100826) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.boolean "is_self", default: false, null: false
+    t.index ["user_id", "is_self"], name: "index_passengers_on_user_id_and_is_self"
     t.index ["user_id"], name: "index_passengers_on_user_id"
+  end
+
+  create_table "price_alerts", force: :cascade do |t|
+    t.string "departure"
+    t.string "destination"
+    t.decimal "expected_price"
+    t.date "departure_date"
+    t.string "status", default: "active"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "rooms", force: :cascade do |t|

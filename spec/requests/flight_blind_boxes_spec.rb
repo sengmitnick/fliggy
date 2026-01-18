@@ -1,14 +1,14 @@
 require 'rails_helper'
 
-RSpec.describe "Special flights", type: :request do
+RSpec.describe "Flight blind boxes", type: :request do
 
   # Uncomment this if controller need authentication
   # let(:user) { create(:user) }
   # before { sign_in_as(user) }
 
-  describe "GET /special_flights" do
+  describe "GET /flight_blind_boxes" do
     it "returns http success" do
-      get special_flights_path
+      get flight_blind_boxes_path
       expect(response).to be_success_with_view_check('index')
     end
   end

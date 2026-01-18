@@ -82,7 +82,7 @@
         </div>
 
         <!-- Phone Field -->
-        <div class="px-4 py-4">
+        <div class="px-4 py-4 border-b border-gray-100">
           <div class="flex items-center justify-between">
             <label class="text-base text-gray-700">
               手机号
@@ -92,6 +92,20 @@
               placeholder: "请输入手机号",
               type: "tel",
               maxlength: "11" %>
+          </div>
+        </div>
+
+        <!-- Is Self Field -->
+        <div class="px-4 py-4">
+          <div class="flex items-center justify-between">
+            <label class="text-base text-gray-700">
+              标记为本人
+            </label>
+            <div class="flex items-center">
+              <%= f.check_box :is_self,
+                class: "w-6 h-6 rounded border-2 border-gray-300 text-blue-500 focus:ring-0 focus:ring-offset-0" %>
+              <span class="ml-2 text-sm text-gray-500">仅有一人可标记为本人</span>
+            </div>
           </div>
         </div>
       </div>
