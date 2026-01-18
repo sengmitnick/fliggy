@@ -359,21 +359,92 @@ export default class extends Controller<HTMLElement> {
     this.locationSpinnerTarget.classList.remove('hidden')
     this.locationButtonTarget.disabled = true
     
-    // Use browser geolocation API
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // Success - simulate getting city from coordinates
-          // In real app, you'd call a geocoding API
-          this.handleLocationSuccess('当前城市')
-        },
-        (error) => {
-          this.handleLocationError()
-        }
-      )
-    } else {
-      this.handleLocationError()
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = '正在获取位置信息...'
     }
+    
+    // Directly use IP-based geolocation (most reliable for China)
+    this.getCityFromIP()
+  }
+  
+  // Get city from IP address using ipapi.co (free, no key needed)
+  private getCityFromIP(): void {
+    // Try ipapi.co first (supports Chinese cities)
+    fetch('https://ipapi.co/json/')
+      .then(response => {
+        if (!response.ok) throw new Error('ipapi.co failed')
+        return response.json()
+      })
+      .then(data => {
+        console.log('Location data:', data)
+        let cityName = ''
+        
+        // Try to get Chinese city name or use English name
+        if (data.city) {
+          cityName = data.city
+          // Map common English city names to Chinese
+          const cityMap: {[key: string]: string} = {
+            'Beijing': '北京',
+            'Shanghai': '上海',
+            'Guangzhou': '广州',
+            'Shenzhen': '深圳',
+            'Chengdu': '成都',
+            'Hangzhou': '杭州',
+            'Wuhan': '武汉',
+            'Chongqing': '重庆',
+            'Nanjing': '南京',
+            'Xi\'an': '西安',
+            'Tianjin': '天津',
+            'Suzhou': '苏州',
+            'Changsha': '长沙',
+            'Zhengzhou': '郑州',
+            'Harbin': '哈尔滨',
+            'Qingdao': '青岛',
+            'Kunming': '昆明',
+            'Xiamen': '厦门',
+            'Dalian': '大连'
+          }
+          
+          if (cityMap[data.city]) {
+            cityName = cityMap[data.city]
+          }
+          
+          // Remove 'Shi' or 'City' suffix
+          cityName = cityName.replace(/\s+Shi$/, '').replace(/\s+City$/, '').replace('市', '')
+          
+          this.handleLocationSuccess(cityName)
+        } else {
+          // Fallback to alternative service
+          this.getCityFromIPFallback()
+        }
+      })
+      .catch(error => {
+        console.error('IP location error:', error)
+        // Try fallback service
+        this.getCityFromIPFallback()
+      })
+  }
+  
+  // Fallback: Use ip-api.com (free, no key, better for China)
+  private getCityFromIPFallback(): void {
+    fetch('http://ip-api.com/json/?lang=zh-CN')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Fallback location data:', data)
+        if (data.status === 'success' && data.city) {
+          const cityName = data.city.replace('市', '')
+          this.handleLocationSuccess(cityName)
+        } else {
+          // Last resort: detect from browser language/timezone
+          this.handleLocationError('无法自动定位，请手动选择城市')
+        }
+      })
+      .catch(error => {
+        console.error('Fallback IP location error:', error)
+        this.handleLocationError('定位服务暂时不可用，请手动选择城市')
+      })
   }
 
   // Handle location success
@@ -386,6 +457,12 @@ export default class extends Controller<HTMLElement> {
     this.locationSpinnerTarget.classList.add('hidden')
     this.locationButtonTarget.disabled = false
     
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = `定位成功：${cityName}`
+    }
+    
     // Show located city
     this.locatedCityTarget.classList.remove('hidden')
     this.locatedCityButtonTarget.textContent = cityName
@@ -393,18 +470,24 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Handle location error
-  private handleLocationError(): void {
+  private handleLocationError(errorMessage?: string): void {
     if (!this.hasLocationTextTarget || !this.hasLocationSpinnerTarget || !this.hasLocationButtonTarget) return
     
-    this.locationTextTarget.textContent = '定位失败'
+    this.locationTextTarget.textContent = '重试定位'
     this.locationSpinnerTarget.classList.add('hidden')
     this.locationButtonTarget.disabled = false
+    
+    // Update status text
+    if (this.hasLocationStatusTarget) {
+      const statusSpan = this.locationStatusTarget.querySelector('span')
+      if (statusSpan) statusSpan.textContent = errorMessage || '定位失败，请重试或手动选择城市'
+    }
     
     setTimeout(() => {
       if (this.hasLocationTextTarget) {
         this.locationTextTarget.textContent = '开启定位权限'
       }
-    }, 2000)
+    }, 3000)
   }
 
   // Save to history
