@@ -143,24 +143,58 @@ class HotelsController < ApplicationController
       @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
     end
     
+    # District filtering (same as special_hotels)
+    if params[:district].present?
+      @hotels = @hotels.where('address LIKE ?', "%#{params[:district]}%")
+    end
+    
+    # Price range filtering (same as special_hotels)
+    if params[:price_range].present?
+      case params[:price_range]
+      when '0-100'
+        @hotels = @hotels.where('price < ?', 100)
+      when '100-200'
+        @hotels = @hotels.where('price >= ? AND price < ?', 100, 200)
+      when '200-300'
+        @hotels = @hotels.where('price >= ? AND price < ?', 200, 300)
+      when '300+'
+        @hotels = @hotels.where('price >= ?', 300)
+      end
+    end
+    
     @hotels = @hotels.by_star_level(@star_level) if @star_level.present?
     @hotels = @hotels.by_price_range(@price_min, @price_max) if @price_min.present? || @price_max.present?
     
-    # 如果有区级信息，按地址匹配度排序（地址包含区名的排在前面）
-    if district.present?
-      @hotels = @hotels.order(
-        Arel.sql("CASE WHEN address ILIKE '%#{district}%' THEN 0 ELSE 1 END"),
-        :display_order, 
-        created_at: :desc
-      ).page(params[:page]).per(10)
+    # Sorting (updated to match special_hotels pattern)
+    case params[:sort]
+    when 'rating'
+      @hotels = @hotels.order(rating: :desc, price: :asc)
+    when 'distance'
+      @hotels = @hotels.order(distance: :asc, price: :asc)
+    when 'price'
+      @hotels = @hotels.order(price: :asc)
     else
-      @hotels = @hotels.ordered.page(params[:page]).per(10)
+      # 如果有区级信息，按地址匹配度排序（地址包含区名的排在前面）
+      if district.present?
+        @hotels = @hotels.order(
+          Arel.sql("CASE WHEN address ILIKE '%#{district}%' THEN 0 ELSE 1 END"),
+          :display_order, 
+          created_at: :desc
+        )
+      else
+        @hotels = @hotels.ordered
+      end
     end
+    
+    @hotels = @hotels.page(params[:page]).per(10)
 
     @featured_hotels = Hotel.featured.limit(3)
     
     # 获取搜索模态框的动态数据
     @search_modal_data = get_search_modal_data(@city)
+    
+    # Extract districts for filter bar
+    @districts = extract_districts_from_hotels(@city)
     
     # Render the dedicated search results view
     render :search
@@ -349,5 +383,20 @@ class HotelsController < ApplicationController
       hospital: ['市人民医院', '市中心医院', '市第一人民医院', '市第二人民医院', '市中医院', '市儿童医院', '市妇幼保健院', '中医院'],
       university: ['综合大学', '理工大学', '师范大学', '医科大学', '财经大学', '科技大学', '外国语大学', '职业技术学院']
     }
+  end
+  
+  # Extract districts from hotel addresses for filter bar
+  def extract_districts_from_hotels(city)
+    addresses = Hotel.by_city(city).pluck(:address).compact
+    districts = addresses.map do |address|
+      if address.match?(/（\w+区）/)
+        address.match(/（\w+区）/)[1]
+      elsif address.match?(/（\w+新区）/)
+        address.match(/（\w+新区）/)[1]
+      else
+        address.split(/[路街道号]/).first
+      end
+    end.compact.uniq.sort
+    districts
   end
 end

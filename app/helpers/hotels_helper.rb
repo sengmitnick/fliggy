@@ -1,7 +1,7 @@
 module HotelsHelper
   def date_label(date)
     date = Date.parse(date) if date.is_a?(String)
-    today = Date.today
+    today = Time.zone.today
     
     case (date - today).to_i
     when 0

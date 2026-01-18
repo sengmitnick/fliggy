@@ -1,5 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Declare Turbo global type
+declare const Turbo: any
+
 export default class extends Controller<HTMLElement> {
   static targets = [
     // stimulus-validator: disable-next-line
@@ -233,7 +236,13 @@ export default class extends Controller<HTMLElement> {
           this.departureCityInputTarget.value = cityName
         }
         
-        // Dispatch city-changed event for tour-group-filter to listen
+        // Special handling for special_hotels page - reload with new city parameter
+        if (window.location.pathname === '/special_hotels') {
+          Turbo.visit(`/special_hotels?city=${encodeURIComponent(cityName)}`)
+          return
+        }
+        
+        // Dispatch city-changed event for tour-group-filter and hotel-services-search to listen
         this.dispatchCityChangedEvent(cityName)
         
         // Dispatch hotel-specific event for hotel-search controller
@@ -572,17 +581,31 @@ export default class extends Controller<HTMLElement> {
 
   // Request user location
   requestLocation(): void {
-    if (!this.hasLocationTextTarget || !this.hasLocationButtonTarget || !this.hasLocationSpinnerTarget) return
+    console.log('===== requestLocation called =====')
+    console.log('navigator.geolocation available:', !!navigator.geolocation)
     
     if (!navigator.geolocation) {
-      this.locationTextTarget.textContent = '浏览器不支持定位'
+      const errorMsg = '浏览器不支持定位'
+      if (this.hasLocationTextTarget) {
+        this.locationTextTarget.textContent = errorMsg
+      } else {
+        alert(errorMsg)
+      }
       return
     }
 
     // Show loading state
-    this.locationButtonTarget.disabled = true
-    this.locationTextTarget.textContent = '定位中...'
-    this.locationSpinnerTarget.classList.remove('hidden')
+    if (this.hasLocationButtonTarget) {
+      this.locationButtonTarget.disabled = true
+    }
+    
+    if (this.hasLocationTextTarget) {
+      this.locationTextTarget.textContent = '定位中...'
+    }
+    
+    if (this.hasLocationSpinnerTarget) {
+      this.locationSpinnerTarget.classList.remove('hidden')
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => this.handleLocationSuccess(position),
@@ -622,16 +645,60 @@ export default class extends Controller<HTMLElement> {
       const data = await response.json()
       console.log('City found:', data)
 
-      // Update UI with located city
-      this.locationTextTarget.textContent = `当前位置: ${data.city}`
-      this.locationButtonTarget.disabled = false
-      this.locationSpinnerTarget.classList.add('hidden')
+      // Check if modal targets exist (modal-based page)
+      if (this.hasLocationTextTarget && this.hasLocationSpinnerTarget) {
+        // Modal-based page: Update modal UI with located city
+        this.locationTextTarget.textContent = `当前位置: ${data.city}`
+        this.locationButtonTarget.disabled = false
+        this.locationSpinnerTarget.classList.add('hidden')
 
-      // Show located city button
-      this.locatedCityButtonTarget.textContent = data.city
-      this.locatedCityButtonTarget.dataset.cityName = data.city
-      this.locatedCityButtonTarget.dataset.cityPinyin = data.pinyin
-      this.locatedCityTarget.classList.remove('hidden')
+        // Show located city button in modal
+        if (this.hasLocatedCityButtonTarget && this.hasLocatedCityTarget) {
+          this.locatedCityButtonTarget.textContent = data.city
+          this.locatedCityButtonTarget.dataset.cityName = data.city
+          this.locatedCityButtonTarget.dataset.cityPinyin = data.pinyin
+          this.locatedCityTarget.classList.remove('hidden')
+        }
+      } else {
+        // No modal: Direct update for special_hotels-style pages
+        console.log('No modal found, updating city display directly')
+        
+        // Update the departure target text immediately
+        if (this.hasDepartureTarget) {
+          this.departureTarget.textContent = data.city
+        }
+        
+        // Update hidden input if exists
+        if (this.hasDepartureCityInputTarget) {
+          this.departureCityInputTarget.value = data.city
+        }
+        
+        // Update the value
+        this.departureCityValue = data.city
+        
+        // Re-enable button
+        if (this.hasLocationButtonTarget) {
+          this.locationButtonTarget.disabled = false
+        }
+        
+        // Hide spinner if exists
+        if (this.hasLocationSpinnerTarget) {
+          this.locationSpinnerTarget.classList.add('hidden')
+        }
+        
+        // Optionally update URL without reload (for consistency)
+        const currentPath = window.location.pathname
+        const newUrl = `${currentPath}?city=${encodeURIComponent(data.city)}`
+        console.log('Updating URL to:', newUrl)
+        
+        // Use history.replaceState to update URL without page reload
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', newUrl)
+        }
+        
+        // Dispatch city-changed event for other controllers to listen
+        this.dispatchCityChangedEvent(data.city)
+      }
 
     } catch (error) {
       console.error('Reverse geocoding error:', error)
@@ -660,9 +727,24 @@ export default class extends Controller<HTMLElement> {
     }
 
     console.error('Location error:', error)
-    this.locationTextTarget.textContent = errorMessage
-    this.locationButtonTarget.disabled = false
-    this.locationSpinnerTarget.classList.add('hidden')
+    
+    // Only update UI targets if they exist
+    if (this.hasLocationTextTarget) {
+      this.locationTextTarget.textContent = errorMessage
+    }
+    
+    if (this.hasLocationButtonTarget) {
+      this.locationButtonTarget.disabled = false
+    }
+    
+    if (this.hasLocationSpinnerTarget) {
+      this.locationSpinnerTarget.classList.add('hidden')
+    }
+    
+    // Show alert for pages without modal
+    if (!this.hasLocationTextTarget) {
+      alert(errorMessage)
+    }
   }
 
   // Get CSRF token

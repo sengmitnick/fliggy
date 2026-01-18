@@ -53,30 +53,222 @@
   </div>
 
   <!-- 筛选栏 -->
-  <div class="bg-white px-4 py-2 flex justify-between items-center text-xs font-medium text-gray-700 border-b border-gray-100">
-    <div class="flex items-center">
-      推荐排序 
-      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
+  <div class="bg-white mt-3 px-4 py-3 flex items-center gap-3 border-b border-gray-100" 
+       data-controller="hotel-search-filter" 
+       data-hotel-search-filter-city-value="<%= @city %>" 
+       data-hotel-search-filter-check-in-value="<%= @check_in %>" 
+       data-hotel-search-filter-check-out-value="<%= @check_out %>" 
+       data-hotel-search-filter-rooms-value="<%= @rooms %>" 
+       data-hotel-search-filter-adults-value="<%= @adults %>" 
+       data-hotel-search-filter-children-value="<%= @children %>" 
+       data-hotel-search-filter-query-value="<%= params[:q] || '' %>" 
+       data-hotel-search-filter-sort-value="<%= params[:sort] || 'recommend' %>" 
+       data-hotel-search-filter-district-value="<%= params[:district] || '' %>" 
+       data-hotel-search-filter-price-range-value="<%= params[:price_range] || '' %>" 
+       data-hotel-search-filter-stars-value="<%= params[:star_level] || '' %>">
+    
+    <!-- 排序按钮 -->
+    <button type="button" 
+            data-hotel-search-filter-target="sortButton" 
+            data-action="click->hotel-search-filter#openSortModal" 
+            class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+      <span><%= params[:sort] == 'rating' ? '评分优先' : params[:sort] == 'distance' ? '距离优先' : params[:sort] == 'price' ? '价格优先' : '推荐排序' %></span>
+      <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
         <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
       </svg>
+    </button>
+    
+    <!-- 商圈按钮 -->
+    <button type="button" 
+            data-hotel-search-filter-target="districtButton" 
+            data-action="click->hotel-search-filter#openDistrictModal" 
+            class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+      <span><%= params[:district].present? ? params[:district] : '位置距离' %></span>
+      <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </button>
+    
+    <!-- 价格按钮 -->
+    <button type="button" 
+            data-hotel-search-filter-target="priceButton" 
+            data-action="click->hotel-search-filter#openPriceModal" 
+            class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+      <span><%= params[:price_range] == '0-100' ? '¥100以下' : params[:price_range] == '100-200' ? '¥100-200' : params[:price_range] == '200-300' ? '¥200-300' : params[:price_range] == '300+' ? '¥300以上' : '价格/星级' %></span>
+      <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </button>
+    
+    <!-- 筛选按钮 -->
+    <button type="button" 
+            data-hotel-search-filter-target="filterButton" 
+            data-action="click->hotel-search-filter#openFilterModal" 
+            class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+      <span><%= params[:star_level].present? ? "#{params[:star_level]}星" : '筛选' %></span>
+      <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
+        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+      </svg>
+    </button>
+    
+    <!-- 排序模态框 -->
+    <div data-hotel-search-filter-target="sortModal" 
+         data-action="click->hotel-search-filter#closeAllModals" 
+         class="hidden fixed inset-0 bg-black/50 z-50">
+      <div data-action="click->hotel-search-filter#stopPropagation" 
+           class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[450px] mx-auto">
+        <div class="p-4 space-y-2">
+          <h3 class="text-lg font-bold mb-4">排序方式</h3>
+          <button data-hotel-search-filter-target="sortOption" 
+                  data-value="recommend" 
+                  data-action="click->hotel-search-filter#selectSort" 
+                  class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 <%= params[:sort].blank? || params[:sort] == 'recommend' ? 'text-primary font-bold' : 'text-gray-700' %>">
+            推荐排序
+          </button>
+          <button data-hotel-search-filter-target="sortOption" 
+                  data-value="price" 
+                  data-action="click->hotel-search-filter#selectSort" 
+                  class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 <%= params[:sort] == 'price' ? 'text-primary font-bold' : 'text-gray-700' %>">
+            价格优先
+          </button>
+          <button data-hotel-search-filter-target="sortOption" 
+                  data-value="rating" 
+                  data-action="click->hotel-search-filter#selectSort" 
+                  class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 <%= params[:sort] == 'rating' ? 'text-primary font-bold' : 'text-gray-700' %>">
+            评分优先
+          </button>
+          <button data-hotel-search-filter-target="sortOption" 
+                  data-value="distance" 
+                  data-action="click->hotel-search-filter#selectSort" 
+                  class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 <%= params[:sort] == 'distance' ? 'text-primary font-bold' : 'text-gray-700' %>">
+            距离优先
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center">
-      位置距离 
-      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
-        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-      </svg>
+    
+    <!-- 商圈模态框 -->
+    <div data-hotel-search-filter-target="districtModal" 
+         data-action="click->hotel-search-filter#closeAllModals" 
+         class="hidden fixed inset-0 bg-black/50 z-50">
+      <div data-action="click->hotel-search-filter#stopPropagation" 
+           class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[450px] mx-auto max-h-[70vh] overflow-y-auto">
+        <div class="p-4">
+          <h3 class="text-lg font-bold mb-4">选择商圈</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <button data-hotel-search-filter-target="districtOption" 
+                    data-value="" 
+                    data-action="click->hotel-search-filter#selectDistrict" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:district].blank? ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              不限
+            </button>
+            <% @districts.each do |district| %>
+              <button data-hotel-search-filter-target="districtOption" 
+                      data-value="<%= district %>" 
+                      data-action="click->hotel-search-filter#selectDistrict" 
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:district] == district ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+                <%= district %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center">
-      价格/星级 
-      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
-        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-      </svg>
+    
+    <!-- 价格模态框 -->
+    <div data-hotel-search-filter-target="priceModal" 
+         data-action="click->hotel-search-filter#closeAllModals" 
+         class="hidden fixed inset-0 bg-black/50 z-50">
+      <div data-action="click->hotel-search-filter#stopPropagation" 
+           class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[450px] mx-auto">
+        <div class="p-4">
+          <h3 class="text-lg font-bold mb-4">价格区间</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <button data-hotel-search-filter-target="priceOption" 
+                    data-value="" 
+                    data-action="click->hotel-search-filter#selectPriceRange" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:price_range].blank? ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              不限
+            </button>
+            <button data-hotel-search-filter-target="priceOption" 
+                    data-value="0-100" 
+                    data-action="click->hotel-search-filter#selectPriceRange" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:price_range] == '0-100' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              ¥100以下
+            </button>
+            <button data-hotel-search-filter-target="priceOption" 
+                    data-value="100-200" 
+                    data-action="click->hotel-search-filter#selectPriceRange" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:price_range] == '100-200' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              ¥100-200
+            </button>
+            <button data-hotel-search-filter-target="priceOption" 
+                    data-value="200-300" 
+                    data-action="click->hotel-search-filter#selectPriceRange" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:price_range] == '200-300' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              ¥200-300
+            </button>
+            <button data-hotel-search-filter-target="priceOption" 
+                    data-value="300+" 
+                    data-action="click->hotel-search-filter#selectPriceRange" 
+                    class="px-3 py-2 rounded-lg text-sm <%= params[:price_range] == '300+' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              ¥300以上
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center">
-      筛选 
-      <svg class="w-3 h-3 ml-0.5 fill-current" viewBox="0 0 20 20">
-        <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-      </svg>
+    
+    <!-- 星级筛选模态框 -->
+    <div data-hotel-search-filter-target="filterModal" 
+         data-action="click->hotel-search-filter#closeAllModals" 
+         class="hidden fixed inset-0 bg-black/50 z-50">
+      <div data-action="click->hotel-search-filter#stopPropagation" 
+           class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[450px] mx-auto">
+        <div class="p-4">
+          <h3 class="text-lg font-bold mb-4">星级筛选</h3>
+          <div class="space-y-2 mb-4">
+            <button data-hotel-search-filter-target="starOption" 
+                    data-value="5" 
+                    data-action="click->hotel-search-filter#toggleStar" 
+                    class="w-full px-4 py-3 rounded-lg text-left <%= params[:star_level] == '5' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              <div class="font-bold">五星级/豪华</div>
+              <div class="text-xs opacity-80">高档豪华型酒店</div>
+            </button>
+            <button data-hotel-search-filter-target="starOption" 
+                    data-value="4" 
+                    data-action="click->hotel-search-filter#toggleStar" 
+                    class="w-full px-4 py-3 rounded-lg text-left <%= params[:star_level] == '4' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              <div class="font-bold">四星级/高档</div>
+              <div class="text-xs opacity-80">舒适高档型酒店</div>
+            </button>
+            <button data-hotel-search-filter-target="starOption" 
+                    data-value="3" 
+                    data-action="click->hotel-search-filter#toggleStar" 
+                    class="w-full px-4 py-3 rounded-lg text-left <%= params[:star_level] == '3' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              <div class="font-bold">三星级/舒适</div>
+              <div class="text-xs opacity-80">经济舒适型酒店</div>
+            </button>
+            <button data-hotel-search-filter-target="starOption" 
+                    data-value="2" 
+                    data-action="click->hotel-search-filter#toggleStar" 
+                    class="w-full px-4 py-3 rounded-lg text-left <%= params[:star_level] == '2' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' %>">
+              <div class="font-bold">二星级及以下</div>
+              <div class="text-xs opacity-80">经济实惠型酒店</div>
+            </button>
+          </div>
+          <div class="flex gap-3 pt-3 border-t">
+            <button data-action="click->hotel-search-filter#clearFilters" 
+                    class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+              清空筛选
+            </button>
+            <button data-action="click->hotel-search-filter#applyFilters" 
+                    class="flex-1 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark">
+              确认
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

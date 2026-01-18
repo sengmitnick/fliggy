@@ -65,7 +65,11 @@ import BusTicketOrderController from "./bus_ticket_order_controller"
 import DeepBookingController from "./deep_booking_controller"
 import SearchController from "./search_controller"
 import HotelFilterPersistenceController from "./hotel_filter_persistence_controller"
+import HotelServicesSearchController from "./hotel_services_search_controller"
 import LiveRoomController from "./live_room_controller"
+import SpecialHotelSearchController from "./special_hotel_search_controller"
+import SpecialHotelFilterController from "./special_hotel_filter_controller"
+import HotelSearchFilterController from "./hotel_search_filter_controller"
 
 const application = Application.start()
 
@@ -134,6 +138,10 @@ application.register("bus-ticket-order", BusTicketOrderController)
 application.register("deep-booking", DeepBookingController)
 application.register("search", SearchController)
 application.register("hotel-filter-persistence", HotelFilterPersistenceController)
+application.register("hotel-services-search", HotelServicesSearchController)
 application.register("live-room", LiveRoomController)
+application.register("special-hotel-search", SpecialHotelSearchController)
+application.register("special-hotel-filter", SpecialHotelFilterController)
+application.register("hotel-search-filter", HotelSearchFilterController)
 
 window.Stimulus = application

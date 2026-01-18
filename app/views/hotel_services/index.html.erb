@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-white">
+<div class="min-h-screen bg-white" data-controller="city-selector hotel-date-picker hotel-services-search" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
   <!-- Header -->
   <div class="relative h-48 overflow-hidden">
     <!-- Background Image -->
@@ -64,7 +64,7 @@
           <div class="bg-white rounded-lg px-3 py-2 text-right">
             <div class="text-orange-600 font-bold text-xs">查看更多</div>
             <div class="text-orange-600 text-[10px]">积分攻略</div>
-            <div class="text-orange-600 text-xs mt-1">点击进入 ></div>
+            <div class="text-orange-600 text-xs mt-1">点击进入 &gt;</div>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@
   <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 overflow-x-auto scrollbar-hide">
     <div class="flex gap-2 min-w-max">
       <% @brands.each do |brand| %>
-        <%= link_to hotel_services_path(brand: brand), class: "flex-shrink-0 px-6 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap #{@selected_brand == brand ? 'bg-yellow-100 text-yellow-800 font-bold' : 'bg-gray-100 text-gray-700'}" do %>
+        <%= link_to hotel_services_path(city: @city, brand: brand), class: "flex-shrink-0 px-6 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap #{@selected_brand == brand ? 'bg-yellow-100 text-yellow-800 font-bold' : 'bg-gray-100 text-gray-700'}" do %>
           <%= brand %>
         <% end %>
       <% end %>
@@ -86,30 +86,37 @@
   <div class="px-4 py-3 bg-gray-50">
     <div class="flex items-center gap-3">
       <!-- City Selector -->
-      <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1">
+      <button type="button" class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1" data-action="click->city-selector#openDeparture">
         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
-        <span class="text-gray-900 font-medium">北京</span>
+        <span class="text-gray-900 font-medium" data-city-selector-target="departure"><%= @city %></span>
         <svg class="w-4 h-4 text-gray-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
-      </div>
+      </button>
+      
+      <!-- Hidden input for city -->
+      <input type="hidden" data-city-selector-target="departureCityInput" data-hotel-services-search-target="cityInput" value="<%= @city %>">
 
       <!-- Date Selector -->
-      <div class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1">
+      <button type="button" class="flex items-center gap-2 bg-white rounded-lg px-4 py-3 flex-1" data-action="click->hotel-date-picker#openModal">
         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
-        <div class="flex items-center gap-1 text-sm">
-          <span class="text-gray-900 font-medium">01月16日</span>
-          <span class="text-xs text-gray-500">今天</span>
+        <span class="flex items-center gap-1 text-sm">
+          <span class="text-gray-900 font-medium" data-hotel-date-picker-target="checkInDisplay"><%= @check_in.is_a?(String) ? Date.parse(@check_in).month : @check_in.month %>月<%= @check_in.is_a?(String) ? Date.parse(@check_in).day : @check_in.day %>日</span>
+          <span class="text-xs text-gray-500"><%= date_label(@check_in) %></span>
           <span class="text-gray-400 mx-1">-</span>
-          <span class="text-gray-900 font-medium">01月17日</span>
-          <span class="text-xs text-gray-500">周六</span>
-        </div>
-      </div>
+          <span class="text-gray-900 font-medium" data-hotel-date-picker-target="checkOutDisplay"><%= @check_out.is_a?(String) ? Date.parse(@check_out).month : @check_out.month %>月<%= @check_out.is_a?(String) ? Date.parse(@check_out).day : @check_out.day %>日</span>
+          <span class="text-xs text-gray-500"><%= date_label(@check_out) %></span>
+        </span>
+      </button>
+      
+      <!-- Hidden inputs for dates -->
+      <input type="hidden" data-hotel-date-picker-target="checkInInput" data-hotel-services-search-target="checkInInput" value="<%= @check_in %>">
+      <input type="hidden" data-hotel-date-picker-target="checkOutInput" data-hotel-services-search-target="checkOutInput" value="<%= @check_out %>">
     </div>
   </div>
 
@@ -221,6 +228,12 @@
       </div>
     <% end %>
   </div>
+
+  <!-- City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
+  
+  <!-- Hotel Date Picker Modal -->
+  <%= render 'shared/hotel_date_picker_modal' %>
 </div>
 
 <style>
