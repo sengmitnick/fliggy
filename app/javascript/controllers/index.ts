@@ -90,6 +90,8 @@ import HotelMapToggleController from "./hotel_map_toggle_controller"
 import HotelMapController from "./hotel_map_controller"
 import SmartBackController from "./smart_back_controller"
 import TourGroupTabsController from "./tour_group_tabs_controller"
+import HotelPriceFilterController from "./hotel_price_filter_controller"
+import HotelGuaranteeController from "./hotel_guarantee_controller"
 
 const application = Application.start()
 
@@ -183,5 +185,7 @@ application.register("hotel-map-toggle", HotelMapToggleController)
 application.register("hotel-map", HotelMapController)
 application.register("smart-back", SmartBackController)
 application.register("tour-group-tabs", TourGroupTabsController)
+application.register("hotel-price-filter", HotelPriceFilterController)
+application.register("hotel-guarantee", HotelGuaranteeController)
 
 window.Stimulus = application
