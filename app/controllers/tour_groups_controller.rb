@@ -67,12 +67,17 @@ class TourGroupsController < ApplicationController
   
   def search
     @destination = params[:destination].presence || '上海'
-    @duration = params[:duration].presence
-    @group_size = params[:group_size].presence
+    @selected_tag = params[:tag].presence
     @tour_category = params[:tour_category].presence
+    @sort_by = params[:sort_by].presence || 'smart' # 智能排序/sales/rating
+    @departure_city = params[:departure_city].presence # 出发地
+    @duration = params[:duration].to_i if params[:duration].present?
     
     # 获取所有可用的目的地列表
     @destinations = TourGroupProduct.distinct.pluck(:destination).sort
+    
+    # 根据目的地智能分组出发城市
+    @departure_city_groups = get_departure_city_groups(@destination)
     
     # 从数据库查询产品
     products = TourGroupProduct.includes(:travel_agency)
@@ -83,19 +88,51 @@ class TourGroupsController < ApplicationController
       products = products.where(tour_category: @tour_category)
     end
     
-    # 根据天数筛选（如果提供）
-    if @duration.present?
+    # 根据天数筛选
+    if @duration.present? && @duration > 0
       products = products.where(duration: @duration)
     end
     
-    # 根据团队大小筛选（如果提供）
-    if @group_size.present?
-      # 这里假设数据库有 group_size 字段，如果没有可以忽略或根据其他逻辑筛选
-      # products = products.where(group_size: @group_size)
+    # 根据标签筛选（在SQL层面过滤，更高效）
+    if @selected_tag.present?
+      products = products.where("tags LIKE ?", "%#{@selected_tag}%")
     end
     
-    # 排序和限制
-    products = products.by_display_order.limit(50)
+    # 排序逻辑（出发地优先）
+    products = case @sort_by
+    when 'sales'
+      if @departure_city.present?
+        # 选择了出发地：优先展示该出发地的商品
+        products.order(
+          Arel.sql("CASE WHEN departure_city = #{ActiveRecord::Base.connection.quote(@departure_city)} THEN 0 ELSE 1 END"),
+          sales_count: :desc
+        )
+      else
+        products.order(sales_count: :desc)
+      end
+    when 'rating'
+      if @departure_city.present?
+        # 选择了出发地：优先展示该出发地的商品
+        products.order(
+          Arel.sql("CASE WHEN departure_city = #{ActiveRecord::Base.connection.quote(@departure_city)} THEN 0 ELSE 1 END"),
+          rating: :desc
+        )
+      else
+        products.order(rating: :desc)
+      end
+    else # 'smart' or default
+      if @departure_city.present?
+        # 选择了出发地：优先展示该出发地的商品
+        products.order(
+          Arel.sql("CASE WHEN departure_city = #{ActiveRecord::Base.connection.quote(@departure_city)} THEN 0 ELSE 1 END")
+        ).by_display_order
+      else
+        products.by_display_order
+      end
+    end
+    
+    # 限制结果
+    products = products.limit(50)
     
     # 转换为视图需要的格式
     @search_results = products.map do |product|
@@ -153,5 +190,73 @@ class TourGroupsController < ApplicationController
                                        .where.not(id: @product.id)
                                        .popular
                                        .limit(4)
+  end
+
+  private
+
+  # 根据目的地返回分组的出发城市
+  def get_departure_city_groups(destination)
+    # 城市地理关系映射表
+    city_regions = {
+      # 华东地区
+      '上海' => { nearby: ['上海', '杭州', '南京', '苏州', '无锡', '常州', '黄山', '芜湖'], others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门'] },
+      '杭州' => { nearby: ['杭州', '上海', '南京', '苏州', '无锡', '常州', '黄山', '芜湖'], others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门'] },
+      '南京' => { nearby: ['南京', '上海', '杭州', '苏州', '无锡', '常州', '黄山', '芜湖'], others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门'] },
+      '苏州' => { nearby: ['苏州', '上海', '杭州', '南京', '无锡', '常州', '黄山', '芜湖'], others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门'] },
+      '浙江' => { nearby: ['杭州', '上海', '南京', '苏州', '无锡', '常州', '黄山', '芜湖'], others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门'] },
+      
+      # 华北地区
+      '北京' => { nearby: ['北京', '天津', '石家庄', '太原', '呼和浩特'], others: ['上海', '杭州', '南京', '西安', '郑州', '济南', '青岛', '沈阳'] },
+      '天津' => { nearby: ['天津', '北京', '石家庄', '太原', '呼和浩特'], others: ['上海', '杭州', '南京', '西安', '郑州', '济南', '青岛', '沈阳'] },
+      
+      # 华南地区
+      '广州' => { nearby: ['广州', '深圳', '珠海', '佛山', '东莞', '中山', '惠州', '江门'], others: ['北京', '上海', '杭州', '南京', '厦门', '福州', '南宁', '海口'] },
+      '深圳' => { nearby: ['深圳', '广州', '珠海', '佛山', '东莞', '中山', '惠州', '江门'], others: ['北京', '上海', '杭州', '南京', '厦门', '福州', '南宁', '海口'] },
+      
+      # 西南地区
+      '成都' => { nearby: ['成都', '重庆', '绵阳', '德阳', '乐山', '峨眉山'], others: ['北京', '上海', '杭州', '广州', '深圳', '西安', '昆明', '贵阳'] },
+      '重庆' => { nearby: ['重庆', '成都', '绵阳', '德阳', '乐山', '峨眉山'], others: ['北京', '上海', '杭州', '广州', '深圳', '西安', '昆明', '贵阳'] },
+      
+      # 西北地区
+      '西安' => { nearby: ['西安', '咸阳', '宝鸡', '渭南', '汉中'], others: ['北京', '上海', '杭州', '成都', '重庆', '郑州', '兰州', '银川'] },
+      
+      # 华中地区
+      '武汉' => { nearby: ['武汉', '长沙', '南昌', '合肥', '郑州'], others: ['北京', '上海', '杭州', '广州', '深圳', '成都', '重庆', '西安'] }
+    }
+    
+    # 默认分组（如果目的地不在映射表中）
+    default_groups = {
+      nearby: ['上海', '杭州', '南京', '苏州', '无锡', '常州', '黄山', '芜湖'],
+      others: ['北京', '合肥', '宁波', '金华', '福州', '郑州', '武汉', '厦门']
+    }
+    
+    # 查找匹配的城市分组
+    groups = city_regions.find { |key, _| destination.to_s.include?(key) }&.last || default_groups
+    
+    # 返回分组结果，标题根据目的地动态生成
+    nearby_title = if destination.to_s.include?('杭州')
+      '杭州及周边参团'
+    elsif destination.to_s.include?('上海')
+      '上海及周边参团'
+    elsif destination.to_s.include?('南京')
+      '南京及周边参团'
+    elsif destination.to_s.include?('北京')
+      '北京及周边参团'
+    elsif destination.to_s.include?('广州')
+      '广州及周边参团'
+    elsif destination.to_s.include?('成都')
+      '成都及周边参团'
+    elsif destination.to_s.include?('西安')
+      '西安及周边参团'
+    elsif destination.to_s.include?('浙江')
+      '杭州及周边参团'
+    else
+      "#{groups[:nearby].first}及周边参团"
+    end
+    
+    [
+      { title: nearby_title, cities: groups[:nearby] },
+      { title: '其他城市参团', cities: groups[:others] }
+    ]
   end
 end
