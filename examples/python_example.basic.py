@@ -15,7 +15,7 @@ import json
 import os
 
 # 配置
-API_BASE = os.environ.get("FLIGGY_API_BASE", "https://fliggy.clackyai.app/api").rstrip("/")
+API_BASE = os.environ.get("TRAVEL_API_BASE", "https://travel01.clackyai.app/api").rstrip("/")
 
 
 def _safe_json(response):

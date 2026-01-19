@@ -1,4 +1,4 @@
-# 飞猪旅游平台 - Docker 商业化部署方案
+# 旅游环境01 - Docker 商业化部署方案
 
 ## 📦 部署文件清单
 
@@ -281,7 +281,7 @@ df -h
 
 ```bash
 # 检查数据库状态
-docker-compose -f docker-compose.production.yml exec db pg_isready -U fliggy
+docker-compose -f docker-compose.production.yml exec db pg_isready -U travel01
 
 # 测试连接
 docker-compose -f docker-compose.production.yml exec web bundle exec rails runner "puts ActiveRecord::Base.connection.execute('SELECT 1')"

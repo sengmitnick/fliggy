@@ -159,7 +159,7 @@ class SearchCheapestFlightValidator < BaseValidator
   # 模拟 AI Agent 操作：搜索上海到深圳最便宜航班并预订
   def simulate
     # 1. 查找测试用户（数据包中已创建）
-    user = User.find_by!(email: 'demo@fliggy.com', data_version: 0)
+    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
     # 2. 查找乘客
     passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)

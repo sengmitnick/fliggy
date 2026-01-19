@@ -126,7 +126,7 @@ class BookFlightValidator < BaseValidator
   # 模拟 AI Agent 操作：预订深圳到北京的最低价航班
   def simulate
     # 1. 查找测试用户（数据包中已创建）
-    user = User.find_by!(email: 'demo@fliggy.com', data_version: 0)
+    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
     # 2. 查找乘客（数据包中已创建）
     passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)

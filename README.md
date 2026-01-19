@@ -1,4 +1,4 @@
-# 飞猪旅游平台 (Fliggy Travel Platform)
+# 旅游环境01 (Travel Platform)
 
 一个功能完善的在线旅游预订平台，基于 Rails 7.2 + PostgreSQL + Redis 构建。
 

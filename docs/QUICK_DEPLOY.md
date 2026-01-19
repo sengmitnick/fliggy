@@ -1,4 +1,4 @@
-# 飞猪旅游平台 - 快速开始指南
+# 旅游环境01 - 快速开始指南
 
 ## 🚀 5分钟快速部署
 
@@ -12,7 +12,7 @@
 
 ```bash
 # 1. 进入项目目录
-cd /path/to/fliggy
+cd /path/to/travel01
 
 # 2. 赋予执行权限
 chmod +x deploy.sh
@@ -133,7 +133,7 @@ docker-compose -f docker-compose.production.yml logs -f web
 
 ```bash
 # 进入数据库
-docker-compose -f docker-compose.production.yml exec db psql -U fliggy fliggy_production
+docker-compose -f docker-compose.production.yml exec db psql -U travel01 travel01_production
 
 # 执行迁移
 docker-compose -f docker-compose.production.yml exec web bundle exec rails db:migrate
@@ -246,7 +246,7 @@ sudo netstat -tlnp | grep -E '3000|5432|6379'
 
 ```bash
 # 检查数据库状态
-docker-compose -f docker-compose.production.yml exec db pg_isready -U fliggy
+docker-compose -f docker-compose.production.yml exec db pg_isready -U travel01
 
 # 查看数据库日志
 docker-compose -f docker-compose.production.yml logs db

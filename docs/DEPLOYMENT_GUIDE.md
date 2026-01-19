@@ -1,4 +1,4 @@
-# 飞猪旅游平台 - 商业化本地部署指南
+# 旅游环境01 - 商业化本地部署指南
 
 ## 📋 目录
 
@@ -150,11 +150,11 @@ Administrator.create!(
 
 | 服务名 | 容器名 | 端口 | 说明 |
 |--------|--------|------|------|
-| db | fliggy_postgres | 5432 | PostgreSQL 数据库 |
-| redis | fliggy_redis | 6379 | Redis 缓存和消息队列 |
-| web | fliggy_web | 3000 | Rails 主应用 |
-| worker | fliggy_worker | - | 后台任务处理器 |
-| nginx | fliggy_nginx | 80/443 | 反向代理 (可选) |
+| db | travel01_postgres | 5432 | PostgreSQL 数据库 |
+| redis | travel01_redis | 6379 | Redis 缓存和消息队列 |
+| web | travel01_web | 3000 | Rails 主应用 |
+| worker | travel01_worker | - | 后台任务处理器 |
+| nginx | travel01_nginx | 80/443 | 反向代理 (可选) |
 
 ### 网络和数据卷
 
@@ -166,7 +166,7 @@ Administrator.create!(
 - `tmp_data`: 临时文件
 
 **网络:**
-- `fliggy_network`: 内部容器通信网络
+- `travel01_network`: 内部容器通信网络
 
 ---
 
@@ -279,7 +279,7 @@ docker-compose -f docker-compose.production.yml logs -f web
 
 ```bash
 # 进入数据库控制台
-docker-compose -f docker-compose.production.yml exec db psql -U fliggy -d fliggy_production
+docker-compose -f docker-compose.production.yml exec db psql -U travel01 -d travel01_production
 
 # 执行数据库迁移
 docker-compose -f docker-compose.production.yml exec web bundle exec rails db:migrate
@@ -320,7 +320,7 @@ docker stats
 docker system prune -a
 
 # 查看容器详细信息
-docker inspect fliggy_web
+docker inspect travel01_web
 ```
 
 ### 监控和日志
@@ -347,7 +347,7 @@ docker-compose -f docker-compose.production.yml logs -f worker
 
 ```bash
 # 查看容器资源使用情况
-docker stats fliggy_web fliggy_worker fliggy_postgres fliggy_redis
+docker stats travel01_web travel01_worker travel01_postgres travel01_redis
 
 # 进入 Redis 控制台查看状态
 docker-compose -f docker-compose.production.yml exec redis redis-cli -a your_redis_password
@@ -371,9 +371,9 @@ docker-compose -f docker-compose.production.yml exec redis redis-cli -a your_red
 
 # 配置
 BACKUP_DIR="/path/to/backup"
-DB_CONTAINER="fliggy_postgres"
-DB_USER="fliggy"
-DB_NAME="fliggy_production"
+DB_CONTAINER="travel01_postgres"
+DB_USER="travel01"
+DB_NAME="travel01_production"
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # 创建备份目录
@@ -402,10 +402,10 @@ crontab -e
 
 ```bash
 # 备份数据库
-docker-compose -f docker-compose.production.yml exec db pg_dump -U fliggy fliggy_production | gzip > backup/manual_backup_$(date +%Y%m%d).sql.gz
+docker-compose -f docker-compose.production.yml exec db pg_dump -U travel01 travel01_production | gzip > backup/manual_backup_$(date +%Y%m%d).sql.gz
 
 # 备份文件存储 (ActiveStorage)
-docker run --rm -v fliggy_storage_data:/data -v $(pwd)/backup:/backup alpine tar czf /backup/storage_backup_$(date +%Y%m%d).tar.gz -C /data .
+docker run --rm -v travel01_storage_data:/data -v $(pwd)/backup:/backup alpine tar czf /backup/storage_backup_$(date +%Y%m%d).tar.gz -C /data .
 ```
 
 ### 数据恢复
@@ -415,10 +415,10 @@ docker run --rm -v fliggy_storage_data:/data -v $(pwd)/backup:/backup alpine tar
 docker-compose -f docker-compose.production.yml stop web worker
 
 # 2. 恢复数据库
-gunzip < backup/backup_20240101_020000.sql.gz | docker-compose -f docker-compose.production.yml exec -T db psql -U fliggy fliggy_production
+gunzip < backup/backup_20240101_020000.sql.gz | docker-compose -f docker-compose.production.yml exec -T db psql -U travel01 travel01_production
 
 # 3. 恢复文件存储
-docker run --rm -v fliggy_storage_data:/data -v $(pwd)/backup:/backup alpine tar xzf /backup/storage_backup_20240101.tar.gz -C /data
+docker run --rm -v travel01_storage_data:/data -v $(pwd)/backup:/backup alpine tar xzf /backup/storage_backup_20240101.tar.gz -C /data
 
 # 4. 启动应用服务
 docker-compose -f docker-compose.production.yml start web worker
@@ -464,7 +464,7 @@ docker-compose -f docker-compose.production.yml ps db
 docker-compose -f docker-compose.production.yml logs db
 
 # 确认数据库健康检查
-docker-compose -f docker-compose.production.yml exec db pg_isready -U fliggy
+docker-compose -f docker-compose.production.yml exec db pg_isready -U travel01
 
 # 测试连接
 docker-compose -f docker-compose.production.yml exec web bundle exec rails runner "ActiveRecord::Base.connection.execute('SELECT 1')"
@@ -538,7 +538,7 @@ docker-compose -f docker-compose.production.yml exec web bash
 
 ```sql
 -- 进入 PostgreSQL 控制台
-docker-compose -f docker-compose.production.yml exec db psql -U fliggy fliggy_production
+docker-compose -f docker-compose.production.yml exec db psql -U travel01 travel01_production
 
 -- 创建常用索引
 CREATE INDEX CONCURRENTLY idx_bookings_user_id ON bookings(user_id);

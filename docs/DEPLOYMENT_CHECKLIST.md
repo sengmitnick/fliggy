@@ -1,4 +1,4 @@
-# 飞猪旅游平台 - 商业化部署检查清单
+# 旅游环境01 - 商业化部署检查清单
 
 ## ✅ 部署前检查
 
@@ -99,7 +99,7 @@
 
 - [ ] 所有容器状态为 healthy 或 running
   ```bash
-  docker ps | grep fliggy
+  docker ps | grep travel01
   ```
 
 ### 3. 数据库初始化
@@ -157,7 +157,7 @@
 
 - [ ] 数据库连接正常
   ```bash
-  docker-compose -f docker-compose.production.yml exec db pg_isready -U fliggy
+  docker-compose -f docker-compose.production.yml exec db pg_isready -U travel01
   # 应返回: accepting connections
   ```
 
@@ -275,7 +275,7 @@
 
 - [ ] 日志目录已挂载
   ```bash
-  docker volume inspect fliggy_log_data
+  docker volume inspect travel01_log_data
   ```
 
 - [ ] 日志可以正常写入
@@ -298,7 +298,7 @@
 
 - [ ] Docker 健康检查已配置
   ```bash
-  docker inspect fliggy_web | grep -A 5 '"Health"'
+  docker inspect travel01_web | grep -A 5 '"Health"'
   ```
 
 - [ ] 健康检查状态正常

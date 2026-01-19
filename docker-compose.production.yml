@@ -5,12 +5,12 @@ services:
   # PostgreSQL 数据库
   db:
     image: postgres:16-alpine
-    container_name: fliggy_postgres
+    container_name: travel01_postgres
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-fliggy}
+      POSTGRES_USER: ${DB_USER:-travel01}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?请在.env文件中设置DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME:-fliggy_production}
+      POSTGRES_DB: ${DB_NAME:-travel01_production}
       # PostgreSQL 性能优化配置
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
@@ -19,13 +19,13 @@ services:
     ports:
       - "${DB_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fliggy}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-travel01}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     networks:
-      - fliggy_network
+      - travel01_network
     # 资源限制
     deploy:
       resources:
@@ -39,7 +39,7 @@ services:
   # Redis (用于 ActionCable 和缓存)
   redis:
     image: redis:7-alpine
-    container_name: fliggy_redis
+    container_name: travel01_redis
     restart: always
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?请在.env文件中设置REDIS_PASSWORD}
     volumes:
@@ -53,7 +53,7 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - fliggy_network
+      - travel01_network
     deploy:
       resources:
         limits:
@@ -70,7 +70,7 @@ services:
       dockerfile: Dockerfile
       args:
         RAILS_ENV: production
-    container_name: fliggy_web
+    container_name: travel01_web
     restart: always
     depends_on:
       db:
@@ -83,7 +83,7 @@ services:
       RACK_ENV: production
       
       # 数据库配置
-      DATABASE_URL: postgresql://${DB_USER:-fliggy}:${DB_PASSWORD}@db:5432/${DB_NAME:-fliggy_production}
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
       
       # Redis 配置 (用于 ActionCable)
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
@@ -136,7 +136,7 @@ services:
     ports:
       - "${WEB_PORT:-3000}:3000"
     networks:
-      - fliggy_network
+      - travel01_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
       interval: 30s
@@ -159,7 +159,7 @@ services:
       dockerfile: Dockerfile
       args:
         RAILS_ENV: production
-    container_name: fliggy_worker
+    container_name: travel01_worker
     restart: always
     depends_on:
       db:
@@ -171,7 +171,7 @@ services:
       NODE_ENV: production
       
       # 数据库配置
-      DATABASE_URL: postgresql://${DB_USER:-fliggy}:${DB_PASSWORD}@db:5432/${DB_NAME:-fliggy_production}
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
       
       # Redis 配置
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
@@ -193,7 +193,7 @@ services:
       - tmp_data:/app/tmp
     command: bundle exec good_job start
     networks:
-      - fliggy_network
+      - travel01_network
     deploy:
       resources:
         limits:
@@ -206,7 +206,7 @@ services:
   # Nginx 反向代理 (可选，用于生产环境)
   nginx:
     image: nginx:alpine
-    container_name: fliggy_nginx
+    container_name: travel01_nginx
     restart: always
     depends_on:
       - web
@@ -219,7 +219,7 @@ services:
       - nginx_logs:/var/log/nginx
       - ./ssl:/etc/nginx/ssl:ro  # SSL 证书目录
     networks:
-      - fliggy_network
+      - travel01_network
     deploy:
       resources:
         limits:
@@ -246,5 +246,5 @@ volumes:
 
 # 网络配置
 networks:
-  fliggy_network:
+  travel01_network:
     driver: bridge
