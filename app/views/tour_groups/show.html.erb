@@ -198,15 +198,67 @@
       <% if @packages.any? %>
       <!-- Booking Button (triggers modal) -->
       <div class="bg-surface p-4" data-controller="booking-modal">
-        <button type="button" 
-                class="w-full py-4 rounded-xl text-base font-semibold text-white flex items-center justify-center gap-2"
-                style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);"
-                data-action="click->booking-modal#open">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          选择出行日期
-        </button>
+        <!-- 城市选择和出行日期按钮组 -->
+        <div class="flex gap-3">
+          <!-- 城市选择按钮 -->
+          <div class="relative flex-shrink-0" data-controller="filter-dropdown">
+            <button type="button" 
+                    data-dropdown-id="city-selector"
+                    data-action="click->filter-dropdown#toggle"
+                    class="px-6 py-4 rounded-xl text-base font-semibold text-gray-800 bg-white border-2 border-gray-200 flex items-center gap-2 hover:border-[#FFD700] transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span><%= @selected_departure_city || '北京' %>出发</span>
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+            
+            <!-- 城市选择下拉框 -->
+            <div data-filter-dropdown-target="dropdown"
+                 data-dropdown-id="city-selector"
+                 class="hidden absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+              <div class="p-4">
+                <h3 class="text-sm font-bold text-gray-700 mb-3">选择出发城市</h3>
+                <div class="grid grid-cols-3 gap-2">
+                  <% 
+                    # 获取所有可用的出发城市
+                    departure_cities = TourGroupProduct.where(destination: @product.destination)
+                                                      .distinct
+                                                      .pluck(:departure_city)
+                                                      .compact
+                                                      .sort
+                    departure_cities = ['北京', '上海', '广州', '成都', '深圳'] if departure_cities.empty?
+                  %>
+                  <% departure_cities.each do |city| %>
+                    <%= link_to city, 
+                        tour_group_path(@product, departure_city: city), 
+                        class: "block px-3 py-2 text-center rounded-lg text-sm hover:bg-gray-100 transition-colors #{city == @selected_departure_city ? 'bg-[#FFF9E6] text-[#FFD700] font-bold' : 'text-gray-700'}",
+                        data: { action: 'filter-dropdown#selectOption' } %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 遮罩层 -->
+            <div data-filter-dropdown-target="overlay" 
+                 data-action="click->filter-dropdown#closeOnOverlay" 
+                 class="hidden fixed inset-0 z-40"></div>
+          </div>
+          
+          <!-- 选择出行日期按钮 -->
+          <button type="button" 
+                  class="flex-1 py-4 rounded-xl text-base font-semibold text-white flex items-center justify-center gap-2"
+                  style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);"
+                  data-action="click->booking-modal#open">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            选择出行日期
+          </button>
+        </div>
         
         <!-- Booking Modal -->
         <div class="hidden fixed inset-0 z-[60]" data-booking-modal-target="modal">

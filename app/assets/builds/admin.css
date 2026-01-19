@@ -10532,6 +10532,11 @@ html, body {
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
 }
 
+.hover\:border-\[\#FFD700\]:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 215 0 / var(--tw-border-opacity, 1));
+}
+
 .hover\:bg-\[\#4a6bc7\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(74 107 199 / var(--tw-bg-opacity, 1));

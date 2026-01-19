@@ -183,6 +183,9 @@ class TourGroupsController < ApplicationController
       tour_reviews: :user
     ).find(params[:id])
     
+    # 处理出发城市参数（用于城市选择器显示）
+    @selected_departure_city = params[:departure_city].presence || @product.departure_city
+    
     # 准备套餐数据
     @packages = @product.tour_packages.by_display_order
     @selected_package = @packages.first
