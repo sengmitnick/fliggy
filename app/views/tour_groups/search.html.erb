@@ -47,41 +47,59 @@
 
   <!-- 二级导航 -->
   <div class="bg-white flex px-4 py-3 space-x-6 text-sm text-gray-600 border-b overflow-x-auto hide-scrollbar">
-    <div class="relative flex flex-col items-center font-bold text-black shrink-0">
-      <span>全部</span>
-      <div class="absolute -bottom-3 w-6 h-0.5 bg-black"></div>
-    </div>
-    <span class="shrink-0">精品小团</span>
-    <span class="shrink-0">多日游</span>
-    <span class="shrink-0">一日游</span>
+    <% 
+      current_category = params[:tour_category].presence
+      categories = [
+        { label: '全部', value: nil },
+        { label: '精品小团', value: 'group_tour' },
+        { label: '多日游', value: 'private_group' },
+        { label: '一日游', value: 'free_travel' }
+      ]
+    %>
+    
+    <% categories.each do |category| %>
+      <% is_active = (current_category == category[:value]) || (current_category.nil? && category[:value].nil?) %>
+      <%= link_to search_tour_groups_path(
+            destination: @destination,
+            duration: @duration,
+            group_size: @group_size,
+            tour_category: category[:value]
+          ), 
+          class: "relative flex flex-col items-center shrink-0 #{'font-bold text-black' if is_active} #{'text-gray-600' unless is_active}" do %>
+        <span><%= category[:label] %></span>
+        <% if is_active %>
+          <div class="absolute -bottom-3 w-6 h-0.5 bg-black"></div>
+        <% end %>
+      <% end %>
+    <% end %>
   </div>
 
   <!-- 顶部横排卡片 -->
   <div class="bg-white p-3 flex space-x-2 overflow-x-auto hide-scrollbar">
-    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
-      <div class="absolute inset-0 bg-blue-900/40 flex flex-col items-center justify-center text-white">
-        <span class="font-bold text-sm">上海+迪士尼</span>
-        <span class="text-[10px] opacity-80">都市乐园精华连线·玩2-3天</span>
-      </div>
-      <%= image_tag 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=600', 
-          class: 'w-full h-full object-cover', alt: '上海+迪士尼' %>
-    </div>
-    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
-      <div class="absolute inset-0 bg-orange-900/40 flex flex-col items-center justify-center text-white">
-        <span class="font-bold text-sm">上海+杭州</span>
-        <span class="text-[10px] opacity-80">探寻华东人文风光·玩2-4天</span>
-      </div>
-      <%= image_tag 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600', 
-          class: 'w-full h-full object-cover', alt: '上海+杭州' %>
-    </div>
-    <div class="relative w-48 h-16 rounded-lg overflow-hidden shrink-0">
-      <div class="absolute inset-0 bg-green-900/40 flex flex-col items-center justify-center text-white">
-        <span class="font-bold text-sm">自然博</span>
-        <span class="text-[10px] opacity-80">探秘文明史</span>
-      </div>
-      <%= image_tag 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', 
-          class: 'w-full h-full object-cover', alt: '自然博' %>
-    </div>
+    <% 
+      # 为每个目的地定义背景图片和主题色
+      destination_config = {
+        '云南' => { image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600', color: 'bg-blue-900/40', desc: '彩云之南·古城风情' },
+        '四川' => { image: 'https://images.unsplash.com/photo-1508253578933-20b529c1783d?w=600', color: 'bg-orange-900/40', desc: '天府之国·自然奇观' },
+        '广西' => { image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600', color: 'bg-green-900/40', desc: '山水甲天下·民族风情' },
+        '新疆' => { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', color: 'bg-yellow-900/40', desc: '丝路明珠·大漠风光' },
+        '浙江' => { image: 'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=600', color: 'bg-cyan-900/40', desc: '江南水乡·诗画山水' },
+        '海南' => { image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600', color: 'bg-teal-900/40', desc: '椰风海韵·热带天堂' },
+        '西藏' => { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', color: 'bg-purple-900/40', desc: '雪域高原·朝圣之旅' },
+        '青海' => { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', color: 'bg-indigo-900/40', desc: '大美青海·湖光山色' }
+      }
+    %>
+    
+    <% @destinations.each do |dest| %>
+      <% config = destination_config[dest] || { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600', color: 'bg-gray-900/40', desc: '探索之旅' } %>
+      <%= link_to search_tour_groups_path(destination: dest), class: "relative w-48 h-16 rounded-lg overflow-hidden shrink-0 #{'ring-2 ring-primary' if @destination == dest}" do %>
+        <div class="absolute inset-0 <%= config[:color] %> flex flex-col items-center justify-center text-white">
+          <span class="font-bold text-sm"><%= dest %></span>
+          <span class="text-[10px] opacity-80"><%= config[:desc] %></span>
+        </div>
+        <%= image_tag config[:image], class: 'w-full h-full object-cover', alt: dest %>
+      <% end %>
+    <% end %>
   </div>
 
   <!-- 筛选栏 -->

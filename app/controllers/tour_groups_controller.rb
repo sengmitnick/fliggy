@@ -69,11 +69,19 @@ class TourGroupsController < ApplicationController
     @destination = params[:destination].presence || '上海'
     @duration = params[:duration].presence
     @group_size = params[:group_size].presence
-    @active_tab = params[:tab].presence || 'group_tour'  # 默认选中跟团游
+    @tour_category = params[:tour_category].presence
+    
+    # 获取所有可用的目的地列表
+    @destinations = TourGroupProduct.distinct.pluck(:destination).sort
     
     # 从数据库查询产品
     products = TourGroupProduct.includes(:travel_agency)
                                .where("destination LIKE ?", "%#{@destination}%")
+    
+    # 根据tour_category筛选（如果提供）
+    if @tour_category.present?
+      products = products.where(tour_category: @tour_category)
+    end
     
     # 根据天数筛选（如果提供）
     if @duration.present?
@@ -85,22 +93,6 @@ class TourGroupsController < ApplicationController
       # 这里假设数据库有 group_size 字段，如果没有可以忽略或根据其他逻辑筛选
       # products = products.where(group_size: @group_size)
     end
-    
-    # 根据 tab 筛选
-    products = case @active_tab
-               when 'comprehensive'
-                 products # 综合：显示所有
-               when 'group_tour'
-                 products.by_category('group_tour')
-               when 'private_group'
-                 products.by_category('private_group')
-               when 'free_travel'
-                 products.by_category('free_travel')
-               when 'outbound_essentials'
-                 products.by_category('outbound_essentials')
-               else
-                 products
-               end
     
     # 排序和限制
     products = products.by_display_order.limit(50)

@@ -7703,6 +7703,30 @@ html, body {
   background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
 }
 
+.bg-cyan-900\/40 {
+  background-color: rgb(22 78 99 / 0.4);
+}
+
+.bg-gray-900\/40 {
+  background-color: rgb(17 24 39 / 0.4);
+}
+
+.bg-indigo-900\/40 {
+  background-color: rgb(49 46 129 / 0.4);
+}
+
+.bg-purple-900\/40 {
+  background-color: rgb(88 28 135 / 0.4);
+}
+
+.bg-teal-900\/40 {
+  background-color: rgb(19 78 74 / 0.4);
+}
+
+.bg-yellow-900\/40 {
+  background-color: rgb(113 63 18 / 0.4);
+}
+
 .bg-opacity-10 {
   --tw-bg-opacity: 0.1;
 }
@@ -10001,6 +10025,11 @@ html, body {
 .ring-yellow-400 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(250 204 21 / var(--tw-ring-opacity, 1));
+}
+
+.ring-primary {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: hsl(var(--color-primary) / var(--tw-ring-opacity, 1));
 }
 
 .ring-opacity-5 {
