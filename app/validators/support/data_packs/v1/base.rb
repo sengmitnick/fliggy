@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# 加载 activerecord-import gem
+require 'activerecord-import' unless defined?(ActiveRecord::Import)
+
 # base_v1 数据包
 # 基础数据：City + Destination
 # 
@@ -241,29 +244,22 @@ cities_data = [
   { name: "内罗毕", pinyin: "neiluobi", airport_code: "NBO", region: "肯尼亚", is_hot: false, themes: [] }
 ]
 
-created_count = 0
-updated_count = 0
+# 批量插入优化：使用 Rails 原生 insert_all
+existing_cities = City.pluck(:name).to_set
+new_cities_data = cities_data.reject { |data| existing_cities.include?(data[:name]) }
 
-cities_data.each do |data|
-  city = City.find_or_create_by(name: data[:name]) do |c|
-    c.pinyin = data[:pinyin]
-    c.airport_code = data[:airport_code]
-    c.region = data[:region]
-    c.is_hot = data[:is_hot]
-    c.themes = data[:themes]
-    created_count += 1
+if new_cities_data.any?
+  timestamp = Time.current
+  cities_with_timestamps = new_cities_data.map do |data|
+    data.merge(created_at: timestamp, updated_at: timestamp)
   end
   
-  # 如果城市已存在，更新其他属性
-  unless city.new_record? || city.id.nil?
-    if city.update(data.except(:name))
-      updated_count += 1
-    end
-  end
+  City.insert_all(cities_with_timestamps)
+  puts "     批量创建了 #{new_cities_data.size} 个新城市"
+else
+  puts "     所有城市已存在，跳过创建"
 end
 
-puts "     创建了 #{created_count} 个新城市"
-puts "     更新了 #{updated_count} 个已存在的城市"
 puts "     城市总数: #{City.count}"
 
 # ==================== 目的地数据 ====================
@@ -289,30 +285,46 @@ destinations_data = [
   { name: "哈尔滨", region: "黑龙江", is_hot: true, description: "冰城，冬季奇观" }
 ]
 
-dest_created_count = 0
-destinations_data.each do |data|
-  dest = Destination.find_or_create_by(name: data[:name]) do |d|
-    d.region = data[:region]
-    d.is_hot = data[:is_hot]
-    d.description = data[:description]
-    dest_created_count += 1
+# 批量插入热门目的地
+existing_destinations = Destination.pluck(:name).to_set
+new_destinations_data = destinations_data.reject { |data| existing_destinations.include?(data[:name]) }
+
+if new_destinations_data.any?
+  timestamp = Time.current
+  destinations_with_timestamps = new_destinations_data.map do |data|
+    data.merge(created_at: timestamp, updated_at: timestamp)
   end
+  
+  Destination.insert_all(destinations_with_timestamps)
+  puts "     批量创建了 #{new_destinations_data.size} 个热门目的地"
+else
+  puts "     所有热门目的地已存在，跳过创建"
 end
 
-puts "     创建了 #{dest_created_count} 个热门目的地"
+# 批量为城市创建 Destination 记录
+existing_destinations = Destination.pluck(:name).to_set
+auto_destinations_data = []
 
-# 为所有城市自动创建 Destination 记录（如果尚未存在）
-auto_created_count = 0
 City.find_each do |city|
-  destination = Destination.find_or_create_by(name: city.name) do |dest|
-    dest.region = city.region
-    dest.is_hot = city.is_hot
-    dest.description = "探索#{city.name}的美好"
-    auto_created_count += 1
-  end
+  next if existing_destinations.include?(city.name)
+  
+  auto_destinations_data << {
+    name: city.name,
+    region: city.region,
+    is_hot: city.is_hot,
+    description: "探索#{city.name}的美好",
+    created_at: Time.current,
+    updated_at: Time.current
+  }
 end
 
-puts "     为城市自动创建了 #{auto_created_count} 个 Destination 记录"
+if auto_destinations_data.any?
+  Destination.insert_all(auto_destinations_data)
+  puts "     为城市批量创建了 #{auto_destinations_data.size} 个 Destination 记录"
+else
+  puts "     所有城市的 Destination 已存在，跳过创建"
+end
+
 puts "     Destination 总数: #{Destination.count}"
 
 puts "\n✓ base_v1 数据包加载完成"

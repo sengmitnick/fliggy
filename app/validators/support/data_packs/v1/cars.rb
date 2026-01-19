@@ -279,8 +279,9 @@ cars_data = [
   }
 ]
 
-cars_data.each do |car_data|
-  Car.create!(car_data)
-end
+# 批量插入汽车数据
+timestamp = Time.current
+cars_data_with_timestamps = cars_data.map { |data| data.merge(created_at: timestamp, updated_at: timestamp) }
+Car.insert_all(cars_data_with_timestamps)
 
 puts "Created #{Car.count} cars successfully!"

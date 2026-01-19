@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# 加载 activerecord-import gem
+require 'activerecord-import' unless defined?(ActiveRecord::Import)
+
 # flights_v1 数据包
 # 用于航班验证任务
 #
@@ -20,7 +23,7 @@ puts "  航班日期: #{base_date} (今天+3天)"
 
 # ==================== 航班数据 ====================
 # 深圳市 -> 北京市 航班（4个航班，最低价 550元）
-[
+flights_sz_to_bj = [
   {
     departure_city: "深圳市",
     destination_city: "北京市",
@@ -85,15 +88,19 @@ puts "  航班日期: #{base_date} (今天+3天)"
     available_seats: 60,
     flight_date: base_date
   }
-].each do |attrs|
-  flight = Flight.create!(attrs)
-  
-  # 为每个航班生成优惠信息
-  flight.generate_offers
-end
+]
+
+# 批量插入航班（使用 Rails 原生 insert_all）
+timestamp = Time.current
+flights_with_timestamps = flights_sz_to_bj.map { |attrs| attrs.merge(created_at: timestamp, updated_at: timestamp) }
+Flight.insert_all(flights_with_timestamps)
+
+# 批量生成优惠信息
+imported_flights = Flight.where(flight_number: flights_sz_to_bj.map { |f| f[:flight_number] })
+imported_flights.each(&:generate_offers)
 
 # 上海市 -> 深圳市 航班（2个航班，最低价 450元）
-[
+flights_sh_to_sz = [
   {
     departure_city: "上海市",
     destination_city: "深圳市",
@@ -126,12 +133,16 @@ end
     available_seats: 80,
     flight_date: base_date
   }
-].each do |attrs|
-  flight = Flight.create!(attrs)
-  
-  # 为每个航班生成优惠信息
-  flight.generate_offers
-end
+]
+
+# 批量插入航班（使用 Rails 原生 insert_all）
+timestamp = Time.current
+flights_with_timestamps = flights_sh_to_sz.map { |attrs| attrs.merge(created_at: timestamp, updated_at: timestamp) }
+Flight.insert_all(flights_with_timestamps)
+
+# 批量生成优惠信息
+imported_flights = Flight.where(flight_number: flights_sh_to_sz.map { |f| f[:flight_number] })
+imported_flights.each(&:generate_offers)
 
 puts "✓ flights_v1 数据包加载完成（6个航班）"
 puts "  - 深圳市到北京市: 4个航班，最低价 550元"

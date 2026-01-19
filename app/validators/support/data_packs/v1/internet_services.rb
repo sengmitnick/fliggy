@@ -6,6 +6,8 @@ InternetSimCard.destroy_all
 InternetDataPlan.destroy_all
 InternetWifi.destroy_all
 
+timestamp = Time.current
+
 # 境外电话卡数据
 sim_cards_data = [
   {
@@ -16,7 +18,9 @@ sim_cards_data = [
     price: 9.9,
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "香港24小时制"],
     sales_count: 10000,
-    shop_name: "深圳游小匠旅游专营店"
+    shop_name: "深圳游小匠旅游专营店",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "插卡即用",
@@ -26,7 +30,9 @@ sim_cards_data = [
     price: 11.5,
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "港澳24小时制"],
     sales_count: 10000,
-    shop_name: "深圳游小匠旅游专营店"
+    shop_name: "深圳游小匠旅游专营店",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "插卡即用",
@@ -36,7 +42,9 @@ sim_cards_data = [
     price: 12.5,
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "含 转换插头", "港澳24小时制"],
     sales_count: 200,
-    shop_name: "深圳游小匠旅游专营店"
+    shop_name: "深圳游小匠旅游专营店",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "插卡即用",
@@ -46,13 +54,14 @@ sim_cards_data = [
     price: 18.0,
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "香港24小时制"],
     sales_count: 5000,
-    shop_name: "深圳游小匠旅游专营店"
+    shop_name: "深圳游小匠旅游专营店",
+    created_at: timestamp,
+    updated_at: timestamp
   }
 ]
 
-sim_cards_data.each do |data|
-  InternetSimCard.create!(data)
-end
+# 批量插入电话卡
+InternetSimCard.insert_all(sim_cards_data) if sim_cards_data.any?
 
 # 境外流量包数据
 data_plans_data = [
@@ -64,7 +73,9 @@ data_plans_data = [
     price: 35,
     phone_number: "180 2712 8600",
     carrier: "中国电信",
-    description: "4G/5G漫游，网速更快且支持境内APP。当日用量达到0.4GB将降速至384kbps，次日0时恢复（以北京时间为准）"
+    description: "4G/5G漫游，网速更快且支持境内APP。当日用量达到0.4GB将降速至384kbps，次日0时恢复（以北京时间为准）",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "香港3天漫游包+20元话费券",
@@ -74,7 +85,9 @@ data_plans_data = [
     price: 88,
     phone_number: "180 2712 8600",
     carrier: "中国电信",
-    description: "4G/5G漫游，网速更快且支持境内APP"
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "香港5天漫游包+20元话费券",
@@ -84,7 +97,9 @@ data_plans_data = [
     price: 128,
     phone_number: "180 2712 8600",
     carrier: "中国电信",
-    description: "4G/5G漫游，网速更快且支持境内APP"
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "香港7天漫游包+20元话费券",
@@ -94,7 +109,9 @@ data_plans_data = [
     price: 168,
     phone_number: "180 2712 8600",
     carrier: "中国电信",
-    description: "4G/5G漫游，网速更快且支持境内APP"
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "香港5天漫游包",
@@ -104,13 +121,14 @@ data_plans_data = [
     price: 108,
     phone_number: "180 2712 8600",
     carrier: "中国电信",
-    description: "4G/5G漫游，网速更快且支持境内APP"
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    created_at: timestamp,
+    updated_at: timestamp
   }
 ]
 
-data_plans_data.each do |data|
-  InternetDataPlan.create!(data)
-end
+# 批量插入流量包
+InternetDataPlan.insert_all(data_plans_data) if data_plans_data.any?
 
 # 随身WiFi数据
 wifis_data = [
@@ -123,7 +141,9 @@ wifis_data = [
     features: ["多网覆盖", "信号稳定", "多人共享"],
     sales_count: 5000,
     shop_name: "漫游超人通讯旗舰店",
-    deposit: 500
+    deposit: 500,
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "5G网·无限量",
@@ -134,7 +154,9 @@ wifis_data = [
     features: ["多网覆盖", "信号稳定", "多人共享", "5G高速"],
     sales_count: 3000,
     shop_name: "漫游超人通讯旗舰店",
-    deposit: 500
+    deposit: 500,
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "5G网·无限量·配转换插头",
@@ -145,7 +167,9 @@ wifis_data = [
     features: ["多网覆盖", "信号稳定", "多人共享", "5G高速", "含转换插头"],
     sales_count: 2000,
     shop_name: "漫游超人通讯旗舰店",
-    deposit: 500
+    deposit: 500,
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "4G网·无限量·配转换插头",
@@ -156,7 +180,9 @@ wifis_data = [
     features: ["多网覆盖", "信号稳定", "多人共享", "含转换插头"],
     sales_count: 1500,
     shop_name: "漫游超人通讯旗舰店",
-    deposit: 500
+    deposit: 500,
+    created_at: timestamp,
+    updated_at: timestamp
   },
   {
     name: "4G网·500MB/天·用完即止",
@@ -167,13 +193,14 @@ wifis_data = [
     features: ["多网覆盖", "信号稳定", "多人共享"],
     sales_count: 1000,
     shop_name: "漫游超人通讯旗舰店",
-    deposit: 500
+    deposit: 500,
+    created_at: timestamp,
+    updated_at: timestamp
   }
 ]
 
-wifis_data.each do |data|
-  InternetWifi.create!(data)
-end
+# 批量插入WiFi设备
+InternetWifi.insert_all(wifis_data) if wifis_data.any?
 
 puts "Created #{InternetSimCard.count} sim cards"
 puts "Created #{InternetDataPlan.count} data plans"

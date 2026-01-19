@@ -16,7 +16,12 @@ agencies = [
   { name: '深圳康辉旅行社', rating: 4.8, sales_count: 7500, is_verified: true }
 ]
 
-travel_agencies = agencies.map { |attrs| TravelAgency.create!(attrs) }
+# 批量创建旅行社
+timestamp = Time.current
+agencies_with_timestamps = agencies.map { |attrs| attrs.merge(created_at: timestamp, updated_at: timestamp) }
+TravelAgency.insert_all(agencies_with_timestamps)
+
+travel_agencies = TravelAgency.all.to_a
 
 puts "✓ 创建了 #{TravelAgency.count} 家旅行社"
 

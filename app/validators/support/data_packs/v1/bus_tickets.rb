@@ -67,7 +67,10 @@ price_ranges = {
 # 座位类型
 seat_types = ["普通座", "商务座", "豪华座"]
 
-# 为每条路线生成班次
+# 批量准备所有班次数据
+all_tickets_data = []
+timestamp = Time.current
+
 routes.each do |route|
   route_key = "#{route[:origin]}-#{route[:destination]}"
   price_range = price_ranges[route_key] || (30..60)
@@ -95,7 +98,7 @@ routes.each do |route|
           base_price = (base_price * 1.1).round
         end
         
-        BusTicket.create!(
+        all_tickets_data << {
           origin: route[:origin],
           destination: route[:destination],
           departure_date: date,
@@ -106,14 +109,21 @@ routes.each do |route|
           seat_type: seat_types.sample,
           departure_station: station[:dep],
           arrival_station: station[:arr],
-          route_description: station[:desc]
-        )
+          route_description: station[:desc],
+          created_at: timestamp,
+          updated_at: timestamp
+        }
       end
     end
   end
   
-  puts "  ✓ 创建 #{route_key} 路线班次"
+  puts "  ✓ 准备 #{route_key} 路线班次数据"
 end
 
-total_count = BusTicket.count
-puts "✅ 成功创建 #{total_count} 条汽车票数据"
+# 批量插入所有数据
+if all_tickets_data.any?
+  BusTicket.insert_all(all_tickets_data)
+  puts "✅ 成功批量创建 #{BusTicket.count} 条汽车票数据"
+else
+  puts "⚠️  没有数据需要创建"
+end
