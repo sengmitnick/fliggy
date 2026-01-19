@@ -239,6 +239,10 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
+    namespace :v1 do
+      get 'health', to: 'health#show'
+    end
+    
     # 验证系统 API（现有接口）
     get 'verify', to: 'verify#index'
     match 'verify/:id/prepare', to: 'verify#prepare', via: :all
