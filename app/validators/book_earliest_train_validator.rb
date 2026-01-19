@@ -152,11 +152,11 @@ class BookEarliestTrainValidator < BaseValidator
     booking = TrainBooking.create!(
       train_id: target_train.id,
       user_id: user.id,
-      passenger_names: [passenger.name],
-      passenger_id_numbers: [passenger.id_number],
+      passenger_name: passenger.name,
+      passenger_id_number: passenger.id_number,
       contact_phone: passenger.phone,
       seat_type: 'second_class',
-      quantity: 1,
+      accept_terms: true,
       total_price: seat.price,
       status: 'pending'
     )

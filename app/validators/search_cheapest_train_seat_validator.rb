@@ -137,7 +137,7 @@ class SearchCheapestTrainSeatValidator < BaseValidator
       
       # 获取实际预订的座位价格
       booked_seat = @booking.train.train_seats.find_by(seat_type: @booking.seat_type)
-      booked_price = booked_seat&.price || @booking.total_price / (@booking.quantity || 1)
+      booked_price = booked_seat&.price || @booking.total_price
       
       expect(booked_price).to be_within(0.5).of(cheapest_price),
         "未选择最便宜车票。最低价: ¥#{cheapest_price} (#{cheapest_info[:train_number]} #{cheapest_info[:seat_type]}), " \
@@ -148,7 +148,7 @@ class SearchCheapestTrainSeatValidator < BaseValidator
     add_assertion "订单总价准确", weight: 30 do
       # 获取座位价格
       seat = @booking.train.train_seats.find_by(seat_type: @booking.seat_type)
-      expected_price = seat.price * (@booking.quantity || 1)
+      expected_price = seat.price
       
       expect(@booking.total_price).to be_within(1).of(expected_price),
         "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@booking.total_price}"
@@ -212,11 +212,11 @@ class SearchCheapestTrainSeatValidator < BaseValidator
     booking = TrainBooking.create!(
       train_id: target_train.id,
       user_id: user.id,
-      passenger_names: [passenger.name],
-      passenger_id_numbers: [passenger.id_number],
+      passenger_name: passenger.name,
+      passenger_id_number: passenger.id_number,
       contact_phone: passenger.phone,
       seat_type: target_seat.seat_type,
-      quantity: 1,
+      accept_terms: true,
       total_price: target_seat.price,
       status: 'pending'
     )

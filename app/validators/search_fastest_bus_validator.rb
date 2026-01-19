@@ -2,10 +2,10 @@
 
 require_relative 'base_validator'
 
-# 验证用例10: 搜索后天杭州到苏州行程时间最短的班次
+# 验证用例10: 搜索后天杭州到深圳行程时间最短的班次
 # 
 # 任务描述:
-#   Agent 需要搜索后天杭州到苏州的所有大巴班次，
+#   Agent 需要搜索后天杭州到深圳的所有大巴班次，
 #   找出行程时间最短的班次并创建订单
 # 
 # 评分标准:
@@ -28,15 +28,15 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class SearchFastestBusValidator < BaseValidator
   self.validator_id = 'search_fastest_bus_hz_to_sz'
-  self.title = '搜索后天杭州到苏州行程时间最短的班次'
-  self.description = '搜索后天杭州到苏州的所有班次，找出行程时间最短的并预订'
+  self.title = '搜索后天杭州到深圳行程时间最短的班次'
+  self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
   def prepare
     # 数据已经通过 load_data_pack 自动加载
     @origin = '杭州'
-    @destination = '苏州'
+    @destination = '深圳'
     @target_date = Date.current + 2.days  # 后天
     
     # 查找所有班次（注意：查询基线数据）
@@ -70,7 +70,7 @@ class SearchFastestBusValidator < BaseValidator
       date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
       hint: "需要对比各班次的行程时间（到达时间 - 出发时间）",
       total_buses: buses.count,
-      fastest_duration_minutes: @fastest_bus[:duration_minutes]
+      fastest_duration_minutes: @fastest_bus ? @fastest_bus[:duration_minutes] : nil
     }
   end
   
@@ -85,7 +85,7 @@ class SearchFastestBusValidator < BaseValidator
     return unless @order
     
     # 断言2: 路线正确
-    add_assertion "路线正确（杭州→苏州）", weight: 10 do
+    add_assertion "路线正确（杭州→深圳）", weight: 10 do
       expect(@order.bus_ticket.origin).to eq(@origin)
       expect(@order.bus_ticket.destination).to eq(@destination)
     end
@@ -147,7 +147,7 @@ class SearchFastestBusValidator < BaseValidator
     @fastest_bus = data['fastest_bus']
   end
   
-  # 模拟 AI Agent 操作：搜索杭州到苏州最短行程班次并预订
+  # 模拟 AI Agent 操作：搜索杭州到深圳最短行程班次并预订
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -161,7 +161,12 @@ class SearchFastestBusValidator < BaseValidator
     )
     
     # 3. 找出行程时间最短的
-    target_bus = all_buses.min_by { |bus| bus.duration_minutes || Float::INFINITY }
+    buses_with_duration = all_buses.select { |bus| bus.respond_to?(:duration_minutes) && bus.duration_minutes }
+    
+    # 如果没有班次有时长，报错
+    raise "没有找到符合条件的班次（#{@origin}→#{@destination}，日期#{@target_date}）" if buses_with_duration.empty?
+    
+    target_bus = buses_with_duration.min_by(&:duration_minutes)
     
     # 4. 创建订单（固定参数）
     order = BusTicketOrder.create!(

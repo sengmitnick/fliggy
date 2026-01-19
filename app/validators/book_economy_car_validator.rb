@@ -95,7 +95,9 @@ class BookEconomyCarValidator < BaseValidator
     # 断言5: 租赁天数正确
     add_assertion "租赁天数正确（3天）", weight: 15 do
       # 从订单中计算天数
-      actual_days = @order.rental_days || @rental_days
+      return_date = @order.return_datetime.to_date
+      pickup_date = @order.pickup_datetime.to_date
+      actual_days = (return_date - pickup_date).to_i
       
       expect(actual_days).to eq(@rental_days),
         "租赁天数不正确。预期: #{@rental_days}天, 实际: #{actual_days}天"
@@ -143,18 +145,21 @@ class BookEconomyCarValidator < BaseValidator
     
     # 3. 创建订单（固定参数）
     total_price = target_car.price_per_day * @rental_days
-    return_date = @pickup_date + @rental_days.days
+    pickup_datetime = @pickup_date.to_time + 9.hours # 上午9点
+    # 3天租期：第1天上午9点 -> 第3天下午6点（正好3天）
+    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time + 18.hours # 下午6点
     
     order = CarOrder.create!(
       car_id: target_car.id,
       user_id: user.id,
-      pickup_date: @pickup_date,
-      return_date: return_date,
-      rental_days: @rental_days,
-      daily_rate: target_car.price_per_day,
-      total_price: total_price,
+      driver_name: '张三',
+      driver_id_number: '110101199001011234',
+      contact_phone: '13800138000',
+      pickup_datetime: pickup_datetime,
+      return_datetime: return_datetime,
       pickup_location: target_car.pickup_location,
-      status: 'pending'
+      status: 'pending',
+      total_price: total_price
     )
     
     # 返回操作信息

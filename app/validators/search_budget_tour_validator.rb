@@ -154,8 +154,11 @@ class SearchBudgetTourValidator < BaseValidator
     # 3. 找出销量最高的
     target_product = budget_products.max_by { |p| p.sales_count }
     
+    # 如果产品没有套餐，先生成
+    target_product.generate_packages if target_product.tour_packages.empty?
+    
     # 4. 选择套餐（经济型）
-    target_package = target_product.tour_packages.find_by(name: '经济型')
+    target_package = target_product.tour_packages.find_by(name: '经济型') || target_product.tour_packages.first
     
     # 5. 创建订单（固定参数）
     travel_date = Date.current + 7.days  # 7天后出发

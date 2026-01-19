@@ -129,18 +129,21 @@ class SearchFamilyCarValidator < BaseValidator
     pickup_date = Date.current + 2.days
     rental_days = 3
     total_price = target_car.price_per_day * rental_days
-    return_date = pickup_date + rental_days.days
+    pickup_datetime = pickup_date.to_time + 9.hours
+    # 3天租期：第1天上午9点 -> 第3天下午6点（正好3天）
+    return_datetime = (pickup_date + (rental_days - 1).days).to_time + 18.hours
     
     order = CarOrder.create!(
       car_id: target_car.id,
       user_id: user.id,
-      pickup_date: pickup_date,
-      return_date: return_date,
-      rental_days: rental_days,
-      daily_rate: target_car.price_per_day,
-      total_price: total_price,
+      driver_name: '张三',
+      driver_id_number: '110101199001011234',
+      contact_phone: '13800138000',
+      pickup_datetime: pickup_datetime,
+      return_datetime: return_datetime,
       pickup_location: target_car.pickup_location,
-      status: 'pending'
+      status: 'pending',
+      total_price: total_price
     )
     
     # 返回操作信息

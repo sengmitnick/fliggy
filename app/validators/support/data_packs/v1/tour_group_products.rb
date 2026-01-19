@@ -36,7 +36,8 @@ destinations = [
   { name: '成都', departure_cities: ['成都', '重庆', '绵阳'] },
   { name: '深圳', departure_cities: ['深圳', '广州', '香港'] },
   { name: '西安', departure_cities: ['西安', '咸阳', '宝鸡'] },
-  { name: '三亚', departure_cities: ['三亚', '海口', '广州', '深圳'] }
+  { name: '三亚', departure_cities: ['三亚', '海口', '广州', '深圳'] },
+  { name: '云南', departure_cities: ['昆明', '成都', '重庆', '广州', '深圳'] }
 ]
 
 # 为每个目的地生成产品

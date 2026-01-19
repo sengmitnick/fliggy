@@ -137,9 +137,10 @@ class SearchMultiCountryWifiValidator < BaseValidator
       order_type: 'wifi',
       region: target_wifi.region,
       quantity: 1,
-      rental_days: rental_days,
+      rental_info: { rental_days: rental_days, pickup_date: Date.current + 3.days }.to_json,
       total_price: total_price,
       delivery_method: 'mail',
+      contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
       status: 'pending'
     )
     

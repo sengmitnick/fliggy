@@ -136,9 +136,10 @@ class BookJapanSimCardValidator < BaseValidator
       order_type: 'sim_card',
       region: @region,
       quantity: 1,
-      rental_days: @validity_days,
+      rental_info: { validity_days: @validity_days }.to_json,
       total_price: target_sim_card.price,
       delivery_method: 'mail',
+      contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
       status: 'pending'
     )
     
