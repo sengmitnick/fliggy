@@ -1,6 +1,17 @@
 <% active_tab ||= :home %>
 
-<% return unless controller_name == 'home' && action_name == 'index' %>
+<%
+  # Only show bottom navigation on these 5 pages
+  show_bottom_nav = (
+    (controller_name == 'home' && action_name == 'index') ||
+    (controller_name == 'members' && action_name == 'index') ||
+    (controller_name == 'messages' && action_name == 'index') ||
+    (controller_name == 'trips' && action_name == 'index') ||
+    (controller_name == 'profiles' && action_name == 'show')
+  )
+%>
+
+<% return unless show_bottom_nav %>
 
 <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 z-50">
   <div class="grid grid-cols-5 gap-0 px-2 py-1">

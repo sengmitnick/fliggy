@@ -29,6 +29,7 @@ import DeepTravelController from "./deep_travel_controller"
 import MultiCityController from "./multi_city_controller"
 import FlightFilterController from "./flight_filter_controller"
 import FlightSortController from "./flight_sort_controller"
+import FlightInfoDisplayController from "./flight_info_display_controller"
 import DateLinkController from "./date_link_controller"
 import HotelGuestSelectorController from "./hotel_guest_selector_controller"
 import HotelDatePickerController from "./hotel_date_picker_controller"
@@ -90,6 +91,8 @@ import HotelMapToggleController from "./hotel_map_toggle_controller"
 import HotelMapController from "./hotel_map_controller"
 import SmartBackController from "./smart_back_controller"
 import TourGroupTabsController from "./tour_group_tabs_controller"
+import HotelPriceFilterController from "./hotel_price_filter_controller"
+import HotelGuaranteeController from "./hotel_guarantee_controller"
 
 const application = Application.start()
 
@@ -122,6 +125,7 @@ application.register("deep-travel", DeepTravelController)
 application.register("multi-city", MultiCityController)
 application.register("flight-filter", FlightFilterController)
 application.register("flight-sort", FlightSortController)
+application.register("flight-info-display", FlightInfoDisplayController)
 application.register("date-link", DateLinkController)
 application.register("hotel-guest-selector", HotelGuestSelectorController)
 application.register("hotel-date-picker", HotelDatePickerController)
@@ -183,5 +187,7 @@ application.register("hotel-map-toggle", HotelMapToggleController)
 application.register("hotel-map", HotelMapController)
 application.register("smart-back", SmartBackController)
 application.register("tour-group-tabs", TourGroupTabsController)
+application.register("hotel-price-filter", HotelPriceFilterController)
+application.register("hotel-guarantee", HotelGuaranteeController)
 
 window.Stimulus = application

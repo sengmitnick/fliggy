@@ -11,11 +11,8 @@ class FlightsController < ApplicationController
       City.all.order(:pinyin).to_a
     end
     
-    # Preload flight prices for date picker modals (batch query optimization)
-    departure_city = params[:departure_city] || '北京'
-    destination_city = params[:destination_city] || '杭州'
-    @departure_date_prices = preload_date_prices(departure_city, destination_city)
-    @return_date_prices = preload_date_prices(destination_city, departure_city)
+    # NOTE: Removed preload_date_prices to improve first-load performance
+    # Date prices will be loaded on-demand when user opens the date picker modal
   end
 
   def search
@@ -64,7 +61,7 @@ class FlightsController < ApplicationController
     
     @return_date = params[:return_date].present? ? Date.parse(params[:return_date]) : nil
 
-    # Get or generate flights for the outbound route and date
+    # Get flights for the outbound route and date (no auto-generation)
     @flights = Flight.search(@departure_city, @destination_city, @date)
     
     # Apply cabin class filter
@@ -87,10 +84,6 @@ class FlightsController < ApplicationController
 
     # Get prices for nearby dates (5 days) - always show all cabin classes
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
-    
-    # Preload flight prices for date picker modals (batch query optimization)
-    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
-    @return_date_prices = preload_date_prices(@destination_city, @departure_city)
 
     # For round trip, also get return flights
     if @trip_type == 'round_trip' && @return_date
@@ -191,9 +184,6 @@ class FlightsController < ApplicationController
     end
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
-    
-    # Preload flight prices for date picker modal (batch query optimization)
-    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     render :multi_city_results
   end
@@ -364,31 +354,5 @@ class FlightsController < ApplicationController
       }
     end
     prices
-  end
-  
-  # Preload flight prices for 60 days using batch queries (for date picker modals)
-  def preload_date_prices(departure_city, destination_city, start_date = Date.today, days = 61)
-    end_date = start_date + days.days
-    
-    # Batch query: get all flights for this route in the date range with flight_offers
-    flights = Flight.by_route(departure_city, destination_city)
-                    .where(flight_date: start_date..end_date)
-                    .includes(:flight_offers)
-    
-    # If no flights exist, generate them in batch
-    if flights.empty?
-      (start_date..end_date).each do |date|
-        Flight.generate_for_route(departure_city, destination_city, date)
-      end
-      # Re-query after generation
-      flights = Flight.by_route(departure_city, destination_city)
-                      .where(flight_date: start_date..end_date)
-                      .includes(:flight_offers)
-    end
-    
-    # Group flights by date and find minimum offer price for each date
-    flights.group_by(&:flight_date).transform_values do |date_flights|
-      date_flights.map(&:min_offer_price).min || 0
-    end
   end
 end
