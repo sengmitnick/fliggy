@@ -30,7 +30,7 @@ require_relative 'base_validator'
 class SearchCheapestFlightValidator < BaseValidator
   self.validator_id = 'search_cheapest_sh_to_sz'
   self.title = '搜索上海到深圳的最便宜航班'
-  self.description = '搜索上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣）'
+  self.description = '搜索后天上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -38,7 +38,7 @@ class SearchCheapestFlightValidator < BaseValidator
     # 数据已经通过 load_data_pack 自动加载
     @origin = '上海市'
     @destination = '深圳市'
-    @target_date = Date.current + 3.days
+    @target_date = Date.current + 2.days  # 后天
     
     # 查找所有航班（注意：查询基线数据）
     flights = Flight.where(
@@ -64,10 +64,11 @@ class SearchCheapestFlightValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索#{@origin}到#{@destination}的所有航班，找出最便宜的并预订",
+      task: "请搜索后天从#{@origin}到#{@destination}的所有航班，找出最便宜的并预订",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,
+      date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
       hint: "注意：有些航班有折扣，需要计算最终价格 = 原价 - 折扣",
       total_flights: flights.count,
       price_range: {

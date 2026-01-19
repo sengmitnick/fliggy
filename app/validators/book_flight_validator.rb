@@ -25,7 +25,7 @@ require_relative 'base_validator'
 class BookFlightValidator < BaseValidator
   self.validator_id = 'book_flight_sz_to_bj'
   self.title = '预订深圳到北京的低价机票'
-  self.description = '在今天的航班中找到价格最低的机票并完成预订'
+  self.description = '在后天的航班中找到价格最低的机票并完成预订'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -33,7 +33,7 @@ class BookFlightValidator < BaseValidator
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
     @origin = '深圳市'
     @destination = '北京市'
-    @target_date = Date.current + 3.days
+    @target_date = Date.current + 2.days  # 后天
     
     # 计算最低价（用于后续验证）
     # 注意：查询基线数据 (data_version=0)
@@ -46,10 +46,11 @@ class BookFlightValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订一张#{@origin.delete_suffix('市')}到#{@destination.delete_suffix('市')}的低价机票",
+      task: "请预订一张后天从#{@origin.delete_suffix('市')}到#{@destination.delete_suffix('市')}的低价机票",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,
+      date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
       hint: "系统中有多个航班可选，请选择价格最低的航班",
       available_flights_count: Flight.where(
         departure_city: @origin,
