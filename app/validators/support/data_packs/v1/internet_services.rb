@@ -1,15 +1,51 @@
 # 境外上网服务种子数据
 puts "Creating internet services data..."
 
-# 清理现有数据
-InternetSimCard.destroy_all
-InternetDataPlan.destroy_all
-InternetWifi.destroy_all
-
 timestamp = Time.current
 
 # 境外电话卡数据
 sim_cards_data = [
+  # 日本地区 SIM卡（支持 BookJapanSimCardValidator）
+  {
+    name: "日本7天无限流量卡",
+    region: "日本",
+    validity_days: 7,
+    data_limit: "无限流量",
+    price: 68.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 15000,
+    shop_name: "日本通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本7天大流量卡",
+    region: "日本",
+    validity_days: 7,
+    data_limit: "无限流量不降速",
+    price: 88.0,
+    features: ["5G网络", "真无限", "热点分享"],
+    sales_count: 12000,
+    shop_name: "日本通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本5天流量卡",
+    region: "日本",
+    validity_days: 5,
+    data_limit: "10GB/天",
+    price: 45.0,
+    features: ["4G网络", "高速流量"],
+    sales_count: 8000,
+    shop_name: "日本通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # 香港地区 SIM卡
   {
     name: "插卡即用",
     region: "中国香港",
@@ -19,6 +55,7 @@ sim_cards_data = [
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "香港24小时制"],
     sales_count: 10000,
     shop_name: "深圳游小匠旅游专营店",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -31,6 +68,7 @@ sim_cards_data = [
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "港澳24小时制"],
     sales_count: 10000,
     shop_name: "深圳游小匠旅游专营店",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -43,6 +81,7 @@ sim_cards_data = [
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "含 转换插头", "港澳24小时制"],
     sales_count: 200,
     shop_name: "深圳游小匠旅游专营店",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -55,6 +94,7 @@ sim_cards_data = [
     features: ["虚商卡", "价格优", "5G网络", "赠 卡针 + 电子地图", "香港24小时制"],
     sales_count: 5000,
     shop_name: "深圳游小匠旅游专营店",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   }
@@ -74,6 +114,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP。当日用量达到0.4GB将降速至384kbps，次日0时恢复（以北京时间为准）",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -86,6 +127,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -98,6 +140,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -110,6 +153,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -122,6 +166,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   }
@@ -132,6 +177,64 @@ InternetDataPlan.insert_all(data_plans_data) if data_plans_data.any?
 
 # 随身WiFi数据
 wifis_data = [
+  # 欧洲多国覆盖WiFi（支持 SearchMultiCountryWifiValidator）
+  {
+    name: "欧洲8国通用WiFi",
+    region: "欧洲8国通用",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 25,
+    features: ["8国覆盖", "无限流量", "多人共享", "免押金"],
+    sales_count: 8000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "欧洲6国通用WiFi·5G高速",
+    region: "欧洲6国通用",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 35,
+    features: ["6国覆盖", "5G网络", "多人共享", "含充电宝"],
+    sales_count: 6000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "欧洲10国通用WiFi·豪华版",
+    region: "欧洲10国通用",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 30,
+    features: ["10国覆盖", "无限流量", "多人共享", "含转换插头"],
+    sales_count: 5000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "欧洲5国通用WiFi",
+    region: "欧洲5国通用",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 20,
+    features: ["5国覆盖", "无限流量", "多人共享"],
+    sales_count: 7000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # 香港地区WiFi
   {
     name: "4G网·无限量",
     region: "中国香港",
@@ -142,6 +245,7 @@ wifis_data = [
     sales_count: 5000,
     shop_name: "漫游超人通讯旗舰店",
     deposit: 500,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -155,6 +259,7 @@ wifis_data = [
     sales_count: 3000,
     shop_name: "漫游超人通讯旗舰店",
     deposit: 500,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -168,6 +273,7 @@ wifis_data = [
     sales_count: 2000,
     shop_name: "漫游超人通讯旗舰店",
     deposit: 500,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -181,6 +287,7 @@ wifis_data = [
     sales_count: 1500,
     shop_name: "漫游超人通讯旗舰店",
     deposit: 500,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -194,6 +301,7 @@ wifis_data = [
     sales_count: 1000,
     shop_name: "漫游超人通讯旗舰店",
     deposit: 500,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   }
