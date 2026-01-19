@@ -597,4 +597,93 @@ export default class extends Controller<HTMLElement> {
   stopPropagation(event: Event): void {
     event.stopPropagation()
   }
+
+  switchToSingleSelect(): void {
+    this.isMultiSelectMode = false
+    this.selectedCities = []
+    this.updateMultiSelectUI()
+  }
+
+  switchToMultiSelect(): void {
+    this.isMultiSelectMode = true
+    this.updateMultiSelectUI()
+  }
+
+  confirmMultiSelect(): void {
+    // Confirm multi-select and close modal
+    if (this.selectedCities.length > 0) {
+      // Trigger event with selected cities
+      const event = new CustomEvent('city-selector:multi-cities-selected', {
+        detail: { cities: this.selectedCities },
+        bubbles: true
+      })
+      document.dispatchEvent(event)
+    }
+    this.closeModal()
+  }
+
+  showDomestic(): void {
+    if (this.hasTabDomesticTarget && this.hasTabInternationalTarget) {
+      this.tabDomesticTarget.classList.add('border-blue-500')
+      this.tabDomesticTarget.classList.remove('border-transparent')
+      this.tabInternationalTarget.classList.remove('border-blue-500')
+      this.tabInternationalTarget.classList.add('border-transparent')
+    }
+    if (this.hasDomesticListTarget) {
+      this.domesticListTarget.classList.remove('hidden')
+    }
+    if (this.hasInternationalListTarget) {
+      this.internationalListTarget.classList.add('hidden')
+    }
+    this.currentRegionType = 'domestic'
+  }
+
+  showInternational(): void {
+    if (this.hasTabInternationalTarget && this.hasTabDomesticTarget) {
+      this.tabInternationalTarget.classList.add('border-blue-500')
+      this.tabInternationalTarget.classList.remove('border-transparent')
+      this.tabDomesticTarget.classList.remove('border-blue-500')
+      this.tabDomesticTarget.classList.add('border-transparent')
+    }
+    if (this.hasInternationalListTarget) {
+      this.internationalListTarget.classList.remove('hidden')
+    }
+    if (this.hasDomesticListTarget) {
+      this.domesticListTarget.classList.add('hidden')
+    }
+    this.currentRegionType = 'international'
+  }
+
+  jumpToLetter(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const letter = button.dataset.letter
+    if (letter) {
+      const targetElement = this.element.querySelector(`[data-letter-section="${letter}"]`)
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+  }
+
+  scrollToRegion(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const region = button.dataset.region
+    if (region) {
+      const targetElement = this.element.querySelector(`[data-region-section="${region}"]`)
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+  }
+
+  expandHotCities(): void {
+    const hotCitiesSection = this.element.querySelector('[data-hot-cities]')
+    if (hotCitiesSection) {
+      hotCitiesSection.classList.toggle('expanded')
+    }
+  }
+
+  search(): void {
+    this.searchCities()
+  }
 }

@@ -426,6 +426,7 @@ Rails.application.routes.draw do
     end
   end
 
+  get 'search', to: 'home#search'
   root 'home#index'
 
   # Do not write business logic at admin dashboard

@@ -34,7 +34,7 @@
 
       <!-- Search Bar -->
       <div class="relative" data-controller="search">
-        <form data-action="submit->search#search" class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+        <form action="<%= search_path %>" method="get" data-action="submit->search#search" class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
           <div class="flex items-center gap-2 flex-1">
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
             <input 

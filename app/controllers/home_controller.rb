@@ -47,4 +47,10 @@ class HomeController < ApplicationController
 
     @full_render = true
   end
+
+  def search
+    # TODO: Implement actual search functionality
+    # For now, just redirect back with a flash message
+    redirect_to root_path, notice: "搜索功能即将上线，敬请期待"
+  end
 end

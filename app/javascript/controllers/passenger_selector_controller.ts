@@ -272,6 +272,27 @@ export default class extends Controller {
     document.body.style.overflow = ""
   }
 
+  toggleEdit(): void {
+    // This method is used in views to toggle between edit and display modes
+    const event = new Event('click')
+    this.openModal(event)
+  }
+
+  selectPassenger(event: Event): void {
+    // Delegate to togglePassenger
+    this.togglePassenger(event)
+  }
+
+  decrease(event: Event): void {
+    // General decrease method that can be used for any count
+    this.decrementAdults(event)
+  }
+
+  increase(event: Event): void {
+    // General increase method that can be used for any count
+    this.incrementAdults(event)
+  }
+
   private updateCounters(): void {
     this.adultsCountTarget.textContent = this.adults.toString()
     this.childrenCountTarget.textContent = this.children.toString()

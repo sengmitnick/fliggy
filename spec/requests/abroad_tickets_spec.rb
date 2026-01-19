@@ -13,7 +13,7 @@ RSpec.describe "Abroad tickets", type: :request do
   end
 
   describe "GET /abroad_tickets/:id" do
-    let(:abroad_ticket_record) { create(:abroad_ticket, user: user) }
+    let(:abroad_ticket_record) { create(:abroad_ticket) }
 
 
     it "returns http success" do

@@ -246,6 +246,18 @@ export default class extends Controller {
     this.statusModalTarget.classList.remove('hidden')
   }
 
+  closeProcessingModal(): void {
+    if (this.hasStatusModalTarget) {
+      this.statusModalTarget.classList.add('hidden')
+    }
+  }
+
+  switchToPasswordPay(): void {
+    // Close any open modals and show password modal
+    this.closeStatusModal()
+    this.showPasswordModal()
+  }
+
   showPaymentSuccess(): void {
     if (this.hasStatusIconTarget) {
       this.statusIconTarget.textContent = '✓'
