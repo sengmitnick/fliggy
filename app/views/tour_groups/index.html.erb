@@ -66,9 +66,9 @@
               data-tour-group-filter-target="destinationButton"
               data-destination="<%= city %>"
               data-action="click->tour-group-filter#selectDestination"
-              class="<%= city == @destination ? 'bg-[#FFE8CC]' : 'bg-gray-50' %> px-4 py-2 rounded-lg flex items-center gap-1 text-sm transition-colors">
+              class="<%= city == @destination ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md' : 'bg-gray-50 border-2 border-transparent' %> px-4 py-2 rounded-lg flex items-center gap-1 text-sm transition-all">
               <span class="text-base">🔥</span>
-              <span class="font-medium"><%= city %></span>
+              <span class="<%= city == @destination ? 'font-bold' : 'font-medium' %>"><%= city %></span>
             </button>
           <% end %>
         </div>
@@ -76,16 +76,46 @@
 
       <!-- Duration Selection -->
       <div class="mb-4">
-        <div class="text-sm text-gray-600 mb-2">天数</div>
-        <div class="flex gap-3">
-          <% @duration_options.each do |option| %>
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-gray-600" data-tour-group-filter-target="durationLabel">
+            <% if @duration.present? && @duration.to_i > 3 %>
+              玩<%= @duration %>天
+            <% else %>
+              天数
+            <% end %>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Clear button (X icon) - only show when duration is selected -->
+            <button 
+              type="button"
+              data-action="click->tour-group-filter#clearDuration"
+              data-tour-group-filter-target="clearDurationButton"
+              class="<%= @duration.present? ? '' : 'hidden' %> text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+            <!-- Arrow button for opening modal -->
+            <button 
+              type="button"
+              data-action="click->tour-group-filter#openDurationModal"
+              class="text-gray-500 hover:text-gray-700 transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Quick duration buttons - shown when no extended duration selected -->
+        <div class="<%= @duration.present? && @duration.to_i > 3 ? 'hidden' : 'flex gap-3' %>" data-tour-group-filter-target="quickDurationButtons">
+          <% @duration_quick_options.each do |option| %>
             <button 
               type="button"
               data-tour-group-filter-target="durationButton"
               data-duration="<%= option[:value] %>"
               data-action="click->tour-group-filter#selectDuration"
-              class="flex-1 py-3 rounded-lg bg-gray-50 text-sm font-medium relative transition-colors">
-              <%= option[:label] %>
+              class="<%= option[:value] == @duration ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md' : 'bg-gray-50 border-2 border-transparent' %> flex-1 py-3 rounded-lg text-sm relative transition-all">
+              <span class="<%= option[:value] == @duration ? 'font-bold' : 'font-medium' %>"><%= option[:label] %></span>
               <% if option[:hot] %>
                 <span class="absolute -top-1 -right-1 text-base">🔥</span>
               <% end %>
@@ -128,6 +158,60 @@
           搜索跟团游商品
         </button>
       <% end %>
+
+      <!-- Duration Selection Modal (inside controller scope) -->
+      <div 
+        data-tour-group-filter-target="durationModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden"
+        data-action="click->tour-group-filter#closeDurationModalOnBackdrop">
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] overflow-y-auto shadow-2xl">
+          <!-- Modal Header -->
+          <div class="sticky top-0 bg-white px-6 py-5 flex items-center justify-center relative border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-900">选择天数</h3>
+            <button 
+              type="button"
+              data-action="click->tour-group-filter#cancelDurationModal"
+              class="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Duration Options Grid -->
+          <div class="px-4 py-5">
+            <div class="grid grid-cols-4 gap-2 mb-6">
+              <% @duration_options.each do |option| %>
+                <button 
+                  type="button"
+                  data-action="click->tour-group-filter#selectDurationInModal"
+                  data-duration="<%= option[:value] %>"
+                  data-tour-group-filter-target="durationOption"
+                  class="px-3 py-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                  <%= option[:label] %>
+                </button>
+              <% end %>
+            </div>
+            
+            <!-- Bottom Action Buttons -->
+            <div class="flex gap-3">
+              <button 
+                type="button"
+                data-action="click->tour-group-filter#clearDurationInModal"
+                class="flex-1 py-3.5 rounded-full bg-gray-100 text-gray-700 text-base font-medium hover:bg-gray-200 transition-colors">
+                清空
+              </button>
+              <button 
+                type="button"
+                data-action="click->tour-group-filter#confirmDurationSelection"
+                class="flex-[2] py-3.5 rounded-full text-base font-medium transition-colors"
+                style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%); color: #000;">
+                确认
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>

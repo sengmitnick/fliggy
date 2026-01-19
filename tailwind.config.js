@@ -34,6 +34,11 @@ module.exports = {
           light: 'hsl(var(--color-secondary-light) / <alpha-value>)',
           dark: 'hsl(var(--color-secondary-dark) / <alpha-value>)',
         },
+        accent: {
+          DEFAULT: 'hsl(var(--color-accent) / <alpha-value>)',
+          light: 'hsl(var(--color-accent-light) / <alpha-value>)',
+          dark: 'hsl(var(--color-accent-dark) / <alpha-value>)',
+        },
         background: {
           DEFAULT: 'hsl(var(--color-surface) / <alpha-value>)',
         },
@@ -43,15 +48,19 @@ module.exports = {
         surface: {
           DEFAULT: 'hsl(var(--color-surface) / <alpha-value>)',
           elevated: 'hsl(var(--color-surface-elevated) / <alpha-value>)',
+          hover: 'hsl(var(--color-surface-hover) / <alpha-value>)',
         },
         border: {
           DEFAULT: 'hsl(var(--color-border) / <alpha-value>)',
+          light: 'hsl(var(--color-border-light) / <alpha-value>)',
         },
         muted: {
           DEFAULT: 'hsl(var(--color-text-muted) / <alpha-value>)',
         },
         neutral: {
           DEFAULT: 'hsl(var(--color-neutral) / <alpha-value>)',
+          light: 'hsl(var(--color-neutral-light) / <alpha-value>)',
+          bg: 'hsl(var(--color-neutral-bg) / <alpha-value>)',
         },
         success: {
           DEFAULT: 'hsl(var(--color-success) / <alpha-value>)',
@@ -94,6 +103,9 @@ module.exports = {
         },
         muted: {
           DEFAULT: 'hsl(var(--color-text-muted) / <alpha-value>)',
+        },
+        inverse: {
+          DEFAULT: 'hsl(var(--color-text-inverse) / <alpha-value>)',
         },
         // Aliases for AI's common mistake: text-text-primary -> text-text-primary
         'text-primary': 'hsl(var(--color-text-primary) / <alpha-value>)',

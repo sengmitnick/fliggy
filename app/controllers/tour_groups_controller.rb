@@ -2,6 +2,7 @@ class TourGroupsController < ApplicationController
   def index
     # Default destination
     @destination = params[:destination].presence || '上海'
+    @duration = params[:duration].presence
     @group_size = params[:group_size].presence
     
     # Hot destinations - 从数据库获取
@@ -14,11 +15,29 @@ class TourGroupsController < ApplicationController
     
     @hot_destinations = ['上海', '北京', '杭州', '广州', '成都'] if @hot_destinations.empty?
     
-    # Duration options
+    # Duration options for main page (only show 3 options)
+    @duration_quick_options = [
+      { label: '一日游', value: '1' },
+      { label: '2天', value: '2' },
+      { label: '3天', value: '3' }
+    ]
+    
+    # All duration options for modal (show all 14 options)
     @duration_options = [
       { label: '一日游', value: '1' },
-      { label: '2天', value: '2', hot: true },
-      { label: '3天', value: '3', hot: true }
+      { label: '2天', value: '2' },
+      { label: '3天', value: '3' },
+      { label: '4天', value: '4' },
+      { label: '5天', value: '5' },
+      { label: '6天', value: '6' },
+      { label: '7天', value: '7' },
+      { label: '8天', value: '8' },
+      { label: '9天', value: '9' },
+      { label: '10天', value: '10' },
+      { label: '11天', value: '11' },
+      { label: '12天', value: '12' },
+      { label: '13天', value: '13' },
+      { label: '14天', value: '14' }
     ]
     
     # Group size options
