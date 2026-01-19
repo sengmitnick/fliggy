@@ -93,26 +93,50 @@ puts "\n批量创建酒店..."
 hotels_data = []
 timestamp = Time.current
 
-50.times do |i|
+# 扩充到 500 家酒店（覆盖更多城市和价格区间）
+500.times do |i|
   city = cities[i % cities.length]
   hotel_name_template = hotel_names[i % hotel_names.length]
-  hotel_name = "#{city}#{hotel_name_template[:prefix]}#{hotel_name_template[:suffix]}"
+  # 添加序号避免重名
+  suffix_num = (i / hotel_names.length) + 1
+  hotel_name = "#{city}#{hotel_name_template[:prefix]}#{suffix_num > 1 ? suffix_num.to_s : ''}#{hotel_name_template[:suffix]}"
   
-  star_level = [3, 4, 4, 5, 5].sample
+  # 更均衡的星级分布：3星40%, 4星35%, 5星25%
+  star_level = case (i % 20)
+  when 0..7
+    3
+  when 8..14
+    4
+  else
+    5
+  end
+  
+  # 价格区间更细分，确保有足够的预算选择
   base_price = case star_level
   when 5
     rand(800..2000)
   when 4
     rand(400..800)
   else
-    rand(200..400)
+    # 3星酒店价格区间：200-600元，确保有足够的经济型选择
+    rand(200..600)
+  end
+  
+  # 评分更真实：根据星级和价格影响评分
+  rating_base = case star_level
+  when 5
+    4.5 + rand * 0.4  # 4.5-4.9
+  when 4
+    4.0 + rand * 0.8  # 4.0-4.8
+  else
+    3.8 + rand * 1.0  # 3.8-4.8
   end
   
   hotels_data << {
     name: hotel_name,
     city: city,
     address: "#{city}#{address_suffixes[i % address_suffixes.length]}#{rand(1..999)}号",
-    rating: (4.0 + rand * 1.0).round(1),
+    rating: rating_base.round(1),
     price: base_price,
     original_price: (base_price * (1.1 + rand * 0.3)).round(0),
     distance: "#{rand(1..10)}.#{rand(0..9)}km",
@@ -124,7 +148,7 @@ timestamp = Time.current
     is_domestic: true,
     region: '国内',
     image_url: hotel_images[i % hotel_images.length],
-    data_version: 1,
+    data_version: 0,
     brand: "",
     created_at: timestamp,
     updated_at: timestamp
@@ -138,10 +162,14 @@ puts "已批量创建 #{hotels_data.size} 家酒店"
 puts "\n批量创建民宿..."
 homestays_data = []
 
-5.times do |i|
+# 扩充到 100 家民宿
+100.times do |i|
   city = cities[i % cities.length]
-  homestay_name = "#{city}#{homestay_names[i]}"
-  base_price = rand(150..350)
+  # 扩展民宿名称
+  homestay_base_name = homestay_names[i % homestay_names.length]
+  suffix_num = (i / homestay_names.length) + 1
+  homestay_name = "#{city}#{homestay_base_name}#{suffix_num > 1 ? suffix_num.to_s : ''}"
+  base_price = rand(150..400)
   
   homestays_data << {
     name: homestay_name,
@@ -154,12 +182,12 @@ homestays_data = []
     features: ["免费WiFi", "厨房", "洗衣机", "独立卫浴"],
     star_level: nil,
     is_featured: [true, false].sample,
-    display_order: 50 + i,
+    display_order: 500 + i,
     hotel_type: 'homestay',
     is_domestic: true,
     region: '国内',
     image_url: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&q=80&fm=jpg&fit=crop&auto=format",
-    data_version: 1,
+    data_version: 0,
     brand: "",
     created_at: timestamp,
     updated_at: timestamp
