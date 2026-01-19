@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_18_145815) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_19_102443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1087,6 +1087,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_18_145815) do
     t.text "group_tour_notice"
     t.boolean "custom_tour_available", default: false
     t.integer "data_version", default: 0, null: false
+    t.string "travel_type"
     t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
   end
@@ -1398,6 +1399,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_18_145815) do
     t.datetime "updated_at", null: false
     t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_visa_products_on_data_version"
+  end
+
+  create_table "visa_services", force: :cascade do |t|
+    t.string "title"
+    t.string "country"
+    t.string "service_type", default: "全国送签"
+    t.decimal "success_rate", default: "100.0"
+    t.integer "processing_days", default: 5
+    t.integer "price", default: 0
+    t.integer "original_price"
+    t.boolean "urgent_processing", default: false
+    t.text "description"
+    t.string "merchant_name"
+    t.integer "sales_count", default: 0
+    t.string "slug"
+    t.string "image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_visa_services_on_slug", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

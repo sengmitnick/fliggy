@@ -72,6 +72,19 @@ class TourGroupsController < ApplicationController
     @sort_by = params[:sort_by].presence || 'smart' # 智能排序/sales/rating
     @departure_city = params[:departure_city].presence # 出发地
     @duration = params[:duration].to_i if params[:duration].present?
+    @travel_type = params[:travel_type].presence # 旅游类型：跟团游/独立成团/自由出行
+    
+    # 处理顶部tab参数，将tab ID映射到travel_type
+    @active_tab = params[:tab].presence || 'comprehensive'
+    tab_to_travel_type = {
+      'group_tour' => '跟团游',
+      'private_group' => '独立成团',
+      'free_travel' => '自由出行'
+    }
+    # 如果有tab参数且不是comprehensive，则设置对应的travel_type
+    if @active_tab != 'comprehensive' && tab_to_travel_type[@active_tab]
+      @travel_type = tab_to_travel_type[@active_tab]
+    end
     
     # 获取所有可用的目的地列表
     @destinations = TourGroupProduct.distinct.pluck(:destination).sort
@@ -86,6 +99,11 @@ class TourGroupsController < ApplicationController
     # 根据tour_category筛选（如果提供）
     if @tour_category.present?
       products = products.where(tour_category: @tour_category)
+    end
+    
+    # 根据旅游类型筛选
+    if @travel_type.present?
+      products = products.where(travel_type: @travel_type)
     end
     
     # 根据天数筛选

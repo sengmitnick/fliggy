@@ -6,11 +6,35 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
     <% end %>
-    <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-1.5 border border-yellow-400">
-      <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <span class="text-gray-700 text-sm"><%= @destination %></span>
+    <div class="flex-1 relative" data-controller="filter-dropdown">
+      <button type="button" 
+              data-action="filter-dropdown#toggle" 
+              data-dropdown-id="destination"
+              class="w-full bg-gray-100 rounded-full flex items-center px-4 py-1.5 border border-yellow-400">
+        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <span class="flex-1 text-gray-700 text-sm text-left"><%= @destination %></span>
+        <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+      </button>
+      
+      <!-- 目的地下拉菜单 -->
+      <div data-filter-dropdown-target="dropdown" 
+           data-dropdown-id="destination"
+           class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-y-auto">
+        <div class="py-2">
+          <div class="px-3 py-2 text-gray-500 text-xs font-bold">选择目的地</div>
+          <div class="grid grid-cols-2 gap-1 px-2">
+            <% @destinations.each do |dest| %>
+              <%= link_to dest, search_tour_groups_path(destination: dest), 
+                  class: "block px-3 py-2 text-center rounded hover:bg-gray-50 transition-colors text-sm #{@destination == dest ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700'}",
+                  data: { action: 'filter-dropdown#selectOption' } %>
+            <% end %>
+          </div>
+        </div>
+      </div>
     </div>
     <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
       <path d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
@@ -31,7 +55,12 @@
       %>
       
       <% tabs.each do |tab| %>
-        <%= link_to search_tour_groups_path(destination: @destination, tab: tab[:id]), 
+        <% 
+          tab_travel_type = {'group_tour' => '跟团游', 'private_group' => '独立成团', 'free_travel' => '自由出行'}[tab[:id]]
+          # 出境必备跳转到签证服务页面
+          tab_url = tab[:id] == 'outbound_essentials' ? visa_services_path : search_tour_groups_path(destination: @destination, tab: tab[:id], travel_type: tab_travel_type)
+        %>
+        <%= link_to tab_url, 
             class: "flex flex-col items-center space-y-1 #{@active_tab == tab[:id] ? 'bg-white rounded-t-md pt-1' : ''}" do %>
           <div class="w-8 h-8 flex items-center justify-center">
             <%= image_tag(@active_tab == tab[:id] ? tab[:icon_active] : tab[:icon], 
@@ -125,14 +154,51 @@
              data-dropdown-id="sort"
              class="hidden absolute top-full left-0 mt-2 w-32 bg-white rounded-lg shadow-lg border z-50">
           <div class="py-2">
-            <%= link_to '智能排序', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'smart', tag: @selected_tag, duration: @duration, departure_city: @departure_city), 
+            <%= link_to '智能排序', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'smart', tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
                 class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@sort_by == 'smart' ? 'text-primary font-bold' : 'text-gray-700'}",
                 data: { action: 'filter-dropdown#selectOption' } %>
-            <%= link_to '销量优先', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'sales', tag: @selected_tag, duration: @duration, departure_city: @departure_city), 
+            <%= link_to '销量优先', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'sales', tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
                 class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@sort_by == 'sales' ? 'text-primary font-bold' : 'text-gray-700'}",
                 data: { action: 'filter-dropdown#selectOption' } %>
-            <%= link_to '好评优先', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'rating', tag: @selected_tag, duration: @duration, departure_city: @departure_city), 
+            <%= link_to '好评优先', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: 'rating', tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
                 class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@sort_by == 'rating' ? 'text-primary font-bold' : 'text-gray-700'}",
+                data: { action: 'filter-dropdown#selectOption' } %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 旅游类型 -->
+      <div class="relative">
+        <button type="button" 
+                data-action="filter-dropdown#toggle" 
+                data-dropdown-id="travel-type"
+                class="flex items-center <%= @travel_type.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+          <span><%= @travel_type.present? ? @travel_type : '旅游类型' %></span>
+          <% if @travel_type.present? %>
+            <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
+          <% end %>
+          <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
+        
+        <!-- 旅游类型下拉菜单 -->
+        <div data-filter-dropdown-target="dropdown" 
+             data-dropdown-id="travel-type"
+             class="hidden absolute top-full left-1/2 -translate-x-1/2 mt-2 w-40 bg-white rounded-lg shadow-lg border z-50">
+          <div class="py-2">
+            <div class="px-3 py-2 text-gray-500 text-xs font-bold">选择类型</div>
+            <%= link_to '全部', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city), 
+                class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@travel_type.blank? ? 'text-primary font-bold' : 'text-gray-700'}",
+                data: { action: 'filter-dropdown#selectOption' } %>
+            <%= link_to '跟团游', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: '跟团游'), 
+                class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@travel_type == '跟团游' ? 'text-primary font-bold' : 'text-gray-700'}",
+                data: { action: 'filter-dropdown#selectOption' } %>
+            <%= link_to '独立成团', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: '独立成团'), 
+                class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@travel_type == '独立成团' ? 'text-primary font-bold' : 'text-gray-700'}",
+                data: { action: 'filter-dropdown#selectOption' } %>
+            <%= link_to '自由出行', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: '自由出行'), 
+                class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@travel_type == '自由出行' ? 'text-primary font-bold' : 'text-gray-700'}",
                 data: { action: 'filter-dropdown#selectOption' } %>
           </div>
         </div>
@@ -175,7 +241,7 @@
               <!-- 城市网格 -->
               <div class="grid grid-cols-4 gap-2 px-3 pb-3" data-group="<%= index %>">
                 <% group[:cities].each do |city| %>
-                  <%= link_to city, search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: city), 
+                  <%= link_to city, search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: city, travel_type: @travel_type), 
                       class: "block px-3 py-2 text-center rounded hover:bg-gray-100 transition-colors text-sm #{@departure_city == city ? 'bg-gray-200 text-gray-900 font-bold' : 'text-gray-600'}",
                       data: { action: 'filter-dropdown#selectOption' } %>
                 <% end %>
@@ -188,7 +254,7 @@
             
             <!-- 底部按钮 -->
             <div class="border-t mt-3 pt-3 px-3 flex gap-2">
-              <%= link_to '重置', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration), 
+              <%= link_to '重置', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, travel_type: @travel_type), 
                   class: "flex-1 px-4 py-2.5 text-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm",
                   data: { action: 'filter-dropdown#selectOption' } %>
               <button type="button" 
@@ -224,13 +290,13 @@
             <div class="px-3 py-2 text-gray-500 text-xs font-bold">选择天数</div>
             <div class="grid grid-cols-4 gap-2 px-3 pb-2">
               <% [1, 2, 3, 4, 5, 6, 7, 8].each do |day| %>
-                <%= link_to "#{day}日", search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: day, departure_city: @departure_city), 
+                <%= link_to "#{day}日", search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: day, departure_city: @departure_city, travel_type: @travel_type), 
                     class: "block px-3 py-2 text-center rounded hover:bg-gray-50 transition-colors #{@duration == day ? 'text-primary font-bold bg-primary/10' : 'text-gray-700'}",
                     data: { action: 'filter-dropdown#selectOption' } %>
               <% end %>
             </div>
             <% if @duration.present? && @duration > 0 %>
-              <%= link_to '清除', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, departure_city: @departure_city), 
+              <%= link_to '清除', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, departure_city: @departure_city, travel_type: @travel_type), 
                   class: "block mx-3 mb-2 px-3 py-2 text-center rounded text-red-600 hover:bg-red-50 transition-colors text-xs",
                   data: { action: 'filter-dropdown#selectOption' } %>
             <% end %>
@@ -260,13 +326,13 @@
           <div class="py-2">
             <div class="px-3 py-2 text-gray-500 text-xs font-bold">特色标签</div>
             <% ['不用早起', '往返直飞', '全额退', '无自费', '纯玩无购物', '小团出行', '含门票', '上门接送'].each do |tag| %>
-              <%= link_to tag, search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: tag, duration: @duration, departure_city: @departure_city), 
+              <%= link_to tag, search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
                   class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@selected_tag == tag ? 'text-primary font-bold' : 'text-gray-700'}",
                   data: { action: 'filter-dropdown#selectOption' } %>
             <% end %>
             <% if @selected_tag.present? %>
               <div class="border-t mt-2 pt-2">
-                <%= link_to '清除筛选', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, duration: @duration, departure_city: @departure_city), 
+                <%= link_to '清除筛选', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
                     class: "block mx-3 px-3 py-2 text-center rounded text-red-600 hover:bg-red-50 transition-colors text-xs",
                     data: { action: 'filter-dropdown#selectOption' } %>
               </div>

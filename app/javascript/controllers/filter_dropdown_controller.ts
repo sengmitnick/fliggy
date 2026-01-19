@@ -4,6 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = ["dropdown", "overlay"]
 
   declare readonly dropdownTargets: HTMLElement[]
+  declare readonly hasOverlayTarget: boolean
   declare readonly overlayTarget: HTMLElement
 
   private activeDropdown: HTMLElement | null = null
@@ -40,7 +41,9 @@ export default class extends Controller<HTMLElement> {
   private openDropdown(dropdown: HTMLElement): void {
     this.activeDropdown = dropdown
     dropdown.classList.remove('hidden')
-    this.overlayTarget.classList.remove('hidden')
+    if (this.hasOverlayTarget) {
+      this.overlayTarget.classList.remove('hidden')
+    }
   }
 
   // 关闭所有下拉菜单
@@ -48,7 +51,9 @@ export default class extends Controller<HTMLElement> {
     this.dropdownTargets.forEach(dropdown => {
       dropdown.classList.add('hidden')
     })
-    this.overlayTarget.classList.add('hidden')
+    if (this.hasOverlayTarget) {
+      this.overlayTarget.classList.add('hidden')
+    }
     this.activeDropdown = null
   }
 

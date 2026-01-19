@@ -52,10 +52,10 @@ class TourGroupProduct < ApplicationRecord
   def self.generate_for_destination(destination, departure_city, start_date, end_date, count_per_day: 5)
     # 旅游类型配置
     tour_types = [
-      { tour_category: 'group_tour', badge: '跟团游', weight: 40 },
-      { tour_category: 'private_group', badge: '私家团', weight: 30 },
-      { tour_category: 'free_travel', badge: '自由行', weight: 20 },
-      { tour_category: 'outbound_essentials', badge: '出境必备', weight: 10 }
+      { tour_category: 'group_tour', badge: '跟团游', travel_type: '跟团游', weight: 40 },
+      { tour_category: 'private_group', badge: '私家团', travel_type: '独立成团', weight: 30 },
+      { tour_category: 'free_travel', badge: '自由行', travel_type: '自由出行', weight: 20 },
+      { tour_category: 'outbound_essentials', badge: '出境必备', travel_type: '自由出行', weight: 10 }
     ]
     
     # 旅行社池
@@ -217,6 +217,7 @@ class TourGroupProduct < ApplicationRecord
           title: title,
           subtitle: subtitles.sample,
           tour_category: selected_type[:tour_category],
+          travel_type: selected_type[:travel_type],
           destination: destination,
           duration: duration,
           departure_city: departure_city,
