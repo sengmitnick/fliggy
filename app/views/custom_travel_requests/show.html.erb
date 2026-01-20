@@ -2,11 +2,11 @@
 <div class="min-h-screen bg-[#F5F5F5]">
   <!-- Header with yellow background -->
   <div class="bg-[#FFD93D] px-4 py-3 flex items-center relative">
-    <%= link_to root_path, class: "absolute left-4" do %>
+    <button onclick="history.back()" class="absolute left-4">
       <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
-    <% end %>
+    </button>
     <h1 class="text-center flex-1 text-base font-bold text-gray-800">定制游订单</h1>
     <button class="absolute right-4">
       <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,8 +109,8 @@
         <span class="text-sm text-gray-600 w-20">联系方式</span>
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-sm font-medium text-gray-800">电话联系</span>
-            <span class="text-sm text-[#6B7FFF]">+86 15274178132</span>
+            <span class="text-sm font-medium text-blue-600">电话联系</span>
+            <span class="text-sm text-[#6B7FFF]">+86 <%= @custom_travel_request.phone %></span>
           </div>
           <p class="text-xs text-gray-500">商家不可见，仅通过隐私号与你联系</p>
         </div>
@@ -120,7 +120,7 @@
       <div class="flex items-start gap-3 bg-[#F8F8F8] px-4 py-3 rounded-lg">
         <span class="text-sm text-gray-600 w-20">联系时间</span>
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800 mb-1"><%= format_contact_time(@custom_travel_request) %></p>
+          <p class="text-sm font-medium text-blue-600 mb-1"><%= format_contact_time(@custom_travel_request) %></p>
           <p class="text-xs text-gray-500">商家预计会在该时间段联系你</p>
         </div>
       </div>
@@ -154,7 +154,7 @@
       <div class="flex items-center justify-between">
         <span class="text-sm text-gray-600">出发地</span>
         <span class="text-sm font-medium text-gray-800"><%= @custom_travel_request.departure_city %></span>
-        <button class="text-xs text-[#6B7FFF] ml-2">复制偏好</button>
+        
       </div>
 
       <!-- Destination -->

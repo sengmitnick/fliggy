@@ -20,7 +20,11 @@ export default class extends Controller<HTMLElement> {
     "departureDateInput",
     "datePicker",
     "currentMonth",
-    "calendarGrid"
+    "calendarGrid",
+    "contactTimeDisplay",
+    "contactTimeInput",
+    "contactTimePicker",
+    "phoneInput"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -42,6 +46,10 @@ export default class extends Controller<HTMLElement> {
   declare readonly datePickerTarget: HTMLElement
   declare readonly currentMonthTarget: HTMLElement
   declare readonly calendarGridTarget: HTMLElement
+  declare readonly contactTimeDisplayTarget: HTMLElement
+  declare readonly contactTimeInputTarget: HTMLInputElement
+  declare readonly contactTimePickerTarget: HTMLElement
+  declare readonly phoneInputTarget: HTMLInputElement
 
   private currentDate: Date = new Date()
   private selectedDate: Date | null = null
@@ -53,7 +61,17 @@ export default class extends Controller<HTMLElement> {
   }
 
   // 打开弹窗
-  open(): void {
+  open(event: Event): void {
+    // Get destination from button data attribute
+    const button = event.currentTarget as HTMLElement
+    const destination = button.dataset.destination
+    
+    // If destination is provided, set it and make it readonly
+    if (destination) {
+      this.destinationCityTarget.textContent = destination
+      this.destinationCityInputTarget.value = destination
+    }
+    
     // Initialize calendar on first open
     if (!this.isInitialized) {
       this.renderCalendar()
@@ -162,6 +180,33 @@ export default class extends Controller<HTMLElement> {
   // 切换日期选择器
   toggleDatePicker(): void {
     this.datePickerTarget.classList.toggle('hidden')
+  }
+
+  // 切换联系时间选择器
+  toggleContactTimePicker(): void {
+    this.contactTimePickerTarget.classList.remove('hidden')
+    document.body.style.overflow = 'hidden'
+  }
+
+  // 关闭联系时间选择器
+  closeContactTimePicker(): void {
+    this.contactTimePickerTarget.classList.add('hidden')
+    document.body.style.overflow = 'hidden' // Keep main modal scroll locked
+  }
+
+  // 选择联系时间
+  selectContactTime(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const time = target.dataset.time || ''
+    this.contactTimeDisplayTarget.textContent = time
+    this.contactTimeInputTarget.value = time
+    this.closeContactTimePicker()
+  }
+
+  // 清除手机号
+  clearPhone(): void {
+    this.phoneInputTarget.value = ''
+    this.phoneInputTarget.focus()
   }
 
   // 上一个月

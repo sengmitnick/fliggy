@@ -3,11 +3,11 @@
   <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
     <div class="flex items-center justify-between px-4 h-14">
       <div class="flex items-center gap-4 flex-1 min-w-0">
-        <%= link_to search_tour_groups_path(destination: @product.destination), class: "text-foreground" do %>
+        <button onclick="history.back()" class="text-foreground">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
-        <% end %>
+        </button>
         <h1 class="text-lg font-semibold text-foreground truncate flex-1 min-w-0"><%= @product.title %></h1>
       </div>
       <div class="flex items-center gap-4">
