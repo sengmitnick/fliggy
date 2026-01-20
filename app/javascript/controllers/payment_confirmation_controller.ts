@@ -56,8 +56,8 @@ export default class extends Controller {
   declare readonly successUrlValue: string
 
   private password: string = ""
-  private boundPasswordVerifiedHandler?: EventListener
-  private boundPasswordErrorHandler?: EventListener
+  private boundPasswordVerifiedHandler?: any
+  private boundPasswordErrorHandler?: any
 
   connect(): void {
     console.log("Payment confirmation controller connected")
