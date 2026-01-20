@@ -14,7 +14,9 @@ export default class extends Controller {
     "statusUserEmail",
     "statusIcon",
     "statusText",
-    "statusDots"
+    "statusDots",
+    "passwordForm",
+    "passwordField"
   ]
 
   static values = {
@@ -44,16 +46,38 @@ export default class extends Controller {
   declare readonly hasStatusTextTarget: boolean
   declare readonly statusDotsTarget: HTMLElement
   declare readonly hasStatusDotsTarget: boolean
+  declare readonly passwordFormTarget: HTMLFormElement
+  declare readonly hasPasswordFormTarget: boolean
+  declare readonly passwordFieldTarget: HTMLInputElement
+  declare readonly hasPasswordFieldTarget: boolean
   declare readonly amountValue: string
   declare readonly userEmailValue: string
   declare readonly paymentUrlValue: string
   declare readonly successUrlValue: string
 
   private password: string = ""
+  private boundPasswordVerifiedHandler?: EventListener
+  private boundPasswordErrorHandler?: EventListener
 
   connect(): void {
-    // Initialize controller
     console.log("Payment confirmation controller connected")
+    
+    // Listen for password verification success event
+    this.boundPasswordVerifiedHandler = this.onPasswordVerified.bind(this)
+    window.addEventListener('payment:password-verified', this.boundPasswordVerifiedHandler)
+    
+    // Listen for password error event to clear password
+    this.boundPasswordErrorHandler = this.onPasswordError.bind(this)
+    document.addEventListener('payment:password-error', this.boundPasswordErrorHandler)
+  }
+
+  disconnect(): void {
+    if (this.boundPasswordVerifiedHandler) {
+      window.removeEventListener('payment:password-verified', this.boundPasswordVerifiedHandler)
+    }
+    if (this.boundPasswordErrorHandler) {
+      document.removeEventListener('payment:password-error', this.boundPasswordErrorHandler)
+    }
   }
 
   showPasswordModal(): void {
@@ -115,76 +139,35 @@ export default class extends Controller {
   }
 
   processPasswordPayment(): void {
-    // Do NOT close modal here - wait for verification result
-    // First verify password before showing payment status
-    this.verifyPasswordThenPay()
+    // Submit password verification via Turbo Frame
+    this.submitPasswordVerification()
   }
 
-  async verifyPasswordThenPay(): Promise<void> {
-    try {
-      // Call verify API first
-      const verifyResponse = await fetch('/profile/verify_pay_password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
-        },
-        body: JSON.stringify({
-          pay_password: this.password
-        })
-      })
-
-      const verifyData = await verifyResponse.json()
-
-      if (!verifyResponse.ok || !verifyData.success) {
-        // Password is wrong - show toast and reset
-        const message = verifyData.message || '支付密码错误'
-        
-        // 如果是需要设置支付密码，直接跳转
-        if (message.includes('请先设置支付密码') || message.includes('设置支付密码')) {
-          if (this.hasPasswordModalTarget) {
-            this.passwordModalTarget.classList.add('hidden')
-          }
-          window.location.href = '/profile/edit_pay_password'
-          return
-        }
-        
-        if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast(message)
-        } else {
-          alert(message)
-        }
-        // Clear password and stay on password input page
-        this.password = ""
-        this.updatePasswordDots()
-        if (this.hasPasswordModalTarget) {
-          this.passwordModalTarget.classList.remove('hidden')
-        }
-        return
-      }
-
-      // Password is correct - proceed with payment
-      if (this.hasPasswordModalTarget) {
-        this.passwordModalTarget.classList.add('hidden')
-      }
-      this.showPayingStatus()
-      
-      // Process actual payment
-      await this.processActualPayment()
-      
-    } catch (error) {
-      console.error('验证支付密码失败:', error)
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('网络错误，请重试')
-      } else {
-        alert('网络错误，请重试')
-      }
-      this.password = ""
-      this.updatePasswordDots()
-      if (this.hasPasswordModalTarget) {
-        this.passwordModalTarget.classList.remove('hidden')
-      }
+  private submitPasswordVerification(): void {
+    if (!this.hasPasswordFormTarget || !this.hasPasswordFieldTarget) {
+      console.error("Password form or field target not found")
+      return
     }
+    
+    this.passwordFieldTarget.value = this.password
+    this.passwordFormTarget.requestSubmit()
+  }
+
+  onPasswordVerified(): void {
+    console.log('Password verified! Proceeding with payment...')
+    
+    if (this.hasPasswordModalTarget) {
+      this.passwordModalTarget.classList.add('hidden')
+    }
+    
+    this.showPayingStatus()
+    this.processActualPayment()
+  }
+
+  onPasswordError(): void {
+    console.log('Password error, clearing input...')
+    this.password = ""
+    this.updatePasswordDots()
   }
 
   async processActualPayment(): Promise<void> {

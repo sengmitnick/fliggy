@@ -4978,6 +4978,10 @@ html, body {
   max-height: 85vh;
 }
 
+.min-h-8 {
+  min-height: 2rem;
+}
+
 .min-h-\[120px\] {
   min-height: 120px;
 }

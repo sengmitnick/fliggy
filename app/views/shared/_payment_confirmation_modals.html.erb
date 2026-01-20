@@ -59,6 +59,20 @@
       <div class="text-4xl font-bold">¥<span data-payment-confirmation-target="passwordAmount"></span></div>
     </div>
 
+    <%= turbo_frame_tag "password_verification" do %>
+      <%= form_with url: verify_pay_password_profile_path, 
+                    method: :post,
+                    data: { 
+                      "payment-confirmation-target": "passwordForm",
+                      turbo_frame: "password_verification"
+                    } do |f| %>
+        <%= f.hidden_field :pay_password, 
+            data: { "payment-confirmation-target": "passwordField" } %>
+      <% end %>
+
+      <div id="password_error" class="min-h-8"></div>
+    <% end %>
+
     <!-- Password Dots Display -->
     <div class="flex justify-center gap-3 py-6" data-payment-confirmation-target="passwordDots">
       <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>

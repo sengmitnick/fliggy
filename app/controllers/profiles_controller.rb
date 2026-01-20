@@ -77,15 +77,26 @@ class ProfilesController < ApplicationController
 
   def verify_pay_password
     unless current_user.has_pay_password?
-      render json: { success: false, message: '请先设置支付密码' }, status: :unprocessable_entity
+      render turbo_stream: turbo_stream.update(
+        "password_error",
+        partial: "shared/password_error",
+        locals: { message: "请先设置支付密码" }
+      )
       return
     end
 
     pay_password = params[:pay_password]
     if current_user.authenticate_pay_password(pay_password)
-      render json: { success: true }
+      # Password correct - trigger payment process via inline script
+      render turbo_stream: turbo_stream.replace("password_verification", 
+        html: '<div id="password_verification"></div><script>window.dispatchEvent(new CustomEvent("payment:password-verified"));</script>'.html_safe)
     else
-      render json: { success: false, message: '支付密码错误' }, status: :unprocessable_entity
+      # Password wrong - show error, keep modal open
+      render turbo_stream: turbo_stream.update(
+        "password_error",
+        partial: "shared/password_error",
+        locals: { message: "支付密码错误" }
+      )
     end
   end
 
