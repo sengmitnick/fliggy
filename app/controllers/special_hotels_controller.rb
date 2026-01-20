@@ -1,4 +1,5 @@
 class SpecialHotelsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
     # Get city from params, default to 北京

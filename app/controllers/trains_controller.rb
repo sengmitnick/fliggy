@@ -1,15 +1,13 @@
 class TrainsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
-    # City selector data
-    @hot_cities = City.hot_cities.order(:pinyin)
-    @all_cities = City.all.order(:pinyin)
+    # NOTE: City selector data is loaded via CitySelectorDataConcern
   end
 
   def show
     @train = Train.find(params[:id])
-    @hot_cities = City.hot_cities.order(:pinyin)
-    @all_cities = City.all.order(:pinyin)
+    # NOTE: City selector data is loaded via CitySelectorDataConcern
   end
 
   def search

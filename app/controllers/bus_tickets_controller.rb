@@ -1,4 +1,5 @@
 class BusTicketsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
     # Homepage with search form

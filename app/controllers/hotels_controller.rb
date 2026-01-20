@@ -1,4 +1,5 @@
 class HotelsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
     # 使用用户选择的城市（从 session 中获取），或使用参数，或默认为深圳
@@ -110,6 +111,8 @@ class HotelsController < ApplicationController
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
     @query = params[:q]
+    
+    # NOTE: City selector data is loaded via CitySelectorDataConcern
 
     @hotels = Hotel.all
     
