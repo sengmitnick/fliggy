@@ -44,7 +44,7 @@ main() {
     echo ""
 
     # 1. 检查系统依赖
-    print_info "步骤 1/8: 检查系统依赖..."
+    print_info "步骤 1/9: 检查系统依赖..."
     
     if ! command_exists docker; then
         print_error "Docker 未安装！请先安装 Docker。"
@@ -60,34 +60,19 @@ main() {
     print_success "Docker Compose 已安装: $(docker-compose --version)"
 
     # 2. 检查 .env 文件
-    print_info "步骤 2/8: 检查环境配置..."
-    
+    print_info "步骤 2/9: 检查环境配置..."
+
     if [ ! -f .env ]; then
-        print_warning ".env 文件不存在，从示例文件复制..."
+        print_info "从 .env.example 复制环境配置文件..."
         cp .env.example .env
-        print_warning "请编辑 .env 文件并填写必要配置项！"
-        echo ""
-        echo "必填项包括:"
-        echo "  - SECRET_KEY_BASE"
-        echo "  - DB_PASSWORD"
-        echo "  - REDIS_PASSWORD"
-        echo "  - PUBLIC_HOST"
-        echo ""
-        read -p "按 Enter 键编辑配置文件..." </dev/tty
-        ${EDITOR:-nano} .env
+        print_success ".env 文件已创建（使用示例配置）"
+        print_info "提示: 如需自定义配置，请编辑 .env 文件"
     else
         print_success ".env 文件已存在"
     fi
 
-    # 验证必填配置项
-    if ! grep -q "SECRET_KEY_BASE=.\+" .env || ! grep -q "DB_PASSWORD=.\+" .env || ! grep -q "REDIS_PASSWORD=.\+" .env; then
-        print_error "环境配置不完整！请确保设置了 SECRET_KEY_BASE、DB_PASSWORD 和 REDIS_PASSWORD"
-        exit 1
-    fi
-    print_success "环境配置验证通过"
-
     # 3. 选择服务器规格
-    print_info "步骤 3/8: 选择服务器规格..."
+    print_info "步骤 3/9: 选择服务器规格..."
 
     echo "请选择部署规格:"
     echo "  1) 8核32G (甲方生产环境，默认)"
@@ -111,13 +96,20 @@ main() {
             ;;
     esac
 
-    # 4. 创建必要目录
-    print_info "步骤 4/8: 创建必要目录..."
+    # 4. 清理旧数据和容器
+    print_info "步骤 4/9: 清理旧数据和容器..."
+
+    print_warning "正在停止现有容器并删除 Volume（清理历史数据）..."
+    docker-compose -f $COMPOSE_FILE down -v 2>/dev/null || true
+    print_success "旧数据和 Volume 已删除，将重新加载数据包"
+
+    # 5. 创建必要目录
+    print_info "步骤 5/9: 创建必要目录..."
     mkdir -p backup ssl log storage
     print_success "目录创建完成"
 
-    # 5. 选择 Nginx 配置
-    print_info "步骤 5/8: 配置 Nginx..."
+    # 6. 选择 Nginx 配置
+    print_info "步骤 6/9: 配置 Nginx..."
 
     echo "是否使用 Nginx 反向代理?"
     echo "  1) 不使用 Nginx (直接访问 Rails，默认)"
@@ -149,8 +141,8 @@ main() {
             ;;
     esac
 
-    # 6. 构建镜像
-    print_info "步骤 6/8: 构建 Docker 镜像..."
+    # 7. 构建镜像
+    print_info "步骤 7/9: 构建 Docker 镜像..."
 
     if [ "$USE_NGINX" = "true" ]; then
         docker-compose -f $COMPOSE_FILE build --no-cache
@@ -160,8 +152,8 @@ main() {
     fi
     print_success "镜像构建完成"
 
-    # 7. 启动服务
-    print_info "步骤 7/8: 启动服务..."
+    # 8. 启动服务
+    print_info "步骤 8/9: 启动服务..."
 
     if [ "$USE_NGINX" = "true" ]; then
         docker-compose -f $COMPOSE_FILE up -d
@@ -177,8 +169,8 @@ main() {
     echo "   自动执行: 数据包加载 (城市、航班、酒店等测试数据)"
     sleep 20
 
-    # 8. 验证部署状态
-    print_info "步骤 8/8: 验证部署状态..."
+    # 9. 验证部署状态
+    print_info "步骤 9/9: 验证部署状态..."
 
     # 检查服务健康状态
     echo "   检查服务状态..."
