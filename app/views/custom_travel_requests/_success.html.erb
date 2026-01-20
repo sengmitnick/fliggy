@@ -1,0 +1,64 @@
+<!-- 提交成功的提示 -->
+<div id="custom-travel-modal" data-controller="custom-travel-modal">
+  <!-- 遮罩层 -->
+  <div data-custom-travel-modal-target="overlay" 
+       data-action="click->custom-travel-modal#close"
+       class="fixed inset-0 bg-black/50 z-[60]"></div>
+
+  <!-- 成功提示内容 -->
+  <div data-custom-travel-modal-target="modal" 
+       class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md p-8 text-center relative">
+      <!-- 关闭按钮 -->
+      <button type="button" 
+              data-action="click->custom-travel-modal#close"
+              class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- 成功图标 -->
+      <div class="w-20 h-20 rounded-full bg-green-100 mx-auto mb-4 flex items-center justify-center">
+        <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+
+      <!-- 成功文案 -->
+      <h3 class="text-2xl font-bold text-gray-800 mb-2">提交成功！</h3>
+      <p class="text-gray-600 mb-6">
+        我们已收到您的定制需求<br>
+        商家将在 <span class="text-[#FF5722] font-bold">30分钟内</span> 通过隐私号联系您
+      </p>
+
+      <!-- 定制信息摘要 -->
+      <div class="bg-gray-50 rounded-2xl p-4 text-left mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm text-gray-600">目的地</span>
+          <span class="text-sm font-bold text-gray-800"><%= request.destination_city %></span>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm text-gray-600">出行人数</span>
+          <span class="text-sm font-bold text-gray-800"><%= request.people_description %></span>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm text-gray-600">行程天数</span>
+          <span class="text-sm font-bold text-gray-800"><%= request.days_count %>天</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-600">联系方式</span>
+          <span class="text-sm font-bold text-gray-800"><%= request.formatted_phone %></span>
+        </div>
+      </div>
+
+      <!-- 关闭按钮 -->
+      <button type="button" 
+              data-action="click->custom-travel-modal#close"
+              class="w-full py-3 rounded-full text-base font-bold text-black hover:opacity-90 transition-opacity"
+              style="background: #FFD700;">
+        我知道了
+      </button>
+    </div>
+  </div>
+</div>

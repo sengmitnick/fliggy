@@ -1,0 +1,360 @@
+<!-- 定制游订单详情页 -->
+<div class="min-h-screen bg-[#F5F5F5]" data-controller="communication-timeline">
+  <!-- Header with yellow background -->
+  <div class="bg-[#FFD93D] px-4 py-3 flex items-center relative">
+    <button onclick="history.back()" class="absolute left-4">
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <h1 class="text-center flex-1 text-base font-bold text-gray-800">定制游订单</h1>
+    <button class="absolute right-4">
+      <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Status Banner -->
+  <% if @custom_travel_request.cancelled? %>
+    <!-- Cancelled Status -->
+    <div class="bg-[#FFD93D] px-6 pb-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">订单已关闭</h2>
+        <p class="text-sm text-gray-700">欢迎下次使用飞猪定制旅行</p>
+      </div>
+    </div>
+  <% else %>
+    <!-- Active Status -->
+    <div class="bg-[#FFD93D] px-6 pb-6">
+      <div class="text-center">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">商家已接单，将联系你沟通方案</h2>
+        <p class="text-sm text-gray-700">
+          预计商家会在 
+          <span class="font-bold"><%= format_predicted_contact_deadline(@custom_travel_request) %></span>
+          ，通过隐私号呼入，请注意接听
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Progress Steps -->
+  <% unless @custom_travel_request.cancelled? %>
+    <div class="bg-white px-6 py-4 mb-2">
+    <div class="flex items-center justify-between relative">
+      <!-- Step 1 - Active -->
+      <div class="flex flex-col items-center z-10">
+        <div class="w-10 h-10 rounded-full bg-[#6B7FFF] flex items-center justify-center mb-2">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="4"/>
+          </svg>
+        </div>
+        <span class="text-xs text-gray-800 font-medium">沟通方案</span>
+      </div>
+
+      <!-- Connector Line -->
+      <div class="absolute left-[15%] right-[15%] top-5 h-0.5 bg-gray-200"></div>
+
+      <!-- Step 2 - Inactive -->
+      <div class="flex flex-col items-center z-10">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+          <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="4"/>
+          </svg>
+        </div>
+        <span class="text-xs text-gray-500">确认方案</span>
+      </div>
+
+      <!-- Step 3 - Inactive -->
+      <div class="flex flex-col items-center z-10">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+          <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="4"/>
+          </svg>
+        </div>
+        <span class="text-xs text-gray-500">预订支付</span>
+      </div>
+
+      <!-- Step 4 - Inactive -->
+      <div class="flex flex-col items-center z-10">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mb-2">
+          <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <circle cx="10" cy="10" r="4"/>
+          </svg>
+        </div>
+        <span class="text-xs text-gray-500">出行游玩</span>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
+  <!-- Merchant Information -->
+  <% unless @custom_travel_request.cancelled? %>
+    <div class="bg-white px-6 py-4 mb-2">
+    <div class="flex items-start gap-3 mb-4">
+      <div class="w-12 h-12 rounded-lg bg-[#FFE5CC] flex items-center justify-center flex-shrink-0">
+        <svg class="w-7 h-7 text-[#FF9F45]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-base font-bold text-gray-800 mb-1">湖南途时光旅游专营店</h3>
+        <p class="text-xs text-gray-500">4年当地定制经验</p>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <!-- Contact Method -->
+      <div class="flex items-start gap-3 bg-[#F8F8F8] px-4 py-3 rounded-lg">
+        <span class="text-sm text-gray-600 w-20">联系方式</span>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-sm font-medium text-blue-600">电话联系</span>
+            <span class="text-sm text-[#6B7FFF]">+86 <%= @custom_travel_request.phone %></span>
+          </div>
+          <p class="text-xs text-gray-500">商家不可见，仅通过隐私号与你联系</p>
+        </div>
+      </div>
+
+      <!-- Contact Time -->
+      <div class="flex items-start gap-3 bg-[#F8F8F8] px-4 py-3 rounded-lg">
+        <span class="text-sm text-gray-600 w-20">联系时间</span>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-blue-600 mb-1"><%= format_contact_time(@custom_travel_request) %></p>
+          <p class="text-xs text-gray-500">商家预计会在该时间段联系你</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
+  <!-- Action Buttons -->
+  <% if @custom_travel_request.cancelled? %>
+    <!-- No buttons for cancelled orders -->
+  <% else %>
+    <div class="flex gap-3 px-6 py-4 bg-white mb-2">
+      <%= button_to '取消订单', 
+          cancel_custom_travel_request_path(@custom_travel_request), 
+          method: :patch,
+          form: { data: { turbo_confirm: '确认要取消此订单吗？' } },
+          class: 'flex-1 py-3 rounded-full bg-white border-2 border-gray-300 text-gray-800 font-bold hover:bg-gray-50 transition-colors' %>
+      <button type="button"
+              data-action="click->communication-timeline#openContactModal"
+              class="flex-1 py-3 rounded-full bg-[#FFD93D] text-gray-800 font-bold hover:opacity-90 transition-opacity">
+        联系商家
+      </button>
+    </div>
+  <% end %>
+
+  <!-- Customization Information -->
+  <div class="bg-white px-6 py-4">
+    <h3 class="text-base font-bold text-gray-800 mb-3">定制信息</h3>
+    <p class="text-xs text-gray-500 mb-4">实际以最终方案为准，如有变更请联系商家</p>
+
+    <div class="space-y-3">
+      <!-- Departure City -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">出发地</span>
+        <span class="text-sm font-medium text-gray-800"><%= @custom_travel_request.departure_city %></span>
+        
+      </div>
+
+      <!-- Destination -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">目的地</span>
+        <span class="text-sm font-medium text-gray-800"><%= @custom_travel_request.destination_city %></span>
+      </div>
+
+      <!-- Travel Count -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">出行人数</span>
+        <span class="text-sm font-medium text-gray-800"><%= format_people_count(@custom_travel_request) %></span>
+      </div>
+
+      <!-- Departure Date -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">出发日期</span>
+        <span class="text-sm font-medium text-gray-800"><%= format_departure_date(@custom_travel_request) %></span>
+      </div>
+
+      <!-- Days Count -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">游玩天数</span>
+        <span class="text-sm font-medium text-gray-800"><%= @custom_travel_request.days_count %></span>
+      </div>
+
+      <!-- Budget -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">人均预算</span>
+        <span class="text-sm font-medium text-gray-800"><%= format_budget(@custom_travel_request) %></span>
+      </div>
+
+      <!-- Custom Number -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">定制单号</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-gray-800"><%= format_order_number(@custom_travel_request) %></span>
+          <button class="text-xs text-[#6B7FFF]">复制</button>
+        </div>
+      </div>
+
+      <!-- Submit Time -->
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">提交时间</span>
+        <span class="text-sm font-medium text-gray-800"><%= format_submit_time(@custom_travel_request) %></span>
+      </div>
+
+      <!-- Communication Record -->
+      <div class="flex items-start justify-between">
+        <span class="text-sm text-gray-600">沟通记录</span>
+        <button type="button" 
+                data-action="click->communication-timeline#open"
+                class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <span class="text-sm font-medium text-gray-800">定制需求沟通详情</span>
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Communication Timeline Modal -->
+  <div data-communication-timeline-target="overlay" 
+       class="hidden fixed inset-0 bg-black/50 z-50"
+       data-action="click->communication-timeline#close"></div>
+  
+  <div data-communication-timeline-target="modal" 
+       class="hidden fixed inset-0 z-50 flex items-end">
+    <div class="w-full bg-white rounded-t-3xl max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up"
+         data-action="click->communication-timeline#stopPropagation">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-gray-800">沟通记录</h2>
+        <button type="button" 
+                data-action="click->communication-timeline#close"
+                class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Timeline Content -->
+      <div class="px-6 py-6">
+        <div class="space-y-6">
+          <% generate_timeline_events(@custom_travel_request).each_with_index do |event, index| %>
+            <div class="flex gap-4">
+              <!-- Timeline Icon -->
+              <div class="flex flex-col items-center">
+                <% if event[:color] == 'blue' %>
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                <% else %>
+                  <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </div>
+                <% end %>
+                
+                <!-- Vertical line connecting to next event -->
+                <% unless index == generate_timeline_events(@custom_travel_request).length - 1 %>
+                  <div class="w-0.5 h-12 bg-gray-200 my-2"></div>
+                <% end %>
+              </div>
+
+              <!-- Event Content -->
+              <div class="flex-1 pb-4">
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="text-base font-bold text-gray-800"><%= event[:title] %></h3>
+                  <span class="text-xs text-gray-500"><%= format_timeline_time(event[:time]) %></span>
+                </div>
+                <p class="text-sm text-gray-600"><%= event[:description] %></p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Empty State (if no events) -->
+        <% if generate_timeline_events(@custom_travel_request).empty? %>
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <p class="text-gray-500">暂无沟通记录</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Merchant Modal -->
+  <div data-communication-timeline-target="contactOverlay" 
+       class="hidden fixed inset-0 bg-black/50 z-50"
+       data-action="click->communication-timeline#closeContactModal"></div>
+  
+  <div data-communication-timeline-target="contactModal" 
+       class="hidden fixed inset-0 z-50 flex items-end">
+    <div class="w-full bg-white rounded-t-3xl shadow-2xl animate-slide-up"
+         data-action="click->communication-timeline#stopPropagation">
+      <!-- Modal Header -->
+      <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
+        <h2 class="text-lg font-bold text-gray-800">联系方式</h2>
+        <button type="button" 
+                data-action="click->communication-timeline#closeContactModal"
+                class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contact Options -->
+      <div class="px-6 py-6 space-y-4">
+        <!-- Merchant Phone -->
+        <div class="bg-[#F8F8F8] rounded-2xl p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#6B7FFF] flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-gray-800 mb-1">商家电话</h3>
+              <p class="text-sm text-gray-600 mb-3">湖南途时光旅游专营店</p>
+              <a href="tel:400-888-8888" 
+                 class="inline-block px-6 py-2.5 bg-[#6B7FFF] text-white text-sm font-bold rounded-full hover:bg-[#5567DD] transition-colors">
+                400-888-8888
+              </a>
+              <p class="text-xs text-gray-500 mt-3">商家会通过隐私号与你联系，请注意接听</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platform Customer Service -->
+        <div class="bg-[#F8F8F8] rounded-2xl p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#FFD93D] flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-gray-800 mb-1">平台客服</h3>
+              <p class="text-sm text-gray-600 mb-3">在线咨询服务时间：9:00-21:00</p>
+              <button type="button"
+                      class="inline-block px-6 py-2.5 bg-[#FFD93D] text-gray-800 text-sm font-bold rounded-full hover:opacity-90 transition-opacity">
+                在线咨询
+              </button>
+              <p class="text-xs text-gray-500 mt-3">如有疑问或需要帮助，随时联系我们</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

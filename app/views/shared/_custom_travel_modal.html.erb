@@ -1,0 +1,360 @@
+<!-- 定制旅游弹窗 -->
+<div>
+  <!-- 遮罩层 -->
+  <div data-custom-travel-modal-target="overlay" 
+       data-action="click->custom-travel-modal#closeOnOverlay"
+       class="hidden fixed inset-0 bg-black/50 z-50"></div>
+
+  <!-- 弹窗内容 -->
+  <div data-custom-travel-modal-target="modal" 
+       class="hidden fixed inset-0 z-[60]">
+    <div class="absolute bottom-0 left-0 right-0 bg-[#F5F0E8] rounded-t-3xl max-h-[75vh] overflow-y-auto shadow-2xl">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-[#F5F0E8] px-4 py-3 flex items-center justify-center relative border-b border-[#E0D5C0]">
+        <h2 class="text-lg font-bold text-gray-800" style="font-family: 'FZHTJW--GB1-0', serif;">飞猪定制游</h2>
+        <button type="button" 
+                data-action="click->custom-travel-modal#close"
+                class="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/50 text-gray-600 hover:text-gray-800 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Subtitle -->
+      <div class="text-center pt-2 pb-2 px-4">
+        <p class="text-xs text-gray-600">提交定制偏好 → 商家免费规划</p>
+      </div>
+
+      <!-- 表单 -->
+      <%= form_with url: custom_travel_requests_path, method: :post, local: false, scope: :custom_travel_request, class: 'px-4 pb-4' do |f| %>
+        <!-- 步骤1: 完善偏好，定制更契合 -->
+        <div class="bg-white rounded-xl p-3 mb-3">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-5 h-5 rounded-full bg-[#FF9F45] text-white text-xs font-bold flex items-center justify-center">1</span>
+            <h3 class="text-sm font-bold text-gray-800">完善偏好，定制更契合</h3>
+          </div>
+
+          <!-- 第一行: 出发地→目的地（左侧） + 成人/儿童/老人（右侧）横向排列 -->
+          <div class="flex items-start gap-4 mb-3">
+            <!-- 左侧：出发地 → 目的地 -->
+            <div class="flex items-center gap-2 flex-1">
+              <div class="flex-1">
+                <label class="text-xs text-gray-500 mb-0.5 block">出发地</label>
+                <div data-controller="filter-dropdown" class="relative">
+                  <button type="button" 
+                          data-action="click->filter-dropdown#toggle"
+                          data-dropdown-id="departure-city"
+                          class="w-full px-3 py-1.5 bg-gray-50 rounded-lg text-left flex items-center justify-between text-sm">
+                    <span data-custom-travel-modal-target="departureCity" class="text-gray-800 font-medium">上海</span>
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                    </svg>
+                  </button>
+                  <%= f.hidden_field :departure_city, value: '上海', data: { custom_travel_modal_target: 'departureCityInput' } %>
+                  
+                  <!-- 出发地下拉框 -->
+                  <div data-filter-dropdown-target="dropdown"
+                       data-dropdown-id="departure-city"
+                       class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border z-50 max-h-60 overflow-y-auto">
+                    <div class="grid grid-cols-3 gap-2 p-3">
+                      <% ['上海', '北京', '广州', '深圳', '成都', '杭州', '南京', '武汉', '西安'].each do |city| %>
+                        <button type="button" 
+                                data-city="<%= city %>"
+                                data-action="click->custom-travel-modal#selectDepartureCity click->filter-dropdown#selectOption"
+                                class="px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
+                          <%= city %>
+                        </button>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <svg class="w-5 h-5 text-gray-400 mt-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+
+              <div class="flex-1">
+                <label class="text-xs text-gray-500 mb-0.5 block">目的地（必填）</label>
+                <div data-controller="filter-dropdown" class="relative">
+                  <button type="button" 
+                          data-action="click->filter-dropdown#toggle"
+                          data-dropdown-id="destination-city"
+                          class="w-full px-3 py-1.5 bg-gray-50 rounded-lg text-left flex items-center justify-between text-sm">
+                    <span data-custom-travel-modal-target="destinationCity" class="text-gray-800 font-medium">湖南</span>
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                    </svg>
+                  </button>
+                  <%= f.hidden_field :destination_city, value: '湖南', data: { custom_travel_modal_target: 'destinationCityInput' } %>
+                  
+                  <!-- 目的地下拉框 -->
+                  <div data-filter-dropdown-target="dropdown"
+                       data-dropdown-id="destination-city"
+                       class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border z-50 max-h-60 overflow-y-auto">
+                    <div class="grid grid-cols-3 gap-2 p-3">
+                      <% ['湖南', '云南', '四川', '西藏', '新疆', '海南', '广西', '贵州', '青海'].each do |city| %>
+                        <button type="button" 
+                                data-city="<%= city %>"
+                                data-action="click->custom-travel-modal#selectDestinationCity click->filter-dropdown#selectOption"
+                                class="px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors text-gray-700">
+                          <%= city %>
+                        </button>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右侧：成人/儿童/老人数量 -->
+            <div class="flex items-center gap-3 pt-5">
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500">成人</label>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#decreaseAdults"
+                        class="w-7 h-7 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
+                  −
+                </button>
+                <span data-custom-travel-modal-target="adultsCount" class="text-lg font-bold text-gray-800 w-8 text-center">2</span>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#increaseAdults"
+                        class="w-7 h-7 rounded-full bg-[#FFD700] text-gray-800 flex items-center justify-center text-lg hover:opacity-90 transition-opacity">
+                  +
+                </button>
+                <%= f.hidden_field :adults_count, value: 2, data: { custom_travel_modal_target: 'adultsInput' } %>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500">儿童</label>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#decreaseChildren"
+                        class="w-7 h-7 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
+                  −
+                </button>
+                <span data-custom-travel-modal-target="childrenCount" class="text-lg font-bold text-gray-800 w-8 text-center">0</span>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#increaseChildren"
+                        class="w-7 h-7 rounded-full bg-[#FFD700] text-gray-800 flex items-center justify-center text-lg hover:opacity-90 transition-opacity">
+                  +
+                </button>
+                <%= f.hidden_field :children_count, value: 0, data: { custom_travel_modal_target: 'childrenInput' } %>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-gray-500">老人</label>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#decreaseElders"
+                        class="w-7 h-7 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
+                  −
+                </button>
+                <span data-custom-travel-modal-target="eldersCount" class="text-lg font-bold text-gray-800 w-8 text-center">0</span>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#increaseElders"
+                        class="w-7 h-7 rounded-full bg-[#FFD700] text-gray-800 flex items-center justify-center text-lg hover:opacity-90 transition-opacity">
+                  +
+                </button>
+                <%= f.hidden_field :elders_count, value: 0, data: { custom_travel_modal_target: 'eldersInput' } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第二行: 出发日期(1/3) + 空白(1/3) + 玩几天(1/3) -->
+          <div class="grid grid-cols-3 gap-3 mb-3">
+            <!-- 出发日期选择 (占1/3) -->
+            <div class="relative">
+              <label class="text-xs text-gray-500 mb-0.5 block">出发日期</label>
+              <button type="button" 
+                      data-action="click->custom-travel-modal#toggleDatePicker"
+                      class="w-full px-3 py-2 bg-gray-50 rounded-lg text-left flex items-center justify-between text-sm">
+                <span data-custom-travel-modal-target="departureDateDisplay" class="text-gray-400">点击选择日期</span>
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                </svg>
+              </button>
+              <%= f.hidden_field :departure_date, data: { custom_travel_modal_target: 'departureDateInput' } %>
+              
+              <!-- 日期选择器下拉框 -->
+              <div data-custom-travel-modal-target="datePicker" 
+                   class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border z-50 p-3 w-64">
+                <div class="flex items-center justify-between mb-3">
+                  <button type="button" 
+                          data-action="click->custom-travel-modal#previousMonth"
+                          class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <span data-custom-travel-modal-target="currentMonth" class="text-sm font-bold text-gray-800"></span>
+                  <button type="button" 
+                          data-action="click->custom-travel-modal#nextMonth"
+                          class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- 星期头 -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                  <div class="text-xs text-center text-gray-500 font-medium">日</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">一</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">二</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">三</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">四</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">五</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">六</div>
+                </div>
+                
+                <!-- 日期网格 -->
+                <div data-custom-travel-modal-target="calendarGrid" class="grid grid-cols-7 gap-1"></div>
+              </div>
+            </div>
+
+            <!-- 中间空白 (占1/3) -->
+            <div></div>
+
+            <!-- 玩几天 (占1/3) -->
+            <div class="flex flex-col justify-end">
+              <label class="text-xs text-gray-500 mb-1 block">玩几天</label>
+              <div class="flex items-center gap-2 justify-center">
+                <button type="button" 
+                        data-action="click->custom-travel-modal#decreaseDays"
+                        class="w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
+                  −
+                </button>
+                <div class="flex items-center gap-1">
+                  <span data-custom-travel-modal-target="daysCount" class="text-xl font-bold text-[#6B5FFE] w-10 text-center">1</span>
+                  <span class="text-sm text-gray-600">天</span>
+                </div>
+                <%= f.hidden_field :days_count, value: 1, data: { custom_travel_modal_target: 'daysInput' } %>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#increaseDays"
+                        class="w-8 h-8 rounded-full bg-[#6B5FFE] text-white flex items-center justify-center text-xl hover:bg-[#5B4FEE] transition-colors">
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 第三行: 偏好输入框 -->
+          <div>
+            <%= f.text_area :preferences, 
+                rows: 3,
+                placeholder: '输入更多偏好，景点、酒店、交通、预算等',
+                class: 'w-full px-3 py-2 bg-gray-50 rounded-lg border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD700]' %>
+          </div>
+        </div>
+
+        <!-- 步骤2: 商家将通过隐私号联系你，沟通定制 -->
+        <div class="bg-white rounded-xl p-3 mb-3">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-5 h-5 rounded-full bg-[#FF9F45] text-white text-xs font-bold flex items-center justify-center">2</span>
+            <h3 class="text-sm font-bold text-gray-800">商家将通过隐私号联系你，沟通定制</h3>
+          </div>
+
+          <!-- 手机号输入 -->
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-0.5 block">手机号<span class="text-red-500 ml-0.5">*</span></label>
+            <div class="flex gap-2">
+              <select class="px-2 py-1.5 bg-gray-50 rounded-lg text-sm text-gray-800 border-0 focus:outline-none focus:ring-2 focus:ring-[#FFD700]">
+                <option>+86</option>
+              </select>
+              <%= f.telephone_field :phone, 
+                  placeholder: '请输入手机号',
+                  required: true,
+                  pattern: '1[3-9]\d{9}',
+                  title: '请输入有效的11位手机号',
+                  data: { custom_travel_modal_target: 'phoneInput' },
+                  class: 'flex-1 px-3 py-1.5 bg-gray-50 rounded-lg border-0 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD700]' %>
+              <button type="button" 
+                      data-action="click->custom-travel-modal#clearPhone"
+                      class="w-7 h-7 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-300 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">飞猪将为你生成隐私号，请放心填写</p>
+          </div>
+
+          <!-- 联系时间 -->
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 mb-0.5 block">联系时间</label>
+            <button type="button" 
+                    data-action="click->custom-travel-modal#toggleContactTimePicker"
+                    class="w-full px-3 py-1.5 bg-gray-50 rounded-lg text-left flex items-center justify-between text-sm">
+              <span data-custom-travel-modal-target="contactTimeDisplay" class="text-gray-800 font-medium">尽快联系 | 提交后30分钟内</span>
+              <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+            <%= f.hidden_field :contact_time, value: '尽快联系 | 提交后30分钟内', data: { custom_travel_modal_target: 'contactTimeInput' } %>
+            
+            <!-- 联系时间选择弹窗 -->
+            <div data-custom-travel-modal-target="contactTimePicker" 
+                 class="hidden fixed inset-0 bg-black/50 z-[70]">
+              <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[60vh] overflow-y-auto shadow-2xl">
+                <!-- Modal Header -->
+                <div class="sticky top-0 bg-white px-6 py-5 flex items-center justify-center relative border-b border-gray-100">
+                  <h3 class="text-lg font-semibold text-gray-900">选择联系时间</h3>
+                  <button type="button" 
+                          data-action="click->custom-travel-modal#closeContactTimePicker"
+                          class="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Time Options -->
+                <div class="px-4 py-5">
+                  <div class="space-y-2 mb-6">
+                    <% [
+                      '尽快联系 | 提交后30分钟内',
+                      '上午8点-12点',
+                      '下午12点-18点',
+                      '晚上18点-21点',
+                      '任意时间'
+                    ].each do |time_option| %>
+                      <button type="button" 
+                              data-time="<%= time_option %>"
+                              data-action="click->custom-travel-modal#selectContactTime"
+                              class="w-full px-4 py-3 rounded-lg text-left text-sm font-medium bg-gray-50 text-gray-700 hover:bg-[#FFE8CC] hover:border-2 hover:border-[#FFD700] transition-all">
+                        <%= time_option %>
+                      </button>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 期望商家数 -->
+          <div>
+            <label class="text-xs text-gray-500 mb-1 block">期望商家数</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <%= f.radio_button :expected_merchants, 1, checked: true, class: 'w-5 h-5 text-[#FFD700] focus:ring-[#FFD700]' %>
+                <span class="text-sm text-gray-800">1位</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <%= f.radio_button :expected_merchants, 2, class: 'w-5 h-5 text-[#FFD700] focus:ring-[#FFD700]' %>
+                <span class="text-sm text-gray-800">2位</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button type="submit" class="w-full py-3 rounded-full text-base font-bold text-black hover:opacity-90 transition-opacity" style="background: #FFD700;">
+          <span class="mr-2">提交</span>
+          <span class="text-sm">|</span>
+          <span class="ml-2">匹配定制商家</span>
+          
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

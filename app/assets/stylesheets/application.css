@@ -41,31 +41,44 @@
    * Use semantic variables only for maintainability and theme consistency.
    */
   :root {
-    --color-primary: 45 100% 51%;      /* Bright yellow #FFD700 */
-    --color-primary-light: 48 100% 70%;  /* Lighter yellow */
-    --color-primary-dark: 43 100% 40%;   /* Darker yellow */
+    /* Brand Primary - Yellow (Feiyu Travel brand color) */
+    --color-primary: 48 100% 62%;       /* Bright yellow #FFD93D */
+    --color-primary-light: 50 100% 70%; /* Lighter yellow #FFE066 */
+    --color-primary-dark: 45 100% 51%;  /* Darker yellow #FFD700 */
 
-    --color-secondary: 211 100% 50%;    /* Blue accent */
-    --color-secondary-light: 213 93% 68%;
-    --color-secondary-dark: 221 83% 53%;
+    /* Brand Secondary - Blue accent */
+    --color-secondary: 230 100% 67%;    /* Blue accent #6B7FFF */
+    --color-secondary-light: 230 100% 80%; /* Lighter blue #A8B9FF */
+    --color-secondary-dark: 230 80% 55%;   /* Darker blue #5367E6 */
+
+    /* Brand Accent - Vibrant blue for buttons */
+    --color-accent: 230 85% 60%;        /* Search button blue #7B8CFF */
+    --color-accent-light: 230 85% 70%;
+    --color-accent-dark: 230 75% 50%;
 
     /* Text colors - high contrast for readability */
-    --color-text-primary: 0 0% 15%;    /* Main headings, important text */
-    --color-text-secondary: 0 0% 35%;  /* Body text, descriptions */
-    --color-text-muted: 0 0% 64%;      /* Captions, helper text */
+    --color-text-primary: 0 0% 13%;    /* Main headings, important text #212121 */
+    --color-text-secondary: 0 0% 40%;  /* Body text, descriptions #666666 */
+    --color-text-muted: 0 0% 60%;      /* Captions, helper text #999999 */
+    --color-text-inverse: 0 0% 100%;   /* White text on colored backgrounds */
 
     /* Surface colors - for backgrounds and borders */
     --color-surface: 0 0% 100%;        /* Main background (white) */
-    --color-surface-elevated: 0 0% 92%; /* Cards, elevated surfaces */
-    --color-border: 0 0% 90%;          /* Borders, dividers */
+    --color-surface-elevated: 0 0% 96%; /* Cards, elevated surfaces #F5F5F5 */
+    --color-surface-hover: 0 0% 98%;    /* Hover state for surfaces */
+    --color-border: 0 0% 88%;          /* Borders, dividers #E0E0E0 */
+    --color-border-light: 0 0% 93%;    /* Lighter borders #EDEDED */
 
-    /*  Neutral color - use only in special cases, avoid for text */
+    /* Neutral colors - use only in special cases, avoid for text */
     --color-neutral: 0 0% 64%;
+    --color-neutral-light: 0 0% 92%;   /* Light neutral #EBEBEB */
+    --color-neutral-bg: 0 0% 97%;      /* Neutral background */
 
-    --color-success: 142 76% 36%;
-    --color-warning: 38 92% 50%;
-    --color-danger: 0 84% 60%;
-    --color-info: 188 94% 42%;
+    /* Status colors - optimized for both light and dark modes */
+    --color-success: 142 71% 45%;      /* Green #22C55E */
+    --color-warning: 38 92% 50%;       /* Orange */
+    --color-danger: 0 72% 51%;         /* Red #EF4444 */
+    --color-info: 188 94% 42%;         /* Cyan */
 
     --color-success-bg: 138 76% 97%;
     --color-warning-bg: 48 100% 96%;

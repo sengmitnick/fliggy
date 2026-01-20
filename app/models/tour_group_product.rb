@@ -52,22 +52,24 @@ class TourGroupProduct < ApplicationRecord
   def self.generate_for_destination(destination, departure_city, start_date, end_date, count_per_day: 5)
     # 旅游类型配置
     tour_types = [
-      { tour_category: 'group_tour', badge: '跟团游', weight: 40 },
-      { tour_category: 'private_group', badge: '私家团', weight: 30 },
-      { tour_category: 'free_travel', badge: '自由行', weight: 20 },
-      { tour_category: 'outbound_essentials', badge: '出境必备', weight: 10 }
+      { tour_category: 'group_tour', badge: '跟团游', travel_type: '跟团游', weight: 40 },
+      { tour_category: 'private_group', badge: '私家团', travel_type: '独立成团', weight: 30 },
+      { tour_category: 'free_travel', badge: '自由行', travel_type: '自由出行', weight: 20 },
+      { tour_category: 'outbound_essentials', badge: '出境必备', travel_type: '自由出行', weight: 10 }
     ]
     
     # 旅行社池
     agencies = TravelAgency.all.to_a
     return [] if agencies.empty?
     
-    # 目的地主题模板
+    # 目的地主题模板（增加与筛选标签对应的特色）
+    # 筛选标签：不用早起、往返直飞、全额退、无自费、纯玩无购物、小团出行、含门票、上门接送
     themes = [
       { 
         name: '古镇漫游', 
         highlights: ['古镇风情', '人文历史', '美食体验'], 
         tags: ['历史文化', '美食'],
+        special_tags: ['不用早起', '纯玩无购物', '含门票'].sample(rand(1..2)),
         images: [
           'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=800',
           'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800',
@@ -78,6 +80,7 @@ class TourGroupProduct < ApplicationRecord
         name: '山水之旅', 
         highlights: ['自然风光', '登山涉水', '生态体验'], 
         tags: ['自然风光', '户外探险'],
+        special_tags: ['往返直飞', '小团出行', '含门票'].sample(rand(1..2)),
         images: [
           'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
           'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800',
@@ -88,6 +91,7 @@ class TourGroupProduct < ApplicationRecord
         name: '都市休闲', 
         highlights: ['城市观光', '购物天堂', '美食打卡'], 
         tags: ['城市漫步', '美食'],
+        special_tags: ['不用早起', '上门接送', '无自费'].sample(rand(1..2)),
         images: [
           'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800',
           'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800',
@@ -98,6 +102,7 @@ class TourGroupProduct < ApplicationRecord
         name: '海岛度假', 
         highlights: ['海滨度假', '水上项目', '阳光沙滩'], 
         tags: ['海滨度假', '亲子游'],
+        special_tags: ['往返直飞', '全额退', '上门接送'].sample(rand(1..2)),
         images: [
           'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800',
           'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=800',
@@ -108,10 +113,44 @@ class TourGroupProduct < ApplicationRecord
         name: '文化探索', 
         highlights: ['博物馆参观', '文化遗产', '艺术体验'], 
         tags: ['文化艺术', '深度体验'],
+        special_tags: ['小团出行', '纯玩无购物', '含门票'].sample(rand(1..2)),
         images: [
           'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800',
           'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800',
           'https://images.unsplash.com/photo-1520760693108-c8bb8944290a?w=800'
+        ]
+      },
+      { 
+        name: '亲子乐园', 
+        highlights: ['家庭娱乐', '儿童友好', '寓教于乐'], 
+        tags: ['亲子游', '家庭出游'],
+        special_tags: ['不用早起', '上门接送', '无自费'].sample(rand(1..2)),
+        images: [
+          'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
+          'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+          'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800'
+        ]
+      },
+      { 
+        name: '美食之旅', 
+        highlights: ['地道美食', '米其林餐厅', '特色小吃'], 
+        tags: ['美食', '深度体验'],
+        special_tags: ['纯玩无购物', '小团出行', '不用早起'].sample(rand(1..2)),
+        images: [
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+          'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800',
+          'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800'
+        ]
+      },
+      { 
+        name: '豪华精品', 
+        highlights: ['五星酒店', '管家服务', '尊享体验'], 
+        tags: ['奢华游', '品质保障'],
+        special_tags: ['往返直飞', '全额退', '上门接送'].sample(rand(2..3)),
+        images: [
+          'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+          'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+          'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800'
         ]
       }
     ]
@@ -131,16 +170,19 @@ class TourGroupProduct < ApplicationRecord
         # 选择主题
         theme = themes.sample
         
-        # 生成天数（2-7天）
-        duration = [2, 3, 4, 5, 7].sample
+        # 生成天数（1-8天，确保覆盖所有筛选选项）
+        duration = [1, 2, 3, 4, 5, 6, 7, 8].sample
         
-        # 生成价格
+        # 生成价格（根据天数）
         base_price = case duration
+        when 1 then rand(500..1000)
         when 2 then rand(800..1500)
         when 3 then rand(1500..2500)
         when 4 then rand(2000..3500)
         when 5 then rand(2800..4500)
+        when 6 then rand(3500..5500)
         when 7 then rand(4000..6500)
+        when 8 then rand(5000..8000)
         end
         
         original_price = (base_price * rand(1.1..1.3)).to_i
@@ -152,22 +194,30 @@ class TourGroupProduct < ApplicationRecord
         # 生成销量
         sales_count = rand(50..500)
         
-        # 生成标题
-        title = "#{destination}#{theme[:name]} #{duration}天#{duration-1}晚 含#{['2晚酒店', '餐食', '门票', '导游'].sample}"
+        # 生成标题（根据天数调整）
+        nights = duration > 1 ? duration - 1 : 1
+        title = "#{destination}#{theme[:name]} #{duration}天#{nights}晚 含#{['2晚酒店', '餐食', '门票', '导游'].sample}"
         
-        # 生成副标题
+        # 生成副标题（包含特色标签）
         subtitles = [
           "精选酒店 贴心服务",
           "品质保障 放心出游",
           "深度体验 精彩行程",
           "小团慢游 舒适自由",
-          "全程陆同 无购物安排"
+          "全程陆同 无购物安排",
+          "豪华五星 管家服务",
+          "亲子首选 儿童友好",
+          "美食之旅 饕餮盛宴"
         ]
+        
+        # 合并基础标签和特色标签
+        all_tags = theme[:tags] + theme[:special_tags]
         
         product = create!(
           title: title,
           subtitle: subtitles.sample,
           tour_category: selected_type[:tour_category],
+          travel_type: selected_type[:travel_type],
           destination: destination,
           duration: duration,
           departure_city: departure_city,
@@ -175,8 +225,8 @@ class TourGroupProduct < ApplicationRecord
           original_price: original_price,
           rating: rating,
           rating_desc: rating_desc,
-          highlights: theme[:highlights],
-          tags: theme[:tags],
+          highlights: theme[:highlights] + theme[:special_tags],
+          tags: all_tags,
           sales_count: sales_count,
           badge: selected_type[:badge],
           departure_label: date.strftime('%m月%d日'),

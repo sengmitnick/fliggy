@@ -639,12 +639,21 @@ export default class extends Controller<HTMLElement> {
   }
 
   showDomestic(): void {
+    // 切换按钮文字颜色
     if (this.hasTabDomesticTarget && this.hasTabInternationalTarget) {
-      this.tabDomesticTarget.classList.add('border-blue-500')
-      this.tabDomesticTarget.classList.remove('border-transparent')
-      this.tabInternationalTarget.classList.remove('border-blue-500')
-      this.tabInternationalTarget.classList.add('border-transparent')
+      this.tabDomesticTarget.classList.add('text-gray-900')
+      this.tabDomesticTarget.classList.remove('text-gray-500')
+      this.tabInternationalTarget.classList.add('text-gray-500')
+      this.tabInternationalTarget.classList.remove('text-gray-900')
+      
+      // 切换底部线条显示
+      const domesticLine = this.tabDomesticTarget.querySelector('div')
+      const internationalLine = this.tabInternationalTarget.querySelector('div')
+      if (domesticLine) domesticLine.classList.remove('hidden')
+      if (internationalLine) internationalLine.classList.add('hidden')
     }
+    
+    // 切换内容区显示
     if (this.hasDomesticListTarget) {
       this.domesticListTarget.classList.remove('hidden')
     }
@@ -655,12 +664,21 @@ export default class extends Controller<HTMLElement> {
   }
 
   showInternational(): void {
+    // 切换按钮文字颜色
     if (this.hasTabInternationalTarget && this.hasTabDomesticTarget) {
-      this.tabInternationalTarget.classList.add('border-blue-500')
-      this.tabInternationalTarget.classList.remove('border-transparent')
-      this.tabDomesticTarget.classList.remove('border-blue-500')
-      this.tabDomesticTarget.classList.add('border-transparent')
+      this.tabInternationalTarget.classList.add('text-gray-900')
+      this.tabInternationalTarget.classList.remove('text-gray-500')
+      this.tabDomesticTarget.classList.add('text-gray-500')
+      this.tabDomesticTarget.classList.remove('text-gray-900')
+      
+      // 切换底部线条显示
+      const internationalLine = this.tabInternationalTarget.querySelector('div')
+      const domesticLine = this.tabDomesticTarget.querySelector('div')
+      if (internationalLine) internationalLine.classList.remove('hidden')
+      if (domesticLine) domesticLine.classList.add('hidden')
     }
+    
+    // 切换内容区显示
     if (this.hasInternationalListTarget) {
       this.internationalListTarget.classList.remove('hidden')
     }
