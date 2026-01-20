@@ -143,6 +143,7 @@ export default class extends Controller<HTMLElement> {
     const element = event.currentTarget as HTMLElement
     const name = element.dataset.abroadOrderFormNameParam || ''
     const phone = element.dataset.abroadOrderFormPhoneParam || ''
+    const email = element.dataset.abroadOrderFormEmailParam || ''
     
     if (this.hasNameInputTarget) {
       this.nameInputTarget.value = name
@@ -150,6 +151,10 @@ export default class extends Controller<HTMLElement> {
     
     if (this.hasPhoneInputTarget) {
       this.phoneInputTarget.value = phone
+    }
+    
+    if (this.hasEmailInputTarget && email) {
+      this.emailInputTarget.value = email
     }
     
     this.closePassengerSelector()
