@@ -11,8 +11,8 @@
 # 3. 所有创建的数据自动标记为 data_version=0（DataVersionable before_create 钩子）
 
 Rails.application.config.after_initialize do
-  # 只在开发和测试环境中自动加载基线数据
-  if Rails.env.development? || Rails.env.test?
+  # 在所有环境中自动加载基线数据（首次启动时）
+  unless Rails.env.test?
     begin
       # 检查是否已存在基线数据（使用City作为标志，因为所有数据包都依赖它）
       # 如果 City 表中不存在 data_version=0 的数据，说明需要初始化

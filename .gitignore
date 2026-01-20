@@ -96,6 +96,7 @@ backup/
 /.vscode
 
 # Ignore local environment variables
+.claude/settings.local.json
 .env.local
 .env.*.local
 

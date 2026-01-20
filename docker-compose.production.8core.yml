@@ -117,7 +117,7 @@ services:
       - ./backup:/app/backup
       - tmp_data:/app/tmp
     ports:
-      - "${WEB_PORT:-5010}:3000"
+      - "${WEB_PORT:-3000}:3000"
     networks:
       - travel01_network
     healthcheck:

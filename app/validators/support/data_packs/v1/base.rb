@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# 加载 activerecord-import gem
-require 'activerecord-import' unless defined?(ActiveRecord::Import)
+# 加载 activerecord-import gem（如果还没加载）
+begin
+  require 'activerecord-import' unless defined?(ActiveRecord::Import)
+rescue LoadError
+  # gem 可能还没加载，在 Rails 启动过程中稍后会自动加载
+end
 
 # base_v1 数据包
 # 基础数据：City + Destination

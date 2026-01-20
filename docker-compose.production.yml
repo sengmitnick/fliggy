@@ -134,7 +134,7 @@ services:
       # 临时文件和缓存
       - tmp_data:/app/tmp
     ports:
-      - "${WEB_PORT:-5010}:3000"
+      - "${WEB_PORT:-3000}:3000"
     networks:
       - travel01_network
     healthcheck:
