@@ -40,7 +40,7 @@ class SearchHighRatedHotelValidator < BaseValidator
   # 准备阶段：设置任务参数
   def prepare
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    @city = '北京市'
+    @city = '北京'
     @min_star_level = 4
     @check_in_date = Date.current + 2.days  # 后天
     @nights = 2  # 入住2晚
@@ -57,7 +57,7 @@ class SearchHighRatedHotelValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订后天入住#{@city.delete_suffix('市')}的高档酒店（4星级及以上，评分最高）",
+      task: "请预订后天入住#{@city}的高档酒店（4星级及以上，评分最高）",
       city: @city,
       min_star_level: @min_star_level,
       check_in_date: @check_in_date.to_s,

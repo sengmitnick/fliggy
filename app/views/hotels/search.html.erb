@@ -522,7 +522,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">热门城市</h3>
             <div class="grid grid-cols-4 gap-2">
-              <% ['上海', '北京', '杭州', '成都', '广州', '深圳', '武汉', '重庆', '西安', '香港', '南京', '三亚', '厦门', '长沙', '苏州', '天津', '澳门', '郑州', '哈尔滨', '宁波'].each do |city| %>
+              <% @hot_domestic_cities.each do |city| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-action="click->city-selector#selectCity"
@@ -538,41 +538,28 @@
             <h3 class="text-sm font-bold text-gray-700 mb-3">字母索引</h3>
             <div class="grid grid-cols-7 gap-2 mb-4">
               <% ('A'..'Z').each do |letter| %>
-                <button type="button" class="px-2 py-1 text-sm text-center text-gray-600 hover:text-primary">
+                <a href="#letter-<%= letter %>" class="px-2 py-1 text-sm text-center text-gray-600 hover:text-primary">
                   <%= letter %>
-                </button>
+                </a>
               <% end %>
             </div>
 
-            <!-- A开头的城市示例 -->
-            <div class="mb-4">
-              <h4 class="text-xs font-bold text-gray-500 mb-2">A</h4>
-              <div class="grid grid-cols-4 gap-2">
-                <% ['阿坝', '阿克苏', '阿拉善', '阿勒泰', '安康', '安庆', '鞍山', '安顺', '安阳'].each do |city| %>
-                  <button type="button" 
-                          data-city-name="<%= city %>"
-                          data-action="click->city-selector#selectCity"
-                          class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
-                    <%= city %>
-                  </button>
-                <% end %>
+            <!-- 所有城市按字母分组 -->
+            <% @cities_by_letter.sort.each do |letter, cities| %>
+              <div class="mb-4" id="letter-<%= letter %>">
+                <h4 class="text-xs font-bold text-gray-500 mb-2"><%= letter %></h4>
+                <div class="grid grid-cols-4 gap-2">
+                  <% cities.each do |city| %>
+                    <button type="button" 
+                            data-city-name="<%= city %>"
+                            data-action="click->city-selector#selectCity"
+                            class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
+                      <%= city %>
+                    </button>
+                  <% end %>
+                </div>
               </div>
-            </div>
-
-            <!-- B开头的城市示例 -->
-            <div class="mb-4">
-              <h4 class="text-xs font-bold text-gray-500 mb-2">B</h4>
-              <div class="grid grid-cols-4 gap-2">
-                <% ['保定', '宝鸡', '保山', '包头', '巴中', '北海', '蚌埠', '本溪', '滨州'].each do |city| %>
-                  <button type="button" 
-                          data-city-name="<%= city %>"
-                          data-action="click->city-selector#selectCity"
-                          class="px-3 py-2 bg-gray-100 rounded-lg text-sm text-center hover:bg-gray-200">
-                    <%= city %>
-                  </button>
-                <% end %>
-              </div>
-            </div>
+            <% end %>
           </div>
         </div>
 
@@ -610,14 +597,9 @@
           <div class="p-4 border-b">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-bold text-gray-700">热门城市</h3>
-              <button type="button" 
-                      class="text-xs text-primary hover:underline"
-                      data-action="click->city-selector#expandHotCities">
-                展开 ›
-              </button>
             </div>
             <div class="grid grid-cols-3 gap-2">
-              <% [['曼谷', '泰国'], ['普吉岛', '泰国'], ['新加坡', '新加坡'], ['首尔', '韩国'], ['清迈', '泰国'], ['亚庇', '马来西亚'], ['芭堤雅', '泰国'], ['吉隆坡', '马来西亚'], ['济州岛', '韩国'], ['东京', '日本'], ['苏梅岛', '泰国'], ['甲米', '泰国']].each do |city, country| %>
+              <% @international_cities_by_region['热门城市'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -635,7 +617,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">东南亚</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['曼谷', '泰国'], ['普吉岛', '泰国'], ['新加坡', '新加坡'], ['清迈', '泰国'], ['亚庇', '马来西亚'], ['芭堤雅', '泰国'], ['吉隆坡', '马来西亚'], ['济州岛', '韩国'], ['苏梅岛', '泰国']].each do |city, country| %>
+              <% @international_cities_by_region['东南亚'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -653,7 +635,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">日韩</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['首尔', '韩国'], ['东京', '日本'], ['大阪', '日本']].each do |city, country| %>
+              <% @international_cities_by_region['日韩'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -671,7 +653,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">欧洲</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['伦敦', '英国'], ['巴黎', '法国'], ['罗马', '意大利'], ['巴塞罗那', '西班牙'], ['阿姆斯特丹', '荷兰'], ['布拉格', '捷克']].each do |city, country| %>
+              <% @international_cities_by_region['欧洲'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -689,7 +671,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">美洲</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['纽约', '美国'], ['洛杉矶', '美国'], ['旧金山', '美国'], ['拉斯维加斯', '美国'], ['多伦多', '加拿大'], ['温哥华', '加拿大']].each do |city, country| %>
+              <% @international_cities_by_region['美洲'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -707,7 +689,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">大洋洲</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['悉尼', '澳大利亚'], ['墨尔本', '澳大利亚'], ['黄金海岸', '澳大利亚'], ['奥克兰', '新西兰'], ['凯恩斯', '澳大利亚'], ['布里斯班', '澳大利亚']].each do |city, country| %>
+              <% @international_cities_by_region['大洋洲'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"
@@ -725,7 +707,7 @@
           <div class="p-4 border-b">
             <h3 class="text-sm font-bold text-gray-700 mb-3">中东非洲</h3>
             <div class="grid grid-cols-3 gap-2">
-              <% [['迪拜', '阿联酋'], ['阿布扎比', '阿联酋'], ['开罗', '埃及'], ['伊斯坦布尔', '土耳其'], ['特拉维夫', '以色列'], ['约翰内斯堡', '南非']].each do |city, country| %>
+              <% @international_cities_by_region['中东非洲'].each do |city, country| %>
                 <button type="button" 
                         data-city-name="<%= city %>"
                         data-country="<%= country %>"

@@ -1,4 +1,5 @@
 class SpecialFlightsController < ApplicationController
+  include CitySelectorDataConcern
   before_action :set_search_params, only: [:index]
 
   def index

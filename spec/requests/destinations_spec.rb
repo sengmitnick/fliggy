@@ -12,7 +12,7 @@ RSpec.describe "Destinations", type: :request do
   describe "GET /destinations/:id" do
     it "returns http success" do
       # Rely on data packs loaded by validators
-      destination = Destination.find_by(name: '深圳') || Destination.find_by(name: '深圳市') || Destination.first
+      destination = Destination.find_by(name: '深圳') || Destination.first
       skip "No destinations available in data packs" unless destination
       
       get destination_path(destination)

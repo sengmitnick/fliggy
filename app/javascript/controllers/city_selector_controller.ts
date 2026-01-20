@@ -352,6 +352,22 @@ export default class extends Controller<HTMLElement> {
     this.departureCityValue = this.destinationCityValue
     this.destinationCityValue = temp
 
+    // Update visible text elements
+    if (this.hasDepartureTarget) {
+      this.departureTarget.textContent = this.departureCityValue
+    }
+    if (this.hasDestinationTarget) {
+      this.destinationTarget.textContent = this.destinationCityValue
+    }
+
+    // Update hidden input values
+    if (this.hasDepartureCityInputTarget) {
+      this.departureCityInputTarget.value = this.departureCityValue
+    }
+    if (this.hasDestinationCityInputTarget) {
+      this.destinationCityInputTarget.value = this.destinationCityValue
+    }
+
     // Dispatch a custom event to notify other controllers
     this.element.dispatchEvent(new CustomEvent('cities-switched', {
       detail: {

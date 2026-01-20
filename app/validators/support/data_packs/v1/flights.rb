@@ -7,8 +7,8 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 # 用于航班验证任务
 #
 # 数据说明：
-# - 深圳市到北京市：每天4个航班，最低价550元
-# - 上海市到深圳市：每天2个航班，考虑折扣后最低价450元
+# - 深圳到北京：每天4个航班，最低价550元
+# - 上海到深圳：每天2个航班，考虑折扣后最低价450元
 # - 生成未来7天的航班数据
 # - 不使用显式 ID，让数据库自动生成
 
@@ -22,7 +22,7 @@ end_date = start_date + 6.days
 puts "  航班日期范围: #{start_date} 至 #{end_date} (共7天)"
 
 # ==================== 航班数据 ====================
-# 深圳市 -> 北京市 航班（每天4个航班，最低价 550元）
+# 深圳 -> 北京 航班（每天4个航班，最低价 550元）
 all_flights = []
 timestamp = Time.current
 
@@ -32,8 +32,8 @@ timestamp = Time.current
   
   flights_sz_to_bj = [
     {
-      departure_city: "深圳市",
-      destination_city: "北京市",
+      departure_city: "深圳",
+      destination_city: "北京",
       departure_time: base_datetime.change(hour: 8, min: 0),
       arrival_time: base_datetime.change(hour: 11, min: 30),
       departure_airport: "宝安T3",
@@ -50,8 +50,8 @@ timestamp = Time.current
       updated_at: timestamp
     },
     {
-      departure_city: "深圳市",
-      destination_city: "北京市",
+      departure_city: "深圳",
+      destination_city: "北京",
       departure_time: base_datetime.change(hour: 10, min: 30),
       arrival_time: base_datetime.change(hour: 14, min: 0),
       departure_airport: "宝安T3",
@@ -68,8 +68,8 @@ timestamp = Time.current
       updated_at: timestamp
     },
     {
-      departure_city: "深圳市",
-      destination_city: "北京市",
+      departure_city: "深圳",
+      destination_city: "北京",
       departure_time: base_datetime.change(hour: 14, min: 0),
       arrival_time: base_datetime.change(hour: 17, min: 30),
       departure_airport: "宝安T3",
@@ -86,8 +86,8 @@ timestamp = Time.current
       updated_at: timestamp
     },
     {
-      departure_city: "深圳市",
-      destination_city: "北京市",
+      departure_city: "深圳",
+      destination_city: "北京",
       departure_time: base_datetime.change(hour: 18, min: 0),
       arrival_time: base_datetime.change(hour: 21, min: 30),
       departure_airport: "宝安T3",
@@ -111,7 +111,7 @@ end
 # 批量插入深圳->北京航班
 Flight.insert_all(all_flights)
 
-# 上海市 -> 深圳市 航班（每天2个航班，最低价 450元）
+# 上海 -> 深圳 航班（每天2个航班，最低价 450元）
 all_flights = []
 
 (start_date..end_date).each do |date|
@@ -120,8 +120,8 @@ all_flights = []
   
   flights_sh_to_sz = [
     {
-      departure_city: "上海市",
-      destination_city: "深圳市",
+      departure_city: "上海",
+      destination_city: "深圳",
       departure_time: base_datetime.change(hour: 9, min: 0),
       arrival_time: base_datetime.change(hour: 11, min: 45),
       departure_airport: "虹桥T2",
@@ -138,8 +138,8 @@ all_flights = []
       updated_at: timestamp
     },
     {
-      departure_city: "上海市",
-      destination_city: "深圳市",
+      departure_city: "上海",
+      destination_city: "深圳",
       departure_time: base_datetime.change(hour: 13, min: 30),
       arrival_time: base_datetime.change(hour: 16, min: 15),
       departure_airport: "浦东T2",
@@ -168,5 +168,5 @@ total_flights = (start_date..end_date).count * 6  # 每天6个航班（4个深�
 Flight.where(data_version: 0).find_each(&:generate_offers)
 
 puts "✓ flights_v1 数据包加载完成（共 #{total_flights} 个航班）"
-puts "  - 深圳市到北京市: 每天4个航班，最低价 550元（共 #{(start_date..end_date).count * 4} 个）"
-puts "  - 上海市到深圳市: 每天2个航班，最低价 450元（共 #{(start_date..end_date).count * 2} 个）"
+puts "  - 深圳到北京: 每天4个航班，最低价 550元（共 #{(start_date..end_date).count * 4} 个）"
+puts "  - 上海到深圳: 每天2个航班，最低价 450元（共 #{(start_date..end_date).count * 2} 个）"

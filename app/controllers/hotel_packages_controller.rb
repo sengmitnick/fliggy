@@ -1,4 +1,5 @@
 class HotelPackagesController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
     @hot_cities = City.where(is_hot: true).limit(4)
