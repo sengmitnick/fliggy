@@ -28,8 +28,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class SearchFamilyCarValidator < BaseValidator
   self.validator_id = 'search_family_car_cd'
-  self.title = '搜索成都适合家庭的7座SUV'
-  self.description = '搜索成都的租车服务，找到适合家庭的7座SUV并租赁'
+  self.title = '搜索并租赁成都适合家庭的7座SUV'
+  self.description = '搜索成都的租车服务，找到适合家庭的7座SUV并完成租赁'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据

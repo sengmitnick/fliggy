@@ -33,8 +33,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class SearchHighRatedHotelValidator < BaseValidator
   self.validator_id = 'search_high_rated_hotel_beijing'
-  self.title = '搜索北京评分最高的高档酒店'
-  self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店'
+  self.title = '搜索并预订北京评分最高的高档酒店'
+  self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店并完成预订'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数

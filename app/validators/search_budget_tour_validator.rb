@@ -30,8 +30,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class SearchBudgetTourValidator < BaseValidator
   self.validator_id = 'search_budget_tour_yn'
-  self.title = '搜索预算5000元以内的云南旅游产品'
-  self.description = '搜索云南的旅游产品，找出预算内（≤5000元/人）最受欢迎的产品并预订'
+  self.title = '搜索并预订预算5000元以内的云南旅游产品'
+  self.description = '搜索云南的旅游产品，找出预算内（≤5000元/人）最受欢迎的产品并完成预订'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据

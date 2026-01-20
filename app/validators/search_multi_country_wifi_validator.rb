@@ -28,8 +28,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class SearchMultiCountryWifiValidator < BaseValidator
   self.validator_id = 'search_multi_country_wifi'
-  self.title = '搜索覆盖5国以上的欧洲WiFi设备'
-  self.description = '搜索欧洲地区的随身WiFi设备，找到覆盖5个以上国家的产品并购买'
+  self.title = '搜索并购买覆盖5国以上的欧洲WiFi设备'
+  self.description = '搜索欧洲地区的随身WiFi设备，找到覆盖5个以上国家的产品并完成购买'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
