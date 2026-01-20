@@ -1,4 +1,6 @@
 class CustomTravelRequest < ApplicationRecord
+  belongs_to :user
+
   # Validations
   validates :destination_city, presence: true
   validates :phone, format: { with: /\A1[3-9]\d{9}\z/, message: "请输入有效的手机号" }, allow_blank: true

@@ -98,6 +98,8 @@
             <%= render partial: 'bookings/internet_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(Transfer) %>
             <%= render partial: 'bookings/transfer_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(CustomTravelRequest) %>
+            <%= render partial: 'bookings/custom_travel_request_card', locals: { booking: booking } %>
           <% end %>
         <% end %>
         

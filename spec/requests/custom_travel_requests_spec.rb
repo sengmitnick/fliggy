@@ -1,6 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe 'CustomTravelRequests', type: :request do
+  let(:user) { User.create!(email: 'test@example.com', password: 'password', verified: true) }
+  
+  before do
+    # Simulate user login
+    allow_any_instance_of(ApplicationController).to receive(:authenticate_user!).and_return(true)
+    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(user)
+  end
+
   describe 'POST /custom_travel_requests' do
     context 'with valid parameters' do
       let(:valid_params) do
@@ -61,7 +69,7 @@ RSpec.describe 'CustomTravelRequests', type: :request do
 
   describe 'GET /custom_travel_requests/:id' do
     let!(:custom_travel_request) do
-      CustomTravelRequest.create!(
+      user.custom_travel_requests.create!(
         departure_city: '上海',
         destination_city: '湖南',
         adults_count: 2,

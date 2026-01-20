@@ -1,12 +1,17 @@
 class CustomTravelRequestsController < ApplicationController
+  before_action :authenticate_user!
   skip_before_action :verify_authenticity_token, only: [:create]
 
+  def my_orders
+    @custom_travel_requests = current_user.custom_travel_requests.order(created_at: :desc)
+  end
+
   def show
-    @custom_travel_request = CustomTravelRequest.find(params[:id])
+    @custom_travel_request = current_user.custom_travel_requests.find(params[:id])
   end
 
   def cancel
-    @custom_travel_request = CustomTravelRequest.find(params[:id])
+    @custom_travel_request = current_user.custom_travel_requests.find(params[:id])
     
     if @custom_travel_request.update(status: :cancelled)
       redirect_to custom_travel_request_path(@custom_travel_request), notice: '订单已取消'
@@ -16,7 +21,7 @@ class CustomTravelRequestsController < ApplicationController
   end
 
   def create
-    @custom_travel_request = CustomTravelRequest.new(custom_travel_request_params)
+    @custom_travel_request = current_user.custom_travel_requests.build(custom_travel_request_params)
     
     if @custom_travel_request.save
       # Use status: :see_other for Turbo to follow the redirect properly

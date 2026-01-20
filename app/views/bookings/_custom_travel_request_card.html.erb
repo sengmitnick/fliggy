@@ -1,0 +1,81 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden">
+  <div class="p-4">
+    <!-- Header with Status -->
+    <div class="flex items-start justify-between mb-3">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        <span class="text-base font-semibold text-text-primary">定制旅行</span>
+      </div>
+      <% status_config = case booking.status.to_sym
+         when :pending then { text: '待处理', class: 'bg-warning-bg text-warning' }
+         when :contacted then { text: '已联系', class: 'bg-info-bg text-info' }
+         when :matched then { text: '已匹配', class: 'bg-success-bg text-success' }
+         when :completed then { text: '已完成', class: 'bg-success-bg text-success' }
+         when :cancelled then { text: '已取消', class: 'bg-error-bg text-error' }
+         else { text: booking.status, class: 'bg-muted text-text-secondary' }
+         end %>
+      <span class="px-3 py-1 text-xs font-medium rounded-full <%= status_config[:class] %>">
+        <%= status_config[:text] %>
+      </span>
+    </div>
+
+    <!-- Route -->
+    <div class="flex items-center mb-2">
+      <span class="text-lg font-semibold text-text-primary"><%= booking.departure_city || '未指定' %></span>
+      <svg class="w-5 h-5 mx-2 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+      <span class="text-lg font-semibold text-text-primary"><%= booking.destination_city %></span>
+    </div>
+
+    <!-- Date and Duration -->
+    <div class="flex items-center text-sm text-text-secondary space-x-4 mb-2">
+      <div class="flex items-center space-x-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span><%= booking.departure_date&.strftime('%m月%d日') || '待定' %></span>
+      </div>
+      <div class="flex items-center space-x-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span><%= booking.days_count %>天</span>
+      </div>
+    </div>
+
+    <!-- People Count -->
+    <div class="text-sm text-text-secondary mb-3">
+      <span><%= booking.people_description %></span>
+    </div>
+
+    <!-- Preferences -->
+    <% if booking.preferences.present? %>
+      <div class="text-sm text-text-muted mb-3 line-clamp-2">
+        需求：<%= booking.preferences %>
+      </div>
+    <% end %>
+
+    <!-- Divider -->
+    <div class="border-t border-border my-3"></div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between">
+      <div class="text-xs text-text-muted">
+        订单号: #<%= booking.id %>
+      </div>
+      <div class="flex items-center space-x-2">
+        <% if booking.pending? %>
+          <%= link_to custom_travel_request_path(booking), class: "px-4 py-2 text-sm font-medium text-text-primary border border-border rounded-lg hover:bg-muted transition-colors" do %>
+            查看详情
+          <% end %>
+          <%= button_to '取消订单', cancel_custom_travel_request_path(booking), method: :patch, form: { data: { turbo_confirm: '确定要取消这个定制单吗？' } }, class: "px-4 py-2 text-sm font-medium text-error border border-error rounded-lg hover:bg-error-bg transition-colors" %>
+        <% else %>
+          <%= link_to '查看详情', custom_travel_request_path(booking), class: "btn-primary" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

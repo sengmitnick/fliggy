@@ -45,6 +45,10 @@ class BookingsController < ApplicationController
       # Fetch transfer orders
       transfer_orders = current_user.transfers.includes(:transfer_package)
                                     .order(created_at: :desc)
+      
+      # Fetch custom travel requests
+      custom_travel_requests = current_user.custom_travel_requests
+                                           .order(created_at: :desc)
     
     # Filter by status
     case @status_filter
@@ -59,6 +63,7 @@ class BookingsController < ApplicationController
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'pending')
       internet_orders = internet_orders.where(status: 'pending')
       transfer_orders = transfer_orders.where(status: 'pending')
+      custom_travel_requests = custom_travel_requests.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -79,6 +84,7 @@ class BookingsController < ApplicationController
       internet_orders = internet_orders.where(status: 'paid')
       transfer_orders = transfer_orders.where(status: 'paid')
                                        .where('transfers.pickup_datetime >= ?', DateTime.now)
+      custom_travel_requests = custom_travel_requests.where(status: ['contacted', 'matched'])
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -91,6 +97,7 @@ class BookingsController < ApplicationController
       abroad_ticket_orders = abroad_ticket_orders.none
       internet_orders = internet_orders.none
       transfer_orders = transfer_orders.none
+      custom_travel_requests = custom_travel_requests.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
@@ -102,6 +109,7 @@ class BookingsController < ApplicationController
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'cancelled')
       internet_orders = internet_orders.where(status: 'cancelled')
       transfer_orders = transfer_orders.where(status: 'cancelled')
+      custom_travel_requests = custom_travel_requests.where(status: 'cancelled')
     end
     
     # Combine and sort by created_at
@@ -115,7 +123,8 @@ class BookingsController < ApplicationController
       visa_orders.to_a,
       abroad_ticket_orders.to_a,
       internet_orders.to_a,
-      transfer_orders.to_a
+      transfer_orders.to_a,
+      custom_travel_requests.to_a
     ].flatten.compact.sort_by(&:created_at).reverse
     
     # Manual pagination

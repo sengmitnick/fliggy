@@ -5002,6 +5002,10 @@ html, body {
   max-height: 24rem;
 }
 
+.max-h-\[60vh\] {
+  max-height: 60vh;
+}
+
 .max-h-\[70vh\] {
   max-height: 70vh;
 }
@@ -5016,10 +5020,6 @@ html, body {
 
 .max-h-\[85vh\] {
   max-height: 85vh;
-}
-
-.max-h-\[60vh\] {
-  max-height: 60vh;
 }
 
 .min-h-\[120px\] {
@@ -7490,8 +7490,18 @@ html, body {
   background-color: rgb(49 46 129 / 0.4);
 }
 
+.bg-info-bg {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--color-info-bg) / var(--tw-bg-opacity, 1));
+}
+
 .bg-info\/10 {
   background-color: hsl(var(--color-info) / 0.1);
+}
+
+.bg-muted {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--color-text-muted) / var(--tw-bg-opacity, 1));
 }
 
 .bg-neutral {
@@ -7693,6 +7703,11 @@ html, body {
 .bg-success {
   --tw-bg-opacity: 1;
   background-color: hsl(var(--color-success) / var(--tw-bg-opacity, 1));
+}
+
+.bg-success-bg {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--color-success-bg) / var(--tw-bg-opacity, 1));
 }
 
 .bg-success\/10 {
@@ -10631,6 +10646,11 @@ html, body {
   background-color: rgb(76 108 232 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-\[\#5567DD\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(85 103 221 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:bg-\[\#5B4FEE\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(91 79 238 / var(--tw-bg-opacity, 1));
@@ -10654,6 +10674,11 @@ html, body {
 .hover\:bg-\[\#FFD700\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 215 0 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-\[\#FFE8CC\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 232 204 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-\[\#f0d020\]:hover {
@@ -10728,6 +10753,11 @@ html, body {
 .hover\:bg-green-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(220 252 231 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-muted:hover {
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--color-text-muted) / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-neutral:hover {
@@ -10805,16 +10835,6 @@ html, body {
 .hover\:bg-yellow-500:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-\[\#FFE8CC\]:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 232 204 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-\[\#5567DD\]:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(85 103 221 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:from-purple-600:hover {
@@ -10968,12 +10988,12 @@ html, body {
   opacity: 0.75;
 }
 
-.hover\:opacity-90:hover {
-  opacity: 0.9;
-}
-
 .hover\:opacity-80:hover {
   opacity: 0.8;
+}
+
+.hover\:opacity-90:hover {
+  opacity: 0.9;
 }
 
 .hover\:shadow-lg:hover {

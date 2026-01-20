@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_20_064659) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_20_123722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -390,6 +390,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_20_064659) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_custom_travel_requests_on_user_id"
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
@@ -1442,6 +1444,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_20_064659) do
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
   add_foreign_key "contacts", "users"
+  add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"

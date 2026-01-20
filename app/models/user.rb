@@ -53,6 +53,7 @@ class User < ApplicationRecord
   has_many :transfers, dependent: :destroy
   has_many :visa_orders, dependent: :destroy
   has_many :addresses, dependent: :destroy
+  has_many :custom_travel_requests, dependent: :destroy
   has_one :membership, dependent: :destroy
   has_many :brand_memberships, dependent: :destroy
   has_many :notifications, dependent: :destroy
