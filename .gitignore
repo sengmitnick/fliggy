@@ -103,3 +103,6 @@ backup/
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Ignore Claude settings
+.claude/settings.local.json
