@@ -1,7 +1,7 @@
 class CustomTravelRequest < ApplicationRecord
   # Validations
   validates :destination_city, presence: true
-  validates :phone, presence: true, format: { with: /\A1[3-9]\d{9}\z/, message: "请输入有效的手机号" }
+  validates :phone, format: { with: /\A1[3-9]\d{9}\z/, message: "请输入有效的手机号" }, allow_blank: true
   validates :adults_count, numericality: { greater_than_or_equal_to: 0 }
   validates :children_count, numericality: { greater_than_or_equal_to: 0 }
   validates :elders_count, numericality: { greater_than_or_equal_to: 0 }

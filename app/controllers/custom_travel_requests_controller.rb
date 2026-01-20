@@ -1,16 +1,16 @@
 class CustomTravelRequestsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
 
+  def show
+    @custom_travel_request = CustomTravelRequest.find(params[:id])
+  end
+
   def create
     @custom_travel_request = CustomTravelRequest.new(custom_travel_request_params)
     
     if @custom_travel_request.save
-      # 成功后返回Turbo Stream响应
-      render turbo_stream: turbo_stream.replace(
-        'custom-travel-modal',
-        partial: 'custom_travel_requests/success',
-        locals: { request: @custom_travel_request }
-      )
+      # Use status: :see_other for Turbo to follow the redirect properly
+      redirect_to custom_travel_request_path(@custom_travel_request), status: :see_other
     else
       # 失败后返回错误信息
       render turbo_stream: turbo_stream.replace(

@@ -1,13 +1,14 @@
 <!-- 定制旅游弹窗 -->
-<!-- 遮罩层 -->
-<div data-custom-travel-modal-target="overlay" 
-     data-action="click->custom-travel-modal#closeOnOverlay"
-     class="hidden fixed inset-0 bg-black/50 z-50"></div>
+<div>
+  <!-- 遮罩层 -->
+  <div data-custom-travel-modal-target="overlay" 
+       data-action="click->custom-travel-modal#closeOnOverlay"
+       class="hidden fixed inset-0 bg-black/50 z-50"></div>
 
-<!-- 弹窗内容 -->
-<div data-custom-travel-modal-target="modal" 
-     class="hidden fixed inset-0 z-[60]">
-  <div class="absolute bottom-0 left-0 right-0 bg-[#F5F0E8] rounded-t-3xl max-h-[75vh] overflow-y-auto shadow-2xl">
+  <!-- 弹窗内容 -->
+  <div data-custom-travel-modal-target="modal" 
+       class="hidden fixed inset-0 z-[60]">
+    <div class="absolute bottom-0 left-0 right-0 bg-[#F5F0E8] rounded-t-3xl max-h-[75vh] overflow-y-auto shadow-2xl">
       <!-- Modal Header -->
       <div class="sticky top-0 bg-[#F5F0E8] px-4 py-3 flex items-center justify-center relative border-b border-[#E0D5C0]">
         <h2 class="text-lg font-bold text-gray-800" style="font-family: 'FZHTJW--GB1-0', serif;">飞猪定制游</h2>
@@ -26,7 +27,7 @@
       </div>
 
       <!-- 表单 -->
-      <%= form_with url: custom_travel_requests_path, method: :post, local: false, class: 'px-4 pb-4' do |f| %>
+      <%= form_with url: custom_travel_requests_path, method: :post, local: false, scope: :custom_travel_request, class: 'px-4 pb-4' do |f| %>
         <!-- 步骤1: 完善偏好，定制更契合 -->
         <div class="bg-white rounded-xl p-3 mb-3">
           <div class="flex items-center gap-2 mb-3">
@@ -159,35 +160,81 @@
             </div>
           </div>
 
-          <!-- 第二行: 出发日期 和 玩几天 -->
-          <div class="flex items-end gap-3 mb-3">
-            <!-- 出发日期选择 -->
-            <div class="flex-1">
+          <!-- 第二行: 出发日期(1/3) + 空白(1/3) + 玩几天(1/3) -->
+          <div class="grid grid-cols-3 gap-3 mb-3">
+            <!-- 出发日期选择 (占1/3) -->
+            <div class="relative">
               <label class="text-xs text-gray-500 mb-0.5 block">出发日期</label>
-              <button type="button" class="w-full px-3 py-2 bg-gray-50 rounded-lg text-left text-gray-400 text-sm">
-                点击选择日期
+              <button type="button" 
+                      data-action="click->custom-travel-modal#toggleDatePicker"
+                      class="w-full px-3 py-2 bg-gray-50 rounded-lg text-left flex items-center justify-between text-sm">
+                <span data-custom-travel-modal-target="departureDateDisplay" class="text-gray-400">点击选择日期</span>
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                </svg>
               </button>
-              <%= f.hidden_field :departure_date %>
+              <%= f.hidden_field :departure_date, data: { custom_travel_modal_target: 'departureDateInput' } %>
+              
+              <!-- 日期选择器下拉框 -->
+              <div data-custom-travel-modal-target="datePicker" 
+                   class="hidden absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border z-50 p-3 w-64">
+                <div class="flex items-center justify-between mb-3">
+                  <button type="button" 
+                          data-action="click->custom-travel-modal#previousMonth"
+                          class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <span data-custom-travel-modal-target="currentMonth" class="text-sm font-bold text-gray-800"></span>
+                  <button type="button" 
+                          data-action="click->custom-travel-modal#nextMonth"
+                          class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <!-- 星期头 -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                  <div class="text-xs text-center text-gray-500 font-medium">日</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">一</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">二</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">三</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">四</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">五</div>
+                  <div class="text-xs text-center text-gray-500 font-medium">六</div>
+                </div>
+                
+                <!-- 日期网格 -->
+                <div data-custom-travel-modal-target="calendarGrid" class="grid grid-cols-7 gap-1"></div>
+              </div>
             </div>
 
-            <!-- 玩几天 -->
-            <div class="flex items-center gap-2">
-              <label class="text-sm text-gray-600">玩几天</label>
-              <button type="button" 
-                      data-action="click->custom-travel-modal#decreaseDays"
-                      class="w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
-                −
-              </button>
-              <div class="flex items-center gap-1">
-                <span data-custom-travel-modal-target="daysCount" class="text-xl font-bold text-[#6B5FFE] w-10 text-center">1</span>
-                <span class="text-sm text-gray-600">天</span>
+            <!-- 中间空白 (占1/3) -->
+            <div></div>
+
+            <!-- 玩几天 (占1/3) -->
+            <div class="flex flex-col justify-end">
+              <label class="text-xs text-gray-500 mb-1 block">玩几天</label>
+              <div class="flex items-center gap-2 justify-center">
+                <button type="button" 
+                        data-action="click->custom-travel-modal#decreaseDays"
+                        class="w-8 h-8 rounded-full border-2 border-gray-300 text-gray-500 flex items-center justify-center text-lg hover:border-gray-400 transition-colors">
+                  −
+                </button>
+                <div class="flex items-center gap-1">
+                  <span data-custom-travel-modal-target="daysCount" class="text-xl font-bold text-[#6B5FFE] w-10 text-center">1</span>
+                  <span class="text-sm text-gray-600">天</span>
+                </div>
+                <%= f.hidden_field :days_count, value: 1, data: { custom_travel_modal_target: 'daysInput' } %>
+                <button type="button" 
+                        data-action="click->custom-travel-modal#increaseDays"
+                        class="w-8 h-8 rounded-full bg-[#6B5FFE] text-white flex items-center justify-center text-xl hover:bg-[#5B4FEE] transition-colors">
+                  +
+                </button>
               </div>
-              <%= f.hidden_field :days_count, value: 1, data: { custom_travel_modal_target: 'daysInput' } %>
-              <button type="button" 
-                      data-action="click->custom-travel-modal#increaseDays"
-                      class="w-8 h-8 rounded-full bg-[#6B5FFE] text-white flex items-center justify-center text-xl hover:bg-[#5B4FEE] transition-colors">
-                +
-              </button>
             </div>
           </div>
 
