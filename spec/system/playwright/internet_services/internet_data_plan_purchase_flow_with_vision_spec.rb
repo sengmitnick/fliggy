@@ -25,7 +25,7 @@ RSpec.describe "Internet Data Plan Purchase Flow (with AI Vision Analysis)", typ
       
       # Step 2: Fill form and login
       puts "\n[Step 2] Performing Login"
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1
@@ -131,7 +131,7 @@ RSpec.describe "Internet Data Plan Purchase Flow (with AI Vision Analysis)", typ
       # Login
       page.goto("#{base_url}/sign_in")
       sleep 0.5
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')  # Fixed selector
       sleep 1

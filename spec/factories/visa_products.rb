@@ -1,7 +1,11 @@
 FactoryBot.define do
   factory :visa_product do
-
-    country_id { 1 }
+    # Note: This project uses data packs for all data
+    # Factories should not be used to create test data
+    # Data is loaded from app/validators/support/data_packs/v1/
+    
+    # Fallback: Create minimal Country if none exists (temporary until data pack is ready)
+    country { Country.first || Country.create!(name: "泰国", code: "TH", region: "东南亚") }
     name { "MyString" }
     product_type { "MyString" }
     price { 9.99 }

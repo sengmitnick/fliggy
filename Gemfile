@@ -38,13 +38,14 @@ group :development, :test do
   gem "parser", "3.3.5.0"  # Match Ruby 3.3.5 version
 end
 
+gem "activerecord-import"
+
 group :test do
   gem "database_cleaner"
   gem "launchy"
   gem "capybara"
   gem "selenium-webdriver"
   gem "playwright-ruby-client"
-  gem "activerecord-import"
 end
 gem "omniauth", "~> 2.1"
 gem "omniauth-rails_csrf_protection", "~> 1.0"

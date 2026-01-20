@@ -34,7 +34,7 @@
 
       <!-- Search Bar -->
       <div class="relative" data-controller="search">
-        <form data-action="submit->search#search" class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
+        <form action="<%= search_path %>" method="get" data-action="submit->search#search" class="flex items-center gap-2 bg-white pl-2 pr-1" style="height: 48px; border-radius: 12px; border: 2px solid #7B8CFF;">
           <div class="flex items-center gap-2 flex-1">
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
             <input 
@@ -74,7 +74,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
         </svg>
         <div class="text-left">
-          <div class="text-sm font-bold">安装飞猪旅行应用</div>
+          <div class="text-sm font-bold">安装旅游环境01应用</div>
           <div class="text-xs opacity-90">添加到主屏幕，快速访问</div>
         </div>
       </div>
@@ -246,8 +246,8 @@
           </button>
 
           <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
-            <%= image_tag "home/飞猪省钱卡.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "飞猪省钱卡" %>
-            <span class="text-[12px] text-gray-700">飞猪省钱卡</span>
+            <%= image_tag "home/飞猪省钱卡.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "省钱卡" %>
+            <span class="text-[12px] text-gray-700">省钱卡</span>
           </button>
 
           <button class="flex flex-col items-center justify-end h-full" onclick="window.showToast('精彩即将上线，敬请期待')">
@@ -290,7 +290,7 @@
 
       <!-- Card 3 - Flight List -->
       <button class="relative overflow-hidden rounded-4" onclick="window.showToast('精彩即将上线，敬请期待')">
-        <%= image_tag "home/飞猪榜单.png", class: "w-full h-auto", alt: "飞猪榜单" %>
+        <%= image_tag "home/飞猪榜单.png", class: "w-full h-auto", alt: "榜单" %>
       </button>
 
       <!-- Card 4 - Performance -->

@@ -17,8 +17,8 @@ class AbroadTicketOrdersController < ApplicationController
       total_price: @total_price
     )
 
-    # Get user's passengers for quick selection
-    @passengers = current_user.passengers.order(created_at: :desc).limit(5)
+    # Get user's contacts for quick selection
+    @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
   end
 
   def create
@@ -42,7 +42,7 @@ class AbroadTicketOrdersController < ApplicationController
         }
       else
         format.html do
-          @passengers = current_user.passengers.order(created_at: :desc).limit(5)
+          @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
           render :new, status: :unprocessable_entity
         end
         format.json { 

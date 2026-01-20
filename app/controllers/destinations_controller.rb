@@ -7,9 +7,16 @@ class DestinationsController < ApplicationController
     end
     
     # 首次访问，跳转到默认城市（深圳）
-    default_destination = Destination.friendly.find('shen-zhen')
-    session[:last_destination_slug] = default_destination.slug
-    redirect_to destination_path(default_destination.slug)
+    default_destination = Destination.find_by(name: '深圳') || Destination.find_by(name: '深圳市') || Destination.first
+    if default_destination
+      # 确保 slug 存在
+      default_destination.save if default_destination.slug.blank?
+      session[:last_destination_slug] = default_destination.slug
+      redirect_to destination_path(default_destination.slug)
+    else
+      # 没有任何目的地数据
+      render plain: 'No destinations available', status: :not_found
+    end
   end
   
   def select

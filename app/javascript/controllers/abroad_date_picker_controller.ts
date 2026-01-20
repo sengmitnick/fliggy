@@ -60,6 +60,10 @@ export default class extends Controller<HTMLElement> {
       this.closeModal()
     }
   }
+
+  openCalendar(): void {
+    this.openModal()
+  }
   
   // Update past dates to be disabled
   private updatePastDates(): void {

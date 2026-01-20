@@ -1,8 +1,9 @@
 class SpecialHotelsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
-    # Get city from params, default to 北京市
-    @city = params[:city] || '北京市'
+    # Get city from params, default to 北京
+    @city = params[:city] || '北京'
     
     # Start with city-specific featured hotels
     @hotels = Hotel.by_city(@city).where(is_featured: true)

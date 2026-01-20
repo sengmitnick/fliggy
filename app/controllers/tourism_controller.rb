@@ -82,7 +82,7 @@ class TourismController < ApplicationController
     # 大家都在买
     @popular_products = [
       {
-        title: '飞猪冰雪温泉季',
+        title: '冰雪温泉季',
         badge: '领最高100元冰雪补贴',
         type: 'promotion'
       },

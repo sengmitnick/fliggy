@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # demo_user_v1 数据包
-# Demo 用户：demo@fliggy.com
+# Demo 用户：demo@travel01.com
 # 
 # 用途：
 # - 为验证器提供默认测试用户
@@ -12,7 +12,7 @@
 
 puts "  → 正在设置 Demo 用户..."
 
-demo_user = User.find_or_create_by(email: 'demo@fliggy.com') do |u|
+demo_user = User.find_or_create_by(email: 'demo@travel01.com') do |u|
   u.password = 'password123'
   u.password_confirmation = 'password123'
   u.name = 'Demo用户'
@@ -95,7 +95,7 @@ if demo_user.persisted?
     puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴"
   end
   
-  puts "     ✓ Demo用户: demo@fliggy.com (密码: password123, 支付密码: 222222)"
+  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222)"
 end
 
 puts "✓ demo_user_v1 数据包加载完成"

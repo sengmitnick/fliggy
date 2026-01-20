@@ -1,4 +1,5 @@
 class HomestaysController < ApplicationController
+  include CitySelectorDataConcern
   def index
     # 重用酒店的逻辑，但固定类型为民宿
     @city = params[:city] || '深圳'

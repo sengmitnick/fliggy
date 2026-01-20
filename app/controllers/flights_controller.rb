@@ -1,16 +1,8 @@
 class FlightsController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
-    # Flight search page with city selector
-    # Cache city data to improve performance (cities rarely change)
-    @hot_cities = Rails.cache.fetch('cities/hot_cities', expires_in: 24.hours) do
-      City.hot_cities.order(:pinyin).to_a
-    end
-    
-    @all_cities = Rails.cache.fetch('cities/all_cities', expires_in: 24.hours) do
-      City.all.order(:pinyin).to_a
-    end
-    
+    # NOTE: City selector data is loaded via CitySelectorDataConcern
     # NOTE: Removed preload_date_prices to improve first-load performance
     # Date prices will be loaded on-demand when user opens the date picker modal
   end

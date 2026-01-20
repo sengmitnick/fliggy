@@ -93,6 +93,8 @@ import SmartBackController from "./smart_back_controller"
 import TourGroupTabsController from "./tour_group_tabs_controller"
 import HotelPriceFilterController from "./hotel_price_filter_controller"
 import HotelGuaranteeController from "./hotel_guarantee_controller"
+import AbroadTicketTypeController from "./abroad_ticket_type_controller"
+import LandmarkFilterController from "./landmark_filter_controller"
 
 const application = Application.start()
 
@@ -189,5 +191,7 @@ application.register("smart-back", SmartBackController)
 application.register("tour-group-tabs", TourGroupTabsController)
 application.register("hotel-price-filter", HotelPriceFilterController)
 application.register("hotel-guarantee", HotelGuaranteeController)
+application.register("abroad-ticket-type", AbroadTicketTypeController)
+application.register("landmark-filter", LandmarkFilterController)
 
 window.Stimulus = application

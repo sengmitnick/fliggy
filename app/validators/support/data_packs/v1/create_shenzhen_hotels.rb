@@ -1,5 +1,5 @@
-# 为深圳市创建符合统一品牌的酒店数据
-puts "正在为深圳市创建新的酒店数据..."
+# 为深圳创建符合统一品牌的酒店数据
+puts "正在为深圳创建新的酒店数据..."
 
 # 统一品牌列表
 brands = [
@@ -70,7 +70,7 @@ brands.each do |brand_info|
     hotel = Hotel.create!(
       name: hotel_name,
       brand: brand_info[:name],
-      city: "深圳市",
+      city: "深圳",
       region: area[:region],
       address: "#{area[:region]}#{area[:name]}商圈",
       star_level: brand_info[:star],
@@ -105,8 +105,8 @@ brands.each do |brand_info|
   end
 end
 
-puts "\n深圳市酒店创建完成！共创建 #{created_count} 家酒店"
+puts "\n深圳酒店创建完成！共创建 #{created_count} 家酒店"
 puts "\n品牌统计:"
-Hotel.where(city: '深圳市').group(:brand).count.each do |brand, count|
+Hotel.where(city: '深圳').group(:brand).count.each do |brand, count|
   puts "  #{brand}: #{count}家"
 end

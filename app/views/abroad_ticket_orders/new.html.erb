@@ -180,23 +180,29 @@
       </div>
 
       <div class="p-4 h-[400px] bg-white overflow-y-auto">
-        <% if @passengers.any? %>
-          <% @passengers.each do |passenger| %>
+        <% if @contacts.any? %>
+          <% @contacts.each do |contact| %>
             <div class="flex items-center justify-between bg-surface p-4 rounded-lg mb-2 cursor-pointer hover:bg-gray-100"
                  data-action="click->abroad-order-form#selectPassenger"
-                 data-abroad-order-form-name-param="<%= passenger.name %>"
-                 data-abroad-order-form-phone-param="<%= passenger.phone %>">
+                 data-abroad-order-form-name-param="<%= contact.name %>"
+                 data-abroad-order-form-phone-param="<%= contact.phone %>"
+                 data-abroad-order-form-email-param="<%= contact.email %>">
               <div class="flex flex-col">
-                <span class="text-base font-bold text-gray-900 mb-1"><%= passenger.name %></span>
-                <span class="text-sm text-gray-500"><%= passenger.phone %></span>
+                <span class="text-base font-bold text-gray-900 mb-1"><%= contact.name %></span>
+                <% if contact.phone.present? %>
+                  <span class="text-sm text-gray-500"><%= contact.phone %></span>
+                <% end %>
+                <% if contact.email.present? %>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= contact.email %></span>
+                <% end %>
               </div>
               <div class="w-6 h-6 rounded-full border border-gray-300"></div>
             </div>
           <% end %>
         <% else %>
           <div class="text-center text-gray-400 py-8">
-            <p>暂无常用出行人</p>
-            <p class="text-sm mt-2">您可以在常用信息中添加</p>
+            <p>暂无常用联系人</p>
+            <p class="text-sm mt-2">您可以在<a href="<%= contacts_path %>" class="text-blue-500">常用信息</a>中添加</p>
           </div>
         <% end %>
       </div>

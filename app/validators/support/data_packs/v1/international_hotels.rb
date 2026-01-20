@@ -109,6 +109,20 @@ regions_by_city = {
   '约翰内斯堡' => ['桑顿', '罗斯班克', '曼德拉广场', '金礁城', '索韦托']
 }
 
+# Hotel images
+hotel_images = [
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80&fm=jpg&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80&fm=jpg&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80&fm=jpg&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80&fm=jpg&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80&fm=jpg&fit=crop&auto=format"
+]
+
+# Prepare all data in memory first
+timestamp = Time.current
+hotels_data = []
+hotel_metadata = [] # Store metadata for associations
+
 international_cities.each do |city_name, city_data|
   regions = regions_by_city[city_name] || ['市中心', '商业区', '海滨区', '老城区', '新城区']
   
@@ -128,8 +142,10 @@ international_cities.each do |city_name, city_data|
             else rand(300..800)
             end
     
-    hotel = Hotel.create!(
-      name: "#{city_name}#{brand}#{hotel_type == 'homestay' ? '民宿' : '酒店'}",
+    hotel_name = "#{city_name}#{brand}#{hotel_type == 'homestay' ? '民宿' : '酒店'}"
+    
+    hotels_data << {
+      name: hotel_name,
       city: city_name,
       address: "#{city_data[:country]}#{city_name}#{region}#{rand(1..999)}号",
       price: price,
@@ -137,89 +153,125 @@ international_cities.each do |city_name, city_data|
       star_level: star_level,
       hotel_type: hotel_type,
       region: region,
-      is_featured: i < 2, # First 2 are featured
+      is_featured: i < 2,
       is_domestic: false,
       brand: brand,
-      display_order: i
-    )
+      display_order: i,
+      image_url: hotel_images.sample,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
     
-    # Set image_url
-    hotel_images = [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80&fm=jpg&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80&fm=jpg&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80&fm=jpg&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80&fm=jpg&fit=crop&auto=format",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80&fm=jpg&fit=crop&auto=format"
-    ]
-    hotel.update(image_url: hotel_images.sample)
-    
-    # Create 3-5 rooms per hotel
-    room_count = rand(3..5)
-    room_count.times do |j|
-      room_types = ['标准间', '豪华间', '套房', '家庭房', '海景房']
-      room_type = room_types.sample
-      
-      HotelRoom.create!(
-        hotel: hotel,
-        room_type: room_type,
-        price: hotel.price + rand(-100..300),
-        available_rooms: rand(5..20),
-        room_category: 'overnight'
-      )
-    end
-    
-    # Create hotel policy
-    HotelPolicy.create!(
-      hotel: hotel,
-      check_in_time: "15:00后",
-      check_out_time: "12:00前",
-      pet_policy: "部分房型可携带宠物，需提前联系酒店",
-      breakfast_type: star_level >= 4 ? "自助餐" : "其他",
-      breakfast_hours: "每天07:00-10:00",
-      breakfast_price: star_level >= 4 ? rand(80..150) : rand(40..80),
-      payment_methods: ["信用卡", "现金", "支付宝"]
-    )
-    
-    # Create 2-4 facilities
-    facilities_data = [
-      { name: '免费WiFi', icon: 'wifi', description: '全酒店覆盖高速无线网络', category: '网络' },
-      { name: '停车场', icon: 'parking', description: '免费地下停车位', category: '停车' },
-      { name: '游泳池', icon: 'swimmer', description: '室内恒温游泳池', category: '娱乐' },
-      { name: '健身房', icon: 'dumbbell', description: '24小时开放的现代化健身中心', category: '健身' },
-      { name: '餐厅', icon: 'utensils', description: '提供中西式美食', category: '餐饮' },
-      { name: '会议室', icon: 'briefcase', description: '提供办公和会议设施', category: '商务' },
-      { name: '机场接送', icon: 'car', description: '提供机场接送服务', category: '服务' },
-      { name: '洗衣服务', icon: 'tshirt', description: '提供洗衣熨烫服务', category: '服务' }
-    ]
-    rand(2..4).times do
-      facility = facilities_data.sample
-      HotelFacility.create!(
-        hotel: hotel,
-        name: facility[:name],
-        icon: facility[:icon],
-        description: facility[:description],
-        category: facility[:category]
-      )
-    end
-    
-    # Create 2-3 reviews (need a user)
-    user = User.first || User.create!(
-      email: "demo@example.com",
-      password_digest: BCrypt::Password.create("password123")
-    )
-    
-    rand(2..3).times do
-      HotelReview.create!(
-        hotel: hotel,
-        user: user,
-        rating: rand(40..50) / 10.0,
-        comment: "酒店位置优越，服务周到，房间舒适干净。#{city_name}的好选择！"
-      )
-    end
+    # Store metadata for later association creation
+    hotel_metadata << {
+      city: city_name,
+      star_level: star_level,
+      price: price,
+      room_count: rand(3..5),
+      facilities_count: rand(2..4)
+    }
   end
   
-  puts "Created #{hotels_count} hotels for #{city_name} (#{city_data[:country]})"
+  puts "Prepared #{hotels_count} hotels for #{city_name} (#{city_data[:country]})"
 end
 
+# Batch insert hotels
+Hotel.insert_all(hotels_data) if hotels_data.any?
+
+# Now create associations using hotel IDs
+all_hotels = Hotel.where(is_domestic: false).order(:id).to_a
+
+rooms_data = []
+policies_data = []
+facilities_data = []
+reviews_data = []
+
+# Get or create demo user for reviews
+user = User.first || User.create!(
+  email: "demo@example.com",
+  password_digest: BCrypt::Password.create("password123")
+)
+
+all_hotels.each_with_index do |hotel, index|
+  metadata = hotel_metadata[index]
+  next unless metadata
+  
+  # Create rooms
+  room_types = ['标准间', '豪华间', '套房', '家庭房', '海景房']
+  metadata[:room_count].times do
+    room_type = room_types.sample
+    rooms_data << {
+      hotel_id: hotel.id,
+      room_type: room_type,
+      price: hotel.price + rand(-100..300),
+      available_rooms: rand(5..20),
+      room_category: 'overnight',
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # Create policy
+  policies_data << {
+    hotel_id: hotel.id,
+    check_in_time: "15:00后",
+    check_out_time: "12:00前",
+    pet_policy: "部分房型可携带宠物，需提前联系酒店",
+    breakfast_type: hotel.star_level >= 4 ? "自助餐" : "其他",
+    breakfast_hours: "每天07:00-10:00",
+    breakfast_price: hotel.star_level >= 4 ? rand(80..150) : rand(40..80),
+    payment_methods: ["信用卡", "现金", "支付宝"],
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # Create facilities
+  facilities_pool = [
+    { name: '免费WiFi', icon: 'wifi', description: '全酒店覆盖高速无线网络', category: '网络' },
+    { name: '停车场', icon: 'parking', description: '免费地下停车位', category: '停车' },
+    { name: '游泳池', icon: 'swimmer', description: '室内恒温游泳池', category: '娱乐' },
+    { name: '健身房', icon: 'dumbbell', description: '24小时开放的现代化健身中心', category: '健身' },
+    { name: '餐厅', icon: 'utensils', description: '提供中西式美食', category: '餐饮' },
+    { name: '会议室', icon: 'briefcase', description: '提供办公和会议设施', category: '商务' },
+    { name: '机场接送', icon: 'car', description: '提供机场接送服务', category: '服务' },
+    { name: '洗衣服务', icon: 'tshirt', description: '提供洗衣熨烫服务', category: '服务' }
+  ]
+  
+  metadata[:facilities_count].times do
+    facility = facilities_pool.sample
+    facilities_data << {
+      hotel_id: hotel.id,
+      name: facility[:name],
+      icon: facility[:icon],
+      description: facility[:description],
+      category: facility[:category],
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # Create reviews
+  rand(2..3).times do
+    reviews_data << {
+      hotel_id: hotel.id,
+      user_id: user.id,
+      rating: rand(40..50) / 10.0,
+      comment: "酒店位置优越，服务周到，房间舒适干净。#{hotel.city}的好选择！",
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+# Batch insert all associations
+HotelRoom.insert_all(rooms_data) if rooms_data.any?
+HotelPolicy.insert_all(policies_data) if policies_data.any?
+HotelFacility.insert_all(facilities_data) if facilities_data.any?
+HotelReview.insert_all(reviews_data) if reviews_data.any?
+
 puts "International hotels created successfully!"
-puts "Total international hotels: #{Hotel.international.count}"
+puts "Total international hotels: #{Hotel.where(is_domestic: false).count}"
+puts "Total rooms: #{HotelRoom.joins(:hotel).where(hotels: { is_domestic: false }).count}"
+puts "Total policies: #{HotelPolicy.joins(:hotel).where(hotels: { is_domestic: false }).count}"
+puts "Total facilities: #{HotelFacility.joins(:hotel).where(hotels: { is_domestic: false }).count}"
+puts "Total reviews: #{HotelReview.joins(:hotel).where(hotels: { is_domestic: false }).count}"
