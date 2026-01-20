@@ -5,6 +5,16 @@ class CustomTravelRequestsController < ApplicationController
     @custom_travel_request = CustomTravelRequest.find(params[:id])
   end
 
+  def cancel
+    @custom_travel_request = CustomTravelRequest.find(params[:id])
+    
+    if @custom_travel_request.update(status: :cancelled)
+      redirect_to custom_travel_request_path(@custom_travel_request), notice: '订单已取消'
+    else
+      redirect_to custom_travel_request_path(@custom_travel_request), alert: '取消失败，请重试'
+    end
+  end
+
   def create
     @custom_travel_request = CustomTravelRequest.new(custom_travel_request_params)
     

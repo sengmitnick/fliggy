@@ -16,19 +16,31 @@
   </div>
 
   <!-- Status Banner -->
-  <div class="bg-[#FFD93D] px-6 pb-6">
-    <div class="text-center">
-      <h2 class="text-xl font-bold text-gray-800 mb-2">商家已接单，将联系你沟通方案</h2>
-      <p class="text-sm text-gray-700">
-        预计商家会在 
-        <span class="font-bold">1月20日 (周二) 16:23前</span>
-        ，通过隐私号呼入，请注意接听
-      </p>
+  <% if @custom_travel_request.cancelled? %>
+    <!-- Cancelled Status -->
+    <div class="bg-[#FFD93D] px-6 pb-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">订单已关闭</h2>
+        <p class="text-sm text-gray-700">欢迎下次使用飞猪定制旅行</p>
+      </div>
     </div>
-  </div>
+  <% else %>
+    <!-- Active Status -->
+    <div class="bg-[#FFD93D] px-6 pb-6">
+      <div class="text-center">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">商家已接单，将联系你沟通方案</h2>
+        <p class="text-sm text-gray-700">
+          预计商家会在 
+          <span class="font-bold">1月20日 (周二) 16:23前</span>
+          ，通过隐私号呼入，请注意接听
+        </p>
+      </div>
+    </div>
+  <% end %>
 
   <!-- Progress Steps -->
-  <div class="bg-white px-6 py-4 mb-2">
+  <% unless @custom_travel_request.cancelled? %>
+    <div class="bg-white px-6 py-4 mb-2">
     <div class="flex items-center justify-between relative">
       <!-- Step 1 - Active -->
       <div class="flex flex-col items-center z-10">
@@ -74,9 +86,11 @@
       </div>
     </div>
   </div>
+  <% end %>
 
   <!-- Merchant Information -->
-  <div class="bg-white px-6 py-4 mb-2">
+  <% unless @custom_travel_request.cancelled? %>
+    <div class="bg-white px-6 py-4 mb-2">
     <div class="flex items-start gap-3 mb-4">
       <div class="w-12 h-12 rounded-lg bg-[#FFE5CC] flex items-center justify-center flex-shrink-0">
         <svg class="w-7 h-7 text-[#FF9F45]" fill="currentColor" viewBox="0 0 20 20">
@@ -112,16 +126,23 @@
       </div>
     </div>
   </div>
+  <% end %>
 
   <!-- Action Buttons -->
-  <div class="flex gap-3 px-6 py-4 bg-white mb-2">
-    <button class="flex-1 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
-      取消订单
-    </button>
-    <button class="flex-1 py-3 rounded-full bg-[#FFD93D] text-gray-800 font-bold hover:opacity-90 transition-opacity">
-      联系商家
-    </button>
-  </div>
+  <% if @custom_travel_request.cancelled? %>
+    <!-- No buttons for cancelled orders -->
+  <% else %>
+    <div class="flex gap-3 px-6 py-4 bg-white mb-2">
+      <%= button_to '取消订单', 
+          cancel_custom_travel_request_path(@custom_travel_request), 
+          method: :patch,
+          form: { data: { turbo_confirm: '确认要取消此订单吗？' } },
+          class: 'flex-1 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors' %>
+      <button class="flex-1 py-3 rounded-full bg-[#FFD93D] text-gray-800 font-bold hover:opacity-90 transition-opacity">
+        联系商家
+      </button>
+    </div>
+  <% end %>
 
   <!-- Customization Information -->
   <div class="bg-white px-6 py-4">
