@@ -170,6 +170,23 @@ Use `rails generate stimulus_controller xxx` to create new Stimulus controller, 
 - NEVER dismiss or ignore stimulus validator failures as "misleading" or "incorrect"
 - These tests validate critical controller-view integration - failures mean broken functionality
 
+**⚠️ STIMULUS CONTROLLER & VIEW STYLE SYNCHRONIZATION - CRITICAL**:
+- When modifying view templates with Stimulus targets, ALWAYS check corresponding controller logic
+- When changing CSS classes in views that are manipulated by controllers, ALWAYS update controller code
+- **Pattern to follow**:
+  1. If view uses `class="text-gray-900 text-gray-500"` for active/inactive states
+  2. Controller MUST manipulate these EXACT classes: `classList.add('text-gray-900')` / `classList.remove('text-gray-500')`
+  3. NEVER leave controller manipulating old classes (e.g., `border-blue-500`) when view uses new classes
+- **Before modifying view styles**:
+  1. Search codebase for the Stimulus target name (e.g., `tabDomestic`)
+  2. Check if any controller methods manipulate classes on that target
+  3. Update controller logic to match new class names
+- **After modifying controller logic**:
+  1. Verify view template has the matching CSS classes
+  2. Test the interaction in browser to ensure styles change correctly
+- **Common failure pattern**: View uses `text-gray-900/text-gray-500`, controller still manipulates `border-blue-500/border-transparent` → styles don't change
+- **Fix protocol**: Always run `npm run build` after updating TypeScript controllers to regenerate JavaScript bundles
+
 Use FriendlyId (already configured) if need slug URLs. For user-facing content use `friendly_id :title, use: :slugged`, for admin/API use simple IDs.
 
 Every form should include error messages using the shared partial. Add `<%= render 'shared/form_error_message', model: @your_model %>` at the beginning of every form for consistent error display. Never write nested form.
