@@ -81,9 +81,14 @@ class TourGroupsController < ApplicationController
       'private_group' => '独立成团',
       'free_travel' => '自由出行'
     }
+    travel_type_to_tab = tab_to_travel_type.invert
+    
     # 如果有tab参数且不是comprehensive，则设置对应的travel_type
     if @active_tab != 'comprehensive' && tab_to_travel_type[@active_tab]
       @travel_type = tab_to_travel_type[@active_tab]
+    # 如果没有tab参数但有travel_type参数，则设置对应的tab
+    elsif @travel_type.present? && travel_type_to_tab[@travel_type]
+      @active_tab = travel_type_to_tab[@travel_type]
     end
     
     # 获取所有可用的目的地列表
