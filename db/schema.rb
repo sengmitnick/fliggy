@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_19_102443) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_20_064659) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -373,6 +373,23 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_19_102443) do
     t.datetime "updated_at", null: false
     t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_countries_on_data_version"
+  end
+
+  create_table "custom_travel_requests", force: :cascade do |t|
+    t.string "departure_city"
+    t.string "destination_city"
+    t.integer "adults_count", default: 2
+    t.integer "children_count", default: 0
+    t.integer "elders_count", default: 0
+    t.date "departure_date"
+    t.integer "days_count", default: 1
+    t.text "preferences"
+    t.string "phone"
+    t.integer "expected_merchants", default: 1
+    t.string "contact_time"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
