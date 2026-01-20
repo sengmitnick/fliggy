@@ -95,7 +95,7 @@ class HotelsController < ApplicationController
 
   def search
     # Use the same logic as index but ensure we're in search mode
-    @city = params[:city] || '深圳市'
+    @city = params[:city] || '深圳'
     @check_in = params[:check_in].present? ? Date.parse(params[:check_in].to_s) : Time.zone.today
     @check_out = params[:check_out].present? ? Date.parse(params[:check_out].to_s) : (Time.zone.today + 1.day)
     @rooms = params[:rooms]&.to_i || 1
@@ -202,7 +202,7 @@ class HotelsController < ApplicationController
 
   def map
     # Map view for hotels in a specific city/region
-    @city = params[:city] || '深圳市'
+    @city = params[:city] || '深圳'
     @check_in = params[:check_in].present? ? Date.parse(params[:check_in].to_s) : Time.zone.today
     @check_out = params[:check_out].present? ? Date.parse(params[:check_out].to_s) : (Time.zone.today + 1.day)
     @rooms = params[:rooms]&.to_i || 1

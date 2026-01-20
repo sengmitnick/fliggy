@@ -40,7 +40,7 @@ class BookBudgetHotelValidator < BaseValidator
   # 准备阶段：设置任务参数
   def prepare
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    @city = '深圳市'
+    @city = '深圳'
     @budget = 500
     @check_in_date = Date.current + 2.days  # 后天
     @nights = 1  # 入住1晚
@@ -57,7 +57,7 @@ class BookBudgetHotelValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订后天入住#{@city.delete_suffix('市')}的经济型酒店（预算≤#{@budget}元/晚）",
+      task: "请预订后天入住#{@city}的经济型酒店（预算≤#{@budget}元/晚）",
       city: @city,
       budget: @budget,
       check_in_date: @check_in_date.to_s,

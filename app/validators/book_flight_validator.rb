@@ -31,8 +31,8 @@ class BookFlightValidator < BaseValidator
   # 准备阶段：设置任务参数
   def prepare
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    @origin = '深圳市'
-    @destination = '北京市'
+    @origin = '深圳'
+    @destination = '北京'
     @target_date = Date.current + 2.days  # 后天
     
     # 计算最低价（用于后续验证）
@@ -46,7 +46,7 @@ class BookFlightValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订一张后天从#{@origin.delete_suffix('市')}到#{@destination.delete_suffix('市')}的低价机票",
+      task: "请预订一张后天从#{@origin}到#{@destination}的低价机票",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,

@@ -9,16 +9,14 @@ fi
 
 echo "Check if application.yml and database.yml are present"
 
-# Skip application.yml in production - use environment variables instead
+# Skip config file copying in production - use environment variables instead
 if [ "${RAILS_ENV}" != "production" ]; then
   if [ ! -f "config/application.yml" ]; then
     cp config/application.yml.example config/application.yml 2>/dev/null || true
   fi
-fi
-
-# Always create database.yml if missing (needed for solid_cable even in production)
-if [ ! -f "config/database.yml" ]; then
-  cp config/database.yml.example config/database.yml 2>/dev/null || true
+  if [ ! -f "config/database.yml" ]; then
+    cp config/database.yml.example config/database.yml 2>/dev/null || true
+  fi
 fi
 
 echo "If running the rails server then create or migrate existing database"

@@ -36,8 +36,8 @@ class SearchCheapestFlightValidator < BaseValidator
   # 准备阶段：插入测试数据
   def prepare
     # 数据已经通过 load_data_pack 自动加载
-    @origin = '上海市'
-    @destination = '深圳市'
+    @origin = '上海'
+    @destination = '深圳'
     @target_date = Date.current + 2.days  # 后天
     
     # 查找所有航班（注意：查询基线数据）
