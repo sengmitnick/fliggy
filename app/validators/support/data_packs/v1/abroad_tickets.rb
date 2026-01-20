@@ -30,7 +30,11 @@ time_slots = [
   { start: "18:00", end: "19:00", price_multiplier: 1.2 }
 ]
 
-# Generate tickets for next 30 days
+# 准备所有票据数据
+all_tickets_data = []
+timestamp = Time.current
+
+# Generate tickets for next 30 days - Japan
 base_date = Date.today
 30.times do |day_offset|
   departure_date = base_date + day_offset.days
@@ -42,7 +46,7 @@ base_date = Date.today
     time_slots.sample(8).each do |slot|
       price = (base_price * slot[:price_multiplier]).round(2)
       
-      AbroadTicket.create!(
+      all_tickets_data << {
         region: 'japan',
         ticket_type: 'train',
         origin: route[:origin],
@@ -54,8 +58,10 @@ base_date = Date.today
         time_slot_end: slot[:end],
         price: price,
         seat_type: '新干线',
-        status: 'available'
-      )
+        status: 'available',
+        created_at: timestamp,
+        updated_at: timestamp
+      }
     end
   end
 end
@@ -78,7 +84,7 @@ europe_routes = [
     time_slots.sample(6).each do |slot|
       price = (base_price * slot[:price_multiplier]).round(2)
       
-      AbroadTicket.create!(
+      all_tickets_data << {
         region: 'europe',
         ticket_type: 'train',
         origin: route[:origin],
@@ -90,10 +96,15 @@ europe_routes = [
         time_slot_end: slot[:end],
         price: price,
         seat_type: '欧铁',
-        status: 'available'
-      )
+        status: 'available',
+        created_at: timestamp,
+        updated_at: timestamp
+      }
     end
   end
 end
+
+# 批量插入所有票据
+AbroadTicket.insert_all(all_tickets_data) if all_tickets_data.any?
 
 puts "Created #{AbroadTicket.count} abroad tickets"

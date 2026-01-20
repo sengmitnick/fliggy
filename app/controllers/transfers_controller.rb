@@ -1,4 +1,5 @@
 class TransfersController < ApplicationController
+  include CitySelectorDataConcern
   before_action :authenticate_user!
   before_action :set_transfer, only: [:show, :pay, :cancel, :success]
 

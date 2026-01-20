@@ -51,7 +51,7 @@ rake validator:reset_baseline
 
 每个 Validator 必须实现 `simulate` 方法：
 
-- 使用数据包中已有的测试用户（demo@fliggy.com）
+- 使用数据包中已有的测试用户（demo@travel01.com）
 - 使用固定的查询和操作
 - 不包含复杂业务逻辑
 - 操作结果应该让 `verify` 通过
@@ -62,7 +62,7 @@ rake validator:reset_baseline
 
 ### 测试用户信息
 
-- **邮箱**: demo@fliggy.com
+- **邮箱**: demo@travel01.com
 - **密码**: password123
 - **支付密码**: 222222
 - **默认乘客**: 张三（身份证: 110101199001011234, 电话: 13800138000）
@@ -72,7 +72,7 @@ rake validator:reset_baseline
 ```ruby
 def simulate
   # 1. 查找测试用户
-  user = User.find_by!(email: 'demo@fliggy.com')
+  user = User.find_by!(email: 'demo@travel01.com')
   
   # 2. 查找乘客
   passenger = Passenger.find_by!(user: user, name: '张三')

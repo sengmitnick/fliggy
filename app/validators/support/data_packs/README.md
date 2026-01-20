@@ -127,7 +127,7 @@ rollback_to_checkpoint()   # 清空测试数据和订单，保留基础数据
 
 - **City**: 240+ 城市数据，包含机场代码、主题标签
 - **Destination**: 目的地数据，与 City 关联
-- **Demo用户**: demo@fliggy.com，用于演示和测试
+- **Demo用户**: demo@travel01.com，用于演示和测试
 
 **特点**:
 - 所有验证器共享

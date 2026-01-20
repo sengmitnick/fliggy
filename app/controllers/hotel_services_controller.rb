@@ -1,8 +1,9 @@
 class HotelServicesController < ApplicationController
+  include CitySelectorDataConcern
 
   def index
-    # Get city from params or default to '北京市'
-    @city = params[:city].presence || '北京市'
+    # Get city from params or default to '北京'
+    @city = params[:city].presence || '北京'
     
     # Set default date params
     @check_in = params[:check_in] || Time.zone.today

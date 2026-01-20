@@ -3,11 +3,11 @@ puts "正在为多个城市创建酒店数据..."
 
 # 定义目标城市
 target_cities = [
-  { name: "北京市", region: "北京" },
-  { name: "上海市", region: "上海" },
-  { name: "杭州市", region: "浙江" },
-  { name: "广州市", region: "广东" },
-  { name: "成都市", region: "四川" }
+  { name: "北京", region: "北京" },
+  { name: "上海", region: "上海" },
+  { name: "杭州", region: "浙江" },
+  { name: "广州", region: "广东" },
+  { name: "成都", region: "四川" }
 ]
 
 # 品牌列表

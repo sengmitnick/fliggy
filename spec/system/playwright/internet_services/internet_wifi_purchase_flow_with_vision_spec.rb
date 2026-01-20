@@ -23,7 +23,7 @@ RSpec.describe "Internet WiFi Device Purchase Flow (with AI Vision Analysis)", t
         "确认登录页面是否正常显示"
       )
       
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1
@@ -206,7 +206,7 @@ RSpec.describe "Internet WiFi Device Purchase Flow (with AI Vision Analysis)", t
       # Login
       page.goto("#{base_url}/sign_in")
       sleep 0.5
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1

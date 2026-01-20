@@ -2,7 +2,7 @@
 
 ## 📋 概述
 
-基于 `deeptravel.html` 的设计稿，成功重构了深度旅行页面（`/deep_travels`），采用了飞猪 APP 风格的移动端优先设计。
+基于 `deeptravel.html` 的设计稿，成功重构了深度旅行页面（`/deep_travels`），采用了移动端优先设计。
 
 ## 🎨 设计特点
 

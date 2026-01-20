@@ -262,10 +262,18 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
-    # 验证系统 API
+    namespace :v1 do
+      get 'health', to: 'health#show'
+    end
+    
+    # 验证系统 API（现有接口）
     get 'verify', to: 'verify#index'
     match 'verify/:id/prepare', to: 'verify#prepare', via: :all
     match 'verify/:execution_id/result', to: 'verify#result', via: :all
+    
+    # 甲方规范兼容接口
+    post 'tasks/:id/start', to: 'verify#start_task'         # 创建训练会话
+    post 'verify/run', to: 'verify#run_verification'        # 验证接口
     
     post 'geocoding/reverse', to: 'geocodings#reverse_geocode'
   end
@@ -445,6 +453,7 @@ Rails.application.routes.draw do
     end
   end
 
+  get 'search', to: 'home#search'
   root 'home#index'
 
   # Do not write business logic at admin dashboard

@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
-require 'rspec/expectations'
-require 'rspec/matchers'
+# 条件加载 RSpec（仅在开发/测试环境可用）
+begin
+  require 'rspec/expectations'
+  require 'rspec/matchers'
+  RSPEC_AVAILABLE = true
+rescue LoadError
+  RSPEC_AVAILABLE = false
+end
 
 # BaseValidator 为验证任务提供 RSpec 风格的 DSL
 # 
@@ -20,7 +26,161 @@ require 'rspec/matchers'
 #     end
 #   end
 class BaseValidator
-  include RSpec::Matchers
+  # 仅在 RSpec 可用时 include
+  include RSpec::Matchers if RSPEC_AVAILABLE
+  
+  # 自定义异常类（用于生产环境）
+  class ExpectationNotMetError < StandardError
+    def initialize(message)
+      super(message)
+    end
+  end
+  
+  # 简单的 ExpectationTarget 实现（用于生产环境）
+  class ExpectationTarget
+    def initialize(actual)
+      @actual = actual
+    end
+    
+    def to(matcher = nil, *args, &block)
+      if matcher.nil?
+        # 返回一个 MatcherProxy 对象，支持链式调用
+        MatcherProxy.new(@actual)
+      else
+        # 直接调用匹配器
+        matcher.call(@actual, *args, &block)
+      end
+    end
+  end
+  
+  # MatcherProxy 类，提供各种匹配器方法
+  class MatcherProxy
+    def initialize(actual)
+      @actual = actual
+    end
+    
+    def eq(expected, message = nil)
+      unless @actual == expected
+        error_msg = message || "expected: #{expected.inspect}\n     got: #{@actual.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def match(pattern, message = nil)
+      unless @actual.to_s.match?(pattern)
+        error_msg = message || "expected: #{@actual.inspect} to match #{pattern.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def be
+      ComparisonProxy.new(@actual)
+    end
+    
+    def be_true(message = nil)
+      unless @actual == true
+        error_msg = message || "expected: true\n     got: #{@actual.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def be_false(message = nil)
+      unless @actual == false
+        error_msg = message || "expected: false\n     got: #{@actual.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def be_nil(message = nil)
+      unless @actual.nil?
+        error_msg = message || "expected: nil\n     got: #{@actual.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def be_present(message = nil)
+      if @actual.respond_to?(:present?)
+        unless @actual.present?
+          error_msg = message || "expected: present\n     got: #{@actual.inspect}"
+          raise ExpectationNotMetError, error_msg
+        end
+      elsif @actual.nil? || (@actual.respond_to?(:empty?) && @actual.empty?)
+        error_msg = message || "expected: present\n     got: #{@actual.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def be_empty(message = nil)
+      if @actual.respond_to?(:empty?)
+        unless @actual.empty?
+          error_msg = message || "expected: empty\n     got: #{@actual.inspect}"
+          raise ExpectationNotMetError, error_msg
+        end
+      else
+        error_msg = message || "expected: empty\n     got: #{@actual.inspect} (does not respond to empty?)"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def include(item, message = nil)
+      if @actual.respond_to?(:include?)
+        unless @actual.include?(item)
+          error_msg = message || "expected: #{@actual.inspect} to include #{item.inspect}"
+          raise ExpectationNotMetError, error_msg
+        end
+      else
+        error_msg = message || "expected: #{@actual.inspect} to respond to include?"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+  end
+  
+  # ComparisonProxy 类，处理比较运算符（be >=, be < 等）
+  class ComparisonProxy
+    def initialize(actual)
+      @actual = actual
+    end
+    
+    def >=(expected, message = nil)
+      unless @actual >= expected
+        error_msg = message || "expected: #{@actual.inspect} to be >= #{expected.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def <=(expected, message = nil)
+      unless @actual <= expected
+        error_msg = message || "expected: #{@actual.inspect} to be <= #{expected.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def >(expected, message = nil)
+      unless @actual > expected
+        error_msg = message || "expected: #{@actual.inspect} to be > #{expected.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+    
+    def <(expected, message = nil)
+      unless @actual < expected
+        error_msg = message || "expected: #{@actual.inspect} to be < #{expected.inspect}"
+        raise ExpectationNotMetError, error_msg
+      end
+      true
+    end
+  end
   
   attr_reader :execution_id, :errors, :score, :assertions
   
@@ -312,7 +472,7 @@ class BaseValidator
       yield
       assertion[:passed] = true
       @score += weight
-    rescue RSpec::Expectations::ExpectationNotMetError => e
+    rescue (RSPEC_AVAILABLE ? RSpec::Expectations::ExpectationNotMetError : ExpectationNotMetError) => e
       assertion[:error] = e.message
       @errors << "#{name}: #{e.message}"
     rescue StandardError => e
@@ -325,6 +485,10 @@ class BaseValidator
   
   # 提供 RSpec 的 expect 方法
   def expect(actual)
-    RSpec::Expectations::ExpectationTarget.new(actual)
+    if RSPEC_AVAILABLE
+      RSpec::Expectations::ExpectationTarget.new(actual)
+    else
+      ExpectationTarget.new(actual)
+    end
   end
 end

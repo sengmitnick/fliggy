@@ -29,6 +29,28 @@
 # Ignore storage (uploaded files in development and any SQLite databases).
 /storage/*
 !/storage/.keep
+
+# 生产环境配置
+.env
+.env.production
+.env.local
+
+# 备份文件
+backup/database/*.sql
+backup/database/*.sql.gz
+backup/storage/*.tar.gz
+backup/logs/*.log
+
+# SSL 证书
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+
+# Docker 相关
+docker-compose.override.yml
+
+# Nginx 日志
+nginx/logs/*.log
 /tmp/storage/*
 !/tmp/storage/.keep
 
@@ -81,3 +103,6 @@ backup/
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Ignore Claude settings
+.claude/settings.local.json

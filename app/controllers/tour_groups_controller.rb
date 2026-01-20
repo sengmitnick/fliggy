@@ -1,4 +1,5 @@
 class TourGroupsController < ApplicationController
+  include CitySelectorDataConcern
   def index
     # Default destination
     @destination = params[:destination].presence || '上海'

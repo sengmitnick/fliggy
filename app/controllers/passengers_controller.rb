@@ -30,19 +30,20 @@ class PassengersController < ApplicationController
   def create
     @passenger = current_user.passengers.build(passenger_params)
     
-    Rails.logger.info "=== Passenger Create ==="
-    Rails.logger.info "params[:return_to]: #{params[:return_to]}"
-    Rails.logger.info "params[:source]: #{params[:source]}"
-    
     if @passenger.save
       if params[:return_to] == 'flights_index'
-        Rails.logger.info "Redirecting to flights_path with open_passenger_modal=true"
         redirect_to flights_path(open_passenger_modal: 'true'), notice: "#{traveler_label}添加成功"
       elsif params[:return_to] == 'booking_new'
-        Rails.logger.info "Redirecting to new_booking_path with flight_id"
-        redirect_to new_booking_path(flight_id: params[:flight_id]), notice: "#{traveler_label}添加成功"
+        booking_params = {
+          flight_id: params[:flight_id],
+          offer_id: params[:offer_id],
+          trip_type: params[:trip_type],
+          return_flight_id: params[:return_flight_id],
+          return_offer_id: params[:return_offer_id],
+          selected_flights: params[:selected_flights]
+        }.reject { |_k, v| v.blank? }
+        redirect_to new_booking_path(booking_params), notice: "#{traveler_label}添加成功"
       elsif params[:return_to] == 'hotel_booking_new'
-        Rails.logger.info "Redirecting to new_hotel_hotel_booking_path with hotel_id and booking params"
         redirect_to new_hotel_hotel_booking_path(
           params[:hotel_id],
           room_id: params[:room_id],
@@ -53,13 +54,11 @@ class PassengersController < ApplicationController
           children: params[:children]
         ), notice: "#{traveler_label}添加成功"
       elsif params[:return_to] == 'bus_ticket_order_new'
-        Rails.logger.info "Redirecting to new_bus_ticket_order_path with bus_ticket_id"
         redirect_to new_bus_ticket_order_path(
           bus_ticket_id: params[:bus_ticket_id],
           insurance_type: params[:insurance_type]
         ), notice: "#{traveler_label}添加成功"
       elsif params[:return_to] == 'deep_travel_booking_new'
-        Rails.logger.info "Redirecting to new_deep_travel_booking_path with guide_id and params"
         redirect_to new_deep_travel_booking_path(
           guide_id: params[:guide_id],
           date: params[:date],
@@ -67,13 +66,17 @@ class PassengersController < ApplicationController
           child_count: params[:child_count]
         ), notice: "#{traveler_label}添加成功"
       else
-        Rails.logger.info "Redirecting to passengers_path"
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
       end
     else
       @traveler_type = params[:source]
       @return_to = params[:return_to]
       @flight_id = params[:flight_id]
+      @offer_id = params[:offer_id]
+      @trip_type = params[:trip_type]
+      @return_flight_id = params[:return_flight_id]
+      @return_offer_id = params[:return_offer_id]
+      @selected_flights = params[:selected_flights]
       @hotel_id = params[:hotel_id]
       @room_id = params[:room_id]
       @check_in = params[:check_in]

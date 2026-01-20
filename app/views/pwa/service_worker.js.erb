@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v1';
-const CACHE_NAME = `飞猪旅行-pwa-${CACHE_VERSION}`;
+const CACHE_NAME = `旅游环境01-pwa-${CACHE_VERSION}`;
 const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 const STATIC_CACHE_URLS = [
@@ -21,7 +21,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
-          .filter(cacheName => cacheName.startsWith('飞猪旅行-pwa-') && cacheName !== CACHE_NAME)
+          .filter(cacheName => cacheName.startsWith('旅游环境01-pwa-') && cacheName !== CACHE_NAME)
           .map(cacheName => caches.delete(cacheName))
       );
     }).then(() => self.clients.claim())

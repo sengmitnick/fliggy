@@ -35,6 +35,9 @@ module Myapp
     config.autoload_lib(ignore: %w[assets tasks generators rails middleware source_mapping])
     config.middleware.insert_before Rails::Rack::Logger, ClackyHealthCheck
 
+    # Ignore data_packs directory in validators (seed data files, not autoloadable classes)
+    Rails.autoloaders.main.ignore("#{Rails.root}/app/validators/support/data_packs")
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

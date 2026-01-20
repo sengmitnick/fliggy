@@ -25,7 +25,7 @@ RSpec.describe "Internet Data Plan Purchase Flow", type: :system do
       take_screenshot(page, "01_login_page")
       check_for_errors(page, "login_page")
       
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1
@@ -145,7 +145,7 @@ RSpec.describe "Internet Data Plan Purchase Flow", type: :system do
       # Login first
       page.goto("#{base_url}/sign_in")
       sleep 0.5
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1
@@ -198,7 +198,7 @@ RSpec.describe "Internet Data Plan Purchase Flow", type: :system do
       # Login
       page.goto("#{base_url}/sign_in")
       sleep 0.5
-      page.fill('input[type="email"]', 'demo@fliggy.com')
+      page.fill('input[type="email"]', 'demo@travel01.com')
       page.fill('input[type="password"]', 'password123')
       page.click('button[type="submit"], input[type="submit"]')
       sleep 1

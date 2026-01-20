@@ -24,6 +24,29 @@ routes = [
       { dep: "福田汽车站", arr: "越秀公园地铁站", desc: "市区直达" }
     ]
   },
+  # 广州 -> 深圳
+  {
+    origin: "广州",
+    destination: "深圳",
+    stations: [
+      { dep: "珠江新城地铁站", arr: "大剧院地铁站E口", desc: "途经4站" },
+      { dep: "广州燕塘地铁站", arr: "深圳宝安汽车站", desc: "普通大巴" },
+      { dep: "广州(东站)", arr: "深圳北站汽车站", desc: "约155公里" },
+      { dep: "广州白云火车站", arr: "深圳福田汽车站", desc: "快速大巴" },
+      { dep: "天河客运站", arr: "深圳湾口岸", desc: "直达快线" }
+    ]
+  },
+  # 杭州 -> 深圳
+  {
+    origin: "杭州",
+    destination: "深圳",
+    stations: [
+      { dep: "杭州客运中心站", arr: "深圳北站汽车站", desc: "长途快线" },
+      { dep: "杭州汽车南站", arr: "深圳福田汽车站", desc: "直达大巴" },
+      { dep: "杭州东站", arr: "深圳宝安汽车站", desc: "豪华大巴" },
+      { dep: "杭州萧山机场", arr: "深圳宝安机场", desc: "机场专线" }
+    ]
+  },
   # 北京 -> 天津
   {
     origin: "北京",
@@ -60,6 +83,8 @@ time_slots = [
 # 价格范围
 price_ranges = {
   "深圳-广州" => (33..55),
+  "广州-深圳" => (33..55),
+  "杭州-深圳" => (280..380),
   "北京-天津" => (50..80),
   "上海-杭州" => (55..90)
 }
@@ -67,7 +92,10 @@ price_ranges = {
 # 座位类型
 seat_types = ["普通座", "商务座", "豪华座"]
 
-# 为每条路线生成班次
+# 批量准备所有班次数据
+all_tickets_data = []
+timestamp = Time.current
+
 routes.each do |route|
   route_key = "#{route[:origin]}-#{route[:destination]}"
   price_range = price_ranges[route_key] || (30..60)
@@ -95,7 +123,7 @@ routes.each do |route|
           base_price = (base_price * 1.1).round
         end
         
-        BusTicket.create!(
+        all_tickets_data << {
           origin: route[:origin],
           destination: route[:destination],
           departure_date: date,
@@ -106,14 +134,21 @@ routes.each do |route|
           seat_type: seat_types.sample,
           departure_station: station[:dep],
           arrival_station: station[:arr],
-          route_description: station[:desc]
-        )
+          route_description: station[:desc],
+          created_at: timestamp,
+          updated_at: timestamp
+        }
       end
     end
   end
   
-  puts "  ✓ 创建 #{route_key} 路线班次"
+  puts "  ✓ 准备 #{route_key} 路线班次数据"
 end
 
-total_count = BusTicket.count
-puts "✅ 成功创建 #{total_count} 条汽车票数据"
+# 批量插入所有数据
+if all_tickets_data.any?
+  BusTicket.insert_all(all_tickets_data)
+  puts "✅ 成功批量创建 #{BusTicket.count} 条汽车票数据"
+else
+  puts "⚠️  没有数据需要创建"
+end

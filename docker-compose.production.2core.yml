@@ -1,0 +1,193 @@
+# 2核8G服务器配置
+# 使用方式: docker-compose -f docker-compose.production.2core.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: travel01_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-travel01}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在.env文件中设置DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-travel01_production}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backup:/backup
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-travel01}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - travel01_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1500M
+        reservations:
+          cpus: '0.2'
+          memory: 512M
+
+  redis:
+    image: redis:7-alpine
+    container_name: travel01_redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?请在.env文件中设置REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - travel01_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RAILS_ENV: production
+    container_name: travel01_web
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+      RACK_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CABLE_URL: redis://:${REDIS_PASSWORD}@redis:6379/1
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?请在.env文件中设置SECRET_KEY_BASE}
+      PUBLIC_HOST: ${PUBLIC_HOST:?请在.env文件中设置PUBLIC_HOST}
+      APP_PORT: 3000
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+    volumes:
+      - storage_data:/app/storage
+      - log_data:/app/log
+      - ./backup:/app/backup
+      - tmp_data:/app/tmp
+    ports:
+      - "${WEB_PORT:-5010}:3000"
+    networks:
+      - travel01_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 3G
+        reservations:
+          cpus: '0.3'
+          memory: 1G
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RAILS_ENV: production
+    container_name: travel01_worker
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      GOOD_JOB_MAX_THREADS: ${GOOD_JOB_MAX_THREADS:-3}
+      GOOD_JOB_POLL_INTERVAL: ${GOOD_JOB_POLL_INTERVAL:-10}
+      GOOD_JOB_QUEUES: ${GOOD_JOB_QUEUES:-*}
+      RAILS_LOG_TO_STDOUT: "true"
+    volumes:
+      - storage_data:/app/storage
+      - log_data:/app/log
+      - tmp_data:/app/tmp
+    command: bundle exec good_job start
+    networks:
+      - travel01_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 1500M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+
+  nginx:
+    image: nginx:alpine
+    container_name: travel01_nginx
+    restart: always
+    depends_on:
+      - web
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./public:/app/public:ro
+      - nginx_logs:/var/log/nginx
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - travel01_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  storage_data:
+    driver: local
+  log_data:
+    driver: local
+  tmp_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  travel01_network:
+    driver: bridge

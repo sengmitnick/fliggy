@@ -78,7 +78,7 @@ class ApplicationController < ActionController::Base
   end
 
   def auto_login_default_user
-    default_email = 'demo@fliggy.com'
+    default_email = 'demo@travel01.com'
     default_password = 'password123'
     
     # Find or create default user
