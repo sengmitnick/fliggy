@@ -191,21 +191,19 @@ main() {
 
     # 自动创建默认管理员账号
     print_info "创建默认管理员账号..."
-    docker-compose -f $COMPOSE_FILE exec -T web bundle exec rails runner "
-      admin = Administrator.find_or_initialize_by(name: 'admin')
-      if admin.new_record?
-        admin.password = 'admin'
-        admin.password_confirmation = 'admin'
-        admin.role = 'super_admin'
-        if admin.save
-          puts '✓ 管理员账号创建成功 (用户名: admin, 密码: admin)'
-        else
-          puts '⚠ 管理员账号创建失败: ' + admin.errors.full_messages.join(', ')
-        end
-      else
-        puts '✓ 管理员账号已存在，跳过创建'
-      end
-    " 2>/dev/null || print_warning "应用尚未完全启动，请稍后手动创建管理员"
+    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
+admin = Administrator.find_or_initialize_by(name: 'admin')
+if admin.new_record?
+  admin.password = 'admin'
+  admin.password_confirmation = 'admin'
+  admin.role = 'super_admin'
+  admin.save!
+  puts '✓ 管理员账号创建成功'
+else
+  puts "✓ 管理员已存在: #{admin.name} (#{admin.role})"
+end
+RUBY
+)" 2>/dev/null || print_warning "应用尚未完全启动，请稍后手动创建管理员"
     print_success "部署验证完成"
 
     # 完成
