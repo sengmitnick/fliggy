@@ -95,6 +95,7 @@ import HotelPriceFilterController from "./hotel_price_filter_controller"
 import HotelGuaranteeController from "./hotel_guarantee_controller"
 import FilterDropdownController from "./filter_dropdown_controller"
 import CustomTravelModalController from "./custom_travel_modal_controller"
+import CommunicationTimelineController from "./communication_timeline_controller"
 
 const application = Application.start()
 
@@ -193,5 +194,6 @@ application.register("hotel-price-filter", HotelPriceFilterController)
 application.register("hotel-guarantee", HotelGuaranteeController)
 application.register("filter-dropdown", FilterDropdownController)
 application.register("custom-travel-modal", CustomTravelModalController)
+application.register("communication-timeline", CommunicationTimelineController)
 
 window.Stimulus = application

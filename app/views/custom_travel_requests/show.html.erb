@@ -1,5 +1,5 @@
 <!-- 定制游订单详情页 -->
-<div class="min-h-screen bg-[#F5F5F5]">
+<div class="min-h-screen bg-[#F5F5F5]" data-controller="communication-timeline">
   <!-- Header with yellow background -->
   <div class="bg-[#FFD93D] px-4 py-3 flex items-center relative">
     <button onclick="history.back()" class="absolute left-4">
@@ -31,7 +31,7 @@
         <h2 class="text-xl font-bold text-gray-800 mb-2">商家已接单，将联系你沟通方案</h2>
         <p class="text-sm text-gray-700">
           预计商家会在 
-          <span class="font-bold">1月20日 (周二) 16:23前</span>
+          <span class="font-bold"><%= format_predicted_contact_deadline(@custom_travel_request) %></span>
           ，通过隐私号呼入，请注意接听
         </p>
       </div>
@@ -137,8 +137,10 @@
           cancel_custom_travel_request_path(@custom_travel_request), 
           method: :patch,
           form: { data: { turbo_confirm: '确认要取消此订单吗？' } },
-          class: 'flex-1 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors' %>
-      <button class="flex-1 py-3 rounded-full bg-[#FFD93D] text-gray-800 font-bold hover:opacity-90 transition-opacity">
+          class: 'flex-1 py-3 rounded-full bg-white border-2 border-gray-300 text-gray-800 font-bold hover:bg-gray-50 transition-colors' %>
+      <button type="button"
+              data-action="click->communication-timeline#openContactModal"
+              class="flex-1 py-3 rounded-full bg-[#FFD93D] text-gray-800 font-bold hover:opacity-90 transition-opacity">
         联系商家
       </button>
     </div>
@@ -205,13 +207,152 @@
       <!-- Communication Record -->
       <div class="flex items-start justify-between">
         <span class="text-sm text-gray-600">沟通记录</span>
-        <div class="flex items-center gap-2">
+        <button type="button" 
+                data-action="click->communication-timeline#open"
+                class="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span class="text-sm font-medium text-gray-800">定制需求沟通详情</span>
-          <button>
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Communication Timeline Modal -->
+  <div data-communication-timeline-target="overlay" 
+       class="hidden fixed inset-0 bg-black/50 z-50"
+       data-action="click->communication-timeline#close"></div>
+  
+  <div data-communication-timeline-target="modal" 
+       class="hidden fixed inset-0 z-50 flex items-end">
+    <div class="w-full bg-white rounded-t-3xl max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up"
+         data-action="click->communication-timeline#stopPropagation">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-gray-800">沟通记录</h2>
+        <button type="button" 
+                data-action="click->communication-timeline#close"
+                class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Timeline Content -->
+      <div class="px-6 py-6">
+        <div class="space-y-6">
+          <% generate_timeline_events(@custom_travel_request).each_with_index do |event, index| %>
+            <div class="flex gap-4">
+              <!-- Timeline Icon -->
+              <div class="flex flex-col items-center">
+                <% if event[:color] == 'blue' %>
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                <% else %>
+                  <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </div>
+                <% end %>
+                
+                <!-- Vertical line connecting to next event -->
+                <% unless index == generate_timeline_events(@custom_travel_request).length - 1 %>
+                  <div class="w-0.5 h-12 bg-gray-200 my-2"></div>
+                <% end %>
+              </div>
+
+              <!-- Event Content -->
+              <div class="flex-1 pb-4">
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="text-base font-bold text-gray-800"><%= event[:title] %></h3>
+                  <span class="text-xs text-gray-500"><%= format_timeline_time(event[:time]) %></span>
+                </div>
+                <p class="text-sm text-gray-600"><%= event[:description] %></p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Empty State (if no events) -->
+        <% if generate_timeline_events(@custom_travel_request).empty? %>
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
-          </button>
+            <p class="text-gray-500">暂无沟通记录</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Merchant Modal -->
+  <div data-communication-timeline-target="contactOverlay" 
+       class="hidden fixed inset-0 bg-black/50 z-50"
+       data-action="click->communication-timeline#closeContactModal"></div>
+  
+  <div data-communication-timeline-target="contactModal" 
+       class="hidden fixed inset-0 z-50 flex items-end">
+    <div class="w-full bg-white rounded-t-3xl shadow-2xl animate-slide-up"
+         data-action="click->communication-timeline#stopPropagation">
+      <!-- Modal Header -->
+      <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
+        <h2 class="text-lg font-bold text-gray-800">联系方式</h2>
+        <button type="button" 
+                data-action="click->communication-timeline#closeContactModal"
+                class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contact Options -->
+      <div class="px-6 py-6 space-y-4">
+        <!-- Merchant Phone -->
+        <div class="bg-[#F8F8F8] rounded-2xl p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#6B7FFF] flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-gray-800 mb-1">商家电话</h3>
+              <p class="text-sm text-gray-600 mb-3">湖南途时光旅游专营店</p>
+              <a href="tel:400-888-8888" 
+                 class="inline-block px-6 py-2.5 bg-[#6B7FFF] text-white text-sm font-bold rounded-full hover:bg-[#5567DD] transition-colors">
+                400-888-8888
+              </a>
+              <p class="text-xs text-gray-500 mt-3">商家会通过隐私号与你联系，请注意接听</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platform Customer Service -->
+        <div class="bg-[#F8F8F8] rounded-2xl p-5">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#FFD93D] flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-gray-800 mb-1">平台客服</h3>
+              <p class="text-sm text-gray-600 mb-3">在线咨询服务时间：9:00-21:00</p>
+              <button type="button"
+                      class="inline-block px-6 py-2.5 bg-[#FFD93D] text-gray-800 text-sm font-bold rounded-full hover:opacity-90 transition-opacity">
+                在线咨询
+              </button>
+              <p class="text-xs text-gray-500 mt-3">如有疑问或需要帮助，随时联系我们</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -49,11 +49,73 @@ module CustomTravelRequestsHelper
     request.created_at.strftime('%Y-%m-%d %H:%M:%S')
   end
 
+  # Format predicted contact deadline
+  def format_predicted_contact_deadline(request)
+    contact_time = request.contact_time
+    created_at = request.created_at
+    
+    deadline = case contact_time
+    when '尽快联系 | 提交后30分钟内'
+      created_at + 30.minutes
+    when '上午8点-12点'
+      # Next day at 12:00
+      (created_at + 1.day).change(hour: 12, min: 0)
+    when '下午12点-18点'
+      # Next day at 18:00
+      (created_at + 1.day).change(hour: 18, min: 0)
+    when '晚上18点-21点'
+      # Next day at 21:00
+      (created_at + 1.day).change(hour: 21, min: 0)
+    when '任意时间'
+      # Next day at 23:59
+      (created_at + 1.day).change(hour: 23, min: 59)
+    else
+      # Default to next day 16:23
+      (created_at + 1.day).change(hour: 16, min: 23)
+    end
+    
+    "#{deadline.strftime('%m月%d日')} (#{format_weekday(deadline)}) #{deadline.strftime('%H:%M')}前"
+  end
+
   private
 
   # Get Chinese weekday name
   def format_weekday(date)
     weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
     weekdays[date.wday]
+  end
+
+  # Generate communication timeline events
+  def generate_timeline_events(request)
+    events = []
+    
+    # Event 1: Order created
+    events << {
+      type: 'created',
+      title: '提交定制需求',
+      description: '你已提交定制旅行需求，等待商家接单',
+      time: request.created_at,
+      icon: 'check',
+      color: 'blue'
+    }
+    
+    # Event 2: Order cancelled (if applicable)
+    if request.cancelled?
+      events << {
+        type: 'cancelled',
+        title: '订单已取消',
+        description: '你已取消此定制旅行订单',
+        time: request.updated_at,
+        icon: 'close',
+        color: 'gray'
+      }
+    end
+    
+    events
+  end
+
+  # Format timeline event time
+  def format_timeline_time(time)
+    "#{time.strftime('%m月%d日')} #{time.strftime('%H:%M')}"
   end
 end
