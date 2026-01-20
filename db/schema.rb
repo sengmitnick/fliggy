@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_19_070000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_20_123722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -373,6 +373,25 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_19_070000) do
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_countries_on_data_version"
+  end
+
+  create_table "custom_travel_requests", force: :cascade do |t|
+    t.string "departure_city"
+    t.string "destination_city"
+    t.integer "adults_count", default: 2
+    t.integer "children_count", default: 0
+    t.integer "elders_count", default: 0
+    t.date "departure_date"
+    t.integer "days_count", default: 1
+    t.text "preferences"
+    t.string "phone"
+    t.integer "expected_merchants", default: 1
+    t.string "contact_time"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_custom_travel_requests_on_user_id"
   end
 
   create_table "deep_travel_bookings", force: :cascade do |t|
@@ -1087,6 +1106,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_19_070000) do
     t.text "group_tour_notice"
     t.boolean "custom_tour_available", default: false
     t.bigint "data_version", default: 0, null: false
+    t.string "travel_type"
     t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
   end
@@ -1400,11 +1420,31 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_19_070000) do
     t.index ["data_version"], name: "index_visa_products_on_data_version"
   end
 
+  create_table "visa_services", force: :cascade do |t|
+    t.string "title"
+    t.string "country"
+    t.string "service_type", default: "全国送签"
+    t.decimal "success_rate", default: "100.0"
+    t.integer "processing_days", default: 5
+    t.integer "price", default: 0
+    t.integer "original_price"
+    t.boolean "urgent_processing", default: false
+    t.text "description"
+    t.string "merchant_name"
+    t.integer "sales_count", default: 0
+    t.string "slug"
+    t.string "image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_visa_services_on_slug", unique: true
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
   add_foreign_key "contacts", "users"
+  add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"
