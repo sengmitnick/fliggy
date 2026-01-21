@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例: 预订后天深圳的经济型酒店
+# 验证用例: 预订后天入住一晚深圳的经济型酒店
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳的酒店，
@@ -13,13 +13,13 @@ require_relative 'base_validator'
 #   2. 需要选择"后天"日期（理解相对日期）
 #   3. 需要对比价格（5家深圳酒店，找到≤500元的）
 #   4. 需要在多个符合条件的酒店中选择性价比最高的
-#   5. 需要填写入住信息（房型、天数）
+#   5. 需要填写入住信息（房型、入住1晚，离店日期为大后天）
 #   ❌ 不能一次性提供：需要先搜索→筛选价格→对比评分→预订
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 城市正确（深圳市）(15分)
-#   - 入住日期正确（后天）(15分)
+#   - 入住日期正确（后天入住，大后天离店，共1晚）(15分)
 #   - 价格符合预算（≤500元/晚）(30分)
 #   - 选择了性价比最高的酒店（综合价格和评分）(20分)
 # 
@@ -44,6 +44,7 @@ class BookBudgetHotelValidator < BaseValidator
     @budget = 500
     @check_in_date = Date.current + 2.days  # 后天
     @nights = 1  # 入住1晚
+    @check_out_date = @check_in_date + @nights.days  # 离店日期
     
     # 查找符合条件的酒店（用于后续验证）
     # 注意：查询基线数据 (data_version=0)
@@ -57,11 +58,12 @@ class BookBudgetHotelValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订后天入住#{@city}的经济型酒店（预算≤#{@budget}元/晚）",
+      task: "请预订后天入住#{@city}的经济型酒店（预算≤#{@budget}元/晚，入住1晚）",
       city: @city,
       budget: @budget,
       check_in_date: @check_in_date.to_s,
-      date_description: "后天（#{@check_in_date.strftime('%Y年%m月%d日')}）",
+      check_out_date: @check_out_date.to_s,
+      date_description: "入住：后天（#{@check_in_date.strftime('%Y年%m月%d日')}），离店：#{@check_out_date.strftime('%Y年%m月%d日')}",
       nights: @nights,
       hint: "系统中有多家酒店可选，请选择性价比最高的（综合价格和评分）",
       available_hotels_count: eligible_hotels.count,
@@ -124,6 +126,7 @@ class BookBudgetHotelValidator < BaseValidator
       city: @city,
       budget: @budget,
       check_in_date: @check_in_date.to_s,
+      check_out_date: @check_out_date.to_s,
       nights: @nights,
       best_hotel_id: @best_hotel&.id
     }
@@ -134,6 +137,7 @@ class BookBudgetHotelValidator < BaseValidator
     @city = data['city']
     @budget = data['budget']
     @check_in_date = Date.parse(data['check_in_date'])
+    @check_out_date = Date.parse(data['check_out_date'])
     @nights = data['nights']
     @best_hotel = Hotel.find_by(id: data['best_hotel_id']) if data['best_hotel_id']
   end

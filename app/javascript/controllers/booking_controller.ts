@@ -23,14 +23,16 @@ export default class extends Controller<HTMLElement> {
     
     // 填充隐藏字段
     const idNumberField = document.getElementById('passenger_id_number') as HTMLInputElement
-    const phoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
     
     if (idNumberField) {
       idNumberField.value = idNumber
     }
+
+    // 自动填充联系电话
+    const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
     
-    if (phoneField && phone) {
-      phoneField.value = phone
+    if (contactPhoneField && phone) {
+      contactPhoneField.value = phone
     }
   }
 
@@ -261,6 +263,20 @@ export default class extends Controller<HTMLElement> {
 
   handleSubmit(event: Event): void {
     event.preventDefault()
+    
+    // 验证是否已选择乘机人
+    const selectedPassenger = document.querySelector('input[name="booking[passenger_name]"]:checked') as HTMLInputElement
+    
+    if (!selectedPassenger) {
+      // 显示错误提示
+      if (window.showToast) {
+        window.showToast('请先选择乘机人')
+      } else {
+        alert('请先选择乘机人')
+      }
+      return
+    }
+    
     // 重置会员检查标志
     this.memberCheckCompleted = false
     this.isSecondWait = false

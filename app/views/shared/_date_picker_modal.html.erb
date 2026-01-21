@@ -36,8 +36,10 @@
   <!-- Exact Date: Calendar Content -->
   <div data-date-picker-target="exactDateContent" class="overflow-y-auto pb-20" style="height: calc(100vh - 120px);">
     <%
-      start_date = Date.today
-      end_date = start_date + 60.days
+      # Start from the 1st day of current month to ensure proper alignment
+      today = Date.today
+      start_date = Date.new(today.year, today.month, 1)
+      end_date = today + 60.days
       
       current_month_year = nil
       calendar_weeks = []
@@ -50,8 +52,7 @@
       current_date = start_date
       
       # Add empty cells for days before the first day of the month
-      first_day_of_month = Date.new(current_date.year, current_date.month, 1)
-      (0...first_day_of_month.wday).each do
+      (0...start_date.wday).each do
         current_week << nil
       end
       
@@ -66,6 +67,13 @@
           end
           
           current_month_year = month_year
+          
+          # Add empty cells for the first week of new month (if not already done)
+          if current_date.day == 1 && current_date != start_date
+            (0...current_date.wday).each do
+              current_week << nil
+            end
+          end
         end
         
         # Add current date to week
@@ -75,16 +83,6 @@
         if current_week.length == 7 || current_date == current_date.end_of_month
           calendar_weeks << { month_year: current_month_year, week: current_week.dup }
           current_week = []
-          
-          # If next day is a new month and not Sunday, add empty cells
-          if current_date != end_date && current_date == current_date.end_of_month
-            next_date = current_date + 1.day
-            if next_date.wday != 0
-              (0...next_date.wday).each do
-                current_week << nil
-              end
-            end
-          end
         end
         
         current_date += 1.day
@@ -118,10 +116,11 @@
                 # This will be set by JavaScript on page load with client's timezone
                 client_today_str = nil # Will be read from data-client-today attribute via JavaScript
                 
-                is_today = date == Date.today
+                is_today = date == today
                 # For initial render, use server timezone; JavaScript will disable buttons dynamically
-                is_past = date < Date.today
-                is_selected = date.to_s == (params[:date] || Date.today.to_s)
+                is_past = date < today
+                is_selected = date.to_s == (params[:date] || today.to_s)
+                
                 price = date_prices[date] || 0
                 
                 # Check for special days
