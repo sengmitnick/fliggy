@@ -562,8 +562,10 @@ class ErbAstParser
         if (key_node.type == :str && key_node.children[0] == "controller") ||
            (key_node.type == :sym && key_node.children[0] == :controller)
 
-          if value_node.type == :str && value_node.children[0] == controller_name
-            return true
+          if value_node.type == :str
+            # Support multiple controllers separated by spaces
+            controllers = value_node.children[0].split(/\s+/)
+            return true if controllers.include?(controller_name)
           end
         end
       end

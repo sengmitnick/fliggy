@@ -330,6 +330,17 @@ RSpec.describe 'Stimulus Validation', type: :system do
                 end
               end
             end
+            
+            # CRITICAL FIX: If no controller found in DOM (because Nokogiri can't parse ERB syntax like <%= form_with ... data: { controller: "..." } %>),
+            # fall back to ERB text-based scope checking
+            if !controller_scope
+              # Try ERB text-based scope checking as fallback
+              # check_erb_action_scope will handle finding line_number if not provided
+              erb_scope_check = check_erb_action_scope(action_info, content, relative_path)
+              if erb_scope_check
+                controller_scope = true  # Mark as in scope based on ERB text analysis
+              end
+            end
 
             if !controller_scope && relative_path.include?('_')
               parent_controllers = get_controllers_from_parents(relative_path)
@@ -365,7 +376,19 @@ RSpec.describe 'Stimulus Validation', type: :system do
                     break
                   end
                 rescue
-                  # Skip unparseable blocks
+                  # If AST parsing fails, try simple string matching as fallback
+                  # This handles complex ERB blocks like form_with ... do |f|
+                  if block[:code].include?(controller_name)
+                    # Check for Rails hash syntax: controller: "name" or 'controller' => "name"
+                    if block[:code] =~ /controller:\s*['"]([^'"]+)['"]/ ||
+                       block[:code] =~ /['" ]controller['"]\s*=>\s*['"]([^'"]+)['"]/
+                      controllers_str = $1
+                      if controllers_str.split(/\s+/).include?(controller_name)
+                        controller_exists_in_file = true
+                        break
+                      end
+                    end
+                  end
                 end
               end
             end
