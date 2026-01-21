@@ -2,7 +2,11 @@
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-      <%= link_to search_trains_path, class: "text-2xl" do %>
+      <%= link_to search_trains_path(
+        departure_city: @train.departure_city,
+        arrival_city: @train.arrival_city,
+        date: @train.departure_time.to_date
+      ), class: "text-2xl" do %>
         ←
       <% end %>
       <span class="text-base font-medium"><%= @train.departure_time.strftime('01月%d日') %> 周<%= @train.departure_time.strftime('%w') %></span>
