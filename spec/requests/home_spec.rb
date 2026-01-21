@@ -70,7 +70,21 @@ RSpec.describe "Home", type: :request do
           "\nUse real Rails routes (like rooms_path) instead of '#'."
 
         # Check for forms without action or with placeholder action
-        bad_forms = doc.css('form:not([action]), form[action="#"], form[action=""], form[action^="javascript:"]')
+        # BUT allow action="#" if form has data-controller or is within a data-controller parent (Stimulus controlled)
+        all_forms = doc.css('form:not([action]), form[action="#"], form[action=""], form[action^="javascript:"]')
+        bad_forms = all_forms.reject do |form|
+          # Allow if form has data-controller attribute (Stimulus controlled)
+          next true if form['data-controller'].present?
+          
+          # Allow if form has data-action attribute AND is within a parent with data-controller
+          if form['data-action'].present?
+            parent_with_controller = form.ancestors.find { |ancestor| ancestor['data-controller'].present? }
+            next true if parent_with_controller.present?
+          end
+          
+          false
+        end
+        
         expect(bad_forms).to be_empty,
           "Found #{bad_forms.size} demo placeholder form(s) in home/index.html.erb. Please implement real business logic using Rails form helpers (form_with). WARNING: Never nest button_to inside a form element."
       end

@@ -8313,14 +8313,14 @@ html, body {
   --tw-gradient-stops: var(--tw-gradient-from), rgb(0 0 0 / 0.2) var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
-.via-transparent {
-  --tw-gradient-to: rgb(0 0 0 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), transparent var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-
 .via-primary-light {
   --tw-gradient-to: hsl(var(--color-primary-light) / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--color-primary-light) / 1) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+.via-transparent {
+  --tw-gradient-to: rgb(0 0 0 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), transparent var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
 .to-\[\#2B4C6F\] {
@@ -8571,6 +8571,10 @@ html, body {
   --tw-gradient-to: hsl(var(--color-secondary-dark) / 1) var(--tw-gradient-to-position);
 }
 
+.to-surface {
+  --tw-gradient-to: hsl(var(--color-surface) / 1) var(--tw-gradient-to-position);
+}
+
 .to-transparent {
   --tw-gradient-to: transparent var(--tw-gradient-to-position);
 }
@@ -8597,10 +8601,6 @@ html, body {
 
 .to-yellow-500 {
   --tw-gradient-to: #eab308 var(--tw-gradient-to-position);
-}
-
-.to-surface {
-  --tw-gradient-to: hsl(var(--color-surface) / 1) var(--tw-gradient-to-position);
 }
 
 .bg-repeat-y {

@@ -34,7 +34,7 @@
 
       <!-- Search Bar -->
       <div class="relative" data-controller="search">
-        <form data-action="submit->search#search" class="flex items-center gap-2 bg-surface pl-2 pr-1 border-2 border-secondary rounded-xl transition-shadow duration-200 hover:shadow-md" style="height: 48px;">
+        <form action="#" data-action="submit->search#search" class="flex items-center gap-2 bg-surface pl-2 pr-1 border-2 border-secondary rounded-xl transition-shadow duration-200 hover:shadow-md" style="height: 48px;">
           <div class="flex items-center gap-2 flex-1">
             <%= image_tag "home/扫一扫.png", class: "w-5 h-5", alt: "搜索" %>
             <input 
@@ -248,7 +248,6 @@
           <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
             <%= image_tag "home/飞猪省钱卡.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "省钱卡" %>
             <span class="text-[12px] text-secondary">省钱卡</span>
-          </button>
           </button>
 
           <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
