@@ -27,6 +27,7 @@
         <!-- Departure City -->
         <div class="flex-1">
           <button 
+            type="button"
             data-action="click->train-city-selector#openDeparture"
             class="text-left w-full">
             <div class="text-2xl font-bold" data-train-city-selector-target="departure">北京</div>
@@ -47,6 +48,7 @@
         <!-- Arrival City -->
         <div class="flex-1 text-right">
           <button 
+            type="button"
             data-action="click->train-city-selector#openDestination"
             class="text-right w-full">
             <div class="text-2xl font-bold" data-train-city-selector-target="destination">杭州</div>
@@ -89,7 +91,6 @@
     <% end %>
 
     </div>
-  </div>
 
   
     <!-- Quick Links -->
@@ -277,22 +278,9 @@
     </div>
   </div>
 
-  <!-- City Selector Modal (reuse the shared partial, but replace controller name) -->
-  <%= render 'shared/city_selector_modal' %>
+  <!-- Train City Selector Modal -->
+  <%= render 'trains/city_selector_modal' %>
   
   <!-- Date Picker Modal -->
   <%= render 'shared/date_picker_modal' %>
 </div>
-
-<script>
-  // Replace city-selector with train-city-selector in the rendered modal
-  document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.querySelector('[data-city-selector-target="modal"]');
-    if (modal && document.querySelector('[data-controller~="train-city-selector"]')) {
-      // Replace all city-selector references with train-city-selector
-      modal.innerHTML = modal.innerHTML
-        .replace(/data-city-selector-target=/g, 'data-train-city-selector-target=')
-        .replace(/data-action="([^"]*)->city-selector#/g, 'data-action="$1->train-city-selector#');
-    }
-  });
-</script>
