@@ -254,7 +254,17 @@ RUBY
     fi
 
     echo ""
-    print_info "详细文档请参考: 手机应用环境交付规范.md"
+    print_info "详细文档请参考:"
+    echo "   - 部署指南: docs/DEPLOYMENT_GUIDE.md"
+    echo "   - APK 重建: docs/APK_REBUILD_GUIDE.md (自定义域名后重新生成 APK)"
+    echo "   - 手机应用环境交付规范.md"
+    echo ""
+    print_warning "📱 Android APK 重建说明:"
+    echo "   当前 APK 绑定到开发环境域名，如需为当前部署地址生成 APK:"
+    echo "   1. 运行重建脚本: bash rebuild_apk.sh"
+    echo "   2. 输入实际部署地址（IP:端口 或 域名）"
+    echo "   3. 等待构建完成，获得新的 app-release-signed.apk"
+    echo "   详细说明: docs/APK_REBUILD_GUIDE.md"
 }
 
 # 执行主函数

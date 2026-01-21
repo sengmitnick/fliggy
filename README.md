@@ -84,6 +84,7 @@ docker-compose -f docker-compose.production.yml exec web bundle exec rails conso
 - 📖 [完整部署指南](docs/DEPLOYMENT_GUIDE.md) - 60+ 页详细文档 (系统要求、配置说明、运维管理、故障排查)
 - ⚡ [5分钟快速开始](docs/QUICK_DEPLOY.md) - 快速部署指南
 - 🐳 [Docker 部署方案](docs/DOCKER_DEPLOYMENT.md) - 商业化部署总结
+- 📱 [APK 重建指南](docs/APK_REBUILD_GUIDE.md) - 自定义域名部署后重新生成 Android APK
 
 ### 服务架构
 
