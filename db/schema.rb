@@ -390,7 +390,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_20_123722) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
+    t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_custom_travel_requests_on_user_id"
   end
 
