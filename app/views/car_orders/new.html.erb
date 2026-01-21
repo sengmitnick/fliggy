@@ -1,13 +1,38 @@
-<%= form_with(model: CarOrder.new, url: car_orders_path, class: "bg-[#F7F8FA] pb-24") do |form| %>
+<div data-controller="car-order payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @total_price %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value=""
+     data-payment-confirmation-success-url-value="">
+<%= form_with(model: CarOrder.new, url: car_orders_path, class: "bg-[#F7F8FA] pb-24", data: { 'car-order-target': 'form' }) do |form| %>
+  <% 
+    # 计算取还车日期时间
+    pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Date.today
+    return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Date.today + 2.days)
+    days_count = (return_date - pickup_date).to_i
+    
+    # 使用固定时间 13:55:00
+    pickup_datetime = "#{pickup_date.strftime('%Y-%m-%d')} 13:55:00"
+    return_datetime = "#{return_date.strftime('%Y-%m-%d')} 13:55:00"
+    
+    # 获取第一个乘客信息（如果存在）
+    first_passenger = @passengers.first
+  %>
+  
   <!-- Hidden fields for order data -->
   <%= form.hidden_field :car_id, value: @car.id %>
-  <%= form.hidden_field :driver_name, value: "张润胜" %>
-  <%= form.hidden_field :driver_id_number, value: "440783199301071219" %>
-  <%= form.hidden_field :contact_phone, value: "18027128600" %>
-  <%= form.hidden_field :pickup_datetime, value: "2025-01-10 13:55:00" %>
-  <%= form.hidden_field :return_datetime, value: "2025-01-12 13:55:00" %>
-  <%= form.hidden_field :pickup_location, value: "天河国际机场T3" %>
-  <%= form.hidden_field :total_price, value: (@car.price_per_day * 2).round %>
+  <% if first_passenger.present? %>
+    <%= form.hidden_field :driver_name, value: first_passenger.name, data: { "passenger-selector-target" => "driverName" } %>
+    <%= form.hidden_field :driver_id_number, value: first_passenger.id_number, data: { "passenger-selector-target" => "driverIdNumber" } %>
+    <%= form.hidden_field :contact_phone, value: first_passenger.phone, data: { "passenger-selector-target" => "contactPhone" } %>
+  <% else %>
+    <%= form.hidden_field :driver_name, value: "", data: { "passenger-selector-target" => "driverName" } %>
+    <%= form.hidden_field :driver_id_number, value: "", data: { "passenger-selector-target" => "driverIdNumber" } %>
+    <%= form.hidden_field :contact_phone, value: "", data: { "passenger-selector-target" => "contactPhone" } %>
+  <% end %>
+  <%= form.hidden_field :pickup_datetime, value: pickup_datetime %>
+  <%= form.hidden_field :return_datetime, value: return_datetime %>
+  <%= form.hidden_field :pickup_location, value: @search_pickup_location || "请选择取车地点" %>
+  <%= form.hidden_field :total_price, value: @total_price %>
 
   <!-- 顶部状态栏 & 导航 -->
   <div class="bg-[#FFD900] sticky top-0 z-50">
@@ -50,14 +75,20 @@
     </div>
 
     <!-- 取还车时间 -->
+   <% 
+      pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Date.today
+      return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Date.today + 2.days)
+      days_count = (return_date - pickup_date).to_i
+      weekday_names = ['日', '一', '二', '三', '四', '五', '六']
+    %>
     <div class="bg-white rounded-xl p-4">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-lg font-bold">1月10日 <span class="text-sm font-normal">周六 13:55</span></div>
+          <div class="text-lg font-bold"><%= pickup_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[pickup_date.wday] %> 13:55</span></div>
         </div>
-        <div class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border">2天</div>
+        <div class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border"><%= days_count %>天</div>
         <div>
-          <div class="text-lg font-bold">1月12日 <span class="text-sm font-normal">周一 13:55</span></div>
+          <div class="text-lg font-bold"><%= return_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[return_date.wday] %> 13:55</span></div>
         </div>
       </div>
       <div class="mt-4 flex items-start space-x-2">
@@ -69,7 +100,7 @@
             <span class="text-sm font-bold">取/还：店员免费上门送取车</span>
             <span class="text-xs text-gray-500 flex items-center">地图指引 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
           </div>
-          <div class="text-xs text-gray-400 mt-0.5">天河国际机场T3</div>
+          <div class="text-xs text-gray-400 mt-0.5"><%= @search_pickup_location || '请选择取车地点' %></div>
         </div>
       </div>
       <div class="mt-4 pt-4 border-t flex justify-between items-center text-xs">
@@ -86,19 +117,6 @@
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold">选择驾驶人</h3>
         <div class="text-xs text-gray-500 flex items-center">增加多名驾驶员 <svg class="w-3 h-3 ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg></div>
-      </div>
-      <div class="flex space-x-2 mb-4 overflow-x-auto pb-1">
-        <div class="bg-yellow-50 border border-yellow-400 text-sm px-4 py-1.5 rounded relative">
-          张润胜
-          <div class="absolute bottom-0 right-0 bg-yellow-400 rounded-tl-md">
-            <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-          </div>
-        </div>
-        <div class="bg-gray-50 text-sm px-4 py-1.5 rounded text-gray-600">杨颖娴</div>
-        <div class="text-sm px-4 py-1.5 rounded text-blue-500 flex items-center">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          更多/新增
-        </div>
       </div>
       <div class="bg-gray-50 rounded-lg p-3 relative" data-controller="passenger-selector" data-passenger-selector-selected-id-value="<%= @passengers.first&.id %>">
         <% if @passengers.any? %>
@@ -146,7 +164,7 @@
               
               <div class="p-4 space-y-3">
                 <% @passengers.each do |passenger| %>
-                  <div class="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors <%= 'border-blue-500 bg-blue-50' if passenger == @passengers.first %>" 
+                  <div class="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors" 
                        data-action="click->passenger-selector#selectPassenger"
                        data-passenger-id="<%= passenger.id %>"
                        data-passenger-name="<%= passenger.name %>"
@@ -161,12 +179,8 @@
                           <div class="text-xs text-gray-400 mt-1">电话: <%= passenger.phone %></div>
                         <% end %>
                       </div>
-                      <div class="w-5 h-5 rounded-full border-2 <%= passenger == @passengers.first ? 'border-blue-500 bg-blue-500' : 'border-gray-300' %> flex items-center justify-center">
-                        <% if passenger == @passengers.first %>
-                          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                          </svg>
-                        <% end %>
+                      <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                        <!-- Checkmark will be dynamically added by Stimulus -->
                       </div>
                     </div>
                   </div>
@@ -181,11 +195,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Hidden form fields -->
-          <%= form.hidden_field :driver_name, data: { "passenger-selector-target" => "driverName" }, value: first_passenger.name %>
-          <%= form.hidden_field :driver_id_number, data: { "passenger-selector-target" => "driverIdNumber" }, value: first_passenger.id_number %>
-          <%= form.hidden_field :contact_phone, data: { "passenger-selector-target" => "contactPhone" }, value: first_passenger.phone %>
         <% else %>
           <!-- 无出行人，显示添加提示 -->
           <div class="text-center py-6">
@@ -460,18 +469,23 @@
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex items-center justify-between z-50">
     <div class="flex flex-col">
       <div class="flex items-baseline">
-        <span class="text-xs text-gray-400 line-through mr-1">￥<%= (@car.price_per_day * 2 * 1.45).round %></span>
+        <span class="text-xs text-gray-400 line-through mr-1">￥<%= (@car.price_per_day * days_count * 1.45).round %></span>
         <span class="text-xs text-[#FF5000] font-bold italic font-serif">￥</span>
-        <span class="text-2xl text-[#FF5000] font-bold"><%= (@car.price_per_day * 2).round %></span>
+        <span class="text-2xl text-[#FF5000] font-bold"><%= (@car.price_per_day * days_count).round %></span>
         <div class="ml-2 flex items-center text-xs text-gray-500">
           明细 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
         </div>
       </div>
       <div class="text-[10px] text-gray-500">已优惠￥71</div>
     </div>
-    <%= form.button type: "submit", class: "bg-[#FF5000] text-white rounded-full px-10 py-3 text-center flex flex-col leading-tight" do %>
-      <span class="font-bold text-lg">去选服务</span>
+    <button type="button" 
+            data-action="click->car-order#createOrder"
+            class="bg-[#FF5000] text-white rounded-full px-10 py-3 text-center flex flex-col leading-tight">
+      <span class="font-bold text-lg">立即支付</span>
       <span class="text-[10px] opacity-90">享信用免押</span>
-    <% end %>
+    </button>
   </div>
 <% end %>
+
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>

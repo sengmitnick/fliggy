@@ -9,8 +9,24 @@
       <% end %>
       <div class="flex-1 bg-gray-100 rounded-lg p-2 flex items-center justify-between">
         <div class="text-center flex-1">
-          <div class="text-xs font-bold">天河国际机场T3</div>
-          <div class="text-[10px] text-gray-500">01月10日 13:55 — 01月12日 13:55</div>
+          <div class="text-xs font-bold">
+            <% if params[:city].present? %>
+              <%= params[:city] %>
+            <% end %>
+            <% if params[:pickup_location].present? %>
+              <%= params[:pickup_location] %>
+            <% end %>
+            <% if params[:city].blank? && params[:pickup_location].blank? %>
+              全部地点
+            <% end %>
+          </div>
+          <div class="text-[10px] text-gray-500">
+            <% if params[:pickup_date].present? && params[:return_date].present? %>
+              <%= params[:pickup_date] %> — <%= params[:return_date] %>
+            <% else %>
+              请选择日期
+            <% end %>
+          </div>
         </div>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -80,7 +96,7 @@
     <!-- 右侧列表 -->
     <div class="flex-1 bg-gray-100 p-2 overflow-y-auto space-y-3">
       <% @cars.each do |car| %>
-        <%= link_to car_path(car), class: "block" do %>
+        <%= link_to car_path(car, city: params[:city], pickup_location: params[:pickup_location], return_location: params[:return_location], pickup_date: params[:pickup_date], return_date: params[:return_date]), class: "block" do %>
           <div class="bg-white rounded-xl p-3 relative shadow-sm">
             <!-- 标签 -->
             <% if car.tags.present? && car.tags.include?('销量第一') %>
