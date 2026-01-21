@@ -3,7 +3,8 @@ class PwaController < ApplicationController
   skip_before_action :verify_authenticity_token
   
   def manifest
-    render 'pwa/manifest', layout: false, content_type: 'application/json'
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    render 'pwa/manifest', layout: false
   end
 
   def service_worker
