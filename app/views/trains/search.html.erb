@@ -28,7 +28,7 @@
     
     <!-- Date Selector -->
     <div class="flex overflow-x-auto gap-2 px-4 pb-3 no-scrollbar">
-      <% (-1..3).each do |offset| %>
+      <% (0..4).each do |offset| %>
         <% target_date = Date.today + offset.days %>
         <% is_selected = target_date == @date %>
         <%= link_to search_trains_path(
@@ -39,7 +39,7 @@
           only_high_speed: @only_high_speed
         ), class: "flex flex-col items-center justify-center px-4 py-2 rounded-lg whitespace-nowrap transition-colors #{is_selected ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground'}" do %>
           <div class="text-xs text-muted-foreground <%= 'text-primary-foreground' if is_selected %>">
-            <%= offset == -1 ? '今天' : offset == 0 ? '明天' : target_date.strftime('%m-%d') %>
+            <%= offset == 0 ? '今天' : offset == 1 ? '明天' : target_date.strftime('%m-%d') %>
           </div>
           <div class="text-base font-medium">
             <%= target_date.strftime('%d') %>
@@ -130,7 +130,7 @@
   </div>
 
   <!-- Train List -->
-  <div class="pb-20">
+  <div class="px-4 pb-20">
     <% if @trains.any? %>
       <% @trains.each do |train| %>
         <%= link_to train_path(train), class: "block" do %>
@@ -242,6 +242,7 @@
                 <% end %>
               </div>
             <% end %>
+          </div>
         <% end %>
       <% end %>
     <% else %>
