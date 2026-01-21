@@ -1,0 +1,204 @@
+<div data-internet-services-target="regionModal" class="hidden fixed inset-0 bg-white z-50 flex flex-col">
+  <!-- Header -->
+  <div class="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200">
+    <h2 class="text-lg font-bold">目的地选择</h2>
+    <button type="button" data-action="click->internet-services#closeRegionModal" class="text-gray-400 text-2xl">
+      ×
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex-shrink-0 p-4 bg-gray-50">
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="搜索目的地的中文" 
+        data-internet-services-target="searchInput"
+        data-action="input->internet-services#searchDestinations"
+        class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+      />
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex-shrink-0 flex border-b border-gray-200 bg-white">
+    <button 
+      data-action="click->internet-services#switchSelectorTab" 
+      data-tab="popular"
+      data-internet-services-target="selectorTab"
+      class="flex-1 py-3 text-center font-medium border-b-2 border-black">
+      历史/热门
+    </button>
+    <button 
+      data-action="click->internet-services#switchSelectorTab" 
+      data-tab="history"
+      data-internet-services-target="selectorTab"
+      class="flex-1 py-3 text-center font-medium text-gray-500">
+      历史选择
+      <button 
+        data-action="click->internet-services#clearHistory" 
+        class="ml-2 text-xs text-gray-400 hover:text-gray-600">
+        🗑️ 清空
+      </button>
+    </button>
+  </div>
+
+  <!-- Main Content Area with Sidebar -->
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Left Sidebar - Continents -->
+    <div class="w-24 flex-shrink-0 bg-gray-50 overflow-y-auto border-r border-gray-200">
+      <% 
+      continents = [
+        {key: 'asia', name: '亚洲'},
+        {key: 'oceania', name: '大洋洲'},
+        {key: 'south_america', name: '南美洲'},
+        {key: 'europe', name: '欧洲'},
+        {key: 'africa', name: '非洲'},
+        {key: 'north_america', name: '北美洲'}
+      ]
+      %>
+      <% continents.each_with_index do |continent, index| %>
+        <button 
+          data-action="click->internet-services#selectContinent" 
+          data-continent="<%= continent[:key] %>"
+          data-internet-services-target="continentBtn"
+          class="w-full py-4 text-sm text-center <%= index == 0 ? 'bg-white font-bold border-l-2 border-yellow-500' : 'text-gray-600' %>">
+          <%= continent[:name] %>
+        </button>
+      <% end %>
+    </div>
+
+    <!-- Right Content - Destinations Grid -->
+    <div class="flex-1 overflow-y-auto p-4" data-internet-services-target="destinationsContainer">
+      <!-- Popular Section (visible by default) -->
+      <div data-internet-services-target="popularSection">
+        <!-- Asia -->
+        <div data-continent="asia" data-internet-services-target="continentSection">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">历史选择</h3>
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <% ['日本'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <div class="flex items-center justify-center">
+                  <span class="text-sm"><%= dest %></span>
+                  <% if @region == dest %>
+                    <svg class="w-4 h-4 ml-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <h3 class="text-sm font-bold text-gray-500 mb-3">热门国家</h3>
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <% ['中国香港', '中国澳门', '韩国', '日本', '泰国', '新加坡', '越南', '马来西亚', '美国', '法国', '印度尼西亚', '俄罗斯'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <div class="flex items-center justify-center">
+                  <span class="text-sm"><%= dest %></span>
+                  <% if @region == dest %>
+                    <svg class="w-4 h-4 ml-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Oceania -->
+        <div data-continent="oceania" data-internet-services-target="continentSection" class="hidden">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">大洋洲</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <% ['澳大利亚', '新西兰', '斐济'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <span class="text-sm"><%= dest %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- South America -->
+        <div data-continent="south_america" data-internet-services-target="continentSection" class="hidden">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">南美洲</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <% ['巴西', '阿根廷', '秘鲁', '智利'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <span class="text-sm"><%= dest %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Europe -->
+        <div data-continent="europe" data-internet-services-target="continentSection" class="hidden">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">欧洲</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <% ['英国', '法国', '德国', '意大利', '西班牙', '瑞士', '荷兰', '奥地利', '希腊', '葡萄牙'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <span class="text-sm"><%= dest %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Africa -->
+        <div data-continent="africa" data-internet-services-target="continentSection" class="hidden">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">非洲</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <% ['埃及', '南非', '摩洛哥', '肯尼亚'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <span class="text-sm"><%= dest %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- North America -->
+        <div data-continent="north_america" data-internet-services-target="continentSection" class="hidden">
+          <h3 class="text-sm font-bold text-gray-500 mb-3">北美洲</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <% ['美国', '加拿大', '墨西哥'].each do |dest| %>
+              <%= link_to internet_services_path(region: dest, tab: @current_tab), 
+                  data: { action: "click->internet-services#selectDestination", destination: dest },
+                  class: "p-3 text-center rounded-lg border-2 transition-all #{@region == dest ? 'border-yellow-500 bg-yellow-50 font-bold text-yellow-600' : 'border-gray-200 hover:border-yellow-300'}" do %>
+                <span class="text-sm"><%= dest %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Section (hidden by default) -->
+      <div data-internet-services-target="historySection" class="hidden">
+        <div class="text-center text-gray-400 py-12">
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p>暂无历史选择记录</p>
+        </div>
+      </div>
+
+      <!-- Search Results (hidden by default) -->
+      <div data-internet-services-target="searchResults" class="hidden">
+        <!-- Search results will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+</div>

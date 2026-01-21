@@ -10650,6 +10650,11 @@ html, body {
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
 }
 
+.hover\:border-yellow-300:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(253 224 71 / var(--tw-border-opacity, 1));
+}
+
 .hover\:bg-\[\#4a6bc7\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(74 107 199 / var(--tw-bg-opacity, 1));

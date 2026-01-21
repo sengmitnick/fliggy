@@ -23,14 +23,16 @@ export default class extends Controller<HTMLElement> {
     
     // 填充隐藏字段
     const idNumberField = document.getElementById('passenger_id_number') as HTMLInputElement
-    const phoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
     
     if (idNumberField) {
       idNumberField.value = idNumber
     }
+
+    // 自动填充联系电话
+    const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
     
-    if (phoneField && phone) {
-      phoneField.value = phone
+    if (contactPhoneField && phone) {
+      contactPhoneField.value = phone
     }
   }
 
