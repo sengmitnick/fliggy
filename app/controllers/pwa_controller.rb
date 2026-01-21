@@ -1,7 +1,7 @@
 class PwaController < ApplicationController
   # Skip browser version check for PWA files
   skip_before_action :verify_authenticity_token
-  allow_browser versions: :all
+  # allow_browser versions: :all  # TEMPORARILY DISABLED FOR DEBUGGING
   
   def manifest
     manifest_data = {
@@ -33,8 +33,7 @@ class PwaController < ApplicationController
   end
 
   def service_worker
-    expires_in 0.seconds, public: true
-    render 'pwa/service_worker', layout: false, content_type: 'application/javascript'
+    render 'pwa/service_worker', layout: false, formats: [:js]
   end
 
   def assetlinks

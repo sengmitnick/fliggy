@@ -1,6 +1,12 @@
 # GoodJob Cron Configuration
 # https://github.com/bensheldon/good_job#cron-style-repeating-jobs
 
+development:
+  # No cron jobs in development
+
+test:
+  # No cron jobs in test
+
 production:
   # Clean up finished GoodJob jobs every hour, Do not remove this job!!!
   cleanup_good_jobs:
