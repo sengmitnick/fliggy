@@ -59,21 +59,28 @@
   </div>
 
   <!-- 取还车时间地点 -->
+  <% 
+    pickup_date = @search_params[:pickup_date].present? ? Date.parse(@search_params[:pickup_date]) : Date.today
+    return_date = @search_params[:return_date].present? ? Date.parse(@search_params[:return_date]) : (Date.today + 2.days)
+    days_count = (return_date - pickup_date).to_i
+    pickup_location = @search_params[:pickup_location].presence || '天河国际机场T3'
+    weekday_names = ['日', '一', '二', '三', '四', '五', '六']
+  %>
   <div class="bg-white px-4 py-6 mb-4 flex justify-between items-center border-t border-gray-50">
     <div class="text-left">
-      <div class="text-lg font-bold">01月10日 周六</div>
+      <div class="text-lg font-bold"><%= pickup_date.strftime('%m月%d日') %> 周<%= weekday_names[pickup_date.wday] %></div>
       <div class="text-gray-500 text-sm">13:55</div>
     </div>
     <div class="flex flex-col items-center">
-      <div class="text-sm font-medium">天河国际机场T3</div>
+      <div class="text-sm font-medium"><%= pickup_location %></div>
       <div class="flex items-center w-24">
         <div class="h-[1px] bg-gray-300 flex-grow"></div>
-        <div class="px-2 text-xs text-gray-400 whitespace-nowrap">2天</div>
+        <div class="px-2 text-xs text-gray-400 whitespace-nowrap"><%= days_count %>天</div>
         <div class="h-[1px] bg-gray-300 flex-grow"></div>
       </div>
     </div>
     <div class="text-right">
-      <div class="text-lg font-bold">01月12日 周一</div>
+      <div class="text-lg font-bold"><%= return_date.strftime('%m月%d日') %> 周<%= weekday_names[return_date.wday] %></div>
       <div class="text-gray-500 text-sm">13:55</div>
     </div>
   </div>
@@ -115,7 +122,7 @@
           <div class="text-right flex items-center">
             <div class="mr-3">
               <div class="text-orange-600 font-bold text-2xl">¥<%= @car.price_per_day %><span class="text-xs font-normal">/天</span></div>
-              <div class="text-[10px] text-gray-400">总价¥<%= @car.price_per_day * 2 %> <span class="border rounded-full px-0.5 ml-0.5">?</span></div>
+              <div class="text-[10px] text-gray-400">总价¥<%= @car.price_per_day * days_count %> <span class="border rounded-full px-0.5 ml-0.5">?</span></div>
             </div>
             <%= link_to new_car_order_path(car_id: @car.id, city: @search_params[:city], pickup_location: @search_params[:pickup_location], return_location: @search_params[:return_location], pickup_date: @search_params[:pickup_date], return_date: @search_params[:return_date]), class: "block" do %>
               <button class="bg-orange-600 text-white w-12 h-12 rounded-lg font-bold text-lg shadow-lg">订</button>
@@ -161,7 +168,7 @@
             <div class="mr-3">
               <span class="text-[10px] text-red-500 border border-red-200 px-1 rounded">仅剩2辆</span>
               <div class="text-orange-600 font-bold text-2xl">¥<%= (@car.price_per_day * 0.9).round %><span class="text-xs font-normal">/天</span></div>
-              <div class="text-[10px] text-gray-400">总价¥<%= (@car.price_per_day * 2 * 0.9).round %> <span class="border rounded-full px-0.5 ml-0.5">?</span></div>
+              <div class="text-[10px] text-gray-400">总价¥<%= (@car.price_per_day * days_count * 0.9).round %> <span class="border rounded-full px-0.5 ml-0.5">?</span></div>
             </div>
             <%= link_to new_car_order_path(car_id: @car.id, city: @search_params[:city], pickup_location: @search_params[:pickup_location], return_location: @search_params[:return_location], pickup_date: @search_params[:pickup_date], return_date: @search_params[:return_date]), class: "block" do %>
               <button class="bg-orange-600 text-white w-12 h-12 rounded-lg font-bold text-lg">订</button>

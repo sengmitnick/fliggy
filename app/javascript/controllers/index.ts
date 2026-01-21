@@ -99,6 +99,7 @@ import CommunicationTimelineController from "./communication_timeline_controller
 import AbroadTicketTypeController from "./abroad_ticket_type_controller"
 import LandmarkFilterController from "./landmark_filter_controller"
 import CarDatetimePickerController from "./car_datetime_picker_controller"
+import CarOrderController from "./car_order_controller"
 
 const application = Application.start()
 
@@ -201,5 +202,6 @@ application.register("communication-timeline", CommunicationTimelineController)
 application.register("abroad-ticket-type", AbroadTicketTypeController)
 application.register("landmark-filter", LandmarkFilterController)
 application.register("car-datetime-picker", CarDatetimePickerController)
+application.register("car-order", CarOrderController)
 
 window.Stimulus = application
