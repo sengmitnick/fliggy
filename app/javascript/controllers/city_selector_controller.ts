@@ -268,6 +268,14 @@ export default class extends Controller<HTMLElement> {
         
         // Dispatch trip-planner city change event
         this.dispatchTripCityChangeEvent('departure', cityName)
+        
+        // Dispatch city-selector:city-selected event for car-rental-tabs to listen
+        const carCityEvent = new CustomEvent('city-selector:city-selected', {
+          detail: { cityName },
+          bubbles: true
+        })
+        document.dispatchEvent(carCityEvent)
+        console.log('City selector: Dispatched city-selected event for cars', cityName)
       } else {
         this.destinationCityValue = cityName
         if (this.hasDestinationTarget) {

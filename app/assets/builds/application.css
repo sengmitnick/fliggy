@@ -4722,6 +4722,10 @@ html, body {
   display: grid;
 }
 
+.contents {
+  display: contents;
+}
+
 .hidden {
   display: none;
 }
@@ -6081,10 +6085,6 @@ html, body {
 
 .rounded-tl-lg {
   border-top-left-radius: var(--border-radius-lg);
-}
-
-.rounded-tl-md {
-  border-top-left-radius: var(--border-radius-md);
 }
 
 .rounded-tl-sm {

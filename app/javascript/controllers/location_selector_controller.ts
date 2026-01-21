@@ -6,13 +6,12 @@ export default class extends Controller<HTMLElement> {
     "searchInput",
     "locationList",
     "locationInput",
-    "locationDisplay",
-    "recentSection",
-    "recentList"
+    "locationDisplay"
   ]
 
   static values = {
     locationType: String, // "from" or "to"
+    currentCity: String, // current selected city
   }
 
   declare readonly modalTarget: HTMLElement
@@ -20,27 +19,60 @@ export default class extends Controller<HTMLElement> {
   declare readonly locationListTarget: HTMLElement
   declare readonly locationInputTarget: HTMLInputElement
   declare readonly locationDisplayTarget: HTMLElement
-  declare readonly recentSectionTarget: HTMLElement
-  declare readonly recentListTarget: HTMLElement
   declare readonly hasLocationInputTarget: boolean
   declare readonly hasLocationDisplayTarget: boolean
   declare readonly locationTypeValue: string
+  declare currentCityValue: string
 
   private selectedLocation: { name: string; address: string } | null = null
 
   connect(): void {
     console.log("LocationSelector connected")
+    // Get initial city from the page
+    this.initializeCurrentCity()
+    // Listen for city changes
+    document.addEventListener('city-selector:city-selected', this.handleCityChange.bind(this))
   }
 
   disconnect(): void {
     console.log("LocationSelector disconnected")
+    document.removeEventListener('city-selector:city-selected', this.handleCityChange.bind(this))
+  }
+
+  // Initialize current city from the page
+  private initializeCurrentCity(): void {
+    // Try to get city from car-rental-tabs city display
+    const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
+    if (cityDisplay && cityDisplay.textContent) {
+      this.currentCityValue = cityDisplay.textContent.trim()
+      console.log('LocationSelector: Initial city from DOM:', this.currentCityValue)
+    } else {
+      this.currentCityValue = '深圳' // fallback to Shenzhen
+      console.log('LocationSelector: Using fallback city:', this.currentCityValue)
+    }
+  }
+
+  // Handle city change event
+  private handleCityChange(event: Event): void {
+    const customEvent = event as CustomEvent
+    const { cityName } = customEvent.detail
+    console.log('LocationSelector: City changed to', cityName)
+    this.currentCityValue = cityName
+    // Reload locations when modal is opened
   }
 
   openModal(): void {
+    console.log('[LocationSelector] openModal called')
+    console.log('[LocationSelector] currentCityValue:', this.currentCityValue)
     this.modalTarget.classList.remove("hidden")
     this.searchInputTarget.value = ""
     this.searchInputTarget.focus()
     document.body.style.overflow = "hidden"
+    
+    console.log('[LocationSelector] About to call loadLocations()')
+    // Load locations for current city
+    this.loadLocations()
+    console.log('[LocationSelector] loadLocations() called')
   }
 
   closeModal(): void {
@@ -83,8 +115,15 @@ export default class extends Controller<HTMLElement> {
       this.locationDisplayTarget.classList.add("text-text-primary")
     }
 
-    // Save to recent locations
-    this.saveToRecent(this.selectedLocation)
+    // Dispatch event for other controllers (e.g. car-rental-tabs)
+    const event = new CustomEvent('location-selector:location-selected', {
+      detail: {
+        locationName: this.selectedLocation.name,
+        locationAddress: this.selectedLocation.address
+      },
+      bubbles: true
+    })
+    document.dispatchEvent(event)
 
     this.closeModal()
   }
@@ -108,57 +147,131 @@ export default class extends Controller<HTMLElement> {
     })
   }
 
-  private saveToRecent(location: { name: string; address: string }): void {
+  private async loadLocations(): Promise<void> {
+    const city = this.currentCityValue || '深圳'
+    console.log('[LocationSelector] loadLocations START - city:', city)
+    
     try {
-      const key = "recent_transfer_locations"
-      const stored = localStorage.getItem(key)
-      let recent: Array<{ name: string; address: string }> = stored ? JSON.parse(stored) : []
-
-      // Remove if already exists
-      recent = recent.filter(loc => loc.name !== location.name)
-
-      // Add to front
-      recent.unshift(location)
-
-      // Keep only last 5
-      recent = recent.slice(0, 5)
-
-      localStorage.setItem(key, JSON.stringify(recent))
-
-      // Update UI
-      this.updateRecentList(recent)
+      console.log('[LocationSelector] Fetching from:', `/cars/locations?city=${encodeURIComponent(city)}`)
+      const response = await fetch(`/cars/locations?city=${encodeURIComponent(city)}`)
+      console.log('[LocationSelector] Response status:', response.status)
+      console.log('[LocationSelector] Response ok:', response.ok)
+      
+      if (!response.ok) {
+        throw new Error('Failed to load locations')
+      }
+      
+      const data = await response.json()
+      console.log('[LocationSelector] Data received:', data)
+      console.log('[LocationSelector] About to call renderLocations')
+      this.renderLocations(data.locations)
+      console.log('[LocationSelector] renderLocations completed')
     } catch (error) {
-      console.error("Failed to save recent location:", error)
+      console.error('[LocationSelector] Failed to load locations:', error)
+      // Fallback to default武汉 locations
+      this.renderDefaultLocations()
     }
   }
 
-  private updateRecentList(locations: Array<{ name: string; address: string }>): void {
-    if (locations.length === 0) {
-      this.recentSectionTarget.classList.add("hidden")
-      return
-    }
+  private renderLocations(locations: { airports: string[], train_stations: string[], others: string[] }): void {
+    console.log('[LocationSelector] renderLocations START')
+    console.log('[LocationSelector] Airports:', locations.airports)
+    console.log('[LocationSelector] Train stations:', locations.train_stations)
+    console.log('[LocationSelector] Others:', locations.others)
+    let html = ''
 
-    this.recentSectionTarget.classList.remove("hidden")
-    
-    const html = locations.map(loc => `
-      <button
-        type="button"
-        data-action="click->location-selector#selectLocation"
-        data-location-name="${loc.name}"
-        data-location-address="${loc.address}"
-        class="w-full text-left p-3 rounded-lg hover:bg-surface-hover transition-colors">
-        <div class="flex items-start">
-          <svg class="w-5 h-5 text-text-muted mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-          </svg>
-          <div class="flex-1">
-            <div class="text-text-primary font-medium">${loc.name}</div>
-            <div class="text-xs text-text-muted mt-0.5">${loc.address}</div>
+    // Airports
+    if (locations.airports && locations.airports.length > 0) {
+      html += `
+        <div class="mb-4">
+          <h4 class="text-xs text-text-muted mb-2">机场</h4>
+          <div class="grid grid-cols-2 gap-2">
+            ${locations.airports.map(airport => `
+              <button
+                type="button"
+                data-action="click->location-selector#selectLocation"
+                data-location-name="${airport}"
+                data-location-address="机场"
+                class="w-full text-center p-2 rounded-lg hover:bg-surface-hover transition-colors text-sm">
+                ${airport}
+              </button>
+            `).join('')}
           </div>
         </div>
-      </button>
-    `).join("")
+      `
+    }
 
-    this.recentListTarget.innerHTML = html
+    // Train Stations
+    if (locations.train_stations && locations.train_stations.length > 0) {
+      html += `
+        <div class="mb-4">
+          <h4 class="text-xs text-text-muted mb-2">火车站</h4>
+          <div class="grid grid-cols-3 gap-2">
+            ${locations.train_stations.map(station => `
+              <button
+                type="button"
+                data-action="click->location-selector#selectLocation"
+                data-location-name="${station}"
+                data-location-address="火车站"
+                class="w-full text-center p-2 rounded-lg hover:bg-surface-hover transition-colors text-xs">
+                ${station}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `
+    }
+
+    // Others
+    if (locations.others && locations.others.length > 0) {
+      html += `
+        <div class="mb-4">
+          <h4 class="text-xs text-text-muted mb-2">其他地点</h4>
+          <div class="space-y-2">
+            ${locations.others.map(location => `
+              <button
+                type="button"
+                data-action="click->location-selector#selectLocation"
+                data-location-name="${location}"
+                data-location-address="租车点"
+                class="w-full text-left p-3 rounded-lg hover:bg-surface-hover transition-colors">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-text-muted mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                  </svg>
+                  <div class="flex-1">
+                    <div class="text-text-primary font-medium">${location}</div>
+                    <div class="text-xs text-text-muted mt-0.5">租车点</div>
+                  </div>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `
+    }
+
+    // If no locations found
+    if (!html) {
+      console.log('[LocationSelector] No locations found, showing fallback message')
+      html = `
+        <div class="text-center py-8 text-text-muted">
+          <p>该城市暂无租车点</p>
+        </div>
+      `
+    }
+
+    console.log('[LocationSelector] Setting innerHTML, html length:', html.length)
+    this.locationListTarget.innerHTML = html
+    console.log('[LocationSelector] innerHTML set successfully')
+  }
+
+  private renderDefaultLocations(): void {
+    // Fallback for武汉
+    this.renderLocations({
+      airports: ['天河国际机场T3'],
+      train_stations: ['武汉站', '武昌站', '汉口站'],
+      others: []
+    })
   }
 }

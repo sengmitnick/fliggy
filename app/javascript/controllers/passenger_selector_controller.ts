@@ -11,20 +11,61 @@ export default class extends Controller {
     "countPanel",
     "adultsCount",
     "childrenCount",
-    "infantsCount"
+    "infantsCount",
+    "count",
+    "name",
+    "idType",
+    "idNumber",
+    "phone",
+    "driverName",
+    "driverIdNumber",
+    "contactPhone"
   ]
 
+  static values = {
+    selectedId: Number
+  }
+
   declare readonly modalTarget: HTMLElement
+  declare readonly hasModalTarget: boolean
   declare readonly modalTitleTarget: HTMLElement
+  declare readonly hasModalTitleTarget: boolean
   declare readonly selectedDisplayTarget: HTMLElement
   declare readonly selectedDisplayTargets: HTMLElement[]
+  declare readonly hasSelectedDisplayTarget: boolean
   declare readonly passengerTabTarget: HTMLElement
+  declare readonly hasPassengerTabTarget: boolean
   declare readonly countTabTarget: HTMLElement
+  declare readonly hasCountTabTarget: boolean
   declare readonly passengerListPanelTarget: HTMLElement
+  declare readonly hasPassengerListPanelTarget: boolean
   declare readonly countPanelTarget: HTMLElement
+  declare readonly hasCountPanelTarget: boolean
   declare readonly adultsCountTarget: HTMLElement
+  declare readonly hasAdultsCountTarget: boolean
   declare readonly childrenCountTarget: HTMLElement
+  declare readonly hasChildrenCountTarget: boolean
   declare readonly infantsCountTarget: HTMLElement
+  declare readonly hasInfantsCountTarget: boolean
+  declare readonly countTarget: HTMLElement
+  declare readonly hasCountTarget: boolean
+  declare readonly nameTarget: HTMLElement
+  declare readonly hasNameTarget: boolean
+  declare readonly idTypeTarget: HTMLElement
+  declare readonly hasIdTypeTarget: boolean
+  declare readonly idNumberTarget: HTMLElement
+  declare readonly hasIdNumberTarget: boolean
+  declare readonly phoneTarget: HTMLElement
+  declare readonly hasPhoneTarget: boolean
+  declare readonly driverNameTarget: HTMLElement
+  declare readonly hasDriverNameTarget: boolean
+  declare readonly driverIdNumberTarget: HTMLElement
+  declare readonly hasDriverIdNumberTarget: boolean
+  declare readonly contactPhoneTarget: HTMLElement
+  declare readonly hasContactPhoneTarget: boolean
+
+  declare selectedIdValue: number
+  declare readonly hasSelectedIdValue: boolean
 
   private adults: number = 0
   private children: number = 0
@@ -52,34 +93,49 @@ export default class extends Controller {
   openModal(event: Event): void {
     event.preventDefault()
     event.stopPropagation()
+    
+    // Only open modal if it exists (not needed for visa order simple +/- mode)
+    if (!this.hasModalTarget) return
+    
     this.modalTarget.classList.remove("hidden")
     document.body.style.overflow = "hidden"
     
-    // Show passenger list panel by default
-    this.switchToPassengerTab(event)
+    // Show passenger list panel by default (only if tabs exist - flight booking mode)
+    if (this.hasPassengerTabTarget && this.hasCountTabTarget) {
+      this.switchToPassengerTab(event)
+    }
+    
+    // Highlight the selected passenger in the modal (car rental mode)
+    this.highlightSelectedPassenger()
   }
 
   closeModal(event: Event): void {
     event.preventDefault()
     event.stopPropagation()
     
-    // Restore to confirmed state when closing without confirming
-    this.adults = this.confirmedAdults
-    this.children = this.confirmedChildren
-    this.infants = this.confirmedInfants
-    this.selectedPassengerIds = new Set(this.confirmedPassengerIds)
-    this.selectedPassengerNames = new Map(this.confirmedPassengerNames)
+    // Only close modal if it exists (not needed for visa order simple +/- mode)
+    if (!this.hasModalTarget) return
     
-    // Restore checkbox states
-    const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
-    checkboxes.forEach((checkbox: Element) => {
-      const cb = checkbox as HTMLInputElement
-      const passengerId = parseInt(cb.value)
-      cb.checked = this.confirmedPassengerIds.has(passengerId)
-    })
-    
-    // Update counters to show confirmed values
-    this.updateCounters()
+    // Only restore state if we have the full modal with passenger list
+    if (this.hasPassengerListPanelTarget) {
+      // Restore to confirmed state when closing without confirming
+      this.adults = this.confirmedAdults
+      this.children = this.confirmedChildren
+      this.infants = this.confirmedInfants
+      this.selectedPassengerIds = new Set(this.confirmedPassengerIds)
+      this.selectedPassengerNames = new Map(this.confirmedPassengerNames)
+      
+      // Restore checkbox states
+      const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+      checkboxes.forEach((checkbox: Element) => {
+        const cb = checkbox as HTMLInputElement
+        const passengerId = parseInt(cb.value)
+        cb.checked = this.confirmedPassengerIds.has(passengerId)
+      })
+      
+      // Update counters to show confirmed values
+      this.updateCounters()
+    }
     
     this.modalTarget.classList.add("hidden")
     document.body.style.overflow = ""
@@ -93,30 +149,38 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     
-    // Update tab styles
-    this.passengerTabTarget.classList.add("border-blue-500")
-    this.passengerTabTarget.classList.remove("border-transparent")
-    this.countTabTarget.classList.remove("border-blue-500")
-    this.countTabTarget.classList.add("border-transparent")
+    // Only update tab styles if tabs exist (flight booking mode)
+    if (this.hasPassengerTabTarget && this.hasCountTabTarget) {
+      this.passengerTabTarget.classList.add("border-blue-500")
+      this.passengerTabTarget.classList.remove("border-transparent")
+      this.countTabTarget.classList.remove("border-blue-500")
+      this.countTabTarget.classList.add("border-transparent")
+    }
     
-    // Show passenger list panel, hide count panel
-    this.passengerListPanelTarget.classList.remove("hidden")
-    this.countPanelTarget.classList.add("hidden")
+    // Show passenger list panel, hide count panel (only if both panels exist)
+    if (this.hasPassengerListPanelTarget && this.hasCountPanelTarget) {
+      this.passengerListPanelTarget.classList.remove("hidden")
+      this.countPanelTarget.classList.add("hidden")
+    }
   }
 
   switchToCountTab(event: Event): void {
     event.preventDefault()
     event.stopPropagation()
     
-    // Update tab styles
-    this.countTabTarget.classList.add("border-blue-500")
-    this.countTabTarget.classList.remove("border-transparent")
-    this.passengerTabTarget.classList.remove("border-blue-500")
-    this.passengerTabTarget.classList.add("border-transparent")
+    // Only update tab styles if tabs exist (flight booking mode)
+    if (this.hasPassengerTabTarget && this.hasCountTabTarget) {
+      this.countTabTarget.classList.add("border-blue-500")
+      this.countTabTarget.classList.remove("border-transparent")
+      this.passengerTabTarget.classList.remove("border-blue-500")
+      this.passengerTabTarget.classList.add("border-transparent")
+    }
     
-    // Show count panel, hide passenger list panel
-    this.countPanelTarget.classList.remove("hidden")
-    this.passengerListPanelTarget.classList.add("hidden")
+    // Show count panel, hide passenger list panel (only if both panels exist)
+    if (this.hasPassengerListPanelTarget && this.hasCountPanelTarget) {
+      this.countPanelTarget.classList.remove("hidden")
+      this.passengerListPanelTarget.classList.add("hidden")
+    }
   }
 
   togglePassenger(event: Event): void {
@@ -221,11 +285,13 @@ export default class extends Controller {
     // Clear localStorage
     localStorage.removeItem('passenger_selection')
     
-    // Uncheck all checkboxes
-    const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
-    checkboxes.forEach((checkbox: Element) => {
-      (checkbox as HTMLInputElement).checked = false
-    })
+    // Uncheck all checkboxes (only if passengerListPanel exists)
+    if (this.hasPassengerListPanelTarget) {
+      const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+      checkboxes.forEach((checkbox: Element) => {
+        (checkbox as HTMLInputElement).checked = false
+      })
+    }
     
     this.updateCounters()
     this.updateDisplay()
@@ -235,25 +301,30 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     
-    // Check if we're on the count panel (not passenger list panel)
-    const isCountPanelActive = !this.countPanelTarget.classList.contains("hidden")
-    
-    // Mutually exclusive modes: clear opposite mode data
-    if (isCountPanelActive) {
-      // Count mode: clear passenger names/IDs
-      this.selectedPassengerIds.clear()
-      this.selectedPassengerNames.clear()
+    // Check if we have the full modal with count panel
+    if (this.hasCountPanelTarget) {
+      // Check if we're on the count panel (not passenger list panel)
+      const isCountPanelActive = !this.countPanelTarget.classList.contains("hidden")
       
-      // Uncheck all checkboxes in passenger list
-      const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
-      checkboxes.forEach((checkbox: Element) => {
-        (checkbox as HTMLInputElement).checked = false
-      })
-    } else {
-      // Passenger name mode: clear counts
-      this.adults = 0
-      this.children = 0
-      this.infants = 0
+      // Mutually exclusive modes: clear opposite mode data
+      if (isCountPanelActive) {
+        // Count mode: clear passenger names/IDs
+        this.selectedPassengerIds.clear()
+        this.selectedPassengerNames.clear()
+        
+        // Uncheck all checkboxes in passenger list (if it exists)
+        if (this.hasPassengerListPanelTarget) {
+          const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+          checkboxes.forEach((checkbox: Element) => {
+            (checkbox as HTMLInputElement).checked = false
+          })
+        }
+      } else {
+        // Passenger name mode: clear counts
+        this.adults = 0
+        this.children = 0
+        this.infants = 0
+      }
     }
     
     // Save current state as confirmed state
@@ -279,7 +350,60 @@ export default class extends Controller {
   }
 
   selectPassenger(event: Event): void {
-    // Delegate to togglePassenger
+    // For car rental: simple click selection on div elements
+    const target = event.currentTarget as HTMLElement
+    
+    // Check if this is a div-based selection (car rental) vs checkbox (flight booking)
+    if (target.tagName === 'DIV' && target.hasAttribute('data-passenger-id')) {
+      // Car rental mode: update display fields and close modal
+      const passengerId = target.getAttribute('data-passenger-id')
+      const passengerName = target.getAttribute('data-passenger-name') || ''
+      const passengerIdType = target.getAttribute('data-passenger-id-type') || ''
+      const passengerIdNumber = target.getAttribute('data-passenger-id-number') || ''
+      const passengerPhone = target.getAttribute('data-passenger-phone') || ''
+      
+      // Update display fields (name, idType, idNumber, phone targets)
+      if (this.hasNameTarget) {
+        this.nameTarget.textContent = passengerName
+      }
+      if (this.hasIdTypeTarget) {
+        this.idTypeTarget.textContent = passengerIdType
+      }
+      if (this.hasIdNumberTarget) {
+        this.idNumberTarget.textContent = passengerIdNumber
+      }
+      if (this.hasPhoneTarget) {
+        this.phoneTarget.textContent = passengerPhone || '未填写'
+      }
+      
+      // Update hidden form fields
+      if (this.hasDriverNameTarget) {
+        const driverNameField = this.driverNameTarget as HTMLInputElement
+        driverNameField.value = passengerName
+      }
+      if (this.hasDriverIdNumberTarget) {
+        const driverIdNumberField = this.driverIdNumberTarget as HTMLInputElement
+        driverIdNumberField.value = passengerIdNumber
+      }
+      if (this.hasContactPhoneTarget) {
+        const contactPhoneField = this.contactPhoneTarget as HTMLInputElement
+        contactPhoneField.value = passengerPhone
+      }
+      
+      // Save the selected passenger ID to the value
+      if (this.hasSelectedIdValue && passengerId) {
+        this.selectedIdValue = parseInt(passengerId)
+      }
+      
+      // Close modal
+      this.modalTarget.classList.add('hidden')
+      document.body.style.overflow = ''
+      
+      return
+    }
+    
+    // Flight booking mode: delegate to togglePassenger for checkbox handling
+    // This should only be reached if the event comes from a checkbox
     this.togglePassenger(event)
   }
 
@@ -294,17 +418,34 @@ export default class extends Controller {
   }
 
   private updateCounters(): void {
-    this.adultsCountTarget.textContent = this.adults.toString()
-    this.childrenCountTarget.textContent = this.children.toString()
-    this.infantsCountTarget.textContent = this.infants.toString()
+    // Only update counter displays if they exist (flight booking mode)
+    if (this.hasAdultsCountTarget) {
+      this.adultsCountTarget.textContent = this.adults.toString()
+    }
+    if (this.hasChildrenCountTarget) {
+      this.childrenCountTarget.textContent = this.children.toString()
+    }
+    if (this.hasInfantsCountTarget) {
+      this.infantsCountTarget.textContent = this.infants.toString()
+    }
+    // Update simple count target for visa order mode
+    if (this.hasCountTarget) {
+      this.countTarget.textContent = this.adults.toString()
+    }
     this.updateModalTitle()
   }
 
   private updateModalTitle(): void {
-    this.modalTitleTarget.textContent = `当前已选: ${this.adults}成人 ${this.children}儿童 ${this.infants}婴儿`
+    // Only update modal title if it exists (flight booking mode)
+    if (this.hasModalTitleTarget) {
+      this.modalTitleTarget.textContent = `当前已选: ${this.adults}成人 ${this.children}儿童 ${this.infants}婴儿`
+    }
   }
 
   private updateDisplay(): void {
+    // Only update display if it exists (flight booking mode)
+    if (!this.hasSelectedDisplayTarget) return
+    
     const total = this.confirmedAdults + this.confirmedChildren + this.confirmedInfants
     
     // Update all button displays on the page
@@ -367,5 +508,62 @@ export default class extends Controller {
         console.error('Failed to load passenger selection from localStorage:', e)
       }
     }
+  }
+
+  private highlightSelectedPassenger(): void {
+    // Only run in car rental mode where selectedIdValue exists
+    if (!this.hasSelectedIdValue) return
+    
+    // Find all passenger div elements in the modal
+    const passengerDivs = this.element.querySelectorAll('[data-passenger-id]')
+    
+    passengerDivs.forEach((div: Element) => {
+      const passengerId = parseInt((div as HTMLElement).getAttribute('data-passenger-id') || '0')
+      const isSelected = passengerId === this.selectedIdValue
+      
+      // Update div border and background
+      if (isSelected) {
+        div.classList.add('border-blue-500', 'bg-blue-50')
+        div.classList.remove('border-gray-200')
+      } else {
+        div.classList.remove('border-blue-500', 'bg-blue-50')
+        if (!div.classList.contains('border')) {
+          // Ensure it has a border class if it was originally border-less
+        }
+      }
+      
+      // Update the radio-style indicator circle
+      const indicatorCircle = div.querySelector('.w-5.h-5.rounded-full')
+      if (indicatorCircle) {
+        if (isSelected) {
+          indicatorCircle.classList.add('border-blue-500', 'bg-blue-500')
+          indicatorCircle.classList.remove('border-gray-300')
+          
+          // Ensure checkmark icon exists
+          let checkmark = indicatorCircle.querySelector('svg')
+          if (!checkmark) {
+            checkmark = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+            checkmark.setAttribute('class', 'w-3 h-3 text-white')
+            checkmark.setAttribute('fill', 'currentColor')
+            checkmark.setAttribute('viewBox', '0 0 20 20')
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+            path.setAttribute('fill-rule', 'evenodd')
+            path.setAttribute('d', 'M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z')
+            path.setAttribute('clip-rule', 'evenodd')
+            checkmark.appendChild(path)
+            indicatorCircle.appendChild(checkmark)
+          }
+        } else {
+          indicatorCircle.classList.remove('border-blue-500', 'bg-blue-500')
+          indicatorCircle.classList.add('border-gray-300')
+          
+          // Remove checkmark icon
+          const checkmark = indicatorCircle.querySelector('svg')
+          if (checkmark) {
+            checkmark.remove()
+          }
+        }
+      }
+    })
   }
 }

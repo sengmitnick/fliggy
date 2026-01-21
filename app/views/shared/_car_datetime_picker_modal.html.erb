@@ -1,0 +1,91 @@
+<!-- Car DateTime Picker Modal -->
+<div data-car-datetime-picker-target="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+  <div class="bg-white w-full max-w-md mx-auto rounded-t-3xl pb-8 animate-slide-up max-h-[85vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white z-10 flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-xl font-bold text-gray-900" data-car-datetime-picker-target="titleText">选择取车时间</h2>
+      <button data-action="click->car-datetime-picker#closeModal" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">
+        ×
+      </button>
+    </div>
+
+    <!-- Date Selection Section -->
+    <div data-car-datetime-picker-target="dateSection">
+      <!-- Month Navigation -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <button data-action="click->car-datetime-picker#previousMonth" class="p-2 hover:bg-gray-100 rounded-full">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        
+        <div class="text-lg font-bold text-gray-900" data-car-datetime-picker-target="monthLabel">
+          2024年1月
+        </div>
+        
+        <button data-action="click->car-datetime-picker#nextMonth" class="p-2 hover:bg-gray-100 rounded-full">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Weekday Headers -->
+      <div class="grid grid-cols-7 gap-1 px-6 py-2 text-center text-sm text-gray-600">
+        <div>日</div>
+        <div>一</div>
+        <div>二</div>
+        <div>三</div>
+        <div>四</div>
+        <div>五</div>
+        <div>六</div>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="px-6 py-2" data-car-datetime-picker-target="calendar">
+        <!-- Calendar will be rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Time Selection Section (shown after date selection) -->
+    <div data-car-datetime-picker-target="timeSection" class="hidden">
+      <div class="px-6 py-4">
+        <div class="text-sm text-gray-500 mb-4">已选择：<span data-car-datetime-picker-target="selectedDateDisplay" class="font-bold text-gray-900"></span></div>
+        
+        <!-- Time Selection -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">选择时间</label>
+          <div class="grid grid-cols-6 gap-2" data-car-datetime-picker-target="timeGrid">
+            <% ['00:00', '06:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'].each do |time| %>
+              <button
+                type="button"
+                data-action="click->car-datetime-picker#selectTime"
+                data-time="<%= time %>"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                <%= time %>
+              </button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="sticky bottom-0 bg-white px-6 pt-4 flex gap-3 border-t border-gray-100">
+      <button 
+        data-action="click->car-datetime-picker#cancel"
+        class="flex-1 py-4 rounded-full border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+      >
+        取消
+      </button>
+      <button 
+        data-action="click->car-datetime-picker#confirm"
+        data-car-datetime-picker-target="confirmButton"
+        class="flex-1 py-4 rounded-full text-white font-bold transition-colors"
+        style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);"
+      >
+        确定
+      </button>
+    </div>
+  </div>
+</div>

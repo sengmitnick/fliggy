@@ -23,16 +23,19 @@
   </div>
 
   <!-- Search Card -->
+  <%= form_with url: search_cars_path, method: :get, local: true, class: "contents" do |f| %>
   <div class="mx-4 bg-white rounded-b-xl p-4 relative z-40">
     <!-- 国内/国际选择 -->
     <div class="flex bg-gray-100 p-1 rounded-lg mb-4 text-sm">
       <button 
+        type="button"
         data-car-rental-tabs-target="domesticButton"
         data-action="click->car-rental-tabs#selectDomestic"
         class="flex-1 py-1.5 rounded-md bg-white shadow-sm font-bold">
         国内
       </button>
       <button 
+        type="button"
         data-car-rental-tabs-target="internationalButton"
         data-action="click->car-rental-tabs#selectInternational"
         class="flex-1 py-1.5 text-gray-500">
@@ -43,18 +46,26 @@
     <!-- 地点 -->
     <div class="flex justify-between items-center mb-4">
       <div class="flex-1 border-r border-gray-100">
-        <div class="text-2xl font-bold flex items-center">
-          武汉 
+        <button 
+          type="button"
+          data-action="click->car-rental-tabs#openCitySelector"
+          class="text-2xl font-bold flex items-center hover:text-blue-600 transition-colors">
+          <span data-car-rental-tabs-target="cityDisplay"><%= @current_city %></span>
           <svg class="w-4 h-4 ml-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
           </svg>
-        </div>
+        </button>
       </div>
       <div class="flex-[1.5] pl-4 flex justify-between items-center">
-        <div class="text-lg font-bold">天河国际机场T3</div>
+        <button 
+          type="button"
+          data-action="click->car-rental-tabs#openPickupLocationSelector"
+          class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
+          data-car-rental-tabs-target="pickupLocationDisplay">请选择地点</button>
         <div class="flex items-center text-xs text-gray-400">
           异地还车 
           <button 
+            type="button"
             data-action="click->car-rental-tabs#toggleSwap"
             data-car-rental-tabs-target="swapToggle"
             class="w-10 h-6 bg-gray-200 rounded-full ml-1 relative">
@@ -64,35 +75,61 @@
       </div>
     </div>
 
+    <!-- 还车地点 (异地还车开启时显示) -->
+    <div class="flex justify-between items-center mb-4 hidden" data-car-rental-tabs-target="returnLocationSection">
+      <div class="flex-1">
+        <div class="text-xs text-gray-400 mb-1">还车地点</div>
+        <button 
+          type="button"
+          data-action="click->car-rental-tabs#openReturnLocationSelector"
+          class="text-lg font-bold hover:text-blue-600 transition-colors"
+          data-car-rental-tabs-target="returnLocationDisplay">同取车地点</button>
+      </div>
+    </div>
+
+    <!-- 隐藏的input字段用于表单提交 -->
+    <%= f.hidden_field :city, value: @current_city, data: { car_rental_tabs_target: 'cityInput' } %>
+    <%= f.hidden_field :pickup_location, value: '', data: { car_rental_tabs_target: 'pickupLocationInput' } %>
+    <%= f.hidden_field :return_location, value: '', data: { car_rental_tabs_target: 'returnLocationInput' } %>
+    <%= f.hidden_field :pickup_date, value: '', data: { car_rental_tabs_target: 'pickupDateInput' } %>
+    <%= f.hidden_field :return_date, value: '', data: { car_rental_tabs_target: 'returnDateInput' } %>
+
     <!-- 时间选择 -->
     <div class="flex justify-between items-center py-2 mb-4 border-b border-gray-50">
-      <div class="text-center">
-        <div class="text-xs text-gray-400">周六</div>
-        <div class="text-xl font-bold">1月10日 <span class="text-sm">13:55</span></div>
-      </div>
-      <div class="px-3 py-0.5 border border-gray-200 rounded-full text-xs">2天</div>
-      <div class="text-center">
-        <div class="text-xs text-gray-400">周一</div>
-        <div class="text-xl font-bold">1月12日 <span class="text-sm">13:55</span></div>
-      </div>
+      <button 
+        type="button"
+        data-action="click->car-rental-tabs#openPickupDateSelector"
+        class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+        <div class="text-xs text-gray-400">取车时间</div>
+        <div class="text-xl font-bold" data-car-rental-tabs-target="pickupDateDisplay">1月10日 <span class="text-sm">13:55</span></div>
+      </button>
+      <div 
+        data-car-rental-tabs-target="durationDisplay"
+        class="px-3 py-0.5 border border-gray-200 rounded-full text-xs">2天</div>
+      <button 
+        type="button"
+        data-action="click->car-rental-tabs#openReturnDateSelector"
+        class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+        <div class="text-xs text-gray-400">还车时间</div>
+        <div class="text-xl font-bold" data-car-rental-tabs-target="returnDateDisplay">1月12日 <span class="text-sm">13:55</span></div>
+      </button>
     </div>
 
     <!-- 选项 -->
     <div class="flex space-x-2 mb-6">
-      <button class="bg-gray-100 px-4 py-2 rounded-lg text-sm">送车上门</button>
-      <button class="bg-gray-100 px-4 py-2 rounded-lg text-sm">新能源车</button>
+      <button type="button" class="bg-gray-100 px-4 py-2 rounded-lg text-sm">送车上门</button>
+      <button type="button" class="bg-gray-100 px-4 py-2 rounded-lg text-sm">新能源车</button>
     </div>
 
     <!-- 搜索按钮 -->
-    <%= link_to search_cars_path, class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center", style: "background-color: #ffda00; color: #333;" do %>
-      搜索租车
-    <% end %>
+    <%= f.submit '搜索租车', class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center cursor-pointer", style: "background-color: #ffda00; color: #333; border: none;" %>
 
     <!-- 保障信息 -->
     <div class="text-center text-[10px] text-gray-400">
       平台保障 免押金 · 无车退赔 · 不符退赔 · 洗车交付 >
     </div>
   </div>
+  <% end %>
 
   <!-- 优惠活动区 -->
   <div class="mx-4 mt-4 bg-red-50/50 rounded-xl p-4 border border-red-100">
@@ -155,7 +192,7 @@
   <div class="mx-4 mt-6">
     <div class="text-lg font-bold mb-4">城市热销车型榜单</div>
     <div class="flex space-x-6 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
-      <div class="px-4 py-1 rounded-full text-black" style="background-color: #ffda00;">武汉</div>
+      <div class="px-4 py-1 rounded-full text-black" style="background-color: #ffda00;"><%= @current_city %></div>
       <span>深圳</span>
       <span>成都</span>
       <span>乌鲁木齐</span>
@@ -316,5 +353,20 @@
       <div class="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center text-xs">📄</div>
       <span class="text-[10px] text-gray-500 mt-1">我的订单</span>
     </div>
+  </div>
+
+  <!-- 城市选择器模态框 -->
+  <div data-controller="city-selector" data-city-selector-enable-multi-select-value="false">
+    <%= render 'shared/city_selector_modal' %>
+  </div>
+
+  <!-- 地点选择器模态框 -->
+  <div data-controller="location-selector">
+    <%= render 'shared/location_selector_modal' %>
+  </div>
+
+  <!-- 日期时间选择器模态框 -->
+  <div data-controller="car-datetime-picker">
+    <%= render 'shared/car_datetime_picker_modal' %>
   </div>
 </div>

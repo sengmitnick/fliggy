@@ -211,6 +211,7 @@ Rails.application.routes.draw do
   resources :cars, only: [:index, :show] do
     collection do
       get :search
+      get :locations
     end
   end
   # End routes for cars
