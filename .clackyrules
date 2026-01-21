@@ -202,14 +202,10 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 **MANDATORY**:
 - View/Controller changes: `bundle exec rspec spec/requests/xxx_spec.rb` must pass
 - Major changes or before delivery: Run full `rake test` to ensure stability
-- Browser testing: Use Playwright for end-to-end testing (see Playwright Testing section)
 
 **Testing Order (CRITICAL - Follow this sequence):**
 1. **ERB HTML Validation**: Run `bin/validate_erb_html` to check HTML structure validity
 2. **Unit/Request Tests**: Run `rake test` to verify backend logic
-3. **Browser E2E Tests**: Run Playwright tests to verify user flows
-
-NEVER skip Step 1 - HTML structure errors will cause Playwright tests to fail.
 
 `rake test` is configured to only show 5 failed test cases at a time, so you should repeatedly run rake test if these have errors (no more than 10 rounds) until all tests pass
 
@@ -246,24 +242,6 @@ Temporary files should be written in the `tmp` directory.
 - Filters out ERB-specific false positives
 
 See `docs/ERB_HTML_VALIDATION.md` for detailed documentation.
-
-## Playwright Testing
-
-**Setup:**
-- Gem: `playwright-ruby-client` (in test group)
-- Browser: Chromium installed via `bundle exec playwright install chromium`
-- Helper: `spec/support/playwright_helper.rb` provides setup/teardown methods
-
-**Test Pattern:**
-- Keep tests simple: visit page, check no errors, click main button, check no errors
-- One test per key user flow (homepage, booking flow, payment flow, etc.)
-- Tests located in `spec/system/playwright/` directory
-- Use `PlaywrightHelper` module for browser lifecycle management
-
-**Running Tests:**
-- Single test: `bundle exec rspec spec/system/playwright/xxx_spec.rb`
-- All Playwright tests: `bundle exec rspec spec/system/playwright/`
-- Run with visible browser: Set `headless: false` in test file
 
 ## Debugging Frontend Errors
 

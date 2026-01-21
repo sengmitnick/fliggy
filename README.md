@@ -246,9 +246,6 @@ bundle exec rspec spec/requests/flights_spec.rb
 # 运行 Stimulus 验证
 bundle exec rspec spec/javascript/stimulus_validation_spec.rb
 
-# 运行 Playwright E2E 测试
-bundle exec rspec spec/system/playwright/
-
 # 验证 ERB HTML 结构
 bin/validate_erb_html
 ```
