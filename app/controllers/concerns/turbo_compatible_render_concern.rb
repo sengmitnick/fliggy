@@ -10,23 +10,14 @@ module TurboCompatibleRenderConcern
   extend ActiveSupport::Concern
 
   def render(*args, **options, &block)
-    # Check if this is a mutating request (form submission)
-    mutating_request = request.post? || request.patch? || request.put?
+    # Only apply Turbo-compatible status to HTML form submissions
+    # Skip for: JSON, JS, CSS, XML, Turbo Stream, and explicit status
+    should_add_status = request.post? || request.patch? || request.put?
+    should_add_status &&= request.format.html?
+    should_add_status &&= options[:status].nil?
+    should_add_status &&= !options.key?(:json) && !options.key?(:turbo_stream)
 
-    # Check if status is not explicitly set
-    status_not_set = options[:status].nil?
-
-    # Check if we're rendering a template (not redirecting or sending data)
-    # Exclude explicit turbo_stream renders - those are intentional success responses
-    rendering_template = !options.key?(:json) &&
-                         !options.key?(:plain) &&
-                         !options.key?(:body) &&
-                         !options.key?(:turbo_stream)
-
-    # Auto-add unprocessable_entity status for Turbo compatibility
-    if mutating_request && status_not_set && rendering_template
-      options[:status] = :unprocessable_entity
-    end
+    options[:status] = :unprocessable_entity if should_add_status
 
     super(*args, **options, &block)
   end

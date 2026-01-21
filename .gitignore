@@ -106,3 +106,19 @@ backup/
 
 # Ignore Claude settings
 .claude/settings.local.json
+
+# Bubblewrap CLI build artifacts (npx @bubblewrap/cli build)
+# Note: Keep twa-manifest.json and store_icon.png (from init) in version control
+*.apk
+*.aab
+*.apk.idsig
+android.keystore
+build.gradle
+settings.gradle
+gradle.properties
+gradlew
+gradlew.bat
+manifest-checksum.txt
+build/
+gradle/
+.gradle/
