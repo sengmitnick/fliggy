@@ -1,3 +1,5 @@
+require_relative 'herb_stimulus_parser'
+
 # Shared helper methods for Stimulus validation specs
 module StimulusValidationHelpers
   # Parse action string into component parts
@@ -178,26 +180,24 @@ module StimulusValidationHelpers
     type_string.split(/[-_]/).map(&:capitalize).join('')
   end
 
-  # Parse ERB actions from content
+  # Parse ERB actions from content using Herb
   def parse_erb_actions(content, relative_path)
     actions = []
 
-    # Use AST parser to find actions in ERB blocks
-    erb_parser = ErbAstParser.new(content)
-    erb_actions = erb_parser.find_stimulus_actions
+    # Use Herb-based parser to find actions in ERB blocks
+    parser = StimulusValidation::HerbStimulusParser.new(content, relative_path)
+    parser.parse
 
-    erb_actions.each do |erb_action|
-      action_info = erb_action[:match][:parsed_action]
-
+    parser.actions.each do |action_info|
       actions << {
         element: nil, # ERB actions don't have direct DOM elements
-        action: action_info[:action],
+        action: action_info[:action_string],
         event: action_info[:event],
         controller: action_info[:controller],
         method: action_info[:method],
         source: 'erb_ast',
-        line_number: erb_action[:line_number],
-        line_content: action_info[:action]
+        line_number: action_info[:location] ? action_info[:location].start.line : 1,
+        line_content: action_info[:action_string]
       }
     end
 
@@ -205,9 +205,24 @@ module StimulusValidationHelpers
   end
 
   # Check if ERB action is within the controller scope
-  def check_erb_action_scope(action_info, content, relative_path)
+  def check_erb_action_scope(action_info, content, relative_path, herb_parser)
     controller_name = action_info[:controller]
     action_line = action_info[:line_number]
+    
+    # If no line number provided (HTML actions), try to find it by searching for the action string
+    if !action_line
+      action_string = action_info[:action]  # e.g., "click->payment-modal#closeOnBackdrop"
+      lines = content.split("\n")
+      lines.each_with_index do |line, index|
+        if line.include?(action_string)
+          action_line = index + 1
+          break
+        end
+      end
+    end
+    
+    # If still no line number found, cannot check scope
+    return false unless action_line
 
     # Find all controller definitions in the file
     controller_scopes = []
@@ -215,20 +230,61 @@ module StimulusValidationHelpers
 
     lines.each_with_index do |line, index|
       line_num = index + 1
+      controller_found = false
 
-      # Check for data-controller attribute using simple string matching
+      # Check for HTML data-controller attribute (data-controller="...")
       if line.include?('data-controller=') && line.include?(controller_name)
         # Verify it's actually the controller name (not a substring)
         if line.include?("\"#{controller_name}\"") || line.include?("'#{controller_name}'") ||
            line.include?("\"#{controller_name} ") || line.include?("'#{controller_name} ") ||
            line.include?(" #{controller_name}\"") || line.include?(" #{controller_name}'") ||
            line.include?(" #{controller_name} ")
-
-          # Find the scope boundaries for this controller
-          scope_start = line_num
-          scope_end = find_scope_end(lines, index)
-          controller_scopes << { start: scope_start, end: scope_end, line: line.strip }
+          controller_found = true
         end
+      end
+
+      # Check for Rails hash syntax (data: { controller: "..." } or data: { 'controller' => '...' })
+      if !controller_found && line.include?('controller:') && line.include?(controller_name)
+        # Match: controller: "payment-modal hotel-traveler-selector"
+        if line =~ /controller:\s*['"]([^'"]+)['"]/
+          controllers_str = $1
+          if controllers_str.split(/\s+/).include?(controller_name)
+            controller_found = true
+          end
+        end
+      end
+
+      if !controller_found && line.include?('controller') && line.include?('=>') && line.include?(controller_name)
+        # Match: 'controller' => "payment-modal hotel-traveler-selector"
+        if line =~ /['"]controller['"]\s*=>\s*['"]([^'"]+)['"]/
+          controllers_str = $1
+          if controllers_str.split(/\s+/).include?(controller_name)
+            controller_found = true
+          end
+        end
+      end
+
+      if controller_found
+        # Find the scope boundaries for this controller
+        scope_start = line_num
+        scope_end = find_scope_end(lines, index)
+        controller_scopes << { start: scope_start, end: scope_end, line: line.strip }
+      end
+    end
+
+    # Second, check for ERB controller definitions using herb_parser
+    herb_parser.controllers.each do |controller_info|
+      if controller_info[:controller_name] == controller_name && controller_info[:location]
+        block_start_line = controller_info[:location].start.line
+        # For ERB controllers, consider the scope from start to a reasonable range
+        # This is a simplified approach - we assume controller scope extends reasonably far
+        block_end_line = block_start_line + 100 # Reasonable default
+
+        controller_scopes << {
+          start: block_start_line,
+          end: block_end_line,
+          line: "ERB controller: #{controller_name}"
+        }
       end
     end
 
@@ -244,6 +300,40 @@ module StimulusValidationHelpers
   def find_scope_end(lines, start_index)
     # Find the opening tag that contains data-controller
     start_line = lines[start_index]
+
+    # Check if this is a Rails helper (form_with, link_to, etc.)
+    # These use <% end %> as closing tag
+    if start_line.include?('<%=') && (start_line.include?('form_with') || start_line.include?('link_to') || start_line.include?('do |'))
+      # Count ERB block depth to find matching <% end %>
+      depth = 0
+      block_started = false
+
+      (start_index...lines.length).each do |i|
+        line = lines[i]
+
+        # Look for block start (do |...| or do)
+        if line.include?('do |') || line =~ /\bdo\s*$/
+          depth += 1
+          block_started = true
+        end
+
+        # Look for other block starts (if, unless, each, etc.)
+        if line =~ /<% (?:if|unless|case|for|while|begin|[\w\.]+\.(?:each|map|select|times))\b/
+          depth += 1
+        end
+
+        # Look for block end
+        if line =~ /<%\s*end\s*%>/
+          depth -= 1
+          if depth == 0 && block_started
+            return i + 1
+          end
+        end
+      end
+
+      # If no matching end found, assume scope extends to end of file
+      return lines.length
+    end
 
     # Look for the opening tag in the current line or previous line
     opening_tag_line = nil

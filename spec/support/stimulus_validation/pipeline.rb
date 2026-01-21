@@ -24,8 +24,33 @@ class StimulusValidationPipeline
       parent_content = File.read(Rails.root.join(parent_file))
       parent_doc = Nokogiri::HTML::DocumentFragment.parse(parent_content)
 
+      # Extract controllers from ALL HTML data-controller attributes in parent file
+      # (not just top-level ones, since partials can be nested deep in the structure)
       parent_doc.css('[data-controller]').each do |element|
         element['data-controller'].split(/\s+/).each do |controller|
+          controllers << controller.strip
+        end
+      end
+
+      # Extract controllers from ERB syntax: data: { controller: "..." }
+      # Pattern: data: { controller: "controller-name" } or data: { "controller" => "controller-name" }
+      parent_content.scan(/data:\s*\{[^}]*['"]controller['"]\s*[=:]>?\s*['"]([^'"]+)['"]/) do |match|
+        match[0].split(/\s+/).each do |controller|
+          controllers << controller.strip
+        end
+      end
+
+      # Extract controllers from Rails hash syntax: controller: "controller-name"
+      # This is the most common pattern in Rails ERB templates
+      parent_content.scan(/controller:\s*['"]([^'"]+)['"]/) do |match|
+        match[0].split(/\s+/).each do |controller|
+          controllers << controller.strip
+        end
+      end
+
+      # Also check for data-controller in ERB output tags: <%= ... data-controller="..." ... %>
+      parent_content.scan(/data-controller=['"]([^'"]+)['"]/) do |match|
+        match[0].split(/\s+/).each do |controller|
           controllers << controller.strip
         end
       end
@@ -88,8 +113,8 @@ class StimulusValidationPipeline
         file.include?('/admin/') ||
         file.include?('/kaminari/') ||
         file.include?('/shared/admin/') ||
-        file.include?('bookings/new.html.erb') ||
-        file.include?('train_bookings/new.html.erb') ||
+        file.end_with?('/bookings/new.html.erb') ||  # Only match /bookings/new.html.erb, not hotel_bookings or tour_group_bookings
+        file.end_with?('/train_bookings/new.html.erb') ||  # Match exact path
         file.include?('shared/friendly_error.html.erb') ||
         file.include?('shared/missing_template_fallback.html.erb')
       end
