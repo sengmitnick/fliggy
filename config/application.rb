@@ -70,7 +70,12 @@ module Myapp
     # Enable cron-style recurring jobs
     config.good_job.enable_cron = true
     # Load cron configuration from recurring.yml
-    cron_config = Rails.application.config_for(:recurring)
-    config.good_job.cron = cron_config if cron_config.present?
+    begin
+      cron_config = Rails.application.config_for(:recurring)
+      config.good_job.cron = cron_config if cron_config.is_a?(Hash) && cron_config.present?
+    rescue RuntimeError
+      # No cron configuration for this environment
+      config.good_job.cron = {}
+    end
   end
 end
