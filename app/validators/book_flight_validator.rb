@@ -2,17 +2,29 @@
 
 require_relative 'base_validator'
 
-# 验证用例1: 预订深圳到北京的低价机票
+# 验证用例1: 预订深圳到北京后天的最低价机票
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索深圳到北京的航班，
-#   找到价格最低的航班并成功创建订单
+#   Agent 需要在系统中搜索深圳到北京后天的航班，
+#   找到价格最低的航班并成功创建订单。
+#   
+#   具体要求:
+#   - 出发城市: 深圳
+#   - 目的城市: 北京
+#   - 出发日期: 后天（当前日期 + 2天）
+#   - 价格要求: 必须选择该航线当天的最低价航班
+#   - 操作要求: 完整填写订单信息（乘客姓名、身份证号、联系电话等）
+#   
+#   测试场景:
+#   系统中会有多个深圳到北京的航班，价格各不相同。
+#   Agent 需要正确筛选目标日期的航班，对比价格，选择最便宜的选项。
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 航线正确 (20分)
-#   - 出发日期正确 (20分)
-#   - 选择了最低价航班 (40分)
+#   - 订单已创建 (20分) - 系统中存在新创建的订单记录
+#   - 出发城市正确 (10分) - 订单中的航班出发城市为深圳
+#   - 目的城市正确 (10分) - 订单中的航班目的城市为北京
+#   - 出发日期正确 (20分) - 订单中的航班日期为后天（+2天）
+#   - 选择了最低价航班 (40分) - 所选航班价格等于该航线当天的最低价
 # 
 # 使用方法:
 #   # 准备阶段
@@ -25,7 +37,7 @@ require_relative 'base_validator'
 class BookFlightValidator < BaseValidator
   self.validator_id = 'book_flight_sz_to_bj'
   self.title = '预订深圳到北京的低价机票'
-  self.description = '在后天的航班中找到价格最低的机票并完成预订'
+  self.description = '预订后天（当前日期+2天）从深圳到北京的航班，要求选择价格最低的航班并完成订单创建'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -44,6 +56,15 @@ class BookFlightValidator < BaseValidator
       data_version: 0
     ).minimum(:price)
     
+    # 计算可用航班的价格范围
+    available_flights = Flight.where(
+      departure_city: @origin,
+      destination_city: @destination,
+      flight_date: @target_date,
+      data_version: 0
+    )
+    max_price = available_flights.maximum(:price)
+    
     # 返回给 Agent 的任务信息
     {
       task: "请预订一张后天从#{@origin}到#{@destination}的低价机票",
@@ -51,14 +72,14 @@ class BookFlightValidator < BaseValidator
       destination_city: @destination,
       date: @target_date.to_s,
       date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
-      hint: "系统中有多个航班可选，请选择价格最低的航班",
-      available_flights_count: Flight.where(
-        departure_city: @origin,
-        destination_city: @destination,
-        flight_date: @target_date,
-        data_version: 0
-      ).count,
-      lowest_price: @lowest_price
+      requirement: "必须选择该航线当天的最低价航班",
+      hint: "系统中有多个航班可选，价格从 #{@lowest_price} 元到 #{max_price} 元不等，请仔细对比后选择最便宜的航班",
+      available_flights_count: available_flights.count,
+      price_range: {
+        lowest: @lowest_price,
+        highest: max_price
+      },
+      scoring_note: "选择最低价航班占评分权重40%，请务必进行价格对比"
     }
   end
   

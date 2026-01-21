@@ -13,7 +13,9 @@ class Train < ApplicationRecord
   scope :by_date, ->(date) { where("DATE(departure_time) = ?", date) }
   scope :available, -> { where('available_seats > ?', 0) }
   scope :high_speed, -> { where("train_number LIKE 'G%' OR train_number LIKE 'D%'") }
-  scope :ordered_by_time, -> { order(:departure_time) }
+  scope :ordered_by_time, -> { 
+    order(Arel.sql("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai')"))
+  }
   scope :ordered_by_price, -> { order(:price_second_class) }
   scope :ordered_by_duration, -> { order(:duration) }
 

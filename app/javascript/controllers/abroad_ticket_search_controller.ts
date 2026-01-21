@@ -346,7 +346,7 @@ export default class extends Controller<HTMLElement> {
     if (html === noResultsHeader) {
       html += '<div class="text-center py-8 text-gray-400">未找到匹配的站点</div>'
     }
-    /* eslint-enable indent, max-len */
+    /* eslint-enable indent */
     
     this.stationListTarget.innerHTML = html
   }

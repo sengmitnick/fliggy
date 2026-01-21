@@ -1,9 +1,10 @@
 class PwaController < ApplicationController
   # Skip browser version check for PWA files
   skip_before_action :verify_authenticity_token
+  allow_browser versions: :all
   
   def manifest
-    render 'pwa/manifest', layout: false, content_type: 'application/json'
+    render 'pwa/manifest', layout: false, formats: [:json], content_type: 'application/manifest+json'
   end
 
   def service_worker

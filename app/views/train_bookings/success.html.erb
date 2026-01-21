@@ -172,7 +172,11 @@
     <!-- Action Buttons -->
     <div class="flex space-x-3">
       <%= link_to '返回首页', root_path, class: 'flex-1 px-6 py-3 text-center border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors' %>
-      <%= link_to '继续预订', search_trains_path, class: 'flex-1 px-6 py-3 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors' %>
+      <%= link_to '继续预订', search_trains_path(
+        departure_city: @train.departure_city,
+        arrival_city: @train.arrival_city,
+        date: @train.departure_time.to_date
+      ), class: 'flex-1 px-6 py-3 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors' %>
     </div>
   </div>
 </div>

@@ -2,17 +2,19 @@
 
 require_relative 'base_validator'
 
-# 验证用例3: 预订明天上海到杭州最早的高铁
+# 验证用例3: 预订明天上海到杭州最早的高铁（二等座）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天上海到杭州的所有高铁，
-#   找到发车时间最早的车次并成功创建订单
+#   找到发车时间最早的车次并成功创建订单。
+#   优先选择二等座（最常用的座位类型）。
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 路线正确 (20分)
 #   - 出发日期正确 (20分)
-#   - 选择了最早的车次 (40分)
+#   - 选择了最早的车次 (30分)
+#   - 选择了二等座 (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -24,8 +26,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class BookEarliestTrainValidator < BaseValidator
   self.validator_id = 'book_earliest_train_sh_to_hz'
-  self.title = '预订明天上海到杭州最早的高铁'
-  self.description = '在明天的车次中找到发车时间最早的高铁并完成预订'
+  self.title = '预订明天上海到杭州最早的高铁（二等座）'
+  self.description = '在明天的车次中找到发车时间最早的高铁并完成预订，优先选择二等座'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -49,12 +51,12 @@ class BookEarliestTrainValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订一张明天从#{@origin}到#{@destination}最早的高铁票",
+      task: "请预订一张明天从#{@origin}到#{@destination}最早的高铁票（二等座）",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,
       date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
-      hint: "系统中有多个车次可选，请选择发车时间最早的",
+      hint: "系统中有多个车次可选，请选择发车时间最早的，并选择二等座",
       available_trains_count: Train.where(
         departure_city: @origin,
         arrival_city: @destination,
@@ -91,7 +93,7 @@ class BookEarliestTrainValidator < BaseValidator
     end
     
     # 断言4: 选择了最早的车次（核心评分项）
-    add_assertion "选择了最早的车次", weight: 40 do
+    add_assertion "选择了最早的车次", weight: 30 do
       # 查找该路线当天的所有车次
       all_trains = Train.where(
         departure_city: @origin,
@@ -105,6 +107,12 @@ class BookEarliestTrainValidator < BaseValidator
       expect(@booking.train.departure_time).to eq(earliest_time),
         "未选择最早车次。最早发车: #{earliest_time.strftime('%H:%M')} (#{all_trains.find_by(departure_time: earliest_time).train_number}), " \
         "实际选择: #{@booking.train.departure_time.strftime('%H:%M')} (#{@booking.train.train_number})"
+    end
+    
+    # 断言5: 选择了二等座
+    add_assertion "选择了二等座", weight: 10 do
+      expect(@booking.seat_type).to eq('second_class'),
+        "应选择二等座，实际选择: #{@booking.seat_type_label}"
     end
   end
   
