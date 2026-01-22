@@ -100,32 +100,38 @@ export default class extends Controller<HTMLElement> {
   }
 
   private updateTravelerForms(): void {
-    const container = document.querySelector('.bg-white.px-4.py-4 > div:has(> h3.text-base.font-semibold.text-foreground)')
-    if (!container) return
+    // 找到出行人信息容器（包含"选择X位游客"标题的section）
+    const travelerSection = document.querySelector('[data-traveler-toggle-target="travelerSection"]')
+    if (!travelerSection) {
+      console.warn('未找到出行人信息容器')
+      return
+    }
     
-    // 找到所有已存在的出行人表单
-    const existingForms = container.querySelectorAll('.mb-4.p-4.bg-surface.rounded-lg.border.border-border')
+    // 找到所有已存在的出行人表单卡片
+    const existingForms = travelerSection.querySelectorAll('.mb-4.p-4.bg-surface.rounded-lg.border.border-border')
     const currentCount = existingForms.length
     
     if (this.quantity > currentCount) {
       // 需要添加表单
       const formsToAdd = this.quantity - currentCount
-      const lastForm = existingForms[existingForms.length - 1] as HTMLElement
       
       for (let i = 0; i < formsToAdd; i++) {
-        const newForm = this.createTravelerForm(currentCount + i, 'adult')
-        // 在“更多出行人”按钮之前插入
-        const addButton = container.querySelector('button[type="button"].w-full')
+        const newIndex = currentCount + i
+        const newForm = this.createTravelerForm(newIndex, 'adult')
+        
+        // 在"更多出行人"按钮之前插入
+        const addButton = travelerSection.querySelector('button[type="button"].w-full.py-3')
         if (addButton) {
-          addButton.parentElement?.insertBefore(newForm, addButton)
+          travelerSection.insertBefore(newForm, addButton)
         }
       }
     } else if (this.quantity < currentCount) {
-      // 需要删除表单
+      // 需要删除表单（从最后一个开始删除）
       const formsToRemove = currentCount - this.quantity
       for (let i = 0; i < formsToRemove; i++) {
-        const lastForm = existingForms[currentCount - 1 - i] as HTMLElement
-        lastForm.remove()
+        const lastFormIndex = currentCount - 1 - i
+        const formToRemove = existingForms[lastFormIndex] as HTMLElement
+        formToRemove.remove()
       }
     }
   }
@@ -158,8 +164,12 @@ export default class extends Controller<HTMLElement> {
           <input type="text" 
                  name="tour_group_booking[booking_travelers_attributes][${index}][traveler_name]" 
                  placeholder="请输入姓名"
+                 data-tour-traveler-selector-target="travelerNameInput"
                  class="flex-1 text-sm text-foreground focus:outline-none" />
-          <button type="button" class="text-blue-500">
+          <button type="button" 
+                  class="text-blue-500"
+                  data-action="click->tour-traveler-selector#openModal"
+                  data-traveler-index="${index}">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
             </svg>
@@ -171,6 +181,7 @@ export default class extends Controller<HTMLElement> {
           <input type="text" 
                  name="tour_group_booking[booking_travelers_attributes][${index}][id_number]" 
                  placeholder="请输入身份证号"
+                 data-tour-traveler-selector-target="travelerIdInput"
                  class="flex-1 text-sm text-foreground focus:outline-none" />
         </div>
         

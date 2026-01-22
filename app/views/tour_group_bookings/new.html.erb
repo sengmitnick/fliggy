@@ -146,7 +146,9 @@
               </span>
             </div>
             <button type="button" class="w-6 h-6 text-foreground-muted">
-              
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+              </svg>
             </button>
           </div>
           
@@ -239,11 +241,7 @@
     </div>
     
     <!-- 保险 -->
-    <div class="bg-white px-4 py-4" 
-         data-controller="insurance-selector"
-         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
-         data-insurance-selector-adult-count-value="<%= @adult_count %>"
-         data-insurance-selector-child-count-value="<%= @child_count %>">
+    <div class="bg-white px-4 py-4">
       <div class="flex items-center gap-2 mb-4">
         <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -267,8 +265,7 @@
               checked: @booking.insurance_type == 'none',
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
@@ -291,8 +288,7 @@
           <%= f.radio_button :insurance_type, 'standard', 
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #FFE4B3;">
@@ -321,8 +317,7 @@
           <%= f.radio_button :insurance_type, 'premium', 
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #E6F3FF;">
@@ -427,7 +422,11 @@
     </div>
     
     <!-- 底部固定栏 -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3">
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3"
+         data-controller="insurance-selector"
+         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
+         data-insurance-selector-adult-count-value="<%= @adult_count %>"
+         data-insurance-selector-child-count-value="<%= @child_count %>">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
           <span class="text-sm text-foreground-muted">合计</span>

@@ -1,14 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["radio", "totalPrice"]
+  static targets = ["totalPrice"]
   static values = {
     basePrice: Number,
     adultCount: Number,
     childCount: Number
   }
 
-  declare readonly radioTargets: HTMLInputElement[]
   declare readonly totalPriceTarget: HTMLElement
   declare readonly basePriceValue: number
   declare readonly adultCountValue: number
@@ -44,7 +43,8 @@ export default class extends Controller<HTMLElement> {
   }
 
   updatePrice(): void {
-    const selectedRadio = this.radioTargets.find((radio) => radio.checked)
+    // 查找选中的保险类型
+    const selectedRadio = document.querySelector<HTMLInputElement>('input[name="tour_group_booking[insurance_type]"]:checked')
     if (!selectedRadio) return
 
     const insuranceType = selectedRadio.value
