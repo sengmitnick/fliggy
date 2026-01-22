@@ -100,4 +100,88 @@ class InsuranceService < ApplicationService
       medical: option[:medical]
     }
   end
+
+  # Get standalone insurance product by embedding code
+  def self.get_standalone_product(insurance_type)
+    return nil if insurance_type.to_sym == :none
+    InsuranceProduct.embeddable.find_by(embedding_code: insurance_type.to_s)
+  end
+
+  # Create insurance order from booking (for embedded insurance)
+  def self.create_insurance_order_from_booking(booking, user:)
+    return nil if booking.insurance_type.blank? || booking.insurance_type == 'none'
+    return nil if booking.insurance_price.blank? || booking.insurance_price.zero?
+
+    product = get_standalone_product(booking.insurance_type)
+    return nil unless product
+
+    # Determine dates based on booking type
+    start_date, end_date = extract_booking_dates(booking)
+    return nil unless start_date && end_date
+
+    # Determine destination
+    destination = extract_booking_destination(booking)
+    destination_type = extract_booking_destination_type(booking)
+
+    # Create insurance order
+    InsuranceOrder.create!(
+      user: user,
+      insurance_product: product,
+      source: 'embedded',
+      start_date: start_date,
+      end_date: end_date,
+      destination: destination,
+      destination_type: destination_type,
+      insured_persons: [{ name: user.name.presence || user.email.split('@').first, id_number: '' }],
+      unit_price: booking.insurance_price,
+      quantity: 1,
+      status: 'paid',
+      paid_at: booking.created_at,
+      related_booking: booking
+    )
+  end
+
+  private
+
+  def self.extract_booking_dates(booking)
+    case booking
+    when Booking  # Flight booking
+      departure_date = booking.departure_time&.to_date
+      return_date = booking.return_time&.to_date || departure_date
+      [departure_date, return_date]
+    when HotelBooking
+      [booking.check_in_date, booking.check_out_date]
+    when TrainBooking
+      departure_date = booking.departure_time&.to_date
+      [departure_date, departure_date]
+    else
+      [nil, nil]
+    end
+  end
+
+  def self.extract_booking_destination(booking)
+    case booking
+    when Booking  # Flight booking
+      booking.arrival_city || booking.destination
+    when HotelBooking
+      booking.city
+    when TrainBooking
+      booking.arrival_station
+    else
+      '未知目的地'
+    end
+  end
+
+  def self.extract_booking_destination_type(booking)
+    case booking
+    when Booking
+      booking.trip_type == 'international' ? 'international' : 'domestic'
+    when HotelBooking
+      'domestic'  # Hotels are primarily domestic
+    when TrainBooking
+      'domestic'
+    else
+      'domestic'
+    end
+  end
 end

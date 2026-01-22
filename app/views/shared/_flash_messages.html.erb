@@ -1,5 +1,8 @@
 <% flash.each do |key, value| %>
-  <%
+  <% 
+    # Skip helper keys that are not actual messages
+    next if [:return_to, :reopen_modal].include?(key.to_sym)
+    
     # Determine if this is a tips message for special styling
     is_tips = key.to_sym == :tips
     klass = is_tips ? "fixed top-4 left-1/2 z-50 w-auto max-w-md" : "px-1 py-3"
@@ -22,11 +25,27 @@
        <% end %>>
     <div class="<%= alert_class %>">
       <div class="<%= text_class %>"><%= value %></div>
-      <button class="ml-auto p-1 rounded-full hover:bg-gray-900/10 transition-colors" @click="show = false">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
+      
+      <% if key.to_sym == :notice && flash[:return_to].present? %>
+        <!-- Return button for going back to booking page and reopening modal -->
+        <% 
+          return_url = flash[:return_to]
+          if flash[:reopen_modal].present?
+            separator = return_url.include?('?') ? '&' : '?'
+            return_url = "#{return_url}#{separator}reopen_modal=#{flash[:reopen_modal]}"
+          end
+        %>
+        <%= link_to return_url, class: "ml-auto px-3 py-1 rounded-full text-xs font-medium bg-white/20 hover:bg-white/30 transition-colors" do %>
+          返回
+        <% end %>
+      <% else %>
+        <!-- Close button -->
+        <button class="ml-auto p-1 rounded-full hover:bg-gray-900/10 transition-colors" @click="show = false">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      <% end %>
     </div>
   </div>
 <% end %>

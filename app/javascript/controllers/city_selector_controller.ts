@@ -111,9 +111,9 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("CitySelector connected", { enableMultiSelect: this.enableMultiSelectValue })
-    // Initialize default values
-    if (!this.departureCityValue) this.departureCityValue = "北京"
-    if (!this.destinationCityValue) this.destinationCityValue = "杭州"
+    // Initialize default values only if undefined (not empty string)
+    if (this.departureCityValue === undefined) this.departureCityValue = "北京"
+    if (this.destinationCityValue === undefined) this.destinationCityValue = "杭州"
     
     // Set initial values to hidden inputs (only if targets exist)
     if (this.hasDepartureCityInputTarget) {

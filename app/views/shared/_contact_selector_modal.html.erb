@@ -1,0 +1,82 @@
+<!-- Contact Selector Modal -->
+<div data-contact-selector-target="modal" 
+     data-action="click->contact-selector#closeModal"
+     class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-end">
+  <div class="bg-white w-full max-w-md mx-auto rounded-t-3xl pb-safe animate-slide-up"
+       data-action="click->contact-selector#stopPropagation">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+      <h2 class="text-lg font-medium text-gray-900">选择联系人</h2>
+      <button 
+        data-action="click->contact-selector#closeModal"
+        class="text-gray-400 hover:text-gray-600 text-3xl leading-none p-1">
+        ×
+      </button>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="px-4 py-2 bg-blue-50 border-b border-blue-100">
+      <p class="text-sm text-gray-600">选择常用联系人</p>
+    </div>
+
+    <!-- Content - Scrollable contact list -->
+    <div class="max-h-96 overflow-y-auto">
+      <% if current_user&.contacts&.any? %>
+        <!-- Contact List -->
+        <% current_user.contacts.order(is_default: :desc, created_at: :desc).each_with_index do |contact, index| %>
+          <div 
+            class="px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+            data-action="click->contact-selector#selectContact"
+            data-contact-name="<%= contact.name %>"
+            data-contact-phone="<%= contact.phone %>">
+            <div class="flex items-center">
+              <div class="flex-1">
+                <!-- Name with badge -->
+                <div class="flex items-center mb-1">
+                  <span class="font-bold text-base text-gray-900"><%= contact.name %></span>
+                  <% if contact.is_default? %>
+                    <span class="ml-2 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-600">默认</span>
+                  <% end %>
+                </div>
+                
+                <!-- Phone Number -->
+                <div class="text-sm text-gray-600">
+                  <%= contact.phone.present? ? contact.phone : '未设置手机号' %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4">
+          <svg class="w-20 h-20 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+          </svg>
+          <div class="text-gray-500 text-base mb-2">暂无常用联系人</div>
+          <div class="text-sm text-gray-400 mb-6">请前往个人中心添加常用联系人信息</div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+</style>

@@ -1,0 +1,279 @@
+<div class="bg-surface min-h-screen pb-24">
+  <!-- 顶部导航 -->
+  <header class="sticky top-0 z-50 bg-white shadow-sm">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to (params[:from] == 'search' ? search_insurances_path : insurances_path), class: "p-1" do %>
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="text-lg font-bold">产品详情</h1>
+      <button class="p-1">
+        <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 产品头部卡片 -->
+  <section class="mt-4 mx-4">
+    <div class="bg-white rounded-2xl overflow-hidden shadow-md">
+      <!-- 产品图片 -->
+      <% if @product.image_url.present? %>
+        <div class="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100">
+          <img src="<%= @product.image_url %>" alt="<%= @product.name %>" class="w-full h-full object-cover">
+        </div>
+      <% else %>
+        <div class="w-full h-48 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 flex items-center justify-center relative overflow-hidden">
+          <svg class="w-24 h-24 text-blue-400 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+      <% end %>
+
+      <!-- 产品信息 -->
+      <div class="p-4">
+        <!-- 标题和标签 -->
+        <div class="flex items-start justify-between mb-3">
+          <h2 class="text-xl font-bold text-gray-900 flex-1"><%= @product.name %></h2>
+          <div class="flex gap-1 ml-2">
+            <% if @product.official_select %>
+              <span class="bg-orange-50 text-orange-600 text-xs px-2 py-1 rounded-full border border-orange-100 font-medium">官方优选</span>
+            <% end %>
+            <% if @product.featured %>
+              <span class="bg-red-50 text-red-600 text-xs px-2 py-1 rounded-full border border-red-100 font-medium">热销</span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- 保险公司 -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex items-center gap-1 text-sm text-gray-600">
+            <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <%= @product.company %>承保
+          </div>
+          <span class="text-xs text-gray-400">|</span>
+          <span class="text-xs text-gray-500"><%= @product.product_type_name %></span>
+        </div>
+
+        <!-- 价格区域 -->
+        <div class="bg-orange-50 rounded-xl p-4 border border-orange-100">
+          <% if @calculated_price.present? && @days.present? %>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-gray-600">保障<%= @days %>天</span>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500">¥</span>
+                <span class="text-3xl font-bold text-orange-600"><%= @calculated_price.to_i %></span>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500">¥<%= @product.price_per_day.to_i %>/天</div>
+          <% else %>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">保障价格</span>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500">¥</span>
+                <span class="text-3xl font-bold text-orange-600"><%= @product.price_per_day.to_i %></span>
+                <span class="text-sm text-gray-500 ml-1">/天起</span>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              适用天数：<%= @product.min_days %>-<%= @product.max_days %>天
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 产品亮点 -->
+  <% if @product.highlights.any? %>
+    <section class="mt-4 mx-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-900 mb-3">产品亮点</h3>
+        <div class="space-y-2">
+          <% @product.highlights.each_with_index do |highlight, index| %>
+            <div class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span class="text-xs font-bold text-gray-900"><%= index + 1 %></span>
+              </div>
+              <span class="text-sm text-gray-700 flex-1"><%= highlight %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- 保障详情 -->
+  <section class="mt-4 mx-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">保障详情</h3>
+      
+      <div class="space-y-3">
+        <% if @product.coverage_accident > 0 %>
+          <div class="flex items-center justify-between py-3 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-900">意外身故/伤残</div>
+                <div class="text-xs text-gray-500">因意外导致的身故或伤残赔付</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-base font-bold text-blue-600">¥<%= number_to_human(@product.coverage_accident, precision: 0, significant: false, units: { thousand: '千', million: '万' }) %></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @product.coverage_medical > 0 %>
+          <div class="flex items-center justify-between py-3 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-900">意外医疗费用</div>
+                <div class="text-xs text-gray-500">因意外导致的医疗费用赔付</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-base font-bold text-green-600">¥<%= number_to_human(@product.coverage_medical, precision: 0, significant: false, units: { thousand: '千', million: '万' }) %></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @product.coverage_trip_cancellation > 0 %>
+          <div class="flex items-center justify-between py-3 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-900">行程取消</div>
+                <div class="text-xs text-gray-500">行程取消的损失赔付</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-base font-bold text-orange-600">¥<%= number_to_human(@product.coverage_trip_cancellation, precision: 0, significant: false, units: { thousand: '千', million: '万' }) %></div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- 其他保障项目 -->
+        <% @product.coverage_details.except('accident', 'medical', 'trip_cancellation').each do |key, value| %>
+          <% if value.to_i > 0 %>
+            <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-gray-900"><%= key.to_s.titleize %></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-base font-bold text-purple-600">
+                  <% if value.to_s.include?('%') %>
+                    <%= value %>
+                  <% else %>
+                    ¥<%= number_to_human(value, precision: 0, significant: false, units: { thousand: '千', million: '万' }) %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- 适用场景 -->
+  <% if @product.scenes.any? %>
+    <section class="mt-4 mx-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-900 mb-3">适用场景</h3>
+        <div class="flex flex-wrap gap-2">
+          <% @product.scenes.each do |scene| %>
+            <span class="inline-block bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full border border-blue-100">
+              <%= scene %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- 相关推荐 -->
+  <% if @related_products.any? %>
+    <section class="mt-6 mx-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold text-gray-900">相关推荐</h3>
+        <span class="text-xs text-gray-500">来自 <%= @product.company %></span>
+      </div>
+
+      <div class="space-y-3">
+        <% @related_products.each do |product| %>
+          <%= link_to insurance_path(product), class: "block bg-white rounded-xl p-3 shadow-sm border border-gray-100" do %>
+            <div class="flex gap-3">
+              <% if product.image_url.present? %>
+                <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+                </div>
+              <% else %>
+                <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+              <% end %>
+
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-gray-900 line-clamp-1 mb-1"><%= product.name %></h4>
+                <div class="text-xs text-gray-500 mb-2 line-clamp-1">
+                  <% if product.highlights.any? %>
+                    <%= product.highlights.first %>
+                  <% end %>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500">¥</span>
+                  <span class="text-base font-bold text-orange-600"><%= product.price_per_day.to_i %></span>
+                  <span class="text-xs text-gray-500 ml-1">/天起</span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>
+
+<!-- 底部操作栏 -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-40 safe-area-bottom">
+  <div class="flex items-center gap-3">
+    <div class="flex-1">
+      <% if @calculated_price.present? %>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500">总价 ¥</span>
+          <span class="text-2xl font-bold text-orange-600"><%= @calculated_price.to_i %></span>
+        </div>
+        <div class="text-xs text-gray-500">保障<%= @days %>天</div>
+      <% else %>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500">¥</span>
+          <span class="text-2xl font-bold text-orange-600"><%= @product.price_per_day.to_i %></span>
+          <span class="text-xs text-gray-500 ml-1">/天起</span>
+        </div>
+      <% end %>
+    </div>
+    <%= link_to new_insurance_order_path(
+      insurance_product_id: @product.id,
+      start_date: @start_date,
+      end_date: @end_date,
+      destination: @destination
+    ), class: "flex-1 btn-primary py-3 text-center font-bold rounded-full shadow-lg" do %>
+      立即投保
+    <% end %>
+  </div>
+</div>
+
+<style>
+.safe-area-bottom {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+</style>

@@ -103,6 +103,13 @@ import CarOrderController from "./car_order_controller"
 import CruiseDetailController from "./cruise_detail_controller"
 import CruiseOrderFormController from "./cruise_order_form_controller"
 import CruiseSearchController from "./cruise_search_controller"
+import InsuranceFilterController from "./insurance_filter_controller"
+import ContactSelectorController from "./contact_selector_controller"
+import InsuranceSearchValidationController from "./insurance_search_validation_controller"
+import BookingQuantityController from "./booking_quantity_controller"
+import TravelerToggleController from "./traveler_toggle_controller"
+import TravelerDuplicateValidatorController from "./traveler_duplicate_validator_controller"
+import TermsCheckboxController from "./terms_checkbox_controller"
 
 const application = Application.start()
 
@@ -209,5 +216,12 @@ application.register("car-order", CarOrderController)
 application.register("cruise-detail", CruiseDetailController)
 application.register("cruise-order-form", CruiseOrderFormController)
 application.register("cruise-search", CruiseSearchController)
+application.register("insurance-filter", InsuranceFilterController)
+application.register("contact-selector", ContactSelectorController)
+application.register("insurance-search-validation", InsuranceSearchValidationController)
+application.register("booking-quantity", BookingQuantityController)
+application.register("traveler-toggle", TravelerToggleController)
+application.register("traveler-duplicate-validator", TravelerDuplicateValidatorController)
+application.register("terms-checkbox", TermsCheckboxController)
 
 window.Stimulus = application

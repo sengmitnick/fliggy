@@ -25,6 +25,12 @@ class PassengersController < ApplicationController
     @date = params[:date]
     @adult_count = params[:adult_count]
     @child_count = params[:child_count]
+    # Insurance order params
+    @insurance_product_id = params[:insurance_product_id]
+    @start_date = params[:start_date]
+    @end_date = params[:end_date]
+    @destination = params[:destination]
+    @city_id = params[:city_id]
   end
 
   def create
@@ -65,6 +71,14 @@ class PassengersController < ApplicationController
           adult_count: params[:adult_count],
           child_count: params[:child_count]
         ), notice: "#{traveler_label}添加成功"
+      elsif params[:return_to] == 'insurance_order_new'
+        redirect_to new_insurance_order_path(
+          insurance_product_id: params[:insurance_product_id],
+          start_date: params[:start_date],
+          end_date: params[:end_date],
+          destination: params[:destination],
+          city_id: params[:city_id]
+        ), notice: "出行人添加成功"
       else
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
       end
@@ -91,6 +105,12 @@ class PassengersController < ApplicationController
       @date = params[:date]
       @adult_count = params[:adult_count]
       @child_count = params[:child_count]
+      # Insurance order params
+      @insurance_product_id = params[:insurance_product_id]
+      @start_date = params[:start_date]
+      @end_date = params[:end_date]
+      @destination = params[:destination]
+      @city_id = params[:city_id]
       render :new
     end
   end
@@ -100,7 +120,14 @@ class PassengersController < ApplicationController
 
   def update
     if @passenger.update(passenger_params)
-      redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      # Store return_to and reopen_modal in flash for showing return button
+      if params[:return_to].present?
+        flash[:return_to] = params[:return_to]
+        flash[:reopen_modal] = params[:reopen_modal] if params[:reopen_modal].present?
+        redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      else
+        redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      end
     else
       @traveler_type = params[:source]
       render :edit
