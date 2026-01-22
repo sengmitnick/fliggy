@@ -1,4 +1,6 @@
-<div class="min-h-screen bg-surface pb-32" data-controller="tour-traveler-selector">
+<div class="min-h-screen bg-surface pb-32" 
+     data-controller="tour-traveler-selector booking-quantity"
+     data-booking-quantity-unit-price-value="<%= @package.price.to_i %>">
   <!-- Header -->
   <div class="sticky top-0 z-40 bg-white border-b border-border">
     <div class="flex items-center px-4 py-3">
@@ -46,14 +48,31 @@
           <span class="text-sm text-foreground-muted">出行日期</span>
           <span class="text-sm text-foreground"><%= l(@travel_date, format: :long) %></span>
         </div>
-        <div class="flex items-center justify-between py-2">
-          <span class="text-sm text-foreground-muted">出行人数</span>
-          <span class="text-sm text-foreground">
-            成人 <%= @adult_count %> 人
-            <% if @child_count > 0 %>
-              ，儿童 <%= @child_count %> 人
-            <% end %>
-          </span>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-2">
+            <span class="text-sm text-foreground-muted">份数</span>
+            <div class="flex items-center gap-4">
+              <span class="text-sm text-foreground-muted">¥<%= @package.price.to_i %>/份</span>
+              <div class="flex items-center gap-2">
+                <button type="button" 
+                        class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-foreground hover:bg-gray-100"
+                        data-action="click->booking-quantity#decrease">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                  </svg>
+                </button>
+                <span class="text-base font-semibold text-foreground w-8 text-center" data-booking-quantity-target="quantity"><%= @adult_count + @child_count %></span>
+                <button type="button" 
+                        class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-foreground hover:bg-gray-100"
+                        data-action="click->booking-quantity#increase">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                </button>
+              </div>
+              <span class="text-base font-semibold text-red-500" data-booking-quantity-target="itemTotal">¥<%= @package.price.to_i * (@adult_count + @child_count) %></span>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -90,16 +109,19 @@
       </div>
     </div>
     
+    <div data-controller="traveler-toggle">
     <!-- 我要付款后填写出行人 -->
     <div class="bg-white px-4 py-3">
       <label class="flex items-center justify-between">
         <span class="text-sm text-foreground font-medium">我要付款后填写出行人</span>
-        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300" />
+        <input type="checkbox" 
+               class="form-checkbox h-5 w-5 text-primary rounded border-gray-300"
+               data-action="change->traveler-toggle#toggle" />
       </label>
     </div>
     
     <!-- 出行人信息 -->
-    <div class="bg-white px-4 py-4">
+    <div class="bg-white px-4 py-4" data-traveler-toggle-target="travelerSection">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-semibold text-foreground">选择 <%= @adult_count + @child_count %> 位游客</h3>
         <button type="button" class="text-sm text-blue-500">
@@ -166,6 +188,7 @@
         </svg>
         更多出行人
       </button>
+    </div>
     </div>
     
     <!-- 留言备注 -->

@@ -29,8 +29,8 @@
   <div class="relative bg-surface" data-controller="carousel">
     <% if @product.main_image.attached? %>
       <%= image_tag @product.main_image, class: "w-full h-80 object-cover" %>
-    <% else %>
-      <%= image_tag @product.image_url, class: "w-full h-80 object-cover" %>
+    <% elsif @product.image_url.present? %>
+      <%= image_tag @product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'" %>
     <% end %>
     
     <% if @product.gallery_images.attached? && @product.gallery_images.count > 0 %>
@@ -270,8 +270,8 @@
             <!-- Header -->
             <div class="sticky top-0 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100">
               <div class="flex-1">
-                <div class="text-xl font-bold text-red-500">券后价 ¥<%= @selected_package.price %><span class="text-sm">起</span></div>
-                <div class="text-sm text-foreground-muted line-through">¥<%= (@selected_package.price * 1.2).to_i %></div>
+                <div class="text-xl font-bold text-red-500" data-booking-modal-target="headerPrice">券后价 ¥<%= @selected_package.price.to_i %><span class="text-sm">起</span></div>
+                <div class="text-sm text-foreground-muted line-through" data-booking-modal-target="headerOriginalPrice">¥<%= (@selected_package.price * 1.2).to_i %></div>
               </div>
               <button type="button" 
                       class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
@@ -284,7 +284,7 @@
             
             <!-- Selected Info -->
             <div class="px-4 py-3 bg-[#FFF9E6] text-sm text-foreground-secondary">
-              已选："出发地: <%= @product.destination %>"、"套餐类型: <%= @selected_package.name %>"、"购买数量: 成人1"
+              已选："出发地: <%= @product.destination %>"、"套餐类型: <span data-booking-modal-target="selectedPackageName"><%= @selected_package.name %></span>"、"购买数量: 成人1"
             </div>
             
             <!-- Package Type Selection -->
@@ -296,8 +296,12 @@
                           class="px-4 py-3 rounded-lg border-2 text-sm font-medium text-left relative <%= package == @selected_package ? 'bg-[#FFF9E6] border-[#FFD700]' : 'bg-white border-gray-200' %>"
                           data-booking-modal-target="packageBtn"
                           data-package-id="<%= package.id %>"
+                          data-package-name="<%= package.name %>"
+                          data-package-price="<%= package.price.to_i %>"
+                          data-package-child-price="<%= package.child_price.to_i %>"
                           data-action="click->booking-modal#selectPackage">
                     <div class="font-medium text-foreground"><%= package.name %></div>
+                    <div class="text-xs text-red-500 mt-1">¥<%= package.price.to_i %></div>
                     <% if package == @selected_package %>
                       <svg class="absolute top-2 right-2 w-5 h-5" style="color: #FFD700;" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -322,7 +326,7 @@
                           data-month="<%= month.month %>"
                           data-action="click->booking-modal#selectMonth">
                     <%= month.month %>月<br>
-                    <span class="text-xs text-red-500">¥<%= @selected_package.price %>起</span>
+                    <span class="text-xs text-red-500" data-booking-modal-target="monthPrice">¥<%= @selected_package.price.to_i %>起</span>
                   </button>
                 <% end %>
               </div>
@@ -356,7 +360,7 @@
                     <% end %>
                     <div class="font-medium <%= is_past ? '' : 'text-foreground' %>"><%= date.day %></div>
                     <% unless is_past %>
-                      <div class="text-xs text-red-500">¥<%= @selected_package.price %></div>
+                      <div class="text-xs text-red-500" data-booking-modal-target="datePrice">¥<%= @selected_package.price.to_i %></div>
                     <% end %>
                   </button>
                 <% end %>
