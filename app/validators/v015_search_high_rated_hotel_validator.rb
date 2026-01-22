@@ -31,7 +31,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class SearchHighRatedHotelValidator < BaseValidator
+class V015SearchHighRatedHotelValidator < BaseValidator
   self.validator_id = 'search_high_rated_hotel_beijing'
   self.title = '搜索北京评分最高的高档酒店'
   self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店'

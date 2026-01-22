@@ -26,7 +26,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class SearchFastestBusValidator < BaseValidator
+class V014SearchFastestBusValidator < BaseValidator
   self.validator_id = 'search_fastest_bus_hz_to_sz'
   self.title = '搜索后天杭州到深圳行程时间最短的班次'
   self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订'

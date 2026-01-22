@@ -31,7 +31,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class BookBudgetHotelValidator < BaseValidator
+class V001BookBudgetHotelValidator < BaseValidator
   self.validator_id = 'book_budget_hotel_shenzhen'
   self.title = ' 预订后天入住一晚深圳的经济型酒店'
   self.description = '需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单'

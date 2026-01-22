@@ -23,7 +23,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class BookJapanTrainMorningValidator < BaseValidator
+class V007BookJapanTrainMorningValidator < BaseValidator
   self.validator_id = 'book_japan_train_morning'
   self.title = '预订后天东京到京都的上午新干线车票'
   self.description = '搜索后天东京到京都的新干线车票，选择上午（12:00之前）的班次并预订'
