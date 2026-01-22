@@ -122,7 +122,9 @@
     </div>
     
     <!-- 出行人信息 -->
-    <div class="bg-white px-4 py-4" data-traveler-toggle-target="travelerSection">
+    <div class="bg-white px-4 py-4" 
+         data-traveler-toggle-target="travelerSection"
+         data-controller="traveler-duplicate-validator">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-semibold text-foreground">选择 <%= @adult_count + @child_count %> 位游客</h3>
         <button type="button" class="text-sm text-blue-500">
@@ -145,11 +147,7 @@
                 <%= traveler_form.object.traveler_type == 'adult' ? '成人' : '儿童' %>
               </span>
             </div>
-            <button type="button" class="w-6 h-6 text-foreground-muted">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-              </svg>
-            </button>
+
           </div>
           
           <div class="space-y-3">
@@ -157,7 +155,11 @@
               <label class="text-sm text-foreground-muted w-16">姓名</label>
               <%= traveler_form.text_field :traveler_name, 
                   placeholder: "请输入姓名",
-                  data: { "tour-traveler-selector-target": "travelerNameInput" },
+                  data: { 
+                    "tour-traveler-selector-target": "travelerNameInput",
+                    "traveler-duplicate-validator-target": "nameInput",
+                    action: "blur->traveler-duplicate-validator#validateName"
+                  },
                   class: "flex-1 text-sm text-foreground focus:outline-none" %>
               <button type="button" 
                       class="text-blue-500"
@@ -173,7 +175,11 @@
               <label class="text-sm text-foreground-muted w-16">身份证</label>
               <%= traveler_form.text_field :id_number, 
                   placeholder: "请输入身份证号",
-                  data: { "tour-traveler-selector-target": "travelerIdInput" },
+                  data: { 
+                    "tour-traveler-selector-target": "travelerIdInput",
+                    "traveler-duplicate-validator-target": "idInput",
+                    action: "blur->traveler-duplicate-validator#validateIdNumber"
+                  },
                   class: "flex-1 text-sm text-foreground focus:outline-none" %>
             </div>
             

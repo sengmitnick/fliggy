@@ -149,13 +149,6 @@ export default class extends Controller<HTMLElement> {
             ${type === 'adult' ? '成人' : '儿童'}
           </span>
         </div>
-        <button type="button" class="w-6 h-6 text-foreground-muted">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-            </path>
-          </svg>
-        </button>
       </div>
       
       <div class="space-y-3">
@@ -165,6 +158,8 @@ export default class extends Controller<HTMLElement> {
                  name="tour_group_booking[booking_travelers_attributes][${index}][traveler_name]" 
                  placeholder="请输入姓名"
                  data-tour-traveler-selector-target="travelerNameInput"
+                 data-traveler-duplicate-validator-target="nameInput"
+                 data-action="blur->traveler-duplicate-validator#validateName"
                  class="flex-1 text-sm text-foreground focus:outline-none" />
           <button type="button" 
                   class="text-blue-500"
@@ -182,6 +177,8 @@ export default class extends Controller<HTMLElement> {
                  name="tour_group_booking[booking_travelers_attributes][${index}][id_number]" 
                  placeholder="请输入身份证号"
                  data-tour-traveler-selector-target="travelerIdInput"
+                 data-traveler-duplicate-validator-target="idInput"
+                 data-action="blur->traveler-duplicate-validator#validateIdNumber"
                  class="flex-1 text-sm text-foreground focus:outline-none" />
         </div>
         

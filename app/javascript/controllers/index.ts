@@ -102,6 +102,7 @@ import CarDatetimePickerController from "./car_datetime_picker_controller"
 import CarOrderController from "./car_order_controller"
 import BookingQuantityController from "./booking_quantity_controller"
 import TravelerToggleController from "./traveler_toggle_controller"
+import TravelerDuplicateValidatorController from "./traveler_duplicate_validator_controller"
 import ContactSelectorController from "./contact_selector_controller"
 
 const application = Application.start()
@@ -208,6 +209,7 @@ application.register("car-datetime-picker", CarDatetimePickerController)
 application.register("car-order", CarOrderController)
 application.register("booking-quantity", BookingQuantityController)
 application.register("traveler-toggle", TravelerToggleController)
+application.register("traveler-duplicate-validator", TravelerDuplicateValidatorController)
 application.register("contact-selector", ContactSelectorController)
 
 window.Stimulus = application
