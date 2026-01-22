@@ -1,0 +1,78 @@
+<%= link_to insurance_order_path(booking), class: "block" do %>
+  <div class="bg-surface border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+    <!-- Header -->
+    <div class="px-4 py-3 flex items-center justify-between border-b border-border">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+        </svg>
+        <span class="font-semibold text-text-primary">旅游保险</span>
+      </div>
+      <span class="text-sm <%= booking_status_color(booking.status) %> font-medium">
+        <%= booking_status_text(booking.status) %>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4">
+      <div class="flex items-center mb-3">
+        <% if booking.insurance_product.image_url.present? %>
+          <img src="<%= booking.insurance_product.image_url %>" alt="<%= booking.insurance_product.name %>" class="w-16 h-16 rounded-lg object-cover mr-3">
+        <% else %>
+          <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mr-3">
+            <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+          </div>
+        <% end %>
+        <div class="flex-1">
+          <h3 class="font-semibold text-text-primary mb-1"><%= booking.insurance_product.name %></h3>
+          <p class="text-sm text-text-secondary"><%= booking.insurance_product.company %></p>
+        </div>
+      </div>
+
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-text-secondary">目的地</span>
+          <span class="text-text-primary"><%= booking.destination %></span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-text-secondary">保障期间</span>
+          <span class="text-text-primary"><%= booking.start_date %> 至 <%= booking.end_date %></span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-text-secondary">被保人数</span>
+          <span class="text-text-primary"><%= booking.quantity %>人</span>
+        </div>
+        
+        <div class="flex justify-between">
+          <span class="text-text-secondary">订单号</span>
+          <span class="text-text-primary font-mono text-xs"><%= booking.order_number %></span>
+        </div>
+      </div>
+
+      <!-- Price and Actions -->
+      <div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+        <div>
+          <span class="text-xs text-text-secondary">实付金额</span>
+          <div class="text-primary text-xl font-bold">¥<%= booking.total_price.to_i %></div>
+        </div>
+        
+        <div class="flex space-x-2">
+          <% if booking.status == 'pending' %>
+            <%= link_to '取消订单', insurance_order_path(booking), method: :delete, data: { confirm: '确定要取消这个订单吗？' }, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+            <%= link_to '立即支付', insurance_order_path(booking), class: 'px-4 py-2 bg-primary hover:bg-primary-hover text-gray-900 rounded-full text-sm font-medium' %>
+          <% elsif booking.status == 'paid' %>
+            <%= link_to '查看详情', insurance_order_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+          <% elsif booking.status == 'expired' %>
+            <%= link_to '已过期', insurance_order_path(booking), class: 'px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm font-medium cursor-not-allowed' %>
+          <% elsif booking.status == 'cancelled' %>
+            <%= link_to '重新投保', insurances_path, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

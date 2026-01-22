@@ -1,0 +1,314 @@
+<div class="bg-surface min-h-screen pb-24" data-controller="city-selector hotel-date-picker insurance-search-validation" data-city-selector-departure-city-value="" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择目的地">
+  <!-- 顶部导航 -->
+  <header class="sticky top-0 z-50 bg-white">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to root_path, class: "p-1" do %>
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      <h1 class="text-lg font-bold">保险服务</h1>
+      <div class="w-6 h-6"></div>
+    </div>
+  </header>
+
+  <!-- 顶部数据与Banner区域 -->
+  
+
+  <!-- 旅行保险搜索表单 -->
+  <section class="mt-4 px-4">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <h3 class="text-sm font-bold text-gray-900 mb-3">旅行保险</h3>
+      
+      <%= form_with url: search_insurances_path, method: :get, class: "space-y-3",
+                    data: { controller: "insurance-search-validation" } do |form| %>
+        <!-- 目的地选择器 - 使用现有city-selector -->
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">目的地</label>
+          <div class="relative">
+            <button type="button" 
+                    data-action="click->city-selector#openHotelCitySelector"
+                    class="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-lg text-left flex items-center justify-between">
+              <span data-city-selector-target="departure" class="text-sm text-gray-400">请选择</span>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <%= form.hidden_field :destination, data: { 
+              city_selector_target: "departureCityInput",
+              insurance_search_validation_target: "destinationInput"
+            } %>
+          </div>
+        </div>
+
+        <!-- 出行时间选择器 - 使用现有hotel-date-picker -->
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">出行时间</label>
+          <div class="relative">
+            <button type="button" 
+                    data-action="click->hotel-date-picker#openModal"
+                    class="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-lg text-left flex items-center justify-between">
+              <div class="flex items-center gap-2 flex-1">
+                <span class="text-sm text-gray-900">
+                  <span data-hotel-date-picker-target="checkInDisplay"><%= Date.today.strftime('%m月%d日') %></span>
+                  -
+                  <span data-hotel-date-picker-target="checkOutDisplay"><%= (Date.today + 2).strftime('%m月%d日') %></span>
+                </span>
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-primary/10 rounded-full">
+                  <span data-hotel-date-picker-target="nightsDisplay" class="text-xs font-medium text-primary">3天</span>
+                </span>
+              </div>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </button>
+            <%= form.hidden_field :start_date, value: Date.today.to_s, data: { hotel_date_picker_target: "checkInInput" } %>
+            <%= form.hidden_field :end_date, value: (Date.today + 2).to_s, data: { hotel_date_picker_target: "checkOutInput" } %>
+          </div>
+        </div>
+
+        <!-- 场景/保险公司筛选器 -->
+        <div data-controller="insurance-filter">
+          <label class="text-xs text-gray-600 block mb-1">选择适用场景/保险公司（选填）</label>
+          <div class="relative">
+            <button type="button" 
+                    data-action="click->insurance-filter#open"
+                    class="w-full h-11 px-3 bg-gray-50 border border-gray-200 rounded-lg text-left flex items-center justify-between">
+              <span data-insurance-filter-target="displayText" class="text-sm text-gray-400">选择适用场景/保险公司（选填）</span>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <%= form.hidden_field :scenes, data: { insurance_filter_target: "scenesInput" } %>
+            <%= form.hidden_field :company, data: { insurance_filter_target: "companyInput" } %>
+          </div>
+          
+          <!-- 筛选弹窗 -->
+          <div data-insurance-filter-target="modal" 
+               data-action="click->insurance-filter#closeOnBackdrop"
+               class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
+            <div class="bg-white w-full rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">选择适用场景/保险公司</h3>
+                <button type="button" 
+                        data-action="click->insurance-filter#close"
+                        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              
+              <!-- 适用场景 -->
+              <div class="mb-6">
+                <h4 class="text-sm font-bold text-gray-900 mb-3">适用场景</h4>
+                <div class="grid grid-cols-3 gap-2">
+                  <% %w[海岛游 亲子游 携宠出行 携宠旅游 自驾游 户外运动 可办申根签 滑雪 潜水 高原游 短途旅行 东南亚旅行 可选全年计划 航空保障 交通综合 航班延误保障 航班取消保障 家庭保障].each do |scene| %>
+                    <button type="button"
+                            data-insurance-filter-target="sceneItem"
+                            data-action="click->insurance-filter#toggleScene"
+                            data-scene="<%= scene %>"
+                            class="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-800 hover:bg-primary hover:text-white transition">
+                      <%= scene %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- 保险公司 -->
+              <div class="mb-6">
+                <h4 class="text-sm font-bold text-gray-900 mb-3">保险公司</h4>
+                <div class="grid grid-cols-3 gap-2">
+                  <% %w[京东安联 华泰财险 众安保险 华泰财险 众安保险 美亚保险 安盛保险 太平洋保险].each do |company| %>
+                    <button type="button"
+                            data-insurance-filter-target="companyItem"
+                            data-action="click->insurance-filter#toggleCompany"
+                            data-company="<%= company %>"
+                            class="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-800 hover:bg-primary hover:text-white transition">
+                      <%= company %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- 底部按钮 -->
+              <div class="flex gap-3">
+                <button type="button"
+                        data-action="click->insurance-filter#reset"
+                        class="flex-1 py-3 bg-gray-100 text-gray-900 rounded-lg font-medium">重置</button>
+                <button type="button"
+                        data-action="click->insurance-filter#confirm"
+                        class="flex-1 py-3 bg-primary text-white rounded-lg font-medium">确认</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 搜索按钮 -->
+        <button type="submit" 
+                data-action="click->insurance-search-validation#validateDestination"
+                data-insurance-search-validation-target="submitButton"
+                class="w-full py-3 bg-primary text-white rounded-full font-bold shadow-lg hover:shadow-xl transition mt-4">
+          搜一搜
+        </button>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 快捷筛选按钮 -->
+  <section class="mt-4 px-4">
+    <div class="flex gap-3 overflow-x-auto no-scrollbar">
+      <%= link_to search_insurances_path(destination_type: 'domestic'), class: "flex-shrink-0 bg-white rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-100" do %>
+        国内游
+      <% end %>
+      <%= link_to search_insurances_path(destination_type: 'international'), class: "flex-shrink-0 bg-white rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-100" do %>
+        出境游
+      <% end %>
+      <%= link_to search_insurances_path(destination_type: 'transport'), class: "flex-shrink-0 bg-white rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-100" do %>
+        交通意外
+      <% end %>
+      <%= link_to search_insurances_path(scenes: '自驾'), class: "flex-shrink-0 bg-white rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-100" do %>
+        自驾游
+      <% end %>
+      <%= link_to search_insurances_path(scenes: '邮轮'), class: "flex-shrink-0 bg-white rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-100" do %>
+        邮轮游
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 官方优选 -->
+  <section class="mt-6 px-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-extrabold text-gray-900">官方优选</h2>
+      <span class="text-xs text-gray-500">精选高品质产品</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <% @official_products.each do |product| %>
+        <%= link_to insurance_path(product), class: "bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" do %>
+          <div class="relative">
+            <% if product.image_url.present? %>
+              <div class="w-full h-24 rounded-xl mb-3 overflow-hidden bg-gray-100">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+              </div>
+            <% else %>
+              <div class="w-full h-24 rounded-xl mb-3 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+            <% end %>
+            
+            <div class="absolute top-2 left-2 bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+              官方优选
+            </div>
+          </div>
+
+          <h3 class="font-bold text-sm text-gray-900 mb-2 line-clamp-1"><%= product.name %></h3>
+          
+          <div class="space-y-1 mb-3">
+            <div class="flex items-center gap-1 text-[10px] text-gray-500">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <%= product.company %>
+            </div>
+            <% if product.highlights.any? %>
+              <div class="text-[10px] text-gray-600 line-clamp-2">
+                <%= product.highlights.first %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-xs text-gray-500">¥</span>
+              <span class="text-lg font-bold text-orange-600"><%= product.price_per_day.to_i %></span>
+              <span class="text-xs text-gray-500">/天起</span>
+            </div>
+            <span class="text-xs text-primary font-medium">查看详情 ></span>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 热门精选 -->
+  <section class="mt-6 px-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-extrabold text-gray-900">热门精选</h2>
+      <%= link_to "查看全部 >", search_insurances_path, class: "text-xs text-primary font-medium" %>
+    </div>
+
+    <div class="space-y-3">
+      <% @featured_products.each do |product| %>
+        <%= link_to insurance_path(product), class: "block bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow" do %>
+          <div class="flex gap-4">
+            <% if product.image_url.present? %>
+              <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" class="w-full h-full object-cover">
+              </div>
+            <% else %>
+              <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+            <% end %>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between mb-1">
+                <h3 class="font-bold text-sm text-gray-900 line-clamp-1 flex-1"><%= product.name %></h3>
+                <% if product.featured %>
+                  <span class="ml-2 bg-red-50 text-red-600 text-[10px] px-2 py-0.5 rounded-full border border-red-100 flex-shrink-0">热销</span>
+                <% end %>
+              </div>
+
+              <div class="text-[10px] text-gray-500 mb-2"><%= product.company %></div>
+
+              <div class="flex flex-wrap gap-1 mb-2">
+                <% product.highlights.first(2).each do |highlight| %>
+                  <span class="inline-block bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded border border-blue-100">
+                    <%= highlight.truncate(12) %>
+                  </span>
+                <% end %>
+              </div>
+
+              <div class="flex items-baseline justify-between">
+                <div>
+                  <span class="text-xs text-gray-500">¥</span>
+                  <span class="text-lg font-bold text-orange-600"><%= product.price_per_day.to_i %></span>
+                  <span class="text-xs text-gray-500">/天起</span>
+                </div>
+                <span class="text-xs text-primary font-medium">立即投保 ></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 产品分类导航 -->
+  <section class="mt-6 px-4 mb-6">
+    <h2 class="text-xl font-extrabold text-gray-900 mb-4">全部产品分类</h2>
+    
+    <div class="grid grid-cols-3 gap-3">
+      <%= link_to search_insurances_path(destination_type: 'domestic'), class: "bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center" do %>
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mx-auto mb-2 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </div>
+        <div class="text-sm font-bold text-gray-900">国内旅游</div>
+        <div class="text-[10px] text-gray-500 mt-1"><%= @domestic_count %>款产品</div>
+      <% end %>
+
+      <%= link_to search_insurances_path(destination_type: 'international'), class: "bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center" do %>
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 mx-auto mb-2 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="text-sm font-bold text-gray-900">境外旅游</div>
+        <div class="text-[10px] text-gray-500 mt-1"><%= @international_count %>款产品</div>
+      <% end %>
+
+      <%= link_to search_insurances_path(destination_type: 'transport'), class: "bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center" do %>
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 mx-auto mb-2 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        </div>
+        <div class="text-sm font-bold text-gray-900">交通工具</div>
+        <div class="text-[10px] text-gray-500 mt-1"><%= @transport_count %>款产品</div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- 城市选择器模态框 -->
+  <%= render 'shared/city_selector_modal' %>
+
+  <!-- 酒店日期选择器模态框 -->
+  <%= render 'shared/hotel_date_picker_modal' %>
+</div>
+
+<%= render 'insurances/bottom_navigation', active_tab: :insurance %>

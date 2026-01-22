@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_22_075953) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -827,6 +827,76 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_075953) do
     t.index ["region"], name: "index_hotels_on_region"
   end
 
+  create_table "insurance_orders", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "insurance_product_id", null: false
+    t.string "order_number", null: false
+    t.string "source", default: "standalone"
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.integer "days", null: false
+    t.string "destination"
+    t.string "destination_type"
+    t.jsonb "insured_persons", default: []
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
+    t.integer "quantity", default: 1
+    t.decimal "total_price", precision: 10, scale: 2, null: false
+    t.string "status", default: "pending"
+    t.datetime "paid_at"
+    t.string "related_booking_type"
+    t.bigint "related_booking_id"
+    t.string "policy_number"
+    t.text "policy_file_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["insurance_product_id"], name: "index_insurance_orders_on_insurance_product_id"
+    t.index ["order_number"], name: "index_insurance_orders_on_order_number", unique: true
+    t.index ["related_booking_type", "related_booking_id"], name: "index_insurance_orders_on_related_booking"
+    t.index ["start_date"], name: "index_insurance_orders_on_start_date"
+    t.index ["user_id", "status"], name: "index_insurance_orders_on_user_id_and_status"
+    t.index ["user_id"], name: "index_insurance_orders_on_user_id"
+  end
+
+  create_table "insurance_product_cities", force: :cascade do |t|
+    t.integer "insurance_product_id", null: false
+    t.integer "city_id", null: false
+    t.decimal "price_per_day", precision: 10, scale: 2
+    t.boolean "available", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["available"], name: "index_insurance_product_cities_on_available"
+    t.index ["city_id"], name: "index_insurance_product_cities_on_city_id"
+    t.index ["insurance_product_id", "city_id"], name: "index_insurance_product_cities_on_product_and_city", unique: true
+    t.index ["insurance_product_id"], name: "index_insurance_product_cities_on_insurance_product_id"
+  end
+
+  create_table "insurance_products", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "company", null: false
+    t.string "product_type", null: false
+    t.string "code", null: false
+    t.jsonb "coverage_details", default: {}
+    t.decimal "price_per_day", precision: 10, scale: 2
+    t.integer "min_days", default: 1
+    t.integer "max_days", default: 365
+    t.string "scenes", default: [], array: true
+    t.string "highlights", default: [], array: true
+    t.boolean "official_select", default: false
+    t.boolean "featured", default: false
+    t.boolean "available_for_embedding", default: false
+    t.string "embedding_code"
+    t.string "image_url"
+    t.boolean "active", default: true
+    t.integer "sort_order", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active", "sort_order"], name: "index_insurance_products_on_active_and_sort_order"
+    t.index ["code"], name: "index_insurance_products_on_code", unique: true
+    t.index ["company"], name: "index_insurance_products_on_company"
+    t.index ["embedding_code"], name: "index_insurance_products_on_embedding_code"
+    t.index ["product_type"], name: "index_insurance_products_on_product_type"
+  end
+
   create_table "internet_data_plans", force: :cascade do |t|
     t.string "name"
     t.string "region"
@@ -1450,6 +1520,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_075953) do
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"
   add_foreign_key "hotel_packages", "hotels"
+  add_foreign_key "insurance_orders", "insurance_products"
+  add_foreign_key "insurance_orders", "users"
   add_foreign_key "itineraries", "users"
   add_foreign_key "itinerary_items", "itineraries"
   add_foreign_key "memberships", "users"
