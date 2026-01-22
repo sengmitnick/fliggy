@@ -1,4 +1,31 @@
 zh-CN:
+  activerecord:
+    models:
+      cruise_order: "游轮订单"
+    attributes:
+      cruise_order:
+        contact_name: "联系人姓名"
+        contact_phone: "手机号码"
+        contact_email: "邮箱"
+        quantity: "入住人数"
+        total_price: "订单金额"
+        accept_terms: "服务条款"
+        insurance_price: "保险费用"
+    errors:
+      models:
+        cruise_order:
+          attributes:
+            contact_name:
+              blank: "不能为空"
+            contact_phone:
+              blank: "不能为空"
+              invalid: "格式不正确，请输入11位手机号"
+            quantity:
+              greater_than: "至少需要%{count}人"
+            total_price:
+              greater_than: "必须大于0"
+            accept_terms:
+              accepted: "需要勾选同意"
   date:
     formats:
       default: "%Y-%m-%d"

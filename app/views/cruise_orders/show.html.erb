@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-surface pb-6">
+  <!-- Header -->
+  <div class="sticky top-0 z-20 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center">
+      <%= link_to root_path, class: "p-1" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      <% end %>
+      <h1 class="text-lg font-bold ml-4">订单详情</h1>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+    <!-- Order Status Card -->
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="text-sm text-gray-600 mb-1">订单状态</div>
+          <div class="text-lg font-bold <%= status_color(@cruise_order.status) %>">
+            <%= status_text(@cruise_order.status) %>
+          </div>
+        </div>
+        <% if @cruise_order.paid_status? || @cruise_order.completed_status? %>
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+        <% elsif @cruise_order.pending_status? %>
+          <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600">订单号</span>
+          <span class="font-mono text-gray-900"><%= @cruise_order.order_number %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">下单时间</span>
+          <span class="text-gray-900"><%= @cruise_order.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+        </div>
+        <% if @cruise_order.paid_status? %>
+        <div class="flex justify-between">
+          <span class="text-gray-600">支付时间</span>
+          <span class="text-gray-900"><%= @cruise_order.updated_at.strftime('%Y-%m-%d %H:%M') %></span>
+        </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Cruise Product Info -->
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+      <h3 class="font-bold text-base mb-4">游轮信息</h3>
+      <div class="flex gap-4">
+        <%= image_tag @cruise_ship.image_url, alt: @cruise_ship.name, class: "w-24 h-24 rounded-lg object-cover flex-shrink-0" %>
+        <div class="flex-1 min-w-0">
+          <h4 class="font-semibold text-gray-900 mb-2"><%= @cruise_ship.name %></h4>
+          <div class="space-y-1 text-sm text-gray-600">
+            <p><%= @route.name %>航线</p>
+            <p><%= @sailing.date_range %></p>
+            <p>出发港口：<%= @sailing.departure_port %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-gray-100 space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-600">舱型</span>
+          <span class="text-gray-900"><%= @cabin_type.name %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-600">入住人数</span>
+          <span class="text-gray-900"><%= @cruise_order.quantity %>人</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Breakdown -->
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+      <h3 class="font-bold text-base mb-4">费用明细</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">舱位费用（<%= @cruise_order.quantity %>人）</span>
+          <span class="text-gray-900">¥<%= (@product.price_per_person * @cruise_order.quantity).to_i %></span>
+        </div>
+        <% if @cruise_order.insurance_price.to_i > 0 %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">保险费用</span>
+          <span class="text-gray-900">¥<%= @cruise_order.insurance_price.to_i %></span>
+        </div>
+        <% end %>
+        <div class="border-t border-gray-100 pt-3">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-base">实付金额</span>
+            <span class="text-2xl font-bold text-primary">¥<%= @cruise_order.total_price %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+      <h3 class="font-bold text-base mb-4">联系信息</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex">
+          <span class="text-gray-600 w-20">联系人</span>
+          <span class="text-gray-900 flex-1"><%= @cruise_order.contact_name %></span>
+        </div>
+        <div class="flex">
+          <span class="text-gray-600 w-20">手机号</span>
+          <span class="text-gray-900 flex-1"><%= @cruise_order.contact_phone %></span>
+        </div>
+        <% if @cruise_order.contact_email.present? %>
+        <div class="flex">
+          <span class="text-gray-600 w-20">邮箱</span>
+          <span class="text-gray-900 flex-1"><%= @cruise_order.contact_email %></span>
+        </div>
+        <% end %>
+        <% if @cruise_order.remark.present? %>
+        <div class="flex">
+          <span class="text-gray-600 w-20">备注</span>
+          <span class="text-gray-900 flex-1"><%= @cruise_order.remark %></span>
+        </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Passenger Info -->
+    <% if @cruise_order.passenger_info.present? && @cruise_order.passenger_info.any? %>
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+      <h3 class="font-bold text-base mb-4">乘客信息</h3>
+      <div class="space-y-4">
+        <% @cruise_order.passenger_info.each_with_index do |(key, passenger), index| %>
+          <div class="pb-4 border-b border-gray-100 last:border-0">
+            <div class="font-medium text-gray-900 mb-2">乘客 <%= index + 1 %></div>
+            <div class="space-y-2 text-sm">
+              <div class="flex">
+                <span class="text-gray-600 w-24">姓名</span>
+                <span class="text-gray-900"><%= passenger['name'] %></span>
+              </div>
+              <% if passenger['id_number'].present? %>
+              <div class="flex">
+                <span class="text-gray-600 w-24">证件号码</span>
+                <span class="text-gray-900 font-mono"><%= passenger['id_number'] %></span>
+              </div>
+              <% end %>
+              <% if passenger['phone'].present? %>
+              <div class="flex">
+                <span class="text-gray-600 w-24">手机号</span>
+                <span class="text-gray-900"><%= passenger['phone'] %></span>
+              </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
+
+    <!-- Notice -->
+    <% if @cruise_order.paid_status? || @cruise_order.completed_status? %>
+    <div class="bg-blue-50 rounded-xl p-4">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div class="text-sm text-blue-900">
+          <p class="font-medium mb-1">温馨提示</p>
+          <p>您的订单已确认，工作人员将在24小时内与您联系确认详细信息。请保持手机畅通。</p>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
+    <!-- Action Buttons -->
+    <% if @cruise_order.pending_status? %>
+    <div class="space-y-3">
+      <%= link_to "立即支付", confirm_cruise_order_path(@cruise_order), 
+                  class: "block w-full text-center btn-primary py-3" %>
+      <%= link_to "取消订单", cruise_order_path(@cruise_order), method: :delete, 
+                  data: { confirm: '确定要取消这个订单吗？' }, 
+                  class: "block w-full text-center px-6 py-3 border-2 border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition" %>
+    </div>
+    <% else %>
+    <div>
+      <%= link_to "返回首页", root_path, 
+                  class: "block w-full text-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition" %>
+    </div>
+    <% end %>
+  </div>
+</div>
