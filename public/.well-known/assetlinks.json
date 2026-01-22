@@ -1,0 +1,14 @@
+[
+      {
+            "relation": [
+                  "delegate_permission/common.handle_all_urls"
+            ],
+            "target": {
+                  "namespace": "android_app",
+                  "package_name": "ai.clacky.trip01",
+                  "sha256_cert_fingerprints": [
+                        "75:32:A4:85:46:60:85:0E:A5:36:E0:CC:C5:73:4B:59:57:F5:45:0B:88:76:EA:D6:95:31:C4:72:8E:85:13:29"
+                  ]
+            }
+      }
+]
