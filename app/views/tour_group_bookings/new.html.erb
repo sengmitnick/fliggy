@@ -415,9 +415,13 @@
     </div>
     
     <!-- 电子合同、线路标准退订须知 -->
-    <div class="bg-white px-4 py-4">
+    <div class="bg-white px-4 py-4" data-controller="terms-checkbox">
       <label class="flex items-start gap-2">
-        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-0.5 flex-shrink-0" required />
+        <input type="checkbox" 
+               class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-0.5 flex-shrink-0" 
+               required 
+               data-terms-checkbox-target="checkbox"
+               data-action="change->terms-checkbox#toggleState" />
         <span class="text-xs text-foreground-secondary">
           请您仔细阅读
           <button type="button" class="text-blue-500">电子合同</button>、
