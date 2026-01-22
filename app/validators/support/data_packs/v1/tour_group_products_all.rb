@@ -76,9 +76,9 @@ destinations_config = [
 
 # ==================== 旅游类型配置 ====================
 tour_types = [
-  { category: 'free_travel', label: '一日游', durations: [1], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'] },
-  { category: 'group_tour', label: '精品小团', durations: [2, 3, 4, 5], weight: 40, group_sizes: [4, 6, 8, 10], features: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'] },
-  { category: 'private_group', label: '多日游', durations: [4, 5, 6, 7, 8], weight: 30, features: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'] }
+  { category: 'free_travel', label: '一日游', durations: [1], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'], travel_type: '自由出行' },
+  { category: 'group_tour', label: '精品小团', durations: [2, 3, 4, 5], weight: 40, group_sizes: [4, 6, 8, 10], features: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'], travel_type: '跟团游' },
+  { category: 'private_group', label: '多日游', durations: [4, 5, 6, 7, 8], weight: 30, features: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'], travel_type: '独立成团' }
 ]
 
 # ==================== 批量生成旅游产品 ====================
@@ -165,6 +165,7 @@ destinations_config.each_with_index do |dest_config, dest_idx|
           destination: destination,
           departure_city: departure_city,
           tour_category: tour_type[:category],
+          travel_type: tour_type[:travel_type],
           duration: duration,
           badge: badge,
           price: base_price,
