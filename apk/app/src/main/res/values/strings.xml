@@ -34,7 +34,7 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://3000-3662c60e1a38-web.clackypaas.com\"
+            \"site\": \"https://3000-0219d4f8bdd7-web.clackypaas.com\"
         }
     }]
     
