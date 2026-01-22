@@ -100,7 +100,14 @@ class PassengersController < ApplicationController
 
   def update
     if @passenger.update(passenger_params)
-      redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      # Store return_to and reopen_modal in flash for showing return button
+      if params[:return_to].present?
+        flash[:return_to] = params[:return_to]
+        flash[:reopen_modal] = params[:reopen_modal] if params[:reopen_modal].present?
+        redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      else
+        redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}更新成功"
+      end
     else
       @traveler_type = params[:source]
       render :edit

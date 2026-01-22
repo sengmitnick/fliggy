@@ -146,9 +146,7 @@
               </span>
             </div>
             <button type="button" class="w-6 h-6 text-foreground-muted">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-              </svg>
+              
             </button>
           </div>
           
@@ -452,3 +450,27 @@
   <!-- Tour Traveler Selector Modal -->
   <%= render 'shared/tour_traveler_selector_modal' %>
 </div>
+
+<script>
+  // Auto-reopen modal after editing passenger
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reopenModal = urlParams.get('reopen_modal');
+    
+    if (reopenModal === 'tour_traveler_selector') {
+      const modalController = document.querySelector('[data-controller~="tour-traveler-selector"]');
+      if (modalController) {
+        const modal = modalController.querySelector('[data-tour-traveler-selector-target="modal"]');
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          
+          // Remove the parameter from URL to avoid reopening on page refresh
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('reopen_modal');
+          window.history.replaceState({}, '', newUrl);
+        }
+      }
+    }
+  });
+</script>
