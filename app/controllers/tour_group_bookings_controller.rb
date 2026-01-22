@@ -22,13 +22,14 @@ class TourGroupBookingsController < ApplicationController
     )
     
     # 预填出行人（从当前用户的乘客信息中获取）
-    (@adult_count + @child_count).times do
+    # 先添加成人
+    @adult_count.times do
       @booking.booking_travelers.build(traveler_type: 'adult')
     end
-    
-    # 预填联系人信息（使用当前用户信息）
-    @booking.contact_name = current_user.email.split('@').first if current_user.email.present?
-    @booking.contact_phone = current_user.phone if current_user.respond_to?(:phone)
+    # 再添加儿童
+    @child_count.times do
+      @booking.booking_travelers.build(traveler_type: 'child')
+    end
   end
 
   def create
@@ -91,6 +92,7 @@ class TourGroupBookingsController < ApplicationController
       :contact_name,
       :contact_phone,
       :insurance_type,
+      :fill_travelers_later,
       booking_travelers_attributes: [:id, :traveler_name, :id_number, :traveler_type, :_destroy]
     )
   end

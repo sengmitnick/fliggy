@@ -377,7 +377,6 @@
         <!-- 卡片 <%= index + 1 %> -->
         <%= link_to tour_group_path(result[:id]), class: "bg-white rounded-md flex overflow-hidden hover:shadow-md transition-shadow" do %>
           <div class="relative w-32 h-44 shrink-0">
-            <div class="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-br-lg"><%= result[:badge] %></div>
             <% if result[:departure].present? %>
               <div class="absolute bottom-0 w-full text-center bg-black/30 text-white text-[10px] py-1"><%= result[:departure] %></div>
             <% end %>
