@@ -22,7 +22,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class BookMorningBusValidator < BaseValidator
+class V006BookMorningBusValidator < BaseValidator
   self.validator_id = 'book_morning_bus_gz_to_sz'
   self.title = '预订明天上午广州到深圳的大巴票'
   self.description = '搜索明天广州到深圳的大巴票，找到上午（12点前）出发的班次并预订'

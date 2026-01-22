@@ -27,7 +27,7 @@ require_relative 'base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class SearchCheapestEuropeTrainValidator < BaseValidator
+class V012SearchCheapestEuropeTrainValidator < BaseValidator
   self.validator_id = 'search_cheapest_europe_train'
   self.title = '搜索明天欧洲境内最便宜的火车票'
   self.description = '搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订'

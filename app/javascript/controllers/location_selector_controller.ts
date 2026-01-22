@@ -62,17 +62,24 @@ export default class extends Controller<HTMLElement> {
   }
 
   openModal(): void {
-    console.log('[LocationSelector] openModal called')
-    console.log('[LocationSelector] currentCityValue:', this.currentCityValue)
+    console.log('[LocationSelector] ========== openModal START ===========')
+    // CRITICAL: Always read current city from DOM when opening modal
+    this.initializeCurrentCity()
+    console.log('[LocationSelector] currentCityValue after init:', this.currentCityValue)
+    
+    // Clear previous content immediately
+    this.locationListTarget.innerHTML = '<div class="text-center py-8 text-text-muted">加载中...</div>'
+    
     this.modalTarget.classList.remove("hidden")
     this.searchInputTarget.value = ""
     this.searchInputTarget.focus()
     document.body.style.overflow = "hidden"
     
-    console.log('[LocationSelector] About to call loadLocations()')
+    console.log('[LocationSelector] About to call loadLocations() with city:', this.currentCityValue)
     // Load locations for current city
     this.loadLocations()
-    console.log('[LocationSelector] loadLocations() called')
+    console.log('[LocationSelector] loadLocations() triggered')
+    console.log('[LocationSelector] ========== openModal END ===========')
   }
 
   closeModal(): void {
@@ -149,28 +156,41 @@ export default class extends Controller<HTMLElement> {
 
   private async loadLocations(): Promise<void> {
     const city = this.currentCityValue || '深圳'
-    console.log('[LocationSelector] loadLocations START - city:', city)
+    console.log('[LocationSelector] ========== loadLocations START ===========')
+    console.log('[LocationSelector] Loading locations for city:', city)
     
     try {
-      console.log('[LocationSelector] Fetching from:', `/cars/locations?city=${encodeURIComponent(city)}`)
-      const response = await fetch(`/cars/locations?city=${encodeURIComponent(city)}`)
-      console.log('[LocationSelector] Response status:', response.status)
-      console.log('[LocationSelector] Response ok:', response.ok)
+      const url = `/cars/locations?city=${encodeURIComponent(city)}`
+      console.log('[LocationSelector] Fetching from URL:', url)
+      const response = await fetch(url)
+      console.log('[LocationSelector] Response received - status:', response.status, 'ok:', response.ok)
       
       if (!response.ok) {
-        throw new Error('Failed to load locations')
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log('[LocationSelector] Data received:', data)
-      console.log('[LocationSelector] About to call renderLocations')
+      console.log('[LocationSelector] ========== API RESPONSE ===========')
+      console.log('[LocationSelector] Full response data:', JSON.stringify(data, null, 2))
+      console.log('[LocationSelector] City from response:', data.city)
+      console.log('[LocationSelector] Airports count:', data.locations?.airports?.length || 0)
+      console.log('[LocationSelector] Train stations count:', data.locations?.train_stations?.length || 0)
+      console.log('[LocationSelector] Others count:', data.locations?.others?.length || 0)
+      console.log('[LocationSelector] =====================================')
+      
       this.renderLocations(data.locations)
       console.log('[LocationSelector] renderLocations completed')
     } catch (error) {
+      console.error('[LocationSelector] ========== ERROR ===========')
       console.error('[LocationSelector] Failed to load locations:', error)
-      // Fallback to default武汉 locations
+      if (error instanceof Error) {
+        console.error('[LocationSelector] Error details:', error.message)
+      }
+      console.error('[LocationSelector] =============================')
+      // Fallback to default locations
       this.renderDefaultLocations()
     }
+    console.log('[LocationSelector] ========== loadLocations END ===========')
   }
 
   private renderLocations(locations: { airports: string[], train_stations: string[], others: string[] }): void {
