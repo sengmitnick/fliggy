@@ -1,0 +1,56 @@
+<%= link_to cruise_order_path(booking), class: "block bg-surface border border-border rounded-xl p-4 hover:shadow-md transition-shadow" do %>
+  <div class="flex items-start justify-between mb-3">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+        </svg>
+      </div>
+      <div>
+        <p class="text-xs text-text-muted">游轮订单</p>
+        <p class="text-sm font-medium text-text-primary"><%= booking.cruise_product.cruise_sailing.cruise_ship.name %></p>
+      </div>
+    </div>
+    <span class="text-xs px-2 py-1 rounded-full <%= booking_status_color(booking.status) %> bg-opacity-10">
+      <%= booking_status_text(booking.status) %>
+    </span>
+  </div>
+
+  <div class="space-y-2 mb-3">
+    <div class="flex items-center text-sm">
+      <svg class="w-4 h-4 text-text-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <span class="text-text-secondary">
+        出发：<%= booking.cruise_product.cruise_sailing.departure_date.strftime('%Y年%m月%d日') %>
+      </span>
+    </div>
+    <div class="flex items-center text-sm">
+      <svg class="w-4 h-4 text-text-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <span class="text-text-secondary">
+        <%= booking.quantity %>人 · <%= booking.cruise_product.cabin_type %>
+      </span>
+    </div>
+    <div class="flex items-center text-sm">
+      <svg class="w-4 h-4 text-text-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      <span class="text-text-secondary">
+        联系人：<%= booking.contact_name %> <%= booking.contact_phone %>
+      </span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between pt-3 border-t border-border">
+    <div>
+      <p class="text-xs text-text-muted">订单号</p>
+      <p class="text-xs text-text-secondary font-mono"><%= booking.order_number %></p>
+    </div>
+    <div class="text-right">
+      <p class="text-xs text-text-muted">订单金额</p>
+      <p class="text-lg font-bold text-primary">¥<%= booking.total_price %></p>
+    </div>
+  </div>
+<% end %>
