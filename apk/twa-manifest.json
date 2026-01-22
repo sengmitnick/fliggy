@@ -1,6 +1,6 @@
 {
   "packageId": "ai.clacky.trip01",
-  "host": "3000-3662c60e1a38-web.clackypaas.com",
+  "host": "3000-0219d4f8bdd7-web.clackypaas.com",
   "name": "旅游环境01",
   "launcherName": "旅游环境01",
   "display": "standalone",
@@ -10,11 +10,11 @@
   "navigationColorDark": "#000000",
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
-  "backgroundColor": "#7CC0FF",
+  "backgroundColor": "#FFC105",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://3000-3662c60e1a38-web.clackypaas.com/trip-logo.png",
-  "maskableIconUrl": "https://3000-3662c60e1a38-web.clackypaas.com/trip-logo.png",
+  "iconUrl": "https://3000-0219d4f8bdd7-web.clackypaas.com/trip-logo.png",
+  "maskableIconUrl": "https://3000-0219d4f8bdd7-web.clackypaas.com/trip-logo.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "/home/runner/app/apk/android.keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://3000-3662c60e1a38-web.clackypaas.com/manifest.json",
+  "webManifestUrl": "https://3000-0219d4f8bdd7-web.clackypaas.com/manifest.json",
   "fallbackType": "customtabs",
   "features": {
     "locationDelegation": {
@@ -37,7 +37,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://3000-3662c60e1a38-web.clackypaas.com/",
+  "fullScopeUrl": "https://3000-0219d4f8bdd7-web.clackypaas.com/",
   "minSdkVersion": 21,
   "orientation": "any",
   "fingerprints": [],
