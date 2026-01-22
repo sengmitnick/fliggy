@@ -284,7 +284,7 @@
             
             <!-- Selected Info -->
             <div class="px-4 py-3 bg-[#FFF9E6] text-sm text-foreground-secondary">
-              已选："出发地: <%= @product.destination %>"、"套餐类型: <span data-booking-modal-target="selectedPackageName"><%= @selected_package.name %></span>"、"购买数量: 成人1"
+              已选："出发地: <%= @product.departure_city %>"、"套餐类型: <span data-booking-modal-target="selectedPackageName"><%= @selected_package.name %></span>"、"购买数量: 成人1"
             </div>
             
             <!-- Package Type Selection -->
@@ -445,7 +445,7 @@
                       class="flex-1 py-4 rounded-xl text-base font-semibold text-white"
                       style="background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%);"
                       data-action="click->booking-modal#buyNow">
-                领券购买
+                立即购买
               </button>
             </div>
           </div>
