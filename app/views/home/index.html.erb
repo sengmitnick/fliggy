@@ -138,10 +138,10 @@
             <span class="text-[12px] text-secondary">汽车票</span>
           <% end %>
 
-          <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to tickets_path(city: @current_destination&.name || '深圳'), class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/门票.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "门票" %>
             <span class="text-[12px] text-secondary">门票</span>
-          </button>
+          <% end %>
         </div>
 
         <!-- Row 3 -->

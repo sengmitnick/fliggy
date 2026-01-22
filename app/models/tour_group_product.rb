@@ -12,7 +12,7 @@ class TourGroupProduct < ApplicationRecord
   serialize :tags, coder: JSON
 
   validates :title, presence: true
-  validates :tour_category, inclusion: { in: %w[comprehensive group_tour private_group free_travel outbound_essentials] }
+  validates :tour_category, inclusion: { in: %w[comprehensive group_tour private_group free_travel outbound_essentials ticket] }
   validates :price, numericality: { greater_than_or_equal_to: 0 }
   validates :duration, numericality: { greater_than: 0 }
 
