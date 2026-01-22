@@ -13,7 +13,8 @@ export default class extends Controller {
     "headerOriginalPrice",
     "selectedPackageName",
     "monthPrice",
-    "datePrice"
+    "datePrice",
+    "quantitySummary"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -28,6 +29,7 @@ export default class extends Controller {
   declare readonly selectedPackageNameTarget: HTMLElement
   declare readonly monthPriceTargets: HTMLElement[]
   declare readonly datePriceTargets: HTMLElement[]
+  declare readonly quantitySummaryTarget: HTMLElement
 
   private selectedPackageId: number | null = null
   private selectedDate: string | null = null
@@ -186,25 +188,37 @@ export default class extends Controller {
   increaseAdult(): void {
     this.adultQuantity++
     this.adultCountTarget.textContent = this.adultQuantity.toString()
+    this.updateQuantitySummary()
   }
 
   decreaseAdult(): void {
     if (this.adultQuantity > 1) {
       this.adultQuantity--
       this.adultCountTarget.textContent = this.adultQuantity.toString()
+      this.updateQuantitySummary()
     }
   }
 
   increaseChild(): void {
     this.childQuantity++
     this.childCountTarget.textContent = this.childQuantity.toString()
+    this.updateQuantitySummary()
   }
 
   decreaseChild(): void {
     if (this.childQuantity > 0) {
       this.childQuantity--
       this.childCountTarget.textContent = this.childQuantity.toString()
+      this.updateQuantitySummary()
     }
+  }
+
+  private updateQuantitySummary(): void {
+    let summary = `购买数量: 成人${this.adultQuantity}`
+    if (this.childQuantity > 0) {
+      summary += `、儿童${this.childQuantity}`
+    }
+    this.quantitySummaryTarget.textContent = summary
   }
 
   addToCart(): void {

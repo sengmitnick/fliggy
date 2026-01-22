@@ -34,17 +34,17 @@ export default class extends Controller<HTMLElement> {
     document.body.style.overflow = ''
   }
 
-  // Select a passenger as contact
-  selectPassenger(event: Event): void {
+  // Select a contact
+  selectContact(event: Event): void {
     const target = event.currentTarget as HTMLElement
-    const passengerName = target.dataset.passengerName || ''
-    const passengerPhone = target.dataset.passengerPhone || ''
+    const contactName = target.dataset.contactName || ''
+    const contactPhone = target.dataset.contactPhone || ''
 
-    console.log("Selected contact:", { passengerName, passengerPhone })
+    console.log("Selected contact:", { contactName, contactPhone })
 
     // Update form inputs
-    this.contactNameInputTarget.value = passengerName
-    this.contactPhoneInputTarget.value = passengerPhone
+    this.contactNameInputTarget.value = contactName
+    this.contactPhoneInputTarget.value = contactPhone
 
     // Close modal
     this.closeModal()

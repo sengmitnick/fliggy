@@ -17,32 +17,32 @@
 
     <!-- Subtitle -->
     <div class="px-4 py-2 bg-blue-50 border-b border-blue-100">
-      <p class="text-sm text-gray-600">选择常用乘机人作为联系人</p>
+      <p class="text-sm text-gray-600">选择常用联系人</p>
     </div>
 
-    <!-- Content - Scrollable passenger list -->
+    <!-- Content - Scrollable contact list -->
     <div class="max-h-96 overflow-y-auto">
-      <% if current_user&.passengers&.any? %>
-        <!-- Passenger List -->
-        <% current_user.passengers.order(is_self: :desc, created_at: :desc).each_with_index do |passenger, index| %>
+      <% if current_user&.contacts&.any? %>
+        <!-- Contact List -->
+        <% current_user.contacts.order(is_default: :desc, created_at: :desc).each_with_index do |contact, index| %>
           <div 
             class="px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
-            data-action="click->contact-selector#selectPassenger"
-            data-passenger-name="<%= passenger.name %>"
-            data-passenger-phone="<%= passenger.phone %>">
+            data-action="click->contact-selector#selectContact"
+            data-contact-name="<%= contact.name %>"
+            data-contact-phone="<%= contact.phone %>">
             <div class="flex items-center">
               <div class="flex-1">
                 <!-- Name with badge -->
                 <div class="flex items-center mb-1">
-                  <span class="font-bold text-base text-gray-900"><%= passenger.name %></span>
-                  <% if passenger.is_self? %>
-                    <span class="ml-2 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-600">本人</span>
+                  <span class="font-bold text-base text-gray-900"><%= contact.name %></span>
+                  <% if contact.is_default? %>
+                    <span class="ml-2 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-600">默认</span>
                   <% end %>
                 </div>
                 
                 <!-- Phone Number -->
                 <div class="text-sm text-gray-600">
-                  <%= passenger.phone.present? ? passenger.phone : '未设置手机号' %>
+                  <%= contact.phone.present? ? contact.phone : '未设置手机号' %>
                 </div>
               </div>
             </div>
@@ -54,8 +54,8 @@
           <svg class="w-20 h-20 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
           </svg>
-          <div class="text-gray-500 text-base mb-2">暂无常用乘机人</div>
-          <div class="text-sm text-gray-400 mb-6">请前往个人中心添加常用乘机人信息</div>
+          <div class="text-gray-500 text-base mb-2">暂无常用联系人</div>
+          <div class="text-sm text-gray-400 mb-6">请前往个人中心添加常用联系人信息</div>
         </div>
       <% end %>
     </div>

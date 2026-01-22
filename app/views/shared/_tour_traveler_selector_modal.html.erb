@@ -32,15 +32,6 @@
             data-passenger-name="<%= passenger.name %>"
             data-passenger-id-number="<%= passenger.id_number %>">
             <div class="flex items-center">
-              <!-- Edit Button (Pencil Icon) -->
-              <%= link_to edit_passenger_path(passenger, source: 'tour_booking', return_to: request.fullpath, reopen_modal: 'tour_traveler_selector'), 
-                          onclick: "event.stopPropagation()",
-                          class: "mr-3 flex-shrink-0" do %>
-                <svg class="w-5 h-5 text-gray-400 hover:text-gray-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                </svg>
-              <% end %>
-              
               <div class="flex-1">
                 <!-- Name with badge -->
                 <div class="flex items-center mb-1">
