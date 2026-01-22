@@ -8,8 +8,8 @@ class TourGroupBooking < ApplicationRecord
   validates :travel_date, presence: true
   validates :adult_count, numericality: { greater_than: 0 }
   validates :child_count, numericality: { greater_than_or_equal_to: 0 }
-  validates :contact_name, presence: true
-  validates :contact_phone, presence: true
+  validates :contact_name, presence: true, unless: :fill_travelers_later?
+  validates :contact_phone, presence: true, unless: :fill_travelers_later?
   validates :insurance_type, inclusion: { in: %w[none standard premium] }
   validates :status, inclusion: { in: %w[pending confirmed cancelled completed] }
   validates :total_price, numericality: { greater_than_or_equal_to: 0 }

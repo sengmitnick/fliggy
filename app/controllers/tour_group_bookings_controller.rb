@@ -92,6 +92,7 @@ class TourGroupBookingsController < ApplicationController
       :contact_name,
       :contact_phone,
       :insurance_type,
+      :fill_travelers_later,
       booking_travelers_attributes: [:id, :traveler_name, :id_number, :traveler_type, :_destroy]
     )
   end
