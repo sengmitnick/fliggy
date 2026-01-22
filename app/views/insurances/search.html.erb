@@ -59,15 +59,12 @@
   <!-- 日期选择区域（如果有日期参数） -->
   <% if @start_date.present? && @end_date.present? %>
     <section class="mt-4 mx-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          <div>
-            <div class="text-sm font-bold text-gray-900"><%= @start_date %> 至 <%= @end_date %></div>
-            <div class="text-xs text-gray-500">共<%= @days %>天</div>
-          </div>
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <div>
+          <div class="text-sm font-bold text-gray-900"><%= @start_date %> 至 <%= @end_date %></div>
+          <div class="text-xs text-gray-500">共<%= @days %>天</div>
         </div>
-        <%= link_to "修改", search_insurances_path(destination_type: params[:destination_type]), class: "text-sm text-primary font-medium" %>
       </div>
     </section>
   <% end %>
