@@ -1,4 +1,6 @@
-<div class="min-h-screen bg-surface pb-32" data-controller="tour-traveler-selector">
+<div class="min-h-screen bg-surface pb-32" 
+     data-controller="tour-traveler-selector booking-quantity"
+     data-booking-quantity-unit-price-value="<%= @package.price.to_i %>">
   <!-- Header -->
   <div class="sticky top-0 z-40 bg-white border-b border-border">
     <div class="flex items-center px-4 py-3">
@@ -46,14 +48,31 @@
           <span class="text-sm text-foreground-muted">出行日期</span>
           <span class="text-sm text-foreground"><%= l(@travel_date, format: :long) %></span>
         </div>
-        <div class="flex items-center justify-between py-2">
-          <span class="text-sm text-foreground-muted">出行人数</span>
-          <span class="text-sm text-foreground">
-            成人 <%= @adult_count %> 人
-            <% if @child_count > 0 %>
-              ，儿童 <%= @child_count %> 人
-            <% end %>
-          </span>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-2">
+            <span class="text-sm text-foreground-muted">份数</span>
+            <div class="flex items-center gap-4">
+              <span class="text-sm text-foreground-muted">¥<%= @package.price.to_i %>/份</span>
+              <div class="flex items-center gap-2">
+                <button type="button" 
+                        class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-foreground hover:bg-gray-100"
+                        data-action="click->booking-quantity#decrease">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                  </svg>
+                </button>
+                <span class="text-base font-semibold text-foreground w-8 text-center" data-booking-quantity-target="quantity"><%= @adult_count + @child_count %></span>
+                <button type="button" 
+                        class="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-foreground hover:bg-gray-100"
+                        data-action="click->booking-quantity#increase">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                </button>
+              </div>
+              <span class="text-base font-semibold text-red-500" data-booking-quantity-target="itemTotal">¥<%= @package.price.to_i * (@adult_count + @child_count) %></span>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -90,16 +109,22 @@
       </div>
     </div>
     
+    <div data-controller="traveler-toggle">
     <!-- 我要付款后填写出行人 -->
     <div class="bg-white px-4 py-3">
+      <%= f.hidden_field :fill_travelers_later, value: 'false', data: { "traveler-toggle-target": "hiddenField" } %>
       <label class="flex items-center justify-between">
         <span class="text-sm text-foreground font-medium">我要付款后填写出行人</span>
-        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300" />
+        <input type="checkbox" 
+               class="form-checkbox h-5 w-5 text-primary rounded border-gray-300"
+               data-action="change->traveler-toggle#toggle" />
       </label>
     </div>
     
     <!-- 出行人信息 -->
-    <div class="bg-white px-4 py-4">
+    <div class="bg-white px-4 py-4" 
+         data-traveler-toggle-target="travelerSection"
+         data-controller="traveler-duplicate-validator">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-semibold text-foreground">选择 <%= @adult_count + @child_count %> 位游客</h3>
         <button type="button" class="text-sm text-blue-500">
@@ -122,11 +147,7 @@
                 <%= traveler_form.object.traveler_type == 'adult' ? '成人' : '儿童' %>
               </span>
             </div>
-            <button type="button" class="w-6 h-6 text-foreground-muted">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-              </svg>
-            </button>
+
           </div>
           
           <div class="space-y-3">
@@ -134,7 +155,11 @@
               <label class="text-sm text-foreground-muted w-16">姓名</label>
               <%= traveler_form.text_field :traveler_name, 
                   placeholder: "请输入姓名",
-                  data: { "tour-traveler-selector-target": "travelerNameInput" },
+                  data: { 
+                    "tour-traveler-selector-target": "travelerNameInput",
+                    "traveler-duplicate-validator-target": "nameInput",
+                    action: "blur->traveler-duplicate-validator#validateName"
+                  },
                   class: "flex-1 text-sm text-foreground focus:outline-none" %>
               <button type="button" 
                       class="text-blue-500"
@@ -150,7 +175,11 @@
               <label class="text-sm text-foreground-muted w-16">身份证</label>
               <%= traveler_form.text_field :id_number, 
                   placeholder: "请输入身份证号",
-                  data: { "tour-traveler-selector-target": "travelerIdInput" },
+                  data: { 
+                    "tour-traveler-selector-target": "travelerIdInput",
+                    "traveler-duplicate-validator-target": "idInput",
+                    action: "blur->traveler-duplicate-validator#validateIdNumber"
+                  },
                   class: "flex-1 text-sm text-foreground focus:outline-none" %>
             </div>
             
@@ -160,12 +189,15 @@
       <% end %>
       
       <!-- 添加出行人按钮 -->
-      <button type="button" class="w-full py-3 text-sm font-medium text-center rounded-lg border-2 border-dashed border-gray-300 text-foreground-muted hover:border-primary hover:text-primary">
+      <button type="button" 
+              class="w-full py-3 text-sm font-medium text-center rounded-lg border-2 border-dashed border-gray-300 text-foreground-muted hover:border-primary hover:text-primary"
+              onclick="window.showToast('精彩即将上线，敬请期待')">
         <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         更多出行人
       </button>
+    </div>
     </div>
     
     <!-- 留言备注 -->
@@ -178,41 +210,46 @@
     </div>
     
     <!-- 联系人 -->
-    <div class="bg-white px-4 py-4">
-      <h3 class="text-base font-semibold text-foreground mb-4">联系人</h3>
-      
-      <div class="space-y-3">
-        <div class="flex items-center py-3 border-b border-border">
-          <label class="text-sm text-foreground-muted w-16">姓名</label>
-          <%= f.text_field :contact_name, 
-              placeholder: "请输入联系人姓名",
-              class: "flex-1 text-sm text-foreground focus:outline-none" %>
-          <button type="button" class="text-blue-500">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
-            </svg>
-          </button>
-        </div>
+    <div data-controller="contact-selector">
+      <div class="bg-white px-4 py-4">
+        <h3 class="text-base font-semibold text-foreground mb-4">联系人</h3>
         
-        <div class="flex items-center py-3">
-          <label class="text-sm text-foreground-muted w-16">手机号</label>
-          <span class="text-xs text-foreground-muted mr-2">+86</span>
-          <svg class="w-4 h-4 text-foreground-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-          <%= f.text_field :contact_phone, 
-              placeholder: "请输入手机号",
-              class: "flex-1 text-sm text-foreground focus:outline-none" %>
+        <div class="space-y-3">
+          <div class="flex items-center py-3 border-b border-border">
+            <label class="text-sm text-foreground-muted w-16">姓名</label>
+            <%= f.text_field :contact_name, 
+                placeholder: "请输入联系人姓名",
+                data: { "contact-selector-target": "contactNameInput" },
+                class: "flex-1 text-sm text-foreground focus:outline-none" %>
+            <button type="button" 
+                    class="text-blue-500"
+                    data-action="click->contact-selector#openModal">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="flex items-center py-3">
+            <label class="text-sm text-foreground-muted w-16">手机号</label>
+            <span class="text-xs text-foreground-muted mr-2">+86</span>
+            <svg class="w-4 h-4 text-foreground-muted mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+            <%= f.text_field :contact_phone, 
+                placeholder: "请输入手机号",
+                data: { "contact-selector-target": "contactPhoneInput" },
+                class: "flex-1 text-sm text-foreground focus:outline-none" %>
+          </div>
         </div>
       </div>
+      
+      <!-- Contact Selector Modal -->
+      <%= render 'shared/contact_selector_modal' %>
     </div>
     
     <!-- 保险 -->
-    <div class="bg-white px-4 py-4" 
-         data-controller="insurance-selector"
-         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
-         data-insurance-selector-adult-count-value="<%= @adult_count %>"
-         data-insurance-selector-child-count-value="<%= @child_count %>">
+    <div class="bg-white px-4 py-4">
       <div class="flex items-center gap-2 mb-4">
         <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -236,8 +273,7 @@
               checked: @booking.insurance_type == 'none',
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
@@ -260,8 +296,7 @@
           <%= f.radio_button :insurance_type, 'standard', 
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #FFE4B3;">
@@ -290,8 +325,7 @@
           <%= f.radio_button :insurance_type, 'premium', 
               class: "peer sr-only",
               data: { 
-                action: "change->insurance-selector#updatePrice",
-                "insurance-selector-target": "radio"
+                action: "change->insurance-selector#updatePrice"
               } %>
           <div class="p-4 text-center border-2 rounded-lg peer-checked:border-primary peer-checked:bg-[#FFF9E6] transition-colors">
             <div class="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style="background: #E6F3FF;">
@@ -383,9 +417,13 @@
     </div>
     
     <!-- 电子合同、线路标准退订须知 -->
-    <div class="bg-white px-4 py-4">
+    <div class="bg-white px-4 py-4" data-controller="terms-checkbox">
       <label class="flex items-start gap-2">
-        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-0.5 flex-shrink-0" required />
+        <input type="checkbox" 
+               class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 mt-0.5 flex-shrink-0" 
+               required 
+               data-terms-checkbox-target="checkbox"
+               data-action="change->terms-checkbox#toggleState" />
         <span class="text-xs text-foreground-secondary">
           请您仔细阅读
           <button type="button" class="text-blue-500">电子合同</button>、
@@ -396,7 +434,11 @@
     </div>
     
     <!-- 底部固定栏 -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3">
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3"
+         data-controller="insurance-selector"
+         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
+         data-insurance-selector-adult-count-value="<%= @adult_count %>"
+         data-insurance-selector-child-count-value="<%= @child_count %>">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
           <span class="text-sm text-foreground-muted">合计</span>
@@ -419,3 +461,27 @@
   <!-- Tour Traveler Selector Modal -->
   <%= render 'shared/tour_traveler_selector_modal' %>
 </div>
+
+<script>
+  // Auto-reopen modal after editing passenger
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reopenModal = urlParams.get('reopen_modal');
+    
+    if (reopenModal === 'tour_traveler_selector') {
+      const modalController = document.querySelector('[data-controller~="tour-traveler-selector"]');
+      if (modalController) {
+        const modal = modalController.querySelector('[data-tour-traveler-selector-target="modal"]');
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          
+          // Remove the parameter from URL to avoid reopening on page refresh
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('reopen_modal');
+          window.history.replaceState({}, '', newUrl);
+        }
+      }
+    }
+  });
+</script>

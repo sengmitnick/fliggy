@@ -8,7 +8,13 @@ export default class extends Controller {
     "calendar",
     "dateBtn",
     "adultCount",
-    "childCount"
+    "childCount",
+    "headerPrice",
+    "headerOriginalPrice",
+    "selectedPackageName",
+    "monthPrice",
+    "datePrice",
+    "quantitySummary"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -18,6 +24,12 @@ export default class extends Controller {
   declare readonly dateBtnTargets: HTMLElement[]
   declare readonly adultCountTarget: HTMLElement
   declare readonly childCountTarget: HTMLElement
+  declare readonly headerPriceTarget: HTMLElement
+  declare readonly headerOriginalPriceTarget: HTMLElement
+  declare readonly selectedPackageNameTarget: HTMLElement
+  declare readonly monthPriceTargets: HTMLElement[]
+  declare readonly datePriceTargets: HTMLElement[]
+  declare readonly quantitySummaryTarget: HTMLElement
 
   private selectedPackageId: number | null = null
   private selectedDate: string | null = null
@@ -59,9 +71,15 @@ export default class extends Controller {
   selectPackage(event: Event): void {
     const btn = event.currentTarget as HTMLElement
     const packageId = parseInt(btn.dataset.packageId || "0")
+    const packagePrice = parseInt(btn.dataset.packagePrice || "0")
+    const packageChildPrice = parseInt(btn.dataset.packageChildPrice || "0")
+    const packageName = btn.dataset.packageName || ""
     
     this.selectedPackageId = packageId
     this.updatePackageButtons(packageId)
+    
+    // Update all price displays
+    this.updatePrices(packagePrice, packageName)
     
     // Notify external package switcher
     const customEvent = new CustomEvent("booking-modal:package-changed", {
@@ -108,6 +126,27 @@ export default class extends Controller {
     })
   }
 
+  private updatePrices(price: number, packageName: string): void {
+    const originalPrice = Math.round(price * 1.2)
+    
+    // Update header prices
+    this.headerPriceTarget.innerHTML = `券后价 ¥${price}<span class="text-sm">起</span>`
+    this.headerOriginalPriceTarget.textContent = `¥${originalPrice}`
+    
+    // Update selected package name
+    this.selectedPackageNameTarget.textContent = packageName
+    
+    // Update month tab prices
+    this.monthPriceTargets.forEach(el => {
+      el.textContent = `¥${price}起`
+    })
+    
+    // Update calendar date prices
+    this.datePriceTargets.forEach(el => {
+      el.textContent = `¥${price}`
+    })
+  }
+
   selectMonth(event: Event): void {
     const btn = event.currentTarget as HTMLElement
     const month = btn.dataset.month
@@ -149,25 +188,37 @@ export default class extends Controller {
   increaseAdult(): void {
     this.adultQuantity++
     this.adultCountTarget.textContent = this.adultQuantity.toString()
+    this.updateQuantitySummary()
   }
 
   decreaseAdult(): void {
     if (this.adultQuantity > 1) {
       this.adultQuantity--
       this.adultCountTarget.textContent = this.adultQuantity.toString()
+      this.updateQuantitySummary()
     }
   }
 
   increaseChild(): void {
     this.childQuantity++
     this.childCountTarget.textContent = this.childQuantity.toString()
+    this.updateQuantitySummary()
   }
 
   decreaseChild(): void {
     if (this.childQuantity > 0) {
       this.childQuantity--
       this.childCountTarget.textContent = this.childQuantity.toString()
+      this.updateQuantitySummary()
     }
+  }
+
+  private updateQuantitySummary(): void {
+    let summary = `购买数量: 成人${this.adultQuantity}`
+    if (this.childQuantity > 0) {
+      summary += `、儿童${this.childQuantity}`
+    }
+    this.quantitySummaryTarget.textContent = summary
   }
 
   addToCart(): void {

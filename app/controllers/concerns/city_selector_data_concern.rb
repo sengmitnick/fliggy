@@ -14,19 +14,18 @@ module CitySelectorDataConcern
     # 国际地区列表
     international_regions = %w[日本 韩国 泰国 马来西亚 新加坡 越南 英国 法国 意大利 西班牙 荷兰 德国 美国 加拿大 澳大利亚 新西兰 阿联酋 土耳其 埃及 肯尼亚]
 
-    # 热门城市（国内）- 返回城市名称数组
-    @hot_domestic_cities = City.where.not(region: international_regions)
-                               .where(is_hot: true)
-                               .order(:pinyin)
-                               .pluck(:name)
-
-    # 所有国内城市按首字母分组 - 确保先加载所有记录
-    domestic_cities = City.where.not(region: international_regions)
+    # 热门城市（国内）- 返回City对象数组以便模板使用
+    @hot_cities = City.where.not(region: international_regions)
+                          .where(is_hot: true)
                           .order(:pinyin)
-                          .to_a  # Load all records first
+
+    # 所有国内城市 - 返回City对象数组以便模板使用
+    @all_cities = City.where.not(region: international_regions)
+                          .order(:pinyin)
     
-    @cities_by_letter = domestic_cities.group_by { |city| city.pinyin.first.upcase }
-                                      .transform_values { |cities| cities.map(&:name) }
+    # 国内城市按首字母分组（保留用于其他用途）
+    @cities_by_letter = @all_cities.group_by { |city| city.pinyin.first.upcase }
+                                    .transform_values { |cities| cities.map(&:name) }
 
     # 国际城市按地区分组（城市名, 国家）- 确保先加载所有记录
     international_cities = City.where(region: international_regions)

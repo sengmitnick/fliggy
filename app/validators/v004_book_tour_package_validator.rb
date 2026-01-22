@@ -2,18 +2,19 @@
 
 require_relative 'base_validator'
 
-# 验证用例5: 预订价格合适的三亚跟团游
+# 验证用例5: 预订价格合适的三亚5天4晚跟团游（2成人0儿童，预算≤5000元/人，总价≤10000元，小团）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索三亚的跟团游产品，
-#   找到价格合适（预算5000元以内）的5天4晚产品并成功创建订单（2人）
+#   找到价格合适（预算5000元/人以内）的5天4晚产品并成功创建订单
+#   要求：2个成人，0个儿童，总预算10000元以内，小团（<15人）
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 目的地正确（三亚） (15分)
-#   - 天数正确（5天） (15分)
-#   - 价格符合预算（≤5000元/人） (30分)
-#   - 预订人数正确（2人） (20分)
+#   - 订单已创建 (20分) - 系统中存在跟团游订单记录
+#   - 目的地正确（三亚） (15分) - 订单的目的地必须是三亚
+#   - 天数正确（5天4晚） (15分) - 订单的行程天数必须是5天
+#   - 价格符合预算（≤5000元/人，总价≤10000元） (30分) - 成人单价不超过5000元
+#   - 预订人数正确（2个成人，0个儿童，小团：<15人） (20分) - 成人数量为2，儿童数量为0，总人数<15人
 # 
 # 使用方法:
 #   # 准备阶段
@@ -25,8 +26,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V004BookTourPackageValidator < BaseValidator
   self.validator_id = 'book_tour_package_sanya'
-  self.title = '预订价格合适的三亚5天4晚跟团游（2人）'
-  self.description = '搜索三亚的跟团游产品，找到价格合适（预算≤5000元/人）的5天4晚产品并预订（2人）'
+  self.title = '预订价格合适的三亚5天4晚跟团游（2成人0儿童，预算≤5000元/人，小团）'
+  self.description = '搜索三亚的跟团游产品，找到价格合适（预算≤5000元/人，总价≤10000元）的5天4晚产品并预订（2个成人，0个儿童，小团：<15人）'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -53,11 +54,13 @@ class V004BookTourPackageValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订一个价格合适的#{@destination}#{@duration}天#{@duration - 1}晚跟团游产品（2人），预算每人不超过#{@budget_per_person}元",
+      task: "请预订一个价格合适的#{@destination}#{@duration}天#{@duration - 1}晚跟团游产品，要求：#{@adult_count}个成人、0个儿童，每人预算不超过#{@budget_per_person}元（总预算≤#{@budget_per_person * @adult_count}元）",
       destination: @destination,
       duration: @duration,
       budget_per_person: @budget_per_person,
+      total_budget: @budget_per_person * @adult_count,
       adult_count: @adult_count,
+      child_count: 0,
       hint: "系统中有多个符合条件的产品可选，请选择价格在预算内的",
       suitable_products_count: @suitable_count,
       price_range: @price_range
@@ -96,13 +99,13 @@ class V004BookTourPackageValidator < BaseValidator
     end
     
     # 断言5: 预订人数正确
-    add_assertion "预订人数正确（2人）", weight: 20 do
+    add_assertion "预订人数正确（2个成人，0个儿童）", weight: 20 do
       expect(@booking.adult_count).to eq(@adult_count),
-        "预订人数不正确。预期: #{@adult_count}人, 实际: #{@booking.adult_count}人"
+        "成人数量不正确。预期: #{@adult_count}个成人, 实际: #{@booking.adult_count}个成人"
       
       # 儿童数应该是0
       expect(@booking.child_count).to eq(0),
-        "不应该有儿童票。实际: #{@booking.child_count}个儿童"
+        "儿童数量不正确。预期: 0个儿童, 实际: #{@booking.child_count}个儿童"
     end
   end
   

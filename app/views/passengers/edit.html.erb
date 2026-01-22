@@ -23,7 +23,14 @@
 
   <!-- Form Content -->
   <div class="pb-32">
-    <%= form_with model: @passenger, url: passenger_path(@passenger, source: @traveler_type), method: :patch, local: true, data: { turbo: false } do |f| %>
+    <%= form_with model: @passenger, 
+                  url: passenger_path(@passenger, 
+                                      source: @traveler_type,
+                                      return_to: params[:return_to],
+                                      reopen_modal: params[:reopen_modal]), 
+                  method: :patch, 
+                  local: true, 
+                  data: { turbo: false } do |f| %>
       <!-- Error Messages -->
       <% if @passenger.errors.any? %>
         <div class="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
