@@ -693,13 +693,23 @@
   }
 
   .field_with_errors {
-    @apply inline-block w-full;
+    @apply inline-block;
+  }
+
+  /* Prevent layout shift for checkboxes wrapped in field_with_errors */
+  label:has(> .field_with_errors input[type="checkbox"]) {
+    display: flex !important;
   }
 
   .field_with_errors input,
   .field_with_errors textarea,
   .field_with_errors select {
     border-color: hsl(var(--color-danger)) !important;
+  }
+
+  /* Checkbox error styling */
+  .field_with_errors input[type="checkbox"] {
+    @apply border-2 border-red-500;
   }
 
   .field_with_errors input:focus,
