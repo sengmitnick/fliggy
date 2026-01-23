@@ -85,6 +85,12 @@ export default class extends Controller {
     if (this.hasPasswordModalTarget) {
       this.passwordModalTarget.classList.add('hidden')
     }
+    
+    // 触发事件通知外部恢复按钮状态
+    this.element.dispatchEvent(new CustomEvent('payment-modal-closed', {
+      bubbles: true,
+      detail: { reason: 'password-modal-closed' }
+    }))
   }
 
   inputPassword(event: Event): void {

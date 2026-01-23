@@ -19,9 +19,13 @@ export default class extends Controller<HTMLElement> {
   private basePrice: number = 0
   private insurancePrice: number = 0
   private insuranceType: string = 'none'
+  private submitButton: HTMLButtonElement | null = null // 保存提交按钮引用
 
   connect(): void {
     console.log("BusTicketOrder connected")
+    
+    // 监听支付模态框关闭事件
+    document.addEventListener('payment-modal-closed', this.handlePaymentModalClosed.bind(this))
     
     // Read initial insurance data from form data element
     this.insuranceType = this.formDataTarget.dataset.insuranceType || 'none'
@@ -102,6 +106,19 @@ export default class extends Controller<HTMLElement> {
     this.contactPhoneTarget.focus()
   }
 
+  showComingSoon(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    // Use window.showToast to display coming soon message
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('精彩即将上线', 'info')
+    } else {
+      console.warn('showToast function not available')
+      alert('精彩即将上线')
+    }
+  }
+
   selectInsurance(event: Event): void {
     const target = event.currentTarget as HTMLElement
     this.insuranceType = target.dataset.insuranceType || 'none'
@@ -112,38 +129,61 @@ export default class extends Controller<HTMLElement> {
     allInsuranceCards.forEach(card => {
       const cardElement = card as HTMLElement
       const cardType = cardElement.dataset.insuranceType
-      const checkIcon = cardElement.querySelector('svg:last-child')
+      
+      // Find the check icon container (last div with svg inside)
+      const allDivs = cardElement.querySelectorAll('div')
+      const checkIconContainer = Array.from(allDivs).find(div => {
+        const svg = div.querySelector('svg')
+        return svg && div.classList.contains('mt-auto')
+      }) as HTMLElement | undefined
       
       if (cardType === this.insuranceType) {
         // Selected card styling
         if (cardType === 'none') {
-          cardElement.classList.add('border-[#FFD944]')
           cardElement.classList.remove('border-gray-100')
-          if (checkIcon) checkIcon.classList.remove('text-gray-300')
-          if (checkIcon) checkIcon.classList.add('text-[#FFD944]')
+          cardElement.classList.add('border-[#FFD944]')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-gray-300')
+            checkIconContainer.classList.add('text-[#FFD944]')
+          }
         } else if (cardType === 'premium') {
+          cardElement.classList.remove('bg-gray-50', 'border-gray-100')
           cardElement.classList.add('bg-[#FFFAED]', 'border-[#FFD944]')
-          cardElement.classList.remove('bg-gray-50', 'border-gray-100')
-          if (checkIcon) checkIcon.classList.remove('text-gray-300')
-          if (checkIcon) checkIcon.classList.add('text-[#FFD944]')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-gray-300')
+            checkIconContainer.classList.add('text-[#FFD944]')
+          }
         } else if (cardType === 'refund') {
-          cardElement.classList.add('bg-[#F0F7FF]', 'border-[#5D9CEC]')
           cardElement.classList.remove('bg-gray-50', 'border-gray-100')
-          if (checkIcon) checkIcon.classList.remove('text-gray-300')
-          if (checkIcon) checkIcon.classList.add('text-[#5D9CEC]')
+          cardElement.classList.add('bg-[#F0F7FF]', 'border-[#5D9CEC]')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-gray-300')
+            checkIconContainer.classList.add('text-[#5D9CEC]')
+          }
         }
       } else {
         // Unselected card styling
         if (cardType === 'none') {
           cardElement.classList.remove('border-[#FFD944]')
           cardElement.classList.add('border-gray-100')
-          if (checkIcon) checkIcon.classList.add('text-gray-300')
-          if (checkIcon) checkIcon.classList.remove('text-[#FFD944]')
-        } else {
-          cardElement.classList.remove('bg-[#FFFAED]', 'bg-[#F0F7FF]', 'border-[#FFD944]', 'border-[#5D9CEC]')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-[#FFD944]')
+            checkIconContainer.classList.add('text-gray-300')
+          }
+        } else if (cardType === 'premium') {
+          cardElement.classList.remove('bg-[#FFFAED]', 'border-[#FFD944]')
           cardElement.classList.add('bg-gray-50', 'border-gray-100')
-          if (checkIcon) checkIcon.classList.add('text-gray-300')
-          if (checkIcon) checkIcon.classList.remove('text-[#FFD944]', 'text-[#5D9CEC]')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-[#FFD944]')
+            checkIconContainer.classList.add('text-gray-300')
+          }
+        } else if (cardType === 'refund') {
+          cardElement.classList.remove('bg-[#F0F7FF]', 'border-[#5D9CEC]')
+          cardElement.classList.add('bg-gray-50', 'border-gray-100')
+          if (checkIconContainer) {
+            checkIconContainer.classList.remove('text-[#5D9CEC]')
+            checkIconContainer.classList.add('text-gray-300')
+          }
         }
       }
     })
@@ -155,6 +195,7 @@ export default class extends Controller<HTMLElement> {
     event.preventDefault()
     
     const button = event.currentTarget as HTMLButtonElement
+    this.submitButton = button // 保存按钮引用
     const busTicketId = button.dataset.busTicketId
     const basePrice = parseInt(button.dataset.basePrice || '0')
     
@@ -164,6 +205,22 @@ export default class extends Controller<HTMLElement> {
     // Validate passenger selection
     if (this.selectedPassengers.size === 0) {
       alert('请至少选择一位乘车人')
+      return
+    }
+    
+    // Validate contact phone
+    const contactPhone = this.contactPhoneTarget.value.trim()
+    if (!contactPhone) {
+      alert('请输入取票电话')
+      this.contactPhoneTarget.focus()
+      return
+    }
+    
+    // Validate phone format (11 digits)
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(contactPhone)) {
+      alert('请输入正确的手机号码')
+      this.contactPhoneTarget.focus()
       return
     }
     
@@ -285,5 +342,13 @@ export default class extends Controller<HTMLElement> {
     const basePrice = parseInt(button?.dataset.basePrice || '0')
     
     return (basePrice + this.insurancePrice) * passengerCount
+  }
+
+  // 处理支付模态框关闭事件，恢复按钮状态
+  private handlePaymentModalClosed(event: Event): void {
+    if (this.submitButton) {
+      this.submitButton.disabled = false
+      this.submitButton.textContent = '去支付'
+    }
   }
 }
