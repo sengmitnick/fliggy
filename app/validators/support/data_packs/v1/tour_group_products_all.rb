@@ -83,34 +83,7 @@ destinations_config = [
   { name: '稻城亚丁', cities: ['稻城', '亚丁', '香格里拉镇'], attractions: ['亚丁景区', '牛奶海', '五色海', '珍珠海'], departure_cities: ['成都', '康定', '丽江'] },
   { name: '呼伦贝尔', cities: ['海拉尔', '满洲里', '额尔古纳'], attractions: ['呼伦贝尔大草原', '满洲里国门', '白桦林', '莫日格勒河'], departure_cities: ['海拉尔', '哈尔滨', '北京'] },
   { name: '敦煌', cities: ['敦煌', '嘉峪关'], attractions: ['莫高窟', '鸣沙山', '月牙泉', '雅丹魔鬼城'], departure_cities: ['兰州', '敦煌', '西安', '乌鲁木齐'] },
-  { name: '喀纳斯', cities: ['喀纳斯', '禾木', '白哈巴'], attractions: ['喀纳斯湖', '禾木村', '神仙湾', '观鱼台'], departure_cities: ['乌鲁木齐', '阿勒泰'] },
-  { name: '婺源', cities: ['婺源', '江湾', '篁岭'], attractions: ['江湾', '篁岭', '李坑', '汪口'], departure_cities: ['上饶', '景德镇', '黄山', '南昌'] },
-  { name: '凤凰古城', cities: ['凤凰', '吉首'], attractions: ['凤凰古城', '沱江', '南方长城', '奇梁洞'], departure_cities: ['长沙', '张家界', '吉首', '怀化'] },
-  { name: '平遥古城', cities: ['平遥', '太原'], attractions: ['平遥古城', '日升昌票号', '城隍庙', '县衙'], departure_cities: ['太原', '西安', '北京', '郑州'] },
-  { name: '西双版纳', cities: ['景洪', '勐腊', '勐海'], attractions: ['野象谷', '原始森林公园', '傣族园', '植物园'], departure_cities: ['昆明', '西双版纳', '成都'] },
-  { name: '香格里拉', cities: ['香格里拉', '德钦'], attractions: ['普达措', '独克宗古城', '松赞林寺', '纳帕海'], departure_cities: ['丽江', '昆明', '大理'] },
-  { name: '腾冲', cities: ['腾冲', '和顺'], attractions: ['火山地热公园', '和顺古镇', '银杏村', '北海湿地'], departure_cities: ['昆明', '保山', '大理'] },
-  { name: '阿尔山', cities: ['阿尔山', '五岔沟'], attractions: ['阿尔山天池', '石塘林', '杜鹃湖', '三潭峡'], departure_cities: ['呼和浩特', '乌兰浩特', '海拉尔'] },
-  { name: '长白山', cities: ['二道白河', '长白山'], attractions: ['天池', '长白山瀑布', '温泉', '地下森林'], departure_cities: ['长春', '延吉', '沈阳'] },
-  { name: '峨眉山', cities: ['峨眉山', '乐山'], attractions: ['峨眉山', '金顶', '乐山大佛', '报国寺'], departure_cities: ['成都', '重庆', '乐山'] },
-  { name: '青城山', cities: ['都江堰', '青城山'], attractions: ['青城山', '都江堰', '街子古镇'], departure_cities: ['成都', '重庆'] },
-  { name: '大理', cities: ['大理', '洱海', '双廊'], attractions: ['洱海', '苍山', '大理古城', '崇圣寺三塔'], departure_cities: ['昆明', '丽江', '大理'] },
-  { name: '丽江', cities: ['丽江', '束河', '白沙'], attractions: ['丽江古城', '玉龙雪山', '束河古镇', '拉市海'], departure_cities: ['昆明', '丽江', '大理', '香格里拉'] },
-  { name: '武夷山', cities: ['武夷山', '九曲溪'], attractions: ['九曲溪', '天游峰', '大红袍景区', '一线天'], departure_cities: ['福州', '厦门', '南平', '武夷山'] },
-  { name: '鼓浪屿', cities: ['厦门', '鼓浪屿'], attractions: ['日光岩', '菽庄花园', '皓月园', '厦门大学'], departure_cities: ['厦门', '福州', '泉州'] },
-  { name: '华山', cities: ['华山', '西安'], attractions: ['华山', '长空栈道', '苍龙岭', '金锁关'], departure_cities: ['西安', '渭南', '郑州'] },
-  { name: '泰山', cities: ['泰安', '泰山'], attractions: ['泰山', '岱庙', '天外村', '红门'], departure_cities: ['济南', '泰安', '北京', '青岛'] },
-  { name: '蓬莱', cities: ['蓬莱', '长岛'], attractions: ['蓬莱阁', '长岛', '八仙渡', '海洋极地世界'], departure_cities: ['烟台', '青岛', '济南', '威海'] },
-  { name: '千岛湖', cities: ['千岛湖', '淳安'], attractions: ['千岛湖', '森林氧吧', '梅峰岛', '龙川湾'], departure_cities: ['杭州', '上海', '南京', '千岛湖'] },
-  { name: '乌镇', cities: ['乌镇', '西塘'], attractions: ['乌镇东栅', '乌镇西栅', '西塘古镇'], departure_cities: ['杭州', '上海', '嘉兴', '苏州'] },
-  { name: '普陀山', cities: ['普陀山', '舟山'], attractions: ['普陀山', '南海观音', '紫竹林', '不肯去观音院'], departure_cities: ['杭州', '上海', '宁波', '舟山'] },
-  { name: '三清山', cities: ['上饶', '三清山'], attractions: ['三清山', '巨蟒出山', '东方女神', '玉京峰'], departure_cities: ['上饶', '南昌', '景德镇', '杭州'] },
-  { name: '龙门石窟', cities: ['洛阳', '龙门'], attractions: ['龙门石窟', '白马寺', '关林', '老君山'], departure_cities: ['郑州', '洛阳', '西安'] },
-  { name: '嵩山少林', cities: ['郑州', '登封'], attractions: ['少林寺', '嵩山', '中岳庙', '塔林'], departure_cities: ['郑州', '洛阳', '开封'] },
-  { name: '承德', cities: ['承德', '围场'], attractions: ['避暑山庄', '外八庙', '木兰围场', '塞罕坝'], departure_cities: ['北京', '承德', '天津'] },
-  { name: '秦皇岛', cities: ['秦皇岛', '北戴河', '南戴河'], attractions: ['山海关', '老龙头', '北戴河', '鸽子窝公园'], departure_cities: ['北京', '秦皇岛', '天津', '石家庄'] },
-  { name: '威海', cities: ['威海', '荣成'], attractions: ['刘公岛', '成山头', '威海国际海水浴场', '天鹅湖'], departure_cities: ['烟台', '威海', '济南', '青岛'] },
-  { name: '日照', cities: ['日照', '东港'], attractions: ['万平口', '灯塔风景区', '森林公园', '第三海水浴场'], departure_cities: ['日照', '青岛', '济南', '临沂'] }
+  { name: '喀纳斯', cities: ['喀纳斯', '禾木', '白哈巴'], attractions: ['喀纳斯湖', '禾木村', '神仙湾', '观鱼台'], departure_cities: ['乌鲁木齐', '阿勒泰'] }
 ]
 
 # ==================== 旅游类型配置 ====================
@@ -141,9 +114,9 @@ destinations_config.each_with_index do |dest_config, dest_idx|
     tour_types.each do |tour_type|
       # 根据类型决定生成数量
       products_count = case tour_type[:category]
-      when 'free_travel' then 3  # 一日游：每个出发地3个
-      when 'group_tour' then 4   # 精品小团：每个出发地4个
-      when 'private_group' then 3 # 多日游：每个出发地3个
+      when 'free_travel' then 3  # 一日游:每个出发地3个
+      when 'group_tour' then 4   # 精品小团:每个出发地4个
+      when 'private_group' then 3 # 多日游:每个出发地3个
       end
       
       products_count.times do
@@ -258,11 +231,22 @@ TourGroupProduct.find_each do |product|
     when 2 then ['至尊套餐', '尊享套餐', 'VIP套餐', '奢华套餐']
     end
     
+    # 根据套餐等级生成详细描述
+    description = case i
+    when 0
+      "✓ 三星级酒店住宿 (经济实惠)\n✓ 包含早餐\n✓ 景点首道门票\n✓ 旅游大巴接送\n✓ 专业导游服务"
+    when 1
+      "✓ 四星级酒店住宿 (品质保障)\n✓ 包含早餐+午餐\n✓ 景点门票+特色体验项目\n✓ 豪华旅游大巴\n✓ 金牌导游服务\n✓ 赠送旅游意外险"
+    when 2
+      "✓ 五星级酒店住宿 (奢华尊享)\n✓ 包含三餐(含特色餐)\n✓ 景点VIP通道+深度体验\n✓ 商务车接送\n✓ 资深导游一对一服务\n✓ 赠送旅游意外险+旅拍服务\n✓ 24小时管家服务"
+    end
+    
     all_packages_data << {
       tour_group_product_id: product.id,
       name: package_names.sample,
       price: package_price,
       child_price: child_price,
+      description: description,
       is_featured: i == 0,  # 第一个套餐为推荐套餐
       display_order: i,
       purchase_count: rand(10..500),
@@ -275,7 +259,151 @@ end
 puts "  批量插入 #{all_packages_data.count} 个套餐..."
 TourPackage.insert_all(all_packages_data)
 
-puts "📊 生成统计："
+# ==================== 批量生成行程数据 ====================
+puts "\n📅 批量生成行程数据..."
+
+all_itinerary_data = []
+timestamp = Time.current
+
+# 景点模板库
+attractions_library = {
+  '自然风光' => ['观赏日出', '山水徒步', '森林氧吧', '天然湖泊', '草原风光', '雪山远眺'],
+  '人文历史' => ['古城游览', '博物馆参观', '寺庙朝拜', '民俗体验', '古镇漫步', '历史遗迹'],
+  '休闲娱乐' => ['温泉体验', '特色表演', '美食街', '手工艺制作', '茶艺体验', '夜市逛街'],
+  '特色体验' => ['当地美食', '摄影打卡', '互动体验', '文化讲解', '特色活动', '自由活动']
+}
+
+TourGroupProduct.find_each do |product|
+  duration = product.duration
+  destination = product.destination
+  departure_city = product.departure_city
+  
+  duration.times do |i|
+    day_number = i + 1
+    
+    if day_number == 1
+      # 第一天：抵达日
+      all_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: day_number,
+        title: "出发日 - 抵达#{destination}",
+        attractions: ["从#{departure_city}出发", "#{destination}机场/车站接站", '酒店办理入住', '欢迎晚餐(自费)'],
+        assembly_point: "#{departure_city}机场/车站集合",
+        disassembly_point: nil,
+        transportation: '飞机/高铁',
+        service_info: '专车接站,专人引导入住酒店,提供旅游咨询服务',
+        duration_minutes: 480,
+        created_at: timestamp,
+        updated_at: timestamp
+      }
+    elsif day_number == duration
+      # 最后一天：返程日
+      morning_activity = duration > 2 ? '早餐后酒店周边自由活动' : '早餐后退房'
+      all_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: day_number,
+        title: "返程日 - 返回#{departure_city}",
+        attractions: [morning_activity, '专车送站服务', "返回#{departure_city}", '结束愉快旅程'],
+        assembly_point: nil,
+        disassembly_point: "#{destination}机场/车站",
+        transportation: '飞机/高铁',
+        service_info: '专车送站,协助办理登机/乘车手续,期待下次再见',
+        duration_minutes: 360,
+        created_at: timestamp,
+        updated_at: timestamp
+      }
+    else
+      # 中间天：精华游览日
+      category = ['自然风光', '人文历史', '休闲娱乐', '特色体验'].sample
+      day_attractions = attractions_library[category].sample(3) + [
+        "#{destination}特色景点#{day_number - 1}",
+        '当地特色午餐',
+        '下午茶时光(自费)'
+      ]
+      
+      all_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: day_number,
+        title: "第#{day_number}天 - #{destination}#{category}深度游",
+        attractions: day_attractions,
+        assembly_point: nil,
+        disassembly_point: nil,
+        transportation: '旅游大巴',
+        service_info: '全天游览,包含景点门票、专业导游讲解服务、午餐',
+        duration_minutes: 540,
+        created_at: timestamp,
+        updated_at: timestamp
+      }
+    end
+  end
+end
+
+puts "  批量插入 #{all_itinerary_data.count} 条行程..."
+TourItineraryDay.insert_all(all_itinerary_data) if all_itinerary_data.any?
+
+# ==================== 附加画廊图片 ====================
+puts "\n🖼️  为旅游产品附加画廊图片..."
+
+require 'open-uri'
+
+# Unsplash 图片库 - 旅游风景类主题
+gallery_image_urls = [
+  # 自然风光
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', # 雪山
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800', # 山峦
+  'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800', # 海滨
+  'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=800', # 沙滩
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', # 海景
+  # 城市景观
+  'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', # 城市夜景
+  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800', # 城市建筑
+  'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800', # 城市街道
+  # 文化古迹
+  'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=800', # 古镇
+  'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800', # 古建筑
+  'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800', # 寺庙
+  # 美食体验
+  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', # 美食
+  'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800', # 餐桌
+  'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', # 佳肴
+  # 休闲娱乐
+  'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', # 博物馆
+  'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800', # 艺术
+  'https://images.unsplash.com/photo-1520760693108-c8bb8944290a?w=800', # 画廊
+  # 亲子活动
+  'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800', # 亲子
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', # 家庭
+  'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800'  # 儿童
+]
+
+attachment_count = 0
+TourGroupProduct.find_each.with_index do |product, idx|
+  # 每个产品附加3-5张随机图片
+  images_count = rand(3..5)
+  selected_urls = gallery_image_urls.sample(images_count)
+  
+  selected_urls.each_with_index do |url, img_idx|
+    begin
+      # 下载并附加图片
+      filename = "gallery_#{product.id}_#{img_idx + 1}.jpg"
+      product.gallery_images.attach(
+        io: URI.open(url),
+        filename: filename,
+        content_type: 'image/jpeg'
+      )
+      attachment_count += 1
+    rescue => e
+      puts "    ⚠️  产品 #{product.id} 图片 #{img_idx + 1} 附加失败: #{e.message}"
+    end
+  end
+  
+  # 每处理50个产品显示进度
+  puts "    已处理 #{idx + 1}/#{TourGroupProduct.count} 个产品..." if (idx + 1) % 50 == 0
+end
+
+puts "  ✓ 成功附加 #{attachment_count} 张画廊图片"
+
+puts "\n📊 生成统计:"
 puts "  总产品数: #{TourGroupProduct.count}"
 puts "  - 跟团游: #{TourGroupProduct.by_category('group_tour').count}"
 puts "  - 私家团: #{TourGroupProduct.by_category('private_group').count}"
@@ -283,5 +411,9 @@ puts "  - 自由行: #{TourGroupProduct.by_category('free_travel').count}"
 puts "  - 推荐产品: #{TourGroupProduct.where(is_featured: true).count}"
 puts "  总套餐数: #{TourPackage.count}"
 puts "  - 平均每产品: #{(TourPackage.count.to_f / TourGroupProduct.count).round(1)}个套餐"
+puts "  总行程数: #{TourItineraryDay.count}"
+puts "  - 平均每产品: #{(TourItineraryDay.count.to_f / TourGroupProduct.count).round(1)}天行程"
+puts "  画廊图片: #{ActiveStorage::Attachment.where(record_type: 'TourGroupProduct', name: 'gallery_images').count}张"
+puts "  - 平均每产品: #{(ActiveStorage::Attachment.where(record_type: 'TourGroupProduct', name: 'gallery_images').count.to_f / TourGroupProduct.count).round(1)}张"
 
 puts "\n✅ 旅游产品数据包加载完成！"
