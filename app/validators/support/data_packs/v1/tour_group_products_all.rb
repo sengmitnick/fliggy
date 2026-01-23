@@ -342,66 +342,10 @@ puts "  批量插入 #{all_itinerary_data.count} 条行程..."
 TourItineraryDay.insert_all(all_itinerary_data) if all_itinerary_data.any?
 
 # ==================== 附加画廊图片 ====================
-puts "\n🖼️  为旅游产品附加画廊图片..."
-
-require 'open-uri'
-
-# Unsplash 图片库 - 旅游风景类主题
-gallery_image_urls = [
-  # 自然风光
-  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', # 雪山
-  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800', # 山峦
-  'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800', # 海滨
-  'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=800', # 沙滩
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800', # 海景
-  # 城市景观
-  'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800', # 城市夜景
-  'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800', # 城市建筑
-  'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800', # 城市街道
-  # 文化古迹
-  'https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=800', # 古镇
-  'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800', # 古建筑
-  'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800', # 寺庙
-  # 美食体验
-  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800', # 美食
-  'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=800', # 餐桌
-  'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800', # 佳肴
-  # 休闲娱乐
-  'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800', # 博物馆
-  'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=800', # 艺术
-  'https://images.unsplash.com/photo-1520760693108-c8bb8944290a?w=800', # 画廊
-  # 亲子活动
-  'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800', # 亲子
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800', # 家庭
-  'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800'  # 儿童
-]
-
-attachment_count = 0
-TourGroupProduct.find_each.with_index do |product, idx|
-  # 每个产品附加3-5张随机图片
-  images_count = rand(3..5)
-  selected_urls = gallery_image_urls.sample(images_count)
-  
-  selected_urls.each_with_index do |url, img_idx|
-    begin
-      # 下载并附加图片
-      filename = "gallery_#{product.id}_#{img_idx + 1}.jpg"
-      product.gallery_images.attach(
-        io: URI.open(url),
-        filename: filename,
-        content_type: 'image/jpeg'
-      )
-      attachment_count += 1
-    rescue => e
-      puts "    ⚠️  产品 #{product.id} 图片 #{img_idx + 1} 附加失败: #{e.message}"
-    end
-  end
-  
-  # 每处理50个产品显示进度
-  puts "    已处理 #{idx + 1}/#{TourGroupProduct.count} 个产品..." if (idx + 1) % 50 == 0
-end
-
-puts "  ✓ 成功附加 #{attachment_count} 张画廊图片"
+# 注意：为了加快初始化速度，跳过网络下载图片
+# 如需添加真实图片，可在后台管理界面手动上传
+puts "\n🖼️  跳过画廊图片附加（避免网络下载延迟）..."
+puts "  提示：可在后台管理界面为产品手动上传画廊图片"
 
 puts "\n📊 生成统计:"
 puts "  总产品数: #{TourGroupProduct.count}"
@@ -413,7 +357,5 @@ puts "  总套餐数: #{TourPackage.count}"
 puts "  - 平均每产品: #{(TourPackage.count.to_f / TourGroupProduct.count).round(1)}个套餐"
 puts "  总行程数: #{TourItineraryDay.count}"
 puts "  - 平均每产品: #{(TourItineraryDay.count.to_f / TourGroupProduct.count).round(1)}天行程"
-puts "  画廊图片: #{ActiveStorage::Attachment.where(record_type: 'TourGroupProduct', name: 'gallery_images').count}张"
-puts "  - 平均每产品: #{(ActiveStorage::Attachment.where(record_type: 'TourGroupProduct', name: 'gallery_images').count.to_f / TourGroupProduct.count).round(1)}张"
 
 puts "\n✅ 旅游产品数据包加载完成！"
