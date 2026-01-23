@@ -48,16 +48,30 @@ export default class extends Controller<HTMLElement> {
     this.selectedContactIdValue = contactId
     this.contactIdInputTarget.value = contactId.toString()
 
-    // Update display
-    this.nameDisplayTarget.textContent = contactName
+    // Update display - use value for input fields
+    if (this.nameDisplayTarget instanceof HTMLInputElement) {
+      this.nameDisplayTarget.value = contactName
+    } else {
+      this.nameDisplayTarget.textContent = contactName
+    }
+    
     if (contactEmail) {
-      this.emailDisplayTarget.textContent = contactEmail
+      if (this.emailDisplayTarget instanceof HTMLInputElement) {
+        this.emailDisplayTarget.value = contactEmail
+      } else {
+        this.emailDisplayTarget.textContent = contactEmail
+      }
       this.emailDisplayTarget.closest('div')?.classList.remove('hidden')
     } else {
       this.emailDisplayTarget.closest('div')?.classList.add('hidden')
     }
+    
     if (contactPhone) {
-      this.phoneDisplayTarget.textContent = contactPhone
+      if (this.phoneDisplayTarget instanceof HTMLInputElement) {
+        this.phoneDisplayTarget.value = contactPhone
+      } else {
+        this.phoneDisplayTarget.textContent = contactPhone
+      }
       this.phoneDisplayTarget.closest('div')?.classList.remove('hidden')
     } else {
       this.phoneDisplayTarget.closest('div')?.classList.add('hidden')
@@ -95,5 +109,9 @@ export default class extends Controller<HTMLElement> {
     if (event.target === event.currentTarget) {
       this.closeModal()
     }
+  }
+
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
   }
 }

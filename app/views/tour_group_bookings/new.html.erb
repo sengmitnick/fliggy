@@ -1,6 +1,9 @@
 <div class="min-h-screen bg-surface pb-32" 
-     data-controller="tour-traveler-selector booking-quantity"
-     data-booking-quantity-unit-price-value="<%= @package.price.to_i %>">
+     data-controller="tour-traveler-selector booking-quantity insurance-selector"
+     data-booking-quantity-unit-price-value="<%= @package.price.to_i %>"
+     data-insurance-selector-base-price-value="<%= @booking.base_price %>"
+     data-insurance-selector-adult-count-value="<%= @adult_count %>"
+     data-insurance-selector-child-count-value="<%= @child_count %>">
   <!-- Header -->
   <div class="sticky top-0 z-40 bg-white border-b border-border">
     <div class="flex items-center px-4 py-3">
@@ -211,6 +214,7 @@
     
     <!-- 联系人 -->
     <div data-controller="contact-selector">
+      <%= f.hidden_field :contact_id, data: { "contact-selector-target": "contactIdInput" } %>
       <div class="bg-white px-4 py-4">
         <h3 class="text-base font-semibold text-foreground mb-4">联系人</h3>
         
@@ -219,7 +223,7 @@
             <label class="text-sm text-foreground-muted w-16">姓名</label>
             <%= f.text_field :contact_name, 
                 placeholder: "请输入联系人姓名",
-                data: { "contact-selector-target": "contactNameInput" },
+                data: { "contact-selector-target": "nameDisplay" },
                 class: "flex-1 text-sm text-foreground focus:outline-none" %>
             <button type="button" 
                     class="text-blue-500"
@@ -238,8 +242,9 @@
             </svg>
             <%= f.text_field :contact_phone, 
                 placeholder: "请输入手机号",
-                data: { "contact-selector-target": "contactPhoneInput" },
+                data: { "contact-selector-target": "phoneDisplay" },
                 class: "flex-1 text-sm text-foreground focus:outline-none" %>
+            <span class="hidden" data-contact-selector-target="emailDisplay"></span>
           </div>
         </div>
       </div>
@@ -434,11 +439,7 @@
     </div>
     
     <!-- 底部固定栏 -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3"
-         data-controller="insurance-selector"
-         data-insurance-selector-base-price-value="<%= @booking.base_price %>"
-         data-insurance-selector-adult-count-value="<%= @adult_count %>"
-         data-insurance-selector-child-count-value="<%= @child_count %>">
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border px-4 py-3">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2">
           <span class="text-sm text-foreground-muted">合计</span>
