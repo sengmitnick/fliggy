@@ -839,5 +839,3 @@ cars_data = [
 timestamp = Time.current
 cars_data_with_timestamps = cars_data.map { |data| data.merge(created_at: timestamp, updated_at: timestamp) }
 Car.insert_all(cars_data_with_timestamps)
-
-puts "Created #{Car.count} cars successfully!"

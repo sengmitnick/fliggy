@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_23_063726) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -299,7 +299,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.jsonb "image_urls"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cruise_ship_id"], name: "index_cabin_types_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cabin_types_on_data_version"
   end
 
   create_table "car_orders", force: :cascade do |t|
@@ -399,6 +401,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_lines_on_data_version"
     t.index ["slug"], name: "index_cruise_lines_on_slug", unique: true
   end
 
@@ -437,8 +441,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "badge"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cabin_type_id"], name: "index_cruise_products_on_cabin_type_id"
     t.index ["cruise_sailing_id"], name: "index_cruise_products_on_cruise_sailing_id"
+    t.index ["data_version"], name: "index_cruise_products_on_data_version"
   end
 
   create_table "cruise_routes", force: :cascade do |t|
@@ -447,6 +453,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "icon_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_routes_on_data_version"
   end
 
   create_table "cruise_sailings", force: :cascade do |t|
@@ -462,8 +470,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "on_sale"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cruise_route_id"], name: "index_cruise_sailings_on_cruise_route_id"
     t.index ["cruise_ship_id"], name: "index_cruise_sailings_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cruise_sailings_on_data_version"
   end
 
   create_table "cruise_ships", force: :cascade do |t|
@@ -475,7 +485,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.integer "tonnage"
+    t.integer "passenger_capacity"
     t.index ["cruise_line_id"], name: "index_cruise_ships_on_cruise_line_id"
+    t.index ["data_version"], name: "index_cruise_ships_on_data_version"
     t.index ["slug"], name: "index_cruise_ships_on_slug", unique: true
   end
 

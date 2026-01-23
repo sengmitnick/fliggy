@@ -95,6 +95,44 @@ When developing features that require User or Order models, **DO NOT create them
 Do not recreate administrator functionality in User model. Administrator system already exists. Adding admin page low priority.
 
 
+## Data Packs - Test/Validation Data Management
+
+**CRITICAL: Data Packs Directory Structure**
+- **Location**: `app/validators/support/data_packs/v1/` (NOT `db/seeds/`)
+- **Purpose**: Store validation and test data for different modules
+- **Naming**: Use descriptive names like `insurances.rb`, `cruises.rb`, `hotels_all.rb`
+- **Pattern**: Use `insert_all` for batch operations, NOT `find_or_create_by!`
+- **Loading**: `rails runner "load Rails.root.join('app/validators/support/data_packs/v1/xxx.rb')"`
+
+**File Structure Template**:
+```ruby
+# frozen_string_literal: true
+
+# module_name_v1 数据包
+# 模块描述
+#
+# 用途：
+# - 功能说明
+#
+# 加载方式：
+# rails runner "load Rails.root.join('app/validators/support/data_packs/v1/xxx.rb')"
+
+puts "正在加载 module_name_v1 数据包..."
+
+# Use insert_all for batch operations
+ModelName.insert_all([
+  { field1: 'value1', field2: 'value2' },
+  { field1: 'value3', field2: 'value4' }
+])
+
+puts "✓ 数据包加载完成"
+```
+
+**NEVER**:
+- ❌ Place test/validation data in `db/seeds/` directory
+- ❌ Use `find_or_create_by!` for data packs (use `insert_all` instead)
+- ❌ Mix production seed data with test data
+
 ## Some important tips when coding
 
 **CRITICAL: Demo File Management**

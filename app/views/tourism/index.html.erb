@@ -77,10 +77,10 @@
               <%= image_tag 'tourism/定制游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">定制游</span>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center px-1">
+            <%= link_to cruises_path, class: "flex-1 flex flex-col items-center justify-center px-1" do %>
               <%= image_tag 'tourism/邮轮游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">邮轮游</span>
-            </div>
+            <% end %>
           </div>
   
           <!-- 第二行: 5列 -->
@@ -97,35 +97,35 @@
               <%= image_tag 'tourism/景酒套餐.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">景酒套餐</span>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1 relative">
+            <%= link_to tickets_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1 relative" do %>
               <span class="absolute -top-1 -right-0.5 bg-orange-500 text-white text-[8px] px-1 rounded-full scale-90 z-10">特惠</span>
               <%= image_tag 'tourism/门票.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">门票</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center justify-center px-1">
+            <% end %>
+            <%= link_to deep_travels_path, class: "flex-1 flex flex-col items-center justify-center px-1" do %>
               <%= image_tag 'tourism/深度旅行.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">深度旅行+</span>
-            </div>
+            <% end %>
           </div>
   
           <!-- 第三行: 3列对齐 (比例 1:1:1) -->
           <div class="flex h-12">
             <!-- 签证 -->
-            <div class="w-1/3 flex items-center justify-center border-r border-[#fdf2cc] px-2 relative">
+            <%= link_to visas_path(ref: 'home'), class: "w-1/3 flex items-center justify-center border-r border-[#fdf2cc] px-2 relative" do %>
               <span class="absolute -top-1.5 left-1/2 -translate-x-1/2 bg-orange-500 text-white text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap z-10">出签率高</span>
               <%= image_tag 'tourism/签证.png', class: 'w-5 h-5 mr-1.5' %>
               <span class="text-[11px] font-medium text-gray-700">签证</span>
-            </div>
+            <% end %>
             <!-- 境外上网 -->
-            <div class="w-1/3 flex items-center justify-center border-r border-[#fdf2cc] px-2">
+            <%= link_to internet_services_path(tab: 'data_plan'), class: "w-1/3 flex items-center justify-center border-r border-[#fdf2cc] px-2" do %>
               <%= image_tag 'tourism/境外上网.png', class: 'w-5 h-5 mr-1.5' %>
               <span class="text-[11px] font-medium text-gray-700">境外上网</span>
-            </div>
+            <% end %>
             <!-- 境外交通 -->
-            <div class="w-1/3 flex items-center justify-center px-2">
+            <%= link_to abroad_tickets_path(ref: 'home'), class: "w-1/3 flex items-center justify-center px-2" do %>
               <%= image_tag 'tourism/境外交通.png', class: 'w-5 h-5 mr-1.5' %>
               <span class="text-[11px] font-medium text-gray-700">境外交通</span>
-            </div>
+            <% end %>
           </div>
   
         </div>
