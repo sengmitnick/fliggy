@@ -38,25 +38,100 @@
     </div>
 
     <!-- 筛选标签 -->
-    <div class="flex items-center justify-between mt-4 text-sm text-gray-700">
-      <div class="flex items-center space-x-1 font-medium">
-        <span>推荐排序</span>
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-        </svg>
+    <div class="flex items-center justify-between mt-4 text-sm text-gray-700" data-controller="car-filter">
+      <!-- 推荐排序 -->
+      <div class="relative">
+        <button 
+          type="button"
+          data-car-filter-target="sortButton"
+          data-action="click->car-filter#toggleSortDropdown"
+          class="flex items-center space-x-1 font-medium">
+          <span>推荐排序</span>
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
+        <!-- 下拉列表 -->
+        <div 
+          data-car-filter-target="sortDropdown"
+          class="hidden absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-2 w-36 z-20">
+          <div data-value="recommend" data-action="click->car-filter#selectSortOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-blue-600 font-bold">推荐排序</div>
+          <div data-value="price-low" data-action="click->car-filter#selectSortOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700">价格从低到高</div>
+          <div data-value="price-high" data-action="click->car-filter#selectSortOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700">价格从高到低</div>
+          <div data-value="sales" data-action="click->car-filter#selectSortOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer text-gray-700">销量优先</div>
+        </div>
       </div>
-      <div class="flex items-center space-x-1">
-        <span>快速选车</span>
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-        </svg>
+
+      <!-- 快速选车 -->
+      <div class="relative">
+        <button 
+          type="button"
+          data-car-filter-target="quickSelectButton"
+          data-action="click->car-filter#toggleQuickSelectDropdown"
+          class="flex items-center space-x-1">
+          <span>快速选车</span>
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
+        <!-- 下拉列表 -->
+        <div 
+          data-car-filter-target="quickSelectDropdown"
+          class="hidden absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-2 w-40 z-20">
+          <div data-value="new-energy" data-action="click->car-filter#selectQuickOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>新能源车</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="luxury" data-action="click->car-filter#selectQuickOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>豪华车</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="suv" data-action="click->car-filter#selectQuickOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>SUV</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="mpv" data-action="click->car-filter#selectQuickOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>MPV</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+        </div>
       </div>
-      <div class="flex items-center space-x-1">
-        <span>价格服务</span>
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-        </svg>
+
+      <!-- 价格服务 -->
+      <div class="relative">
+        <button 
+          type="button"
+          data-car-filter-target="priceServiceButton"
+          data-action="click->car-filter#togglePriceServiceDropdown"
+          class="flex items-center space-x-1">
+          <span>价格服务</span>
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
+        <!-- 下拉列表 -->
+        <div 
+          data-car-filter-target="priceServiceDropdown"
+          class="hidden absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 py-2 w-40 z-20">
+          <div data-value="free-cancel" data-action="click->car-filter#selectPriceOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>免费取消</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="no-deposit" data-action="click->car-filter#selectPriceOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>免押金</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="insurance" data-action="click->car-filter#selectPriceOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>小伤免赔</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+          <div data-value="discount" data-action="click->car-filter#selectPriceOption" class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+            <span>特惠优惠</span>
+            <input type="checkbox" class="pointer-events-none">
+          </div>
+        </div>
       </div>
+
       <div class="bg-gray-100 rounded-full px-3 py-1 flex items-center space-x-1">
         <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -96,7 +171,7 @@
     <!-- 右侧列表 -->
     <div class="flex-1 bg-gray-100 p-2 overflow-y-auto space-y-3">
       <% @cars.each do |car| %>
-        <%= link_to car_path(car, city: params[:city], pickup_location: params[:pickup_location], return_location: params[:return_location], pickup_date: params[:pickup_date], return_date: params[:return_date]), class: "block" do %>
+        <%= link_to car_path(car, city: params[:city], pickup_location: params[:pickup_location], return_location: params[:return_location], pickup_date: params[:pickup_date], return_date: params[:return_date], sort: params[:sort], quick_select: params[:quick_select], price_service: params[:price_service]), class: "block" do %>
           <div class="bg-white rounded-xl p-3 relative shadow-sm">
             <!-- 标签 -->
             <% if car.tags.present? && car.tags.include?('销量第一') %>
