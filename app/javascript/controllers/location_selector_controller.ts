@@ -65,22 +65,52 @@ export default class extends Controller<HTMLElement> {
     console.log('[LocationSelector] ========== openModal START ===========')
     // CRITICAL: Always sync with DOM to ensure we have the current city
     // This handles both initial load and city changes
-    const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
-    if (cityDisplay && cityDisplay.textContent) {
-      // Trim first, then remove zero-width characters and normalize consecutive spaces
-      let domCity = cityDisplay.textContent.trim()
-      domCity = domCity.replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
-      domCity = domCity.replace(/\s+/g, '') // Remove all spaces (Chinese city names don't have spaces)
-      console.log('[LocationSelector] DOM city raw:', JSON.stringify(cityDisplay.textContent))
-      console.log('[LocationSelector] DOM city cleaned:', JSON.stringify(domCity))
-      console.log('[LocationSelector] DOM city bytes:', Array.from(domCity).map(c => c.charCodeAt(0)))
-      console.log('[LocationSelector] Current city value before:', JSON.stringify(this.currentCityValue))
-      console.log('[LocationSelector] Match check:', this.currentCityValue === domCity)
-      if (this.currentCityValue !== domCity) {
-        console.log('[LocationSelector] Syncing city from DOM:', this.currentCityValue, '->', domCity)
-        this.currentCityValue = domCity
+    
+    // Check if we're selecting return location (异地还车)
+    const carRentalController = this.application.getControllerForElementAndIdentifier(
+      document.querySelector('[data-controller*="car-rental-tabs"]') as Element,
+      'car-rental-tabs'
+    ) as any
+    
+    let cityToUse = ''
+    if (carRentalController) {
+      const selectionType = (carRentalController as any).currentSelectionType
+      console.log('[LocationSelector] Selection type:', selectionType)
+      
+      if (selectionType === 'return') {
+        // Use return city for return location selection
+        const returnCityDisplay = document.querySelector('[data-car-rental-tabs-target="returnCityDisplay"]')
+        if (returnCityDisplay && returnCityDisplay.textContent) {
+          cityToUse = returnCityDisplay.textContent.trim()
+          console.log('[LocationSelector] Using return city:', cityToUse)
+        }
       }
     }
+    
+    // If no return city specified, use pickup city
+    if (!cityToUse) {
+      const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
+      if (cityDisplay && cityDisplay.textContent) {
+        cityToUse = cityDisplay.textContent.trim()
+        console.log('[LocationSelector] Using pickup city:', cityToUse)
+      }
+    }
+    
+    // Clean the city name
+    if (cityToUse) {
+      // Trim first, then remove zero-width characters and normalize consecutive spaces
+      cityToUse = cityToUse.replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
+      cityToUse = cityToUse.replace(/\s+/g, '') // Remove all spaces (Chinese city names don't have spaces)
+      console.log('[LocationSelector] DOM city cleaned:', JSON.stringify(cityToUse))
+      console.log('[LocationSelector] DOM city bytes:', Array.from(cityToUse).map(c => c.charCodeAt(0)))
+      console.log('[LocationSelector] Current city value before:', JSON.stringify(this.currentCityValue))
+      console.log('[LocationSelector] Match check:', this.currentCityValue === cityToUse)
+      if (this.currentCityValue !== cityToUse) {
+        console.log('[LocationSelector] Syncing city from DOM:', this.currentCityValue, '->', cityToUse)
+        this.currentCityValue = cityToUse
+      }
+    }
+    
     console.log('[LocationSelector] currentCityValue after sync:', JSON.stringify(this.currentCityValue))
     console.log('[LocationSelector] currentCityValue bytes:', Array.from(this.currentCityValue || '').map(c => c.charCodeAt(0)))
     
