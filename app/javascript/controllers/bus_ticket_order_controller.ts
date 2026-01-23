@@ -27,18 +27,43 @@ export default class extends Controller<HTMLElement> {
     this.insuranceType = this.formDataTarget.dataset.insuranceType || 'none'
     this.insurancePrice = parseInt(this.formDataTarget.dataset.insurancePrice || '0')
     
-    // Auto-select first passenger if exists
-    const firstPassenger = this.element.querySelector('[data-passenger-id]') as HTMLElement
-    if (firstPassenger) {
-      const passengerId = firstPassenger.dataset.passengerId
-      if (passengerId) {
-        this.selectedPassengers.add(passengerId)
-        this.updatePassengerUI(firstPassenger, true)
-        
-        // Update contact phone with first passenger's phone
-        const phone = firstPassenger.dataset.passengerPhone
-        if (phone) {
-          this.contactPhoneTarget.textContent = phone
+    // Restore selected passengers from URL params
+    const selectedIds = this.formDataTarget.dataset.selectedPassengerIds || ''
+    if (selectedIds) {
+      // Restore previously selected passengers
+      const passengerIds = selectedIds.split(',').filter(id => id.trim())
+      passengerIds.forEach(passengerId => {
+        const passengerElement = this.element.querySelector(`[data-passenger-id="${passengerId}"]`) as HTMLElement
+        if (passengerElement) {
+          this.selectedPassengers.add(passengerId)
+          this.updatePassengerUI(passengerElement, true)
+        }
+      })
+      
+      // Update contact phone with first selected passenger's phone
+      if (passengerIds.length > 0) {
+        const firstSelectedElement = this.element.querySelector(`[data-passenger-id="${passengerIds[0]}"]`) as HTMLElement
+        if (firstSelectedElement) {
+          const phone = firstSelectedElement.dataset.passengerPhone
+          if (phone) {
+            this.contactPhoneTarget.textContent = phone
+          }
+        }
+      }
+    } else {
+      // Auto-select first passenger if no previous selection
+      const firstPassenger = this.element.querySelector('[data-passenger-id]') as HTMLElement
+      if (firstPassenger) {
+        const passengerId = firstPassenger.dataset.passengerId
+        if (passengerId) {
+          this.selectedPassengers.add(passengerId)
+          this.updatePassengerUI(firstPassenger, true)
+          
+          // Update contact phone with first passenger's phone
+          const phone = firstPassenger.dataset.passengerPhone
+          if (phone) {
+            this.contactPhoneTarget.textContent = phone
+          }
         }
       }
     }
@@ -76,6 +101,25 @@ export default class extends Controller<HTMLElement> {
     }
     
     this.updateTotal()
+  }
+
+  prepareAddPassenger(event: Event): void {
+    // Get the link element
+    const link = event.currentTarget as HTMLAnchorElement
+    const originalHref = link.getAttribute('href')
+    
+    if (!originalHref) return
+    
+    // Build selected passenger IDs query string
+    const selectedIds = Array.from(this.selectedPassengers).join(',')
+    
+    // Update the href with selected_passenger_ids parameter
+    const url = new URL(originalHref, window.location.origin)
+    if (selectedIds) {
+      url.searchParams.set('selected_passenger_ids', selectedIds)
+    }
+    
+    link.href = url.pathname + url.search
   }
 
   selectInsurance(event: Event): void {

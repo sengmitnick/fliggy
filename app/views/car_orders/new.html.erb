@@ -1,8 +1,13 @@
-<div data-controller="car-order payment-confirmation"
+<div data-controller="car-order payment-confirmation map-guide"
      data-payment-confirmation-amount-value="<%= @total_price %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value=""
-     data-payment-confirmation-success-url-value="">
+     data-payment-confirmation-success-url-value=""
+     data-map-guide-pickup-location-value="<%= @search_pickup_location || '白云国际机场T2' %>"
+     data-map-guide-return-location-value="<%= @search_pickup_location || '白云国际机场T2' %>"
+     data-map-guide-pickup-method-value="店员免费送车上门"
+     data-map-guide-store-address-value="广州市白云区人和镇矮岗村迎宾大道和顺停车场"
+     data-map-guide-business-hours-value="08:00-22:01">
 <%= form_with(model: CarOrder.new, url: car_orders_path, class: "bg-[#F7F8FA] pb-24", data: { 'car-order-target': 'form' }) do |form| %>
   <% 
     # 计算取还车日期时间
@@ -98,7 +103,7 @@
         <div class="flex-1">
           <div class="flex items-center justify-between">
             <span class="text-sm font-bold">取/还：店员免费上门送取车</span>
-            <span class="text-xs text-gray-500 flex items-center">地图指引 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+            <button type="button" data-action="click->map-guide#openModal" class="text-xs text-gray-500 flex items-center">地图指引 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
           </div>
           <div class="text-xs text-gray-400 mt-0.5"><%= @search_pickup_location || '请选择取车地点' %></div>
         </div>
@@ -513,4 +518,5 @@
 <% end %>
 
   <%= render 'shared/payment_confirmation_modals' %>
+  <%= render 'shared/map_guide_modal' %>
 </div>
