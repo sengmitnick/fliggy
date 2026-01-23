@@ -63,9 +63,26 @@ export default class extends Controller<HTMLElement> {
 
   openModal(): void {
     console.log('[LocationSelector] ========== openModal START ===========')
-    // CRITICAL: Always read current city from DOM when opening modal
-    this.initializeCurrentCity()
-    console.log('[LocationSelector] currentCityValue after init:', this.currentCityValue)
+    // CRITICAL: Always sync with DOM to ensure we have the current city
+    // This handles both initial load and city changes
+    const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
+    if (cityDisplay && cityDisplay.textContent) {
+      // Trim first, then remove zero-width characters and normalize consecutive spaces
+      let domCity = cityDisplay.textContent.trim()
+      domCity = domCity.replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
+      domCity = domCity.replace(/\s+/g, '') // Remove all spaces (Chinese city names don't have spaces)
+      console.log('[LocationSelector] DOM city raw:', JSON.stringify(cityDisplay.textContent))
+      console.log('[LocationSelector] DOM city cleaned:', JSON.stringify(domCity))
+      console.log('[LocationSelector] DOM city bytes:', Array.from(domCity).map(c => c.charCodeAt(0)))
+      console.log('[LocationSelector] Current city value before:', JSON.stringify(this.currentCityValue))
+      console.log('[LocationSelector] Match check:', this.currentCityValue === domCity)
+      if (this.currentCityValue !== domCity) {
+        console.log('[LocationSelector] Syncing city from DOM:', this.currentCityValue, '->', domCity)
+        this.currentCityValue = domCity
+      }
+    }
+    console.log('[LocationSelector] currentCityValue after sync:', JSON.stringify(this.currentCityValue))
+    console.log('[LocationSelector] currentCityValue bytes:', Array.from(this.currentCityValue || '').map(c => c.charCodeAt(0)))
     
     // Clear previous content immediately
     this.locationListTarget.innerHTML = '<div class="text-center py-8 text-text-muted">加载中...</div>'
