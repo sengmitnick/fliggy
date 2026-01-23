@@ -29,7 +29,8 @@ namespace :validator do
       tables.each do |table|
         count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
         if count > 0
-          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} CASCADE")
+          # RESTART IDENTITY resets the sequence counters
+          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
           deleted_total += count
           puts "  → #{table}: 清空 #{count} 条记录"
         end

@@ -89,10 +89,10 @@
               <%= image_tag 'tourism/机酒套餐.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">机酒套餐</span>
             </div>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <%= link_to chartered_tours_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/包车游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">包车游</span>
-            </div>
+            <% end %>
             <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
               <%= image_tag 'tourism/景酒套餐.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">景酒套餐</span>

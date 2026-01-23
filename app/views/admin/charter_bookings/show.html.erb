@@ -1,0 +1,160 @@
+<% content_for :title, @charter_booking.respond_to?(:name) ? @charter_booking.name : "Charter booking" %>
+
+<div class="container-lg">
+  <div class="mb-6">
+    <div class="flex items-center space-x-4">
+      <%= link_to admin_charter_bookings_path, class: "btn-ghost text-sm py-1 px-3" do %>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Charter bookings
+      <% end %>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50"><%= @charter_booking.respond_to?(:name) ? @charter_booking.name : "Charter booking ##{@charter_booking.id}" %></h1>
+
+      <div class="flex items-center space-x-3">
+        <%= link_to edit_admin_charter_booking_path(@charter_booking.id), class: "btn-primary" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Edit
+        <% end %>
+
+        <%= link_to admin_charter_booking_path(@charter_booking.id),
+            method: :delete,
+            data: { confirm: "Are you sure you want to delete this charter_booking?" },
+            class: "btn-danger" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Delete
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charter booking Content -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <div class="space-y-6">
+        <!-- Departure date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departure date</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.departure_date&.strftime('%Y-%m-%d %H:%M') %></div>
+        </div>
+
+        <!-- Departure time -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departure time</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.departure_time %></div>
+        </div>
+
+        <!-- Duration hours -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Duration hours</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.duration_hours %></div>
+        </div>
+
+        <!-- Booking mode -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Booking mode</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.booking_mode %></div>
+        </div>
+
+        <!-- Contact name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact name</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.contact_name %></div>
+        </div>
+
+        <!-- Contact phone -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contact phone</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.contact_phone %></div>
+        </div>
+
+        <!-- Passengers count -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Passengers count</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.passengers_count %></div>
+        </div>
+
+        <!-- Note -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Note</label>
+          <div class="prose prose-gray dark:prose-invert max-w-none">
+            <%= simple_format(@charter_booking.note) %>
+          </div>
+        </div>
+
+        <!-- Total price -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total price</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.total_price %></div>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.status %></div>
+        </div>
+
+        <!-- Order number -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order number</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.order_number %></div>
+        </div>
+
+        <!-- Paid at -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Paid at</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.paid_at&.strftime('%Y-%m-%d %H:%M') %></div>
+        </div>
+
+        <!-- User -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">User</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.user&.name %></div>
+        </div>
+
+        <!-- Charter route -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Charter route</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.charter_route&.name %></div>
+        </div>
+
+        <!-- Vehicle type -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vehicle type</label>
+          <div class="text-lg font-medium text-gray-900 dark:text-gray-100"><%= @charter_booking.vehicle_type&.name %></div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-600">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ID</label>
+              <div class="text-sm text-gray-900 dark:text-gray-100 font-mono"><%= @charter_booking.id %></div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Created</label>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                <%= @charter_booking.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+                <span class="text-gray-400">(<%= time_ago_in_words(@charter_booking.created_at) %> ago)</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Updated</label>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                <%= @charter_booking.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+                <span class="text-gray-400">(<%= time_ago_in_words(@charter_booking.updated_at) %> ago)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

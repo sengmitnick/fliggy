@@ -1,0 +1,188 @@
+<!-- 包车游首页 -->
+<div class="min-h-screen bg-gradient-to-b from-yellow-100 to-white">
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-gradient-to-r from-yellow-300 to-yellow-400 shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <button onclick="history.back()" class="p-2 -ml-2 text-gray-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <h1 class="text-xl font-bold text-gray-900">全球包车游</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- 飞猪旅行 Branding -->
+  <div class="max-w-md mx-auto px-4 py-3 bg-gradient-to-r from-yellow-300 to-yellow-400">
+    <div class="flex items-center">
+      <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">
+        <span class="text-yellow-500 font-black text-lg">飞</span>
+      </div>
+      <div>
+        <div class="text-sm text-gray-800 font-medium">飞猪旅行</div>
+        <div class="text-xs text-gray-700">品质包车 安心出行</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 城市选择器 -->
+  <div class="max-w-md mx-auto px-4 py-4 bg-gradient-to-b from-yellow-300/50 to-transparent">
+    <div class="bg-white rounded-2xl shadow-md p-4">
+      <!-- 城市选择 -->
+      <button 
+        data-controller="city-selector"
+        data-action="click->city-selector#showModal"
+        data-city-selector-departure-city-value="<%= @selected_city&.name || '武汉' %>"
+        data-city-selector-destination-city-value=""
+        class="w-full mb-3 flex items-center justify-between">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span class="text-lg font-bold text-gray-900"><%= @selected_city&.name || '武汉' %></span>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <!-- 热门城市快捷链接 -->
+      <div class="flex gap-2 mb-4 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+        <% ['东京', '大阪', '京都', '冲绳', '北海道', '清迈', '普吉岛', '曼谷'].each do |city_name| %>
+          <%= link_to city_name, chartered_tours_path(city: city_name), 
+              class: "px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full whitespace-nowrap hover:bg-gray-200" %>
+        <% end %>
+      </div>
+
+      <!-- 日期选择 -->
+      <button 
+        data-controller="date-picker"
+        data-action="click->date-picker#openModal"
+        data-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>"
+        data-date-picker-selected-date-value="<%= (Date.today + 1.day).to_s %>"
+        class="w-full flex items-center justify-between mb-3 border-t border-gray-100 pt-3">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="text-base text-gray-900"><%= @default_departure_date %> 出发</span>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <!-- 立即包车按钮 -->
+      <%= link_to search_charter_routes_path(city: @selected_city&.name), 
+          class: "block w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-center font-bold py-4 rounded-xl shadow-lg transition-colors" do %>
+        立即包车
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 武汉精挑路线 -->
+  <% if @featured_routes.any? %>
+    <div class="max-w-md mx-auto px-4 py-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-900"><%= @selected_city&.name %>精挑路线</h2>
+        <%= link_to "查看更多", search_charter_routes_path(city: @selected_city&.name, category: 'featured'), 
+            class: "text-sm text-gray-600 hover:text-gray-900" %>
+      </div>
+
+      <div class="space-y-4">
+        <% @featured_routes.each do |route| %>
+          <%= link_to charter_route_path(route), class: "block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow" do %>
+            <!-- 路线图片 -->
+            <div class="relative h-48">
+              <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=600&h=400&fit=crop" 
+                   alt="<%= route.name %>" 
+                   class="w-full h-full object-cover">
+              <div class="absolute top-2 left-2 bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-xs font-bold">
+                <%= route.category == 'featured' ? '精选' : route.category == 'hot' ? '热门' : '经典' %>
+              </div>
+            </div>
+
+            <!-- 路线信息 -->
+            <div class="p-4">
+              <h3 class="text-base font-bold text-gray-900 mb-2"><%= route.name %></h3>
+              
+              <!-- 景点列表 -->
+              <div class="flex items-center text-sm text-gray-600 mb-2">
+                <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                </svg>
+                <span class="truncate"><%= route.attractions.pluck(:name).join(' → ') %></span>
+              </div>
+
+              <!-- 亮点 -->
+              <% if route.highlights.present? %>
+                <div class="flex flex-wrap gap-2 mb-3">
+                  <% highlights_array = route.highlights.is_a?(Array) ? route.highlights : (JSON.parse(route.highlights) rescue []) %>
+                  <% highlights_array.take(3).each do |highlight| %>
+                    <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                      <%= highlight %>
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- 价格信息 -->
+              <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                <div>
+                  <span class="text-xs text-gray-500">起</span>
+                  <span class="text-2xl font-bold text-orange-500">¥308</span>
+                  <span class="text-sm text-gray-500">/6小时</span>
+                </div>
+                <div class="text-yellow-500 font-medium">查看详情 →</div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 热门景点 -->
+  <% if @popular_attractions.any? %>
+    <div class="max-w-md mx-auto px-4 py-6 bg-gray-50">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">热门景点</h2>
+      
+      <div class="grid grid-cols-3 gap-3">
+        <% @popular_attractions.each do |attraction| %>
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+            <div class="aspect-square relative">
+              <img src="https://images.unsplash.com/photo-1564594167960-0e4e89f534bf?w=300&h=300&fit=crop" 
+                   alt="<%= attraction.name %>" 
+                   class="w-full h-full object-cover">
+            </div>
+            <div class="p-2 text-center">
+              <div class="text-sm font-medium text-gray-900 truncate"><%= attraction.name %></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 底部Tab导航 -->
+  <div class="max-w-md mx-auto px-4 py-6">
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="flex border-b border-gray-100">
+        <%= link_to "猜你喜欢", search_charter_routes_path(city: @selected_city&.name, category: 'featured'), 
+            class: "flex-1 py-3 text-center text-gray-900 font-medium border-b-2 border-yellow-400" %>
+        <%= link_to "经典路线", search_charter_routes_path(city: @selected_city&.name, category: 'classic'), 
+            class: "flex-1 py-3 text-center text-gray-500" %>
+        <%= link_to "热门路线", search_charter_routes_path(city: @selected_city&.name, category: 'hot'), 
+            class: "flex-1 py-3 text-center text-gray-500" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 引入城市选择器模态框 -->
+<%= render 'shared/city_selector_modal' %>
+
+<!-- 引入日期选择器模态框 -->
+<%= render 'shared/date_picker_modal' %>

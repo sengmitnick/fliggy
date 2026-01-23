@@ -1,0 +1,175 @@
+<!-- 订单详情页 -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <button onclick="history.back()" class="p-2 -ml-2 text-gray-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <h1 class="text-lg font-bold text-gray-900">订单详情</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- 订单状态 -->
+  <div class="max-w-md mx-auto px-4 py-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm text-gray-600">订单状态</span>
+        <%
+          status_config = case @charter_booking.status
+          when 'paid'
+            { text: '已支付', class: 'bg-green-100 text-green-800' }
+          when 'completed'
+            { text: '已完成', class: 'bg-blue-100 text-blue-800' }
+          when 'cancelled'
+            { text: '已取消', class: 'bg-gray-100 text-gray-800' }
+          when 'refunded'
+            { text: '已退款', class: 'bg-red-100 text-red-800' }
+          else
+            { text: '待支付', class: 'bg-yellow-100 text-yellow-800' }
+          end
+        %>
+        <span class="px-3 py-1 <%= status_config[:class] %> text-sm font-bold rounded-full">
+          <%= status_config[:text] %>
+        </span>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">订单号</span>
+        <span class="text-sm font-mono text-gray-900"><%= @charter_booking.order_number %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行程信息 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">行程信息</h2>
+      
+      <div class="space-y-3">
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">路线</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.charter_route.name %>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">车型</div>
+          <div class="flex-1">
+            <div class="text-sm text-gray-900 font-medium">
+              <%= @charter_booking.vehicle_type.name %>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+              <%= @charter_booking.vehicle_type.seats %>座 · 
+              <%= @charter_booking.vehicle_type.luggage_capacity %>件行李
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">出发日期</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.departure_date.strftime('%Y年%m月%d日') %>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">包车时长</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.duration_hours %>小时
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">乘车人数</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.passengers_count %>人
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系人信息 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">联系人信息</h2>
+      
+      <div class="space-y-3">
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">联系人</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.contact_name %>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">联系电话</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.contact_phone %>
+          </div>
+        </div>
+        
+        <% if @charter_booking.special_requirements.present? %>
+          <div class="flex items-start">
+            <div class="w-20 text-sm text-gray-600 flex-shrink-0">特殊需求</div>
+            <div class="flex-1 text-sm text-gray-900">
+              <%= @charter_booking.special_requirements %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 价格信息 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">价格信息</h2>
+      
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-600">包车费用</span>
+          <span class="text-gray-900 font-medium">
+            ¥<%= @charter_booking.total_price.round(2) %>
+          </span>
+        </div>
+        
+        <% if @charter_booking.paid_at.present? %>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600">支付时间</span>
+            <span class="text-gray-900 font-medium">
+              <%= @charter_booking.paid_at.strftime('%Y-%m-%d %H:%M') %>
+            </span>
+          </div>
+        <% end %>
+        
+        <div class="border-t border-gray-200 pt-2 mt-2">
+          <div class="flex items-center justify-between">
+            <span class="text-base font-bold text-gray-900">实付金额</span>
+            <span class="text-2xl font-bold text-orange-500">
+              ¥<%= @charter_booking.total_price.round(2) %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <% if @charter_booking.status == 'pending' %>
+    <div class="max-w-md mx-auto px-4 py-4">
+      <%= link_to confirm_charter_booking_path(@charter_booking), 
+          class: "block w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-center font-bold py-4 rounded-xl shadow-lg transition-colors" do %>
+        立即支付
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- 底部占位 -->
+  <div class="h-6"></div>
+</div>

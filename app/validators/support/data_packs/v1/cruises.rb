@@ -91,6 +91,8 @@ cruise_ships_data = [
 ]
 
 CruiseShip.insert_all(cruise_ships_data)
+# Regenerate slugs for FriendlyId (insert_all bypasses callbacks)
+CruiseShip.find_each(&:save)
 puts "    ✓ 已加载 #{cruise_ships_data.size} 艘游轮船只"
 
 # ==================== 航线数据 ====================
