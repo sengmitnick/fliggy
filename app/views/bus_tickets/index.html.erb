@@ -45,9 +45,9 @@
         </button>
 
         <!-- 搜索按钮 -->
-        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false } do |f| %>
-          <%= f.hidden_field :origin, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
-          <%= f.hidden_field :destination, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
+        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false, action: "submit->bus-ticket-history#saveSearch" } do |f| %>
+          <%= f.hidden_field :departure_city, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
+          <%= f.hidden_field :destination_city, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
           <%= f.hidden_field :date, value: Date.today, data: { 'bus-date-picker-target': 'dateInput' } %>
           <button type="submit" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
             搜索汽车票
@@ -55,9 +55,14 @@
         <% end %>
 
         <!-- 历史记录 -->
-        <div class="flex justify-between text-xs text-gray-400" data-bus-ticket-history-target="container">
-          <span>深圳-广州</span>
-          <button type="button" class="cursor-pointer hover:text-gray-600" data-action="click->bus-ticket-history#clear">清除</button>
+        <div class="hidden" data-bus-ticket-history-target="container">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400">历史搜索</span>
+            <button type="button" class="text-xs text-gray-400 cursor-pointer hover:text-gray-600" data-action="click->bus-ticket-history#clearHistory">清除</button>
+          </div>
+          <div class="flex flex-wrap gap-2" data-bus-ticket-history-target="list">
+            <!-- 历史记录列表会动态渲染到这里 -->
+          </div>
         </div>
       </div>
     </div>

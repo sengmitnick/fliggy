@@ -31,8 +31,8 @@ class BusTicketsController < ApplicationController
   end
 
   def search
-    @origin = params[:origin] || '深圳'
-    @destination = params[:destination] || '广州'
+    @origin = params[:departure_city] || params[:origin] || '深圳'
+    @destination = params[:destination_city] || params[:destination] || '广州'
     @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
     
     # Search bus tickets with base criteria
