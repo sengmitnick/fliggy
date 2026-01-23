@@ -144,17 +144,16 @@
     </div>
 
     <!-- 3. 取票电话 -->
-    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
-      <div class="flex items-center">
+    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" data-action="click->bus-ticket-order#editContactPhone">
+      <div class="flex items-center flex-1">
         <span class="text-gray-500 mr-4 text-[15px]">取票电话</span>
-        <span class="text-[17px] font-medium" data-bus-ticket-order-target="contactPhone">
-          <%= current_user.passengers.first&.phone || '请添加乘车人' %>
-        </span>
+        <input type="tel" 
+               class="text-[17px] font-medium bg-transparent border-none outline-none w-full"
+               placeholder="请输入取票电话"
+               maxlength="11"
+               data-bus-ticket-order-target="contactPhone">
       </div>
-      <svg class="w-6 h-6 text-[#5D6B8F] opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"></path>
-        <circle cx="12" cy="7" r="4" stroke-width="1.5"></circle>
-      </svg>
+      
     </div>
 
     <!-- 4. 保险模块 -->

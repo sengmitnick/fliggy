@@ -12,7 +12,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly checkIconTargets: HTMLElement[]
   declare readonly passengerCountTarget: HTMLElement
   declare readonly totalPriceTarget: HTMLElement
-  declare readonly contactPhoneTarget: HTMLElement
+  declare readonly contactPhoneTarget: HTMLInputElement
   declare readonly formDataTarget: HTMLElement
 
   private selectedPassengers: Set<string> = new Set()
@@ -39,17 +39,6 @@ export default class extends Controller<HTMLElement> {
           this.updatePassengerUI(passengerElement, true)
         }
       })
-      
-      // Update contact phone with first selected passenger's phone
-      if (passengerIds.length > 0) {
-        const firstSelectedElement = this.element.querySelector(`[data-passenger-id="${passengerIds[0]}"]`) as HTMLElement
-        if (firstSelectedElement) {
-          const phone = firstSelectedElement.dataset.passengerPhone
-          if (phone) {
-            this.contactPhoneTarget.textContent = phone
-          }
-        }
-      }
     } else {
       // Auto-select first passenger if no previous selection
       const firstPassenger = this.element.querySelector('[data-passenger-id]') as HTMLElement
@@ -58,12 +47,6 @@ export default class extends Controller<HTMLElement> {
         if (passengerId) {
           this.selectedPassengers.add(passengerId)
           this.updatePassengerUI(firstPassenger, true)
-          
-          // Update contact phone with first passenger's phone
-          const phone = firstPassenger.dataset.passengerPhone
-          if (phone) {
-            this.contactPhoneTarget.textContent = phone
-          }
         }
       }
     }
@@ -90,14 +73,6 @@ export default class extends Controller<HTMLElement> {
       
       this.selectedPassengers.add(passengerId)
       this.updatePassengerUI(target, true)
-      
-      // If this is the first selection, update contact phone
-      if (this.selectedPassengers.size === 1) {
-        const phone = target.dataset.passengerPhone
-        if (phone) {
-          this.contactPhoneTarget.textContent = phone
-        }
-      }
     }
     
     this.updateTotal()
@@ -120,6 +95,11 @@ export default class extends Controller<HTMLElement> {
     }
     
     link.href = url.pathname + url.search
+  }
+
+  editContactPhone(event: Event): void {
+    // Focus on the input field when clicking the container
+    this.contactPhoneTarget.focus()
   }
 
   selectInsurance(event: Event): void {
