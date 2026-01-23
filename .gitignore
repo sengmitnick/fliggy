@@ -110,3 +110,4 @@ backup/
 
 # Ignore Claude settings
 .claude/settings.local.json
+.gradle-cache/

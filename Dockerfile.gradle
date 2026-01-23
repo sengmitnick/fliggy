@@ -1,0 +1,39 @@
+# Dockerfile for Gradle APK Building
+# 包含 JDK 17 + Android SDK + Gradle
+
+FROM eclipse-temurin:17-jdk-jammy
+
+# 安装必要工具
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置环境变量
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_HOME=/opt/android-sdk
+ENV PATH="${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/build-tools/35.0.0"
+
+# 下载并安装 Android SDK Command Line Tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    cd ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
+    unzip commandlinetools-linux-11076708_latest.zip && \
+    rm commandlinetools-linux-11076708_latest.zip && \
+    mv cmdline-tools latest
+
+# 接受 Android SDK licenses
+RUN yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+# 安装必要的 Android SDK 组件
+RUN ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
+    "platforms;android-35" \
+    "build-tools;35.0.0" \
+    "platform-tools"
+
+# 设置工作目录
+WORKDIR /project
+
+# 默认命令
+CMD ["bash"]
