@@ -13,13 +13,13 @@
         class="flex-1 bg-gray-100 rounded-lg p-2 flex items-center justify-between hover:bg-gray-200 transition-colors">
         <div class="text-center flex-1">
           <div class="text-xs font-bold" data-car-search-edit-target="cityDisplay">
-            <% if params[:city].present? %>
+            <% if params[:city].present? && params[:pickup_location].present? %>
+              <%= params[:city] %> <%= params[:pickup_location] %>
+            <% elsif params[:city].present? %>
               <%= params[:city] %>
-            <% end %>
-            <% if params[:pickup_location].present? %>
+            <% elsif params[:pickup_location].present? %>
               <%= params[:pickup_location] %>
-            <% end %>
-            <% if params[:city].blank? && params[:pickup_location].blank? %>
+            <% else %>
               全部地点
             <% end %>
           </div>
@@ -229,6 +229,9 @@
       <% end %>
     </div>
   </div>
+  
+  <!-- Car Search Form Modal -->
+  <%= render 'shared/car_search_form_modal' %>
 </div>
 
 <style>
@@ -240,7 +243,11 @@
 <%= render 'shared/location_selector_modal' %>
 
 <!-- City Selector Modal -->
-<%= render 'shared/city_selector_modal' %>
+<div data-controller="city-selector" data-city-selector-enable-multi-select-value="false">
+  <%= render 'shared/city_selector_modal' %>
+</div>
 
 <!-- Datetime Picker Modal -->
-<%= render 'shared/car_datetime_picker_modal' %>
+<div data-controller="car-datetime-picker">
+  <%= render 'shared/car_datetime_picker_modal' %>
+</div>
