@@ -112,6 +112,7 @@ import TravelerDuplicateValidatorController from "./traveler_duplicate_validator
 import TermsCheckboxController from "./terms_checkbox_controller"
 import CarInsuranceSelectorController from "./car_insurance_selector_controller"
 import CarSearchEditController from "./car_search_edit_controller"
+import CarFilterController from "./car_filter_controller"
 
 const application = Application.start()
 
@@ -227,5 +228,6 @@ application.register("traveler-duplicate-validator", TravelerDuplicateValidatorC
 application.register("terms-checkbox", TermsCheckboxController)
 application.register("car-insurance-selector", CarInsuranceSelectorController)
 application.register("car-search-edit", CarSearchEditController)
+application.register("car-filter", CarFilterController)
 
 window.Stimulus = application
