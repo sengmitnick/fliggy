@@ -50,6 +50,10 @@ class BookingsController < ApplicationController
       custom_travel_requests = current_user.custom_travel_requests
                                            .order(created_at: :desc)
       
+      # Fetch cruise orders
+      cruise_orders = current_user.cruise_orders.includes(cruise_product: { cruise_sailing: :cruise_ship })
+                                  .order(created_at: :desc)
+      
       # Fetch insurance orders
       insurance_orders = current_user.insurance_orders.includes(:insurance_product)
                                      .order(created_at: :desc)
@@ -68,6 +72,7 @@ class BookingsController < ApplicationController
       internet_orders = internet_orders.where(status: 'pending')
       transfer_orders = transfer_orders.where(status: 'pending')
       custom_travel_requests = custom_travel_requests.where(status: 'pending')
+      cruise_orders = cruise_orders.where(status: 'pending')
       insurance_orders = insurance_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
@@ -90,6 +95,7 @@ class BookingsController < ApplicationController
       transfer_orders = transfer_orders.where(status: 'paid')
                                        .where('transfers.pickup_datetime >= ?', DateTime.now)
       custom_travel_requests = custom_travel_requests.where(status: ['contacted', 'matched'])
+      cruise_orders = cruise_orders.where(status: ['paid', 'completed'])
       insurance_orders = insurance_orders.where(status: 'paid')
                                          .where('insurance_orders.start_date >= ?', Date.today)
     when 'review'
@@ -105,6 +111,7 @@ class BookingsController < ApplicationController
       internet_orders = internet_orders.none
       transfer_orders = transfer_orders.none
       custom_travel_requests = custom_travel_requests.none
+      cruise_orders = cruise_orders.none
       insurance_orders = insurance_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
@@ -118,6 +125,7 @@ class BookingsController < ApplicationController
       internet_orders = internet_orders.where(status: 'cancelled')
       transfer_orders = transfer_orders.where(status: 'cancelled')
       custom_travel_requests = custom_travel_requests.where(status: 'cancelled')
+      cruise_orders = cruise_orders.where(status: 'cancelled')
       insurance_orders = insurance_orders.where(status: 'cancelled')
     end
     
@@ -134,6 +142,7 @@ class BookingsController < ApplicationController
       internet_orders.to_a,
       transfer_orders.to_a,
       custom_travel_requests.to_a,
+      cruise_orders.to_a,
       insurance_orders.to_a
     ].flatten.compact.sort_by(&:created_at).reverse
     

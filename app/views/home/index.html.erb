@@ -205,10 +205,10 @@
 
         <!-- Row 2 -->
         <div class="grid grid-cols-5 mb-2 h-[60px]">
-          <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to cruises_path, class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/邮轮.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "邮轮" %>
             <span class="text-[12px] text-secondary">邮轮</span>
-          </button>
+          <% end %>
 
           <%= link_to deep_travels_path, class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/深度旅行.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "深度游+" %>

@@ -1,0 +1,185 @@
+<div class="min-h-screen bg-surface pb-20" data-controller="cruise-detail">
+  <!-- Header -->
+  <div class="sticky top-0 z-20 bg-surface/95 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <%= link_to cruises_path, class: "text-gray-700" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+        <h1 class="text-lg font-semibold text-gray-900"><%= @cruise_ship.name %></h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto">
+    <!-- Ship Image -->
+    <div class="relative h-64">
+      <%= image_tag @cruise_ship.image_url, alt: @cruise_ship.name, class: "w-full h-full object-cover" %>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+      <div class="absolute bottom-4 left-4 right-4">
+        <h2 class="text-2xl font-bold text-white mb-1"><%= @cruise_ship.name %></h2>
+        <p class="text-white/90"><%= @cruise_ship.cruise_line.name %></p>
+      </div>
+    </div>
+
+    <div class="px-4">
+      <!-- Ship Features -->
+      <% if @cruise_ship.features.any? %>
+        <section class="py-4 border-b border-gray-200">
+          <div class="flex flex-wrap gap-2">
+            <% @cruise_ship.feature_list.each do |feature| %>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <%= feature %>
+              </span>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
+      <!-- Date Selection Tabs -->
+      <section class="py-4 border-b border-gray-200">
+        <h3 class="text-base font-semibold text-gray-900 mb-3">选择日期</h3>
+        <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4" data-cruise-detail-target="dateContainer">
+          <% @sailings.each_with_index do |sailing, index| %>
+            <%= link_to cruise_path(@cruise_ship.slug, sailing_id: sailing.id), 
+                        class: "flex-none w-32 px-4 py-3 rounded-lg border-2 transition #{sailing == @selected_sailing ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}",
+                        data: { 
+                          cruise_detail_target: "dateTab",
+                          action: "click->cruise-detail#selectDate",
+                          sailing_id: sailing.id
+                        } do %>
+              <div class="text-sm font-medium <%= sailing == @selected_sailing ? 'text-primary' : 'text-gray-900' %>">
+                <%= sailing.departure_date.strftime('%m月%d日') %>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                <%= sailing.duration_days %>天<%= sailing.duration_nights %>晚
+              </div>
+              <div class="text-sm font-bold <%= sailing == @selected_sailing ? 'text-primary' : 'text-gray-900' %> mt-1">
+                ¥<%= sailing.min_price %>起
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <% if @selected_sailing %>
+        <!-- Selected Sailing Info -->
+        <section class="py-4 border-b border-gray-200">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-medium text-gray-900 mb-1"><%= @selected_sailing.cruise_route.name %>航线</h4>
+              <p class="text-sm text-gray-600">
+                <%= @selected_sailing.departure_port %> → <%= @selected_sailing.arrival_port %>
+              </p>
+              <p class="text-sm text-gray-500 mt-1">
+                <%= @selected_sailing.departure_date.strftime('%Y年%m月%d日') %> - 
+                <%= @selected_sailing.return_date.strftime('%m月%d日') %>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cabin Type Selection -->
+        <section class="py-4 border-b border-gray-200">
+          <h3 class="text-base font-semibold text-gray-900 mb-3">选择舱房</h3>
+          <div class="space-y-3">
+            <% @cabin_types.each do |cabin_type| %>
+              <% min_product = @selected_sailing.cruise_products.where(cabin_type: cabin_type, status: 'on_sale').order(:price_per_person).first %>
+              <% if min_product %>
+                <%= link_to cruise_sailing_path(@selected_sailing, cabin_type_id: cabin_type.id), 
+                            class: "block bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-sm transition p-4" do %>
+                  <div class="flex gap-4">
+                    <!-- Cabin Image -->
+                    <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
+                      <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
+                        <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-full object-cover" %>
+                      </div>
+                    <% end %>
+                    
+                    <!-- Cabin Info -->
+                    <div class="flex-1">
+                      <h4 class="font-medium text-gray-900 mb-1"><%= cabin_type.name %></h4>
+                      <p class="text-sm text-gray-600 mb-2"><%= cabin_type.floor_range %></p>
+                      
+                      <!-- Features -->
+                      <div class="flex flex-wrap gap-1.5 mb-2">
+                        <% cabin_type.feature_badges.each do |badge| %>
+                          <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                            <%= badge %>
+                          </span>
+                        <% end %>
+                      </div>
+                      
+                      <!-- Price -->
+                      <div class="flex items-baseline gap-1">
+                        <span class="text-xs text-gray-500">¥</span>
+                        <span class="text-lg font-bold text-primary"><%= min_product.price_per_person %></span>
+                        <span class="text-xs text-gray-500">/人起</span>
+                      </div>
+                    </div>
+
+                    <!-- Arrow -->
+                    <div class="flex-shrink-0 flex items-center">
+                      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </section>
+
+        <!-- Itinerary -->
+        <% if @itinerary.any? %>
+          <section class="py-4">
+            <h3 class="text-base font-semibold text-gray-900 mb-3">行程安排</h3>
+            <div class="space-y-4">
+              <% @itinerary.each_with_index do |day_plan, index| %>
+                <div class="flex gap-4">
+                  <!-- Day Number -->
+                  <div class="flex-shrink-0 flex flex-col items-center">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium">
+                      D<%= day_plan['day'] || day_plan[:day] %>
+                    </div>
+                    <% if index < @itinerary.length - 1 %>
+                      <div class="w-0.5 h-full bg-gray-200 mt-2"></div>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Day Info -->
+                  <div class="flex-1 pb-6">
+                    <h4 class="font-medium text-gray-900 mb-1">
+                      <%= day_plan['port'] || day_plan[:port] %>
+                    </h4>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                      <%= day_plan['description'] || day_plan[:description] %>
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <p class="text-gray-500">暂无可预订的班次</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

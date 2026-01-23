@@ -100,6 +100,8 @@
             <%= render partial: 'bookings/transfer_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(CustomTravelRequest) %>
             <%= render partial: 'bookings/custom_travel_request_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(CruiseOrder) %>
+            <%= render partial: 'bookings/cruise_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(InsuranceOrder) %>
             <%= render partial: 'bookings/insurance_order_card', locals: { booking: booking } %>
           <% end %>

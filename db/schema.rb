@@ -24,7 +24,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_abroad_brands_on_data_version"
   end
 
@@ -40,7 +40,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_abroad_coupons_on_data_version"
   end
 
@@ -55,7 +55,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_abroad_shops_on_data_version"
   end
 
@@ -74,7 +74,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "order_number"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["abroad_ticket_id"], name: "index_abroad_ticket_orders_on_abroad_ticket_id"
     t.index ["data_version"], name: "index_abroad_ticket_orders_on_data_version"
     t.index ["user_id"], name: "index_abroad_ticket_orders_on_user_id"
@@ -95,7 +95,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "destination_en"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_abroad_tickets_on_data_version"
   end
 
@@ -139,7 +139,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "address_type", default: "delivery"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_addresses_on_data_version"
     t.index ["user_id"], name: "index_addresses_on_user_id"
   end
@@ -181,7 +181,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_booking_options_on_data_version"
     t.index ["train_id"], name: "index_booking_options_on_train_id"
   end
@@ -194,7 +194,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "deep_travel_booking_id"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_booking_travelers_on_data_version"
     t.index ["deep_travel_booking_id"], name: "index_booking_travelers_on_deep_travel_booking_id"
     t.index ["tour_group_booking_id"], name: "index_booking_travelers_on_tour_group_booking_id"
@@ -218,7 +218,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.date "return_date"
     t.integer "return_offer_id"
     t.jsonb "multi_city_flights"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_bookings_on_data_version"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
@@ -233,7 +233,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_brand_memberships_on_data_version"
     t.index ["user_id"], name: "index_brand_memberships_on_user_id"
   end
@@ -244,7 +244,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "duration"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_bus_routes_on_data_version"
   end
 
@@ -262,7 +262,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["bus_ticket_id"], name: "index_bus_ticket_orders_on_bus_ticket_id"
     t.index ["data_version"], name: "index_bus_ticket_orders_on_data_version"
     t.index ["user_id"], name: "index_bus_ticket_orders_on_user_id"
@@ -282,8 +282,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "departure_station"
     t.string "arrival_station"
     t.string "route_description"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_bus_tickets_on_data_version"
+  end
+
+  create_table "cabin_types", force: :cascade do |t|
+    t.bigint "cruise_ship_id"
+    t.string "name"
+    t.string "category"
+    t.string "floor_range"
+    t.decimal "area", default: "0.0"
+    t.boolean "has_balcony", default: false
+    t.boolean "has_window", default: false
+    t.integer "max_occupancy", default: 2
+    t.text "description"
+    t.jsonb "image_urls"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["cruise_ship_id"], name: "index_cabin_types_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cabin_types_on_data_version"
   end
 
   create_table "car_orders", force: :cascade do |t|
@@ -299,7 +317,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.decimal "total_price", default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["car_id"], name: "index_car_orders_on_car_id"
     t.index ["data_version"], name: "index_car_orders_on_data_version"
     t.index ["user_id"], name: "index_car_orders_on_user_id"
@@ -327,7 +345,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image_url"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_cars_on_data_version"
   end
 
@@ -340,7 +358,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "themes"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_cities_on_data_version"
     t.index ["is_hot"], name: "index_cities_on_is_hot"
     t.index ["name"], name: "index_cities_on_name", unique: true
@@ -355,7 +373,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_contacts_on_data_version"
     t.index ["user_id"], name: "index_contacts_on_user_id"
   end
 
@@ -371,8 +390,108 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.jsonb "statistics", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_countries_on_data_version"
+  end
+
+  create_table "cruise_lines", force: :cascade do |t|
+    t.string "name"
+    t.string "name_en"
+    t.string "logo_url"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "slug"
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_lines_on_data_version"
+    t.index ["slug"], name: "index_cruise_lines_on_slug", unique: true
+  end
+
+  create_table "cruise_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "cruise_product_id"
+    t.integer "quantity", default: 1
+    t.decimal "total_price", default: "0.0"
+    t.jsonb "passenger_info"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.string "insurance_type"
+    t.decimal "insurance_price", default: "0.0"
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.boolean "accept_terms", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.string "contact_email"
+    t.text "remark"
+    t.index ["cruise_product_id"], name: "index_cruise_orders_on_cruise_product_id"
+    t.index ["data_version"], name: "index_cruise_orders_on_data_version"
+    t.index ["user_id"], name: "index_cruise_orders_on_user_id"
+  end
+
+  create_table "cruise_products", force: :cascade do |t|
+    t.bigint "cruise_sailing_id"
+    t.bigint "cabin_type_id"
+    t.string "merchant_name"
+    t.decimal "price_per_person", default: "0.0"
+    t.integer "occupancy_requirement", default: 2
+    t.integer "stock", default: 0
+    t.integer "sales_count", default: 0
+    t.boolean "is_refundable", default: true
+    t.boolean "requires_confirmation", default: false
+    t.string "status", default: "on_sale"
+    t.string "badge"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["cabin_type_id"], name: "index_cruise_products_on_cabin_type_id"
+    t.index ["cruise_sailing_id"], name: "index_cruise_products_on_cruise_sailing_id"
+    t.index ["data_version"], name: "index_cruise_products_on_data_version"
+  end
+
+  create_table "cruise_routes", force: :cascade do |t|
+    t.string "name"
+    t.string "region"
+    t.string "icon_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_routes_on_data_version"
+  end
+
+  create_table "cruise_sailings", force: :cascade do |t|
+    t.bigint "cruise_ship_id"
+    t.bigint "cruise_route_id"
+    t.date "departure_date"
+    t.date "return_date"
+    t.integer "duration_days"
+    t.integer "duration_nights"
+    t.string "departure_port"
+    t.string "arrival_port"
+    t.jsonb "itinerary"
+    t.string "status", default: "on_sale"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["cruise_route_id"], name: "index_cruise_sailings_on_cruise_route_id"
+    t.index ["cruise_ship_id"], name: "index_cruise_sailings_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cruise_sailings_on_data_version"
+  end
+
+  create_table "cruise_ships", force: :cascade do |t|
+    t.bigint "cruise_line_id"
+    t.string "name"
+    t.string "name_en"
+    t.string "image_url"
+    t.jsonb "features"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "slug"
+    t.integer "data_version", default: 0, null: false
+    t.index ["cruise_line_id"], name: "index_cruise_ships_on_cruise_line_id"
+    t.index ["data_version"], name: "index_cruise_ships_on_data_version"
+    t.index ["slug"], name: "index_cruise_ships_on_slug", unique: true
   end
 
   create_table "custom_travel_requests", force: :cascade do |t|
@@ -391,6 +510,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_custom_travel_requests_on_data_version"
     t.index ["user_id"], name: "index_custom_travel_requests_on_user_id"
   end
 
@@ -413,7 +534,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_deep_travel_bookings_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_bookings_on_deep_travel_guide_id"
     t.index ["deep_travel_product_id"], name: "index_deep_travel_bookings_on_deep_travel_product_id"
@@ -434,7 +555,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_deep_travel_guides_on_data_version"
   end
 
@@ -450,7 +571,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "featured", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_deep_travel_products_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_products_on_deep_travel_guide_id"
   end
@@ -464,7 +585,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_destinations_on_data_version"
     t.index ["slug"], name: "index_destinations_on_slug", unique: true
   end
@@ -476,6 +597,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "child_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_family_benefits_on_data_version"
   end
 
   create_table "family_coupons", force: :cascade do |t|
@@ -487,6 +610,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_family_coupons_on_data_version"
   end
 
   create_table "flight_offers", force: :cascade do |t|
@@ -507,7 +632,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_flight_offers_on_data_version"
     t.index ["flight_id"], name: "index_flight_offers_on_flight_id"
   end
@@ -528,6 +653,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_flight_packages_on_data_version"
   end
 
   create_table "flights", force: :cascade do |t|
@@ -547,7 +674,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.date "flight_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
@@ -675,7 +802,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "insurance_type"
     t.decimal "insurance_price"
     t.datetime "locked_until"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_bookings_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_bookings_on_hotel_id"
     t.index ["hotel_room_id"], name: "index_hotel_bookings_on_hotel_room_id"
@@ -690,7 +817,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_facilities_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_facilities_on_hotel_id"
   end
@@ -713,7 +840,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "booking_type", default: "stockup"
     t.string "contact_name"
     t.string "contact_phone"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_package_orders_on_data_version"
     t.index ["hotel_package_id"], name: "index_hotel_package_orders_on_hotel_package_id"
     t.index ["order_number"], name: "index_hotel_package_orders_on_order_number"
@@ -746,7 +873,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "instant_booking", default: false
     t.boolean "luxury", default: false
     t.string "slug"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["brand_name"], name: "index_hotel_packages_on_brand_name"
     t.index ["data_version"], name: "index_hotel_packages_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_packages_on_hotel_id"
@@ -764,7 +891,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "payment_methods"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_policies_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_policies_on_hotel_id"
   end
@@ -777,7 +904,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "helpful_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_reviews_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_reviews_on_hotel_id"
     t.index ["user_id"], name: "index_hotel_reviews_on_user_id"
@@ -796,7 +923,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "room_category", default: "overnight"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotel_rooms_on_data_version"
     t.index ["room_category"], name: "index_hotel_rooms_on_room_category"
   end
@@ -819,8 +946,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "hotel_type", default: "hotel"
     t.string "region"
     t.boolean "is_domestic", default: true
-    t.bigint "data_version", default: 0, null: false
     t.string "brand"
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_hotels_on_data_version"
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
@@ -908,7 +1035,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_internet_data_plans_on_data_version"
   end
 
@@ -928,7 +1055,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "orderable_type"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_internet_orders_on_data_version"
     t.index ["orderable_id"], name: "index_internet_orders_on_orderable_id"
     t.index ["orderable_type", "orderable_id"], name: "index_internet_orders_on_orderable_type_and_orderable_id"
@@ -946,7 +1073,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "shop_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_internet_sim_cards_on_data_version"
   end
 
@@ -962,7 +1089,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.decimal "deposit", default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_internet_wifis_on_data_version"
   end
 
@@ -975,7 +1102,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "upcoming"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_itineraries_on_data_version"
     t.index ["user_id", "start_date"], name: "index_itineraries_on_user_id_and_start_date"
     t.index ["user_id", "status"], name: "index_itineraries_on_user_id_and_status"
@@ -991,7 +1118,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "sequence", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["bookable_type", "bookable_id"], name: "index_itinerary_items_on_bookable_type_and_bookable_id"
     t.index ["data_version"], name: "index_itinerary_items_on_data_version"
     t.index ["itinerary_id", "sequence"], name: "index_itinerary_items_on_itinerary_id_and_sequence"
@@ -1005,7 +1132,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_membership_benefits_on_data_version"
   end
 
@@ -1016,7 +1143,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "experience", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_memberships_on_data_version"
     t.index ["user_id"], name: "index_memberships_on_user_id"
   end
@@ -1027,7 +1154,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "enabled", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_notification_settings_on_data_version"
     t.index ["user_id", "category"], name: "index_notification_settings_on_user_id_and_category", unique: true
     t.index ["user_id"], name: "index_notification_settings_on_user_id"
@@ -1042,7 +1169,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "badge_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_notifications_on_data_version"
     t.index ["user_id", "category"], name: "index_notifications_on_user_id_and_category"
     t.index ["user_id", "read"], name: "index_notifications_on_user_id_and_read"
@@ -1061,7 +1188,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_package_options_on_data_version"
     t.index ["hotel_package_id"], name: "index_package_options_on_hotel_package_id"
   end
@@ -1074,8 +1201,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.bigint "data_version", default: 0, null: false
     t.boolean "is_self", default: false, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_passengers_on_data_version"
     t.index ["user_id", "is_self"], name: "index_passengers_on_user_id_and_is_self"
     t.index ["user_id"], name: "index_passengers_on_user_id"
@@ -1089,6 +1216,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "status", default: "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_price_alerts_on_data_version"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -1103,7 +1232,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "cancellation_policy"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_rooms_on_data_version"
     t.index ["hotel_id"], name: "index_rooms_on_hotel_id"
   end
@@ -1131,8 +1260,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.decimal "total_price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+<<<<<<< HEAD
+    t.integer "data_version", default: 0, null: false
+=======
     t.bigint "data_version", default: 0, null: false
     t.boolean "fill_travelers_later", default: false
+>>>>>>> origin/master
     t.index ["data_version"], name: "index_tour_group_bookings_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_group_bookings_on_tour_group_product_id"
     t.index ["tour_package_id"], name: "index_tour_group_bookings_on_tour_package_id"
@@ -1176,8 +1309,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.text "price_explanation"
     t.text "group_tour_notice"
     t.boolean "custom_tour_available", default: false
-    t.bigint "data_version", default: 0, null: false
     t.string "travel_type"
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
   end
@@ -1196,7 +1329,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "duration_minutes", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_tour_itinerary_days_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_itinerary_days_on_tour_group_product_id"
   end
@@ -1212,7 +1345,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "display_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_tour_packages_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_packages_on_tour_group_product_id"
   end
@@ -1242,7 +1375,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "badge"
     t.string "departure_label"
     t.string "price_suffix", default: "起"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_tour_products_on_data_version"
     t.index ["destination_id"], name: "index_tour_products_on_destination_id"
   end
@@ -1260,7 +1393,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "helpful_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_tour_reviews_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_reviews_on_tour_group_product_id"
     t.index ["user_id"], name: "index_tour_reviews_on_user_id"
@@ -1282,7 +1415,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "accept_terms", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_train_bookings_on_data_version"
     t.index ["train_id"], name: "index_train_bookings_on_train_id"
     t.index ["user_id"], name: "index_train_bookings_on_user_id"
@@ -1296,7 +1429,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "total_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_train_seats_on_data_version"
     t.index ["train_id"], name: "index_train_seats_on_train_id"
   end
@@ -1315,7 +1448,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.integer "available_seats"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_trains_on_data_version"
   end
 
@@ -1335,7 +1468,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_transfer_packages_on_data_version"
   end
 
@@ -1361,7 +1494,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "transfer_package_id"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_transfers_on_data_version"
     t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
     t.index ["user_id"], name: "index_transfers_on_user_id"
@@ -1376,7 +1509,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.boolean "is_verified", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_travel_agencies_on_data_version"
   end
 
@@ -1389,7 +1522,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_user_coupons_on_data_version"
   end
 
@@ -1406,7 +1539,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "pay_password_digest"
     t.decimal "balance", precision: 10, scale: 2, default: "0.0", null: false
     t.string "phone"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_users_on_data_version"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
@@ -1433,7 +1566,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.date "passport_expiry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_visa_order_travelers_on_data_version"
   end
 
@@ -1458,7 +1591,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "insurance_type"
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_visa_orders_on_data_version"
   end
 
@@ -1487,7 +1620,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "merchant_avatar"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "data_version", default: 0, null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_visa_products_on_data_version"
   end
 
@@ -1507,6 +1640,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_22_101921) do
     t.string "image_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_visa_services_on_data_version"
     t.index ["slug"], name: "index_visa_services_on_slug", unique: true
   end
 

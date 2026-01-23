@@ -1,0 +1,185 @@
+<% content_for :title, "Edit Cruise sailing" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_cruise_sailing_path(@cruise_sailing.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Cruise sailing
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Cruise sailing</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @cruise_sailing], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @cruise_sailing %>
+
+        <!-- Departure date -->
+        <div class="mb-4">
+          <%= form.label :departure_date, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure date<% if field_required?(@cruise_sailing, :departure_date) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.date_field :departure_date, {
+            placeholder: "Enter departure date...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :departure_date) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:departure_date].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:departure_date].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Return date -->
+        <div class="mb-4">
+          <%= form.label :return_date, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Return date<% if field_required?(@cruise_sailing, :return_date) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.date_field :return_date, {
+            placeholder: "Enter return date...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :return_date) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:return_date].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:return_date].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Duration days -->
+        <div class="mb-4">
+          <%= form.label :duration_days, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Duration days<% if field_required?(@cruise_sailing, :duration_days) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :duration_days, {
+            placeholder: "Enter duration days...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :duration_days) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:duration_days].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:duration_days].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Duration nights -->
+        <div class="mb-4">
+          <%= form.label :duration_nights, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Duration nights<% if field_required?(@cruise_sailing, :duration_nights) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :duration_nights, {
+            placeholder: "Enter duration nights...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :duration_nights) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:duration_nights].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:duration_nights].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Departure port -->
+        <div class="mb-4">
+          <%= form.label :departure_port, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Departure port<% if field_required?(@cruise_sailing, :departure_port) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :departure_port, {
+            placeholder: "Enter departure port...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :departure_port) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:departure_port].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:departure_port].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Arrival port -->
+        <div class="mb-4">
+          <%= form.label :arrival_port, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Arrival port<% if field_required?(@cruise_sailing, :arrival_port) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :arrival_port, {
+            placeholder: "Enter arrival port...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :arrival_port) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:arrival_port].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:arrival_port].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Itinerary -->
+        <div class="mb-4">
+          <%= form.label :itinerary, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Itinerary<% if field_required?(@cruise_sailing, :itinerary) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :itinerary, {
+            placeholder: "Enter itinerary...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :itinerary) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:itinerary].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:itinerary].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Data version -->
+        <div class="mb-4">
+          <%= form.label :data_version, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Data version<% if field_required?(@cruise_sailing, :data_version) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :data_version, {
+            placeholder: "Enter data version...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_sailing, :data_version) ? { required: true } : {}) %>
+          <% if @cruise_sailing.errors[:data_version].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:data_version].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-4">
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Status<% if field_required?(@cruise_sailing, :status) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :status, 
+              options_for_select([['Select Status', '']] + [["On sale", "on_sale"], ["Sold out", "sold_out"], ["Cancelled", "cancelled"]], @cruise_sailing.status),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_sailing.errors[:status].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:status].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Cruise ship -->
+        <div class="mb-4">
+          <%= form.label :cruise_ship_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Cruise ship<% if field_required?(@cruise_sailing, :cruise_ship) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :cruise_ship_id, 
+              options_for_select([['Select Cruise ship', '']] + CruiseShip.all.map { |item| [item.name, item.id] }, @cruise_sailing.cruise_ship_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_sailing.errors[:cruise_ship_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:cruise_ship_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Cruise route -->
+        <div class="mb-4">
+          <%= form.label :cruise_route_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Cruise route<% if field_required?(@cruise_sailing, :cruise_route) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :cruise_route_id, 
+              options_for_select([['Select Cruise route', '']] + CruiseRoute.all.map { |item| [item.name, item.id] }, @cruise_sailing.cruise_route_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_sailing.errors[:cruise_route_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_sailing.errors[:cruise_route_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_cruise_sailing_path(@cruise_sailing.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Cruise sailing", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

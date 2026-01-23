@@ -2,7 +2,7 @@
   <div class="p-4 bg-red-50 border border-red-200 rounded-lg flex justify-between items-start" x-data="{ show: true }" x-show="show">
     <div class="flex-1 pr-4">
       <h3 class="font-medium text-red-800">
-        <%= pluralize(model.errors.count, "error") %> prohibited this <%= model.class.model_name.human.downcase %> from being saved:
+        😢 提交失败了，请检查以下 <%= model.errors.count %> 个问题：
       </h3>
       <ul class="list-disc list-inside mt-2 text-sm text-red-700">
         <% model.errors.full_messages.each do |message| %>

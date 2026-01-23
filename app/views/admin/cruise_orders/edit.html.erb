@@ -1,0 +1,208 @@
+<% content_for :title, "Edit Cruise order" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_cruise_order_path(@cruise_order.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Cruise order
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Cruise order</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @cruise_order], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @cruise_order %>
+
+        <!-- Quantity -->
+        <div class="mb-4">
+          <%= form.label :quantity, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Quantity<% if field_required?(@cruise_order, :quantity) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :quantity, {
+            placeholder: "Enter quantity...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :quantity) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:quantity].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:quantity].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Total price -->
+        <div class="mb-4">
+          <%= form.label :total_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Total price<% if field_required?(@cruise_order, :total_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :total_price, {
+            placeholder: "Enter total price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :total_price) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:total_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:total_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Passenger info -->
+        <div class="mb-4">
+          <%= form.label :passenger_info, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Passenger info<% if field_required?(@cruise_order, :passenger_info) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :passenger_info, {
+            placeholder: "Enter passenger info...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :passenger_info) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:passenger_info].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:passenger_info].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Contact name -->
+        <div class="mb-4">
+          <%= form.label :contact_name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Contact name<% if field_required?(@cruise_order, :contact_name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :contact_name, {
+            placeholder: "Enter contact name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :contact_name) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:contact_name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:contact_name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Contact phone -->
+        <div class="mb-4">
+          <%= form.label :contact_phone, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Contact phone<% if field_required?(@cruise_order, :contact_phone) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :contact_phone, {
+            placeholder: "Enter contact phone...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :contact_phone) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:contact_phone].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:contact_phone].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Insurance type -->
+        <div class="mb-4">
+          <%= form.label :insurance_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Insurance type<% if field_required?(@cruise_order, :insurance_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :insurance_type, {
+            placeholder: "Enter insurance type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :insurance_type) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:insurance_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:insurance_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Insurance price -->
+        <div class="mb-4">
+          <%= form.label :insurance_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Insurance price<% if field_required?(@cruise_order, :insurance_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :insurance_price, {
+            placeholder: "Enter insurance price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :insurance_price) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:insurance_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:insurance_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Order number -->
+        <div class="mb-4">
+          <%= form.label :order_number, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Order number<% if field_required?(@cruise_order, :order_number) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :order_number, {
+            placeholder: "Enter order number...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :order_number) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:order_number].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:order_number].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Accept terms -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :accept_terms,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Accept terms</span>
+          </label>
+        </div>
+
+        <!-- Data version -->
+        <div class="mb-4">
+          <%= form.label :data_version, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Data version<% if field_required?(@cruise_order, :data_version) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :data_version, {
+            placeholder: "Enter data version...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@cruise_order, :data_version) ? { required: true } : {}) %>
+          <% if @cruise_order.errors[:data_version].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:data_version].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-4">
+          <%= form.label :status, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Status<% if field_required?(@cruise_order, :status) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :status, 
+              options_for_select([['Select Status', '']] + [["Pending", "pending"], ["Paid", "paid"], ["Cancelled", "cancelled"], ["Completed", "completed"]], @cruise_order.status),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_order.errors[:status].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:status].first %></p>
+          <% end %>
+        </div>
+
+        <!-- User -->
+        <div class="mb-4">
+          <%= form.label :user_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            User<% if field_required?(@cruise_order, :user) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :user_id, 
+              options_for_select([['Select User', '']] + User.all.map { |item| [item.name, item.id] }, @cruise_order.user_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_order.errors[:user_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:user_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Cruise product -->
+        <div class="mb-4">
+          <%= form.label :cruise_product_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Cruise product<% if field_required?(@cruise_order, :cruise_product) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :cruise_product_id, 
+              options_for_select([['Select Cruise product', '']] + CruiseProduct.all.map { |item| [item.id, item.id] }, @cruise_order.cruise_product_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @cruise_order.errors[:cruise_product_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @cruise_order.errors[:cruise_product_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_cruise_order_path(@cruise_order.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Cruise order", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

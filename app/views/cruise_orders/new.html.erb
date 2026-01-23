@@ -1,0 +1,347 @@
+<div class="min-h-screen bg-surface pb-20" data-controller="cruise-order-form">
+  <!-- Header -->
+  <div class="sticky top-0 z-20 bg-surface/95 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <%= link_to cruise_sailing_path(@sailing, cabin_type_id: @cabin_type.id), class: "text-gray-700" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        <% end %>
+        <h1 class="text-lg font-semibold text-gray-900">填写订单</h1>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @cruise_order, url: cruise_orders_path, local: true, class: "max-w-7xl mx-auto px-4 py-4 space-y-4" do |f| %>
+    <%= render 'shared/form_error_message', model: @cruise_order %>
+    <%= f.hidden_field :cruise_product_id, value: @product.id %>
+
+    <!-- Order Summary Card -->
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 mb-3">订单信息</h2>
+      
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">游轮</span>
+          <span class="font-medium text-gray-900"><%= @cruise_ship.name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">航线</span>
+          <span class="font-medium text-gray-900"><%= @sailing.cruise_route.name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">出发日期</span>
+          <span class="font-medium text-gray-900">
+            <%= @sailing.departure_date.strftime('%Y年%m月%d日') %>
+          </span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">舱房</span>
+          <span class="font-medium text-gray-900"><%= @cabin_type.name %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">商家</span>
+          <span class="font-medium text-gray-900"><%= @product.merchant_name %></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Passenger Count -->
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 mb-3">乘客人数</h2>
+      
+      <div class="form-group">
+        <%= f.label :quantity, "入住人数", class: "form-label" %>
+        <%= f.number_field :quantity, 
+                          min: @product.occupancy_requirement, 
+                          value: @product.occupancy_requirement,
+                          class: "form-input",
+                          data: { 
+                            cruise_order_form_target: "quantityInput",
+                            action: "input->cruise-order-form#updateTotalPrice"
+                          } %>
+        <p class="form-help">此舱房要求至少 <%= @product.occupancy_requirement %> 人入住</p>
+      </div>
+    </section>
+
+    <!-- Contact Information -->
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-semibold text-gray-900">联系人信息</h2>
+        <button type="button" 
+                class="text-sm text-primary hover:underline"
+                data-action="click->cruise-order-form#openContactSelector">
+          选择常用联系人
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="form-group">
+          <%= f.label :contact_name, "联系人姓名", class: "form-label required" %>
+          <%= f.text_field :contact_name, 
+                          placeholder: "请输入联系人姓名",
+                          class: "form-input",
+                          data: { cruise_order_form_target: "nameInput" } %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :contact_phone, "联系人手机", class: "form-label required" %>
+          <%= f.telephone_field :contact_phone, 
+                         placeholder: "请输入手机号码",
+                         class: "form-input",
+                         data: { cruise_order_form_target: "phoneInput" } %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :contact_email, "联系人邮箱", class: "form-label" %>
+          <%= f.email_field :contact_email, 
+                           placeholder: "用于接收订单确认邮件（选填）",
+                           class: "form-input",
+                           data: { cruise_order_form_target: "emailInput" } %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insurance (Optional) -->
+    <!-- 4. Insurance Section -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-sm pt-2">
+      <!-- Top Banner -->
+      <div class="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-3 flex justify-between items-center relative overflow-hidden">
+        <div class="z-10">
+          <div class="flex items-center text-[#4A89DC] font-bold mb-1">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            添加保障，出游更安心
+          </div>
+        </div>
+        <!-- Decorative cruise ship icon -->
+        <div class="absolute right-0 bottom-0 opacity-80">
+          <svg width="120" height="60" viewBox="0 0 100 50">
+            <path d="M20 30 L80 30 L85 40 L15 40 Z" fill="#7A94C4" />
+            <path d="M30 20 L70 20 L75 30 L25 30 Z" fill="#9FB4D8" />
+            <path d="M40 10 L60 10 L65 20 L35 20 Z" fill="#B8CCE8" />
+            <circle cx="30" cy="40" r="3" fill="#555" />
+            <circle cx="50" cy="40" r="3" fill="#555" />
+            <circle cx="70" cy="40" r="3" fill="#555" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <div class="flex items-center mb-3">
+          <h3 class="font-bold text-[16px]">邮轮旅游综合保障</h3>
+          <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+
+        <!-- Insurance Cards Grid -->
+        <div class="grid grid-cols-3 gap-2">
+          <!-- Card 1: No Insurance -->
+          <div class="border-2 border-gray-100 rounded-lg p-2 text-center relative h-40 flex flex-col items-center"
+               data-action="click->cruise-order-form#selectInsurance"
+               data-cruise-order-form-target="insuranceCard"
+               data-insurance-type="none"
+               data-insurance-price="0">
+            <div class="text-gray-300 mb-1 mt-1">
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12z" opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">无保障</div>
+            <div class="text-[10px] text-gray-400 border border-gray-200 rounded px-1 mb-2">放弃保障</div>
+            
+            <div class="space-y-1 w-full flex flex-col items-center">
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <svg class="w-2.5 h-2.5 text-[#FF5533]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+
+            <!-- Selection checkmark -->
+            <div class="mt-auto mb-1 text-gray-300" data-cruise-order-form-target="checkmark">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Card 2: Basic Protection -->
+          <div class="bg-gray-50 border border-gray-100 rounded-lg p-2 text-center h-40 flex flex-col items-center"
+               data-action="click->cruise-order-form#selectInsurance"
+               data-cruise-order-form-target="insuranceCard"
+               data-insurance-type="basic"
+               data-insurance-price="20">
+            <div class="text-[#FFD944] mb-1 mt-1">
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">基础保障</div>
+            <div class="text-[10px] text-[#D88C3C] border border-[#D88C3C] bg-[#FEF6E8] rounded px-1 mb-2">经济之选</div>
+            
+            <div class="space-y-0.5 w-full text-[10px] text-gray-500 text-center leading-tight">
+              <div>意外受伤¥30万</div>
+              <div>医疗费用¥5万</div>
+              <div>财物损失¥2千</div>
+            </div>
+
+            <div class="mt-auto flex items-center justify-center space-x-1 mb-1">
+              <span class="font-bold">¥20/人</span>
+              <div class="text-gray-300" data-cruise-order-form-target="checkmark">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Premium Protection -->
+          <div class="bg-gray-50 border border-gray-100 rounded-lg p-2 text-center h-40 flex flex-col items-center"
+               data-action="click->cruise-order-form#selectInsurance"
+               data-cruise-order-form-target="insuranceCard"
+               data-insurance-type="premium"
+               data-insurance-price="50">
+            <div class="text-[#5D9CEC] mb-1 mt-1">
+              <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+            </div>
+            <div class="font-bold text-[13px] mb-1">全程保障</div>
+            <div class="text-[10px] text-[#4A89DC] border border-[#4A89DC] bg-[#EBF4FF] rounded px-1 mb-2">明智之选</div>
+            
+            <div class="space-y-0.5 w-full text-[10px] text-gray-500 text-center leading-tight">
+              <div>意外受伤¥100万</div>
+              <div>医疗费用¥20万</div>
+              <div>行程取消¥5千</div>
+            </div>
+
+            <div class="mt-auto flex items-center justify-center space-x-1 mb-1">
+              <span class="font-bold">¥50/人</span>
+              <div class="text-gray-300" data-cruise-order-form-target="checkmark">
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 85% users choice label -->
+        <div class="relative mt-2">
+          <div class="absolute left-1/2 -translate-x-1/2 -top-[10px] bg-[#FF8C00] text-white text-[10px] px-3 py-0.5 rounded-full z-10 shadow-sm">
+            90%用户的选择
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden form field for insurance price -->
+      <%= f.hidden_field :insurance_price, value: 0, data: { cruise_order_form_target: "insurancePriceInput" } %>
+    </div>
+
+    <!-- Remark -->
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <h2 class="text-base font-semibold text-gray-900 mb-3">备注信息</h2>
+      
+      <div class="form-group">
+        <%= f.label :remark, "订单备注", class: "form-label" %>
+        <%= f.text_area :remark, 
+                       rows: 3,
+                       placeholder: "如有特殊需求请在此说明（选填）",
+                       class: "form-input" %>
+      </div>
+    </section>
+
+    <!-- Terms -->
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <label class="flex items-start gap-3">
+        <%= f.check_box :accept_terms, class: "mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" %>
+        <span class="text-sm text-gray-700 flex-1">
+          我已阅读并同意
+          <a href="#" class="text-primary hover:underline">《游轮预订服务条款》</a>
+          和
+          <a href="#" class="text-primary hover:underline">《退改规则》</a>
+        </span>
+      </label>
+    </section>
+
+    <!-- Price Summary & Submit -->
+    <div class="sticky bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-sm border-t border-gray-200 p-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm text-gray-500 mb-1">总价</p>
+          <div class="flex items-baseline gap-1">
+            <span class="text-xs text-gray-500">¥</span>
+            <span class="text-2xl font-bold text-primary" 
+                  data-cruise-order-form-target="totalPrice"
+                  data-base-price="<%= @product.price_per_person %>">
+              <%= @product.price_per_person * @product.occupancy_requirement %>
+            </span>
+          </div>
+        </div>
+        
+        <%= f.submit "提交订单", 
+                    class: "btn-primary px-8 py-3 text-base font-medium",
+                    data: { disable_with: "提交中..." } %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Contact Selector Modal -->
+  <div id="contactSelectorModal" 
+       class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-[1px]" 
+       data-cruise-order-form-target="modal">
+    <div class="absolute bottom-0 left-0 w-full bg-surface-alt rounded-t-2xl transform transition-transform duration-300">
+      <div class="relative bg-white rounded-t-2xl px-4 py-4 border-b border-gray-100">
+        <h3 class="text-center text-lg font-medium text-black">请选择联系人</h3>
+        <button type="button" 
+                class="absolute right-4 top-4 text-gray-500 hover:text-gray-700" 
+                data-action="click->cruise-order-form#closeContactSelector">
+          <svg class="w-6 h-6 border border-gray-800 rounded-full p-1 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 h-[400px] bg-white overflow-y-auto">
+        <% if @contacts.any? %>
+          <% @contacts.each do |contact| %>
+            <div class="flex items-center justify-between bg-surface p-4 rounded-lg mb-2 cursor-pointer hover:bg-gray-100"
+                 data-cruise-order-form-target="contactItem"
+                 data-action="click->cruise-order-form#selectContact"
+                 data-cruise-order-form-name-param="<%= contact.name %>"
+                 data-cruise-order-form-phone-param="<%= contact.phone %>"
+                 data-cruise-order-form-email-param="<%= contact.email %>">
+              <div class="flex flex-col">
+                <span class="text-base font-bold text-gray-900 mb-1"><%= contact.name %></span>
+                <% if contact.phone.present? %>
+                  <span class="text-sm text-gray-500"><%= contact.phone %></span>
+                <% end %>
+                <% if contact.email.present? %>
+                  <span class="text-xs text-gray-400 mt-0.5"><%= contact.email %></span>
+                <% end %>
+              </div>
+              <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600 hidden" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center text-gray-400 py-8">
+            <p>暂无常用联系人</p>
+            <p class="text-sm mt-2">您可以在<a href="<%= contacts_path %>" class="text-blue-500">常用信息</a>中添加</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

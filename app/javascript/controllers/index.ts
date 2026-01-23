@@ -100,6 +100,9 @@ import AbroadTicketTypeController from "./abroad_ticket_type_controller"
 import LandmarkFilterController from "./landmark_filter_controller"
 import CarDatetimePickerController from "./car_datetime_picker_controller"
 import CarOrderController from "./car_order_controller"
+import CruiseDetailController from "./cruise_detail_controller"
+import CruiseOrderFormController from "./cruise_order_form_controller"
+import CruiseSearchController from "./cruise_search_controller"
 import InsuranceFilterController from "./insurance_filter_controller"
 import ContactSelectorController from "./contact_selector_controller"
 import InsuranceSearchValidationController from "./insurance_search_validation_controller"
@@ -210,6 +213,9 @@ application.register("abroad-ticket-type", AbroadTicketTypeController)
 application.register("landmark-filter", LandmarkFilterController)
 application.register("car-datetime-picker", CarDatetimePickerController)
 application.register("car-order", CarOrderController)
+application.register("cruise-detail", CruiseDetailController)
+application.register("cruise-order-form", CruiseOrderFormController)
+application.register("cruise-search", CruiseSearchController)
 application.register("insurance-filter", InsuranceFilterController)
 application.register("contact-selector", ContactSelectorController)
 application.register("insurance-search-validation", InsuranceSearchValidationController)
