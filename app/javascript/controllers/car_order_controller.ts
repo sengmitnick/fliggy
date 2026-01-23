@@ -33,6 +33,10 @@ export default class extends Controller {
       return
     }
 
+    // Get displayed total price from bottom bar (NOT from hidden field)
+    const totalPriceElement = document.querySelector<HTMLElement>('[data-car-insurance-selector-target="totalPrice"]')
+    const displayedTotalPrice = totalPriceElement?.textContent?.trim() || formData.get('car_order[total_price]') as string
+
     // Prepare order data
     const orderData = {
       car_order: {
@@ -43,7 +47,7 @@ export default class extends Controller {
         pickup_datetime: formData.get('car_order[pickup_datetime]'),
         return_datetime: formData.get('car_order[return_datetime]'),
         pickup_location: formData.get('car_order[pickup_location]'),
-        total_price: formData.get('car_order[total_price]')
+        total_price: displayedTotalPrice
       }
     }
     
@@ -68,9 +72,9 @@ export default class extends Controller {
       const data = await response.json()
       
       if (response.ok && data.success) {
-        // Order created successfully, trigger payment modal
+        // Order created successfully, trigger payment modal with displayed price
         this.triggerPaymentModal(
-          orderData.car_order.total_price as string, 
+          displayedTotalPrice, 
           data.pay_url, 
           data.success_url
         )

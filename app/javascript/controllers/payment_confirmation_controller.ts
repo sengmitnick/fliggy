@@ -44,7 +44,7 @@ export default class extends Controller {
   declare readonly hasStatusTextTarget: boolean
   declare readonly statusDotsTarget: HTMLElement
   declare readonly hasStatusDotsTarget: boolean
-  declare readonly amountValue: string
+  declare amountValue: string
   declare readonly userEmailValue: string
   declare readonly paymentUrlValue: string
   declare readonly successUrlValue: string
@@ -54,6 +54,15 @@ export default class extends Controller {
   connect(): void {
     // Initialize controller
     console.log("Payment confirmation controller connected")
+    
+    // 监听价格变化事件
+    this.element.addEventListener('payment-confirmation:amount-changed', (event: Event) => {
+      const customEvent = event as CustomEvent
+      if (customEvent.detail && customEvent.detail.amount) {
+        this.amountValue = customEvent.detail.amount.toString()
+        console.log(`Payment amount synced: ¥${this.amountValue}`)
+      }
+    })
   }
 
   showPasswordModal(): void {
