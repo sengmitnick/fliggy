@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto bg-white min-h-screen flex flex-col">
+<div class="max-w-md mx-auto bg-white min-h-screen flex flex-col" data-controller="car-search-edit">
   <!-- 顶部导航 & 搜索栏 -->
   <div class="px-4 py-2 sticky top-0 bg-white z-10">
     <div class="flex items-center space-x-3">
@@ -7,9 +7,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
       <% end %>
-      <div class="flex-1 bg-gray-100 rounded-lg p-2 flex items-center justify-between">
+      <button 
+        type="button"
+        data-action="click->car-search-edit#openLocationEditor"
+        class="flex-1 bg-gray-100 rounded-lg p-2 flex items-center justify-between hover:bg-gray-200 transition-colors">
         <div class="text-center flex-1">
-          <div class="text-xs font-bold">
+          <div class="text-xs font-bold" data-car-search-edit-target="cityDisplay">
             <% if params[:city].present? %>
               <%= params[:city] %>
             <% end %>
@@ -31,7 +34,7 @@
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
         </svg>
-      </div>
+      </button>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
       </svg>
@@ -232,3 +235,12 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
+
+<!-- Location Selector Modal -->
+<%= render 'shared/location_selector_modal' %>
+
+<!-- City Selector Modal -->
+<%= render 'shared/city_selector_modal' %>
+
+<!-- Datetime Picker Modal -->
+<%= render 'shared/car_datetime_picker_modal' %>
