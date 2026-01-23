@@ -4,6 +4,460 @@ puts "正在加载签证服务数据..."
 
 timestamp = Time.current
 
+# ============================================
+# 第一步：创建国家数据
+# ============================================
+puts "\n正在创建国家数据..."
+
+countries_data = [
+  # 东南亚国家
+  { name: "泰国", code: "TH", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=400", description: "东南亚热门旅游目的地", created_at: timestamp, updated_at: timestamp },
+  { name: "越南", code: "VN", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400", description: "东南亚文化古国", created_at: timestamp, updated_at: timestamp },
+  { name: "新加坡", code: "SG", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400", description: "东南亚金融中心", created_at: timestamp, updated_at: timestamp },
+  { name: "马来西亚", code: "MY", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=400", description: "多元文化国家", created_at: timestamp, updated_at: timestamp },
+  { name: "菲律宾", code: "PH", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1551244072-5d12893278ab?w=400", description: "千岛之国", created_at: timestamp, updated_at: timestamp },
+  { name: "印度尼西亚", code: "ID", region: "东南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1555409290-7896f99c76b2?w=400", description: "万岛之国", created_at: timestamp, updated_at: timestamp },
+  
+  # 东亚国家
+  { name: "日本", code: "JP", region: "东亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400", description: "樱花之国", created_at: timestamp, updated_at: timestamp },
+  { name: "韩国", code: "KR", region: "东亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=400", description: "韩流文化发源地", created_at: timestamp, updated_at: timestamp },
+  
+  # 欧洲国家
+  { name: "英国", code: "GB", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400", description: "大不列颠及北爱尔兰联合王国", created_at: timestamp, updated_at: timestamp },
+  { name: "法国", code: "FR", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400", description: "浪漫之都", created_at: timestamp, updated_at: timestamp },
+  { name: "德国", code: "DE", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400", description: "欧洲经济引擎", created_at: timestamp, updated_at: timestamp },
+  { name: "意大利", code: "IT", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400", description: "文艺复兴发源地", created_at: timestamp, updated_at: timestamp },
+  { name: "西班牙", code: "ES", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=400", description: "激情国度", created_at: timestamp, updated_at: timestamp },
+  { name: "瑞士", code: "CH", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400", description: "永久中立国", created_at: timestamp, updated_at: timestamp },
+  { name: "希腊", code: "GR", region: "欧洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=400", description: "西方文明发源地", created_at: timestamp, updated_at: timestamp },
+  
+  # 大洋洲国家
+  { name: "澳大利亚", code: "AU", region: "大洋洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=400", description: "南半球大陆", created_at: timestamp, updated_at: timestamp },
+  { name: "新西兰", code: "NZ", region: "大洋洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=400", description: "长白云之乡", created_at: timestamp, updated_at: timestamp },
+  
+  # 北美洲国家
+  { name: "美国", code: "US", region: "北美洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=400", description: "超级大国", created_at: timestamp, updated_at: timestamp },
+  { name: "加拿大", code: "CA", region: "北美洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=400", description: "枫叶之国", created_at: timestamp, updated_at: timestamp },
+  
+  # 南美洲国家
+  { name: "巴西", code: "BR", region: "南美洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=400", description: "足球王国", created_at: timestamp, updated_at: timestamp },
+  { name: "阿根廷", code: "AR", region: "南美洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=400", description: "探戈之国", created_at: timestamp, updated_at: timestamp },
+  
+  # 非洲国家
+  { name: "埃及", code: "EG", region: "非洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=400", description: "古文明古国", created_at: timestamp, updated_at: timestamp },
+  { name: "南非", code: "ZA", region: "非洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=400", description: "彩虹之国", created_at: timestamp, updated_at: timestamp },
+  { name: "肯尼亚", code: "KE", region: "非洲", visa_free: false, image_url: "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=400", description: "野生动物天堂", created_at: timestamp, updated_at: timestamp },
+  
+  # 南亚国家
+  { name: "印度", code: "IN", region: "南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400", description: "文明古国", created_at: timestamp, updated_at: timestamp },
+  { name: "斯里兰卡", code: "LK", region: "南亚", visa_free: false, image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400", description: "印度洋上的明珠", created_at: timestamp, updated_at: timestamp },
+  
+  # 中东国家
+  { name: "阿联酋", code: "AE", region: "中东", visa_free: false, image_url: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400", description: "沙漠中的明珠", created_at: timestamp, updated_at: timestamp },
+  { name: "土耳其", code: "TR", region: "中东", visa_free: false, image_url: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=400", description: "横跨欧亚大陆", created_at: timestamp, updated_at: timestamp }
+]
+
+Country.insert_all(countries_data)
+puts "✓ 批量创建了 #{countries_data.count} 个国家"
+
+# 重新加载国家数据以获取ID
+countries = Country.all.index_by(&:code)
+
+# ============================================
+# 第二步：创建签证产品数据
+# ============================================
+puts "\n正在创建签证产品数据..."
+
+visa_products_data = []
+
+# 泰国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["TH"].id,
+    name: "泰国旅游签证",
+    product_type: "旅游签证",
+    price: 88,
+    original_price: 93,
+    residence_area: "全国",
+    processing_days: 2,
+    visa_validity: "90天",
+    max_stay: "60天",
+    success_rate: 100.0,
+    material_count: 2,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南新康辉国旅旗舰店",
+    sales_count: 15000,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["TH"].id,
+    name: "泰国电子签证",
+    product_type: "电子签证",
+    price: 158,
+    original_price: 163,
+    residence_area: "全国",
+    processing_days: 3,
+    visa_validity: "90天",
+    max_stay: "60天",
+    success_rate: 99.8,
+    material_count: 1,
+    can_simplify: true,
+    home_pickup: false,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "武汉碧海蓝天旅游专营店",
+    sales_count: 9800,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 日本签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["JP"].id,
+    name: "日本单次旅游签证",
+    product_type: "单次签证",
+    price: 191,
+    original_price: 196,
+    residence_area: "全国",
+    processing_days: 18,
+    visa_validity: "90天",
+    max_stay: "15天",
+    success_rate: 100.0,
+    material_count: 5,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 6000,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["JP"].id,
+    name: "日本三年多次签证",
+    product_type: "多次签证",
+    price: 588,
+    original_price: 598,
+    residence_area: "全国",
+    processing_days: 15,
+    visa_validity: "3年",
+    max_stay: "30天",
+    success_rate: 98.5,
+    material_count: 6,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 3500,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["JP"].id,
+    name: "日本五年多次签证",
+    product_type: "多次签证",
+    price: 788,
+    original_price: 798,
+    residence_area: "全国",
+    processing_days: 20,
+    visa_validity: "5年",
+    max_stay: "90天",
+    success_rate: 96.2,
+    material_count: 7,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 2800,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 韩国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["KR"].id,
+    name: "韩国团体旅游签证",
+    product_type: "团体签证",
+    price: 108,
+    original_price: 113,
+    residence_area: "全国",
+    processing_days: 5,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 100.0,
+    material_count: 1,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南新康辉国旅旗舰店",
+    sales_count: 7000,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["KR"].id,
+    name: "韩国单次签证",
+    product_type: "单次签证",
+    price: 433,
+    original_price: 438,
+    residence_area: "全国",
+    processing_days: 8,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 97.8,
+    material_count: 4,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "武汉碧海蓝天旅游专营店",
+    sales_count: 10000,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 越南签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["VN"].id,
+    name: "越南电子签证",
+    product_type: "电子签证",
+    price: 68,
+    original_price: 73,
+    residence_area: "全国",
+    processing_days: 1,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 100.0,
+    material_count: 2,
+    can_simplify: true,
+    home_pickup: false,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "武汉碧海蓝天旅游专营店",
+    sales_count: 18000,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 新加坡签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["SG"].id,
+    name: "新加坡电子签证",
+    product_type: "电子签证",
+    price: 268,
+    original_price: 278,
+    residence_area: "全国",
+    processing_days: 3,
+    visa_validity: "63天",
+    max_stay: "30天",
+    success_rate: 100.0,
+    material_count: 3,
+    can_simplify: true,
+    home_pickup: false,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 8500,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["SG"].id,
+    name: "新加坡两年多次签证",
+    product_type: "多次签证",
+    price: 388,
+    original_price: 398,
+    residence_area: "全国",
+    processing_days: 5,
+    visa_validity: "2年",
+    max_stay: "30天",
+    success_rate: 98.5,
+    material_count: 4,
+    can_simplify: true,
+    home_pickup: false,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 5200,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 马来西亚签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["MY"].id,
+    name: "马来西亚电子签证",
+    product_type: "电子签证",
+    price: 128,
+    original_price: 133,
+    residence_area: "全国",
+    processing_days: 1,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 100.0,
+    material_count: 2,
+    can_simplify: true,
+    home_pickup: false,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南新康辉国旅旗舰店",
+    sales_count: 12000,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 美国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["US"].id,
+    name: "美国B1/B2旅游商务签证",
+    product_type: "旅游商务签证",
+    price: 1688,
+    original_price: 1798,
+    residence_area: "全国",
+    processing_days: 30,
+    visa_validity: "10年",
+    max_stay: "180天",
+    success_rate: 92.5,
+    material_count: 8,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 4500,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 澳大利亚签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["AU"].id,
+    name: "澳大利亚旅游签证",
+    product_type: "旅游签证",
+    price: 1288,
+    original_price: 1398,
+    residence_area: "全国",
+    processing_days: 20,
+    visa_validity: "1年",
+    max_stay: "90天",
+    success_rate: 95.8,
+    material_count: 6,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 3200,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 英国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["GB"].id,
+    name: "英国旅游签证",
+    product_type: "旅游签证",
+    price: 1588,
+    original_price: 1688,
+    residence_area: "全国",
+    processing_days: 25,
+    visa_validity: "2年",
+    max_stay: "180天",
+    success_rate: 94.2,
+    material_count: 7,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 2800,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 法国签证产品（申根签证）
+visa_products_data.concat([
+  {
+    country_id: countries["FR"].id,
+    name: "法国申根旅游签证",
+    product_type: "申根签证",
+    price: 998,
+    original_price: 1088,
+    residence_area: "全国",
+    processing_days: 15,
+    visa_validity: "90天",
+    max_stay: "90天",
+    success_rate: 96.5,
+    material_count: 6,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 3500,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 新西兰签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["NZ"].id,
+    name: "新西兰旅游签证",
+    product_type: "旅游签证",
+    price: 1188,
+    original_price: 1288,
+    residence_area: "全国",
+    processing_days: 20,
+    visa_validity: "1年",
+    max_stay: "90天",
+    success_rate: 96.0,
+    material_count: 6,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "湖南新康辉国旅旗舰店",
+    sales_count: 2500,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+VisaProduct.insert_all(visa_products_data)
+puts "✓ 批量创建了 #{visa_products_data.count} 个签证产品"
+
+# ============================================
+# 第三步：创建签证服务数据（原有数据）
+# ============================================
+puts "\n正在创建签证服务数据..."
+
 # 准备所有签证服务数据
 visa_services_data = []
 
@@ -249,4 +703,14 @@ puts "  - 泰国签证: 2 个商品"
 puts "  - 新加坡签证: 2 个商品"
 puts "  - 马来西亚签证: 1 个商品"
 puts "  - 越南签证: 1 个商品"
-puts "\n✅ 签证服务数据加载完成！总计: #{VisaService.count} 个签证服务"
+
+# ============================================
+# 最终统计
+# ============================================
+puts "\n" + "="*50
+puts "✅ 签证数据加载完成！"
+puts "="*50
+puts "国家总数: #{Country.count}"
+puts "签证产品总数: #{VisaProduct.count}"
+puts "签证服务总数: #{VisaService.count}"
+puts "="*50
