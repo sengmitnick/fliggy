@@ -45,6 +45,6 @@ class Admin::AttractionsController < Admin::BaseController
   end
 
   def attraction_params
-    params.require(:attraction).permit(:name, :latitude, :longitude, :description, :cover_image_url, :city_id)
+    params.require(:attraction).permit(:name, :province, :city, :district, :address, :latitude, :longitude, :rating, :review_count, :opening_hours, :phone, :description, :slug, :cover_image, gallery_images: [])
   end
 end

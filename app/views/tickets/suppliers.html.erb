@@ -1,0 +1,137 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">选择供应商</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="bg-surface p-4 border-b border-border">
+    <div class="flex items-start gap-3">
+      <% if @attraction.cover_image.attached? %>
+        <%= image_tag @attraction.cover_image, class: "w-20 h-20 object-cover rounded-lg" %>
+      <% else %>
+        <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span class="text-2xl">🎫</span>
+        </div>
+      <% end %>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-foreground mb-1 truncate"><%= @attraction.name %></h3>
+        <p class="text-sm text-foreground-secondary mb-1"><%= @ticket.name %></p>
+        <p class="text-xs text-foreground-muted">游玩日期：<%= @visit_date.strftime('%Y年%m月%d日') %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier List -->
+  <div class="p-4">
+    <% if @ticket_suppliers.any? %>
+      <div class="space-y-3">
+        <% @ticket_suppliers.each do |ticket_supplier| %>
+          <% supplier = ticket_supplier.supplier %>
+          <%= link_to new_ticket_ticket_order_path(
+                @ticket, 
+                supplier_id: supplier.id, 
+                visit_date: @visit_date
+              ), 
+              class: "block border border-border rounded-lg p-4 hover:border-primary transition-colors bg-surface" do %>
+            
+            <!-- Supplier Header -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="font-semibold text-foreground"><%= supplier.name %></h4>
+                  <% if supplier.supplier_type == 'official' %>
+                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">官方</span>
+                  <% else %>
+                    <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">代理</span>
+                  <% end %>
+                </div>
+                <% if supplier.description.present? %>
+                  <p class="text-xs text-foreground-muted mb-2"><%= supplier.description %></p>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Rating and Sales -->
+            <div class="flex items-center gap-4 mb-3">
+              <% if supplier.rating && supplier.rating > 0 %>
+                <div class="flex items-center gap-1">
+                  <span class="text-sm font-semibold text-accent"><%= supplier.rating %></span>
+                  <div class="flex">
+                    <% 5.times do |i| %>
+                      <svg class="w-3 h-3 <%= i < supplier.rating.floor ? 'text-accent' : 'text-border' %>" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+              <% if ticket_supplier.sales_count > 0 %>
+                <span class="text-xs text-foreground-muted">已售 <%= ticket_supplier.sales_count %></span>
+              <% end %>
+            </div>
+
+            <!-- Discount Info -->
+            <% if ticket_supplier.discount_info.present? %>
+              <div class="mb-3">
+                <span class="inline-block px-2 py-1 bg-red-50 text-red-600 text-xs rounded">
+                  <%= ticket_supplier.discount_info %>
+                </span>
+              </div>
+            <% end %>
+
+            <!-- Price Section -->
+            <div class="flex items-end justify-between pt-3 border-t border-border">
+              <div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-xs text-accent">¥</span>
+                  <span class="text-2xl font-bold text-accent"><%= ticket_supplier.current_price.to_i %></span>
+                </div>
+                <% if ticket_supplier.original_price && ticket_supplier.original_price > ticket_supplier.current_price %>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-foreground-muted line-through">¥<%= ticket_supplier.original_price.to_i %></span>
+                    <span class="text-xs text-red-600">省¥<%= (ticket_supplier.original_price - ticket_supplier.current_price).to_i %></span>
+                  </div>
+                <% end %>
+              </div>
+              <div class="btn-primary px-6 py-2 text-sm">
+                立即预订
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="bg-surface p-8 rounded-lg text-center">
+        <div class="text-4xl mb-2">🏪</div>
+        <p class="text-foreground-muted mb-4">暂无供应商</p>
+        <%= link_to "返回选择", select_ticket_path(@ticket), class: "btn-primary inline-block px-6 py-2" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Tips Section -->
+  <div class="px-4 pb-4">
+    <div class="bg-blue-50 rounded-lg p-4">
+      <div class="flex items-start gap-2">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div class="text-xs text-blue-800">
+          <p class="font-semibold mb-1">购票提示</p>
+          <p>不同供应商提供相同门票，但价格和服务可能有所差异。官方旗舰店服务更有保障，代理商价格更优惠。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

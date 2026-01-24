@@ -1,0 +1,159 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">填写订单</h1>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @order, url: attraction_activity_activity_orders_path(@activity), method: :post, local: true, data: { turbo: false }, class: "space-y-4 p-4" do |f| %>
+    <!-- Activity Info -->
+    <div class="bg-surface p-4 rounded-lg">
+      <h3 class="text-base font-semibold text-foreground mb-3"><%= @attraction.name %></h3>
+      <h4 class="font-semibold text-foreground-secondary mb-2"><%= @activity.name %></h4>
+      <% if @activity.duration.present? %>
+        <p class="text-sm text-foreground-muted mb-2">时长：<%= @activity.duration %></p>
+      <% end %>
+      <div class="flex items-baseline gap-1">
+        <span class="text-xs text-accent">¥</span>
+        <span class="text-2xl font-bold text-accent"><%= @activity.current_price.to_i %></span>
+        <span class="text-sm text-foreground-muted">/人</span>
+      </div>
+    </div>
+
+    <!-- Visitor Info -->
+    <div class="bg-surface p-4 rounded-lg">
+      <h3 class="text-base font-semibold text-foreground mb-4">游客信息</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <%= f.label :passenger_name, "姓名", class: "block text-sm font-medium text-foreground mb-2" %>
+          <%= f.text_field :passenger_name, 
+              placeholder: "请输入姓名",
+              required: true,
+              class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+        </div>
+
+        <div>
+          <%= f.label :contact_phone, "联系电话", class: "block text-sm font-medium text-foreground mb-2" %>
+          <%= f.text_field :contact_phone, 
+              placeholder: "请输入手机号码",
+              required: true,
+              pattern: "[0-9]{11}",
+              type: "tel",
+              class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+        </div>
+
+        <div>
+          <%= f.label :visit_date, "游玩日期", class: "block text-sm font-medium text-foreground mb-2" %>
+          <%= f.date_field :visit_date, 
+              required: true,
+              min: Date.today,
+              class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+        </div>
+
+        <div>
+          <%= f.label :quantity, "购买数量", class: "block text-sm font-medium text-foreground mb-2" %>
+          <div class="flex items-center gap-4">
+            <button type="button" onclick="decreaseQuantity()" class="w-10 h-10 border border-border rounded-lg flex items-center justify-center text-xl font-bold hover:bg-surface-secondary">
+              -
+            </button>
+            <%= f.number_field :quantity, 
+                value: 1,
+                min: 1,
+                max: 99,
+                required: true,
+                id: "quantity_field",
+                onchange: "updateTotalPrice()",
+                class: "flex-1 px-4 py-3 border border-border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary" %>
+            <button type="button" onclick="increaseQuantity()" class="w-10 h-10 border border-border rounded-lg flex items-center justify-center text-xl font-bold hover:bg-surface-secondary">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <%= f.label :notes, "备注（选填）", class: "block text-sm font-medium text-foreground mb-2" %>
+          <%= f.text_area :notes, 
+              placeholder: "如有特殊需求请在此说明",
+              rows: 3,
+              class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Messages -->
+    <% if @order.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-red-800 mb-2">订单提交失败：</h3>
+        <ul class="text-sm text-red-600 space-y-1">
+          <% @order.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Price Summary -->
+    <div class="bg-surface p-4 rounded-lg">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-foreground-secondary">项目单价</span>
+        <span class="text-foreground">¥<%= @activity.current_price.to_i %></span>
+      </div>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-foreground-secondary">购买数量</span>
+        <span class="text-foreground" id="quantity_display">1</span>
+      </div>
+      <div class="border-t border-border pt-2 mt-2">
+        <div class="flex items-center justify-between">
+          <span class="text-base font-semibold text-foreground">合计</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-sm text-accent">¥</span>
+            <span class="text-2xl font-bold text-accent" id="total_price"><%= @activity.current_price.to_i %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4">
+      <%= f.submit "提交订单", class: "btn-primary w-full py-4 text-lg font-bold cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  const unitPrice = <%= @activity.current_price.to_i %>;
+  
+  function updateTotalPrice() {
+    const quantity = parseInt(document.getElementById('quantity_field').value) || 1;
+    const total = unitPrice * quantity;
+    document.getElementById('total_price').textContent = total;
+    document.getElementById('quantity_display').textContent = quantity;
+  }
+  
+  function increaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue < 99) {
+      field.value = currentValue + 1;
+      updateTotalPrice();
+    }
+  }
+  
+  function decreaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue > 1) {
+      field.value = currentValue - 1;
+      updateTotalPrice();
+    }
+  }
+</script>
