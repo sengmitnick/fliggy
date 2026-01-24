@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background pb-20">
+<div class="min-h-screen bg-background pb-20" data-controller="activity-order payment-confirmation">
   <!-- Top Navigation -->
   <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
     <div class="flex items-center justify-between px-4 h-14">
@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <%= form_with model: @order, url: attraction_activity_activity_orders_path(@activity), method: :post, local: true, data: { turbo: false } do |f| %>
+  <%= form_with model: @order, url: attraction_activity_activity_orders_path(@activity), method: :post, local: true, data: { activity_order_target: "form", turbo: false } do |f| %>
     <!-- Activity Info -->
     <div class="bg-surface p-4 border-b border-border">
       <div class="flex items-start gap-3">
@@ -152,8 +152,8 @@
       </div>
       <div class="px-4 py-4 space-y-4">
         <!-- No Insurance Option -->
-        <label class="flex items-start gap-3 cursor-pointer">
-          <input type="radio" name="activity_order[insurance_type]" value="none" 
+        <label class="flex items-start gap-3 cursor-pointer" for="insurance_none">
+          <input type="radio" id="insurance_none" name="activity_order[insurance_type]" value="none" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="0">
           <div class="flex-1">
@@ -168,8 +168,8 @@
         </label>
 
         <!-- Basic Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5">
-          <input type="radio" name="activity_order[insurance_type]" value="basic" 
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_basic">
+          <input type="radio" id="insurance_basic" name="activity_order[insurance_type]" value="basic" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="9">
           <div class="flex-1">
@@ -202,8 +202,8 @@
         </label>
 
         <!-- Premium Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5">
-          <input type="radio" name="activity_order[insurance_type]" value="premium" checked
+        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5" for="insurance_premium">
+          <input type="radio" id="insurance_premium" name="activity_order[insurance_type]" value="premium" checked
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="15">
           <div class="flex-1">
@@ -266,22 +266,46 @@
         <span class="text-2xl font-bold text-accent" id="total_price"><%= @activity.current_price.to_i %></span>
       </div>
     </div>
-    <button type="submit" 
-            form="<%= dom_id(@order) %>"
+    <!-- Hidden price elements for Stimulus controller -->
+    <span id="base_price_display" style="display:none;"><%= @activity.current_price.to_i %></span>
+    <span id="insurance_price_display" style="display:none;">15</span>
+    <span id="total_price_display" style="display:none;"><%= @activity.current_price.to_i + 15 %></span>
+    
+    <button type="button" 
+            data-activity-order-target="submitButton"
+            data-action="click->activity-order#submit"
             class="btn-primary w-full py-4 text-base font-bold">
       去付款
     </button>
   </div>
+
+  <%= render 'shared/payment_confirmation_modals' %>
 </div>
 
 <script>
   const unitPrice = <%= @activity.current_price.to_i %>;
   
   function updateTotalPrice() {
+    console.log('=== updateTotalPrice 被调用 ===');
+    
     const quantity = parseInt(document.getElementById('quantity_field').value) || 1;
+    console.log('数量:', quantity);
+    
+    const insuranceRadios = document.querySelectorAll('input[name="activity_order[insurance_type]"]');
+    console.log('找到的保险radio数量:', insuranceRadios.length);
+    
     const checkedInsurance = document.querySelector('input[name="activity_order[insurance_type]"]:checked');
+    console.log('选中的保险元素:', checkedInsurance);
+    console.log('选中的保险value:', checkedInsurance?.value);
+    console.log('选中的保险data-price:', checkedInsurance?.dataset?.price);
+    console.log('选中的保险getAttribute(data-price):', checkedInsurance?.getAttribute('data-price'));
+    
     const insurancePrice = parseInt(checkedInsurance?.dataset.price || 0);
-    const total = (unitPrice * quantity) + (insurancePrice * quantity);
+    console.log('解析后的保险价格:', insurancePrice);
+    
+    const basePrice = unitPrice * quantity;
+    const totalInsurancePrice = insurancePrice * quantity;
+    const total = basePrice + totalInsurancePrice;
     
     console.log('价格计算:', {
       unitPrice,
@@ -291,8 +315,27 @@
       total: `${unitPrice} * ${quantity} + ${insurancePrice} * ${quantity} = ${total}`
     });
     
-    document.getElementById('total_price').textContent = total;
+    // Update visible total price
+    const totalPriceElement = document.getElementById('total_price');
+    console.log('total_price元素:', totalPriceElement);
+    if (totalPriceElement) {
+      totalPriceElement.textContent = total;
+      console.log('已更新total_price为:', total);
+    } else {
+      console.error('找不到total_price元素！');
+    }
+    
+    // Update hidden elements for Stimulus controller
+    const basePriceDisplay = document.getElementById('base_price_display');
+    const insurancePriceDisplay = document.getElementById('insurance_price_display');
+    const totalPriceDisplay = document.getElementById('total_price_display');
+    
+    if (basePriceDisplay) basePriceDisplay.textContent = basePrice;
+    if (insurancePriceDisplay) insurancePriceDisplay.textContent = totalInsurancePrice;
+    if (totalPriceDisplay) totalPriceDisplay.textContent = total;
+    
     document.getElementById('required_passenger_count').textContent = quantity;
+    console.log('=== updateTotalPrice 完成 ===\n');
   }
   
   function increaseQuantity() {
@@ -314,7 +357,7 @@
   }
 
   // Handle passenger checkbox selection UI
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('turbo:load', function() {
     const passengerCheckboxes = document.querySelectorAll('input[name="activity_order[passenger_ids][]"]');
     const quantityField = document.getElementById('quantity_field');
     
@@ -342,6 +385,12 @@
     
     // Initial price calculation on page load
     console.log('页面加载完成，初始化价格计算');
+    updateTotalPrice();
+  });
+  
+  // Also run on DOMContentLoaded for non-Turbo navigation
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded触发');
     updateTotalPrice();
   });
 </script>
