@@ -22,7 +22,7 @@ plugins {
 
 def twaManifest = [
     applicationId: 'ai.clacky.trip01',
-    hostName: '3000-90fed8d41add-web.clackypaas.com', // The domain being opened in the TWA.
+    hostName: 'localhost', // 占位符，运行时会被动态配置覆盖
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: '旅游环境01', // The application name.
     launcherName: '旅游环境01', // The name shown on the Android Launcher.

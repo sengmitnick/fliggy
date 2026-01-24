@@ -15,74 +15,34 @@
  */
 package ai.clacky.trip01;
 
-import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.os.Build;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
-
-
-public class LauncherActivity
-        extends com.google.androidbrowserhelper.trusted.LauncherActivity {
+/**
+ * LauncherActivity - 启动器
+ * 简单的跳转器，直接启动 CustomWebViewFallbackActivity
+ */
+public class LauncherActivity extends Activity {
 
     private static final String TAG = "LauncherActivity";
-    private static final int TIMEOUT_MS = 10000; // 10 秒超时
-    private Handler timeoutHandler = new Handler();
-    private boolean isLaunched = false;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: Starting LauncherActivity");
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: Starting LauncherActivity");
 
-        // 设置超时保护
-        timeoutHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isLaunched) {
-                    Log.e(TAG, "Launch timeout, finishing activity");
-                    finish();
-                }
-            }
-        }, TIMEOUT_MS);
+        // 直接启动全屏 WebView Activity
+        Intent intent = new Intent(this, CustomWebViewFallbackActivity.class);
 
-        // Setting an orientation crashes the app due to the transparent background on Android 8.0
-        // Oreo and below. We only set the orientation on Oreo and above. This only affects the
-        // splash screen and Chrome will still respect the orientation.
-        // See https://github.com/GoogleChromeLabs/bubblewrap/issues/496 for details.
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        // 传递 Intent Data（支持 Deeplink 参数）
+        if (getIntent().getData() != null) {
+            intent.setData(getIntent().getData());
+            Log.d(TAG, "Passing deeplink data: " + getIntent().getData());
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        isLaunched = true;
-        timeoutHandler.removeCallbacksAndMessages(null);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        timeoutHandler.removeCallbacksAndMessages(null);
-    }
-
-    @Override
-    protected Uri getLaunchingUrl() {
-        // Get the original launch Url.
-        Uri uri = super.getLaunchingUrl();
-
-        
-
-        return uri;
+        startActivity(intent);
+        finish();
     }
 }

@@ -22,15 +22,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ai.clacky.trip01">
 
-    
+    <!-- 网络权限（WebView 必需） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    
 
-    
 
-    
 
-    
+
+
+
+
 
     <application
         android:name="Application"
@@ -77,93 +81,25 @@
             </activity>
         
 
-        <activity android:name="LauncherActivity"
-            android:alwaysRetainTaskState="true"
+        <!-- LauncherActivity: 简单的启动器，直接跳转到 WebView -->
+        <activity android:name=".LauncherActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:label="@string/launcherName"
             android:exported="true">
-            <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                android:value="@string/launchUrl" />
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
-                android:resource="@color/colorPrimary" />
-
-            
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
-                android:resource="@color/colorPrimaryDark" />
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
-                android:resource="@color/navigationColor" />
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
-                android:resource="@color/navigationColorDark" />
-
-            <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
-                android:resource="@color/navigationDividerColor" />
-
-            <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
-                android:resource="@color/navigationDividerColorDark" />
-
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@drawable/splash"/>
-
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
-                android:resource="@color/backgroundColor"/>
-
-            <meta-data android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="@integer/splashScreenFadeOutDuration"/>
-
-            <meta-data android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
-                android:value="@string/providerAuthority"/>
-
-            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
-
-            <meta-data android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
-                android:value="@string/fallbackType" />
-
-            
-
-            
-
-            <meta-data android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
-                android:value="@string/orientation"/>
-
-            
-
-            
-
-            
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- 支持自定义 Deeplink -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"
-                    android:host="@string/hostName"
-
-                />
-            </intent-filter>
-
-            <!-- 支持 HTTP（用于内网/测试环境） -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="http"
-                    android:host="@string/hostName"
-
-                />
+                <data
+                    android:scheme="ai.clacky.trip01"
+                    android:host="" />
             </intent-filter>
 
             
@@ -173,8 +109,17 @@
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
 
-        <activity android:name="com.google.androidbrowserhelper.trusted.WebViewFallbackActivity"
-            android:configChanges="orientation|screenSize" />
+        <!-- 自定义 WebView Fallback（全屏，无地址栏） -->
+        <activity android:name=".CustomWebViewFallbackActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:hardwareAccelerated="true"
+            android:exported="false">
+            <!-- 注册为 WebView Fallback 处理器 -->
+            <intent-filter>
+                <action android:name="android.support.customtabs.action.CustomTabsService" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
