@@ -1,0 +1,115 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">订单详情</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 space-y-4">
+    <!-- Order Status -->
+    <div class="bg-surface p-6 rounded-lg text-center">
+      <% if @order.status == 'paid' || @order.status == 'confirmed' || @order.status == 'completed' %>
+        <div class="text-6xl mb-3">✅</div>
+        <h2 class="text-xl font-bold text-foreground mb-2">订单已创建</h2>
+      <% elsif @order.status == 'cancelled' || @order.status == 'refunded' %>
+        <div class="text-6xl mb-3">❌</div>
+        <h2 class="text-xl font-bold text-foreground mb-2">订单已取消</h2>
+      <% else %>
+        <div class="text-6xl mb-3">⏳</div>
+        <h2 class="text-xl font-bold text-foreground mb-2">等待支付</h2>
+      <% end %>
+      <p class="text-sm text-foreground-muted">订单号：<%= @order.order_number %></p>
+    </div>
+
+    <!-- Order Info -->
+    <div class="bg-surface p-4 rounded-lg">
+      <h3 class="text-base font-semibold text-foreground mb-3"><%= @attraction.name %></h3>
+      <h4 class="font-semibold text-foreground-secondary mb-3"><%= @ticket.name %></h4>
+      
+      <div class="space-y-2 text-sm">
+        <% if @order.passenger %>
+          <div class="flex justify-between">
+            <span class="text-foreground-muted">出行人</span>
+            <span class="text-foreground"><%= @order.passenger.name %></span>
+          </div>
+        <% end %>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">联系电话</span>
+          <span class="text-foreground"><%= @order.contact_phone %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">游玩日期</span>
+          <span class="text-foreground"><%= @order.visit_date.strftime('%Y年%m月%d日') %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">购买数量</span>
+          <span class="text-foreground"><%= @order.quantity %>张</span>
+        </div>
+        <% if @order.supplier %>
+          <div class="flex justify-between">
+            <span class="text-foreground-muted">供应商</span>
+            <span class="text-foreground"><%= @order.supplier.name %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Price Info -->
+    <div class="bg-surface p-4 rounded-lg">
+      <h3 class="text-base font-semibold text-foreground mb-3">费用明细</h3>
+      
+      <div class="space-y-2 text-sm mb-3">
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">门票单价</span>
+          <span class="text-foreground">¥<%= @ticket.current_price.to_i %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-foreground-muted">购买数量</span>
+          <span class="text-foreground">×<%= @order.quantity %></span>
+        </div>
+      </div>
+      
+      <div class="border-t border-border pt-3">
+        <div class="flex items-center justify-between">
+          <span class="text-base font-semibold text-foreground">订单总额</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-sm text-accent">¥</span>
+            <span class="text-2xl font-bold text-accent"><%= @order.total_price.to_i %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Time -->
+    <div class="bg-surface p-4 rounded-lg">
+      <div class="text-sm text-foreground-muted">
+        下单时间：<%= @order.created_at.strftime('%Y-%m-%d %H:%M:%S') %>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <% if @order.status == 'pending' %>
+      <div class="space-y-3">
+        <button type="button" class="btn-primary w-full py-4 text-lg font-bold">
+          立即支付
+        </button>
+        <button type="button" onclick="if(confirm('确定要取消订单吗？')) { /* TODO: 取消订单逻辑 */ }" class="btn-outline w-full py-4 text-lg font-bold">
+          取消订单
+        </button>
+      </div>
+    <% end %>
+
+    <!-- Back Button -->
+    <div class="pt-2">
+      <%= link_to "返回景点详情", attraction_path(@attraction), class: "btn-outline w-full py-3 text-center block" %>
+    </div>
+  </div>
+</div>

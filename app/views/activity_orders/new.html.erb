@@ -1,0 +1,396 @@
+<div class="min-h-screen bg-background pb-20" data-controller="activity-order payment-confirmation">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">填写订单</h1>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @order, url: attraction_activity_activity_orders_path(@activity), method: :post, local: true, data: { activity_order_target: "form", turbo: false } do |f| %>
+    <!-- Activity Info -->
+    <div class="bg-surface p-4 border-b border-border">
+      <div class="flex items-start gap-3">
+        <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span class="text-2xl">🎨</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-foreground mb-1 truncate"><%= @attraction.name %></h3>
+          <p class="text-sm text-foreground-secondary mb-1"><%= @activity.name %></p>
+          <% if @activity.duration.present? %>
+            <p class="text-xs text-foreground-muted">时长：<%= @activity.duration %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visit Date -->
+    <div class="mt-2 bg-surface px-4 py-4">
+      <label class="block text-base font-semibold text-foreground mb-3">游玩日期</label>
+      <%= f.date_field :visit_date,
+          value: Date.tomorrow,
+          min: Date.today,
+          required: true,
+          class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      <p class="text-xs text-foreground-muted mt-2">请选择您计划游玩的日期</p>
+    </div>
+
+    <!-- Quantity -->
+    <div class="mt-2 bg-surface">
+      <div class="px-4 py-3 border-b border-border">
+        <h3 class="font-semibold text-foreground">购买数量</h3>
+      </div>
+      <div class="px-4 py-4">
+        <div class="flex items-center justify-between">
+          <span class="text-foreground">数量</span>
+          <div class="flex items-center gap-4">
+            <button type="button" onclick="decreaseQuantity()" class="w-6 h-6 flex items-center justify-center text-foreground-secondary hover:text-foreground">-</button>
+            <%= f.number_field :quantity,
+                value: 1,
+                min: 1,
+                max: 99,
+                required: true,
+                id: "quantity_field",
+                onchange: "updateTotalPrice()",
+                class: "w-8 text-center border-none p-0 focus:outline-none focus:ring-0" %>
+            <button type="button" onclick="increaseQuantity()" class="w-6 h-6 flex items-center justify-center text-foreground-secondary hover:text-foreground">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passenger Selection -->
+    <div class="mt-2 bg-surface">
+      <div class="px-4 py-3 border-b border-border">
+        <h3 class="font-semibold text-foreground">选择 <span id="required_passenger_count">1</span> 位游客</h3>
+      </div>
+
+      <div class="divide-y divide-border">
+        <% if @passengers.any? %>
+          <% @passengers.each_with_index do |passenger, index| %>
+            <label class="flex items-center gap-3 px-4 py-4 cursor-pointer hover:bg-surface-secondary active:bg-surface-secondary">
+              <div class="flex items-center justify-center w-6 h-6">
+                <%= f.check_box :passenger_ids, 
+                    { multiple: true, id: "passenger_#{passenger.id}", class: "w-5 h-5 text-accent border-border focus:ring-accent cursor-pointer" }, 
+                    passenger.id, 
+                    nil %>
+              </div>
+              <div class="flex items-center justify-center w-10 h-10 bg-surface-secondary rounded-full text-lg">
+                👤
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-medium text-foreground"><%= passenger.name %></span>
+                  <% if passenger.is_self %>
+                    <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded">本人</span>
+                  <% end %>
+                </div>
+                <p class="text-sm text-foreground-muted">身份证 <%= passenger.id_number.gsub(/(.{6})(.*)(.{4})/, '\1****\3') %></p>
+              </div>
+            </label>
+          <% end %>
+
+          <!-- Add New Passenger Button -->
+          <div class="px-4 py-4">
+            <%= link_to new_passenger_path, class: "w-full flex items-center justify-center gap-2 py-3 bg-accent/5 text-accent rounded-lg hover:bg-accent/10" do %>
+              <span class="text-xl">+</span>
+              <span class="font-medium">更多出行人</span>
+            <% end %>
+          </div>
+        <% else %>
+          <!-- No passengers - must add new -->
+          <div class="px-4 py-8 text-center">
+            <div class="text-5xl mb-4">👤</div>
+            <p class="text-foreground-secondary mb-4">暂无出行人信息</p>
+            <%= link_to "添加出行人", new_passenger_path, class: "btn-primary inline-block px-6 py-3" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Contact Phone -->
+    <!-- stimulus-validator: disable-next-line -->
+    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector">
+      <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
+      <div class="flex items-center gap-2">
+        <select class="w-20 px-2 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm">
+          <option value="+86">+86</option>
+          <option value="+852">+852</option>
+          <option value="+853">+853</option>
+          <option value="+886">+886</option>
+        </select>
+        <%= f.text_field :contact_phone, 
+            placeholder: "18027128600",
+            required: true,
+            pattern: "[0-9]{11}",
+            type: "tel",
+            value: @passengers.find(&:is_self)&.phone || @passengers.first&.phone,
+            data: { "contact-selector-target": "contactPhoneInput" },
+            class: "flex-1 min-w-0 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" %>
+        <button type="button" 
+                class="p-2.5 border border-border rounded-lg shrink-0"
+                data-action="click->contact-selector#openModal">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <%= render 'shared/contact_selector_modal' %>
+    </div>
+
+    <!-- Insurance Options -->
+    <div class="mt-2 bg-surface">
+      <div class="bg-accent/10 px-4 py-1.5">
+        <span class="text-xs text-accent font-medium">玩乐综合保障</span>
+      </div>
+      <div class="px-4 py-4 space-y-4">
+        <!-- No Insurance Option -->
+        <label class="flex items-start gap-3 cursor-pointer" for="insurance_none">
+          <input type="radio" id="insurance_none" name="activity_order[insurance_type]" value="none" 
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="0">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-foreground">无保障</span>
+              <span class="px-2 py-0.5 bg-surface-secondary text-foreground-muted text-xs rounded">放弃保障</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground-secondary">
+              <span>无保障</span>
+            </div>
+          </div>
+        </label>
+
+        <!-- Basic Insurance -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_basic">
+          <input type="radio" id="insurance_basic" name="activity_order[insurance_type]" value="basic" 
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="9">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-foreground">基础保障</span>
+                <span class="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded">高性价比</span>
+              </div>
+              <span class="text-accent font-bold">¥9/人</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>意外保障 ¥ 30万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>医疗报销 ¥ 5万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>财物损失 ¥ 1000</span>
+            </div>
+          </div>
+        </label>
+
+        <!-- Premium Insurance -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5" for="insurance_premium">
+          <input type="radio" id="insurance_premium" name="activity_order[insurance_type]" value="premium" checked
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="15">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-foreground">升级保障</span>
+                <span class="px-2 py-0.5 bg-accent text-white text-xs rounded">经典爆款</span>
+              </div>
+              <span class="text-accent font-bold">¥15/人</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>意外保障 ¥ 50万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>医疗报销 ¥ 10万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>财物损失 ¥ 2000</span>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Insurance Notice -->
+      <div class="px-4 pb-4">
+        <div class="text-xs text-foreground-muted leading-relaxed">
+          <span class="font-medium text-foreground">明亚保险经纪</span> 本模块为保险投保页面，由明亚保险经纪股份有限公司管理运营。
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="mt-2 bg-surface px-4 py-4">
+      <label class="block text-base font-semibold text-foreground mb-3">备注（选填）</label>
+      <%= f.text_area :notes, 
+          placeholder: "如有特殊需求请在此说明",
+          rows: 3,
+          class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+    </div>
+
+    <!-- Error Messages -->
+    <%= render 'shared/form_error_message', model: @order %>
+  <% end %>
+
+  <!-- Bottom Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border px-4 py-3 z-40">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm text-foreground-secondary">合计</span>
+      <div class="flex items-baseline gap-1">
+        <span class="text-xs text-accent">¥</span>
+        <span class="text-2xl font-bold text-accent" id="total_price"><%= @activity.current_price.to_i %></span>
+      </div>
+    </div>
+    <!-- Hidden price elements for Stimulus controller -->
+    <span id="base_price_display" style="display:none;"><%= @activity.current_price.to_i %></span>
+    <span id="insurance_price_display" style="display:none;">15</span>
+    <span id="total_price_display" style="display:none;"><%= @activity.current_price.to_i + 15 %></span>
+    
+    <button type="button" 
+            data-activity-order-target="submitButton"
+            data-action="click->activity-order#submit"
+            class="btn-primary w-full py-4 text-base font-bold">
+      去付款
+    </button>
+  </div>
+
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>
+
+<script>
+  const unitPrice = <%= @activity.current_price.to_i %>;
+  
+  function updateTotalPrice() {
+    console.log('=== updateTotalPrice 被调用 ===');
+    
+    const quantity = parseInt(document.getElementById('quantity_field').value) || 1;
+    console.log('数量:', quantity);
+    
+    const insuranceRadios = document.querySelectorAll('input[name="activity_order[insurance_type]"]');
+    console.log('找到的保险radio数量:', insuranceRadios.length);
+    
+    const checkedInsurance = document.querySelector('input[name="activity_order[insurance_type]"]:checked');
+    console.log('选中的保险元素:', checkedInsurance);
+    console.log('选中的保险value:', checkedInsurance?.value);
+    console.log('选中的保险data-price:', checkedInsurance?.dataset?.price);
+    console.log('选中的保险getAttribute(data-price):', checkedInsurance?.getAttribute('data-price'));
+    
+    const insurancePrice = parseInt(checkedInsurance?.dataset.price || 0);
+    console.log('解析后的保险价格:', insurancePrice);
+    
+    const basePrice = unitPrice * quantity;
+    const totalInsurancePrice = insurancePrice * quantity;
+    const total = basePrice + totalInsurancePrice;
+    
+    console.log('价格计算:', {
+      unitPrice,
+      quantity,
+      insuranceValue: checkedInsurance?.value,
+      insurancePrice,
+      total: `${unitPrice} * ${quantity} + ${insurancePrice} * ${quantity} = ${total}`
+    });
+    
+    // Update visible total price
+    const totalPriceElement = document.getElementById('total_price');
+    console.log('total_price元素:', totalPriceElement);
+    if (totalPriceElement) {
+      totalPriceElement.textContent = total;
+      console.log('已更新total_price为:', total);
+    } else {
+      console.error('找不到total_price元素！');
+    }
+    
+    // Update hidden elements for Stimulus controller
+    const basePriceDisplay = document.getElementById('base_price_display');
+    const insurancePriceDisplay = document.getElementById('insurance_price_display');
+    const totalPriceDisplay = document.getElementById('total_price_display');
+    
+    if (basePriceDisplay) basePriceDisplay.textContent = basePrice;
+    if (insurancePriceDisplay) insurancePriceDisplay.textContent = totalInsurancePrice;
+    if (totalPriceDisplay) totalPriceDisplay.textContent = total;
+    
+    document.getElementById('required_passenger_count').textContent = quantity;
+    console.log('=== updateTotalPrice 完成 ===\n');
+  }
+  
+  function increaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue < 99) {
+      field.value = currentValue + 1;
+      updateTotalPrice();
+    }
+  }
+  
+  function decreaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue > 1) {
+      field.value = currentValue - 1;
+      updateTotalPrice();
+    }
+  }
+
+  // Handle passenger checkbox selection UI
+  document.addEventListener('turbo:load', function() {
+    const passengerCheckboxes = document.querySelectorAll('input[name="activity_order[passenger_ids][]"]');
+    const quantityField = document.getElementById('quantity_field');
+    
+    // Validate selection count
+    passengerCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const selectedCount = document.querySelectorAll('input[name="activity_order[passenger_ids][]"]:checked').length;
+        const requiredCount = parseInt(quantityField.value) || 1;
+        
+        if (selectedCount > requiredCount) {
+          alert(`最多只能选择 ${requiredCount} 位出行人`);
+          this.checked = false;
+        }
+      });
+    });
+
+    // Handle insurance selection price update
+    const insuranceRadios = document.querySelectorAll('input[name="activity_order[insurance_type]"]');
+    insuranceRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        console.log('保险选项变化:', this.value, 'price:', this.dataset.price);
+        updateTotalPrice();
+      });
+    });
+    
+    // Initial price calculation on page load
+    console.log('页面加载完成，初始化价格计算');
+    updateTotalPrice();
+  });
+  
+  // Also run on DOMContentLoaded for non-Turbo navigation
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded触发');
+    updateTotalPrice();
+  });
+</script>

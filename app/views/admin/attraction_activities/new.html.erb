@@ -1,0 +1,185 @@
+<% content_for :title, "New Attraction activity" %>
+
+<div class="container-md">
+  <div class="flex items-center space-x-4">
+    <%= link_to admin_attraction_activities_path, class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Attraction activities
+    <% end %>
+  </div>
+
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4 mb-8">Create New Attraction activity</h1>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @attraction_activity], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @attraction_activity %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@attraction_activity, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :name) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Activity type -->
+        <div class="mb-4">
+          <%= form.label :activity_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Activity type<% if field_required?(@attraction_activity, :activity_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :activity_type, {
+            placeholder: "Enter activity type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :activity_type) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:activity_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:activity_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@attraction_activity, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :original_price) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Current price -->
+        <div class="mb-4">
+          <%= form.label :current_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Current price<% if field_required?(@attraction_activity, :current_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :current_price, {
+            placeholder: "Enter current price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :current_price) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:current_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:current_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Discount info -->
+        <div class="mb-4">
+          <%= form.label :discount_info, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Discount info<% if field_required?(@attraction_activity, :discount_info) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :discount_info, {
+            placeholder: "Enter discount info...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :discount_info) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:discount_info].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:discount_info].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Refund policy -->
+        <div class="mb-4">
+          <%= form.label :refund_policy, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Refund policy<% if field_required?(@attraction_activity, :refund_policy) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :refund_policy, {
+            placeholder: "Enter refund policy...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :refund_policy) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:refund_policy].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:refund_policy].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Description<% if field_required?(@attraction_activity, :description) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :description, {
+            rows: 5,
+            placeholder: "Enter description...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :description) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:description].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:description].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Duration -->
+        <div class="mb-4">
+          <%= form.label :duration, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Duration<% if field_required?(@attraction_activity, :duration) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :duration, {
+            placeholder: "Enter duration...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :duration) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:duration].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:duration].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Sales count -->
+        <div class="mb-4">
+          <%= form.label :sales_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Sales count<% if field_required?(@attraction_activity, :sales_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :sales_count, {
+            placeholder: "Enter sales count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@attraction_activity, :sales_count) ? { required: true } : {}) %>
+          <% if @attraction_activity.errors[:sales_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:sales_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Attraction -->
+        <div class="mb-4">
+          <%= form.label :attraction_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Attraction<% if field_required?(@attraction_activity, :attraction) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :attraction_id, 
+              options_for_select([['Select Attraction', '']] + Attraction.all.map { |item| [item.name, item.id] }, @attraction_activity.attraction_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @attraction_activity.errors[:attraction_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:attraction_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+          <%= form.label :image, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image
+          <% end %>
+          <%= form.file_field :image, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <% if @attraction_activity.errors[:image].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @attraction_activity.errors[:image].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_attraction_activities_path, class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Create Attraction activity", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

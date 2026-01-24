@@ -1,0 +1,71 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">编辑出行人</h1>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @traveler, url: traveler_path(@traveler), method: :patch, local: true, data: { turbo: false }, class: "p-4 space-y-4" do |f| %>
+    <!-- Form Fields -->
+    <div class="bg-surface p-4 rounded-lg space-y-4">
+      <div>
+        <%= f.label :name, "姓名", class: "block text-sm font-medium text-foreground mb-2" %>
+        <%= f.text_field :name,
+            placeholder: "请输入姓名",
+            required: true,
+            class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      </div>
+
+      <div>
+        <%= f.label :id_type, "证件类型", class: "block text-sm font-medium text-foreground mb-2" %>
+        <%= f.select :id_type,
+            [['身份证', 'id_card'], ['护照', 'passport']],
+            {},
+            required: true,
+            class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      </div>
+
+      <div>
+        <%= f.label :id_number, "证件号码", class: "block text-sm font-medium text-foreground mb-2" %>
+        <%= f.text_field :id_number,
+            placeholder: "请输入证件号码",
+            required: true,
+            class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      </div>
+
+      <div>
+        <%= f.label :phone, "手机号", class: "block text-sm font-medium text-foreground mb-2" %>
+        <%= f.text_field :phone,
+            placeholder: "请输入手机号",
+            required: true,
+            pattern: "[0-9]{11}",
+            type: "tel",
+            class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      </div>
+
+      <div class="pt-2">
+        <label class="flex items-center gap-3">
+          <%= f.check_box :is_default, class: "w-5 h-5 text-primary rounded focus:ring-primary" %>
+          <span class="text-sm text-foreground">设为默认出行人</span>
+        </label>
+        <p class="text-xs text-foreground-muted mt-1 ml-8">订票时将优先选择默认出行人</p>
+      </div>
+    </div>
+
+    <!-- Error Messages -->
+    <%= render 'shared/form_error_message', model: @traveler %>
+
+    <!-- Submit Button -->
+    <div class="pt-2">
+      <%= f.submit "保存", class: "btn-primary w-full py-4 text-lg font-bold cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

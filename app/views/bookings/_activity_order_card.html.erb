@@ -1,0 +1,101 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden mb-3">
+  <!-- Activity Order Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div class="flex items-center space-x-2">
+      <div class="w-6 h-6 bg-secondary/10 rounded flex items-center justify-center">
+        <svg class="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <span class="text-sm font-semibold text-text-primary"><%= booking.attraction_activity.attraction.name %></span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'cancelled' || booking.status == 'refunded' %>
+        <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded">已关闭</span>
+      <% elsif booking.status == 'pending' %>
+        <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded">待付款</span>
+      <% elsif booking.status == 'paid' || booking.status == 'confirmed' %>
+        <span class="px-2 py-1 bg-success/10 text-success text-xs rounded">预订成功</span>
+      <% elsif booking.status == 'completed' %>
+        <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">已完成</span>
+      <% end %>
+      <button type="button" class="text-text-muted">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Activity Order Details -->
+  <%= link_to activity_order_path(booking), class: "block" do %>
+    <div class="px-4 py-4">
+      <!-- Activity Info -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex-1">
+          <div class="text-text-primary text-lg font-bold mb-1">
+            <%= booking.attraction_activity.name %>
+          </div>
+          <div class="text-xs text-text-muted mb-2">
+            <%= booking.attraction_activity.attraction.city %> · <%= booking.attraction_activity.attraction.address %>
+          </div>
+          <div class="text-xs text-text-muted">
+            游玩日期: <%= booking.visit_date.strftime('%Y-%m-%d') %>(<%= ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][booking.visit_date.wday] %>)
+          </div>
+          <div class="text-xs text-text-muted mt-1">
+            数量: <%= booking.quantity %>张
+            <% if booking.passengers.any? %>
+              · 出行人: <%= booking.passengers.first.name %>
+              <% if booking.passengers.count > 1 %>
+                等<%= booking.passengers.count %>人
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
+        <span>联系电话: <%= booking.contact_phone %></span>
+      </div>
+
+      <!-- Services/Tags -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">景点门票</span>
+        <% if booking.insurance_type != 'none' %>
+          <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">
+            <%= booking.insurance_type == 'basic' ? '基础保险' : '高级保险' %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Price Section -->
+  <div class="px-4 py-3 bg-surface-elevated flex items-center justify-between">
+    <div>
+      <div class="text-text-muted text-xs mb-1">
+        <% if booking.status == 'cancelled' || booking.status == 'refunded' %>
+          未付款
+        <% else %>
+          实付款
+        <% end %>
+      </div>
+      <div class="flex items-baseline space-x-1">
+        <span class="text-xs text-text-primary">¥</span>
+        <span class="text-2xl font-bold text-primary"><%= sprintf('%.2f', booking.total_price) %></span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'paid' || booking.status == 'confirmed' || booking.status == 'completed' %>
+        <%= link_to '查看详情', activity_order_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '再来一单', new_attraction_activity_activity_order_path(booking.attraction_activity), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% elsif booking.status == 'cancelled' || booking.status == 'refunded' %>
+        <%= link_to '重新预订', new_attraction_activity_activity_order_path(booking.attraction_activity), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+      <% elsif booking.status == 'pending' %>
+        <%= link_to '取消订单', '#', class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '立即支付', activity_order_path(booking), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% end %>
+    </div>
+  </div>
+</div>

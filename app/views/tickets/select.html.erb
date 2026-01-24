@@ -1,0 +1,91 @@
+<div class="min-h-screen bg-background pb-20">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-foreground">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold text-foreground">选择门票</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attraction Info -->
+  <div class="bg-surface p-4 border-b border-border">
+    <h2 class="text-lg font-semibold text-foreground mb-1"><%= @attraction.name %></h2>
+    <% if @attraction.address.present? %>
+      <p class="text-sm text-foreground-muted">📍 <%= @attraction.address %></p>
+    <% end %>
+  </div>
+
+  <%= form_with url: suppliers_ticket_path(@ticket.id), method: :get, data: { turbo: false }, class: "space-y-4" do |f| %>
+    <!-- Visit Date Selection -->
+    <div class="bg-surface p-4">
+      <label class="block text-base font-semibold text-foreground mb-3">游玩日期</label>
+      <%= f.date_field :visit_date,
+          value: Date.tomorrow,
+          min: Date.today,
+          required: true,
+          class: "w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" %>
+      <p class="text-xs text-foreground-muted mt-2">请选择您计划游玩的日期</p>
+    </div>
+
+    <!-- Ticket Selection -->
+    <div class="bg-surface p-4">
+      <h3 class="text-base font-semibold text-foreground mb-3">选择门票</h3>
+      
+      <div class="space-y-3">
+        <% all_tickets = @adult_tickets + @child_tickets %>
+        <% all_tickets.each do |ticket| %>
+          <label class="block border border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+            <div class="flex items-start gap-3">
+              <%= f.radio_button :ticket_id, ticket.id, 
+                  checked: ticket.id == @ticket.id,
+                  class: "mt-1 w-5 h-5 text-primary focus:ring-primary" %>
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-2">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="font-semibold text-foreground"><%= ticket.name %></h4>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= ticket.ticket_type == 'adult' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' %>">
+                        <%= ticket.ticket_type == 'adult' ? '成人票' : '儿童票' %>
+                      </span>
+                    </div>
+                    <% if ticket.requirements.present? %>
+                      <p class="text-sm text-foreground-muted mt-1"><%= ticket.requirements %></p>
+                    <% end %>
+                  </div>
+                  <div class="text-right ml-4">
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-xs text-accent">¥</span>
+                      <span class="text-xl font-bold text-accent"><%= ticket.current_price.to_i %></span>
+                    </div>
+                    <% if ticket.original_price && ticket.original_price > ticket.current_price %>
+                      <div class="text-xs text-foreground-muted line-through">¥<%= ticket.original_price.to_i %></div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <% if @adult_tickets.empty? && @child_tickets.empty? %>
+      <div class="bg-surface p-8 text-center">
+        <div class="text-4xl mb-2">🎫</div>
+        <p class="text-foreground-muted">暂无可用门票</p>
+      </div>
+    <% end %>
+
+    <!-- Submit Button -->
+    <div class="px-4 pb-4">
+      <%= f.submit "立刻预订", class: "btn-primary w-full py-4 text-lg font-bold cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

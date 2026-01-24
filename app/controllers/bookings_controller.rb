@@ -61,6 +61,14 @@ class BookingsController < ApplicationController
       # Fetch charter bookings
       charter_bookings = current_user.charter_bookings.includes(:charter_route, :vehicle_type)
                                      .order(created_at: :desc)
+      
+      # Fetch activity orders
+      activity_orders = current_user.activity_orders.includes(attraction_activity: :attraction)
+                                    .order(created_at: :desc)
+      
+      # Fetch ticket orders
+      ticket_orders = current_user.ticket_orders.includes(ticket: :attraction)
+                                  .order(created_at: :desc)
     
     # Filter by status
     case @status_filter
@@ -79,6 +87,8 @@ class BookingsController < ApplicationController
       cruise_orders = cruise_orders.where(status: 'pending')
       insurance_orders = insurance_orders.where(status: 'pending')
       charter_bookings = charter_bookings.where(status: 'pending')
+      activity_orders = activity_orders.where(status: 'pending')
+      ticket_orders = ticket_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
                                        .where('bookings.created_at >= ?', Date.today)
@@ -105,6 +115,10 @@ class BookingsController < ApplicationController
                                          .where('insurance_orders.start_date >= ?', Date.today)
       charter_bookings = charter_bookings.where(status: 'paid')
                                          .where('charter_bookings.departure_date >= ?', Date.today)
+      activity_orders = activity_orders.where(status: ['paid', 'confirmed'])
+                                       .where('activity_orders.visit_date >= ?', Date.today)
+      ticket_orders = ticket_orders.where(status: ['paid', 'confirmed'])
+                                   .where('ticket_orders.visit_date >= ?', Date.today)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -121,6 +135,8 @@ class BookingsController < ApplicationController
       cruise_orders = cruise_orders.none
       insurance_orders = insurance_orders.none
       charter_bookings = charter_bookings.none
+      activity_orders = activity_orders.none
+      ticket_orders = ticket_orders.none
     when 'refund'
       flight_bookings = flight_bookings.where(status: 'cancelled')
       hotel_bookings = hotel_bookings.where(status: 'cancelled')
@@ -136,6 +152,8 @@ class BookingsController < ApplicationController
       cruise_orders = cruise_orders.where(status: 'cancelled')
       insurance_orders = insurance_orders.where(status: 'cancelled')
       charter_bookings = charter_bookings.where(status: 'cancelled')
+      activity_orders = activity_orders.where(status: ['cancelled', 'refunded'])
+      ticket_orders = ticket_orders.where(status: ['cancelled', 'refunded'])
     end
     
     # Combine and sort by created_at
@@ -153,7 +171,9 @@ class BookingsController < ApplicationController
       custom_travel_requests.to_a,
       cruise_orders.to_a,
       insurance_orders.to_a,
-      charter_bookings.to_a
+      charter_bookings.to_a,
+      activity_orders.to_a,
+      ticket_orders.to_a
     ].flatten.compact.sort_by(&:created_at).reverse
     
     # Manual pagination

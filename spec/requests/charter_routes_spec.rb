@@ -7,7 +7,7 @@ RSpec.describe "Charter routes", type: :request do
 
 
   describe "GET /charter_routes/:id" do
-    let(:charter_route_record) { create(:charter_route, user: user) }
+    let(:charter_route_record) { create(:charter_route) }
 
 
     it "returns http success" do

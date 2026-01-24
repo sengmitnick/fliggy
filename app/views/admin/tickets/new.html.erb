@@ -1,0 +1,214 @@
+<% content_for :title, "New Ticket" %>
+
+<div class="container-md">
+  <div class="flex items-center space-x-4">
+    <%= link_to admin_tickets_path, class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Tickets
+    <% end %>
+  </div>
+
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4 mb-8">Create New Ticket</h1>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @ticket], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @ticket %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@ticket, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :name) ? { required: true } : {}) %>
+          <% if @ticket.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Ticket type -->
+        <div class="mb-4">
+          <%= form.label :ticket_type, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Ticket type<% if field_required?(@ticket, :ticket_type) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :ticket_type, {
+            placeholder: "Enter ticket type...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :ticket_type) ? { required: true } : {}) %>
+          <% if @ticket.errors[:ticket_type].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:ticket_type].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@ticket, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :original_price) ? { required: true } : {}) %>
+          <% if @ticket.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Current price -->
+        <div class="mb-4">
+          <%= form.label :current_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Current price<% if field_required?(@ticket, :current_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :current_price, {
+            placeholder: "Enter current price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :current_price) ? { required: true } : {}) %>
+          <% if @ticket.errors[:current_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:current_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Discount info -->
+        <div class="mb-4">
+          <%= form.label :discount_info, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Discount info<% if field_required?(@ticket, :discount_info) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :discount_info, {
+            placeholder: "Enter discount info...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :discount_info) ? { required: true } : {}) %>
+          <% if @ticket.errors[:discount_info].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:discount_info].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Requirements -->
+        <div class="mb-4">
+          <%= form.label :requirements, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Requirements<% if field_required?(@ticket, :requirements) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :requirements, {
+            rows: 5,
+            placeholder: "Enter requirements...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :requirements) ? { required: true } : {}) %>
+          <% if @ticket.errors[:requirements].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:requirements].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Refund policy -->
+        <div class="mb-4">
+          <%= form.label :refund_policy, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Refund policy<% if field_required?(@ticket, :refund_policy) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :refund_policy, {
+            placeholder: "Enter refund policy...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :refund_policy) ? { required: true } : {}) %>
+          <% if @ticket.errors[:refund_policy].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:refund_policy].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Booking notice -->
+        <div class="mb-4">
+          <%= form.label :booking_notice, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Booking notice<% if field_required?(@ticket, :booking_notice) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :booking_notice, {
+            rows: 5,
+            placeholder: "Enter booking notice...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :booking_notice) ? { required: true } : {}) %>
+          <% if @ticket.errors[:booking_notice].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:booking_notice].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Validity days -->
+        <div class="mb-4">
+          <%= form.label :validity_days, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Validity days<% if field_required?(@ticket, :validity_days) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :validity_days, {
+            placeholder: "Enter validity days...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :validity_days) ? { required: true } : {}) %>
+          <% if @ticket.errors[:validity_days].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:validity_days].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Sales count -->
+        <div class="mb-4">
+          <%= form.label :sales_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Sales count<% if field_required?(@ticket, :sales_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :sales_count, {
+            placeholder: "Enter sales count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :sales_count) ? { required: true } : {}) %>
+          <% if @ticket.errors[:sales_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:sales_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Stock -->
+        <div class="mb-4">
+          <%= form.label :stock, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Stock<% if field_required?(@ticket, :stock) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :stock, {
+            placeholder: "Enter stock...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@ticket, :stock) ? { required: true } : {}) %>
+          <% if @ticket.errors[:stock].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:stock].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Attraction -->
+        <div class="mb-4">
+          <%= form.label :attraction_id, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Attraction<% if field_required?(@ticket, :attraction) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.select :attraction_id, 
+              options_for_select([['Select Attraction', '']] + Attraction.all.map { |item| [item.name, item.id] }, @ticket.attraction_id),
+              {},
+              { class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50" } %>
+          <% if @ticket.errors[:attraction_id].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:attraction_id].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+          <%= form.label :image, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image
+          <% end %>
+          <%= form.file_field :image, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <% if @ticket.errors[:image].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @ticket.errors[:image].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_tickets_path, class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Create Ticket", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

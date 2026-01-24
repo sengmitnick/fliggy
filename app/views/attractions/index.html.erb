@@ -1,0 +1,162 @@
+<div class="min-h-screen bg-white" 
+     data-controller="city-selector"
+     data-city-selector-departure-city-value="<%= @city %>"
+     data-city-selector-destination-city-value=""
+     data-city-selector-enable-multi-select-value="false"
+     data-city-selector-modal-title-value="选择城市">
+  <!-- Header -->
+  <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
+
+  <!-- Tabs Container with Gray Background -->
+  <div class="relative mx-4 -mt-3 overflow-hidden z-50">
+    <!-- Custom Tabs -->
+    <div class="bg-[#F2F3F7] rounded-t-[24px] pt-2 px-1">
+      <nav class="flex items-end">
+        <!-- Active Tab: 景点门票 -->
+        <div class="relative bg-white flex-1 rounded-t-[12px] px-3 py-2.5">
+          <div class="flex flex-col items-center">
+            <span class="text-[15px] font-bold text-[#1a1a1a] leading-tight whitespace-nowrap">景点门票</span>
+            <div class="absolute bottom-1 w-6 h-[4px] bg-[#FFD900] rounded-full"></div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- White Card Container -->
+    <div class="bg-white rounded-b-[24px] shadow-sm px-4 pt-4 pb-6">
+      
+      <!-- City Selection -->
+      <div class="mb-4">
+        <button 
+          type="button"
+          data-action="click->city-selector#openDeparture"
+          class="w-full text-left flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-600 mb-1">选择城市</div>
+            <div class="text-[32px] font-bold leading-tight" 
+                 data-city-selector-target="departure"><%= @city %></div>
+          </div>
+          <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Hot Cities -->
+      <div class="mb-4">
+        <div class="flex flex-wrap gap-2">
+          <% @cities.take(6).each do |city| %>
+            <%= link_to attractions_path(city: city), 
+                data: { turbo: false },
+                class: "#{city == @city ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md' : 'bg-gray-50 border-2 border-transparent'} px-4 py-2 rounded-lg flex items-center gap-1 text-sm transition-all" do %>
+              <span class="text-base">🎫</span>
+              <span class="<%= city == @city ? 'font-bold' : 'font-medium' %>"><%= city %></span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Sort Options -->
+      <div class="mb-4">
+        <div class="flex gap-3">
+          <%= link_to attractions_path(city: @city, sort_by: 'rating'),
+              data: { turbo: false },
+              class: "#{@sort_by == 'rating' ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md font-bold' : 'bg-gray-50 border-2 border-transparent font-medium'} flex-1 py-3 rounded-lg text-sm text-center transition-all" do %>
+            评分最高
+          <% end %>
+          <%= link_to attractions_path(city: @city, sort_by: 'review_count'),
+              data: { turbo: false },
+              class: "#{@sort_by == 'review_count' ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md font-bold' : 'bg-gray-50 border-2 border-transparent font-medium'} flex-1 py-3 rounded-lg text-sm text-center transition-all" do %>
+            人气最高
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Search Form (Hidden inputs for city-selector) -->
+      <%= form_with url: attractions_path, method: :get, local: true, data: { turbo: false } do |f| %>
+        <%= f.hidden_field :city, value: @city, data: { city_selector_target: 'departureCityInput' } %>
+        <span class="hidden" data-city-selector-target="destination"></span>
+        <%= f.hidden_field :unused_destination, value: '', data: { city_selector_target: 'destinationCityInput' }, class: 'hidden' %>
+      <% end %>
+
+    </div>
+  </div>
+
+  <!-- Attractions List -->
+  <div class="mt-6 px-4 pb-20">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold"><%= @city %>热门景点</h2>
+    </div>
+
+    <% if @attractions.any? %>
+      <div class="space-y-4">
+        <% @attractions.each do |attraction| %>
+          <%= link_to attraction_path(attraction), data: { turbo: false }, class: "block" do %>
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex gap-3">
+                <!-- Attraction Image -->
+                <div class="w-32 h-32 flex-shrink-0">
+                  <% if attraction.cover_image.attached? %>
+                    <%= image_tag attraction.cover_image, class: "w-full h-full object-cover" %>
+                  <% else %>
+                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span class="text-4xl">🎫</span>
+                    </div>
+                  <% end %>
+                </div>
+
+                <!-- Attraction Info -->
+                <div class="flex-1 py-2 pr-3">
+                  <h3 class="text-base font-bold text-gray-900 mb-2 line-clamp-1"><%= attraction.name %></h3>
+                  
+                  <!-- Rating -->
+                  <% if attraction.rating && attraction.rating > 0 %>
+                    <div class="flex items-center gap-2 mb-2">
+                      <div class="flex items-center gap-1">
+                        <span class="text-yellow-500 text-sm">★</span>
+                        <span class="text-sm font-semibold"><%= attraction.rating %></span>
+                      </div>
+                      <span class="text-xs text-gray-500"><%= attraction.review_count %>条评价</span>
+                    </div>
+                  <% end %>
+
+                  <!-- Address -->
+                  <% if attraction.address.present? %>
+                    <p class="text-xs text-gray-500 mb-2 line-clamp-1">
+                      📍 <%= attraction.address %>
+                    </p>
+                  <% end %>
+
+                  <!-- Ticket Count -->
+                  <div class="flex items-center justify-between mt-auto">
+                    <span class="text-xs text-gray-500">
+                      <%= attraction.tickets.available.count %>种门票
+                    </span>
+                    <% if attraction.tickets.available.any? %>
+                      <div class="text-right">
+                        <span class="text-sm text-gray-400">¥</span><span class="text-lg font-bold text-[#FF6B35]"><%= attraction.tickets.available.minimum(:current_price).to_i %></span>
+                        <span class="text-xs text-gray-400">起</span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-6">
+        <%= paginate @attractions %>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-12">
+        <div class="text-6xl mb-4">🎫</div>
+        <p class="text-gray-500">暂无<%= @city %>的景点数据</p>
+        <p class="text-sm text-gray-400 mt-2">请选择其他城市</p>
+      </div>
+    <% end %>
+  </div>
+</div>

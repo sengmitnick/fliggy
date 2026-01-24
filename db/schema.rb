@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_24_122947) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -127,6 +127,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "activity_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "attraction_activity_id"
+    t.string "passenger_name"
+    t.string "contact_phone"
+    t.date "visit_date"
+    t.integer "quantity", default: 1
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.jsonb "passenger_ids", default: []
+    t.string "insurance_type", default: "none"
+    t.text "notes"
+    t.index ["attraction_activity_id"], name: "index_activity_orders_on_attraction_activity_id"
+    t.index ["user_id"], name: "index_activity_orders_on_user_id"
+  end
+
   create_table "addresses", force: :cascade do |t|
     t.bigint "user_id"
     t.string "name"
@@ -171,15 +191,54 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["role"], name: "index_administrators_on_role"
   end
 
-  create_table "attractions", force: :cascade do |t|
+  create_table "attraction_activities", force: :cascade do |t|
+    t.bigint "attraction_id"
     t.string "name"
-    t.integer "city_id"
-    t.decimal "latitude"
-    t.decimal "longitude"
+    t.string "activity_type", default: "experience"
+    t.decimal "original_price"
+    t.decimal "current_price"
+    t.string "discount_info"
+    t.string "refund_policy"
     t.text "description"
-    t.string "cover_image_url"
+    t.string "duration"
+    t.integer "sales_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["attraction_id"], name: "index_attraction_activities_on_attraction_id"
+  end
+
+  create_table "attraction_reviews", force: :cascade do |t|
+    t.bigint "attraction_id"
+    t.bigint "user_id"
+    t.decimal "rating", default: "5.0"
+    t.text "comment"
+    t.boolean "is_featured", default: false
+    t.integer "helpful_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["attraction_id"], name: "index_attraction_reviews_on_attraction_id"
+    t.index ["user_id"], name: "index_attraction_reviews_on_user_id"
+  end
+
+  create_table "attractions", force: :cascade do |t|
+    t.string "name"
+    t.string "province"
+    t.string "city"
+    t.string "district"
+    t.text "address"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.decimal "rating", default: "0.0"
+    t.integer "review_count", default: 0
+    t.string "opening_hours"
+    t.string "phone"
+    t.text "description"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
   end
 
   create_table "booking_options", force: :cascade do |t|
@@ -996,6 +1055,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.boolean "is_domestic", default: true
     t.bigint "data_version", default: 0, null: false
     t.string "brand"
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
     t.index ["data_version"], name: "index_hotels_on_data_version"
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
@@ -1300,6 +1361,73 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "suppliers", force: :cascade do |t|
+    t.string "name"
+    t.string "supplier_type", default: "official"
+    t.decimal "rating"
+    t.integer "sales_count", default: 0
+    t.text "description"
+    t.string "contact_phone"
+    t.integer "data_version", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "ticket_orders", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "ticket_id"
+    t.string "contact_phone"
+    t.date "visit_date"
+    t.integer "quantity", default: 1
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.integer "supplier_id"
+    t.integer "passenger_id"
+    t.string "insurance_type"
+    t.integer "insurance_price"
+    t.decimal "total_amount"
+    t.text "notes"
+    t.jsonb "passenger_ids"
+    t.index ["ticket_id"], name: "index_ticket_orders_on_ticket_id"
+    t.index ["user_id"], name: "index_ticket_orders_on_user_id"
+  end
+
+  create_table "ticket_suppliers", force: :cascade do |t|
+    t.integer "ticket_id"
+    t.integer "supplier_id"
+    t.decimal "current_price"
+    t.decimal "original_price"
+    t.integer "stock", default: -1
+    t.string "discount_info"
+    t.integer "sales_count", default: 0
+    t.integer "data_version", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "tickets", force: :cascade do |t|
+    t.bigint "attraction_id"
+    t.string "name"
+    t.string "ticket_type", default: "adult"
+    t.decimal "original_price"
+    t.decimal "current_price"
+    t.string "discount_info"
+    t.text "requirements"
+    t.string "refund_policy"
+    t.text "booking_notice"
+    t.integer "validity_days"
+    t.integer "sales_count", default: 0
+    t.integer "stock", default: -1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["attraction_id"], name: "index_tickets_on_attraction_id"
+  end
+
   create_table "tour_group_bookings", force: :cascade do |t|
     t.integer "tour_group_product_id"
     t.integer "tour_package_id"
@@ -1361,6 +1489,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.boolean "custom_tour_available", default: false
     t.bigint "data_version", default: 0, null: false
     t.string "travel_type"
+    t.bigint "attraction_id"
+    t.index ["attraction_id"], name: "index_tour_group_products_on_attraction_id"
     t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
   end
@@ -1727,6 +1857,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
   add_foreign_key "notifications", "users"
   add_foreign_key "passengers", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "tour_group_products", "attractions"
   add_foreign_key "tour_group_products", "travel_agencies"
   add_foreign_key "transfers", "transfer_packages"
 end

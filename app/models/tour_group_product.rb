@@ -2,6 +2,7 @@
 class TourGroupProduct < ApplicationRecord
   include DataVersionable
   belongs_to :travel_agency
+  belongs_to :attraction, optional: true
   has_many :tour_packages, dependent: :destroy
   has_many :tour_itinerary_days, -> { order(day_number: :asc) }, dependent: :destroy
   has_many :tour_reviews, dependent: :destroy

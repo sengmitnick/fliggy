@@ -1,0 +1,559 @@
+<div data-controller="ticket-order payment-confirmation"
+     data-ticket-price="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
+     data-payment-confirmation-amount-value="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value=""
+     data-payment-confirmation-success-url-value=""
+     class="min-h-screen bg-background pb-32">
+  <!-- Top Navigation -->
+  <div class="sticky top-0 z-50 bg-primary text-white">
+    <div class="flex items-center justify-between px-4 h-14">
+      <div class="flex items-center gap-4">
+        <button onclick="history.back()" class="text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <h1 class="text-lg font-semibold">填写订单</h1>
+      </div>
+    </div>
+  </div>
+
+  <%= form_with model: @order, url: ticket_ticket_orders_path(@ticket), method: :post, local: true, data: { turbo: false } do |f| %>
+    <!-- Visit Date & Ticket Info Card -->
+    <div class="bg-accent/10 px-4 py-3">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">📅</div>
+        <div class="flex-1">
+          <div class="font-semibold text-foreground mb-1">
+            <%= f.date_field :visit_date, 
+                required: true,
+                min: Date.tomorrow,
+                value: @visit_date,
+                class: "text-base font-semibold bg-transparent border-none p-0 focus:outline-none focus:ring-0 cursor-pointer" %>
+          </div>
+          <div class="text-sm text-foreground-secondary">
+            <%= @attraction.name %> - <%= @ticket.name %>
+          </div>
+          <div class="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-accent/20 text-accent text-xs rounded-full">
+            <span class="inline-block w-1 h-1 bg-accent rounded-full"></span>
+            飞猪旅行·自营 7×24小时官网客服·极速响应·售后无忧
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket Type Card -->
+    <div class="mt-2 bg-surface">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-border">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-5 h-5 bg-primary text-white text-xs rounded">✓</span>
+          <span class="font-medium text-foreground"><%= @ticket.ticket_type == 'adult' ? '成人票' : '儿童票' %></span>
+          <span class="text-xs text-foreground-muted">随时全额退</span>
+        </div>
+        <button type="button" onclick="location.href='<%= select_ticket_path(@ticket, visit_date: @visit_date) %>'" 
+                class="text-sm text-primary">
+          详情 ›
+        </button>
+      </div>
+    </div>
+
+    <!-- Quantity & Price -->
+    <div class="bg-surface px-4 py-4 border-t border-border">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-foreground-secondary mb-1"><%= @ticket.requirements %></div>
+          <div class="text-xs text-foreground-muted">预订须知 ›</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="text-xl font-bold text-accent">¥<%= (@ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i) %>/张</div>
+            <% if @ticket.original_price && @ticket.original_price > (@ticket_supplier&.current_price || @ticket.current_price) %>
+              <div class="text-xs text-foreground-muted line-through">¥<%= @ticket.original_price.to_i %></div>
+            <% end %>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 border border-border rounded">
+            <button type="button" onclick="decreaseQuantity()" class="w-6 h-6 flex items-center justify-center text-foreground-secondary hover:text-foreground">-</button>
+            <%= f.number_field :quantity, 
+                value: 1,
+                min: 1,
+                max: 99,
+                required: true,
+                id: "quantity_field",
+                onchange: "updateTotalPrice()",
+                class: "w-8 text-center border-none p-0 focus:outline-none focus:ring-0" %>
+            <button type="button" onclick="increaseQuantity()" class="w-6 h-6 flex items-center justify-center text-foreground-secondary hover:text-foreground">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passenger Selection -->
+    <div class="mt-2 bg-surface">
+      <div class="px-4 py-3 border-b border-border">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold text-foreground">选择 <span id="required_passenger_count">1</span> 位游客</h3>
+        </div>
+      </div>
+
+      <div class="divide-y divide-border">
+        <% if @passengers.any? %>
+          <% @passengers.each_with_index do |passenger, index| %>
+            <label class="flex items-center gap-3 px-4 py-4 cursor-pointer hover:bg-surface-secondary active:bg-surface-secondary">
+              <div class="flex items-center justify-center w-6 h-6">
+                <%= f.check_box :passenger_ids, 
+                    { multiple: true, id: "passenger_#{passenger.id}", class: "w-5 h-5 text-accent border-border focus:ring-accent cursor-pointer" }, 
+                    passenger.id, 
+                    nil %>
+              </div>
+              <div class="flex items-center justify-center w-10 h-10 bg-surface-secondary rounded-full text-lg">
+                ✏️
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-medium text-foreground"><%= passenger.name %></span>
+                  <% if passenger.is_self %>
+                    <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded">本人</span>
+                  <% end %>
+                </div>
+                <p class="text-sm text-foreground-muted">身份证 <%= passenger.id_number.gsub(/(.{6})(.*)(.{4})/, '\1****\3') %></p>
+              </div>
+            </label>
+          <% end %>
+
+          <!-- Add New Passenger Button -->
+          <div class="px-4 py-4">
+            <button type="button" onclick="showAddPassengerForm()" 
+                    class="w-full flex items-center justify-center gap-2 py-3 bg-accent/5 text-accent rounded-lg hover:bg-accent/10">
+              <span class="text-xl">+</span>
+              <span class="font-medium">更多出行人</span>
+            </button>
+          </div>
+        <% else %>
+          <!-- No passengers - must add new -->
+          <div class="px-4 py-8 text-center">
+            <div class="text-5xl mb-4">👤</div>
+            <p class="text-foreground-secondary mb-4">暂无出行人信息</p>
+            <button type="button" onclick="showAddPassengerForm()" class="btn-primary px-6 py-3">
+              添加出行人
+            </button>
+          </div>
+          <%= f.hidden_field :passenger_ids, value: "new", multiple: true %>
+        <% end %>
+      </div>
+
+      <!-- New Passenger Form Modal (hidden by default) -->
+      <div id="new_passenger_modal" class="hidden fixed inset-0 bg-black/50 z-50">
+        <div class="absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-surface border-b border-border px-4 py-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-foreground">添加出行人</h3>
+            <button type="button" onclick="hideAddPassengerForm()" class="text-foreground-secondary">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-2">中文姓名</label>
+              <input type="text" name="new_passenger[name]" 
+                     placeholder="请输入姓名（与证件一致）" 
+                     class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-2">证件类型</label>
+              <select name="new_passenger[id_type]" 
+                      class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
+                <option value="身份证">中国居民身份证</option>
+                <option value="护照">护照</option>
+                <option value="港澳通行证">港澳居民来往内地通行证</option>
+                <option value="台湾通行证">台湾居民来往大陆通行证</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-2">证件号码</label>
+              <input type="text" name="new_passenger[id_number]" 
+                     placeholder="请输入证件号码" 
+                     class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-2">手机号（选填）</label>
+              <input type="tel" name="new_passenger[phone]" 
+                     placeholder="用于接收出行通知" 
+                     pattern="[0-9]{11}"
+                     class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent">
+            </div>
+
+            <label class="flex items-center gap-2 p-4 bg-surface-secondary rounded-lg">
+              <input type="checkbox" name="new_passenger[is_self]" value="1" class="w-5 h-5 text-accent rounded border-border">
+              <span class="text-sm text-foreground">设为常用出行人</span>
+            </label>
+
+            <div class="pt-4">
+              <button type="button" onclick="confirmAddPassenger()" class="btn-primary w-full py-4 text-base font-semibold">
+                确认添加
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Phone -->
+    <!-- stimulus-validator: disable-next-line -->
+    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector">
+      <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
+      <div class="flex items-center gap-2">
+        <select class="w-20 px-2 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm">
+          <option value="+86">+86</option>
+          <option value="+852">+852</option>
+          <option value="+853">+853</option>
+          <option value="+886">+886</option>
+        </select>
+        <%= f.text_field :contact_phone, 
+            placeholder: "18027128600",
+            required: true,
+            pattern: "[0-9]{11}",
+            type: "tel",
+            value: @passengers.find(&:is_self)&.phone || @passengers.first&.phone,
+            data: { "contact-selector-target": "contactPhoneInput" },
+            class: "flex-1 min-w-0 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" %>
+        <button type="button" 
+                class="p-2.5 border border-border rounded-lg shrink-0"
+                data-action="click->contact-selector#openModal">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <%= render 'shared/contact_selector_modal' %>
+    </div>
+
+    <!-- Insurance Options -->
+    <div class="mt-2 bg-surface">
+      <div class="bg-accent/10 px-4 py-1.5">
+        <span class="text-xs text-accent font-medium">玩乐综合保障</span>
+      </div>
+      <div class="px-4 py-4 space-y-4">
+        <!-- No Insurance Option -->
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="radio" name="insurance_type" value="none" checked 
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="0">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-foreground">无保障</span>
+              <span class="px-2 py-0.5 bg-surface-secondary text-foreground-muted text-xs rounded">放弃保障</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground-secondary">
+              <svg class="w-3.5 h-3.5 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span>意外保障 ¥ 0</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground-secondary">
+              <svg class="w-3.5 h-3.5 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span>医疗报销 ¥ 0</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground-secondary">
+              <svg class="w-3.5 h-3.5 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span>财物损失 ¥ 0</span>
+            </div>
+          </div>
+        </label>
+
+        <!-- Basic Insurance -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5">
+          <input type="radio" name="insurance_type" value="basic" 
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="9">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-foreground">基础保障</span>
+                <span class="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded">高性价比</span>
+              </div>
+              <span class="text-accent font-bold">¥9/人</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>意外保障 ¥ 30万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>医疗报销 ¥ 5万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>财物损失 ¥ 1000</span>
+            </div>
+          </div>
+        </label>
+
+        <!-- Premium Insurance -->
+        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5">
+          <input type="radio" name="insurance_type" value="premium" 
+                 class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
+                 data-price="15">
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-foreground">升级保障</span>
+                <span class="px-2 py-0.5 bg-accent text-white text-xs rounded">经典爆款</span>
+              </div>
+              <span class="text-accent font-bold">¥15/人</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>意外保障 ¥ 50万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground mb-1">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>医疗报销 ¥ 10万</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-foreground">
+              <svg class="w-3.5 h-3.5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>财物损失 ¥ 2000</span>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Insurance Notice -->
+      <div class="px-4 pb-4">
+        <div class="text-xs text-foreground-muted leading-relaxed">
+          <span class="font-medium text-foreground">明亚保险经纪</span> 本模块为保险投保页面，由明亚保险经纪股份有限公司管理运营。请仔细阅读<span class="text-accent">客户通知书</span>、<span class="text-accent">保险代理协议</span>、<span class="text-accent">投保须知及条款</span>等重要内容。
+        </div>
+      </div>
+    </div>
+
+    <%= f.hidden_field :supplier_id, value: @supplier_id %>
+
+    <!-- Error Messages -->
+    <%= render 'shared/form_error_message', model: @order %>
+  <% end %>
+
+  <!-- Bottom Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border px-4 py-3 z-40">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm text-foreground-secondary">合计</span>
+      <div class="flex items-baseline gap-1">
+        <span class="text-xs text-accent">¥</span>
+        <span class="text-2xl font-bold text-accent" id="total_price"><%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %></span>
+      </div>
+    </div>
+    <button type="button" 
+            data-action="click->ticket-order#createOrder"
+            class="btn-primary w-full py-4 text-base font-bold">
+      立即支付
+    </button>
+  </div>
+
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>
+
+<script>
+  const unitPrice = <%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>;
+  
+  function updateTotalPrice() {
+    const quantity = parseInt(document.getElementById('quantity_field').value) || 1;
+    const checkedInsurance = document.querySelector('input[name="insurance_type"]:checked');
+    const insurancePrice = parseInt(checkedInsurance?.dataset.price || 0);
+    const total = (unitPrice * quantity) + (insurancePrice * quantity);
+    
+    console.log('价格计算:', {
+      unitPrice,
+      quantity,
+      insuranceValue: checkedInsurance?.value,
+      insurancePrice,
+      total: `${unitPrice} * ${quantity} + ${insurancePrice} * ${quantity} = ${total}`
+    });
+    
+    document.getElementById('total_price').textContent = total;
+    document.getElementById('required_passenger_count').textContent = quantity;
+  }
+  
+  function increaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue < 99) {
+      field.value = currentValue + 1;
+      updateTotalPrice();
+    }
+  }
+  
+  function decreaseQuantity() {
+    const field = document.getElementById('quantity_field');
+    const currentValue = parseInt(field.value) || 1;
+    if (currentValue > 1) {
+      field.value = currentValue - 1;
+      updateTotalPrice();
+    }
+  }
+
+  function showAddPassengerForm() {
+    document.getElementById('new_passenger_modal').classList.remove('hidden');
+  }
+
+  function hideAddPassengerForm() {
+    document.getElementById('new_passenger_modal').classList.add('hidden');
+    // 如果有其他乘客，默认选中第一个
+    const firstPassenger = document.querySelector('input[name="ticket_order[passenger_ids][]"]');
+    if (firstPassenger) {
+      firstPassenger.checked = true;
+    }
+  }
+
+  function confirmAddPassenger() {
+    // 验证必填字段
+    const name = document.querySelector('input[name="new_passenger[name]"]').value.trim();
+    const idNumber = document.querySelector('input[name="new_passenger[id_number]"]').value.trim();
+    
+    if (!name || !idNumber) {
+      alert('请填写姓名和证件号码');
+      return;
+    }
+    
+    // 收集表单数据
+    const formData = new FormData();
+    formData.append('passenger[name]', name);
+    formData.append('passenger[id_type]', document.querySelector('select[name="new_passenger[id_type]"]').value);
+    formData.append('passenger[id_number]', idNumber);
+    formData.append('passenger[phone]', document.querySelector('input[name="new_passenger[phone]"]').value);
+    formData.append('passenger[is_self]', document.querySelector('input[name="new_passenger[is_self]"]').checked ? '1' : '0');
+    
+    // 添加return_to参数以便创建后返回当前页面
+    formData.append('return_to', 'ticket_order_new');
+    
+    // 保存当前URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    formData.append('ticket_id', urlParams.get('ticket_id') || '<%= params[:ticket_id] %>');
+    formData.append('supplier_id', urlParams.get('supplier_id') || '<%= params[:supplier_id] %>');
+    formData.append('visit_date', urlParams.get('visit_date') || '<%= params[:visit_date] %>');
+    
+    // 提交到后端
+    fetch('/passengers', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        // 创建成功，刷新页面
+        window.location.reload();
+      } else {
+        return response.json().then(data => {
+          alert(data.error || '添加出行人失败，请检查输入信息');
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('添加出行人失败，请稍后重试');
+    });
+  }
+
+  function showPassengerManagement() {
+    window.location.href = '/passengers';
+  }
+
+  // Track if page is already initialized to prevent duplicate listeners
+  let isInitialized = false;
+  
+  // Handle passenger checkbox selection UI
+  function initializePage() {
+    // Prevent duplicate initialization
+    if (isInitialized) {
+      // Only update price on subsequent loads
+      updateTotalPrice();
+      return;
+    }
+    isInitialized = true;
+    
+    const passengerCheckboxes = document.querySelectorAll('input[name="ticket_order[passenger_ids][]"]');
+    const quantityField = document.getElementById('quantity_field');
+    
+    // Update check marks when checkbox changes
+    passengerCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const label = this.closest('label');
+        const check = label ? label.querySelector('.passenger-check') : null;
+        
+        if (check) {
+          if (this.checked) {
+            // Add check mark
+            check.classList.add('border-accent', 'bg-accent');
+            check.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+          } else {
+            // Remove check mark
+            check.classList.remove('border-accent', 'bg-accent');
+            check.innerHTML = '';
+          }
+        }
+        
+        // Validate selection count
+        const selectedCount = document.querySelectorAll('input[name="ticket_order[passenger_ids][]"]:checked').length;
+        const requiredCount = parseInt(quantityField.value) || 1;
+        
+        if (selectedCount > requiredCount) {
+          alert(`最多只能选择 ${requiredCount} 位出行人`);
+          this.checked = false;
+          if (check) {
+            check.classList.remove('border-accent', 'bg-accent');
+            check.innerHTML = '';
+          }
+        }
+      });
+    });
+
+    // Handle insurance selection price update - use 'input' event for immediate response
+    const insuranceRadios = document.querySelectorAll('input[name="insurance_type"]');
+    insuranceRadios.forEach(radio => {
+      // Use both 'input' (immediate) and 'change' (guaranteed) events
+      radio.addEventListener('input', function() {
+        console.log('保险选项变化(input):', this.value, 'price:', this.dataset.price);
+        updateTotalPrice();
+      });
+      radio.addEventListener('change', function() {
+        console.log('保险选项变化(change):', this.value, 'price:', this.dataset.price);
+        updateTotalPrice();
+      });
+    });
+    
+    // Initial price calculation on page load
+    console.log('页面加载完成，初始化价格计算');
+    updateTotalPrice();
+  }
+  
+  // Support both DOMContentLoaded (full page load) and turbo:load (Turbo navigation)
+  document.addEventListener('DOMContentLoaded', initializePage);
+  document.addEventListener('turbo:load', initializePage);
+  
+  // Also handle turbo:before-cache to reset initialization flag
+  document.addEventListener('turbo:before-cache', function() {
+    isInitialized = false;
+  });
+</script>

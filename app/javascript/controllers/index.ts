@@ -115,6 +115,8 @@ import CarSearchEditController from "./car_search_edit_controller"
 import CarFilterController from "./car_filter_controller"
 import MapGuideController from "./map_guide_controller"
 import BusTicketHistoryController from "./bus_ticket_history_controller"
+import TicketOrderController from "./ticket_order_controller"
+import ActivityOrderController from "./activity_order_controller"
 
 const application = Application.start()
 
@@ -233,5 +235,7 @@ application.register("car-search-edit", CarSearchEditController)
 application.register("car-filter", CarFilterController)
 application.register("map-guide", MapGuideController)
 application.register("bus-ticket-history", BusTicketHistoryController)
+application.register("ticket-order", TicketOrderController)
+application.register("activity-order", ActivityOrderController)
 
 window.Stimulus = application
