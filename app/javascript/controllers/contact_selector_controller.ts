@@ -7,6 +7,7 @@ export default class extends Controller<HTMLElement> {
     "emailDisplay",
     "phoneDisplay",
     "contactIdInput",
+    "contactPhoneInput",
     "contactItem"
   ]
 
@@ -15,10 +16,16 @@ export default class extends Controller<HTMLElement> {
   }
 
   declare readonly modalTarget: HTMLElement
-  declare readonly nameDisplayTarget: HTMLElement
-  declare readonly emailDisplayTarget: HTMLElement
-  declare readonly phoneDisplayTarget: HTMLElement
-  declare readonly contactIdInputTarget: HTMLInputElement
+  declare readonly hasNameDisplayTarget: boolean
+  declare readonly nameDisplayTarget?: HTMLElement
+  declare readonly hasEmailDisplayTarget: boolean
+  declare readonly emailDisplayTarget?: HTMLElement
+  declare readonly hasPhoneDisplayTarget: boolean
+  declare readonly phoneDisplayTarget?: HTMLElement
+  declare readonly hasContactIdInputTarget: boolean
+  declare readonly contactIdInputTarget?: HTMLInputElement
+  declare readonly hasContactPhoneInputTarget: boolean
+  declare readonly contactPhoneInputTarget?: HTMLInputElement
   declare readonly contactItemTargets: HTMLElement[]
   declare selectedContactIdValue: number
 
@@ -37,6 +44,10 @@ export default class extends Controller<HTMLElement> {
     document.body.style.overflow = ''
   }
 
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
+  }
+
   selectContact(event: Event): void {
     const button = event.currentTarget as HTMLElement
     const contactId = parseInt(button.dataset.contactId || '0')
@@ -46,35 +57,52 @@ export default class extends Controller<HTMLElement> {
 
     // Update selected contact ID
     this.selectedContactIdValue = contactId
-    this.contactIdInputTarget.value = contactId.toString()
+    
+    // Update contact ID input if exists
+    if (this.hasContactIdInputTarget && this.contactIdInputTarget) {
+      this.contactIdInputTarget.value = contactId.toString()
+    }
 
-    // Update display - use value for input fields
-    if (this.nameDisplayTarget instanceof HTMLInputElement) {
-      this.nameDisplayTarget.value = contactName
-    } else {
-      this.nameDisplayTarget.textContent = contactName
+    // Update name display if exists - support both input and display elements
+    if (this.hasNameDisplayTarget && this.nameDisplayTarget) {
+      if (this.nameDisplayTarget instanceof HTMLInputElement) {
+        this.nameDisplayTarget.value = contactName
+      } else {
+        this.nameDisplayTarget.textContent = contactName
+      }
     }
     
-    if (contactEmail) {
-      if (this.emailDisplayTarget instanceof HTMLInputElement) {
-        this.emailDisplayTarget.value = contactEmail
+    // Update email display if exists
+    if (this.hasEmailDisplayTarget && this.emailDisplayTarget) {
+      if (contactEmail) {
+        if (this.emailDisplayTarget instanceof HTMLInputElement) {
+          this.emailDisplayTarget.value = contactEmail
+        } else {
+          this.emailDisplayTarget.textContent = contactEmail
+        }
+        this.emailDisplayTarget.closest('div')?.classList.remove('hidden')
       } else {
-        this.emailDisplayTarget.textContent = contactEmail
+        this.emailDisplayTarget.closest('div')?.classList.add('hidden')
       }
-      this.emailDisplayTarget.closest('div')?.classList.remove('hidden')
-    } else {
-      this.emailDisplayTarget.closest('div')?.classList.add('hidden')
     }
     
-    if (contactPhone) {
-      if (this.phoneDisplayTarget instanceof HTMLInputElement) {
-        this.phoneDisplayTarget.value = contactPhone
+    // Update phone display if exists
+    if (this.hasPhoneDisplayTarget && this.phoneDisplayTarget) {
+      if (contactPhone) {
+        if (this.phoneDisplayTarget instanceof HTMLInputElement) {
+          this.phoneDisplayTarget.value = contactPhone
+        } else {
+          this.phoneDisplayTarget.textContent = contactPhone
+        }
+        this.phoneDisplayTarget.closest('div')?.classList.remove('hidden')
       } else {
-        this.phoneDisplayTarget.textContent = contactPhone
+        this.phoneDisplayTarget.closest('div')?.classList.add('hidden')
       }
-      this.phoneDisplayTarget.closest('div')?.classList.remove('hidden')
-    } else {
-      this.phoneDisplayTarget.closest('div')?.classList.add('hidden')
+    }
+    
+    // Update phone input if exists (for ticket orders)
+    if (this.hasContactPhoneInputTarget && this.contactPhoneInputTarget) {
+      this.contactPhoneInputTarget.value = contactPhone
     }
 
     // Update selected state in modal
@@ -109,9 +137,5 @@ export default class extends Controller<HTMLElement> {
     if (event.target === event.currentTarget) {
       this.closeModal()
     }
-  }
-
-  stopPropagation(event: Event): void {
-    event.stopPropagation()
   }
 }

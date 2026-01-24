@@ -73,7 +73,9 @@ class TicketsController < ApplicationController
 
   # 供应商列表页面：显示不同供应商的价格和优惠
   def suppliers
-    @ticket = Ticket.includes(:attraction, ticket_suppliers: :supplier).find(params[:id])
+    # 使用用户选择的 ticket_id（如果存在），否则使用 URL 中的 id
+    ticket_id = params[:ticket_id].presence || params[:id]
+    @ticket = Ticket.includes(:attraction, ticket_suppliers: :supplier).find(ticket_id)
     @attraction = @ticket.attraction
     @visit_date = params[:visit_date]&.to_date || Date.tomorrow
     @ticket_type = params[:ticket_type] || @ticket.ticket_type

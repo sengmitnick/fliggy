@@ -814,6 +814,34 @@ Attraction.find_each do |attraction|
   )
 end
 
+# ==================== 附加封面图片 ====================
+puts "\n🖼️  附加景点封面图片..."
+
+require 'open-uri'
+
+# 景点封面图片映射（使用 Unsplash 高质量图片）
+cover_images = {
+  "shenzhen-happy-harbor" => "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=1200",
+  "shanghai-disney" => "https://images.unsplash.com/photo-1528502668750-88ba58015b2f?w=1200",
+  "beijing-universal" => "https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=1200",
+  "guangzhou-chimelong" => "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=1200",
+  "hangzhou-songcheng" => "https://images.unsplash.com/photo-1548013146-72479768bada?w=1200",
+  "chengdu-happy-valley" => "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=1200"
+}
+
+cover_images.each do |slug, image_url|
+  attraction = Attraction.find_by(slug: slug)
+  next unless attraction
+  
+  begin
+    io = URI.open(image_url)
+    attraction.cover_image.attach(io: io, filename: "#{slug}-cover.jpg", content_type: 'image/jpeg')
+    puts "  ✓ #{attraction.name} - 封面已附加"
+  rescue => e
+    puts "  ✗ #{attraction.name} - 失败: #{e.message}"
+  end
+end
+
 puts "\n" + "="*50
 puts "✅ 景点数据包加载完成！"
 puts "="*50

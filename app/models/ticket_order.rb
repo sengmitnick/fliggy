@@ -30,11 +30,19 @@ class TicketOrder < ApplicationRecord
   end
   
   def calculate_total_price
+    # Skip if no ticket or quantity
+    return unless ticket && quantity
+    
+    # Calculate base price
     if supplier && ticket
       ticket_supplier = TicketSupplier.find_by(ticket_id: ticket.id, supplier_id: supplier.id)
-      self.total_price = (ticket_supplier&.current_price || ticket.current_price) * quantity
-    elsif ticket && quantity
-      self.total_price = ticket.current_price * quantity
+      base_price = (ticket_supplier&.current_price || ticket.current_price) * quantity
+    else
+      base_price = ticket.current_price * quantity
     end
+    
+    # Add insurance price if present
+    insurance_cost = (insurance_price || 0) * quantity
+    self.total_price = base_price + insurance_cost
   end
 end

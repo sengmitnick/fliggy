@@ -1,4 +1,5 @@
 <div data-controller="ticket-order payment-confirmation"
+     data-ticket-price="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
      data-payment-confirmation-amount-value="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value=""
@@ -92,11 +93,6 @@
       <div class="px-4 py-3 border-b border-border">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-foreground">选择 <span id="required_passenger_count">1</span> 位游客</h3>
-          <% if @passengers.any? %>
-            <button type="button" onclick="showPassengerManagement()" class="text-sm text-primary">
-              ✚ 邀请同行人填写
-            </button>
-          <% end %>
         </div>
       </div>
 
@@ -208,7 +204,8 @@
     </div>
 
     <!-- Contact Phone -->
-    <div class="mt-2 bg-surface px-4 py-4">
+    <!-- stimulus-validator: disable-next-line -->
+    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector">
       <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
       <div class="flex items-center gap-2">
         <select class="w-20 px-2 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm">
@@ -223,13 +220,18 @@
             pattern: "[0-9]{11}",
             type: "tel",
             value: @passengers.find(&:is_self)&.phone || @passengers.first&.phone,
+            data: { "contact-selector-target": "contactPhoneInput" },
             class: "flex-1 min-w-0 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" %>
-        <button type="button" class="p-2.5 border border-border rounded-lg shrink-0">
+        <button type="button" 
+                class="p-2.5 border border-border rounded-lg shrink-0"
+                data-action="click->contact-selector#openModal">
           <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
           </svg>
         </button>
       </div>
+      
+      <%= render 'shared/contact_selector_modal' %>
     </div>
 
     <!-- Insurance Options -->
@@ -376,8 +378,18 @@
   
   function updateTotalPrice() {
     const quantity = parseInt(document.getElementById('quantity_field').value) || 1;
-    const insurancePrice = parseInt(document.querySelector('input[name="insurance_type"]:checked')?.dataset.price || 0);
+    const checkedInsurance = document.querySelector('input[name="insurance_type"]:checked');
+    const insurancePrice = parseInt(checkedInsurance?.dataset.price || 0);
     const total = (unitPrice * quantity) + (insurancePrice * quantity);
+    
+    console.log('价格计算:', {
+      unitPrice,
+      quantity,
+      insuranceValue: checkedInsurance?.value,
+      insurancePrice,
+      total: `${unitPrice} * ${quantity} + ${insurancePrice} * ${quantity} = ${total}`
+    });
+    
     document.getElementById('total_price').textContent = total;
     document.getElementById('required_passenger_count').textContent = quantity;
   }
@@ -423,15 +435,64 @@
       return;
     }
     
-    hideAddPassengerForm();
+    // 收集表单数据
+    const formData = new FormData();
+    formData.append('passenger[name]', name);
+    formData.append('passenger[id_type]', document.querySelector('select[name="new_passenger[id_type]"]').value);
+    formData.append('passenger[id_number]', idNumber);
+    formData.append('passenger[phone]', document.querySelector('input[name="new_passenger[phone]"]').value);
+    formData.append('passenger[is_self]', document.querySelector('input[name="new_passenger[is_self]"]').checked ? '1' : '0');
+    
+    // 添加return_to参数以便创建后返回当前页面
+    formData.append('return_to', 'ticket_order_new');
+    
+    // 保存当前URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    formData.append('ticket_id', urlParams.get('ticket_id') || '<%= params[:ticket_id] %>');
+    formData.append('supplier_id', urlParams.get('supplier_id') || '<%= params[:supplier_id] %>');
+    formData.append('visit_date', urlParams.get('visit_date') || '<%= params[:visit_date] %>');
+    
+    // 提交到后端
+    fetch('/passengers', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        // 创建成功，刷新页面
+        window.location.reload();
+      } else {
+        return response.json().then(data => {
+          alert(data.error || '添加出行人失败，请检查输入信息');
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('添加出行人失败，请稍后重试');
+    });
   }
 
   function showPassengerManagement() {
     window.location.href = '/passengers';
   }
 
+  // Track if page is already initialized to prevent duplicate listeners
+  let isInitialized = false;
+  
   // Handle passenger checkbox selection UI
-  document.addEventListener('DOMContentLoaded', function() {
+  function initializePage() {
+    // Prevent duplicate initialization
+    if (isInitialized) {
+      // Only update price on subsequent loads
+      updateTotalPrice();
+      return;
+    }
+    isInitialized = true;
+    
     const passengerCheckboxes = document.querySelectorAll('input[name="ticket_order[passenger_ids][]"]');
     const quantityField = document.getElementById('quantity_field');
     
@@ -439,16 +500,18 @@
     passengerCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
         const label = this.closest('label');
-        const check = label.querySelector('.passenger-check');
+        const check = label ? label.querySelector('.passenger-check') : null;
         
-        if (this.checked) {
-          // Add check mark
-          check.classList.add('border-accent', 'bg-accent');
-          check.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
-        } else {
-          // Remove check mark
-          check.classList.remove('border-accent', 'bg-accent');
-          check.innerHTML = '';
+        if (check) {
+          if (this.checked) {
+            // Add check mark
+            check.classList.add('border-accent', 'bg-accent');
+            check.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+          } else {
+            // Remove check mark
+            check.classList.remove('border-accent', 'bg-accent');
+            check.innerHTML = '';
+          }
         }
         
         // Validate selection count
@@ -458,16 +521,39 @@
         if (selectedCount > requiredCount) {
           alert(`最多只能选择 ${requiredCount} 位出行人`);
           this.checked = false;
-          check.classList.remove('border-accent', 'bg-accent');
-          check.innerHTML = '';
+          if (check) {
+            check.classList.remove('border-accent', 'bg-accent');
+            check.innerHTML = '';
+          }
         }
       });
     });
 
-    // Handle insurance selection price update
+    // Handle insurance selection price update - use 'input' event for immediate response
     const insuranceRadios = document.querySelectorAll('input[name="insurance_type"]');
     insuranceRadios.forEach(radio => {
-      radio.addEventListener('change', updateTotalPrice);
+      // Use both 'input' (immediate) and 'change' (guaranteed) events
+      radio.addEventListener('input', function() {
+        console.log('保险选项变化(input):', this.value, 'price:', this.dataset.price);
+        updateTotalPrice();
+      });
+      radio.addEventListener('change', function() {
+        console.log('保险选项变化(change):', this.value, 'price:', this.dataset.price);
+        updateTotalPrice();
+      });
     });
+    
+    // Initial price calculation on page load
+    console.log('页面加载完成，初始化价格计算');
+    updateTotalPrice();
+  }
+  
+  // Support both DOMContentLoaded (full page load) and turbo:load (Turbo navigation)
+  document.addEventListener('DOMContentLoaded', initializePage);
+  document.addEventListener('turbo:load', initializePage);
+  
+  // Also handle turbo:before-cache to reset initialization flag
+  document.addEventListener('turbo:before-cache', function() {
+    isInitialized = false;
   });
 </script>

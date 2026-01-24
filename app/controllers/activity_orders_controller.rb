@@ -6,6 +6,7 @@ class ActivityOrdersController < ApplicationController
   def new
     @order = ActivityOrder.new(attraction_activity: @activity, quantity: 1)
     @attraction = @activity.attraction
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
   end
 
   def create
@@ -16,6 +17,7 @@ class ActivityOrdersController < ApplicationController
       redirect_to activity_order_path(@order), notice: '订单创建成功，请完成支付'
     else
       @attraction = @activity.attraction
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
       render :new, status: :unprocessable_entity
     end
   end
@@ -36,6 +38,13 @@ class ActivityOrdersController < ApplicationController
   end
 
   def activity_order_params
-    params.require(:activity_order).permit(:passenger_name, :contact_phone, :visit_date, :quantity, :notes)
+    params.require(:activity_order).permit(
+      :visit_date, 
+      :quantity, 
+      :notes, 
+      :insurance_type,
+      :contact_phone,
+      passenger_ids: []
+    )
   end
 end

@@ -81,6 +81,12 @@ class PassengersController < ApplicationController
           destination: params[:destination],
           city_id: params[:city_id]
         ), notice: "出行人添加成功"
+      elsif params[:return_to] == 'ticket_order_new'
+        redirect_to new_ticket_ticket_order_path(
+          params[:ticket_id],
+          supplier_id: params[:supplier_id],
+          visit_date: params[:visit_date]
+        ), notice: "出行人添加成功"
       else
         redirect_to passengers_path(source: params[:source]), notice: "#{traveler_label}添加成功"
       end
