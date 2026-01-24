@@ -65,9 +65,9 @@
 
       <!-- Passenger Info -->
       <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
-        <span>乘车人: <%= booking.passenger_name %></span>
+        <span>乘车人: <%= booking.passengers.map(&:passenger_name).join('、') %></span>
         <span>|</span>
-        <span><%= booking.contact_phone %></span>
+        <span>共<%= booking.passenger_count %>人</span>
       </div>
 
       <!-- Services/Tags -->

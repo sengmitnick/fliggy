@@ -29,7 +29,7 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  // 选择保障套餐（单选：基础/优享/尊享）
+  // 选择保障套餐（单选：基础/优享/尊享，可取消）
   selectProtection(event: Event): void {
     const target = event.currentTarget as HTMLElement
     const protectionType = target.dataset.protectionType
@@ -39,16 +39,41 @@ export default class extends Controller<HTMLElement> {
       return
     }
 
-    // 移除所有选中状态
+    // 检查当前是否已选中
+    const checkbox = target.querySelector<HTMLElement>(
+      '[data-car-insurance-selector-target="checkbox"]'
+    )
+    const isCurrentlySelected = checkbox && 
+      (checkbox.classList.contains("bg-green-500") || checkbox.classList.contains("bg-orange-400"))
+
+    // 如果点击的是已选中的保障，则取消选中
+    if (isCurrentlySelected) {
+      if (checkbox) {
+        checkbox.classList.remove("bg-green-500", "border-green-500", "bg-orange-400", "border-orange-400")
+        checkbox.classList.add("border-gray-300")
+        checkbox.innerHTML = ""
+      }
+      // 移除卡片高亮边框
+      const card = target.closest<HTMLElement>('.border-2')
+      if (card) {
+        card.classList.remove("border-green-500", "border-orange-400")
+        card.classList.add("border-gray-200")
+      }
+      console.log(`Deselected protection: ${protectionType}`)
+      this.updatePrice()
+      return
+    }
+
+    // 否则，移除其他保障的选中状态，选中当前保障
     this.optionTargets.forEach(option => {
       if (option.dataset.category === "protection") {
-        const checkbox = option.querySelector<HTMLElement>(
+        const optCheckbox = option.querySelector<HTMLElement>(
           '[data-car-insurance-selector-target="checkbox"]'
         )
-        if (checkbox) {
-          checkbox.classList.remove("bg-green-500", "border-green-500")
-          checkbox.classList.add("border-gray-300")
-          checkbox.innerHTML = ""
+        if (optCheckbox) {
+          optCheckbox.classList.remove("bg-green-500", "border-green-500", "bg-orange-400", "border-orange-400")
+          optCheckbox.classList.add("border-gray-300")
+          optCheckbox.innerHTML = ""
         }
         // 移除卡片高亮边框
         const card = option.closest<HTMLElement>('.border-2')
@@ -60,9 +85,6 @@ export default class extends Controller<HTMLElement> {
     })
 
     // 添加选中状态
-    const checkbox = target.querySelector<HTMLElement>(
-      '[data-car-insurance-selector-target="checkbox"]'
-    )
     if (checkbox) {
       if (protectionType === "premium") {
         checkbox.classList.remove("border-gray-300")

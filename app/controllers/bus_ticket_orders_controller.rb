@@ -29,41 +29,62 @@ class BusTicketOrdersController < ApplicationController
     @bus_ticket = BusTicket.find(params[:bus_ticket_order][:bus_ticket_id])
     passenger_ids = params[:bus_ticket_order][:passenger_ids] || []
     
-    # Create order for each passenger
-    orders_created = []
-    passenger_ids.each do |passenger_id|
-      passenger = current_user.passengers.find(passenger_id)
-      order = BusTicketOrder.new(
-        user: current_user,
-        bus_ticket: @bus_ticket,
-        passenger_name: passenger.name,
-        passenger_id_number: passenger.id_number,
-        contact_phone: passenger.phone,
-        departure_station: @bus_ticket.departure_station,
-        arrival_station: @bus_ticket.arrival_station,
-        insurance_type: params[:bus_ticket_order][:insurance_type],
-        insurance_price: params[:bus_ticket_order][:insurance_price].to_f / passenger_ids.length,
-        total_price: params[:bus_ticket_order][:total_price].to_f / passenger_ids.length,
-        status: 'pending'
-      )
-      
-      if order.save
-        orders_created << order
-      else
-        # Rollback: delete previously created orders
-        orders_created.each(&:destroy)
-        render json: { success: false, message: order.errors.full_messages.join(', ') }, status: :unprocessable_entity
-        return
-      end
+    if passenger_ids.empty?
+      render json: { success: false, message: '请至少选择一位乘车人' }, status: :unprocessable_entity
+      return
     end
     
-    # Store first order ID for payment and success redirect
-    render json: { 
-      success: true, 
-      order_id: orders_created.first.id,
-      payment_url: pay_bus_ticket_order_path(orders_created.first),
-      success_url: success_bus_ticket_order_path(orders_created.first)
-    }
+    # Calculate prices
+    insurance_type = params[:bus_ticket_order][:insurance_type] || 'none'
+    base_price = @bus_ticket.price
+    insurance_price_per_person = case insurance_type
+    when 'refund' then 9
+    when 'premium' then 3
+    else 0
+    end
+    
+    passenger_count = passenger_ids.length
+    total_insurance_price = insurance_price_per_person * passenger_count
+    total_price = (base_price * passenger_count) + total_insurance_price
+    
+    # Create one order with multiple passengers
+    order = BusTicketOrder.new(
+      user: current_user,
+      bus_ticket: @bus_ticket,
+      departure_station: @bus_ticket.departure_station,
+      arrival_station: @bus_ticket.arrival_station,
+      base_price: base_price,
+      passenger_count: passenger_count,
+      insurance_type: insurance_type,
+      insurance_price: total_insurance_price,
+      total_price: total_price,
+      status: 'pending'
+    )
+    
+    BusTicketOrder.transaction do
+      if order.save
+        # Create passenger records
+        passenger_ids.each do |passenger_id|
+          passenger = current_user.passengers.find(passenger_id)
+          order.passengers.create!(
+            passenger_name: passenger.name,
+            passenger_id_number: passenger.id_number,
+            insurance_type: insurance_type
+          )
+        end
+        
+        render json: { 
+          success: true, 
+          order_id: order.id,
+          payment_url: pay_bus_ticket_order_path(order),
+          success_url: success_bus_ticket_order_path(order)
+        }
+      else
+        render json: { success: false, message: order.errors.full_messages.join(', ') }, status: :unprocessable_entity
+      end
+    end
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { success: false, message: e.message }, status: :unprocessable_entity
   end
 
 
@@ -73,13 +94,6 @@ class BusTicketOrdersController < ApplicationController
     # Password already verified by frontend via /profile/verify_pay_password
     # Update order status to paid
     if @order.update(status: 'paid')
-      # Update related orders (same user, same ticket, same create time) to paid
-      BusTicketOrder.where(
-        user: current_user,
-        bus_ticket_id: @order.bus_ticket_id,
-        created_at: @order.created_at
-      ).update_all(status: 'paid')
-      
       render json: { success: true }
     else
       render json: { success: false, message: '支付失败' }, status: :unprocessable_entity
@@ -89,12 +103,6 @@ class BusTicketOrdersController < ApplicationController
   def success
     @order = current_user.bus_ticket_orders.find(params[:id])
     @bus_ticket = @order.bus_ticket
-    # Get all orders from the same booking (same user, ticket, create time)
-    @orders = BusTicketOrder.where(
-      user: current_user,
-      bus_ticket_id: @order.bus_ticket_id,
-      created_at: @order.created_at
-    ).order(:id)
   end
 
   def destroy
