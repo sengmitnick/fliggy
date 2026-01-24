@@ -19,18 +19,37 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 
 
 
 public class LauncherActivity
         extends com.google.androidbrowserhelper.trusted.LauncherActivity {
-    
 
-    
+    private static final String TAG = "LauncherActivity";
+    private static final int TIMEOUT_MS = 10000; // 10 秒超时
+    private Handler timeoutHandler = new Handler();
+    private boolean isLaunched = false;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: Starting LauncherActivity");
         super.onCreate(savedInstanceState);
+
+        // 设置超时保护
+        timeoutHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isLaunched) {
+                    Log.e(TAG, "Launch timeout, finishing activity");
+                    finish();
+                }
+            }
+        }, TIMEOUT_MS);
+
         // Setting an orientation crashes the app due to the transparent background on Android 8.0
         // Oreo and below. We only set the orientation on Oreo and above. This only affects the
         // splash screen and Chrome will still respect the orientation.
@@ -40,6 +59,21 @@ public class LauncherActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        isLaunched = true;
+        timeoutHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+        timeoutHandler.removeCallbacksAndMessages(null);
     }
 
     @Override

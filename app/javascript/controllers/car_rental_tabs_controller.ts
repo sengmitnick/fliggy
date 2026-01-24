@@ -9,20 +9,24 @@ export default class extends Controller {
     "returnLocationSection",
     "cityDisplay",
     "pickupLocationDisplay",
+    "returnCityDisplay",
     "returnLocationDisplay",
     "pickupDateDisplay",
     "returnDateDisplay",
     "durationDisplay",
     "cityInput",
     "pickupLocationInput",
+    "returnCityInput",
     "returnLocationInput",
     "pickupDateInput",
-    "returnDateInput"
+    "returnDateInput",
+    "searchButton"
   ]
 
   static values = {
     city: String,
     pickupLocation: String,
+    returnCity: String,
     returnLocation: String,
     pickupDate: String,
     returnDate: String
@@ -35,29 +39,34 @@ export default class extends Controller {
   declare readonly returnLocationSectionTarget: HTMLElement
   declare readonly cityDisplayTarget: HTMLElement
   declare readonly pickupLocationDisplayTarget: HTMLElement
+  declare readonly returnCityDisplayTarget: HTMLElement
   declare readonly returnLocationDisplayTarget: HTMLElement
   declare readonly pickupDateDisplayTarget: HTMLElement
   declare readonly returnDateDisplayTarget: HTMLElement
   declare readonly durationDisplayTarget: HTMLElement
   declare readonly cityInputTarget: HTMLInputElement
   declare readonly pickupLocationInputTarget: HTMLInputElement
+  declare readonly returnCityInputTarget: HTMLInputElement
   declare readonly returnLocationInputTarget: HTMLInputElement
   declare readonly pickupDateInputTarget: HTMLInputElement
   declare readonly returnDateInputTarget: HTMLInputElement
+  declare readonly searchButtonTarget: HTMLInputElement
   declare cityValue: string
   declare pickupLocationValue: string
+  declare returnCityValue: string
   declare returnLocationValue: string
   declare pickupDateValue: string
   declare returnDateValue: string
 
   private isDomestic: boolean = true
   private isSwapEnabled: boolean = false
-  private currentSelectionType: 'city' | 'pickup' | 'return' | null = null
+  private currentSelectionType: 'city' | 'pickup' | 'return' | 'return-city' | null = null
 
   connect(): void {
     console.log("CarRentalTabs connected")
     this.updateDomesticView()
     this.initializeDefaults()
+    this.validateSearchButton()
     
     // Listen for events
     document.addEventListener('city-selector:city-selected', this.handleCitySelected.bind(this))
@@ -110,10 +119,19 @@ export default class extends Controller {
     // Show/hide return location section
     if (this.isSwapEnabled) {
       this.returnLocationSectionTarget.classList.remove('hidden')
+      // Initialize return city to current pickup city
+      const currentCity = this.cityDisplayTarget.textContent?.trim() || '深圳'
+      this.returnCityValue = currentCity
+      this.returnCityDisplayTarget.textContent = currentCity
+      this.returnCityInputTarget.value = currentCity
     } else {
       this.returnLocationSectionTarget.classList.add('hidden')
+      this.returnCityValue = ''
       this.returnLocationValue = ''
-      this.returnLocationDisplayTarget.textContent = '同取车地点'
+      this.returnCityDisplayTarget.textContent = '深圳'
+      this.returnLocationDisplayTarget.textContent = '请选择地点'
+      this.returnLocationDisplayTarget.classList.add('text-gray-400')
+      this.returnCityInputTarget.value = ''
       this.returnLocationInputTarget.value = ''
     }
   }
@@ -142,6 +160,22 @@ export default class extends Controller {
       controller.openModal()
     } else {
       console.error('[CarRentalTabs] location-selector controller or openModal method not found')
+    }
+  }
+
+  // Open return city selector
+  openReturnCitySelector(): void {
+    if (!this.isSwapEnabled) {
+      if (window.showToast) {
+        window.showToast('请先开启异地还车')
+      }
+      return
+    }
+    this.currentSelectionType = 'return-city'
+    const modal = document.querySelector('[data-city-selector-target="modal"]') as HTMLElement
+    if (modal) {
+      modal.classList.remove('hidden')
+      document.body.style.overflow = 'hidden'
     }
   }
 
@@ -203,6 +237,22 @@ export default class extends Controller {
         this.clearReturnLocation()
       }
       this.currentSelectionType = null
+      
+      // Auto-jump to pickup location selector after city selection
+      // Use setTimeout to ensure city selector modal is fully closed first
+      setTimeout(() => {
+        this.openPickupLocationSelector()
+      }, 300)
+    } else if (this.currentSelectionType === 'return-city') {
+      this.updateReturnCity(cityName)
+      // Clear return location when return city changes
+      this.clearReturnLocation()
+      this.currentSelectionType = null
+      
+      // Auto-jump to return location selector after return city selection
+      setTimeout(() => {
+        this.openReturnLocationSelector()
+      }, 300)
     }
   }
 
@@ -239,6 +289,14 @@ export default class extends Controller {
     this.cityValue = cityName
     this.cityDisplayTarget.textContent = cityName
     this.cityInputTarget.value = cityName
+    this.validateSearchButton()
+  }
+
+  // Update return city
+  private updateReturnCity(cityName: string): void {
+    this.returnCityValue = cityName
+    this.returnCityDisplayTarget.textContent = cityName
+    this.returnCityInputTarget.value = cityName
   }
 
   // Update pickup location
@@ -247,6 +305,7 @@ export default class extends Controller {
     this.pickupLocationDisplayTarget.textContent = location
     this.pickupLocationDisplayTarget.classList.remove('text-gray-400')
     this.pickupLocationInputTarget.value = location
+    this.validateSearchButton()
   }
 
   // Clear pickup location
@@ -255,6 +314,7 @@ export default class extends Controller {
     this.pickupLocationDisplayTarget.textContent = '请选择地点'
     this.pickupLocationDisplayTarget.classList.add('text-gray-400')
     this.pickupLocationInputTarget.value = ''
+    this.validateSearchButton()
   }
 
   // Update return location
@@ -268,7 +328,7 @@ export default class extends Controller {
   // Clear return location
   private clearReturnLocation(): void {
     this.returnLocationValue = ''
-    this.returnLocationDisplayTarget.textContent = '同取车地点'
+    this.returnLocationDisplayTarget.textContent = '请选择地点'
     this.returnLocationDisplayTarget.classList.add('text-gray-400')
     this.returnLocationInputTarget.value = ''
   }
@@ -362,6 +422,22 @@ export default class extends Controller {
       this.swapIndicatorTarget.classList.remove("left-5")
       this.swapToggleTarget.classList.add("bg-gray-200")
       this.swapToggleTarget.classList.remove("bg-blue-500")
+    }
+  }
+
+  // Validate search button - disable if city or pickup location is empty
+  private validateSearchButton(): void {
+    const hasCity = this.cityValue && this.cityValue.trim() !== ''
+    const hasPickupLocation = this.pickupLocationValue && this.pickupLocationValue.trim() !== ''
+    
+    if (hasCity && hasPickupLocation) {
+      this.searchButtonTarget.disabled = false
+      this.searchButtonTarget.classList.remove('opacity-50', 'cursor-not-allowed')
+      this.searchButtonTarget.classList.add('cursor-pointer')
+    } else {
+      this.searchButtonTarget.disabled = true
+      this.searchButtonTarget.classList.add('opacity-50', 'cursor-not-allowed')
+      this.searchButtonTarget.classList.remove('cursor-pointer')
     }
   }
 }

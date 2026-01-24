@@ -1,0 +1,145 @@
+<!-- 地图指引 Modal -->
+<div data-map-guide-target="modal" class="fixed inset-0 bg-white z-50 hidden">
+  <!-- 顶部导航栏 -->
+  <div class="bg-white sticky top-0 z-10">
+    <div class="flex items-center h-12 px-4 relative border-b">
+      <button data-action="click->map-guide#closeModal" class="absolute left-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      <div class="flex-1 flex justify-center space-x-8">
+        <button data-map-guide-target="pickupTab" 
+                data-action="click->map-guide#switchTab" 
+                data-tab="pickup"
+                class="text-base font-bold border-b-2 border-black pb-1">
+          取车门店
+        </button>
+        <button data-map-guide-target="returnTab" 
+                data-action="click->map-guide#switchTab" 
+                data-tab="return"
+                class="text-base text-gray-400 pb-1">
+          还车门店
+        </button>
+      </div>
+      <div class="absolute right-4">
+        <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 地图区域 -->
+  <div class="relative h-[55vh] bg-gray-100">
+    <!-- 实际应用中这里会加载真实地图（如高德地图、百度地图） -->
+    <!-- 这里用静态图片模拟 -->
+    <div class="w-full h-full bg-gradient-to-br from-blue-50 to-green-50 relative">
+      <!-- 起点标记 -->
+      <div class="absolute top-[20%] right-[30%] flex flex-col items-center">
+        <div class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-bold">起</div>
+        <div class="w-0.5 h-8 bg-blue-500"></div>
+        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+      </div>
+      
+      <!-- 终点标记 -->
+      <div class="absolute bottom-[30%] left-[25%] flex flex-col items-center">
+        <div class="bg-orange-500 text-white px-3 py-2 rounded-lg shadow-lg font-bold flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+          </svg>
+          门店
+        </div>
+        <div class="w-0.5 h-6 bg-orange-500"></div>
+        <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+      </div>
+
+      <!-- 路线 (简化的SVG路径) -->
+      <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 70 25 Q 50 40, 25 70" stroke="#3B82F6" stroke-width="0.5" fill="none" stroke-dasharray="2,2"></path>
+      </svg>
+
+      <!-- 地图控件 -->
+      <div class="absolute bottom-4 right-4 flex flex-col space-y-2">
+        <button class="bg-white rounded-lg shadow p-2">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+        </button>
+        <button class="bg-white rounded-lg shadow p-2">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 我的位置按钮 -->
+      <button class="absolute bottom-4 left-4 bg-white rounded-full shadow p-2">
+        <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 底部信息区域 -->
+  <div class="bg-white px-4 py-3 space-y-4">
+    <!-- 取车方式 -->
+    <div class="flex items-start space-x-3">
+      <div class="text-gray-500 text-sm w-20 flex-shrink-0">取车方式</div>
+      <div class="flex-1 text-sm font-medium" data-map-guide-target="pickupMethod">
+        店员免费送车上门
+      </div>
+    </div>
+
+    <!-- 取车地址 -->
+    <div class="flex items-start space-x-3">
+      <div class="text-gray-500 text-sm w-20 flex-shrink-0">取车地址</div>
+      <div class="flex-1">
+        <div class="text-sm font-medium mb-1" data-map-guide-target="pickupAddress">
+          <%= @search_pickup_location || '白云国际机场T2' %>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button class="text-xs text-blue-500 border border-blue-500 rounded px-2 py-0.5">
+            复制
+          </button>
+          <button class="text-xs text-blue-500 border border-blue-500 rounded px-2 py-0.5">
+            电话
+          </button>
+        </div>
+      </div>
+      <svg class="w-5 h-5 text-gray-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+
+    <!-- 门店地址 -->
+    <div class="flex items-start space-x-3">
+      <div class="text-gray-500 text-sm w-20 flex-shrink-0">门店地址</div>
+      <div class="flex-1">
+        <div class="text-sm" data-map-guide-target="storeAddress">
+          广州市白云区人和镇矮岗村迎宾大道和顺停车场
+        </div>
+        <div class="flex items-center space-x-2 mt-2">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span class="text-xs text-gray-400">距离</span>
+          <span class="text-xs font-medium">27.3公里</span>
+        </div>
+      </div>
+      <svg class="w-5 h-5 text-gray-300 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+
+    <!-- 营业时间 -->
+    <div class="flex items-start space-x-3">
+      <div class="text-gray-500 text-sm w-20 flex-shrink-0">营业时间</div>
+      <div class="flex-1 text-sm" data-map-guide-target="businessHours">
+        08:00-22:01
+      </div>
+    </div>
+  </div>
+</div>

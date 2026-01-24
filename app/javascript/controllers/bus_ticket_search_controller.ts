@@ -689,4 +689,18 @@ export default class extends Controller {
       text.textContent = label
     }
   }
+
+  // 显示精彩即将上线提示
+  showComingSoon(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    // Use window.showToast to display coming soon message
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('精彩即将上线', 'info')
+    } else {
+      console.warn('showToast function not available')
+      alert('精彩即将上线')
+    }
+  }
 }

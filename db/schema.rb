@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_23_101011) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -262,9 +262,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_23_101011) do
   create_table "bus_ticket_orders", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "bus_ticket_id"
-    t.string "passenger_name"
-    t.string "passenger_id_number"
-    t.string "contact_phone"
     t.string "departure_station"
     t.string "arrival_station"
     t.string "insurance_type"
@@ -274,9 +271,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_23_101011) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
+    t.integer "passenger_count", default: 1
+    t.decimal "base_price"
     t.index ["bus_ticket_id"], name: "index_bus_ticket_orders_on_bus_ticket_id"
     t.index ["data_version"], name: "index_bus_ticket_orders_on_data_version"
     t.index ["user_id"], name: "index_bus_ticket_orders_on_user_id"
+  end
+
+  create_table "bus_ticket_passengers", force: :cascade do |t|
+    t.bigint "bus_ticket_order_id", null: false
+    t.string "passenger_name", null: false
+    t.string "passenger_id_number", null: false
+    t.string "insurance_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bus_ticket_order_id"], name: "index_bus_ticket_passengers_on_bus_ticket_order_id"
   end
 
   create_table "bus_tickets", force: :cascade do |t|
@@ -1702,6 +1711,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_23_101011) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
+  add_foreign_key "bus_ticket_passengers", "bus_ticket_orders"
   add_foreign_key "contacts", "users"
   add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"

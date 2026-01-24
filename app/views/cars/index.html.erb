@@ -57,11 +57,14 @@
         </button>
       </div>
       <div class="flex-[1.5] pl-4 flex justify-between items-center">
-        <button 
-          type="button"
-          data-action="click->car-rental-tabs#openPickupLocationSelector"
-          class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
-          data-car-rental-tabs-target="pickupLocationDisplay">请选择地点</button>
+        <div>
+          <div class="text-xs text-gray-400 mb-1">取车地点</div>
+          <button 
+            type="button"
+            data-action="click->car-rental-tabs#openPickupLocationSelector"
+            class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
+            data-car-rental-tabs-target="pickupLocationDisplay">请选择地点</button>
+        </div>
         <div class="flex items-center text-xs text-gray-400">
           异地还车 
           <button 
@@ -77,19 +80,31 @@
 
     <!-- 还车地点 (异地还车开启时显示) -->
     <div class="flex justify-between items-center mb-4 hidden" data-car-rental-tabs-target="returnLocationSection">
-      <div class="flex-1">
+      <div class="flex-1 border-r border-gray-100">
+        <button 
+          type="button"
+          data-action="click->car-rental-tabs#openReturnCitySelector"
+          class="text-2xl font-bold flex items-center hover:text-blue-600 transition-colors">
+          <span data-car-rental-tabs-target="returnCityDisplay">深圳</span>
+          <svg class="w-4 h-4 ml-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex-[1.5] pl-4">
         <div class="text-xs text-gray-400 mb-1">还车地点</div>
         <button 
           type="button"
           data-action="click->car-rental-tabs#openReturnLocationSelector"
-          class="text-lg font-bold hover:text-blue-600 transition-colors"
-          data-car-rental-tabs-target="returnLocationDisplay">同取车地点</button>
+          class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
+          data-car-rental-tabs-target="returnLocationDisplay">请选择地点</button>
       </div>
     </div>
 
     <!-- 隐藏的input字段用于表单提交 -->
     <%= f.hidden_field :city, value: @current_city, data: { car_rental_tabs_target: 'cityInput' } %>
     <%= f.hidden_field :pickup_location, value: '', data: { car_rental_tabs_target: 'pickupLocationInput' } %>
+    <%= f.hidden_field :return_city, value: '', data: { car_rental_tabs_target: 'returnCityInput' } %>
     <%= f.hidden_field :return_location, value: '', data: { car_rental_tabs_target: 'returnLocationInput' } %>
     <%= f.hidden_field :pickup_date, value: '', data: { car_rental_tabs_target: 'pickupDateInput' } %>
     <%= f.hidden_field :return_date, value: '', data: { car_rental_tabs_target: 'returnDateInput' } %>
@@ -122,7 +137,7 @@
     </div>
 
     <!-- 搜索按钮 -->
-    <%= f.submit '搜索租车', class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center cursor-pointer", style: "background-color: #ffda00; color: #333; border: none;" %>
+    <%= f.submit '搜索租车', data: { car_rental_tabs_target: 'searchButton' }, class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center cursor-pointer", style: "background-color: #ffda00; color: #333; border: none;" %>
 
     <!-- 保障信息 -->
     <div class="text-center text-[10px] text-gray-400">
@@ -361,9 +376,7 @@
   </div>
 
   <!-- 地点选择器模态框 -->
-  <div data-controller="location-selector">
-    <%= render 'shared/location_selector_modal' %>
-  </div>
+  <%= render 'shared/location_selector_modal' %>
 
   <!-- 日期时间选择器模态框 -->
   <div data-controller="car-datetime-picker">

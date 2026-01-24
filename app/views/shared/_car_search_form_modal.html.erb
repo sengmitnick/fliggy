@@ -1,0 +1,136 @@
+<!-- Car Search Form Modal -->
+<div data-car-search-edit-target="modal"
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
+     data-action="click->car-search-edit#closeModal">
+  
+  <!-- Modal Content -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col overflow-hidden"
+       data-action="click->car-search-edit#stopPropagation">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-bold text-text-primary">修改搜索条件</h3>
+      <button 
+        type="button"
+        data-action="click->car-search-edit#closeModal"
+        class="text-text-secondary w-8 h-8 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scrollable Form Content -->
+    <div class="flex-1 overflow-y-auto">
+      <%= form_with url: search_cars_path, method: :get, local: true, class: "p-4" do |f| %>
+        <!-- 国内/国际选择 -->
+        <div class="flex bg-gray-100 p-1 rounded-lg mb-4 text-sm">
+          <button 
+            type="button"
+            data-car-search-edit-target="domesticButton"
+            data-action="click->car-search-edit#selectDomestic"
+            class="flex-1 py-1.5 rounded-md bg-white shadow-sm font-bold">
+            国内
+          </button>
+          <button 
+            type="button"
+            data-car-search-edit-target="internationalButton"
+            data-action="click->car-search-edit#selectInternational"
+            class="flex-1 py-1.5 text-gray-500">
+            国际/中国港澳台
+          </button>
+        </div>
+
+        <!-- 地点 -->
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex-1 border-r border-gray-100">
+            <button 
+              type="button"
+              data-action="click->car-search-edit#openCitySelector"
+              class="text-2xl font-bold flex items-center hover:text-blue-600 transition-colors">
+              <span data-car-search-edit-target="modalCityDisplay"></span>
+              <svg class="w-4 h-4 ml-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+          <div class="flex-[1.5] pl-4 flex justify-between items-center">
+            <div>
+              <div class="text-xs text-gray-400 mb-1">取车地点</div>
+              <button 
+                type="button"
+                data-action="click->car-search-edit#openPickupLocationSelector"
+                class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
+                data-car-search-edit-target="pickupLocationDisplay">请选择地点</button>
+            </div>
+            <div class="flex items-center text-xs text-gray-400">
+              异地还车 
+              <button 
+                type="button"
+                data-action="click->car-search-edit#toggleSwap"
+                data-car-search-edit-target="swapToggle"
+                class="w-10 h-6 bg-gray-200 rounded-full ml-1 relative">
+                <div data-car-search-edit-target="swapIndicator" class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 还车地点 (异地还车开启时显示) -->
+        <div class="flex justify-between items-center mb-4 hidden" data-car-search-edit-target="returnLocationSection">
+          <div class="flex-1 border-r border-gray-100">
+            <button 
+              type="button"
+              data-action="click->car-search-edit#openReturnCitySelector"
+              class="text-2xl font-bold flex items-center hover:text-blue-600 transition-colors">
+              <span data-car-search-edit-target="returnCityDisplay">深圳</span>
+              <svg class="w-4 h-4 ml-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+          <div class="flex-[1.5] pl-4">
+            <div class="text-xs text-gray-400 mb-1">还车地点</div>
+            <button 
+              type="button"
+              data-action="click->car-search-edit#openReturnLocationSelector"
+              class="text-lg font-bold hover:text-blue-600 transition-colors text-gray-400"
+              data-car-search-edit-target="returnLocationDisplay">请选择地点</button>
+          </div>
+        </div>
+
+        <!-- 隐藏的input字段用于表单提交 -->
+        <%= f.hidden_field :city, value: '', data: { car_search_edit_target: 'cityInput' } %>
+        <%= f.hidden_field :pickup_location, value: '', data: { car_search_edit_target: 'pickupLocationInput' } %>
+        <%= f.hidden_field :return_city, value: '', data: { car_search_edit_target: 'returnCityInput' } %>
+        <%= f.hidden_field :return_location, value: '', data: { car_search_edit_target: 'returnLocationInput' } %>
+        <%= f.hidden_field :pickup_date, value: '', data: { car_search_edit_target: 'pickupDateInput' } %>
+        <%= f.hidden_field :return_date, value: '', data: { car_search_edit_target: 'returnDateInput' } %>
+
+        <!-- 时间选择 -->
+        <div class="flex justify-between items-center py-2 mb-4 border-b border-gray-50">
+          <button 
+            type="button"
+            data-action="click->car-search-edit#openPickupDateSelector"
+            class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+            <div class="text-xs text-gray-400">取车时间</div>
+            <div class="text-xl font-bold" data-car-search-edit-target="pickupDateDisplay">1月10日 <span class="text-sm">13:55</span></div>
+          </button>
+          <div 
+            data-car-search-edit-target="durationDisplay"
+            class="px-3 py-0.5 border border-gray-200 rounded-full text-xs">2天</div>
+          <button 
+            type="button"
+            data-action="click->car-search-edit#openReturnDateSelector"
+            class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
+            <div class="text-xs text-gray-400">还车时间</div>
+            <div class="text-xl font-bold" data-car-search-edit-target="returnDateDisplay">1月12日 <span class="text-sm">13:55</span></div>
+          </button>
+        </div>
+
+        <!-- 搜索按钮 -->
+        <%= f.submit '搜索租车', data: { car_search_edit_target: 'searchButton' }, class: "block w-full py-4 rounded-xl text-lg mb-4 font-bold text-center cursor-pointer", style: "background-color: #ffda00; color: #333; border: none;" %>
+      <% end %>
+    </div>
+  </div>
+</div>
