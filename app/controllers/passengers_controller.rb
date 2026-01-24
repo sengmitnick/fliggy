@@ -20,6 +20,7 @@ class PassengersController < ApplicationController
     @children = params[:children]
     @bus_ticket_id = params[:bus_ticket_id]
     @insurance_type = params[:insurance_type]
+    @selected_passenger_ids = params[:selected_passenger_ids]
     # Deep travel booking params
     @guide_id = params[:guide_id]
     @date = params[:date]
@@ -62,7 +63,8 @@ class PassengersController < ApplicationController
       elsif params[:return_to] == 'bus_ticket_order_new'
         redirect_to new_bus_ticket_order_path(
           bus_ticket_id: params[:bus_ticket_id],
-          insurance_type: params[:insurance_type]
+          insurance_type: params[:insurance_type],
+          selected_passenger_ids: params[:selected_passenger_ids]
         ), notice: "#{traveler_label}添加成功"
       elsif params[:return_to] == 'deep_travel_booking_new'
         redirect_to new_deep_travel_booking_path(
@@ -100,6 +102,7 @@ class PassengersController < ApplicationController
       @children = params[:children]
       @bus_ticket_id = params[:bus_ticket_id]
       @insurance_type = params[:insurance_type]
+      @selected_passenger_ids = params[:selected_passenger_ids]
       # Deep travel booking params
       @guide_id = params[:guide_id]
       @date = params[:date]

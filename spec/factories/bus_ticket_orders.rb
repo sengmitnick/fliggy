@@ -3,15 +3,14 @@ FactoryBot.define do
 
     association :user
     association :bus_ticket
-    passenger_name { "MyString" }
-    passenger_id_number { "MyString" }
-    contact_phone { "MyString" }
-    departure_station { "MyString" }
-    arrival_station { "MyString" }
-    insurance_type { "MyString" }
-    insurance_price { 9.99 }
-    total_price { 9.99 }
-    status { "MyString" }
+    base_price { 50.0 }
+    passenger_count { 1 }
+    departure_station { "北京" }
+    arrival_station { "上海" }
+    insurance_type { "none" }
+    insurance_price { 0.0 }
+    total_price { 50.0 }
+    status { "pending" }
 
   end
 end

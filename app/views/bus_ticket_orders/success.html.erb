@@ -25,7 +25,7 @@
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 mb-6">
       <div class="text-center mb-6">
         <div class="text-sm text-gray-500 mb-1">订单金额</div>
-        <div class="text-3xl font-bold text-[#FF5000]">￥<%= @orders.sum(&:total_price).to_i %></div>
+        <div class="text-3xl font-bold text-[#FF5000]">￥<%= '%.2f' % @order.total_price %></div>
       </div>
 
       <div class="border-t pt-4 space-y-3">
@@ -36,12 +36,12 @@
 
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">乘车人</span>
-          <span class="font-medium"><%= @orders.map(&:passenger_name).join('、') %></span>
+          <span class="font-medium"><%= @order.passengers.map(&:passenger_name).join('、') %></span>
         </div>
 
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">乘车人数</span>
-          <span class="font-medium"><%= @orders.count %>人</span>
+          <span class="font-medium"><%= @order.passenger_count %>人</span>
         </div>
 
         <div class="flex justify-between text-sm">
@@ -59,9 +59,9 @@
           <span class="font-medium">
             <% case @order.insurance_type %>
             <% when 'refund' %>
-              退改无忧险（¥9/人）
+              退改无忧险（¥9/人 × <%= @order.passenger_count %>人）
             <% when 'premium' %>
-              高额保障险（¥3/人）
+              基础保障险（¥3/人 × <%= @order.passenger_count %>人）
             <% else %>
               不购买保险
             <% end %>

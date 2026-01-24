@@ -2,9 +2,11 @@ class BusTicketOrder < ApplicationRecord
   include DataVersionable
   belongs_to :user
   belongs_to :bus_ticket
+  has_many :passengers, class_name: 'BusTicketPassenger', dependent: :destroy
   
-  validates :passenger_name, :passenger_id_number, :contact_phone, :total_price, presence: true
+  validates :total_price, :passenger_count, presence: true
   validates :status, inclusion: { in: %w[pending paid confirmed cancelled refunded] }
+  validates :passenger_count, numericality: { greater_than: 0 }
   
   # 状态说明:
   # pending - 待支付

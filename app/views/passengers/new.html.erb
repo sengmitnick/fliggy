@@ -28,7 +28,8 @@
         elsif @return_to == 'bus_ticket_order_new'
           new_bus_ticket_order_path(
             bus_ticket_id: @bus_ticket_id,
-            insurance_type: @insurance_type
+            insurance_type: @insurance_type,
+            selected_passenger_ids: @selected_passenger_ids
           )
         elsif @return_to == 'deep_travel_booking_new'
           new_deep_travel_booking_path(
@@ -73,6 +74,7 @@
       children: @children,
       bus_ticket_id: @bus_ticket_id,
       insurance_type: @insurance_type,
+      selected_passenger_ids: @selected_passenger_ids,
       guide_id: @guide_id,
       date: @date,
       adult_count: @adult_count,

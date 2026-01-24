@@ -1,4 +1,4 @@
-<div class="bg-gray-100 min-h-screen" data-controller="city-selector bus-date-picker" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="bg-gray-100 min-h-screen" data-controller="city-selector bus-date-picker bus-ticket-history" data-city-selector-departure-city-value="深圳" data-city-selector-destination-city-value="广州" data-city-selector-enable-multi-select-value="false" data-bus-date-picker-current-date-value="<%= Date.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative pb-8">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -16,7 +16,7 @@
             <div class="w-8 h-1 bg-gray-800 rounded-full mt-1"></div>
           </div>
           <div class="flex flex-col items-center relative">
-            <span class="text-lg text-gray-500">城际·景区</span>
+            <button type="button" class="text-lg text-gray-500" data-action="click->bus-ticket-history#showComingSoon">城际·景区</button>
             <!-- Hot Tag -->
             <div class="absolute -top-3 -right-6 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-tr-lg rounded-bl-lg">Hot</div>
           </div>
@@ -45,9 +45,9 @@
         </button>
 
         <!-- 搜索按钮 -->
-        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false } do |f| %>
-          <%= f.hidden_field :origin, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
-          <%= f.hidden_field :destination, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
+        <%= form_with url: search_bus_tickets_path, method: :get, local: true, data: { turbo: false, action: "submit->bus-ticket-history#saveSearch" } do |f| %>
+          <%= f.hidden_field :departure_city, value: '深圳', data: { 'city-selector-target': 'departureCityInput' } %>
+          <%= f.hidden_field :destination_city, value: '广州', data: { 'city-selector-target': 'destinationCityInput' } %>
           <%= f.hidden_field :date, value: Date.today, data: { 'bus-date-picker-target': 'dateInput' } %>
           <button type="submit" class="w-full bg-yellow-400 text-gray-900 font-bold text-lg py-3.5 rounded-full shadow-md hover:bg-yellow-500 transition mb-4">
             搜索汽车票
@@ -55,9 +55,14 @@
         <% end %>
 
         <!-- 历史记录 -->
-        <div class="flex justify-between text-xs text-gray-400">
-          <span>深圳-广州</span>
-          <span>清除</span>
+        <div class="hidden" data-bus-ticket-history-target="container">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400">历史搜索</span>
+            <button type="button" class="text-xs text-gray-400 cursor-pointer hover:text-gray-600" data-action="click->bus-ticket-history#clearHistory">清除</button>
+          </div>
+          <div class="flex flex-wrap gap-2" data-bus-ticket-history-target="list">
+            <!-- 历史记录列表会动态渲染到这里 -->
+          </div>
         </div>
       </div>
     </div>
@@ -66,7 +71,7 @@
   <!-- Quick Links Section -->
   <div class="mx-3 grid grid-cols-3 gap-3">
     <!-- 顺风车 -->
-    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+    <button type="button" class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm cursor-pointer hover:shadow-md transition" data-action="click->bus-ticket-history#showComingSoon">
       <div>
         <div class="font-bold text-gray-900 text-sm">顺风车</div>
         <div class="text-xs text-gray-400 mt-0.5">助您出行</div>
@@ -74,10 +79,10 @@
       <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
       </svg>
-    </div>
+    </button>
 
     <!-- 打车 -->
-    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+    <button type="button" class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm cursor-pointer hover:shadow-md transition" data-action="click->bus-ticket-history#showComingSoon">
       <div>
         <div class="font-bold text-gray-900 text-sm">打车</div>
         <div class="text-xs text-gray-400 mt-0.5">立即出发</div>
@@ -85,10 +90,10 @@
       <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
         <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
       </svg>
-    </div>
+    </button>
 
     <!-- 租车 -->
-    <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm">
+    <button type="button" class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm cursor-pointer hover:shadow-md transition" data-action="click->bus-ticket-history#showComingSoon">
       <div>
         <div class="font-bold text-gray-900 text-sm">租车</div>
         <div class="text-xs text-gray-400 mt-0.5">信用免押</div>
@@ -101,7 +106,7 @@
         </svg>
         <div class="absolute -bottom-1 -right-1 bg-yellow-100 text-yellow-700 text-[8px] px-1 rounded-sm border border-yellow-200">租</div>
       </div>
-    </div>
+    </button>
   </div>
 
 

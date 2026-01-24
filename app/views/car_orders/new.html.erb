@@ -1,8 +1,13 @@
-<div data-controller="car-order payment-confirmation"
+<div data-controller="car-order payment-confirmation map-guide"
      data-payment-confirmation-amount-value="<%= @total_price %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value=""
-     data-payment-confirmation-success-url-value="">
+     data-payment-confirmation-success-url-value=""
+     data-map-guide-pickup-location-value="<%= @search_pickup_location || '白云国际机场T2' %>"
+     data-map-guide-return-location-value="<%= @search_pickup_location || '白云国际机场T2' %>"
+     data-map-guide-pickup-method-value="店员免费送车上门"
+     data-map-guide-store-address-value="广州市白云区人和镇矮岗村迎宾大道和顺停车场"
+     data-map-guide-business-hours-value="08:00-22:01">
 <%= form_with(model: CarOrder.new, url: car_orders_path, class: "bg-[#F7F8FA] pb-24", data: { 'car-order-target': 'form' }) do |form| %>
   <% 
     # 计算取还车日期时间
@@ -98,7 +103,7 @@
         <div class="flex-1">
           <div class="flex items-center justify-between">
             <span class="text-sm font-bold">取/还：店员免费上门送取车</span>
-            <span class="text-xs text-gray-500 flex items-center">地图指引 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+            <button type="button" data-action="click->map-guide#openModal" class="text-xs text-gray-500 flex items-center">地图指引 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
           </div>
           <div class="text-xs text-gray-400 mt-0.5"><%= @search_pickup_location || '请选择取车地点' %></div>
         </div>
@@ -138,14 +143,12 @@
               <span data-passenger-selector-target="idType"><%= first_passenger.id_type %></span> 
               <span data-passenger-selector-target="idNumber"><%= first_passenger.id_number %></span>
             </div>
-            <div class="mt-4 flex items-center justify-between">
+            <div class="mt-4 flex items-center gap-2">
               <span class="text-sm text-gray-400">联系电话</span>
-              <div class="flex items-center text-sm font-bold">
-                <span data-passenger-selector-target="phone"><%= first_passenger.phone || '未填写' %></span>
-                <svg class="w-4 h-4 ml-2 text-gray-300 cursor-pointer" fill="currentColor" viewBox="0 0 20 20" data-action="click->passenger-selector#toggleEdit">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
+              <span class="text-sm font-bold" data-passenger-selector-target="phone"><%= first_passenger.phone || '未填写' %></span>
+              <svg class="w-4 h-4 ml-auto text-gray-300 cursor-pointer" fill="currentColor" viewBox="0 0 20 20" data-action="click->passenger-selector#toggleEdit">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+              </svg>
             </div>
           </div>
 
@@ -238,7 +241,9 @@
     </div>
 
     <!-- 升级商家保障 -->
-    <div>
+    <div data-controller="car-insurance-selector"
+         data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
+         data-car-insurance-selector-days-count-value="<%= days_count %>">
       <h3 class="font-bold text-lg mb-3">升级商家保障，租车达人必备</h3>
       <div class="flex space-x-3 overflow-x-auto no-scrollbar snap-x px-1 pb-4">
         
@@ -263,7 +268,12 @@
         </div>
 
         <!-- 优享保障卡片 (绿色样式) -->
-        <div class="bg-white border-2 border-green-500 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm">
+        <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm cursor-pointer"
+             data-car-insurance-selector-target="option"
+             data-category="protection"
+             data-protection-type="premium"
+             data-price="40"
+             data-action="click->car-insurance-selector#selectProtection">
           <div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
             <span class="bg-green-500 text-white text-[10px] px-3 py-0.5 rounded-b-lg">车损免赔 更全保障</span>
           </div>
@@ -279,12 +289,17 @@
           </div>
           <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
             <div class="text-gray-900 font-bold">+ ￥40<span class="text-[10px] font-normal text-gray-400">/天</span></div>
-            <div class="w-6 h-6 rounded-full border border-gray-300"></div>
+            <div class="w-6 h-6 rounded-full border border-gray-300" data-car-insurance-selector-target="checkbox"></div>
           </div>
         </div>
 
         <!-- 尊享保障卡片 (橙色样式) -->
-        <div class="bg-white border-2 border-orange-400 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm">
+        <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 w-[260px] flex-shrink-0 snap-center relative shadow-sm cursor-pointer"
+             data-car-insurance-selector-target="option"
+             data-category="protection"
+             data-protection-type="deluxe"
+             data-price="90"
+             data-action="click->car-insurance-selector#selectProtection">
           <div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
             <span class="bg-orange-500 text-white text-[10px] px-3 py-0.5 rounded-b-lg">免折旧费 免停运费</span>
           </div>
@@ -300,7 +315,7 @@
           </div>
           <div class="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
             <div class="text-gray-900 font-bold">+ ￥90<span class="text-[10px] font-normal text-gray-400">/天</span></div>
-            <div class="w-6 h-6 rounded-full border border-gray-300"></div>
+            <div class="w-6 h-6 rounded-full border border-gray-300" data-car-insurance-selector-target="checkbox"></div>
           </div>
         </div>
 
@@ -308,11 +323,18 @@
     </div>
 
     <!-- 平台保险 -->
-    <div class="bg-white rounded-xl overflow-hidden">
+    <div class="bg-white rounded-xl overflow-hidden" data-controller="car-insurance-selector"
+         data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
+         data-car-insurance-selector-days-count-value="<%= days_count %>">
       <div class="bg-sky-100 px-4 py-1.5 text-xs text-sky-700 inline-block rounded-br-xl">平台保险</div>
       <div class="p-4 space-y-6">
         <!-- 三者险 -->
-        <div class="flex items-start justify-between">
+        <div class="flex items-start justify-between cursor-pointer"
+             data-car-insurance-selector-target="option"
+             data-category="platform"
+             data-insurance-type="liability"
+             data-price="40"
+             data-action="click->car-insurance-selector#toggleInsurance">
           <div class="flex items-start space-x-3">
             <div class="w-16 h-12 bg-gray-100 rounded flex items-center justify-center relative">
               <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/></svg>
@@ -330,7 +352,7 @@
           </div>
           <div class="text-right">
             <div class="text-sm font-bold">￥40<span class="text-xs font-normal text-gray-400">/天</span></div>
-            <div class="w-6 h-6 rounded-full border-2 border-gray-200 mt-1 inline-block"></div>
+            <div class="w-6 h-6 rounded-full border-2 border-gray-200 mt-1 inline-block" data-car-insurance-selector-target="checkbox"></div>
           </div>
         </div>
         <div class="flex items-center space-x-6 text-xs text-gray-500 bg-gray-50 p-3 rounded">
@@ -345,7 +367,12 @@
 
         <!-- 人身财物保障 -->
         <div class="border-t pt-4">
-          <div class="flex items-start justify-between">
+          <div class="flex items-start justify-between cursor-pointer"
+               data-car-insurance-selector-target="option"
+               data-category="platform"
+               data-insurance-type="personal"
+               data-price="25"
+               data-action="click->car-insurance-selector#toggleInsurance">
             <div class="flex items-start space-x-3">
               <div class="w-16 h-12 bg-gray-100 rounded overflow-hidden">
                 <div class="w-full h-full bg-blue-100 flex items-center justify-center">
@@ -362,7 +389,7 @@
             </div>
             <div class="text-right">
               <div class="text-sm font-bold">￥25<span class="text-xs font-normal text-gray-400">/天</span></div>
-              <div class="w-6 h-6 rounded-full border-2 border-gray-200 mt-1 inline-block"></div>
+              <div class="w-6 h-6 rounded-full border-2 border-gray-200 mt-1 inline-block" data-car-insurance-selector-target="checkbox"></div>
             </div>
           </div>
           <div class="grid grid-cols-4 gap-2 mt-4 text-center bg-gray-50 p-2 rounded">
@@ -466,12 +493,15 @@
   </div>
 
   <!-- 底部固定栏 -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex items-center justify-between z-50">
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex items-center justify-between z-50"
+       data-controller="car-insurance-selector"
+       data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
+       data-car-insurance-selector-days-count-value="<%= days_count %>">
     <div class="flex flex-col">
       <div class="flex items-baseline">
-        <span class="text-xs text-gray-400 line-through mr-1">￥<%= (@car.price_per_day * days_count * 1.45).round %></span>
+        <span class="text-xs text-gray-400 line-through mr-1" data-car-insurance-selector-target="originalPrice">￥<%= (@car.price_per_day * days_count * 1.45).round %></span>
         <span class="text-xs text-[#FF5000] font-bold italic font-serif">￥</span>
-        <span class="text-2xl text-[#FF5000] font-bold"><%= (@car.price_per_day * days_count).round %></span>
+        <span class="text-2xl text-[#FF5000] font-bold" data-car-insurance-selector-target="totalPrice"><%= (@car.price_per_day * days_count).round %></span>
         <div class="ml-2 flex items-center text-xs text-gray-500">
           明细 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
         </div>
@@ -488,4 +518,5 @@
 <% end %>
 
   <%= render 'shared/payment_confirmation_modals' %>
+  <%= render 'shared/map_guide_modal' %>
 </div>

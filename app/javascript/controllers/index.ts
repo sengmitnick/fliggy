@@ -110,6 +110,11 @@ import BookingQuantityController from "./booking_quantity_controller"
 import TravelerToggleController from "./traveler_toggle_controller"
 import TravelerDuplicateValidatorController from "./traveler_duplicate_validator_controller"
 import TermsCheckboxController from "./terms_checkbox_controller"
+import CarInsuranceSelectorController from "./car_insurance_selector_controller"
+import CarSearchEditController from "./car_search_edit_controller"
+import CarFilterController from "./car_filter_controller"
+import MapGuideController from "./map_guide_controller"
+import BusTicketHistoryController from "./bus_ticket_history_controller"
 
 const application = Application.start()
 
@@ -223,5 +228,10 @@ application.register("booking-quantity", BookingQuantityController)
 application.register("traveler-toggle", TravelerToggleController)
 application.register("traveler-duplicate-validator", TravelerDuplicateValidatorController)
 application.register("terms-checkbox", TermsCheckboxController)
+application.register("car-insurance-selector", CarInsuranceSelectorController)
+application.register("car-search-edit", CarSearchEditController)
+application.register("car-filter", CarFilterController)
+application.register("map-guide", MapGuideController)
+application.register("bus-ticket-history", BusTicketHistoryController)
 
 window.Stimulus = application
