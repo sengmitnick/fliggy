@@ -29,7 +29,8 @@ namespace :validator do
       tables.each do |table|
         count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
         if count > 0
-          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} CASCADE")
+          # RESTART IDENTITY resets the sequence counters
+          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
           deleted_total += count
           puts "  → #{table}: 清空 #{count} 条记录"
         end
@@ -121,7 +122,6 @@ namespace :validator do
       puts "  - 数据库已完全清空并重新初始化"
       puts "  - 共加载 #{loaded_files.size} 个数据包"
       puts "  - 当前时间: #{Date.current}"
-      puts "  - 航班日期范围: #{Date.current + 1.day} 至 #{Date.current + 7.days}（未来7天）"
       puts "\n💡 提示: 此命令模拟甲方交付新环境的初始化过程"
       puts "   请在每天开始工作时运行此命令，确保数据包日期与当前日期同步"
     else

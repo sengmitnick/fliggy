@@ -1,0 +1,173 @@
+<!-- 订单确认页 - 集成支付弹窗 -->
+<div class="min-h-screen bg-gray-50"
+     data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @charter_booking.total_price.round(2) %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="<%= pay_charter_booking_path(@charter_booking) %>"
+     data-payment-confirmation-success-url-value="<%= success_charter_booking_path(@charter_booking) %>">
+  
+  <!-- Hidden targets for payment-confirmation controller -->
+  <div data-payment-confirmation-target="processingAmount" style="display:none;"><%= @charter_booking.total_price.round(2) %></div>
+  <div data-payment-confirmation-target="userEmail" style="display:none;"><%= current_user.email %></div>
+  
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <button onclick="history.back()" class="p-2 -ml-2 text-gray-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <h1 class="text-lg font-bold text-gray-900">确认订单</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- 订单号 -->
+  <div class="max-w-md mx-auto px-4 py-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600">订单号</span>
+        <span class="text-sm font-mono text-gray-900"><%= @charter_booking.order_number %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行程信息 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">行程信息</h2>
+      
+      <div class="space-y-3">
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">路线</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium"><%= @route.name %></div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">车型</div>
+          <div class="flex-1">
+            <div class="text-sm text-gray-900 font-medium"><%= @vehicle_type.name %></div>
+            <div class="text-xs text-gray-500 mt-1">
+              <%= @vehicle_type.seats %>座 · <%= @vehicle_type.luggage_capacity %>件行李
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">出发日期</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.departure_date.strftime('%Y年%m月%d日') %>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">包车时长</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.duration_hours %>小时
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">乘车人数</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.passengers_count %>人
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 联系人信息 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">联系人信息</h2>
+      
+      <div class="space-y-3">
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">联系人</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.contact_name %>
+          </div>
+        </div>
+        
+        <div class="flex items-start">
+          <div class="w-20 text-sm text-gray-600 flex-shrink-0">联系电话</div>
+          <div class="flex-1 text-sm text-gray-900 font-medium">
+            <%= @charter_booking.contact_phone %>
+          </div>
+        </div>
+        
+        <% if @charter_booking.special_requirements.present? %>
+          <div class="flex items-start">
+            <div class="w-20 text-sm text-gray-600 flex-shrink-0">特殊需求</div>
+            <div class="flex-1 text-sm text-gray-900">
+              <%= @charter_booking.special_requirements %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 价格明细 -->
+  <div class="max-w-md mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2">
+      <h2 class="text-base font-bold text-gray-900 mb-3">价格明细</h2>
+      
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-600">包车费用</span>
+          <span class="text-gray-900 font-medium">¥<%= @charter_booking.total_price.round(2) %></span>
+        </div>
+        
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-600">服务费</span>
+          <span class="text-gray-900 font-medium">¥0</span>
+        </div>
+        
+        <div class="border-t border-gray-200 pt-2 mt-2">
+          <div class="flex items-center justify-between">
+            <span class="text-base font-bold text-gray-900">应付金额</span>
+            <span class="text-2xl font-bold text-orange-500">¥<%= @charter_booking.total_price.round(2) %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 服务保障 -->
+  <div class="max-w-md mx-auto px-4 mb-24">
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <div class="flex items-start">
+        <svg class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div class="text-sm text-gray-700">
+          <div class="font-bold mb-1">安全保障</div>
+          <div class="text-xs">
+            专业司机 · 车辆保险 · 24小时客服 · 行程保障
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部固定支付按钮 -->
+  <div class="max-w-md mx-auto fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="flex-1">
+        <div class="text-xs text-gray-500">应付金额</div>
+        <div class="text-2xl font-bold text-orange-500">¥<%= @charter_booking.total_price.round(2) %></div>
+      </div>
+      <button 
+        data-action="click->payment-confirmation#showPasswordModal"
+        class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-center font-bold py-4 rounded-xl shadow-lg transition-colors">
+        立即支付
+      </button>
+    </div>
+  </div>
+  
+  <!-- 引入支付弹窗模态框 -->
+  <%= render 'shared/payment_confirmation_modals' %>
+</div>

@@ -61,6 +61,7 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy
   has_many :notification_settings, dependent: :destroy
   has_many :itineraries, dependent: :destroy
+  has_many :charter_bookings, dependent: :destroy
   
   after_create :create_default_membership
 

@@ -1,0 +1,132 @@
+<!-- 路线搜索页 - 地图+路线列表 -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white shadow-sm">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <button onclick="history.back()" class="p-2 -ml-2 text-gray-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <h1 class="text-lg font-bold text-gray-900"><%= @city&.name %>包车游</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <!-- 静态地图区域 -->
+  <div class="max-w-md mx-auto bg-white">
+    <div class="relative h-64 bg-gray-200">
+      <img src="<%= @map_image_url %>" 
+           alt="<%= @city&.name %>地图" 
+           class="w-full h-full object-cover">
+      
+      <!-- 地图上的标记点（使用绝对定位模拟） -->
+      <div class="absolute top-1/4 left-1/3 transform -translate-x-1/2 -translate-y-1/2">
+        <div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+          <span class="text-white text-xs font-bold">1</span>
+        </div>
+      </div>
+      <div class="absolute top-1/2 right-1/4 transform -translate-x-1/2 -translate-y-1/2">
+        <div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+          <span class="text-white text-xs font-bold">2</span>
+        </div>
+      </div>
+      <div class="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div class="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+          <span class="text-white text-xs font-bold">3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 路线筛选Tab -->
+  <div class="max-w-md mx-auto bg-white border-b border-gray-200 sticky top-[56px] z-30">
+    <div class="flex">
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'all'), 
+          class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'all' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
+        全部路线
+      <% end %>
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'featured'), 
+          class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'featured' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
+        精选推荐
+      <% end %>
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'classic'), 
+          class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'classic' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
+        经典路线
+      <% end %>
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'hot'), 
+          class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'hot' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
+        热门路线
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 路线列表 -->
+  <div class="max-w-md mx-auto px-4 py-4">
+    <% if @routes.any? %>
+      <div class="space-y-4">
+        <% @routes.each do |route| %>
+          <%= link_to charter_route_path(route), class: "block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow" do %>
+            <div class="flex">
+              <!-- 路线缩略图 -->
+              <div class="w-32 h-32 flex-shrink-0">
+                <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
+                     alt="<%= route.name %>" 
+                     class="w-full h-full object-cover">
+              </div>
+
+              <!-- 路线信息 -->
+              <div class="flex-1 p-3 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2"><%= route.name %></h3>
+                  
+                  <!-- 景点 -->
+                  <div class="flex items-center text-xs text-gray-600 mb-2">
+                    <svg class="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    </svg>
+                    <span class="truncate"><%= route.attractions.pluck(:name).take(3).join(' · ') %></span>
+                  </div>
+
+                  <!-- 标签 -->
+                  <div class="flex flex-wrap gap-1 mb-2">
+                    <span class="inline-flex items-center px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
+                      <%= route.duration_days %>日游
+                    </span>
+                    <% if route.category == 'featured' %>
+                      <span class="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded">
+                        精选
+                      </span>
+                    <% elsif route.category == 'hot' %>
+                      <span class="inline-flex items-center px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded">
+                        热门
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+
+                <!-- 价格 -->
+                <div class="flex items-end justify-between">
+                  <div>
+                    <span class="text-xs text-gray-500">起</span>
+                    <span class="text-xl font-bold text-orange-500">¥308</span>
+                    <span class="text-xs text-gray-500">/6h</span>
+                  </div>
+                  <div class="text-xs text-yellow-500 font-medium">选车型 →</div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- 空状态 -->
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        <p class="text-gray-500">暂无路线，换个城市看看吧～</p>
+      </div>
+    <% end %>
+  </div>
+</div>

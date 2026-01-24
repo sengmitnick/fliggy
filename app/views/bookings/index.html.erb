@@ -104,6 +104,8 @@
             <%= render partial: 'bookings/cruise_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(InsuranceOrder) %>
             <%= render partial: 'bookings/insurance_order_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(CharterBooking) %>
+            <%= render partial: 'bookings/charter_booking_card', locals: { booking: booking } %>
           <% end %>
         <% end %>
         

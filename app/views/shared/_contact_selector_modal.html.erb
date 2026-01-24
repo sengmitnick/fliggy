@@ -27,8 +27,11 @@
         <% current_user.contacts.order(is_default: :desc, created_at: :desc).each_with_index do |contact, index| %>
           <div 
             class="px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+            data-contact-selector-target="contactItem"
             data-action="click->contact-selector#selectContact"
+            data-contact-id="<%= contact.id %>"
             data-contact-name="<%= contact.name %>"
+            data-contact-email="<%= contact.email %>"
             data-contact-phone="<%= contact.phone %>">
             <div class="flex items-center">
               <div class="flex-1">

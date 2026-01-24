@@ -171,6 +171,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["role"], name: "index_administrators_on_role"
   end
 
+  create_table "attractions", force: :cascade do |t|
+    t.string "name"
+    t.integer "city_id"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.text "description"
+    t.string "cover_image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "booking_options", force: :cascade do |t|
     t.bigint "train_id"
     t.string "title"
@@ -308,7 +319,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.jsonb "image_urls"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cruise_ship_id"], name: "index_cabin_types_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cabin_types_on_data_version"
   end
 
   create_table "car_orders", force: :cascade do |t|
@@ -354,6 +367,43 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.string "image_url"
     t.bigint "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_cars_on_data_version"
+  end
+
+  create_table "charter_bookings", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "charter_route_id"
+    t.integer "vehicle_type_id"
+    t.date "departure_date"
+    t.string "departure_time"
+    t.integer "duration_hours", default: 6
+    t.string "booking_mode", default: "by_route"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.integer "passengers_count", default: 1
+    t.text "note"
+    t.decimal "total_price"
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "pickup_address"
+    t.text "special_requirements"
+  end
+
+  create_table "charter_routes", force: :cascade do |t|
+    t.string "name"
+    t.integer "city_id"
+    t.string "slug"
+    t.integer "duration_days", default: 1
+    t.integer "distance_km", default: 100
+    t.string "category", default: "featured"
+    t.text "description"
+    t.decimal "price_from"
+    t.text "highlights"
+    t.string "cover_image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "cities", force: :cascade do |t|
@@ -408,6 +458,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_lines_on_data_version"
     t.index ["slug"], name: "index_cruise_lines_on_slug", unique: true
   end
 
@@ -446,8 +498,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.string "badge"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cabin_type_id"], name: "index_cruise_products_on_cabin_type_id"
     t.index ["cruise_sailing_id"], name: "index_cruise_products_on_cruise_sailing_id"
+    t.index ["data_version"], name: "index_cruise_products_on_data_version"
   end
 
   create_table "cruise_routes", force: :cascade do |t|
@@ -456,6 +510,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.string "icon_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_cruise_routes_on_data_version"
   end
 
   create_table "cruise_sailings", force: :cascade do |t|
@@ -471,8 +527,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.string "status", default: "on_sale"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
     t.index ["cruise_route_id"], name: "index_cruise_sailings_on_cruise_route_id"
     t.index ["cruise_ship_id"], name: "index_cruise_sailings_on_cruise_ship_id"
+    t.index ["data_version"], name: "index_cruise_sailings_on_data_version"
   end
 
   create_table "cruise_ships", force: :cascade do |t|
@@ -484,7 +542,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.bigint "data_version", default: 0, null: false
+    t.integer "tonnage"
+    t.integer "passenger_capacity"
     t.index ["cruise_line_id"], name: "index_cruise_ships_on_cruise_line_id"
+    t.index ["data_version"], name: "index_cruise_ships_on_data_version"
     t.index ["slug"], name: "index_cruise_ships_on_slug", unique: true
   end
 
@@ -1221,6 +1283,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["hotel_id"], name: "index_rooms_on_hotel_id"
   end
 
+  create_table "route_attractions", force: :cascade do |t|
+    t.integer "charter_route_id"
+    t.integer "attraction_id"
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "user_agent"
@@ -1534,6 +1604,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_071853) do
     t.index ["execution_id"], name: "index_validator_executions_on_execution_id", unique: true
     t.index ["is_active"], name: "index_validator_executions_on_is_active"
     t.index ["user_id", "is_active"], name: "index_validator_executions_on_user_id_and_is_active"
+  end
+
+  create_table "vehicle_types", force: :cascade do |t|
+    t.string "name"
+    t.string "category", default: "5座"
+    t.string "level", default: "经济"
+    t.integer "seats", default: 5
+    t.integer "luggage_capacity", default: 2
+    t.decimal "hourly_price_6h"
+    t.decimal "hourly_price_8h"
+    t.integer "included_mileage", default: 100
+    t.string "image_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "visa_order_travelers", force: :cascade do |t|
