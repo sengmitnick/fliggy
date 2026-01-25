@@ -116,7 +116,7 @@ shops_data = [
   {
     name: "【全日空免税 南翼店】",
     abroad_brand_id: brands_map["ANA 【全日空免税店】"],
-    city: "成田市",
+    city: "成田",
     address: "千叶县成田市成田国际机场 第1航站楼南翼出国出境审查区",
     description: "位于成田机场第 1 航站楼南翼出出国境审查区出口后的左手边的第二家商店。",
     image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop",
@@ -126,7 +126,7 @@ shops_data = [
   {
     name: "【全日空免税 第4卫星厅店】",
     abroad_brand_id: brands_map["ANA 【全日空免税店】"],
-    city: "成田市",
+    city: "成田",
     address: "千叶县成田市成田国际机场 第1航站楼第4卫星厅",
     description: "位于成田机场第 1 航站楼第4卫星厅的免税店。",
     image_url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&h=300&fit=crop",
@@ -178,7 +178,7 @@ shops_data = [
   {
     name: "AKAKABE PHARMACY 【赤壁药妆】",
     abroad_brand_id: brands_map["AKAKABE PHARMACY 【赤壁药妆】"],
-    city: "大阪市",
+    city: "大阪",
     address: "大阪市中央区",
     description: "位于大阪市中心的药妆店。",
     image_url: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=300&fit=crop",
