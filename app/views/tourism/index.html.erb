@@ -30,7 +30,7 @@
         <span class="bg-gray-100 px-3 py-1 rounded-lg text-xs">长白山风景区 <span class="text-[10px] text-gray-400">9.3万人感兴趣</span></span>
         <span class="bg-gray-100 px-3 py-1 rounded-lg text-xs">深圳 <span class="text-[10px] text-gray-400">296万+人想去</span></span>
       </div>
-      <button class="bg-[#FFE12E] px-6 py-2 rounded-xl font-bold text-sm ml-1">搜索</button>
+      <button class="bg-[#FFE12E] px-6 py-2 rounded-xl font-bold text-sm ml-1" onclick="window.showToast('精彩即将上线，敬请期待')">搜索</button>
     </div>
   </div>
 
@@ -48,12 +48,12 @@
             </span>
           <% end %>
           <!-- 自由行 - 跨两行高度，高度占 2/3 -->
-          <div class="flex-1 bg-gradient-to-br from-[#7c88ff] to-[#5a6bff] flex flex-col items-center justify-center text-white border-r border-[#fdf2cc] relative min-h-[144px]">
+          <%= link_to free_travels_path, class: "flex-1 bg-gradient-to-br from-[#7c88ff] to-[#5a6bff] flex flex-col items-center justify-center text-white border-r border-[#fdf2cc] relative min-h-[144px]" do %>
             <%= image_tag 'tourism/自由行.png', class: 'w-9 h-9 opacity-90 mb-1' %>
             <span class="text-[11px] font-bold tracking-tighter flex items-center">
               自由行<span class="scale-75 ml-0.5">〉</span>
             </span>
-          </div>
+          <% end %>
         </div>
   
         <!-- 右侧网格区域 (占 5/6 宽度) -->
@@ -65,14 +65,14 @@
               <%= image_tag 'tourism/精品小团.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">精品小团</span>
             <% end %>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <%= link_to private_groups_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/私家团.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">私家团</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <% end %>
+            <%= link_to tour_groups_search_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/一日游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">一日游</span>
-            </div>
+            <% end %>
             <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" onclick="window.showToast('精彩即将上线，敬请期待')">
               <%= image_tag 'tourism/定制游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">定制游</span>
