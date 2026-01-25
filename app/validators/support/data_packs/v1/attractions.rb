@@ -357,7 +357,7 @@ puts "\n🏢 批量创建供应商..."
 
 suppliers_data = [
   {
-    name: "飞猪景区乐园旗舰店",
+    name: "旅游景区乐园旗舰店",
     supplier_type: "official",
     rating: 4.8,
     sales_count: 3800,
@@ -432,10 +432,10 @@ ticket_suppliers_data = []
   
   base_price = ticket_info[:base_price]
   
-  # 供应商1：飞猪（官方旗舰店，最贵但服务最好）
+  # 供应商1：旅游（官方旗舰店，最贵但服务最好）
   ticket_suppliers_data << {
     ticket_id: ticket_id,
-    supplier_id: suppliers_map["飞猪景区乐园旗舰店"],
+    supplier_id: suppliers_map["旅游景区乐园旗舰店"],
     current_price: base_price,
     original_price: (base_price * 1.2).round,
     stock: -1,
