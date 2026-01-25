@@ -30,7 +30,7 @@
         <span class="bg-gray-100 px-3 py-1 rounded-lg text-xs">长白山风景区 <span class="text-[10px] text-gray-400">9.3万人感兴趣</span></span>
         <span class="bg-gray-100 px-3 py-1 rounded-lg text-xs">深圳 <span class="text-[10px] text-gray-400">296万+人想去</span></span>
       </div>
-      <button class="bg-[#FFE12E] px-6 py-2 rounded-xl font-bold text-sm ml-1">搜索</button>
+      <button class="bg-[#FFE12E] px-6 py-2 rounded-xl font-bold text-sm ml-1" onclick="window.showToast('精彩即将上线，敬请期待')">搜索</button>
     </div>
   </div>
 
@@ -48,12 +48,12 @@
             </span>
           <% end %>
           <!-- 自由行 - 跨两行高度，高度占 2/3 -->
-          <div class="flex-1 bg-gradient-to-br from-[#7c88ff] to-[#5a6bff] flex flex-col items-center justify-center text-white border-r border-[#fdf2cc] relative min-h-[144px]">
+          <%= link_to free_travels_path, class: "flex-1 bg-gradient-to-br from-[#7c88ff] to-[#5a6bff] flex flex-col items-center justify-center text-white border-r border-[#fdf2cc] relative min-h-[144px]" do %>
             <%= image_tag 'tourism/自由行.png', class: 'w-9 h-9 opacity-90 mb-1' %>
             <span class="text-[11px] font-bold tracking-tighter flex items-center">
               自由行<span class="scale-75 ml-0.5">〉</span>
             </span>
-          </div>
+          <% end %>
         </div>
   
         <!-- 右侧网格区域 (占 5/6 宽度) -->
@@ -65,15 +65,15 @@
               <%= image_tag 'tourism/精品小团.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">精品小团</span>
             <% end %>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <%= link_to private_groups_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/私家团.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">私家团</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <% end %>
+            <%= link_to search_tour_groups_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/一日游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">一日游</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <% end %>
+            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" onclick="window.showToast('精彩即将上线，敬请期待')">
               <%= image_tag 'tourism/定制游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">定制游</span>
             </div>
@@ -85,7 +85,7 @@
   
           <!-- 第二行: 5列 -->
           <div class="flex h-24 border-b border-[#fdf2cc]">
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" onclick="window.showToast('精彩即将上线，敬请期待')">
               <%= image_tag 'tourism/机酒套餐.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">机酒套餐</span>
             </div>
@@ -93,7 +93,7 @@
               <%= image_tag 'tourism/包车游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">包车游</span>
             <% end %>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1">
+            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" onclick="window.showToast('精彩即将上线，敬请期待')">
               <%= image_tag 'tourism/景酒套餐.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">景酒套餐</span>
             </div>
@@ -135,7 +135,7 @@
 
   <!-- 特色功能栏 -->
   <div class="px-2 mt-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between" onclick="window.showToast('精彩即将上线，敬请期待')">
       <!-- 左侧菜单组 -->
       <div class="flex-1 flex items-center space-x-0 overflow-x-auto no-scrollbar whitespace-nowrap">
         <!-- Item 1: 特色火车 -->
@@ -185,7 +185,7 @@
   </div>
 
   <!-- 广州 目的地 部分 -->
-  <div class="mt-6 px-4 bg-white rounded-t-3xl pt-6 pb-20">
+  <div class="mt-6 px-4 bg-white rounded-t-3xl pt-6 pb-20" onclick="window.showToast('精彩即将上线，敬请期待')">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-3xl font-bold">广州</h2>
       <div class="bg-yellow-300 px-3 py-1 rounded-full text-xs font-bold flex items-center">

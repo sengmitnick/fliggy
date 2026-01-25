@@ -3,7 +3,7 @@ class TicketsController < ApplicationController
   
   def index
     # 默认城市为深圳（根据设计稿）
-    @city = params[:city].presence || '深圳市'
+    @city = params[:city].presence || '深圳'
     @selected_tag = params[:tag].presence
     @sort_by = params[:sort_by].presence || 'smart' # 智能排序/sales/rating
     
@@ -11,11 +11,11 @@ class TicketsController < ApplicationController
     @cities = Attraction.distinct.pluck(:city).compact.sort
     
     # 如果没有城市数据，使用默认列表
-    @cities = ['深圳市', '上海市', '北京市', '广州市', '杭州市', '成都市'] if @cities.empty?
+    @cities = ['深圳', '上海', '北京', '广州', '杭州', '成都'] if @cities.empty?
     
     # 从数据库查询景点
     attractions = Attraction.includes(:tickets)
-                            .where("city LIKE ?", "%#{@city.gsub('市', '')}%")
+                            .where("city LIKE ?", "%#{@city}%")
     
     # 排序逻辑
     attractions = case @sort_by
