@@ -371,14 +371,15 @@ Rails.application.routes.draw do
       get 'health', to: 'health#show'
     end
     
-    # 验证系统 API（现有接口）
-    get 'verify', to: 'verify#index'
-    match 'verify/:id/prepare', to: 'verify#prepare', via: :all
-    match 'verify/:execution_id/result', to: 'verify#result', via: :all
-    
-    # 甲方规范兼容接口
+    # 验证系统 API
+    get 'tasks', to: 'verify#index'                         # 获取所有任务列表
     post 'tasks/:id/start', to: 'verify#start_task'         # 创建训练会话
     post 'verify/run', to: 'verify#run_verification'        # 验证接口
+    
+    # 向下兼容旧接口
+    get 'verify', to: 'verify#index'                        # 兼容旧路径
+    match 'verify/:id/prepare', to: 'verify#prepare', via: :all
+    match 'verify/:execution_id/result', to: 'verify#result', via: :all
     
     post 'geocoding/reverse', to: 'geocodings#reverse_geocode'
   end

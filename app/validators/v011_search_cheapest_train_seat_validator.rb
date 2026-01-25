@@ -29,7 +29,7 @@ require_relative 'base_validator'
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V011SearchCheapestTrainSeatValidator < BaseValidator
-  self.validator_id = 'search_cheapest_train_bj_to_tj'
+  self.validator_id = 'v011_search_cheapest_train_seat_validator'
   self.title = '搜索后天北京到天津最便宜的车票'
   self.description = '搜索后天北京到天津的所有车次，找出最便宜的车票（对比不同座位类型）并完成预订'
   self.timeout_seconds = 300

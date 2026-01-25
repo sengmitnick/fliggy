@@ -25,7 +25,7 @@ require_relative 'base_validator'
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V004BookTourPackageValidator < BaseValidator
-  self.validator_id = 'book_tour_package_sanya'
+  self.validator_id = 'v004_book_tour_package_validator'
   self.title = '预订价格合适的三亚5天4晚跟团游（2成人0儿童，预算≤5000元/人，小团）'
   self.description = '搜索三亚的跟团游产品，找到价格合适（预算≤5000元/人，总价≤10000元）的5天4晚产品并预订（2个成人，0个儿童，小团：<15人）'
   self.timeout_seconds = 300

@@ -25,14 +25,14 @@ require_relative 'base_validator'
 # 
 # 使用方法:
 #   # 准备阶段
-#   POST /api/verify/book_budget_hotel_shenzhen/prepare
+#   POST /api/tasks/v001_book_budget_hotel_validator/start
 #   
 #   # Agent 通过界面操作完成预订...
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V001BookBudgetHotelValidator < BaseValidator
-  self.validator_id = 'book_budget_hotel_shenzhen'
+  self.validator_id = 'v001_book_budget_hotel_validator'
   self.title = ' 预订后天入住一晚深圳的经济型酒店'
   self.description = '需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单'
   self.timeout_seconds = 300

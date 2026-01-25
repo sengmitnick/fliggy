@@ -29,7 +29,7 @@ require_relative 'base_validator'
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V009SearchBudgetTourValidator < BaseValidator
-  self.validator_id = 'search_budget_tour_yn'
+  self.validator_id = 'v009_search_budget_tour_validator'
   self.title = '搜索预算5000元以内的云南旅游产品'
   self.description = '搜索云南的旅游产品，找出预算内（≤5000元/人）最受欢迎的产品并预订'
   self.timeout_seconds = 300

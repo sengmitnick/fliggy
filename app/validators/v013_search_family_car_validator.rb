@@ -27,7 +27,7 @@ require_relative 'base_validator'
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V013SearchFamilyCarValidator < BaseValidator
-  self.validator_id = 'search_family_car_cd'
+  self.validator_id = 'v013_search_family_car_validator'
   self.title = '搜索成都适合家庭的7座SUV'
   self.description = '搜索成都的租车服务，找到适合家庭的7座SUV并租赁'
   self.timeout_seconds = 300

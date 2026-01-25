@@ -4,14 +4,20 @@ module Api
   # API 控制器：验证任务管理
   # 
   # 提供接口：
-  # - GET /api/verify - 列出所有可用验证器
-  # - POST /api/verify/:id/prepare - 准备验证环境
-  # - POST /api/verify/:execution_id/result - 验证结果
+  # - GET /api/tasks - 列出所有可用验证器
+  # - POST /api/tasks/:id/start - 创建训练会话
+  # - POST /api/verify/run - 验证接口
+  # 
+  # 向下兼容接口：
+  # - GET /api/verify - 列出所有可用验证器（兼容）
+  # - POST /api/verify/:id/prepare - 准备验证环境（兼容）
+  # - POST /api/verify/:execution_id/result - 验证结果（兼容）
   class VerifyController < BaseController
     # 互斥锁确保同一时间只有一个验证在执行
     VERIFY_LOCK = Mutex.new
     
-    # GET /api/verify
+    # GET /api/tasks
+    # GET /api/verify (向下兼容)
     # 获取所有可用的验证器列表
     def index
       validators = load_all_validators.map(&:metadata)

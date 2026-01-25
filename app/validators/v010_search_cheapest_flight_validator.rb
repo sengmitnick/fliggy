@@ -28,7 +28,7 @@ require_relative 'base_validator'
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V010SearchCheapestFlightValidator < BaseValidator
-  self.validator_id = 'search_cheapest_sh_to_sz'
+  self.validator_id = 'v010_search_cheapest_flight_validator'
   self.title = '搜索上海到深圳的最便宜航班'
   self.description = '搜索后天上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣）'
   self.timeout_seconds = 300
