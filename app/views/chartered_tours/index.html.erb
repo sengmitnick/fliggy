@@ -49,12 +49,7 @@
       </button>
 
       <!-- 热门城市快捷链接 -->
-      <div class="flex gap-2 mb-4 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
-        <% ['东京', '大阪', '京都', '冲绳', '北海道', '清迈', '普吉岛', '曼谷'].each do |city_name| %>
-          <%= link_to city_name, chartered_tours_path(city: city_name), 
-              class: "px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-full whitespace-nowrap hover:bg-gray-200" %>
-        <% end %>
-      </div>
+      
 
       <!-- 日期选择 -->
       <button 
