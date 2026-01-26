@@ -110,6 +110,7 @@ class HotelsController < ApplicationController
     @region = params[:region]
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
+    @brand = params[:brand] # 品牌筛选
     @query = params[:q]
     
     # NOTE: City selector data is loaded via CitySelectorDataConcern
@@ -146,22 +147,48 @@ class HotelsController < ApplicationController
       @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
     end
     
+    # Brand filtering
+    if @brand.present?
+      @hotels = @hotels.where(brand: @brand)
+    end
+    
     # District filtering (same as special_hotels)
     if params[:district].present?
       @hotels = @hotels.where('address LIKE ?', "%#{params[:district]}%")
     end
     
-    # Price range filtering (same as special_hotels)
+    # Price range filtering - use room category specific prices
     if params[:price_range].present?
-      case params[:price_range]
+      min_price, max_price = case params[:price_range]
       when '0-100'
-        @hotels = @hotels.where('price < ?', 100)
+        [0, 100]
       when '100-200'
-        @hotels = @hotels.where('price >= ? AND price < ?', 100, 200)
+        [100, 200]
       when '200-300'
-        @hotels = @hotels.where('price >= ? AND price < ?', 200, 300)
+        [200, 300]
       when '300+'
-        @hotels = @hotels.where('price >= ?', 300)
+        [300, Float::INFINITY]
+      end
+      
+      if min_price && max_price
+        # 根据 room_category 决定筛选逻辑
+        if @room_category == 'hourly'
+          # 钟点房搜索：按钟点房最低价筛选
+          @hotels = @hotels.where(
+            id: HotelRoom.where(room_category: 'hourly')
+                         .group(:hotel_id)
+                         .having('MIN(price) >= ? AND MIN(price) < ?', min_price, max_price)
+                         .select(:hotel_id)
+          )
+        else
+          # 默认/整晚搜索：按整晚房最低价筛选
+          @hotels = @hotels.where(
+            id: HotelRoom.where(room_category: 'overnight')
+                         .group(:hotel_id)
+                         .having('MIN(price) >= ? AND MIN(price) < ?', min_price, max_price)
+                         .select(:hotel_id)
+          )
+        end
       end
     end
     
@@ -198,6 +225,9 @@ class HotelsController < ApplicationController
     
     # Extract districts for filter bar
     @districts = extract_districts_from_hotels(@city)
+    
+    # Extract brands available in current city
+    @brands = extract_brands_from_hotels(@city)
     
     # Render the dedicated search results view
     render :search
@@ -240,6 +270,18 @@ class HotelsController < ApplicationController
     # 匹配格式：XX市YY区
     match = city.match(/市(.+区)$/)
     match ? match[1] : nil
+  end
+  
+  # 提取当前城市的所有品牌
+  def extract_brands_from_hotels(city)
+    return [] if city.blank?
+    
+    Hotel.where("city = ? OR city = ? OR city = ?", city, city, "#{city}市")
+         .where(data_version: 0)
+         .where.not(brand: [nil, ''])
+         .distinct
+         .pluck(:brand)
+         .sort
   end
   
   def default_policy_data

@@ -3,7 +3,7 @@ class FlightsController < ApplicationController
 
   def index
     # NOTE: City selector data is loaded via CitySelectorDataConcern
-    # Preload flight prices for date picker modal (batch query optimization)
+    # Preload date prices for date picker modal (only query existing data)
     @departure_date_prices = preload_date_prices('北京', '杭州')
   end
 
@@ -14,7 +14,7 @@ class FlightsController < ApplicationController
     @sort_by = params[:sort_by] || 'time' # 'time' or 'price'
     @cabin_class = params[:cabin_class] || 'all'
     
-    # Preload flight prices for date picker modal (batch query optimization)
+    # Preload date prices for date picker modal (only query existing data)
     @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
     
     # Check if either departure or destination contains multiple cities (comma-separated)
@@ -79,6 +79,7 @@ class FlightsController < ApplicationController
 
     # Get prices for nearby dates (5 days) - always show all cabin classes
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     # For round trip, also get return flights
     if @trip_type == 'round_trip' && @return_date
@@ -179,8 +180,6 @@ class FlightsController < ApplicationController
     end
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
-    
-    # Preload flight prices for date picker modal (batch query optimization)
     @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     render :multi_city_results
@@ -268,9 +267,6 @@ class FlightsController < ApplicationController
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
     
-    # Preload flight prices for date picker modal (batch query optimization)
-    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
-    
     render :multi_city_results
   end
 
@@ -280,6 +276,31 @@ class FlightsController < ApplicationController
   end
 
   private
+  
+  # Query existing flight prices for date picker (NO auto-generation)
+  def preload_date_prices(departure_city, destination_city)
+    today = Date.today
+    start_date = Date.new(today.year, today.month, 1)
+    end_date = today + 60.days
+    prices = {}
+    
+    # Only query existing flights, never generate new data
+    flights = Flight.where(
+      departure_city: departure_city,
+      destination_city: destination_city
+    ).where(
+      'DATE(flight_date) >= ? AND DATE(flight_date) <= ?',
+      start_date,
+      end_date
+    ).includes(:flight_offers)
+    
+    flights.group_by(&:flight_date).each do |date, date_flights|
+      min_price = date_flights.map(&:min_offer_price).compact.min || 0
+      prices[date] = min_price.to_i
+    end
+    
+    prices
+  end
 
   def find_cheapest_in_months(departure_city, destination_city, months)
     cheapest_flight = nil
@@ -351,34 +372,6 @@ class FlightsController < ApplicationController
         is_today: date == center_date
       }
     end
-    prices
-  end
-
-  # Preload flight prices for date picker (60 days from today)
-  def preload_date_prices(departure_city, destination_city)
-    today = Date.today
-    # Start from the 1st day of current month to match calendar display
-    start_date = Date.new(today.year, today.month, 1)
-    end_date = today + 60.days
-    prices = {}
-    
-    # Query all flights within the date range
-    flights = Flight.where(
-      departure_city: departure_city,
-      destination_city: destination_city
-    ).where(
-      'DATE(flight_date) >= ? AND DATE(flight_date) <= ?',
-      start_date,
-      end_date
-    ).includes(:flight_offers)
-    
-    # Group flights by date and find minimum price for each date
-    flights.group_by(&:flight_date).each do |date, date_flights|
-      # Get minimum offer price from all flights on this date (all cabin classes)
-      min_price = date_flights.map(&:min_offer_price).compact.min || 0
-      prices[date] = min_price.to_i
-    end
-    
     prices
   end
 end

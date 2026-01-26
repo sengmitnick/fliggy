@@ -91,12 +91,16 @@ puts "\n🏨 批量创建酒店..."
 hotels_data = []
 hotel_index = 0
 
+# 房型因子（用于计算房价）
+min_room_factor = 1.0  # 最低房价因子
+
 # 国际品牌酒店 (每个城市 4-6 家)
 cities.each do |city|
   international_brands.sample(rand(4..6)).each do |brand|
     hotel_index += 1
     star_level = brand[:star]
     
+    # base_price 现在代表最低房价（将作为 hotel.price）
     base_price = case star_level
     when 5 then rand(800..2000)
     when 4 then rand(400..800)
@@ -115,7 +119,7 @@ cities.each do |city|
       city: city,
       address: "#{city}#{address_suffixes.sample}#{rand(1..999)}号",
       rating: rating,
-      price: base_price,
+      price: base_price,  # 确保这是最低房价
       original_price: (base_price * rand(1.1..1.3)).round(0),
       distance: "#{rand(1..10)}.#{rand(0..9)}km",
       features: features_pool.sample,
@@ -139,6 +143,7 @@ cities.each do |city|
     hotel_index += 1
     star_level = brand[:star]
     
+    # base_price 现在代表最低房价（将作为 hotel.price）
     base_price = case star_level
     when 4 then rand(300..600)
     else rand(150..400)
@@ -155,7 +160,7 @@ cities.each do |city|
       city: city,
       address: "#{city}#{address_suffixes.sample}#{rand(1..999)}号",
       rating: rating,
-      price: base_price,
+      price: base_price,  # 确保这是最低房价
       original_price: (base_price * rand(1.1..1.25)).round(0),
       distance: "#{rand(1..10)}.#{rand(0..9)}km",
       features: features_pool.sample,
@@ -290,7 +295,7 @@ facilities_templates = [
 # 评论模板
 hotel_comments = [
   "酒店位置很好，交通便利，服务周到。",
-  "房间宽敞明亮，设施齐全，非常满意。",
+  "房间宽敞明亮,设施齐全，非常满意。",
   "早餐丰富美味，员工态度友好热情。",
   "性价比很高，下次还会选择入住。",
   "环境优雅，卫生整洁，推荐给大家。"
@@ -304,6 +309,7 @@ homestay_comments = [
 ]
 
 # 房型配置
+# CRITICAL: 第一个房型 factor=1.0 确保 hotel.price = minimum(room.price)
 overnight_room_types = [
   { type: "标准双床房", bed: "双床", area: "28㎡", category: "overnight", factor: 1.0 },
   { type: "豪华大床房", bed: "大床", area: "35㎡", category: "overnight", factor: 1.3 },
@@ -311,6 +317,7 @@ overnight_room_types = [
   { type: "家庭房", bed: "双床+沙发床", area: "45㎡", category: "overnight", factor: 1.5 }
 ]
 
+# 钟点房 factor < 1.0，因为只住几小时比过夜便宜
 hourly_room_types = [
   { type: "2小时房", bed: "大床", area: "25㎡", category: "hourly", factor: 0.3 },
   { type: "3小时房", bed: "大床", area: "28㎡", category: "hourly", factor: 0.4 },
@@ -342,9 +349,13 @@ all_hotels.each do |hotel_info|
   end
   
   # 房型 (2-4个)
+  # CRITICAL FIX: 确保第一个房型 factor=1.0 总是被选中，保证 hotel.price = minimum(room.price)
   if is_homestay
-    # 民宿只有过夜房型
-    overnight_room_types.sample(rand(1..2)).each do |room|
+    # 民宿只有过夜房型 - 必须包含标准双床房（factor=1.0）
+    selected_rooms = [overnight_room_types[0]]  # 第一个房型 factor=1.0
+    selected_rooms += overnight_room_types[1..-1].sample(rand(0..1))  # 随机增加0-1个其他房型
+    
+    selected_rooms.each do |room|
       hotel_rooms_data << {
         hotel_id: hotel_id,
         room_type: room[:type],
@@ -358,8 +369,11 @@ all_hotels.each do |hotel_info|
       }
     end
   else
-    # 酒店有过夜房型
-    overnight_room_types.sample(rand(2..3)).each do |room|
+    # 酒店有过夜房型 - 必须包含标准双床房（factor=1.0）
+    selected_rooms = [overnight_room_types[0]]  # 第一个房型 factor=1.0
+    selected_rooms += overnight_room_types[1..-1].sample(rand(1..2))  # 随机增加1-2个其他房型
+    
+    selected_rooms.each do |room|
       hotel_rooms_data << {
         hotel_id: hotel_id,
         room_type: room[:type],
@@ -429,6 +443,25 @@ puts "✓ 已创建 #{HotelFacility.count} 个设施"
 puts "✓ 已创建 #{HotelRoom.count} 个房型"
 puts "✓ 已创建 #{HotelPolicy.count} 个政策"
 puts "✓ 已创建 #{HotelReview.count} 条评论"
+
+# ==================== CRITICAL FIX: 同步酒店价格 ====================
+puts "\n🔧 同步酒店价格为实际最低房价..."
+hotel_price_updates = []
+Hotel.find_each do |hotel|
+  min_room_price = hotel.hotel_rooms.minimum(:price)
+  if min_room_price && hotel.price != min_room_price
+    hotel_price_updates << { id: hotel.id, price: min_room_price }
+  end
+end
+
+if hotel_price_updates.any?
+  # Bulk update using update_all with CASE statement
+  when_clauses = hotel_price_updates.map { |h| "WHEN #{h[:id]} THEN #{h[:price]}" }.join(" ")
+  Hotel.where(id: hotel_price_updates.map { |h| h[:id] }).update_all("price = CASE id #{when_clauses} END")
+  puts "✓ 已同步 #{hotel_price_updates.size} 家酒店价格"
+else
+  puts "✓ 所有酒店价格已一致，无需同步"
+end
 
 puts "\n📊 统计信息："
 puts "  总酒店数: #{Hotel.count}"
