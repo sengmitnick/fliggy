@@ -30,7 +30,7 @@
   <!-- Calendar Content -->
   <div class="overflow-y-auto pb-20" style="height: calc(100vh - 120px);">
     <%
-      start_date = Date.today + 1.day
+      start_date = Time.zone.today + 1.day
       end_date = start_date + 60.days
       
       current_month_year = nil
@@ -108,8 +108,8 @@
               <div class="flex-1 py-3"></div>
             <% else %>
               <%
-                is_today = date == Date.today
-                is_selected = date.to_s == (params[:return_date] || (Date.today + 1.day).to_s)
+                is_today = date == Time.zone.today
+                is_selected = date.to_s == (params[:return_date] || (Time.zone.today + 1.day).to_s)
                 price = date_prices[date] || 0
                 
                 # Check for special days

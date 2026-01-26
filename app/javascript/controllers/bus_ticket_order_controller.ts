@@ -6,7 +6,9 @@ export default class extends Controller<HTMLElement> {
     "passengerCount",
     "totalPrice",
     "contactPhone",
-    "formData"
+    "formData",
+    "contactModal",
+    "contactItem"
   ]
 
   declare readonly checkIconTargets: HTMLElement[]
@@ -14,6 +16,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly totalPriceTarget: HTMLElement
   declare readonly contactPhoneTarget: HTMLInputElement
   declare readonly formDataTarget: HTMLElement
+  declare readonly contactModalTarget: HTMLElement
+  declare readonly contactItemTargets: HTMLElement[]
 
   private selectedPassengers: Set<string> = new Set()
   private basePrice: number = 0
@@ -104,6 +108,59 @@ export default class extends Controller<HTMLElement> {
   editContactPhone(event: Event): void {
     // Focus on the input field when clicking the container
     this.contactPhoneTarget.focus()
+  }
+
+  openContactSelector(): void {
+    this.contactModalTarget.classList.remove('hidden')
+    document.body.style.overflow = 'hidden'
+    this.updateContactSelection()
+  }
+
+  closeContactSelector(): void {
+    this.contactModalTarget.classList.add('hidden')
+    document.body.style.overflow = ''
+  }
+
+  selectContact(event: Event): void {
+    const element = event.currentTarget as HTMLElement
+    const phone = element.dataset.contactPhone || ''
+    
+    // Fill in the phone field
+    this.contactPhoneTarget.value = phone
+    
+    // Update visual selection state
+    this.updateContactSelection()
+    
+    // Close modal
+    this.closeContactSelector()
+  }
+
+  private updateContactSelection(): void {
+    const currentPhone = this.contactPhoneTarget.value.trim()
+    
+    this.contactItemTargets.forEach(item => {
+      const itemPhone = item.dataset.contactPhone || ''
+      const isMatch = currentPhone && itemPhone === currentPhone
+      
+      const circle = item.querySelector('.w-6.h-6.rounded-full') as HTMLElement
+      const checkIcon = circle?.querySelector('svg')
+      
+      if (isMatch) {
+        item.classList.add('bg-blue-50', 'border-blue-500')
+        item.classList.remove('bg-surface')
+        circle?.classList.add('border-blue-600', 'bg-blue-600')
+        circle?.classList.remove('border-gray-300')
+        checkIcon?.classList.remove('hidden')
+        checkIcon?.classList.add('text-white')
+      } else {
+        item.classList.remove('bg-blue-50', 'border-blue-500')
+        item.classList.add('bg-surface')
+        circle?.classList.remove('border-blue-600', 'bg-blue-600')
+        circle?.classList.add('border-gray-300')
+        checkIcon?.classList.add('hidden')
+        checkIcon?.classList.remove('text-white')
+      }
+    })
   }
 
   showComingSoon(event: Event): void {

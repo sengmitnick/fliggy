@@ -1,4 +1,4 @@
-<div class="bg-gray-100 pb-4" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Date.today.to_s %>">
+<div class="bg-gray-100 pb-4" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Time.zone.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -64,10 +64,10 @@
           type="button"
           class="text-left">
           <div class="text-3xl font-bold flex items-baseline leading-none" data-date-picker-target="selectedDate">
-            <%= Date.today.month %><span class="text-sm">月</span><%= Date.today.day %><span class="text-sm">日</span> <span class="text-sm">今天</span>
+            <%= Time.zone.today.month %><span class="text-sm">月</span><%= Time.zone.today.day %><span class="text-sm">日</span> <span class="text-sm">今天</span>
           </div>
         </button>
-        <%= f.hidden_field :date, value: Date.today.strftime("%Y-%m-%d"), data: { date_picker_target: "dateInput" } %>
+        <%= f.hidden_field :date, value: Time.zone.today.strftime("%Y-%m-%d"), data: { date_picker_target: "dateInput" } %>
       </div>
 
       <!-- Filters -->

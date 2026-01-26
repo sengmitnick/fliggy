@@ -6,7 +6,7 @@ class AbroadTicketsController < ApplicationController
     @ticket_type = params[:ticket_type] || 'train'
     @origin = params[:origin]
     @destination = params[:destination]
-    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @date = params[:date] ? Date.parse(params[:date]) : Time.zone.today
 
     # Get popular routes based on region
     @popular_routes = get_popular_routes(@region)
@@ -16,7 +16,7 @@ class AbroadTicketsController < ApplicationController
     @region = params[:region] || 'japan'
     @origin = params[:origin]
     @destination = params[:destination]
-    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @date = params[:date] ? Date.parse(params[:date]) : Time.zone.today
     
     # Get available tickets
     @tickets = AbroadTicket.available
@@ -35,7 +35,7 @@ class AbroadTicketsController < ApplicationController
     @region = params[:region] || 'japan'
     @origin = params[:origin]
     @destination = params[:destination]
-    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @date = params[:date] ? Date.parse(params[:date]) : Time.zone.today
     @time_slot_start = params[:time_slot_start]
     @time_slot_end = params[:time_slot_end]
     

@@ -9,7 +9,7 @@
 # - 支持区域限制销售
 #
 # 加载方式：
-# rails runner "load Rails.root.join('app/validators/support/data_packs/v1/insurances.rb')"
+# rake validator:reset_baseline
 
 puts "正在加载 insurances_v1 数据包..."
 
@@ -74,9 +74,11 @@ insurance_products_data = [
     max_days: 15,
     scenes: ['海边度假', '亲子必去'],
     highlights: ['水上运动保障', '紧急医疗运送', '旅行延误赔偿'],
+    official_select: false,
     featured: true,
     active: true,
-    sort_order: 80
+    sort_order: 80,
+    image_url: nil
   },
   
   # 境外/港澳台旅行保险
@@ -139,9 +141,11 @@ insurance_products_data = [
     max_days: 365,
     scenes: ['飞机', '火车', '汽车', '轮船'],
     highlights: ['海陆空全覆盖', '意外身故100万', '意外医疗5万'],
+    official_select: false,
     featured: true,
     active: true,
-    sort_order: 50
+    sort_order: 50,
+    image_url: nil
   },
   {
     name: '航空意外险',
@@ -158,142 +162,117 @@ insurance_products_data = [
     max_days: 1,
     scenes: ['飞机'],
     highlights: ['航空意外200万', '当日有效', '全球航班通用'],
+    official_select: false,
+    featured: false,
     active: true,
-    sort_order: 40
+    sort_order: 40,
+    image_url: nil
   }
 ]
 
-# 批量创建保险产品
-created_products = []
-insurance_products_data.each do |data|
-  product = InsuranceProduct.find_or_create_by!(code: data[:code]) do |p|
-    p.assign_attributes(data.except(:code))
-  end
-  created_products << product
-  puts "    ✓ #{product.name} (#{product.code})"
-end
+# 批量创建保险产品（使用 insert_all 符合规范）
+InsuranceProduct.insert_all(insurance_products_data)
 
 # ==================== 城市关联配置 ====================
 
-# 获取城市对象
-cities = {
-  beijing: City.find_by(name: '北京'),
-  shanghai: City.find_by(name: '上海'),
-  guangzhou: City.find_by(name: '广州'),
-  shenzhen: City.find_by(name: '深圳'),
-  chengdu: City.find_by(name: '成都'),
-  hangzhou: City.find_by(name: '杭州'),
-  xiamen: City.find_by(name: '厦门'),
-  sanya: City.find_by(name: '三亚'),
-  qingdao: City.find_by(name: '青岛'),
-  zhuhai: City.find_by(name: '珠海'),
-  tokyo: City.find_by(name: '东京'),
-  osaka: City.find_by(name: '大阪'),
-  bangkok: City.find_by(name: '曼谷'),
-  hongkong: City.find_by(name: '香港'),
-  macau: City.find_by(name: '澳门')
-}
-
 # 定义城市特定价格配置
-# 格式：{ 产品code => { 城市key => 价格 } }
+# 格式：{ 产品code => { 城市名 => 价格 } }
 city_pricing = {
   'PA-DOM-001' => {
-    beijing: 6.0,      # 北京价格稍高
-    shanghai: 6.0,     # 上海价格稍高
-    guangzhou: 5.0,    # 标准价格
-    shenzhen: 5.5,     # 深圳略高
-    chengdu: 4.5,      # 成都略低
-    hangzhou: 5.0,
-    xiamen: 5.0,
-    sanya: 7.0,        # 海南旅游旺季价格高
-    qingdao: 5.0,
-    zhuhai: 5.0
+    '北京' => 6.0,
+    '上海' => 6.0,
+    '广州' => 5.0,
+    '深圳' => 5.5,
+    '成都' => 4.5,
+    '杭州' => 5.0,
+    '厦门' => 5.0,
+    '三亚' => 7.0,
+    '青岛' => 5.0,
+    '珠海' => 5.0
   },
   'PICC-DOM-001' => {
-    beijing: 11.0,
-    shanghai: 11.0,
-    guangzhou: 10.0,
-    shenzhen: 10.5,
-    chengdu: 9.5,
-    hangzhou: 10.0,
-    xiamen: 10.0,
-    sanya: 12.0,
-    qingdao: 10.0,
-    zhuhai: 10.0
+    '北京' => 11.0,
+    '上海' => 11.0,
+    '广州' => 10.0,
+    '深圳' => 10.5,
+    '成都' => 9.5,
+    '杭州' => 10.0,
+    '厦门' => 10.0,
+    '三亚' => 12.0,
+    '青岛' => 10.0,
+    '珠海' => 10.0
   },
   'CPIC-DOM-001' => {
-    sanya: 12.0,       # 海岛险只在海滨城市提供
-    xiamen: 13.0,
-    qingdao: 11.0,
-    zhuhai: 12.5,
-    shenzhen: 13.0
+    '三亚' => 12.0,
+    '厦门' => 13.0,
+    '青岛' => 11.0,
+    '珠海' => 12.5,
+    '深圳' => 13.0
   },
   'PA-INT-001' => {
-    beijing: 25.0,     # 境外险在一线城市提供
-    shanghai: 25.0,
-    guangzhou: 24.0,
-    shenzhen: 24.0,
-    hangzhou: 26.0,
-    chengdu: 26.0
+    '北京' => 25.0,
+    '上海' => 25.0,
+    '广州' => 24.0,
+    '深圳' => 24.0,
+    '杭州' => 26.0,
+    '成都' => 26.0
   },
   'PICC-INT-001' => {
-    beijing: 45.0,
-    shanghai: 45.0,
-    guangzhou: 43.0,
-    shenzhen: 43.0,
-    hangzhou: 46.0,
-    chengdu: 46.0
+    '北京' => 45.0,
+    '上海' => 45.0,
+    '广州' => 43.0,
+    '深圳' => 43.0,
+    '杭州' => 46.0,
+    '成都' => 46.0
   },
   'CPIC-TRA-001' => {
-    # 交通险在所有主要城市提供（使用默认价格nil）
-    beijing: nil,
-    shanghai: nil,
-    guangzhou: nil,
-    shenzhen: nil,
-    chengdu: nil,
-    hangzhou: nil,
-    xiamen: nil,
-    sanya: nil,
-    qingdao: nil,
-    zhuhai: nil
+    '北京' => nil,
+    '上海' => nil,
+    '广州' => nil,
+    '深圳' => nil,
+    '成都' => nil,
+    '杭州' => nil,
+    '厦门' => nil,
+    '三亚' => nil,
+    '青岛' => nil,
+    '珠海' => nil
   },
   'PA-TRA-001' => {
-    # 航空险在所有城市提供
-    beijing: 20.0,
-    shanghai: 20.0,
-    guangzhou: 20.0,
-    shenzhen: 20.0,
-    chengdu: 20.0,
-    hangzhou: 20.0,
-    xiamen: 18.0,
-    sanya: 22.0,
-    qingdao: 18.0,
-    zhuhai: 18.0
+    '北京' => 20.0,
+    '上海' => 20.0,
+    '广州' => 20.0,
+    '深圳' => 20.0,
+    '成都' => 20.0,
+    '杭州' => 20.0,
+    '厦门' => 18.0,
+    '三亚' => 22.0,
+    '青岛' => 18.0,
+    '珠海' => 18.0
   }
 }
 
-# 创建城市关联
+# 构建批量插入数据
+city_associations = []
 city_pricing.each do |product_code, city_prices|
   product = InsuranceProduct.find_by(code: product_code)
   next unless product
   
-  city_prices.each do |city_key, price|
-    city = cities[city_key]
+  city_prices.each do |city_name, price|
+    city = City.find_by(name: city_name)
     next unless city
     
-    InsuranceProductCity.find_or_create_by!(
+    city_associations << {
       insurance_product_id: product.id,
-      city_id: city.id
-    ) do |ipc|
-      ipc.price_per_day = price  # nil 会使用产品默认价格
-      ipc.available = true
-    end
-    
-    price_display = price ? "¥#{price}/天" : "默认价格"
-    puts "    ✓ #{product.name} → #{city.name} (#{price_display})"
+      city_id: city.id,
+      price_per_day: price,
+      available: true
+    }
   end
 end
 
-puts "✓ 保险产品数据加载完成"
-puts "  - 产品数量: #{InsuranceProduct.count}"
-puts "  - 城市关联: #{InsuranceProductCity.count}"
+# 批量插入城市关联（使用 insert_all 符合规范）
+InsuranceProductCity.insert_all(city_associations) if city_associations.any?
+
+puts "✓ 数据包加载完成"
+puts "  - 保险产品: #{InsuranceProduct.count} 个"
+puts "  - 城市关联: #{InsuranceProductCity.count} 条"
