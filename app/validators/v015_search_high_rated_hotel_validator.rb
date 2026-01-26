@@ -2,11 +2,11 @@
 
 require_relative 'base_validator'
 
-# 验证用例: 搜索后天入住两晚北京评分最高的高档酒店
+# 验证用例: 搜索后天入住两晚北京评分最高的高档酒店（4星级及以上，2人入1间）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索北京的酒店，
-#   筛选4星级及以上的酒店，找到评分最高的并完成预订
+#   筛选4星级及以上的酒店，找到评分最高的并完成预订（2人入1间）
 # 
 # 复杂度分析:
 #   1. 需要搜索"北京"城市（从10个城市中筛选）
@@ -17,11 +17,13 @@ require_relative 'base_validator'
 #   ❌ 不能一次性提供：需要搜索→筛选星级→对比评分→确认最高分→预订
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 城市正确（北京市）(15分)
-#   - 星级符合（≥4星）(15分)
-#   - 选择了评分最高的酒店 (35分)
+#   - 订单已创建 (15分)
+#   - 城市正确（北京市）(10分)
+#   - 星级符合（≥4星）(10分)
+#   - 选择了评分最高的酒店 (30分)
 #   - 订单信息准确（入住2晚，离店日期正确）(15分)
+#   - 入住人数正确（2人） (10分)
+#   - 房间数正确（1间） (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -33,8 +35,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V015SearchHighRatedHotelValidator < BaseValidator
   self.validator_id = 'v015_search_high_rated_hotel_validator'
-  self.title = '搜索北京评分最高的高档酒店'
-  self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店'
+  self.title = '搜索北京评分最高的高档酒店（4星级及以上，2人入1间）'
+  self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店（2人入1间）'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -44,6 +46,8 @@ class V015SearchHighRatedHotelValidator < BaseValidator
     @min_star_level = 4
     @check_in_date = Date.current + 2.days  # 后天
     @nights = 2  # 入住2晚
+    @adults_count = 2  # 入住人数
+    @rooms_count = 1  # 房间数
     
     # 查找符合条件的酒店（用于后续验证）
     # 注意：查询基线数据 (data_version=0)
@@ -57,12 +61,14 @@ class V015SearchHighRatedHotelValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订后天入住#{@city}的高档酒店（4星级及以上，评分最高）",
+      task: "请预订后天入住#{@city}的高档酒店（4星级及以上，评分最高，#{@adults_count}人入住#{@rooms_count}间）",
       city: @city,
       min_star_level: @min_star_level,
       check_in_date: @check_in_date.to_s,
       date_description: "后天（#{@check_in_date.strftime('%Y年%m月%d日')}）",
       nights: @nights,
+      adults_count: @adults_count,
+      rooms_count: @rooms_count,
       hint: "系统中有多家高档酒店可选，请选择评分最高的",
       available_hotels_count: eligible_hotels.count,
       requirement: "≥#{@min_star_level}星级，评分最高"
@@ -72,7 +78,7 @@ class V015SearchHighRatedHotelValidator < BaseValidator
   # 验证阶段：检查订单是否符合要求
   def verify
     # 断言1: 必须有订单创建（最近创建的一条）
-    add_assertion "订单已创建", weight: 20 do
+    add_assertion "订单已创建", weight: 15 do
       @hotel_booking = HotelBooking.order(created_at: :desc).first
       expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
     end
@@ -80,20 +86,20 @@ class V015SearchHighRatedHotelValidator < BaseValidator
     return unless @hotel_booking # 如果没有订单，后续断言无法继续
     
     # 断言2: 城市正确
-    add_assertion "城市正确", weight: 15 do
+    add_assertion "城市正确", weight: 10 do
       expect(@hotel_booking.hotel.city).to eq(@city),
         "城市错误。期望: #{@city}, 实际: #{@hotel_booking.hotel.city}"
     end
     
     # 断言3: 星级符合要求
-    add_assertion "星级符合要求", weight: 15 do
+    add_assertion "星级符合要求", weight: 10 do
       hotel_star_level = @hotel_booking.hotel.star_level
       expect(hotel_star_level >= @min_star_level).to be_truthy,
         "星级不符合要求。最低要求: #{@min_star_level}星, 实际: #{hotel_star_level}星"
     end
     
     # 断言4: 选择了评分最高的酒店（核心评分项）
-    add_assertion "选择了评分最高的酒店", weight: 35 do
+    add_assertion "选择了评分最高的酒店", weight: 30 do
       # 查找所有符合星级要求的酒店
       eligible_hotels = Hotel.where(
         city: @city,
@@ -120,6 +126,18 @@ class V015SearchHighRatedHotelValidator < BaseValidator
       expect(actual_nights).to eq(@nights),
         "入住天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
     end
+    
+    # 断言6: 入住人数正确（2人）
+    add_assertion "入住人数正确（#{@adults_count}人）", weight: 10 do
+      expect(@hotel_booking.adults_count).to eq(@adults_count),
+        "入住人数不正确。预期: #{@adults_count}人, 实际: #{@hotel_booking.adults_count}人"
+    end
+    
+    # 断言7: 房间数正确（1间）
+    add_assertion "房间数正确（#{@rooms_count}间）", weight: 10 do
+      expect(@hotel_booking.rooms_count).to eq(@rooms_count),
+        "房间数不正确。预期: #{@rooms_count}间, 实际: #{@hotel_booking.rooms_count}间"
+    end
   end
   
   private
@@ -131,6 +149,8 @@ class V015SearchHighRatedHotelValidator < BaseValidator
       min_star_level: @min_star_level,
       check_in_date: @check_in_date.to_s,
       nights: @nights,
+      adults_count: @adults_count,
+      rooms_count: @rooms_count,
       best_hotel_id: @best_hotel&.id
     }
   end
@@ -141,6 +161,8 @@ class V015SearchHighRatedHotelValidator < BaseValidator
     @min_star_level = data['min_star_level']
     @check_in_date = Date.parse(data['check_in_date'])
     @nights = data['nights']
+    @adults_count = data['adults_count'] || 2
+    @rooms_count = data['rooms_count'] || 1
     @best_hotel = Hotel.find_by(id: data['best_hotel_id']) if data['best_hotel_id']
   end
   

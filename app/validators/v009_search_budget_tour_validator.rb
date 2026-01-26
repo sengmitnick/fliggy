@@ -2,18 +2,19 @@
 
 require_relative 'base_validator'
 
-# 验证用例6: 搜索预算5000元以内的云南旅游产品
+# 验证用例6: 搜索预算5000元以内的云南旅游产品（任意天数、任意类型、1人出行）
 # 
 # 任务描述:
 #   Agent 需要搜索云南的旅游产品，
-#   找出符合预算（≤5000元/人）的产品，
-#   并选择其中最受欢迎的（销量最高）完成预订
+#   找出符合预算（≤5000元/人）的产品（任意天数、任意旅游类型），
+#   并选择其中最受欢迎的（销量最高）完成预订（1人出行）
 # 
 # 评分标准:
-#   - 搜索到了符合预算的产品 (20分)
-#   - 正确识别价格范围 (20分)
-#   - 选择了销量最高的产品 (30分)
-#   - 成功创建订单 (30分)
+#   - 搜索到了符合预算的产品 (15分)
+#   - 正确识别价格范围 (15分)
+#   - 选择了销量最高的产品 (25分)
+#   - 成功创建订单 (25分)
+#   - 出行人数正确（1人） (20分)
 # 
 # 难点:
 #   - 需要筛选多个产品
@@ -30,8 +31,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V009SearchBudgetTourValidator < BaseValidator
   self.validator_id = 'v009_search_budget_tour_validator'
-  self.title = '搜索预算5000元以内的云南旅游产品'
-  self.description = '搜索云南的旅游产品，找出预算内（≤5000元/人）最受欢迎的产品并预订'
+  self.title = '搜索预算5000元以内的云南旅游产品（任意天数、任意类型、1人出行）'
+  self.description = '搜索云南的旅游产品（任意天数、任意旅游类型），找出预算内（≤5000元/人）最受欢迎的产品并预订（1人出行）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -39,6 +40,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     # 数据已经通过 load_data_pack 自动加载
     @destination = '云南'
     @budget = 5000
+    @adult_count = 1  # 出行人数
     
     # 查找所有云南的产品（注意：查询基线数据）
     all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
@@ -51,9 +53,12 @@ class V009SearchBudgetTourValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索#{@destination}的旅游产品，找出预算#{@budget}元以内最受欢迎的产品并预订（1人）",
+      task: "请搜索#{@destination}的旅游产品（任意天数、任意旅游类型），找出预算#{@budget}元以内最受欢迎的产品并预订（#{@adult_count}人出行）",
       destination: @destination,
       budget: @budget,
+      adult_count: @adult_count,
+      tour_types: "任意类型（跟团游、独立成团、自由出行均可）",
+      duration: "任意天数",
       hint: "系统中有多个产品可选，需要筛选价格并对比销量",
       total_products: all_products.count,
       budget_products_count: @budget_products.count,
@@ -68,7 +73,7 @@ class V009SearchBudgetTourValidator < BaseValidator
   # 验证阶段：检查是否找到并预订了正确的产品
   def verify
     # 断言1: 必须有订单创建
-    add_assertion "订单已创建", weight: 30 do
+    add_assertion "订单已创建", weight: 25 do
       @booking = TourGroupBooking.order(created_at: :desc).first
       expect(@booking).not_to be_nil, "未找到任何跟团游订单记录"
     end
@@ -83,7 +88,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言3: 价格符合预算
-    add_assertion "价格符合预算（≤#{@budget}元/人）", weight: 20 do
+    add_assertion "价格符合预算（≤#{@budget}元/人）", weight: 15 do
       # 获取成人单价（不含保险）
       adult_unit_price = @booking.tour_package.price
       
@@ -92,7 +97,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言4: 选择了销量最高的产品（核心评分）
-    add_assertion "选择了预算内销量最高的产品", weight: 30 do
+    add_assertion "选择了预算内销量最高的产品", weight: 25 do
       # 重新查找所有符合预算的云南产品
       all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
       budget_products = all_products.select { |p| p.price <= @budget }
@@ -108,7 +113,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言5: 正确识别价格范围
-    add_assertion "正确识别了价格范围", weight: 10 do
+    add_assertion "正确识别了价格范围", weight: 15 do
       # 验证订单价格在合理范围内
       adult_unit_price = @booking.tour_package.price
       
@@ -120,6 +125,12 @@ class V009SearchBudgetTourValidator < BaseValidator
       expect(adult_unit_price).to be <= @budget,
         "价格超出预算。实际: #{adult_unit_price}元"
     end
+    
+    # 断言6: 出行人数正确（1人）
+    add_assertion "出行人数正确（#{@adult_count}人）", weight: 20 do
+      expect(@booking.adult_count).to eq(@adult_count),
+        "出行人数不正确。预期: #{@adult_count}人, 实际: #{@booking.adult_count}人"
+    end
   end
   
   private
@@ -129,6 +140,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     {
       destination: @destination,
       budget: @budget,
+      adult_count: @adult_count,
       budget_products_count: @budget_products.count,
       most_popular_id: @most_popular&.id,
       most_popular_sales: @most_popular&.sales_count
@@ -139,6 +151,7 @@ class V009SearchBudgetTourValidator < BaseValidator
   def restore_from_state(data)
     @destination = data['destination']
     @budget = data['budget']
+    @adult_count = data['adult_count'] || 1
     @most_popular = TourGroupProduct.find_by(id: data['most_popular_id']) if data['most_popular_id']
   end
   
