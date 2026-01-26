@@ -178,8 +178,8 @@
                  class="w-full px-3 py-2 border border-gray-300 rounded">
         </div>
         <%= f.fields_for :rental_info, data: { internet_order_form_target: "rentalInfoField" } do |rental| %>
-          <%= rental.hidden_field :pickup_date, value: Date.today.to_s %>
-          <%= rental.hidden_field :return_date, value: (Date.today + 7).to_s %>
+          <%= rental.hidden_field :pickup_date, value: Time.zone.today.to_s %>
+          <%= rental.hidden_field :return_date, value: (Time.zone.today + 7).to_s %>
           <%= rental.hidden_field :days, value: 7, data: { internet_order_form_target: "rentalDaysField" } %>
         <% end %>
       </div>

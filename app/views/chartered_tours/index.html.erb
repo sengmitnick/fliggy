@@ -55,8 +55,8 @@
       <button 
         data-controller="date-picker"
         data-action="click->date-picker#openModal"
-        data-date-picker-current-date-value="<%= (Date.today + 1.day).to_s %>"
-        data-date-picker-selected-date-value="<%= (Date.today + 1.day).to_s %>"
+        data-date-picker-current-date-value="<%= (Time.zone.today + 1.day).to_s %>"
+        data-date-picker-selected-date-value="<%= (Time.zone.today + 1.day).to_s %>"
         class="w-full flex items-center justify-between mb-3 border-t border-gray-100 pt-3">
         <div class="flex items-center">
           <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

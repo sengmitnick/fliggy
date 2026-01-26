@@ -11,8 +11,8 @@
 <%= form_with(model: CarOrder.new, url: car_orders_path, class: "bg-[#F7F8FA] pb-24", data: { 'car-order-target': 'form' }) do |form| %>
   <% 
     # 计算取还车日期时间
-    pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Date.today
-    return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Date.today + 2.days)
+    pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
+    return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
     days_count = (return_date - pickup_date).to_i
     
     # 从搜索参数获取时间，如果没有则使用默认时间 09:00
@@ -84,8 +84,8 @@
 
     <!-- 取还车时间 -->
    <% 
-      pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Date.today
-      return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Date.today + 2.days)
+      pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
+      return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
       days_count = (return_date - pickup_date).to_i
       weekday_names = ['日', '一', '二', '三', '四', '五', '六']
     %>

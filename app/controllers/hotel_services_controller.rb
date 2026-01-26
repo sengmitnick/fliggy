@@ -19,8 +19,8 @@ class HotelServicesController < ApplicationController
   def show
     @hotel = Hotel.find(params[:id])
     # Set default date params for hotel booking compatibility
-    @check_in = params[:check_in] || Date.today.to_s
-    @check_out = params[:check_out] || (Date.today + 1.day).to_s
+    @check_in = params[:check_in] || Time.zone.today.to_s
+    @check_out = params[:check_out] || (Time.zone.today + 1.day).to_s
     @rooms = params[:rooms] || 1
     @adults = params[:adults] || 2
     @children = params[:children] || 0

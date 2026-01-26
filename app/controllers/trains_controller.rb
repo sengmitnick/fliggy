@@ -36,7 +36,7 @@ class TrainsController < ApplicationController
   
   # Query existing train prices for date picker (NO auto-generation)
   def preload_date_prices(departure_city, arrival_city)
-    today = Date.today
+    today = Time.zone.today
     start_date = Date.new(today.year, today.month, 1)
     end_date = today + 60.days
     prices = {}

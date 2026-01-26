@@ -319,7 +319,7 @@
               <!-- Month Tabs -->
               <div class="flex gap-4 mb-4 border-b border-gray-100">
                 <% 4.times do |i| %>
-                  <% month = (Date.today + i.months) %>
+                  <% month = (Time.zone.today + i.months) %>
                   <button type="button"
                           class="pb-2 text-sm font-medium <%= i == 0 ? 'text-red-500 border-b-2 border-red-500' : 'text-foreground-muted' %>"
                           data-booking-modal-target="monthTab"
@@ -341,13 +341,13 @@
                 <% end %>
                 
                 <!-- Calendar Days (Current Month) -->
-                <% start_date = Date.today %>
+                <% start_date = Time.zone.today %>
                 <% end_date = start_date.end_of_month %>
                 <% (start_date.beginning_of_month.wday).times do %>
                   <div></div>
                 <% end %>
                 <% (start_date..end_date).each do |date| %>
-                  <% is_past = date < Date.today %>
+                  <% is_past = date < Time.zone.today %>
                   <% is_holiday = date.saturday? || date.sunday? %>
                   <button type="button"
                           class="aspect-square rounded-lg text-sm flex flex-col items-center justify-center <%= is_past ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50' %>"

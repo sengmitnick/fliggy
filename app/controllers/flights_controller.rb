@@ -279,7 +279,7 @@ class FlightsController < ApplicationController
   
   # Query existing flight prices for date picker (NO auto-generation)
   def preload_date_prices(departure_city, destination_city)
-    today = Date.today
+    today = Time.zone.today
     start_date = Date.new(today.year, today.month, 1)
     end_date = today + 60.days
     prices = {}
@@ -333,7 +333,7 @@ class FlightsController < ApplicationController
 
   def get_date_prices(departure_city, destination_city, center_date)
     prices = []
-    today = Date.today
+    today = Time.zone.today
     
     # 确保中心日期不早于今天
     center_date = [center_date, today].max

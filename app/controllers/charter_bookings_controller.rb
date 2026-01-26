@@ -56,7 +56,7 @@ class CharterBookingsController < ApplicationController
       @departure_date = if @charter_booking.departure_date.present?
                           @charter_booking.departure_date.is_a?(Date) ? @charter_booking.departure_date : Date.parse(@charter_booking.departure_date.to_s)
                         else
-                          Date.today + 1.day  # Fallback
+                          Time.zone.today + 1.day  # Fallback
                         end
       @duration_hours = @charter_booking.duration_hours || 8
       @passengers_count = @charter_booking.passengers_count || 1
