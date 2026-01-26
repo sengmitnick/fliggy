@@ -1,13 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["modal", "dateButton"]
+  static targets = ["modal", "dateButton", "dateScroll", "selectedDate"]
   static values = {
     currentDate: String
   }
 
   declare readonly modalTarget: HTMLElement
   declare readonly dateButtonTargets: HTMLButtonElement[]
+  declare readonly dateScrollTarget: HTMLElement
+  declare readonly hasSelectedDateTarget: boolean
+  declare readonly selectedDateTarget: HTMLElement
   declare readonly currentDateValue: string
 
   connect(): void {
@@ -20,6 +23,9 @@ export default class extends Controller<HTMLElement> {
     
     // Update past dates based on client timezone
     this.updatePastDates()
+    
+    // Scroll to selected date on page load
+    this.scrollToSelectedDate()
   }
 
   openModal(): void {
@@ -47,22 +53,51 @@ export default class extends Controller<HTMLElement> {
         return // Don't select past dates
       }
       
-      // Find the abroad-ticket-search controller and call its updateDate method
+      // Try to find the abroad-ticket-search controller
       const searchController = this.application.getControllerForElementAndIdentifier(
         this.element,
         'abroad-ticket-search'
       )
       
+      // If controller exists (index page), update date via controller
       if (searchController && 'updateDate' in searchController) {
         (searchController as any).updateDate(dateStr)
+        this.closeModal()
+      } else {
+        // If no controller (search page), navigate to new URL
+        const currentUrl = new URL(window.location.href)
+        currentUrl.searchParams.set('date', dateStr)
+        window.Turbo.visit(currentUrl.toString())
       }
-      
-      this.closeModal()
     }
   }
 
   openCalendar(): void {
     this.openModal()
+  }
+  
+  // Scroll to selected date to make it visible
+  private scrollToSelectedDate(): void {
+    if (this.hasSelectedDateTarget && this.dateScrollTarget) {
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      requestAnimationFrame(() => {
+        const selectedElement = this.selectedDateTarget
+        const scrollContainer = this.dateScrollTarget
+        
+        // Calculate scroll position to center the selected date
+        const elementLeft = selectedElement.offsetLeft
+        const elementWidth = selectedElement.offsetWidth
+        const containerWidth = scrollContainer.offsetWidth
+        
+        // Center the selected date in view
+        const scrollPosition = elementLeft - (containerWidth / 2) + (elementWidth / 2)
+        
+        scrollContainer.scrollTo({
+          left: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        })
+      })
+    }
   }
   
   // Update past dates to be disabled

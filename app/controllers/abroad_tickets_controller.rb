@@ -25,8 +25,10 @@ class AbroadTicketsController < ApplicationController
                            .by_date(@date)
                            .order(time_slot_start: :asc)
 
-    # Get date range for date picker (7 days before and after)
-    @date_range = ((@date - 3.days)..(@date + 10.days)).to_a
+    # Get date range for date picker
+    # Show yesterday (disabled) + today onwards, so today appears in second position
+    start_date = @date - 1.day
+    @date_range = (start_date..(start_date + 13.days)).to_a
   end
 
   def show
