@@ -136,11 +136,15 @@ class V006BookMorningBusValidator < BaseValidator
     order = BusTicketOrder.create!(
       bus_ticket_id: target_bus.id,
       user_id: user.id,
-      passenger_name: '张三',
-      passenger_id_number: '110101199001011234',
-      contact_phone: '13800138000',
+      passenger_count: 1,
       total_price: target_bus.price,
       status: 'pending'
+    )
+    
+    # 创建乘客信息
+    order.passengers.create!(
+      passenger_name: '张三',
+      passenger_id_number: '110101199001011234'
     )
     
     # 返回操作信息

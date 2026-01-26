@@ -92,6 +92,7 @@ class V004BookTourPackageValidator < BaseValidator
     # 断言4: 价格符合预算（核心评分项）
     add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 30 do
       # 获取成人单价（不含保险）
+      expect(@booking.tour_package).not_to be_nil, "未找到套餐信息"
       adult_unit_price = @booking.tour_package.price
       
       expect(adult_unit_price).to be <= @budget_per_person,
@@ -148,8 +149,11 @@ class V004BookTourPackageValidator < BaseValidator
     # 随机选择一个
     target_product = suitable_products.sample
     
-    # 3. 选择套餐（经济型）
-    target_package = target_product.tour_packages.find_by(name: '经济型')
+    # 3. 选择套餐（价格最低的）
+    target_package = target_product.tour_packages.order(:price).first
+    
+    # 如果没有套餐，抛出错误
+    raise "产品 #{target_product.title} 没有可用套餐" if target_package.nil?
     
     # 4. 创建订单（固定参数）
     travel_date = Date.current + 7.days  # 7天后出发
