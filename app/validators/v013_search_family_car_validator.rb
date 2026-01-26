@@ -99,7 +99,7 @@ class V013SearchFamilyCarValidator < BaseValidator
     
     # 断言5: 取车时间正确（后天上午9:00）
     add_assertion "取车时间正确（后天上午#{@pickup_time}）", weight: 15 do
-      expected_pickup_datetime = @pickup_date.to_time + 9.hours
+      expected_pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
       actual_pickup_date = @order.pickup_datetime.to_date
       actual_pickup_hour = @order.pickup_datetime.hour
       
@@ -166,9 +166,9 @@ class V013SearchFamilyCarValidator < BaseValidator
     pickup_date = Date.current + 2.days
     rental_days = 3
     total_price = target_car.price_per_day * rental_days
-    pickup_datetime = pickup_date.to_time + 9.hours
+    pickup_datetime = pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
     # 3天租期：第1天上午9点 -> 第3天下午6点（正好3天）
-    return_datetime = (pickup_date + (rental_days - 1).days).to_time + 18.hours
+    return_datetime = (pickup_date + (rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
     
     order = CarOrder.create!(
       car_id: target_car.id,

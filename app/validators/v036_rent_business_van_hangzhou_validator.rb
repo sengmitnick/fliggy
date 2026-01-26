@@ -101,8 +101,8 @@ class V036RentBusinessVanHangzhouValidator < BaseValidator
     ).where('seats >= ?', @min_seats).sample
     
     total_price = target_car.price_per_day * @rental_days
-    pickup_datetime = @pickup_date.to_time + 9.hours
-    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time + 18.hours
+    pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
+    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
     
     CarOrder.create!(
       car_id: target_car.id,
