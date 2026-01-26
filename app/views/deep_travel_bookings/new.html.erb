@@ -331,10 +331,41 @@ function selectPassengerForTraveler(element) {
 
 // Validate all travelers selected before submission
 document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form[action="/deep_travel_bookings"]');
+  console.log('[Form Validation] DOM loaded, looking for form...');
+  const form = document.querySelector('form[action*="deep_travel_bookings"]');
+  console.log('[Form Validation] Form found:', form);
+  
   if (form) {
+    console.log('[Form Validation] Attaching submit listener');
+    
     form.addEventListener('submit', function(e) {
+      console.log('[Form Validation] Submit triggered');
+      
+      // 验证是否勾选同意条款
+      const termsCheckbox = form.querySelector('input[type="checkbox"][value="true"]');
+      console.log('[Form Validation] Terms checkbox found:', termsCheckbox);
+      console.log('[Form Validation] Checkbox checked:', termsCheckbox?.checked);
+      
+      if (termsCheckbox && !termsCheckbox.checked) {
+        console.log('[Form Validation] Blocking submit - terms not agreed');
+        e.preventDefault();
+        if (window.showToast) {
+          window.showToast('请阅读并同意相关条款');
+        } else {
+          alert('请阅读并同意相关条款');
+        }
+        return false;
+      }
+      
       const travelerCards = document.querySelectorAll('.traveler-card');
+      console.log('[Form Validation] Traveler cards found:', travelerCards.length);
+      
+      // 如果没有游客卡片（可能是空状态），则不验证游客信息
+      if (travelerCards.length === 0) {
+        console.log('[Form Validation] No traveler cards, allowing submit');
+        return true;
+      }
+      
       let allSelected = true;
       
       travelerCards.forEach(card => {
@@ -347,7 +378,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       
+      console.log('[Form Validation] All travelers selected:', allSelected);
+      
       if (!allSelected) {
+        console.log('[Form Validation] Blocking submit - travelers not selected');
         e.preventDefault();
         if (window.showToast) {
           window.showToast('请为所有游客选择出行人');
@@ -356,7 +390,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return false;
       }
+      
+      console.log('[Form Validation] All validations passed, allowing submit');
     });
+  } else {
+    console.log('[Form Validation] Form not found!');
   }
 });
 </script>

@@ -113,7 +113,6 @@ class DeepTravelBookingsController < ApplicationController
       :insurance_price,
       :notes,
       :fill_travelers_later,
-      :terms_agreed,
       booking_travelers_attributes: [:id, :traveler_name, :id_number, :traveler_type, :_destroy]
     )
   end

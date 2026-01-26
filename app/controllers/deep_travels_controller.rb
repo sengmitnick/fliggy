@@ -41,6 +41,11 @@ class DeepTravelsController < ApplicationController
                            .pluck(:available_date)
                            .map(&:to_s)
 
+    # 禁用缓存
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
     render json: { available_dates: available_dates }
   end
 

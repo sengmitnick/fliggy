@@ -94,14 +94,28 @@ export default class extends Controller<HTMLElement> {
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
     const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0) // 2个月后
     
+    console.log('[Calendar] Fetching available dates:', {
+      guideId: this.guideIdValue,
+      startDate: this.formatDate(startDate),
+      endDate: this.formatDate(endDate)
+    })
+    
     // 从后端API获取可约日期
     let availableDates: Set<string>
     try {
-      const response = await fetch(`/deep_travels/${this.guideIdValue}/available_dates?start_date=${this.formatDate(startDate)}&end_date=${this.formatDate(endDate)}`)
+      const url = `/deep_travels/${this.guideIdValue}/available_dates?start_date=${this.formatDate(startDate)}&end_date=${this.formatDate(endDate)}`
+      console.log('[Calendar] Fetching URL:', url)
+      
+      const response = await fetch(url)
+      console.log('[Calendar] Response status:', response.status)
+      
       const data = await response.json()
+      console.log('[Calendar] Response data:', data)
+      
       availableDates = new Set(data.available_dates)
+      console.log('[Calendar] Available dates count:', availableDates.size)
     } catch (error) {
-      console.error('Failed to fetch available dates:', error)
+      console.error('[Calendar] Failed to fetch available dates:', error)
       // 如果API失败，使用空集合
       availableDates = new Set()
     }
@@ -187,13 +201,15 @@ export default class extends Controller<HTMLElement> {
           } else {
             // 可选日期
             const bgClass = isSelected ? 'bg-[#ffeeb8] rounded-lg' : ''
+            const topLabel = isSelected 
+              ? '<div class="absolute top-1 text-xs font-bold" style="color: #FF8C00;">已选</div>' 
+              : (isToday ? '<div class="absolute top-1 text-xs text-orange-500 font-bold">今天</div>' : '')
             html += `
               <button 
                 data-action="click->deep-booking#selectCalendarDate"
                 data-date="${dateStr}"
                 class="flex-1 py-2 flex flex-col items-center relative ${bgClass}">
-                ${isToday ? '<div class="absolute top-1 text-xs text-orange-500 font-bold">今天</div>' : ''}
-                ${isSelected ? '<div class="absolute top-1 text-xs font-bold" style="color: #FF8C00;">已选</div>' : ''}
+                ${topLabel}
                 <div class="text-2xl font-bold mt-3 ${isSelected ? 'text-gray-900' : 'text-gray-800'}">${currentDate.getDate()}</div>
                 <div class="text-xs ${isSelected ? 'text-gray-900 font-bold' : 'text-green-600'} mt-1">可约</div>
               </button>
