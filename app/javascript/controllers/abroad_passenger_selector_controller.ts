@@ -32,6 +32,9 @@ export default class extends Controller<HTMLElement> {
   connect(): void {
     // Initialize counters with confirmed values
     this.updateCounters()
+    
+    // Restore previous passenger type selection from sessionStorage
+    this.restoreState()
   }
 
   select(event: Event): void {
@@ -83,6 +86,9 @@ export default class extends Controller<HTMLElement> {
           }
         })
       }
+      
+      // Save state to sessionStorage
+      this.saveState(selectedType)
     }
   }
 
@@ -233,6 +239,9 @@ export default class extends Controller<HTMLElement> {
       })
     }
     
+    // Save state to sessionStorage
+    this.saveState(passengerType)
+    
     // Deselect all preset type buttons
     if (this.hasTypeTarget) {
       this.typeTargets.forEach((element) => {
@@ -268,5 +277,69 @@ export default class extends Controller<HTMLElement> {
       type += `${children}child`
     }
     return type
+  }
+
+  private saveState(passengerType: string): void {
+    // Get current ticket ID from URL or data attribute
+    const ticketId = window.location.pathname.split('/').pop()
+    if (ticketId) {
+      sessionStorage.setItem(`abroad_ticket_${ticketId}_passenger_type`, passengerType)
+    }
+  }
+
+  private restoreState(): void {
+    // Get current ticket ID from URL
+    const ticketId = window.location.pathname.split('/').pop()
+    if (!ticketId) return
+    
+    const savedPassengerType = sessionStorage.getItem(`abroad_ticket_${ticketId}_passenger_type`)
+    if (!savedPassengerType) return
+    
+    // Find and click the matching passenger type button
+    if (this.hasTypeTarget) {
+      const matchingButton = this.typeTargets.find(
+        (element) => element.dataset.abroadPassengerSelectorTypeParam === savedPassengerType
+      )
+      
+      if (matchingButton) {
+        // Trigger click event to restore the selection
+        matchingButton.click()
+      } else {
+        // Handle custom passenger type (not in preset buttons)
+        const passengerCount = this.calculatePassengerCount(savedPassengerType)
+        this.updatePrices(passengerCount)
+        this.updatePassengerCountText(passengerCount)
+        
+        // Update booking button links
+        if (this.hasBookingButtonTarget) {
+          this.bookingButtonTargets.forEach((button) => {
+            const href = button.getAttribute("href")
+            if (href) {
+              const newUrl = new URL(href, window.location.origin)
+              newUrl.searchParams.set("passenger_type", savedPassengerType)
+              button.setAttribute("href", newUrl.toString())
+            }
+          })
+        }
+        
+        // Update internal state for custom types
+        const adultMatch = savedPassengerType.match(/(\d+)adult/)
+        const childMatch = savedPassengerType.match(/(\d+)child/)
+        
+        if (adultMatch) {
+          this.adults = parseInt(adultMatch[1])
+          this.confirmedAdults = this.adults
+        }
+        if (childMatch) {
+          this.children = parseInt(childMatch[1])
+          this.confirmedChildren = this.children
+        } else {
+          this.children = 0
+          this.confirmedChildren = 0
+        }
+        
+        this.updateCounters()
+      }
+    }
   }
 }
