@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["modal", "dateButton", "dateScroll", "selectedDate"]
+  static targets = ["modal", "dateButton", "dateScroll", "selectedDate", "dateDisplay"]
   static values = {
     currentDate: String
   }
@@ -12,6 +12,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasSelectedDateTarget: boolean
   declare readonly selectedDateTarget: HTMLElement
   declare readonly currentDateValue: string
+  declare readonly hasDateDisplayTarget: boolean
+  declare readonly dateDisplayTargets: HTMLElement[]
 
   connect(): void {
     console.log("AbroadDatePicker connected")
@@ -59,21 +61,60 @@ export default class extends Controller<HTMLElement> {
         'abroad-ticket-search'
       )
       
-      // If controller exists (index page), update date via controller
+      // If controller exists (index or search page with controller), update date via controller
       if (searchController && 'updateDate' in searchController) {
         (searchController as any).updateDate(dateStr)
         this.closeModal()
       } else {
-        // If no controller (search page), navigate to new URL
+        // No search controller - could be search page or show page
         const currentUrl = new URL(window.location.href)
-        currentUrl.searchParams.set('date', dateStr)
-        window.Turbo.visit(currentUrl.toString())
+        
+        // Check if we're on a show page (has /abroad_tickets/:id pattern)
+        const isShowPage = /\/abroad_tickets\/\d+$/.test(currentUrl.pathname)
+        
+        if (isShowPage) {
+          // On show page: update date display without navigation
+          this.updateDateDisplay(dateStr)
+          this.closeModal()
+        } else {
+          // On search page: update date parameter
+          currentUrl.searchParams.set('date', dateStr)
+          window.Turbo.visit(currentUrl.toString())
+        }
       }
     }
   }
 
   openCalendar(): void {
     this.openModal()
+  }
+  
+  // Update date display on show page
+  private updateDateDisplay(dateStr: string): void {
+    const date = new Date(`${dateStr}T00:00:00`)
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const year = date.getFullYear()
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const weekday = weekdays[date.getDay()]
+    
+    // Update all date display targets
+    if (this.hasDateDisplayTarget) {
+      this.dateDisplayTargets.forEach(target => {
+        const type = target.dataset.dateType
+        
+        if (type === 'short') {
+          // Format: "1月26日"
+          target.textContent = `${month}月${day}日`
+        } else if (type === 'weekday') {
+          // Format: "周日"
+          target.textContent = weekday
+        } else if (type === 'full') {
+          // Format: "2026年01月26日 周日"
+          target.textContent = `${year}年${String(month).padStart(2, '0')}月${String(day).padStart(2, '0')}日 ${weekday}`
+        }
+      })
+    }
   }
   
   // Scroll to selected date to make it visible
