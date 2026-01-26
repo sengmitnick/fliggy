@@ -2,17 +2,18 @@
 
 require_relative 'base_validator'
 
-# 验证用例10: 搜索后天杭州到深圳行程时间最短的班次
+# 验证用例10: 搜索后天杭州到深圳行程时间最短的班次（1人）
 # 
 # 任务描述:
 #   Agent 需要搜索后天杭州到深圳的所有大巴班次，
-#   找出行程时间最短的班次并创建订单
+#   找出行程时间最短的班次并创建订单（1人乘车）
 # 
 # 评分标准:
-#   - 搜索到了所有可用班次 (20分)
+#   - 搜索到了所有可用班次 (15分)
 #   - 正确识别最短行程时间 (30分)
-#   - 成功创建订单 (20分)
-#   - 订单信息准确 (30分)
+#   - 成功创建订单 (15分)
+#   - 订单信息准确 (20分)
+#   - 乘车人数正确（1人） (20分)
 # 
 # 难点:
 #   - 需要计算行程时间（到达时间 - 出发时间）
@@ -28,8 +29,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V014SearchFastestBusValidator < BaseValidator
   self.validator_id = 'v014_search_fastest_bus_validator'
-  self.title = '搜索后天杭州到深圳行程时间最短的班次'
-  self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订'
+  self.title = '搜索后天杭州到深圳行程时间最短的班次（1人）'
+  self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订（1人乘车）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -38,6 +39,7 @@ class V014SearchFastestBusValidator < BaseValidator
     @origin = '杭州'
     @destination = '深圳'
     @target_date = Date.current + 2.days  # 后天
+    @passenger_count = 1  # 乘车人数
     
     # 查找所有班次（注意：查询基线数据）
     buses = BusTicket.where(
@@ -63,11 +65,12 @@ class V014SearchFastestBusValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索后天从#{@origin}到#{@destination}的所有大巴班次，找出行程时间最短的并预订",
+      task: "请搜索后天从#{@origin}到#{@destination}的所有大巴班次，找出行程时间最短的并预订（#{@passenger_count}人乘车）",
       origin: @origin,
       destination: @destination,
       date: @target_date.to_s,
       date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
+      passenger_count: @passenger_count,
       hint: "需要对比各班次的行程时间（到达时间 - 出发时间）",
       total_buses: buses.count,
       fastest_duration_minutes: @fastest_bus ? @fastest_bus[:duration_minutes] : nil
@@ -77,7 +80,7 @@ class V014SearchFastestBusValidator < BaseValidator
   # 验证阶段：检查是否找到并预订了最短行程的班次
   def verify
     # 断言1: 必须有订单创建
-    add_assertion "订单已创建", weight: 20 do
+    add_assertion "订单已创建", weight: 15 do
       @order = BusTicketOrder.order(created_at: :desc).first
       expect(@order).not_to be_nil, "未找到任何大巴票订单记录"
     end
@@ -117,11 +120,21 @@ class V014SearchFastestBusValidator < BaseValidator
     end
     
     # 断言5: 订单信息准确
-    add_assertion "订单金额准确", weight: 30 do
+    add_assertion "订单金额准确", weight: 20 do
       expected_price = @order.bus_ticket.price
       
       expect(@order.total_price).to be_within(1).of(expected_price),
         "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@order.total_price}"
+    end
+    
+    # 断言6: 乘车人数正确（1人）
+    add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 20 do
+      expect(@order.passenger_count).to eq(@passenger_count),
+        "乘车人数不正确。预期: #{@passenger_count}人, 实际: #{@order.passenger_count}人"
+      
+      # 验证乘客信息存在
+      expect(@order.passengers.count).to eq(@passenger_count),
+        "乘客信息数量不正确。预期: #{@passenger_count}人, 实际: #{@order.passengers.count}人"
     end
   end
   
@@ -133,6 +146,7 @@ class V014SearchFastestBusValidator < BaseValidator
       origin: @origin,
       destination: @destination,
       target_date: @target_date.to_s,
+      passenger_count: @passenger_count,
       bus_durations: @bus_durations,
       fastest_bus: @fastest_bus
     }
@@ -143,6 +157,7 @@ class V014SearchFastestBusValidator < BaseValidator
     @origin = data['origin']
     @destination = data['destination']
     @target_date = Date.parse(data['target_date'])
+    @passenger_count = data['passenger_count'] || 1
     @bus_durations = data['bus_durations']
     @fastest_bus = data['fastest_bus']
   end

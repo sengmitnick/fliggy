@@ -2,18 +2,20 @@
 
 require_relative 'base_validator'
 
-# 验证用例2: 搜索上海到深圳的最便宜航班
+# 验证用例2: 搜索上海到深圳的最便宜航班（后天1人）
 # 
 # 任务描述:
-#   Agent 需要搜索上海到深圳的所有航班，
+#   Agent 需要搜索后天上海到深圳的所有航班，
 #   找出价格最便宜的航班（考虑折扣价），
-#   并创建订单
+#   并创建订单（1人出行）
 # 
 # 评分标准:
-#   - 搜索到了所有可用航班 (20分)
-#   - 正确识别最便宜的航班 (30分)
+#   - 搜索到了所有可用航班 (15分)
+#   - 正确识别最便宜的航班 (25分)
 #   - 成功创建订单 (20分)
-#   - 订单金额准确 (30分)
+#   - 订单金额准确 (20分)
+#   - 出行日期正确（后天） (10分)
+#   - 出行人数正确（1人） (10分)
 # 
 # 难点:
 #   - 需要考虑 discount_price（折扣价）
@@ -29,8 +31,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V010SearchCheapestFlightValidator < BaseValidator
   self.validator_id = 'v010_search_cheapest_flight_validator'
-  self.title = '搜索上海到深圳的最便宜航班'
-  self.description = '搜索后天上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣）'
+  self.title = '搜索上海到深圳的最便宜航班（后天1人）'
+  self.description = '搜索后天上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣，1人出行）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -39,6 +41,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
     @origin = '上海'
     @destination = '深圳'
     @target_date = Date.current + 2.days  # 后天
+    @passenger_count = 1  # 出行人数
     
     # 查找所有航班（注意：查询基线数据）
     flights = Flight.where(
@@ -64,11 +67,12 @@ class V010SearchCheapestFlightValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索后天从#{@origin}到#{@destination}的所有航班，找出最便宜的并预订",
+      task: "请搜索后天从#{@origin}到#{@destination}的所有航班，找出最便宜的并预订（#{@passenger_count}人出行）",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,
       date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
+      passenger_count: @passenger_count,
       hint: "注意：有些航班有折扣，需要计算最终价格 = 原价 - 折扣",
       total_flights: flights.count,
       price_range: {
@@ -95,12 +99,13 @@ class V010SearchCheapestFlightValidator < BaseValidator
     end
     
     # 断言3: 日期正确
-    add_assertion "出发日期正确", weight: 10 do
-      expect(@booking.flight.flight_date).to eq(@target_date)
+    add_assertion "出行日期正确（后天）", weight: 10 do
+      expect(@booking.flight.flight_date).to eq(@target_date),
+        "出行日期不正确。预期: #{@target_date.strftime('%Y年%m月%d日')}, 实际: #{@booking.flight.flight_date.strftime('%Y年%m月%d日')}"
     end
     
     # 断言4: 正确识别最便宜的航班（核心评分）
-    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 30 do
+    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 25 do
       # 重新计算所有航班价格（注意：查询基线数据）
       all_flights = Flight.where(
         departure_city: @origin,
@@ -122,7 +127,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
     end
     
     # 断言5: 订单金额准确
-    add_assertion "订单总价准确", weight: 30 do
+    add_assertion "订单总价准确", weight: 20 do
       expected_price = @booking.flight.price - @booking.flight.discount_price
       
       # 允许有保险费用
@@ -132,6 +137,17 @@ class V010SearchCheapestFlightValidator < BaseValidator
       
       expect(@booking.total_price).to be_within(1).of(expected_price),
         "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@booking.total_price}"
+    end
+    
+    # 断言6: 出行人数正确（1人）
+    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 10 do
+      # Booking模型是单个乘客，验证passenger_name存在
+      expect(@booking.passenger_name).to be_present,
+        "未找到乘客信息"
+      
+      # 验证只有一个乘客（不是往返票或多程票）
+      expect(@booking.trip_type).to eq('one_way').or(be_nil),
+        "订单类型应为单程。实际: #{@booking.trip_type}"
     end
   end
   
@@ -143,6 +159,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
       target_date: @target_date.to_s,
       origin: @origin,
       destination: @destination,
+      passenger_count: @passenger_count,
       flight_prices: @flight_prices,
       cheapest_flight: @cheapest_flight
     }
@@ -153,6 +170,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
     @target_date = Date.parse(data['target_date'])
     @origin = data['origin']
     @destination = data['destination']
+    @passenger_count = data['passenger_count'] || 1
     @flight_prices = data['flight_prices']
     @cheapest_flight = data['cheapest_flight']
   end
