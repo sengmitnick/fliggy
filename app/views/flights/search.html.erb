@@ -330,7 +330,16 @@
     <!-- Flight List -->
     <div class="w-full space-y-3" data-flight-sort-target="flightList">
       <% @flights.each do |flight| %>
-        <%= link_to flight_path(flight, source: params[:source]), data: { turbo: false }, class: "block w-full" do %>
+        <%= link_to flight_path(flight, source: params[:source]), 
+            data: { 
+              turbo: false,
+              flight_sort_price: flight.min_offer_price.to_i,
+              flight_sort_departure_time: flight.departure_time.strftime('%H:%M'),
+              flight_sort_arrival_time: flight.arrival_time.strftime('%H:%M'),
+              flight_sort_duration: flight.duration_minutes,
+              flight_sort_is_direct: (flight.direct_flight? ? 'true' : 'false')
+            }, 
+            class: "block w-full" do %>
           <div class="bg-white p-3 relative border-b border-gray-100 w-full max-w-full">
             <!-- 右上角收藏星标 -->
             <div class="absolute top-1 right-4 text-gray-300">
