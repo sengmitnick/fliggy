@@ -173,6 +173,61 @@ cities.each do |city|
   end
 end
 
+# 商务酒店（北京、杭州专门添加）
+if cities.include?("北京")
+  5.times do
+    hotel_index += 1
+    hotels_data << {
+      name: "北京商务酒店·#{['中关村', '国贸', '金融街', '望京', '亦庄'].sample}店",
+      brand: "商务酒店",
+      city: "北京",
+      address: "北京#{address_suffixes.sample}#{rand(1..999)}号",
+      rating: (4.0 + rand * 0.8).round(1),
+      price: rand(350..550),
+      original_price: rand(450..700),
+      distance: "#{rand(1..10)}.#{rand(0..9)}km",
+      features: features_pool.sample,
+      star_level: 4,
+      is_featured: false,
+      display_order: hotel_index,
+      hotel_type: 'hotel',
+      is_domestic: true,
+      region: '国内',
+      image_url: hotel_images.sample,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+if cities.include?("杭州")
+  5.times do
+    hotel_index += 1
+    hotels_data << {
+      name: "杭州商务酒店·#{['西湖', '滨江', '钓鱼台', '萎萃', '城西'].sample}店",
+      brand: "商务酒店",
+      city: "杭州",
+      address: "杭州#{address_suffixes.sample}#{rand(1..999)}号",
+      rating: (4.0 + rand * 0.8).round(1),
+      price: rand(350..550),
+      original_price: rand(450..700),
+      distance: "#{rand(1..10)}.#{rand(0..9)}km",
+      features: features_pool.sample,
+      star_level: 4,
+      is_featured: false,
+      display_order: hotel_index,
+      hotel_type: 'hotel',
+      is_domestic: true,
+      region: '国内',
+      image_url: hotel_images.sample,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
 # 民宿 (每个城市 2-3 家)
 cities.each do |city|
   homestay_names.sample(rand(2..3)).each do |homestay_name|

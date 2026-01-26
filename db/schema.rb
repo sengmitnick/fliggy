@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_24_122947) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_26_035321) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1841,7 +1841,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_24_122947) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
-  add_foreign_key "bus_ticket_passengers", "bus_ticket_orders"
+  add_foreign_key "bus_ticket_passengers", "bus_ticket_orders", on_delete: :cascade
   add_foreign_key "contacts", "users"
   add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
