@@ -1,0 +1,110 @@
+<div class="bg-surface border border-border rounded-xl overflow-hidden mb-3">
+  <!-- Train Booking Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div class="flex items-center space-x-2">
+      <div class="w-6 h-6 bg-secondary/10 rounded flex items-center justify-center">
+        <svg class="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8h8l-4 8zm-5-1h2v-3h-2v3zm0-4h2V7h-2v3z"/>
+        </svg>
+      </div>
+      <span class="text-sm font-semibold text-text-primary">火车票</span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'cancelled' %>
+        <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded">已取消</span>
+      <% elsif booking.status == 'pending' %>
+        <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded">待付款</span>
+      <% elsif booking.status == 'paid' %>
+        <span class="px-2 py-1 bg-success/10 text-success text-xs rounded">预订成功</span>
+      <% elsif booking.status == 'completed' %>
+        <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">已完成</span>
+      <% end %>
+      <button type="button" class="text-text-muted" aria-label="展开详情">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Train Booking Details -->
+  <%= link_to train_booking_path(booking), class: "block" do %>
+    <div class="px-4 py-4">
+      <!-- Route Info -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex-1">
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="text-text-primary text-lg font-bold">
+              <%= booking.train.departure_city %>
+            </div>
+            <div class="flex-1 flex items-center justify-center">
+              <div class="flex items-center space-x-1">
+                <div class="w-12 h-px bg-border"></div>
+                <svg class="w-4 h-4 text-text-muted" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8h8l-4 8zm-5-1h2v-3h-2v3zm0-4h2V7h-2v3z"/>
+                </svg>
+                <div class="w-12 h-px bg-border"></div>
+              </div>
+            </div>
+            <div class="text-text-primary text-lg font-bold">
+              <%= booking.train.arrival_city %>
+            </div>
+          </div>
+          
+          <div class="text-xs text-text-muted mb-2">
+            发车时间: <%= booking.train.departure_time.strftime('%Y-%m-%d %H:%M') %>
+          </div>
+          
+          <div class="text-xs text-text-muted">
+            车次: <%= booking.train.train_number %> | 座位: <%= booking.carriage_number %>车<%= booking.seat_number %>号
+          </div>
+        </div>
+      </div>
+
+      <!-- Passenger Info -->
+      <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
+        <span>乘车人: <%= booking.passenger_name %></span>
+        <span>|</span>
+        <span><%= booking.seat_type == 'second_class' ? '二等座' : booking.seat_type == 'first_class' ? '一等座' : '商务座' %></span>
+      </div>
+
+      <!-- Services/Tags -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="px-2 py-1 bg-surface-elevated text-text-secondary text-xs rounded">火车票订单</span>
+        <% if booking.insurance_type == 'premium' %>
+          <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">高额保障险</span>
+        <% elsif booking.insurance_type == 'refund' %>
+          <span class="px-2 py-1 bg-info/10 text-info text-xs rounded">退改无忧险</span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Price Section -->
+  <div class="px-4 py-3 bg-surface-elevated flex items-center justify-between">
+    <div>
+      <div class="text-text-muted text-xs mb-1">
+        <% if booking.status == 'cancelled' %>
+          未付款
+        <% else %>
+          实付款
+        <% end %>
+      </div>
+      <div class="flex items-baseline space-x-1">
+        <span class="text-xs text-text-primary">¥</span>
+        <span class="text-2xl font-bold text-primary"><%= sprintf('%.2f', booking.total_price) %></span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <% if booking.status == 'paid' || booking.status == 'completed' %>
+        <%= link_to '查看详情', train_booking_path(booking), class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '再来一单', trains_path, class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% elsif booking.status == 'cancelled' %>
+        <%= link_to '重新预订', trains_path, class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+      <% elsif booking.status == 'pending' %>
+        <%= link_to '取消订单', '#', class: 'px-4 py-2 bg-surface border border-border text-text-primary text-sm rounded-full font-medium' %>
+        <%= link_to '立即支付', new_train_booking_path(train_id: booking.train_id), class: 'px-4 py-2 bg-primary text-surface text-sm rounded-full font-semibold' %>
+      <% end %>
+    </div>
+  </div>
+</div>

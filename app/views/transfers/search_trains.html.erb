@@ -80,7 +80,7 @@
               <div class="flex-1">
                 <div class="font-bold text-text-primary text-lg"><%= train.train_number %></div>
                 <div class="text-sm text-text-secondary mt-1">
-                  <%= train.departure_station %> → <%= train.arrival_station %>
+                  <%= train.departure_city %> → <%= train.arrival_city %>
                 </div>
                 <div class="text-xs text-text-muted mt-1">
                   <%= train.departure_time&.strftime('%m月%d日 %H:%M') %> - <%= train.arrival_time&.strftime('%H:%M') %>

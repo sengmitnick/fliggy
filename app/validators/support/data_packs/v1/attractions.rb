@@ -346,8 +346,10 @@ tickets_data = [
 ]
 
 Ticket.insert_all(tickets_data)
+puts "✓ 已批量创建 #{Ticket.count} 张门票"
 
 # ==================== 供应商数据 ====================
+puts "\n🏢 批量创建供应商..."
 
 suppliers_data = [
   {
@@ -393,6 +395,7 @@ suppliers_data = [
 ]
 
 Supplier.insert_all(suppliers_data)
+puts "✓ 已批量创建 #{Supplier.count} 个供应商"
 
 # 获取供应商ID映射
 suppliers_map = Supplier.pluck(:name, :id).to_h
@@ -401,6 +404,7 @@ suppliers_map = Supplier.pluck(:name, :id).to_h
 tickets_map = Ticket.pluck(:name, :id).to_h
 
 # ==================== 门票供应商关联数据 ====================
+puts "\n🔗 批量创建门票供应商关联..."
 
 ticket_suppliers_data = []
 
@@ -482,8 +486,10 @@ ticket_suppliers_data = []
 end
 
 TicketSupplier.insert_all(ticket_suppliers_data) if ticket_suppliers_data.any?
+puts "✓ 已批量创建 #{TicketSupplier.count} 条门票供应商关联"
 
 # ==================== 园内项目数据 ====================
+puts "\n🎢 批量创建园内项目..."
 
 activities_data = [
   # 深圳欢乐港湾项目
@@ -752,8 +758,10 @@ activities_data = [
 ]
 
 AttractionActivity.insert_all(activities_data)
+puts "✓ 已批量创建 #{AttractionActivity.count} 个园内项目"
 
 # ==================== 评价数据 ====================
+puts "\n⭐ 批量创建评价..."
 
 # 确保有Demo用户
 demo_user = User.find_or_create_by(email: "demo@example.com") do |u|
@@ -790,8 +798,10 @@ Attraction.find_each do |attraction|
 end
 
 AttractionReview.insert_all(reviews_data)
+puts "✓ 已批量创建 #{AttractionReview.count} 条评价"
 
 # 更新景点统计数据（rating 和 review_count）
+puts "\n🔄 更新景点统计数据..."
 Attraction.find_each do |attraction|
   reviews = AttractionReview.where(attraction_id: attraction.id)
   attraction.update_columns(
@@ -801,6 +811,7 @@ Attraction.find_each do |attraction|
 end
 
 # ==================== 附加封面图片 ====================
+puts "\n🖼️  附加景点封面图片..."
 
 require 'open-uri'
 
@@ -821,6 +832,7 @@ cover_images.each do |slug, image_url|
   begin
     io = URI.open(image_url)
     attraction.cover_image.attach(io: io, filename: "#{slug}-cover.jpg", content_type: 'image/jpeg')
+    puts "  ✓ #{attraction.name} - 封面已附加"
   rescue => e
     puts "  ✗ #{attraction.name} - 失败: #{e.message}"
   end

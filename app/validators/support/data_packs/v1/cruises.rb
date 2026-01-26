@@ -283,8 +283,10 @@ cabin_types_data = [
 ]
 
 CabinType.insert_all(cabin_types_data)
+puts "    ✓ 已加载 #{cabin_types_data.size} 种舱房类型"
 
 # ==================== 商家数据 ====================
+puts "  → 正在加载商家数据..."
 
 travel_agencies_data = [
   {
@@ -306,8 +308,10 @@ travel_agencies_data = [
 ]
 
 TravelAgency.insert_all(travel_agencies_data)
+puts "    ✓ 已加载 #{travel_agencies_data.size} 家商家"
 
 # ==================== 商家产品数据 ====================
+puts "  → 正在加载商家产品数据..."
 
 # 获取班次ID
 sailing_1 = CruiseSailing.find_by(departure_date: Date.parse('2026-01-23'))
@@ -360,4 +364,6 @@ cruise_products_data = [
 ]
 
 CruiseProduct.insert_all(cruise_products_data)
+puts "    ✓ 已加载 #{cruise_products_data.size} 个商家产品"
 
+puts "✓ cruises_v1 数据包加载完成"

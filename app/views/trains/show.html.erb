@@ -109,7 +109,7 @@
   <div data-train-seat-selector-target="optionsContainer">
     <% @train.booking_options.active.ordered.each do |option| %>
       <div class="bg-white mx-4 mt-2 rounded-lg shadow-sm">
-        <%= link_to new_train_booking_path(train_id: @train.id, seat_type: 'second_class'), class: "block" do %>
+        <%= link_to new_train_booking_path(train_id: @train.id, seat_type: 'second_class', booking_option_id: option.id), class: "block booking-link", data: { booking_option_id: option.id } do %>
           <div class="p-4 flex items-center justify-between">
             <div class="flex-1">
               <div class="flex items-center mb-1">

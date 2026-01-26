@@ -80,7 +80,7 @@ class TransfersController < ApplicationController
     return unless @departure_station.present? || @arrival_station.present?
     
     @trains = Train.all
-    @trains = @trains.where('departure_date::date = ?', Date.parse(@departure_date)) if @departure_date.present?
+    @trains = @trains.where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", Date.parse(@departure_date)) if @departure_date.present?
     @trains = @trains.where('departure_station LIKE ? OR arrival_station LIKE ?',
                            "%#{@departure_station}%", "%#{@arrival_station}%") if @departure_station || @arrival_station
     

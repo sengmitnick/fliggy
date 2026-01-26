@@ -43,7 +43,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
      .order(:departure_time)
      .first
     
@@ -61,7 +61,7 @@ class V002BookEarliestTrainValidator < BaseValidator
         departure_city: @origin,
         arrival_city: @destination,
         data_version: 0
-      ).where("DATE(departure_time) = ?", @target_date).count,
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date).count,
       earliest_time: @earliest_departure_time&.strftime('%H:%M')
     }
   end
@@ -98,7 +98,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       all_trains = Train.where(
         departure_city: @origin,
         arrival_city: @destination
-      ).where("DATE(departure_time) = ?", @target_date)
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
       # 找出最早的发车时间
       earliest_time = all_trains.minimum(:departure_time)
@@ -149,7 +149,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
      .order(:departure_time)
      .first
     

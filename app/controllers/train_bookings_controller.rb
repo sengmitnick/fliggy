@@ -5,14 +5,23 @@ class TrainBookingsController < ApplicationController
   def new
     @train = Train.find(params[:train_id])
     @selected_seat_type = params[:seat_type] || 'second_class'
+    @booking_option_id = params[:booking_option_id]
     
-    # Calculate price based on seat type
-    @selected_price = case @selected_seat_type
+    # Calculate base price based on seat type
+    base_price = case @selected_seat_type
     when 'second_class' then @train.price_second_class
     when 'first_class' then @train.price_first_class
     when 'business_class' then @train.price_business_class
     when 'no_seat' then @train.price_second_class * 0.5
     else @train.price_second_class
+    end
+    
+    # Add extra fee from booking option if selected
+    @selected_price = base_price
+    if @booking_option_id.present?
+      booking_option = @train.booking_options.find_by(id: @booking_option_id)
+      @selected_price += booking_option.extra_fee if booking_option
+      @selected_booking_option = booking_option
     end
 
     # Seat type label for display
@@ -33,8 +42,17 @@ class TrainBookingsController < ApplicationController
     @train_booking = current_user.train_bookings.build(train_booking_params)
     @train_booking.train = @train
 
-    # 计算总价（基础票价 + 保险价格）
-    @train_booking.total_price = calculate_ticket_price(@train, @train_booking.seat_type)
+    # 计算总价（基础票价 + 预订选项额外费用 + 保险价格）
+    base_price = calculate_ticket_price(@train, @train_booking.seat_type)
+    @train_booking.total_price = base_price
+    
+    # 添加预订选项额外费用
+    if @train_booking.booking_option_id.present?
+      booking_option = @train.booking_options.find_by(id: @train_booking.booking_option_id)
+      @train_booking.total_price += booking_option.extra_fee if booking_option
+    end
+    
+    # 添加保险费用
     if @train_booking.insurance_price.present?
       @train_booking.total_price += @train_booking.insurance_price
     end
@@ -45,7 +63,17 @@ class TrainBookingsController < ApplicationController
     else
       # 验证失败，返回预订页
       @selected_seat_type = @train_booking.seat_type
-      @selected_price = calculate_ticket_price(@train, @selected_seat_type)
+      @booking_option_id = @train_booking.booking_option_id
+      
+      # 重新计算价格
+      base_price = calculate_ticket_price(@train, @selected_seat_type)
+      @selected_price = base_price
+      if @booking_option_id.present?
+        booking_option = @train.booking_options.find_by(id: @booking_option_id)
+        @selected_price += booking_option.extra_fee if booking_option
+        @selected_booking_option = booking_option
+      end
+      
       @seat_type_label = @train_booking.seat_type_label
       @hot_cities = City.hot_cities.order(:pinyin)
       @all_cities = City.all.order(:pinyin)
@@ -120,6 +148,7 @@ class TrainBookingsController < ApplicationController
       :passenger_id_number,
       :contact_phone,
       :seat_type,
+      :booking_option_id,
       :carriage_number,
       :seat_number,
       :insurance_type,

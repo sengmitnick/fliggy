@@ -85,7 +85,7 @@
         <div class="text-sm text-gray-600 dark:text-gray-400">线路数量</div>
       </div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-primary"><%= Train.where("departure_time >= ?", Date.today).select("DATE(departure_time)").distinct.count %></div>
+        <div class="text-3xl font-bold text-primary"><%= Train.where("departure_time >= ?", Date.today).select("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai')").distinct.count %></div>
         <div class="text-sm text-gray-600 dark:text-gray-400">覆盖日期</div>
       </div>
       <div class="text-center">

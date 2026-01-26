@@ -48,13 +48,22 @@ class V001BookBudgetHotelValidator < BaseValidator
     
     # 查找符合条件的酒店（用于后续验证）
     # 注意：查询基线数据 (data_version=0)
-    eligible_hotels = Hotel.where(
+    # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
+    # 使用子查询方式避免GROUP BY导致的count问题
+    eligible_hotels_base = Hotel.where(
       city: @city,
       data_version: 0
-    ).where('price <= ?', @budget)
+    ).where(
+      'EXISTS (SELECT 1 FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = ? AND hotel_rooms.price <= ?)',
+      'overnight',
+      @budget
+    )
     
-    # 找到性价比最高的酒店（评分最高）
-    @best_hotel = eligible_hotels.order(rating: :desc, price: :asc).first
+    # 找到性价比最高的酒店（使用评分/价格比值）
+    # 使用子查询获取整晚房最低价，然后计算rating/price比值
+    @best_hotel = eligible_hotels_base
+      .select('hotels.*, (SELECT MIN(price) FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = \'overnight\') as min_overnight_price')
+      .max_by { |h| h.rating / h.min_overnight_price.to_f }
     
     # 返回给 Agent 的任务信息
     {
@@ -66,7 +75,7 @@ class V001BookBudgetHotelValidator < BaseValidator
       date_description: "入住：后天（#{@check_in_date.strftime('%Y年%m月%d日')}），离店：#{@check_out_date.strftime('%Y年%m月%d日')}",
       nights: @nights,
       hint: "系统中有多家酒店可选，请选择性价比最高的（综合价格和评分）",
-      available_hotels_count: eligible_hotels.count,
+      available_hotels_count: eligible_hotels_base.count,
       budget_range: "≤#{@budget}元/晚"
     }
   end
@@ -94,27 +103,48 @@ class V001BookBudgetHotelValidator < BaseValidator
     end
     
     # 断言4: 价格符合预算（核心评分项）
+    # CRITICAL FIX: 检查整晚房价而不是包含钟点房的hotel.price
     add_assertion "价格符合预算", weight: 30 do
-      hotel_price = @hotel_booking.hotel.price
-      expect(hotel_price <= @budget).to be_truthy,
-        "价格超出预算。预算: ≤#{@budget}元, 实际: #{hotel_price}元"
+      # 获取订单实际使用的房型价格（必须是过夜房型）
+      hotel_room = @hotel_booking.hotel_room
+      expect(hotel_room.room_category).to eq('overnight'),
+        "订单使用了非过夜房型: #{hotel_room.room_category}"
+      
+      hotel_room_price = hotel_room.price
+      expect(hotel_room_price <= @budget).to be_truthy,
+        "价格超出预算。预算: ≤#{@budget}元, 实际: #{hotel_room_price}元"
     end
     
     # 断言5: 选择了性价比最高的酒店（核心评分项）
+    # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
     add_assertion "选择了性价比最高的酒店", weight: 20 do
-      # 查找所有符合预算的酒店
-      eligible_hotels = Hotel.where(
+      # 查找所有符合预算的酒店（只考虑整晚房价）
+      # 使用子查询方式获取最低整晚房价
+      eligible_hotels_with_price = Hotel.where(
         city: @city,
         data_version: 0
-      ).where('price <= ?', @budget)
+      ).where(
+        'EXISTS (SELECT 1 FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = ? AND hotel_rooms.price <= ?)',
+        'overnight',
+        @budget
+      ).select('hotels.*, (SELECT MIN(price) FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = \'overnight\') as min_overnight_price')
       
-      # 找到性价比最高的（评分最高，价格相同时选便宜的）
-      best_hotel = eligible_hotels.order(rating: :desc, price: :asc).first
+      # 找到性价比最高的（使用评分/价格比值）
+      # 使用整晚房价计算性价比
+      best_hotel = eligible_hotels_with_price.max_by { |h| h.rating / h.min_overnight_price.to_f }
+      
+      # 获取实际选择的酒店的整晚房价
+      actual_hotel_min_price = @hotel_booking.hotel.hotel_rooms.where(room_category: 'overnight').minimum(:price)
+      
+      # 计算性价比（乘以1000便于显示）
+      best_ratio = best_hotel.rating / best_hotel.min_overnight_price.to_f
+      actual_ratio = @hotel_booking.hotel.rating / actual_hotel_min_price.to_f
       
       # 验证是否选择了最优酒店
       expect(@hotel_booking.hotel_id).to eq(best_hotel.id),
-        "未选择性价比最高的酒店。应选: #{best_hotel.name}(评分#{best_hotel.rating}分，价格#{best_hotel.price}元), " \
-        "实际选择: #{@hotel_booking.hotel.name}(评分#{@hotel_booking.hotel.rating}分，价格#{@hotel_booking.hotel.price}元)"
+        "未选择性价比最高的酒店。" \
+        "应选: #{best_hotel.name}(评分#{best_hotel.rating}分，价格#{best_hotel.min_overnight_price.to_f}元，性价比#{(best_ratio * 1000).round(2)})，" \
+        "实际选择: #{@hotel_booking.hotel.name}(评分#{@hotel_booking.hotel.rating}分，价格#{actual_hotel_min_price}元，性价比#{(actual_ratio * 1000).round(2)})"
     end
   end
   
@@ -147,13 +177,19 @@ class V001BookBudgetHotelValidator < BaseValidator
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    # 2. 查找符合预算的酒店，选择评分最高的
-    target_hotel = Hotel.where(
+    # 2. 查找符合预算的酒店，选择性价比最高的（评分/价格比值最大）
+    # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
+    # 使用子查询方式获取最低整晚房价
+    eligible_hotels = Hotel.where(
       city: @city,
       data_version: 0
-    ).where('price <= ?', @budget)
-     .order(rating: :desc, price: :asc)
-     .first
+    ).where(
+      'EXISTS (SELECT 1 FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = ? AND hotel_rooms.price <= ?)',
+      'overnight',
+      @budget
+    ).select('hotels.*, (SELECT MIN(price) FROM hotel_rooms WHERE hotel_rooms.hotel_id = hotels.id AND hotel_rooms.room_category = \'overnight\') as min_overnight_price')
+    
+    target_hotel = eligible_hotels.max_by { |h| h.rating / h.min_overnight_price.to_f }
     
     raise "未找到符合预算的酒店" unless target_hotel
     

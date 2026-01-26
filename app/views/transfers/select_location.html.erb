@@ -85,7 +85,7 @@
       <%= hidden_field_tag :service_type, @service_type %>
       <%= hidden_field_tag :flight_id, @flight_id %>
       <%= hidden_field_tag :train_id, @train_id %>
-      <%= hidden_field_tag :location_from, @flight&.arrival_airport || @train&.arrival_station %>
+      <%= hidden_field_tag :location_from, @flight&.arrival_airport || @train&.arrival_city %>
     <% end %>
 
     <!-- Common Addresses -->
@@ -141,7 +141,7 @@
           <% @saved_addresses.each do |address| %>
             <%= link_to packages_transfers_path(
               location_to: address.full_address,
-              location_from: @flight&.arrival_airport || @train&.arrival_station,
+              location_from: @flight&.arrival_airport || @train&.arrival_city,
               transfer_type: @transfer_type,
               service_type: @service_type,
               flight_id: @flight_id,
@@ -161,7 +161,7 @@
         <% %w[武汉站 庙山站 纸坊东站 乌龙泉南站 左岭站 山坡东站 花山南站 土地堂东站 汤逊湖站 南湖东站 普安站 武昌站 汉口站].each do |station| %>
           <%= link_to packages_transfers_path(
             location_to: station,
-            location_from: @flight&.arrival_airport || @train&.arrival_station,
+            location_from: @flight&.arrival_airport || @train&.arrival_city,
             transfer_type: @transfer_type,
             service_type: @service_type,
             flight_id: @flight_id,
@@ -180,7 +180,7 @@
         <% %w[新洲客运站 邾城客运站 青年路客运站 傅家坡汽车站 杨春湖长途客运站].each do |station| %>
           <%= link_to packages_transfers_path(
             location_to: station,
-            location_from: @flight&.arrival_airport || @train&.arrival_station,
+            location_from: @flight&.arrival_airport || @train&.arrival_city,
             transfer_type: @transfer_type,
             service_type: @service_type,
             flight_id: @flight_id,

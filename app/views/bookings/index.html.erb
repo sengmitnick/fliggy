@@ -88,6 +88,8 @@
             <%= render partial: 'bookings/car_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(BusTicketOrder) %>
             <%= render partial: 'bookings/bus_ticket_order_card', locals: { booking: booking } %>
+          <% elsif booking.is_a?(TrainBooking) %>
+            <%= render partial: 'bookings/train_booking_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(HotelPackageOrder) %>
             <%= render partial: 'bookings/hotel_package_order_card', locals: { booking: booking } %>
           <% elsif booking.is_a?(VisaOrder) %>

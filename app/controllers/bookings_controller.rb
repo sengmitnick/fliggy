@@ -30,6 +30,10 @@ class BookingsController < ApplicationController
       bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
                                       .order(created_at: :desc)
       
+      # Fetch train bookings
+      train_bookings = current_user.train_bookings.includes(:train)
+                                   .order(created_at: :desc)
+      
       # Fetch visa orders
       visa_orders = current_user.visa_orders.includes(visa_product: :country)
                                 .order(created_at: :desc)
@@ -79,6 +83,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'pending')
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
       bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
+      train_bookings = train_bookings.where(status: 'pending')
       visa_orders = visa_orders.where(status: 'pending')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'pending')
       internet_orders = internet_orders.where(status: 'pending')
@@ -102,6 +107,9 @@ class BookingsController < ApplicationController
       bus_ticket_orders = bus_ticket_orders.where(status: 'paid')
                                            .joins(:bus_ticket)
                                            .where('bus_tickets.departure_date >= ?', Date.today)
+      train_bookings = train_bookings.where(status: 'paid')
+                                     .joins(:train)
+                                     .where('trains.departure_time >= ?', DateTime.now)
       visa_orders = visa_orders.where(status: ['paid', 'processing'])
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'paid')
                                                  .joins(:abroad_ticket)
@@ -127,6 +135,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.none
       hotel_package_orders = hotel_package_orders.none
       bus_ticket_orders = bus_ticket_orders.none
+      train_bookings = train_bookings.none
       visa_orders = visa_orders.none
       abroad_ticket_orders = abroad_ticket_orders.none
       internet_orders = internet_orders.none
@@ -144,6 +153,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'cancelled')
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
       bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
+      train_bookings = train_bookings.where(status: 'cancelled')
       visa_orders = visa_orders.where(status: 'cancelled')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'cancelled')
       internet_orders = internet_orders.where(status: 'cancelled')
@@ -164,6 +174,7 @@ class BookingsController < ApplicationController
       car_orders.to_a,
       hotel_package_orders.to_a,
       bus_ticket_orders.to_a,
+      train_bookings.to_a,
       visa_orders.to_a,
       abroad_ticket_orders.to_a,
       internet_orders.to_a,

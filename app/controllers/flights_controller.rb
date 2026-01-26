@@ -289,7 +289,7 @@ class FlightsController < ApplicationController
       departure_city: departure_city,
       destination_city: destination_city
     ).where(
-      'DATE(flight_date) >= ? AND DATE(flight_date) <= ?',
+      "DATE(flight_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') >= ? AND DATE(flight_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') <= ?",
       start_date,
       end_date
     ).includes(:flight_offers)

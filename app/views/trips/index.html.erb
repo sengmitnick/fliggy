@@ -37,12 +37,14 @@
       <!-- Trips List Container -->
       <div id="trips-list" data-infinite-scroll-target="container">
         <% 
-          # 按日期分组（航班用flight_date，酒店用check_in_date）
+          # 按日期分组（航班用flight_date，酒店用check_in_date，火车用train.departure_time.to_date）
           bookings_by_date = @bookings.group_by do |b|
             if b.is_a?(Booking)
               b.flight.flight_date
-            else # HotelBooking
+            elsif b.is_a?(HotelBooking)
               b.check_in_date
+            else # TrainBooking
+              b.train.departure_time.to_date
             end
           end
           bookings_by_date.each do |date, date_bookings|
@@ -58,7 +60,13 @@
               <span class="text-gray-500">前往</span>
               <div class="flex items-center gap-1">
                 <% first_booking = date_bookings.first %>
-                <% destination = first_booking.is_a?(Booking) ? first_booking.flight.destination_city : first_booking.hotel.city %>
+                <% destination = if first_booking.is_a?(Booking)
+                                   first_booking.flight.destination_city
+                                 elsif first_booking.is_a?(HotelBooking)
+                                   first_booking.hotel.city
+                                 else # TrainBooking
+                                   first_booking.train.arrival_city
+                                 end %>
                 <span class="font-medium">📍<%= destination %> ›</span>
               </div>
             </div>
@@ -69,6 +77,8 @@
                 <%= render 'flight_card', booking: booking %>
               <% elsif booking.is_a?(HotelBooking) %>
                 <%= render 'hotel_card', booking: booking %>
+              <% elsif booking.is_a?(TrainBooking) %>
+                <%= render 'train_card', booking: booking %>
               <% end %>
             <% end %>
 

@@ -12,13 +12,21 @@ class TripsController < ApplicationController
                                    .where('hotel_bookings.check_in_date >= ?', Date.today)
                                    .where(status: ['paid', 'confirmed'])
       
-      # Combine both types sorted by date
-      # For flights, use flight_date; for hotels, use check_in_date
-      combined = (flight_bookings.to_a + hotel_bookings.to_a).sort_by do |item|
+      # Fetch train bookings (upcoming trips)
+      train_bookings = current_user.train_bookings.includes(:train)
+                                   .joins(:train)
+                                   .where('trains.departure_time >= ?', Date.today.beginning_of_day)
+                                   .where(status: ['paid', 'completed'])
+      
+      # Combine all three types sorted by date
+      # For flights, use flight_date; for hotels, use check_in_date; for trains, use train.departure_time
+      combined = (flight_bookings.to_a + hotel_bookings.to_a + train_bookings.to_a).sort_by do |item|
         if item.is_a?(Booking)
           [item.flight.flight_date, item.flight.departure_time]
-        else # HotelBooking
+        elsif item.is_a?(HotelBooking)
           [item.check_in_date, Time.parse('00:00')]
+        else # TrainBooking
+          [item.train.departure_time.to_date, item.train.departure_time]
         end
       end
       
@@ -64,12 +72,20 @@ class TripsController < ApplicationController
                                  .where('hotel_bookings.check_in_date >= ?', Date.today)
                                  .where(status: ['paid', 'confirmed'])
     
+    # Fetch train bookings
+    train_bookings = current_user.train_bookings.includes(:train)
+                                 .joins(:train)
+                                 .where('trains.departure_time >= ?', Date.today.beginning_of_day)
+                                 .where(status: ['paid', 'completed'])
+    
     # Combine and sort
-    combined = (flight_bookings.to_a + hotel_bookings.to_a).sort_by do |item|
+    combined = (flight_bookings.to_a + hotel_bookings.to_a + train_bookings.to_a).sort_by do |item|
       if item.is_a?(Booking)
         [item.flight.flight_date, item.flight.departure_time]
-      else
+      elsif item.is_a?(HotelBooking)
         [item.check_in_date, Time.parse('00:00')]
+      else # TrainBooking
+        [item.train.departure_time.to_date, item.train.departure_time]
       end
     end
     

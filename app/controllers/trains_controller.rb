@@ -43,7 +43,7 @@ class TrainsController < ApplicationController
     
     # Only query existing trains, never generate new data
     trains = Train.by_route(departure_city, arrival_city)
-                  .where('DATE(departure_time) >= ? AND DATE(departure_time) <= ?', start_date, end_date)
+                  .where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') >= ? AND DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') <= ?", start_date, end_date)
                   .includes(:train_seats)
     
     trains.group_by { |t| t.departure_time.to_date }.each do |date, date_trains|
