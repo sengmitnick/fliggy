@@ -29,8 +29,8 @@ class V040BookTourGuangzhouValidator < BaseValidator
   
   def prepare
     @destination = '广州'
-    @duration = 5
-    @nights = 4
+    @duration = 4  # 改为4天，数据库中有广州4天的跳团游
+    @nights = 3  # 4天=3晚
     @adult_count = 1
     @child_count = 1
     @departure_date = Date.current + 3.days

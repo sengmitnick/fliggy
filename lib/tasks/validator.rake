@@ -200,11 +200,42 @@ namespace :validator do
     puts "   ✗ Failed:   #{failed}" if failed > 0
     puts "   ⚠ Errors:   #{errors}" if errors > 0
     puts "   💥 Exceptions: #{exceptions}" if exceptions > 0
-    puts "="*70 + "\n"
+    puts "="*70
+    
+    # 列出失败的验证器详情
+    failed_results = results.select { |r| r[:status] != 'passed' }
+    if failed_results.any?
+      puts "\n❌ Failed Validators:"
+      puts "-" * 70
+      
+      failed_results.each do |result|
+        validator_id = result[:validator_id]
+        status = result[:status]
+        
+        case status
+        when 'failed'
+          score = result[:verify_result][:score]
+          puts "\n#{validator_id} - FAILED (#{score}/100)"
+          result[:verify_result][:errors].each do |error|
+            puts "  → #{error}"
+          end
+        when 'error'
+          puts "\n#{validator_id} - ERROR"
+          puts "  → #{result[:error]}"
+        when 'exception'
+          puts "\n#{validator_id} - EXCEPTION"
+          puts "  → #{result[:error]}"
+        end
+      end
+      
+      puts "-" * 70
+    end
+    
+    puts ""
     
     # 如果有失败，退出码为 1（用于 CI）
     if failed > 0 || errors > 0 || exceptions > 0
-      puts "❌ Some validators failed\n"
+      puts "❌ #{failed_results.size} validator(s) failed\n"
       exit 1
     else
       puts "✅ All validators passed\n"
