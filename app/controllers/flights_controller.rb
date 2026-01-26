@@ -3,6 +3,8 @@ class FlightsController < ApplicationController
 
   def index
     # NOTE: City selector data is loaded via CitySelectorDataConcern
+    # Preload date prices for date picker modal (only query existing data)
+    @departure_date_prices = preload_date_prices('北京', '杭州')
   end
 
   def search
@@ -11,6 +13,9 @@ class FlightsController < ApplicationController
     @trip_type = params[:trip_type] || 'one_way'
     @sort_by = params[:sort_by] || 'time' # 'time' or 'price'
     @cabin_class = params[:cabin_class] || 'all'
+    
+    # Preload date prices for date picker modal (only query existing data)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
     
     # Check if either departure or destination contains multiple cities (comma-separated)
     if @departure_city.include?(',') || @destination_city.include?(',')
@@ -74,6 +79,7 @@ class FlightsController < ApplicationController
 
     # Get prices for nearby dates (5 days) - always show all cabin classes
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     # For round trip, also get return flights
     if @trip_type == 'round_trip' && @return_date
@@ -174,6 +180,7 @@ class FlightsController < ApplicationController
     end
     
     @date_prices = get_date_prices(@departure_city, @destination_city, @date)
+    @departure_date_prices = preload_date_prices(@departure_city, @destination_city)
 
     render :multi_city_results
   end
@@ -269,6 +276,31 @@ class FlightsController < ApplicationController
   end
 
   private
+  
+  # Query existing flight prices for date picker (NO auto-generation)
+  def preload_date_prices(departure_city, destination_city)
+    today = Date.today
+    start_date = Date.new(today.year, today.month, 1)
+    end_date = today + 60.days
+    prices = {}
+    
+    # Only query existing flights, never generate new data
+    flights = Flight.where(
+      departure_city: departure_city,
+      destination_city: destination_city
+    ).where(
+      'DATE(flight_date) >= ? AND DATE(flight_date) <= ?',
+      start_date,
+      end_date
+    ).includes(:flight_offers)
+    
+    flights.group_by(&:flight_date).each do |date, date_flights|
+      min_price = date_flights.map(&:min_offer_price).compact.min || 0
+      prices[date] = min_price.to_i
+    end
+    
+    prices
+  end
 
   def find_cheapest_in_months(departure_city, destination_city, months)
     cheapest_flight = nil

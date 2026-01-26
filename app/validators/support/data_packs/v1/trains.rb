@@ -306,7 +306,25 @@ end
 Train.insert_all(all_trains)
 puts "  ✓ 已插入杭州→北京车次: #{all_trains.count} 条"
 
-# 路线6: 深圳→广州（测试用例 v025）
+# 路线6: 北京→杭州（默认首页显示路线）
+all_trains = []
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  trains_bj_to_hz = [
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 18), train_number: "G#{31 + day_suffix}", duration: 288, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 52), train_number: "G#{33 + day_suffix}", duration: 292, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 10, min: 30), arrival_time: base_datetime.change(hour: 15, min: 10), train_number: "D#{321 + day_suffix}", duration: 280, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 13, min: 0), arrival_time: base_datetime.change(hour: 17, min: 45), train_number: "G#{35 + day_suffix}", duration: 285, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 20, min: 15), train_number: "D#{323 + day_suffix}", duration: 285, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 18, min: 0), arrival_time: base_datetime.change(hour: 22, min: 50), train_number: "G#{37 + day_suffix}", duration: 290, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp }
+  ]
+  all_trains.concat(trains_bj_to_hz)
+end
+Train.insert_all(all_trains)
+puts "  ✓ 已插入北京→杭州车次: #{all_trains.count} 条"
+
+# 路线7: 深圳→广州（测试用例 v025）
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
@@ -321,7 +339,7 @@ end
 Train.insert_all(all_trains)
 puts "  ✓ 已插入深圳→广州车次: #{all_trains.count} 条"
 
-# 路线7: 广州→上海（测试用例 v026）
+# 路线8: 广州→上海（测试用例 v026）
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
