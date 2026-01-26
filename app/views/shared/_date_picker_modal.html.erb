@@ -45,8 +45,8 @@
       calendar_weeks = []
       current_week = []
       
-      # Use preloaded prices from controller (batch query optimization)
-      date_prices = @departure_date_prices || {}
+      # Price display removed for performance (no preloading)
+      date_prices = {}
       
       # Build calendar grid
       current_date = start_date
