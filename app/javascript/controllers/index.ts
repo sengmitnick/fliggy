@@ -105,6 +105,7 @@ import CruiseOrderFormController from "./cruise_order_form_controller"
 import CruiseSearchController from "./cruise_search_controller"
 import InsuranceFilterController from "./insurance_filter_controller"
 import ContactSelectorController from "./contact_selector_controller"
+import PolicyholderSelectorController from "./policyholder_selector_controller"
 import InsuranceSearchValidationController from "./insurance_search_validation_controller"
 import BookingQuantityController from "./booking_quantity_controller"
 import TravelerToggleController from "./traveler_toggle_controller"
@@ -117,6 +118,7 @@ import MapGuideController from "./map_guide_controller"
 import BusTicketHistoryController from "./bus_ticket_history_controller"
 import TicketOrderController from "./ticket_order_controller"
 import ActivityOrderController from "./activity_order_controller"
+import GuideSwitcherController from "./guide_switcher_controller"
 import AbroadTimeSlotPickerController from "./abroad_time_slot_picker_controller"
 import AddressModalController from "./address_modal_controller"
 
@@ -227,6 +229,7 @@ application.register("cruise-order-form", CruiseOrderFormController)
 application.register("cruise-search", CruiseSearchController)
 application.register("insurance-filter", InsuranceFilterController)
 application.register("contact-selector", ContactSelectorController)
+application.register("policyholder-selector", PolicyholderSelectorController)
 application.register("insurance-search-validation", InsuranceSearchValidationController)
 application.register("booking-quantity", BookingQuantityController)
 application.register("traveler-toggle", TravelerToggleController)
@@ -239,6 +242,7 @@ application.register("map-guide", MapGuideController)
 application.register("bus-ticket-history", BusTicketHistoryController)
 application.register("ticket-order", TicketOrderController)
 application.register("activity-order", ActivityOrderController)
+application.register("guide-switcher", GuideSwitcherController)
 application.register("abroad-time-slot-picker", AbroadTimeSlotPickerController)
 application.register("address-modal", AddressModalController)
 

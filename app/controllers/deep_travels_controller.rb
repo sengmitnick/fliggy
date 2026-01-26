@@ -27,8 +27,50 @@ class DeepTravelsController < ApplicationController
                                   .recent
                                   .limit(20)
                 end
+    
+    # Group products by venue (景点)
+    @venues = {}
+    @products.each do |product|
+      guide = product.deep_travel_guide
+      next unless guide && guide.venue.present?
+      
+      @venues[guide.venue] ||= {
+        location: product.location,
+        title: product.subtitle&.split(' ')&.first || product.title.split(/[【\[]/)[0],
+        guides: [],
+        products: []
+      }
+      
+      # Add guide if not already in the list
+      unless @venues[guide.venue][:guides].any? { |g| g.id == guide.id }
+        @venues[guide.venue][:guides] << guide
+      end
+      
+      # Add product
+      @venues[guide.venue][:products] << product
+    end
   end
   
+  # GET /deep_travels/:id/available_dates
+  def available_dates
+    @guide = DeepTravelGuide.find(params[:id])
+    start_date = params[:start_date]&.to_date || Date.today
+    end_date = params[:end_date]&.to_date || (Date.today + 90.days)
+
+    available_dates = @guide.availabilities
+                           .where(is_available: true)
+                           .where(available_date: start_date..end_date)
+                           .pluck(:available_date)
+                           .map(&:to_s)
+
+    # 禁用缓存
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    render json: { available_dates: available_dates }
+  end
+
   def show
     @full_render = true
     @guide = DeepTravelGuide.includes(:deep_travel_products, :avatar_attachment, :video_attachment)

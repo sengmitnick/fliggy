@@ -25,6 +25,12 @@ if demo_user.persisted?
   demo_user.pay_password_confirmation = '222222'
   demo_user.save!
   
+  # 设置钱包余额（默认 1w）
+  if demo_user.balance.to_f.zero?
+    demo_user.update!(balance: 10000.0)
+    puts "     ✓ 设置钱包余额: ¥10,000.00"
+  end
+  
   # 添加默认乘机人
   if demo_user.passengers.where(name: '张三').none?
     demo_user.passengers.create!([
@@ -95,7 +101,7 @@ if demo_user.persisted?
     puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴"
   end
   
-  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222)"
+  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000)"
 end
 
 puts "✓ demo_user_v1 数据包加载完成"

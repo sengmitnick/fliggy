@@ -1,6 +1,6 @@
 <% content_for :page_title, "填写订单" %>
 
-<div class="bg-gray-50 min-h-screen pb-24">
+<div class="bg-gray-50 min-h-screen pb-24" data-controller="contact-selector">
   <!-- 头部导航 -->
   <div class="bg-white sticky top-0 z-10 shadow-sm">
     <div class="max-w-[480px] mx-auto flex items-center px-4 py-3">
@@ -23,6 +23,7 @@
     <%= f.hidden_field :adult_count, value: @adult_count %>
     <%= f.hidden_field :child_count, value: @child_count %>
     <%= f.hidden_field :total_price, value: @final_price %>
+    <%= f.hidden_field :fill_travelers_later, value: false %>
 
     <!-- 卡片 1: 行程信息 -->
     <div class="bg-white rounded-xl p-4 shadow-sm">
@@ -125,19 +126,14 @@
         </div>
         
         <!-- 添加更多出行人按钮 -->
-        <%= link_to new_passenger_path(
-          source: 'deep_travel',
-          return_to: 'deep_travel_booking_new',
-          guide_id: @guide.id,
-          date: @travel_date,
-          adult_count: @adult_count,
-          child_count: @child_count
-        ), class: "mt-4 w-full flex items-center justify-center text-[#577CE8] text-sm font-medium py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#577CE8]" do %>
+        <button type="button" 
+                onclick="showAddPassengerModal()"
+                class="mt-4 w-full flex items-center justify-center text-[#577CE8] text-sm font-medium py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#577CE8]">
           <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           更多出行人
-        <% end %>
+        </button>
       <% else %>
         <!-- 无出行人时显示空状态 -->
         <div class="text-center py-8">
@@ -147,32 +143,35 @@
             </svg>
           </div>
           <p class="text-gray-500 text-sm mb-4">暂无常用出行人</p>
-          <%= link_to new_passenger_path(
-            source: 'deep_travel',
-            return_to: 'deep_travel_booking_new',
-            guide_id: @guide.id,
-            date: @travel_date,
-            adult_count: @adult_count,
-            child_count: @child_count
-          ), class: "inline-flex items-center justify-center text-white bg-[#577CE8] text-sm font-medium py-3 px-6 rounded-lg hover:bg-[#4a6bc7]" do %>
+          <button type="button"
+                  onclick="showAddPassengerModal()"
+                  class="inline-flex items-center justify-center text-white bg-[#577CE8] text-sm font-medium py-3 px-6 rounded-lg hover:bg-[#4a6bc7]">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
             添加常用出行人
-          <% end %>
+          </button>
         </div>
       <% end %>
     </div>
 
     <!-- 卡片 4: 联系人 -->
     <div class="bg-white rounded-xl p-4 shadow-sm">
-      <div class="font-bold text-[#111111] mb-4">联系人</div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-bold text-[#111111]">联系人</div>
+        <button type="button" 
+                class="text-[#577CE8] text-sm"
+                data-action="click->contact-selector#openModal">
+          选择联系人
+        </button>
+      </div>
       
       <div class="space-y-3">
         <div>
           <%= f.label :contact_name, "姓名", class: "text-sm text-gray-600 block mb-1" %>
           <%= f.text_field :contact_name, 
                           placeholder: "请输入联系人姓名", 
+                          data: { contact_selector_target: "nameDisplay" },
                           class: "w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-[#FFDD00] focus:ring-1 focus:ring-[#FFDD00] outline-none" %>
         </div>
 
@@ -180,6 +179,7 @@
           <%= f.label :contact_phone, "手机号", class: "text-sm text-gray-600 block mb-1" %>
           <%= f.text_field :contact_phone, 
                           placeholder: "请输入联系人手机号", 
+                          data: { contact_selector_target: "phoneDisplay" },
                           class: "w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-[#FFDD00] focus:ring-1 focus:ring-[#FFDD00] outline-none" %>
         </div>
       </div>
@@ -209,11 +209,13 @@
     <!-- 底部协议文字 -->
     <div class="flex items-start px-1 mt-4 mb-2">
       <div class="mt-0.5 mr-2">
-        <div class="w-4 h-4 rounded-full border border-gray-400"></div>
+        <%= f.check_box :terms_agreed, 
+            { class: "w-4 h-4 rounded border-gray-400 text-[#577CE8] focus:ring-[#577CE8] cursor-pointer" },
+            true, false %>
       </div>
-      <div class="text-xs text-gray-500 leading-tight">
+      <label for="<%= f.object_name %>_terms_agreed" class="text-xs text-gray-500 leading-tight cursor-pointer">
         请您仔细阅读<span class="text-[#577CE8]">电子合同</span>、<span class="text-[#577CE8]">线路标准退预订须知</span>点击去付款即代表您已阅读并同意条款内容。
-      </div>
+      </label>
     </div>
 
     <!-- 底部固定栏 -->
@@ -232,6 +234,69 @@
                   class: "bg-gradient-to-r from-[#FF7A45] to-[#FF5533] text-white font-bold text-lg px-8 py-2.5 rounded-full shadow-lg shadow-orange-200 cursor-pointer" %>
     </div>
   <% end %>
+  
+  <!-- Contact Selector Modal -->
+  <%= render 'shared/contact_selector_modal' %>
+  
+  <!-- Add Passenger Modal -->
+  <div id="add_passenger_modal" class="fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-w-[480px] mx-auto max-h-[90vh] overflow-y-auto">
+      <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-[#111111]">添加出行人</h3>
+        <button type="button" onclick="hideAddPassengerModal()" class="text-gray-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-[#111111] mb-2">中文姓名 <span class="text-red-500">*</span></label>
+          <input type="text" id="new_passenger_name" 
+                 placeholder="请输入姓名（与证件一致）" 
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#577CE8] focus:border-[#577CE8]">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-[#111111] mb-2">证件类型</label>
+          <select id="new_passenger_id_type" 
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#577CE8] focus:border-[#577CE8]">
+            <option value="身份证">中国居民身份证</option>
+            <option value="护照">护照</option>
+            <option value="港澳通行证">港澳居民来往内地通行证</option>
+            <option value="台湾通行证">台湾居民来往大陆通行证</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-[#111111] mb-2">证件号码 <span class="text-red-500">*</span></label>
+          <input type="text" id="new_passenger_id_number" 
+                 placeholder="请输入证件号码" 
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#577CE8] focus:border-[#577CE8]">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-[#111111] mb-2">手机号（选填）</label>
+          <input type="tel" id="new_passenger_phone" 
+                 placeholder="用于接收出行通知" 
+                 pattern="[0-9]{11}"
+                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#577CE8] focus:border-[#577CE8]">
+        </div>
+
+        <label class="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
+          <input type="checkbox" id="new_passenger_is_self" value="1" class="w-5 h-5 text-[#577CE8] rounded border-gray-300">
+          <span class="text-sm text-[#111111]">设为常用出行人</span>
+        </label>
+
+        <div class="pt-4">
+          <button type="button" onclick="confirmAddPassenger()" class="w-full py-4 text-base font-semibold bg-[#577CE8] text-white rounded-lg hover:bg-[#4a6bc7]">
+            确认添加
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Passenger Selection Modal -->
@@ -297,6 +362,91 @@ function closePassengerModal(event) {
   }
 }
 
+// Show add passenger modal
+function showAddPassengerModal() {
+  document.getElementById('add_passenger_modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  // Clear form fields
+  document.getElementById('new_passenger_name').value = '';
+  document.getElementById('new_passenger_id_type').value = '身份证';
+  document.getElementById('new_passenger_id_number').value = '';
+  document.getElementById('new_passenger_phone').value = '';
+  document.getElementById('new_passenger_is_self').checked = false;
+}
+
+// Hide add passenger modal
+function hideAddPassengerModal() {
+  document.getElementById('add_passenger_modal').classList.add('hidden');
+  document.body.style.overflow = 'auto';
+}
+
+// Confirm add passenger
+function confirmAddPassenger() {
+  // 验证必填字段
+  const name = document.getElementById('new_passenger_name').value.trim();
+  const idNumber = document.getElementById('new_passenger_id_number').value.trim();
+  
+  if (!name || !idNumber) {
+    if (window.showToast) {
+      window.showToast('请填写姓名和证件号码');
+    } else {
+      alert('请填写姓名和证件号码');
+    }
+    return;
+  }
+  
+  // 收集表单数据
+  const formData = new FormData();
+  formData.append('passenger[name]', name);
+  formData.append('passenger[id_type]', document.getElementById('new_passenger_id_type').value);
+  formData.append('passenger[id_number]', idNumber);
+  formData.append('passenger[phone]', document.getElementById('new_passenger_phone').value);
+  formData.append('passenger[is_self]', document.getElementById('new_passenger_is_self').checked ? '1' : '0');
+  
+  // 添加return_to参数以便创建后返回当前页面
+  formData.append('return_to', 'deep_travel_booking_new');
+  
+  // 保存当前URL参数
+  const urlParams = new URLSearchParams(window.location.search);
+  ['guide_id', 'product_id', 'date', 'adult_count', 'child_count'].forEach(param => {
+    const value = urlParams.get(param);
+    if (value) {
+      formData.append(param, value);
+    }
+  });
+  
+  // 提交到后端
+  fetch('/passengers', {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: formData
+  })
+  .then(response => {
+    if (response.ok) {
+      // 创建成功，刷新页面
+      window.location.reload();
+    } else {
+      return response.json().then(data => {
+        if (window.showToast) {
+          window.showToast(data.error || '添加出行人失败，请检查输入信息');
+        } else {
+          alert(data.error || '添加出行人失败，请检查输入信息');
+        }
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    if (window.showToast) {
+      window.showToast('添加出行人失败，请稍后重试');
+    } else {
+      alert('添加出行人失败，请稍后重试');
+    }
+  });
+}
+
 // Select passenger for current traveler
 function selectPassengerForTraveler(element) {
   if (currentTravelerIndex === null) return;
@@ -328,10 +478,118 @@ function selectPassengerForTraveler(element) {
 
 // Validate all travelers selected before submission
 document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form[action="/deep_travel_bookings"]');
+  console.log('[Form Validation] DOM loaded, looking for form...');
+  const form = document.querySelector('form[action*="deep_travel_bookings"]');
+  console.log('[Form Validation] Form found:', form);
+  
   if (form) {
+    console.log('[Form Validation] Attaching submit listener');
+    
+    // Helper function to re-enable submit button when validation fails
+    function reEnableSubmitButton() {
+      // Use setTimeout to ensure this runs after base.ts disables the button
+      setTimeout(function() {
+        const submit = form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
+        if (submit && submit.disabled) {
+          console.log('[Form Validation] Re-enabling submit button');
+          submit.disabled = false;
+          
+          // Restore original text if available
+          const originalText = submit.dataset.originalText;
+          if (originalText) {
+            const key = submit instanceof HTMLButtonElement ? 'textContent' : 'value';
+            submit[key] = originalText;
+            delete submit.dataset.originalText;
+          }
+        }
+      }, 0);
+    }
+    
     form.addEventListener('submit', function(e) {
+      console.log('=============================================');
+      console.log('[Form Validation] Submit triggered at', new Date().toLocaleTimeString());
+      console.log('=============================================');
+      
+      // 验证是否勾选同意条款
+      const termsCheckbox = form.querySelector('input[type="checkbox"][value="true"]');
+      console.log('[Form Validation] Terms checkbox found:', termsCheckbox);
+      console.log('[Form Validation] Checkbox checked:', termsCheckbox?.checked);
+      
+      if (termsCheckbox && !termsCheckbox.checked) {
+        console.log('[Form Validation] ❌ FAILED - terms not agreed');
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请阅读并同意相关条款');
+        } else {
+          alert('请阅读并同意相关条款');
+        }
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - terms agreed');
+      
+      // 验证联系人信息
+      const contactName = form.querySelector('input[name="deep_travel_booking[contact_name]"]');
+      const contactPhone = form.querySelector('input[name="deep_travel_booking[contact_phone]"]');
+      
+      console.log('[Form Validation] Contact name field:', contactName);
+      console.log('[Form Validation] Contact name value:', contactName?.value);
+      console.log('[Form Validation] Contact phone field:', contactPhone);
+      console.log('[Form Validation] Contact phone value:', contactPhone?.value);
+      
+      if (!contactName || !contactName.value.trim()) {
+        console.log('[Form Validation] ❌ FAILED - no contact name');
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入联系人姓名');
+        } else {
+          alert('请输入联系人姓名');
+        }
+        if (contactName) contactName.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - contact name OK');
+      
+      if (!contactPhone || !contactPhone.value.trim()) {
+        console.log('[Form Validation] ❌ FAILED - no contact phone');
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入联系人手机号');
+        } else {
+          alert('请输入联系人手机号');
+        }
+        if (contactPhone) contactPhone.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - contact phone not empty');
+      
+      // 验证手机号格式
+      const phonePattern = /^1[3-9]\d{9}$/;
+      if (!phonePattern.test(contactPhone.value.trim())) {
+        console.log('[Form Validation] ❌ FAILED - invalid phone format:', contactPhone.value);
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入正确的手机号码');
+        } else {
+          alert('请输入正确的手机号码');
+        }
+        contactPhone.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - phone format OK');
+      
       const travelerCards = document.querySelectorAll('.traveler-card');
+      console.log('[Form Validation] Traveler cards found:', travelerCards.length);
+      
+      // 如果没有游客卡片（可能是空状态），则不验证游客信息
+      if (travelerCards.length === 0) {
+        console.log('[Form Validation] No traveler cards, allowing submit');
+        return true;
+      }
+      
       let allSelected = true;
       
       travelerCards.forEach(card => {
@@ -339,13 +597,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const nameInput = document.querySelector(`[data-traveler-index="${index}"].traveler-name-input`);
         const idInput = document.querySelector(`[data-traveler-index="${index}"].traveler-id-input`);
         
+        console.log(`[Form Validation] Traveler ${index} - name: "${nameInput?.value}", id: "${idInput?.value}"`);
+        
         if (!nameInput.value || !idInput.value) {
           allSelected = false;
         }
       });
       
+      console.log('[Form Validation] All travelers selected:', allSelected);
+      
       if (!allSelected) {
+        console.log('[Form Validation] ❌ FAILED - travelers not selected');
         e.preventDefault();
+        reEnableSubmitButton();
         if (window.showToast) {
           window.showToast('请为所有游客选择出行人');
         } else {
@@ -353,7 +617,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return false;
       }
+      
+      console.log('[Form Validation] ✅✅✅ ALL VALIDATIONS PASSED - allowing submit');
     });
+  } else {
+    console.log('[Form Validation] Form not found!');
   }
 });
 </script>
