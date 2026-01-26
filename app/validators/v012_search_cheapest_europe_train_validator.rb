@@ -2,17 +2,18 @@
 
 require_relative 'base_validator'
 
-# 验证用例12: 搜索明天欧洲境内最便宜的火车票
+# 验证用例12: 搜索明天欧洲境内最便宜的火车票（1人）
 # 
 # 任务描述:
 #   Agent 需要搜索明天所有欧洲境内的火车票，
-#   找出价格最便宜的班次并成功创建订单
+#   找出价格最便宜的班次并成功创建订单（1人出行）
 # 
 # 评分标准:
-#   - 搜索到了所有欧洲班次 (20分)
-#   - 正确识别最便宜的班次 (40分)
+#   - 搜索到了所有欧洲班次 (15分)
+#   - 正确识别最便宜的班次 (35分)
 #   - 成功创建订单 (20分)
-#   - 订单信息准确 (20分)
+#   - 订单信息准确 (10分)
+#   - 出行人数正确（1人） (20分)
 # 
 # 难点:
 #   - 需要对比所有欧洲路线的价格
@@ -29,8 +30,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V012SearchCheapestEuropeTrainValidator < BaseValidator
   self.validator_id = 'v012_search_cheapest_europe_train_validator'
-  self.title = '搜索明天欧洲境内最便宜的火车票'
-  self.description = '搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订'
+  self.title = '搜索明天欧洲境内最便宜的火车票（1人）'
+  self.description = '搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订（1人出行）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -38,6 +39,7 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
     # 数据已经通过 load_data_pack 自动加载
     @region = 'europe'
     @target_date = Date.current + 1.day  # 明天
+    @passenger_count = 1  # 出行人数
     
     # 查找所有欧洲班次（注意：查询基线数据）
     europe_trains = AbroadTicket.where(
@@ -53,10 +55,11 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订",
+      task: "请搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订（#{@passenger_count}人出行）",
       region: @region,
       date: @target_date.to_s,
       date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
+      passenger_count: @passenger_count,
       hint: "需要对比所有欧洲路线的价格，找出最低价",
       total_trains: @total_trains,
       price_range: "#{europe_trains.minimum(:price).to_f.round(2)} - #{europe_trains.maximum(:price).to_f.round(2)} 元"
@@ -66,7 +69,7 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
   # 验证阶段：检查是否找到并预订了最便宜的班次
   def verify
     # 断言1: 必须有订单创建
-    add_assertion "订单已创建", weight: 20 do
+    add_assertion "订单已创建", weight: 15 do
       @order = AbroadTicketOrder.order(created_at: :desc).first
       expect(@order).not_to be_nil, "未找到任何境外票务订单记录"
     end
@@ -86,7 +89,7 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
     end
     
     # 断言4: 选择了最便宜的班次（核心评分）
-    add_assertion "选择了最便宜的班次", weight: 40 do
+    add_assertion "选择了最便宜的班次", weight: 35 do
       # 重新查询所有欧洲班次找出最低价
       all_europe_trains = AbroadTicket.where(
         region: @region,
@@ -104,11 +107,22 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
     end
     
     # 断言5: 订单金额准确
-    add_assertion "订单金额准确", weight: 20 do
+    add_assertion "订单金额准确", weight: 10 do
       expected_price = @order.abroad_ticket.price
       
       expect(@order.total_price).to be_within(0.01).of(expected_price),
         "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@order.total_price}"
+    end
+    
+    # 断言6: 出行人数正确（1人）
+    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 20 do
+      # AbroadTicketOrder模型是单个乘客，验证passenger_name存在
+      expect(@order.passenger_name).to be_present,
+        "未找到乘客信息"
+      
+      # 验证联系方式存在
+      expect(@order.contact_phone).to be_present,
+        "未找到乘客联系电话"
     end
   end
   
@@ -119,6 +133,7 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
     {
       region: @region,
       target_date: @target_date.to_s,
+      passenger_count: @passenger_count,
       cheapest_price: @cheapest_price,
       total_trains: @total_trains
     }
@@ -128,6 +143,7 @@ class V012SearchCheapestEuropeTrainValidator < BaseValidator
   def restore_from_state(data)
     @region = data['region']
     @target_date = Date.parse(data['target_date'])
+    @passenger_count = data['passenger_count'] || 1
     @cheapest_price = data['cheapest_price']
     @total_trains = data['total_trains']
   end
