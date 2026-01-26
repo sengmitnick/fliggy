@@ -14,7 +14,6 @@
 puts "正在加载 cruises_v1 数据包..."
 
 # ==================== 游轮公司数据 ====================
-puts "  → 正在加载游轮公司数据..."
 
 cruise_lines_data = [
   {
@@ -44,10 +43,8 @@ cruise_lines_data = [
 ]
 
 CruiseLine.insert_all(cruise_lines_data)
-puts "    ✓ 已加载 #{cruise_lines_data.size} 个游轮公司"
 
 # ==================== 游轮船只数据 ====================
-puts "  → 正在加载游轮船只数据..."
 
 # 获取游轮公司ID
 royal_caribbean = CruiseLine.find_by(name: '皇家加勒比国际游轮')
@@ -93,10 +90,8 @@ cruise_ships_data = [
 CruiseShip.insert_all(cruise_ships_data)
 # Regenerate slugs for FriendlyId (insert_all bypasses callbacks)
 CruiseShip.find_each(&:save)
-puts "    ✓ 已加载 #{cruise_ships_data.size} 艘游轮船只"
 
 # ==================== 航线数据 ====================
-puts "  → 正在加载航线数据..."
 
 cruise_routes_data = [
   { name: '日韩', region: 'japan_korea', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
@@ -112,10 +107,8 @@ cruise_routes_data = [
 ]
 
 CruiseRoute.insert_all(cruise_routes_data)
-puts "    ✓ 已加载 #{cruise_routes_data.size} 条航线"
 
 # ==================== 游轮班次数据 ====================
-puts "  → 正在加载游轮班次数据..."
 
 # 获取船只和航线ID
 spectrum = CruiseShip.find_by(name: '海洋光谱号')
@@ -191,10 +184,8 @@ cruise_sailings_data = [
 ]
 
 CruiseSailing.insert_all(cruise_sailings_data)
-puts "    ✓ 已加载 #{cruise_sailings_data.size} 个游轮班次"
 
 # ==================== 舱房类型数据 ====================
-puts "  → 正在加载舱房类型数据..."
 
 cabin_types_data = [
   # 海洋光谱号 - 舱房类型
@@ -292,10 +283,8 @@ cabin_types_data = [
 ]
 
 CabinType.insert_all(cabin_types_data)
-puts "    ✓ 已加载 #{cabin_types_data.size} 种舱房类型"
 
 # ==================== 商家数据 ====================
-puts "  → 正在加载商家数据..."
 
 travel_agencies_data = [
   {
@@ -317,10 +306,8 @@ travel_agencies_data = [
 ]
 
 TravelAgency.insert_all(travel_agencies_data)
-puts "    ✓ 已加载 #{travel_agencies_data.size} 家商家"
 
 # ==================== 商家产品数据 ====================
-puts "  → 正在加载商家产品数据..."
 
 # 获取班次ID
 sailing_1 = CruiseSailing.find_by(departure_date: Date.parse('2026-01-23'))
@@ -373,6 +360,4 @@ cruise_products_data = [
 ]
 
 CruiseProduct.insert_all(cruise_products_data)
-puts "    ✓ 已加载 #{cruise_products_data.size} 个商家产品"
 
-puts "✓ cruises_v1 数据包加载完成"

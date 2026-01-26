@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-puts "正在初始化深度旅行数据..."
 
 # 清理现有深度旅行数据
 DeepTravelProduct.destroy_all
 DeepTravelGuide.destroy_all
 
 # ==================== 深度旅行讲师数据 ====================
-puts "正在创建深度旅行讲师..."
 
 timestamp = Time.current
 guides_data = [
@@ -120,13 +118,11 @@ guides_data = [
 
 # 批量插入讲师
 DeepTravelGuide.insert_all(guides_data)
-puts "✓ 批量创建了 #{guides_data.count} 位深度旅行讲师"
 
 # 重新加载以获取ID映射
 guides_map = DeepTravelGuide.pluck(:name, :id).to_h
 
 # ==================== 深度旅行产品数据 ====================
-puts "正在创建深度旅行产品..."
 
 products_data = []
 
@@ -402,7 +398,6 @@ products_data.concat([
 # 批量插入产品
 DeepTravelProduct.insert_all(products_data)
 
-puts "✓ 批量创建了 #{products_data.count} 个深度旅行产品"
 puts "\n✅ 深度旅行数据初始化完成！"
 puts "  - 讲师总数: #{DeepTravelGuide.count}"
 puts "  - 产品总数: #{DeepTravelProduct.count}"

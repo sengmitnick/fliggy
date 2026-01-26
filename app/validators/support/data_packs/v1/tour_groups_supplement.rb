@@ -3,7 +3,6 @@
 # 旅游产品数据补充包 - 补充三亚6天5晚跟团游
 # 加载方式: rails runner "load Rails.root.join('app/validators/support/data_packs/v1/tour_groups_supplement.rb')"
 
-puts "🏝️ 补充旅游产品数据..."
 
 timestamp = Time.current
 start_date = Date.today
@@ -67,7 +66,6 @@ products_data = []
 end
 
 TourGroupProduct.insert_all(products_data) if products_data.any?
-puts "  ✓ 已补充三亚6天5晚跟团游: #{products_data.count} 个产品"
 
 # 为新产品创建套餐
 all_packages_data = []
@@ -116,6 +114,4 @@ TourGroupProduct.where(destination: "三亚", duration: 6, data_version: 0).wher
 end
 
 TourPackage.insert_all(all_packages_data) if all_packages_data.any?
-puts "  ✓ 已创建套餐数据: #{all_packages_data.count} 个套餐"
 
-puts "\n✅ 旅游产品数据补充完成"

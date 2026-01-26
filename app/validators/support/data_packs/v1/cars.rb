@@ -1,7 +1,6 @@
 # 清空现有数据
 Car.destroy_all
 
-puts "Creating cars..."
 
 cars_data = [
   # ============ 武汉 ============
@@ -2099,5 +2098,3 @@ timestamp = Time.current
 cars_data_with_timestamps = cars_data.map { |data| data.merge(created_at: timestamp, updated_at: timestamp) }
 Car.insert_all(cars_data_with_timestamps)
 
-puts "Created #{Car.count} cars successfully!"
-puts "Cities covered: 武汉, 深圳, 北京, 上海, 广州, 成都, 杭州, 西安, 重庆, 南京, 三亚"

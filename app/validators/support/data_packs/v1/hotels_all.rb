@@ -265,10 +265,8 @@ end
 
 puts "💾 批量插入 #{hotels_data.count} 家酒店..."
 Hotel.insert_all(hotels_data)
-puts "✓ 已批量创建 #{Hotel.count} 家酒店"
 
 # ==================== 批量创建关联数据 ====================
-puts "\n🔗 批量创建关联数据..."
 
 # 获取所有酒店ID
 all_hotels = Hotel.pluck(:id, :hotel_type, :price, :star_level).map do |id, type, price, star|

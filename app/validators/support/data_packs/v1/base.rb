@@ -18,7 +18,6 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 puts "正在加载 base_v1 数据包..."
 
 # ==================== 城市数据 ====================
-puts "  → 正在加载城市数据..."
 
 cities_data = [
   # 直辖市
@@ -389,7 +388,6 @@ if new_cities_data.any?
   end
   
   City.insert_all(cities_with_timestamps)
-  puts "     批量创建了 #{new_cities_data.size} 个新城市"
 else
   puts "     所有城市已存在，跳过创建"
 end
@@ -397,7 +395,6 @@ end
 puts "     城市总数: #{City.count}"
 
 # ==================== 目的地数据 ====================
-puts "  → 正在加载目的地数据..."
 
 # 清理旧数据（如果需要重新加载）
 # TourProduct.destroy_all
@@ -430,7 +427,6 @@ if new_destinations_data.any?
   end
   
   Destination.insert_all(destinations_with_timestamps)
-  puts "     批量创建了 #{new_destinations_data.size} 个热门目的地"
 else
   puts "     所有热门目的地已存在，跳过创建"
 end
@@ -454,13 +450,11 @@ end
 
 if auto_destinations_data.any?
   Destination.insert_all(auto_destinations_data)
-  puts "     为城市批量创建了 #{auto_destinations_data.size} 个 Destination 记录"
 else
   puts "     所有城市的 Destination 已存在，跳过创建"
 end
 
 puts "     Destination 总数: #{Destination.count}"
 
-puts "\n✓ base_v1 数据包加载完成"
 puts "  - 城市: #{City.count} 个"
 puts "  - 目的地: #{Destination.count} 个"

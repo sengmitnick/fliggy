@@ -11,12 +11,10 @@
 # 加载方式：
 # rails runner "load Rails.root.join('app/validators/support/data_packs/v1/deep_travel_venues.rb')"
 
-puts "正在为深度旅行添加景点和多讲解员数据..."
 
 timestamp = Time.current
 
 # ==================== 北京地区 ====================
-puts "\n【北京地区】正在添加讲解员..."
 
 beijing_guides = [
   # 故宫博物院 - 5位讲解员
@@ -152,7 +150,6 @@ beijing_guides = [
 ]
 
 DeepTravelGuide.insert_all(beijing_guides)
-puts "✓ 创建了 #{beijing_guides.count} 位北京地区讲解员"
 
 # 重新加载以获取ID
 beijing_guide_ids = DeepTravelGuide.where(venue: ["故宫博物院", "颐和园"]).pluck(:name, :id).to_h
@@ -268,10 +265,8 @@ beijing_products = [
 ]
 
 DeepTravelProduct.insert_all(beijing_products)
-puts "✓ 创建了 #{beijing_products.count} 个北京地区产品"
 
 # ==================== 陕西地区 ====================
-puts "\n【陕西地区】正在添加讲解员..."
 
 shaanxi_guides = [
   # 秦始皇帝陵博物院 - 3位讲解员
@@ -375,7 +370,6 @@ shaanxi_guides = [
 ]
 
 DeepTravelGuide.insert_all(shaanxi_guides)
-puts "✓ 创建了 #{shaanxi_guides.count} 位陕西地区讲解员"
 
 # 重新加载以获取ID
 shaanxi_guide_ids = DeepTravelGuide.where(venue: ["秦始皇帝陵博物院", "西安城墙"]).pluck(:name, :id).to_h
@@ -465,10 +459,8 @@ shaanxi_products = [
 ]
 
 DeepTravelProduct.insert_all(shaanxi_products)
-puts "✓ 创建了 #{shaanxi_products.count} 个陕西地区产品"
 
 # ==================== 华东地区 ====================
-puts "\n【华东地区】正在添加讲解员..."
 
 huadong_guides = [
   # 上海外滩 - 3位讲解员
@@ -572,7 +564,6 @@ huadong_guides = [
 ]
 
 DeepTravelGuide.insert_all(huadong_guides)
-puts "✓ 创建了 #{huadong_guides.count} 位华东地区讲解员"
 
 # 重新加载以获取ID
 huadong_guide_ids = DeepTravelGuide.where(venue: ["上海外滩", "苏州园林"]).pluck(:name, :id).to_h
@@ -662,10 +653,8 @@ huadong_products = [
 ]
 
 DeepTravelProduct.insert_all(huadong_products)
-puts "✓ 创建了 #{huadong_products.count} 个华东地区产品"
 
 # ==================== 华中地区 ====================
-puts "\n【华中地区】正在添加讲解员..."
 
 huazhong_guides = [
   # 武汉黄鹤楼 - 3位讲解员
@@ -769,7 +758,6 @@ huazhong_guides = [
 ]
 
 DeepTravelGuide.insert_all(huazhong_guides)
-puts "✓ 创建了 #{huazhong_guides.count} 位华中地区讲解员"
 
 # 重新加载以获取ID
 huazhong_guide_ids = DeepTravelGuide.where(venue: ["武汉黄鹤楼", "长沙岳麓书院"]).pluck(:name, :id).to_h
@@ -859,10 +847,8 @@ huazhong_products = [
 ]
 
 DeepTravelProduct.insert_all(huazhong_products)
-puts "✓ 创建了 #{huazhong_products.count} 个华中地区产品"
 
 # ==================== 境外精选 ====================
-puts "\n【境外精选】正在添加讲解员..."
 
 abroad_guides = [
   # 东京浅草寺 - 3位讲解员
@@ -966,7 +952,6 @@ abroad_guides = [
 ]
 
 DeepTravelGuide.insert_all(abroad_guides)
-puts "✓ 创建了 #{abroad_guides.count} 位境外讲解员"
 
 # 重新加载以获取ID
 abroad_guide_ids = DeepTravelGuide.where(venue: ["东京浅草寺", "巴黎卢浮宫"]).pluck(:name, :id).to_h
@@ -1056,7 +1041,6 @@ abroad_products = [
 ]
 
 DeepTravelProduct.insert_all(abroad_products)
-puts "✓ 创建了 #{abroad_products.count} 个境外精选产品"
 
 # ==================== 数据统计 ====================
 puts "\n" + "="*60

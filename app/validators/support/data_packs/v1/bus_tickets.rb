@@ -1,7 +1,6 @@
 # 清理现有数据
 BusTicket.destroy_all
 
-puts "🚌 创建汽车票数据..."
 
 # 热门路线数据
 routes = [
@@ -142,13 +141,11 @@ routes.each do |route|
     end
   end
   
-  puts "  ✓ 准备 #{route_key} 路线班次数据"
 end
 
 # 批量插入所有数据
 if all_tickets_data.any?
   BusTicket.insert_all(all_tickets_data)
-  puts "✅ 成功批量创建 #{BusTicket.count} 条汽车票数据"
 else
   puts "⚠️  没有数据需要创建"
 end

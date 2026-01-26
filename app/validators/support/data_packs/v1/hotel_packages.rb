@@ -1,6 +1,5 @@
 # Hotel Packages Seed Data
 
-puts "Creating hotel packages..."
 
 brands = [
   { name: "华住", logo: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80&fm=jpg&fit=crop&auto=format" },

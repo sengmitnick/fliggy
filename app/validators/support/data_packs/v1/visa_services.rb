@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-puts "正在加载签证服务数据..."
 
 timestamp = Time.current
 
 # ============================================
 # 第一步：创建国家数据
 # ============================================
-puts "\n正在创建国家数据..."
 
 countries_data = [
   # 东南亚国家
@@ -58,7 +56,6 @@ countries_data = [
 ]
 
 Country.insert_all(countries_data)
-puts "✓ 批量创建了 #{countries_data.count} 个国家"
 
 # 重新加载国家数据以获取ID
 countries = Country.all.index_by(&:code)
@@ -66,7 +63,6 @@ countries = Country.all.index_by(&:code)
 # ============================================
 # 第二步：创建签证产品数据
 # ============================================
-puts "\n正在创建签证产品数据..."
 
 visa_products_data = []
 
@@ -451,12 +447,10 @@ visa_products_data.concat([
 ])
 
 VisaProduct.insert_all(visa_products_data)
-puts "✓ 批量创建了 #{visa_products_data.count} 个签证产品"
 
 # ============================================
 # 第三步：创建签证服务数据（原有数据）
 # ============================================
-puts "\n正在创建签证服务数据..."
 
 # 准备所有签证服务数据
 visa_services_data = []
@@ -696,7 +690,6 @@ visa_services_data.concat([
 # 批量插入所有签证服务
 VisaService.insert_all(visa_services_data)
 
-puts "✓ 批量创建了 #{visa_services_data.count} 个签证服务"
 puts "  - 韩国签证: 3 个商品"
 puts "  - 日本签证: 4 个商品"
 puts "  - 泰国签证: 2 个商品"

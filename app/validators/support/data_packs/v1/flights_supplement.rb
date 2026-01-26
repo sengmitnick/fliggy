@@ -3,7 +3,6 @@
 # 航班数据补充包 - 补充缺失的航班路线
 # 加载方式: rails runner "load Rails.root.join('app/validators/support/data_packs/v1/flights_supplement.rb')"
 
-puts "🛫 补充航班数据..."
 
 timestamp = Time.current
 start_date = Date.current
@@ -80,7 +79,6 @@ all_flights = []
 end
 
 Flight.insert_all(all_flights) if all_flights.any?
-puts "  ✓ 已补充深圳→杭州航班: #{all_flights.count} 条"
 
 # 补充 杭州→深圳 经济舱航班（v031需要）
 all_flights = []
@@ -172,6 +170,4 @@ all_flights = []
 end
 
 Flight.insert_all(all_flights) if all_flights.any?
-puts "  ✓ 已补充杭州→深圳经济舱航班: #{all_flights.count} 条"
 
-puts "✓ flights_supplement 数据包加载完成"

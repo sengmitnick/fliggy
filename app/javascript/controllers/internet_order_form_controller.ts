@@ -1,18 +1,153 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["quantity", "totalPrice"]
+  static targets = [
+    "quantity", "totalPrice", "quantityField", "totalPriceField", 
+    "mailSection", "pickupSection", "mailLabel", "pickupLabel", 
+    "rentalDays", "rentalDaysField", "rentalInfoField",
+    "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay"
+  ]
   declare readonly quantityTarget: HTMLElement
   declare readonly totalPriceTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
+  declare readonly quantityFieldTarget: HTMLInputElement
+  declare readonly hasQuantityFieldTarget: boolean
+  declare readonly totalPriceFieldTarget: HTMLInputElement
+  declare readonly hasTotalPriceFieldTarget: boolean
+  declare readonly quantityDisplayTarget: HTMLElement
+  declare readonly hasQuantityDisplayTarget: boolean
+  declare readonly rentalDaysTarget: HTMLInputElement
+  declare readonly hasRentalDaysTarget: boolean
+  declare readonly rentalDaysDisplayTarget: HTMLElement
+  declare readonly hasRentalDaysDisplayTarget: boolean
+  declare readonly totalPriceDisplayTarget: HTMLElement
+  declare readonly hasTotalPriceDisplayTarget: boolean
 
   private basePrice: number = 0
+  private formElement: HTMLFormElement | null = null
+  private isWifiOrder: boolean = false
 
   connect(): void {
     console.log("InternetOrderForm connected")
     const totalPriceField = this.element.querySelector('[data-internet-order-form-target="totalPriceField"]') as HTMLInputElement
     if (totalPriceField) {
       this.basePrice = parseFloat(totalPriceField.value) || 0
+    }
+    
+    // Check if this is a WiFi order
+    const orderTypeField = this.element.querySelector('input[name="internet_order[order_type]"]') as HTMLInputElement
+    this.isWifiOrder = orderTypeField?.value === 'wifi'
+    
+    // For WiFi orders, recalculate initial total price (quantity × days × daily_price)
+    if (this.isWifiOrder && this.hasRentalDaysTarget) {
+      const days = parseInt(this.rentalDaysTarget.value) || 7
+      const quantity = 1
+      const total = this.basePrice * days * quantity
+      this.updateAllPriceDisplays(total)
+    }
+    
+    // Store form reference
+    this.formElement = this.element.querySelector('form')
+    
+    // Intercept form submission
+    if (this.formElement) {
+      this.formElement.addEventListener('submit', this.handleFormSubmit.bind(this))
+    }
+  }
+
+  disconnect(): void {
+    if (this.formElement) {
+      this.formElement.removeEventListener('submit', this.handleFormSubmit.bind(this))
+    }
+  }
+
+  async handleFormSubmit(event: Event): Promise<void> {
+    event.preventDefault()
+    
+    const form = event.target as HTMLFormElement
+    const submitButton = form.querySelector('[type="submit"]') as HTMLButtonElement
+    
+    if (!submitButton) return
+    
+    // Disable button during submission
+    submitButton.disabled = true
+    const originalText = submitButton.textContent
+    submitButton.textContent = '创建订单中...'
+    
+    try {
+      const formData = new FormData(form)
+      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || ''
+      
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: formData
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        // Order created successfully, trigger payment modal
+        const totalPrice = this.hasTotalPriceFieldTarget ? this.totalPriceFieldTarget.value : '0'
+        this.triggerPaymentModal(totalPrice, data.payment_url, data.success_url)
+        
+        // Keep button disabled until payment completes
+        submitButton.textContent = '等待支付...'
+      } else {
+        throw new Error(data.message || '创建订单失败')
+      }
+    } catch (error) {
+      console.error('Error creating order:', error)
+      const message = error instanceof Error ? error.message : '创建订单失败，请重试'
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(message)
+      } else {
+        alert(message)
+      }
+      submitButton.disabled = false
+      submitButton.textContent = originalText || '确认支付'
+    }
+  }
+
+  private triggerPaymentModal(amount: string, paymentUrl: string, successUrl: string): void {
+    // Find payment-confirmation controller and trigger it
+    const paymentElement = document.querySelector('[data-controller*="payment-confirmation"]') as HTMLElement
+    
+    if (!paymentElement) {
+      console.error('Payment confirmation controller not found')
+      alert('支付系统未加载，请刷新页面重试')
+      return
+    }
+    
+    // Get the Stimulus controller instance
+    const app = (window as any).Stimulus
+    if (!app) {
+      console.error('Stimulus not found')
+      alert('系统错误，请刷新页面重试')
+      return
+    }
+    
+    const paymentController = app.getControllerForElementAndIdentifier(paymentElement, 'payment-confirmation')
+    
+    if (paymentController) {
+      // Set values
+      paymentController.amountValue = amount
+      // Get current user email from meta tag or element
+      const userEmail = document.querySelector<HTMLMetaElement>('meta[name="user-email"]')?.content || 
+                       document.querySelector('[data-user-email]')?.getAttribute('data-user-email') ||
+                       'demo@example.com'
+      paymentController.userEmailValue = userEmail
+      paymentController.paymentUrlValue = paymentUrl
+      paymentController.successUrlValue = successUrl
+      
+      // Show password modal
+      paymentController.showPasswordModal()
+    } else {
+      console.error('Payment controller not initialized')
+      alert('支付系统未初始化，请刷新页面重试')
     }
   }
 
@@ -70,8 +205,14 @@ export default class extends Controller<HTMLElement> {
     const currentQty = parseInt(this.quantityTarget.textContent || "1")
     const newQty = currentQty + 1
     this.quantityTarget.textContent = newQty.toString()
+    
+    // Update display in product info section
+    if (this.hasQuantityDisplayTarget) {
+      this.quantityDisplayTarget.textContent = newQty.toString()
+    }
+    
     this.updateQuantityField(newQty)
-    this.updateTotalPrice(newQty)
+    this.recalculateTotalPrice()
   }
 
   decrease(): void {
@@ -79,15 +220,27 @@ export default class extends Controller<HTMLElement> {
     if (currentQty > 1) {
       const newQty = currentQty - 1
       this.quantityTarget.textContent = newQty.toString()
+      
+      // Update display in product info section
+      if (this.hasQuantityDisplayTarget) {
+        this.quantityDisplayTarget.textContent = newQty.toString()
+      }
+      
       this.updateQuantityField(newQty)
-      this.updateTotalPrice(newQty)
+      this.recalculateTotalPrice()
     }
   }
 
   updateRentalDays(event: Event): void {
     const input = event.target as HTMLInputElement
     const days = parseInt(input.value) || 1
-    this.updateTotalPrice(days)
+    
+    // Update display in product info section
+    if (this.hasRentalDaysDisplayTarget) {
+      this.rentalDaysDisplayTarget.textContent = days.toString()
+    }
+    
+    this.recalculateTotalPrice()
     
     // 更新rental_info的hidden fields
     const rentalDaysField = this.element.querySelector('[data-internet-order-form-target="rentalDaysField"]') as HTMLInputElement
@@ -134,11 +287,37 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  private updateTotalPrice(multiplier: number): void {
-    const total = this.basePrice * multiplier
-    if (this.hasTotalPriceTarget) {
-      this.totalPriceTarget.textContent = total.toFixed(0)
+  private recalculateTotalPrice(): void {
+    let total: number
+    
+    if (this.isWifiOrder) {
+      // WiFi: total = quantity × days × daily_price
+      const quantity = parseInt(this.quantityTarget.textContent || "1")
+      const days = this.hasRentalDaysTarget ? (parseInt(this.rentalDaysTarget.value) || 7) : 7
+      total = this.basePrice * quantity * days
+    } else {
+      // SIM card or data plan: total = quantity × price
+      const quantity = parseInt(this.quantityTarget.textContent || "1")
+      total = this.basePrice * quantity
     }
+    
+    this.updateAllPriceDisplays(total)
+  }
+  
+  private updateAllPriceDisplays(total: number): void {
+    const totalStr = total.toFixed(0)
+    
+    // Update bottom bar total price
+    if (this.hasTotalPriceTarget) {
+      this.totalPriceTarget.textContent = totalStr
+    }
+    
+    // Update product info section total price
+    if (this.hasTotalPriceDisplayTarget) {
+      this.totalPriceDisplayTarget.textContent = totalStr
+    }
+    
+    // Update hidden field
     const totalPriceField = this.element.querySelector('[data-internet-order-form-target="totalPriceField"]') as HTMLInputElement
     if (totalPriceField) {
       totalPriceField.value = total.toString()

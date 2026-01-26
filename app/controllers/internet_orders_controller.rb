@@ -14,16 +14,46 @@ class InternetOrdersController < ApplicationController
 
   def create
     @order = current_user.internet_orders.build(order_params)
+    @order.status = 'pending'
     
     if @order.save
-      # 模拟支付流程，实际应该跳转到支付页面
-      @order.update(status: 'paid')
-      redirect_to success_internet_order_path(@order)
+      respond_to do |format|
+        format.json {
+          render json: { 
+            success: true, 
+            order_id: @order.id,
+            payment_url: pay_internet_order_path(@order),
+            success_url: success_internet_order_path(@order)
+          }
+        }
+        format.html {
+          redirect_to success_internet_order_path(@order)
+        }
+      end
     else
-      load_orderable
-      @addresses = current_user.addresses.delivery
-      @passengers = current_user.passengers
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.json {
+          render json: { success: false, message: @order.errors.full_messages.join(', ') }, status: :unprocessable_entity
+        }
+        format.html {
+          load_orderable
+          @addresses = current_user.addresses.delivery
+          @passengers = current_user.passengers
+          render :new, status: :unprocessable_entity
+        }
+      end
+    end
+  end
+
+  def pay
+    @order = current_user.internet_orders.find(params[:id])
+    
+    # Password already verified by frontend via /profile/verify_pay_password
+    # Update order status to paid
+    if @order.update(status: 'paid')
+      render json: { success: true }
+    else
+      render json: { success: false, message: '支付失败' }, status: :unprocessable_entity
     end
   end
 

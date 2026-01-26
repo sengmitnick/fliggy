@@ -40,7 +40,6 @@ agencies_data = [
 TravelAgency.insert_all(agencies_data)
 agencies_map = TravelAgency.pluck(:name, :id).to_h
 
-puts "✓ 批量创建了 #{TravelAgency.count} 家旅行社"
 
 # ==================== 目的地配置（全国主要旅游城市） ====================
 destinations_config = [
@@ -100,12 +99,10 @@ all_products_data = []
 start_date = Date.today
 end_date = start_date + 6.days  # 生成7天的数据
 
-destinations_config.each_with_index do |dest_config, dest_idx|
+destinations_config.each do |dest_config|
   destination = dest_config[:name]
   departure_cities = dest_config[:departure_cities]
   attractions = dest_config[:attractions] || [destination]
-  
-  puts "  [#{dest_idx + 1}/#{destinations_config.count}] 正在为 #{destination} 生成产品..."
   
   # 每个目的地选择2-3个主要出发城市
   selected_departures = departure_cities.sample([departure_cities.count, 3].min)
@@ -344,7 +341,6 @@ TourItineraryDay.insert_all(all_itinerary_data) if all_itinerary_data.any?
 # ==================== 附加画廊图片 ====================
 # 注意：为了加快初始化速度，跳过网络下载图片
 # 如需添加真实图片，可在后台管理界面手动上传
-puts "\n🖼️  跳过画廊图片附加（避免网络下载延迟）..."
 puts "  提示：可在后台管理界面为产品手动上传画廊图片"
 
 puts "\n📊 生成统计:"

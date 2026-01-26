@@ -10,7 +10,6 @@
 # 加载时机：
 # - 系统启动时自动加载（config/initializers/validator_baseline.rb）
 
-puts "  → 正在设置 Demo 用户..."
 
 demo_user = User.find_or_create_by(email: 'demo@travel01.com') do |u|
   u.password = 'password123'
@@ -104,4 +103,3 @@ if demo_user.persisted?
   puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000)"
 end
 
-puts "✓ demo_user_v1 数据包加载完成"

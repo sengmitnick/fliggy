@@ -1,4 +1,6 @@
-<div class="max-w-[390px] mx-auto bg-white min-h-screen pb-20" data-controller="internet-order-form">
+<div class="max-w-[390px] mx-auto bg-white min-h-screen pb-20" data-controller="internet-order-form payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @orderable&.try(:price) || @orderable&.try(:daily_price) || 0 %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>">
   
   <!-- 顶部导航 -->
   <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
@@ -33,25 +35,29 @@
         <div class="flex justify-between items-start">
           <div class="flex-1">
             <h2 class="font-bold text-base mb-2"><%= @orderable.name %></h2>
-            <div class="text-sm text-gray-600">
+            <div class="text-sm text-gray-600 space-y-1">
               <% if @orderable.is_a?(InternetSimCard) %>
                 <p>有效期: <%= @orderable.validity_days %>天</p>
                 <p>流量: <%= @orderable.data_limit %></p>
+                <p>单价: ¥<%= @orderable.price %></p>
+                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
               <% elsif @orderable.is_a?(InternetDataPlan) %>
                 <p>有效期: <%= @orderable.validity_days %>天</p>
                 <p>运营商: <%= @orderable.carrier %></p>
+                <p>单价: ¥<%= @orderable.price %></p>
               <% elsif @orderable.is_a?(InternetWifi) %>
                 <p>网络: <%= @orderable.network_type %></p>
                 <p>押金: ¥<%= @orderable.deposit %></p>
+                <p>单价: ¥<%= @orderable.daily_price %>/天</p>
+                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 台</p>
+                <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
               <% end %>
             </div>
           </div>
           <div class="text-right">
+            <div class="text-xs text-gray-500 mb-1">小计</div>
             <div class="text-[#FF4400] font-bold text-lg">
-              ¥<%= @orderable.try(:price) || @orderable.try(:daily_price) %>
-              <% if @orderable.is_a?(InternetWifi) %>
-                <span class="text-xs text-gray-400">/天</span>
-              <% end %>
+              ¥<span data-internet-order-form-target="totalPriceDisplay"><%= @orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7 %></span>
             </div>
           </div>
         </div>
@@ -208,4 +214,6 @@
     </div>
   <% end %>
 
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals' %>
 </div>

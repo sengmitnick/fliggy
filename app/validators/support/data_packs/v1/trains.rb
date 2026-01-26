@@ -152,7 +152,6 @@ end
 
 # 批量插入上海→杭州火车票
 Train.insert_all(all_trains)
-puts "  ✓ 已插入上海→杭州车次: #{all_trains.count} 条"
 
 # 路线2: 北京→天津（价格区间大，不同座位类型价格差异明显）
 # 这条路线主要测试价格对比（商务座可能是二等座的3倍）
@@ -259,7 +258,6 @@ end
 
 # 批量插入北京→天津火车票
 Train.insert_all(all_trains)
-puts "  ✓ 已插入北京→天津车次: #{all_trains.count} 条"
 
 # 路线3: 北京→上海（测试用例 v022）
 all_trains = []
@@ -274,7 +272,6 @@ all_trains = []
   all_trains.concat(trains_bj_to_sh)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入北京→上海车次: #{all_trains.count} 条"
 
 # 路线4: 上海→深圳（测试用例 v023）
 all_trains = []
@@ -289,7 +286,6 @@ all_trains = []
   all_trains.concat(trains_sh_to_sz)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入上海→深圳车次: #{all_trains.count} 条"
 
 # 路线5: 杭州→北京（测试用例 v024）
 all_trains = []
@@ -304,7 +300,6 @@ all_trains = []
   all_trains.concat(trains_hz_to_bj)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入杭州→北京车次: #{all_trains.count} 条"
 
 # 路线6: 北京→杭州（默认首页显示路线）
 all_trains = []
@@ -322,7 +317,6 @@ all_trains = []
   all_trains.concat(trains_bj_to_hz)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入北京→杭州车次: #{all_trains.count} 条"
 
 # 路线7: 深圳→广州（测试用例 v025）
 all_trains = []
@@ -337,7 +331,6 @@ all_trains = []
   all_trains.concat(trains_sz_to_gz)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入深圳→广州车次: #{all_trains.count} 条"
 
 # 路线8: 广州→上海（测试用例 v026）
 all_trains = []
@@ -352,7 +345,6 @@ all_trains = []
   all_trains.concat(trains_gz_to_sh)
 end
 Train.insert_all(all_trains)
-puts "  ✓ 已插入广州→上海车次: #{all_trains.count} 条"
 
 # ==================== 为每趟车创建座位类型数据 ====================
 puts "\n为所有车次创建座位类型数据..."
@@ -403,7 +395,6 @@ Train.where(data_version: 0).find_each do |train|
 end
 
 TrainSeat.insert_all(all_seats) if all_seats.any?
-puts "  ✓ 已创建座位类型数据: #{all_seats.count} 条"
 
 # ==================== 为每趟车创建订票套餐 ====================
 puts "\n为所有车次创建订票套餐..."
@@ -453,13 +444,11 @@ Train.where(data_version: 0).find_each do |train|
 end
 
 BookingOption.insert_all(all_options) if all_options.any?
-puts "  ✓ 已创建订票套餐: #{all_options.count} 条"
 
 # 统计信息
 total_trains = Train.where(data_version: 0).count
 sh_to_hz_count = Train.where(data_version: 0, departure_city: "上海", arrival_city: "杭州").count
 bj_to_tj_count = Train.where(data_version: 0, departure_city: "北京", arrival_city: "天津").count
 
-puts "\n✓ trains_v1 数据包加载完成（共 #{total_trains} 个车次）"
 puts "  - 上海→杭州: 每天8个车次，最低价 49元（共 #{sh_to_hz_count} 个）"
 puts "  - 北京→天津: 每天6个车次，价格区间 54.5-309元（共 #{bj_to_tj_count} 个）"
