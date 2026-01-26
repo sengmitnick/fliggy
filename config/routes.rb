@@ -564,7 +564,7 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
-    resources :validation_tasks, only: [:index]
+    resources :validation_tasks, only: [:index, :show]
     resources :charter_bookings
     resources :vehicle_types
     resources :charter_routes

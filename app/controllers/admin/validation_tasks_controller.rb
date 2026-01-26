@@ -6,6 +6,21 @@ class Admin::ValidationTasksController < Admin::BaseController
     @tasks = load_all_validators
   end
 
+  # GET /admin/validation_tasks/:id
+  def show
+    @tasks = load_all_validators
+    @task = @tasks.find { |t| t[:id] == params[:id] }
+    
+    if @task.nil?
+      redirect_to admin_validation_tasks_path, alert: "任务不存在"
+      return
+    end
+    
+    # 查找下一个任务
+    current_index = @tasks.index { |t| t[:id] == @task[:id] }
+    @next_task = @tasks[current_index + 1] if current_index && current_index < @tasks.length - 1
+  end
+
   private
 
   # 加载所有验证器类
@@ -29,5 +44,10 @@ class Admin::ValidationTasksController < Admin::BaseController
         nil
       end
     end.compact
+  end
+
+  # 根据ID查找验证器
+  def find_validator_by_id(id)
+    load_all_validators.find { |task| task[:id] == id }
   end
 end

@@ -63,6 +63,28 @@ class Hotel < ApplicationRecord
     joins(:hotel_rooms).where(hotel_rooms: { room_category: 'hourly' }).distinct 
   }
   
+  # 获取最低过夜房价（用于整晚搜索）
+  def min_overnight_price
+    hotel_rooms.where(room_category: 'overnight').minimum(:price) || price
+  end
+  
+  # 获取最低钟点房价（用于钟点房搜索）
+  def min_hourly_price
+    hotel_rooms.where(room_category: 'hourly').minimum(:price) || price
+  end
+  
+  # 根据房型分类获取显示价格
+  # 默认为整晚房价（不包含钟点房）
+  def display_price(room_category = nil)
+    case room_category
+    when 'hourly'
+      min_hourly_price
+    else
+      # 默认显示整晚房价，过滤掉钟点房
+      min_overnight_price
+    end
+  end
+  
   # 酒店评分计算
   def average_rating
     hotel_reviews.average(:rating) || rating || 0

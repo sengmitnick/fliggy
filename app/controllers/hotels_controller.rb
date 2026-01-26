@@ -151,17 +151,38 @@ class HotelsController < ApplicationController
       @hotels = @hotels.where('address LIKE ?', "%#{params[:district]}%")
     end
     
-    # Price range filtering (same as special_hotels)
+    # Price range filtering - use room category specific prices
     if params[:price_range].present?
-      case params[:price_range]
+      min_price, max_price = case params[:price_range]
       when '0-100'
-        @hotels = @hotels.where('price < ?', 100)
+        [0, 100]
       when '100-200'
-        @hotels = @hotels.where('price >= ? AND price < ?', 100, 200)
+        [100, 200]
       when '200-300'
-        @hotels = @hotels.where('price >= ? AND price < ?', 200, 300)
+        [200, 300]
       when '300+'
-        @hotels = @hotels.where('price >= ?', 300)
+        [300, Float::INFINITY]
+      end
+      
+      if min_price && max_price
+        # 根据 room_category 决定筛选逻辑
+        if @room_category == 'hourly'
+          # 钟点房搜索：按钟点房最低价筛选
+          @hotels = @hotels.where(
+            id: HotelRoom.where(room_category: 'hourly')
+                         .group(:hotel_id)
+                         .having('MIN(price) >= ? AND MIN(price) < ?', min_price, max_price)
+                         .select(:hotel_id)
+          )
+        else
+          # 默认/整晚搜索：按整晚房最低价筛选
+          @hotels = @hotels.where(
+            id: HotelRoom.where(room_category: 'overnight')
+                         .group(:hotel_id)
+                         .having('MIN(price) >= ? AND MIN(price) < ?', min_price, max_price)
+                         .select(:hotel_id)
+          )
+        end
       end
     end
     

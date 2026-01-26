@@ -357,7 +357,7 @@
   <!-- 酒店列表 -->
   <div class="pb-10">
     <% @hotels.each do |hotel| %>
-      <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "flex bg-white p-3 border-b border-gray-200" do %>
+      <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, room_category: @room_category), class: "flex bg-white p-3 border-b border-gray-200" do %>
         <!-- 左侧图片 -->
         <div class="relative w-[110px] h-[140px] bg-gray-200 rounded-lg overflow-hidden shrink-0">
           <% if hotel.image.attached? %>
@@ -409,10 +409,10 @@
             <span class="text-[10px] text-gray-400"><%= rand(50..500) %>+预订</span>
             <div class="text-right">
               <% if hotel.original_price.present? && hotel.original_price > hotel.price %>
-                <div class="text-[10px] text-gray-400 line-through">¥<%= (hotel.original_price * @rooms).to_i %></div>
+                <div class="text-[10px] text-gray-400 line-through">¥<%= (hotel.original_price * @rooms).to_i if hotel.original_price && hotel.original_price > hotel.display_price(@room_category) %></div>
               <% end %>
               <div class="text-[#ff4d4f] leading-none">
-                <span class="text-xs font-bold">¥</span><span class="text-2xl font-bold"><%= (hotel.price * @rooms).to_i %></span><span class="text-xs text-gray-500">起</span>
+                <span class="text-xs font-bold">¥</span><span class="text-2xl font-bold"><%= (hotel.display_price(@room_category) * @rooms).to_i %></span><span class="text-xs text-gray-500">起</span>
               </div>
               <% if hotel.is_featured %>
                 <div class="bg-[#ff4d4f] text-white text-[10px] px-1 rounded-sm inline-block mt-0.5 scale-90 origin-right">
