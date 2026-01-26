@@ -9,14 +9,17 @@ export default class extends Controller<HTMLElement> {
     "districtModal", 
     "priceModal",
     "filterModal",
+    "brandModal",
     "sortButton",
     "districtButton",
     "priceButton",
     "filterButton",
+    "brandButton",
     "sortOption",
     "districtOption",
     "priceOption",
-    "starOption"
+    "starOption",
+    "brandOption"
   ]
   
   static values = {
@@ -30,26 +33,31 @@ export default class extends Controller<HTMLElement> {
     sort: { type: String, default: "recommend" },
     district: { type: String, default: "" },
     priceRange: { type: String, default: "" },
-    stars: { type: String, default: "" }
+    stars: { type: String, default: "" },
+    brand: { type: String, default: "" }
   }
 
   declare readonly sortModalTarget: HTMLElement
   declare readonly districtModalTarget: HTMLElement
   declare readonly priceModalTarget: HTMLElement
   declare readonly filterModalTarget: HTMLElement
+  declare readonly brandModalTarget: HTMLElement
   declare readonly sortButtonTarget: HTMLElement
   declare readonly districtButtonTarget: HTMLElement
   declare readonly priceButtonTarget: HTMLElement
   declare readonly filterButtonTarget: HTMLElement
+  declare readonly brandButtonTarget: HTMLElement
   declare readonly sortOptionTargets: HTMLElement[]
   declare readonly districtOptionTargets: HTMLElement[]
   declare readonly priceOptionTargets: HTMLElement[]
   declare readonly starOptionTargets: HTMLElement[]
+  declare readonly brandOptionTargets: HTMLElement[]
   
   declare readonly hasSortModalTarget: boolean
   declare readonly hasDistrictModalTarget: boolean
   declare readonly hasPriceModalTarget: boolean
   declare readonly hasFilterModalTarget: boolean
+  declare readonly hasBrandModalTarget: boolean
   
   declare cityValue: string
   declare checkInValue: string
@@ -62,6 +70,7 @@ export default class extends Controller<HTMLElement> {
   declare districtValue: string
   declare priceRangeValue: string
   declare starsValue: string
+  declare brandValue: string
 
   connect(): void {
     this.updateButtonStates()
@@ -96,12 +105,20 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  openBrandModal(): void {
+    if (this.hasBrandModalTarget) {
+      this.closeAllModals()
+      this.brandModalTarget.classList.remove('hidden')
+    }
+  }
+
   // Close all modals
   closeAllModals(): void {
     if (this.hasSortModalTarget) this.sortModalTarget.classList.add('hidden')
     if (this.hasDistrictModalTarget) this.districtModalTarget.classList.add('hidden')
     if (this.hasPriceModalTarget) this.priceModalTarget.classList.add('hidden')
     if (this.hasFilterModalTarget) this.filterModalTarget.classList.add('hidden')
+    if (this.hasBrandModalTarget) this.brandModalTarget.classList.add('hidden')
   }
 
   // Select sort option
@@ -127,6 +144,15 @@ export default class extends Controller<HTMLElement> {
     const target = event.currentTarget as HTMLElement
     const priceValue = target.dataset.value || ''
     this.priceRangeValue = priceValue
+    this.closeAllModals()
+    this.applyFilters()
+  }
+
+  // Select brand option
+  selectBrand(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const brandValue = target.dataset.value || ''
+    this.brandValue = brandValue
     this.closeAllModals()
     this.applyFilters()
   }
@@ -180,6 +206,10 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.set('star_level', this.starsValue)
     }
     
+    if (this.brandValue) {
+      url.searchParams.set('brand', this.brandValue)
+    }
+    
     this.closeAllModals()
     Turbo.visit(url.toString())
   }
@@ -190,6 +220,7 @@ export default class extends Controller<HTMLElement> {
     this.districtValue = ''
     this.priceRangeValue = ''
     this.starsValue = ''
+    this.brandValue = ''
     this.applyFilters()
   }
 
@@ -213,6 +244,11 @@ export default class extends Controller<HTMLElement> {
     // Update filter button
     if (this.starsValue) {
       this.filterButtonTarget.classList.add('text-primary')
+    }
+    
+    // Update brand button
+    if (this.brandValue) {
+      this.brandButtonTarget.classList.add('text-primary')
     }
   }
 

@@ -110,6 +110,7 @@ class HotelsController < ApplicationController
     @region = params[:region]
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
+    @brand = params[:brand] # 品牌筛选
     @query = params[:q]
     
     # NOTE: City selector data is loaded via CitySelectorDataConcern
@@ -144,6 +145,11 @@ class HotelsController < ApplicationController
     # Apply search filter if query present
     if @query.present?
       @hotels = @hotels.where("name ILIKE ? OR address ILIKE ?", "%#{@query}%", "%#{@query}%")
+    end
+    
+    # Brand filtering
+    if @brand.present?
+      @hotels = @hotels.where(brand: @brand)
     end
     
     # District filtering (same as special_hotels)
@@ -220,6 +226,9 @@ class HotelsController < ApplicationController
     # Extract districts for filter bar
     @districts = extract_districts_from_hotels(@city)
     
+    # Extract brands available in current city
+    @brands = extract_brands_from_hotels(@city)
+    
     # Render the dedicated search results view
     render :search
   end
@@ -261,6 +270,18 @@ class HotelsController < ApplicationController
     # 匹配格式：XX市YY区
     match = city.match(/市(.+区)$/)
     match ? match[1] : nil
+  end
+  
+  # 提取当前城市的所有品牌
+  def extract_brands_from_hotels(city)
+    return [] if city.blank?
+    
+    Hotel.where("city = ? OR city = ? OR city = ?", city, city, "#{city}市")
+         .where(data_version: 0)
+         .where.not(brand: [nil, ''])
+         .distinct
+         .pluck(:brand)
+         .sort
   end
   
   def default_policy_data
