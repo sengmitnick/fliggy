@@ -58,6 +58,48 @@ export default class extends Controller<HTMLElement> {
     console.log("DeepBooking disconnected")
   }
 
+  // 选择套餐
+  selectProduct(event: Event): void {
+    const card = event.currentTarget as HTMLElement
+    const productId = card.dataset.productId
+    const productPrice = card.dataset.productPrice
+    
+    if (!productId || !productPrice) return
+    
+    console.log("Selected product:", productId, "Price:", productPrice)
+    
+    // 更新价格
+    this.pricePerPersonValue = parseInt(productPrice)
+    
+    // 更新底部显示价格
+    const displayPriceElement = this.element.querySelector('[data-deep-booking-target="displayPrice"]')
+    if (displayPriceElement) {
+      displayPriceElement.textContent = productPrice
+    }
+    
+    // 移除所有卡片的选中样式
+    this.productCardTargets.forEach((c) => {
+      c.classList.remove('border-[#fadd54]')
+      c.classList.add('border-yellow-50')
+      
+      // 隐藏所有勾选图标
+      const checkmark = c.querySelector('.absolute.bottom-0.right-0')
+      if (checkmark) {
+        checkmark.classList.add('hidden')
+      }
+    })
+    
+    // 添加当前卡片的选中样式
+    card.classList.remove('border-yellow-50')
+    card.classList.add('border-[#fadd54]')
+    
+    // 显示当前卡片的勾选图标
+    const checkmark = card.querySelector('.absolute.bottom-0.right-0')
+    if (checkmark) {
+      checkmark.classList.remove('hidden')
+    }
+  }
+
   // 选择日期
   selectDate(event: Event): void {
     const button = event.currentTarget as HTMLButtonElement

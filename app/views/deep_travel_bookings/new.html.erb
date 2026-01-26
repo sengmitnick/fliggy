@@ -338,8 +338,30 @@ document.addEventListener('DOMContentLoaded', function() {
   if (form) {
     console.log('[Form Validation] Attaching submit listener');
     
+    // Helper function to re-enable submit button when validation fails
+    function reEnableSubmitButton() {
+      // Use setTimeout to ensure this runs after base.ts disables the button
+      setTimeout(function() {
+        const submit = form.querySelector('button[type="submit"], button:not([type]), input[type="submit"]');
+        if (submit && submit.disabled) {
+          console.log('[Form Validation] Re-enabling submit button');
+          submit.disabled = false;
+          
+          // Restore original text if available
+          const originalText = submit.dataset.originalText;
+          if (originalText) {
+            const key = submit instanceof HTMLButtonElement ? 'textContent' : 'value';
+            submit[key] = originalText;
+            delete submit.dataset.originalText;
+          }
+        }
+      }, 0);
+    }
+    
     form.addEventListener('submit', function(e) {
-      console.log('[Form Validation] Submit triggered');
+      console.log('=============================================');
+      console.log('[Form Validation] Submit triggered at', new Date().toLocaleTimeString());
+      console.log('=============================================');
       
       // 验证是否勾选同意条款
       const termsCheckbox = form.querySelector('input[type="checkbox"][value="true"]');
@@ -347,8 +369,9 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('[Form Validation] Checkbox checked:', termsCheckbox?.checked);
       
       if (termsCheckbox && !termsCheckbox.checked) {
-        console.log('[Form Validation] Blocking submit - terms not agreed');
+        console.log('[Form Validation] ❌ FAILED - terms not agreed');
         e.preventDefault();
+        reEnableSubmitButton();
         if (window.showToast) {
           window.showToast('请阅读并同意相关条款');
         } else {
@@ -356,6 +379,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return false;
       }
+      console.log('[Form Validation] ✅ PASSED - terms agreed');
+      
+      // 验证联系人信息
+      const contactName = form.querySelector('input[name="deep_travel_booking[contact_name]"]');
+      const contactPhone = form.querySelector('input[name="deep_travel_booking[contact_phone]"]');
+      
+      console.log('[Form Validation] Contact name field:', contactName);
+      console.log('[Form Validation] Contact name value:', contactName?.value);
+      console.log('[Form Validation] Contact phone field:', contactPhone);
+      console.log('[Form Validation] Contact phone value:', contactPhone?.value);
+      
+      if (!contactName || !contactName.value.trim()) {
+        console.log('[Form Validation] ❌ FAILED - no contact name');
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入联系人姓名');
+        } else {
+          alert('请输入联系人姓名');
+        }
+        if (contactName) contactName.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - contact name OK');
+      
+      if (!contactPhone || !contactPhone.value.trim()) {
+        console.log('[Form Validation] ❌ FAILED - no contact phone');
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入联系人手机号');
+        } else {
+          alert('请输入联系人手机号');
+        }
+        if (contactPhone) contactPhone.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - contact phone not empty');
+      
+      // 验证手机号格式
+      const phonePattern = /^1[3-9]\d{9}$/;
+      if (!phonePattern.test(contactPhone.value.trim())) {
+        console.log('[Form Validation] ❌ FAILED - invalid phone format:', contactPhone.value);
+        e.preventDefault();
+        reEnableSubmitButton();
+        if (window.showToast) {
+          window.showToast('请输入正确的手机号码');
+        } else {
+          alert('请输入正确的手机号码');
+        }
+        contactPhone.focus();
+        return false;
+      }
+      console.log('[Form Validation] ✅ PASSED - phone format OK');
       
       const travelerCards = document.querySelectorAll('.traveler-card');
       console.log('[Form Validation] Traveler cards found:', travelerCards.length);
@@ -373,6 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const nameInput = document.querySelector(`[data-traveler-index="${index}"].traveler-name-input`);
         const idInput = document.querySelector(`[data-traveler-index="${index}"].traveler-id-input`);
         
+        console.log(`[Form Validation] Traveler ${index} - name: "${nameInput?.value}", id: "${idInput?.value}"`);
+        
         if (!nameInput.value || !idInput.value) {
           allSelected = false;
         }
@@ -381,8 +460,9 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('[Form Validation] All travelers selected:', allSelected);
       
       if (!allSelected) {
-        console.log('[Form Validation] Blocking submit - travelers not selected');
+        console.log('[Form Validation] ❌ FAILED - travelers not selected');
         e.preventDefault();
+        reEnableSubmitButton();
         if (window.showToast) {
           window.showToast('请为所有游客选择出行人');
         } else {
@@ -391,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
       }
       
-      console.log('[Form Validation] All validations passed, allowing submit');
+      console.log('[Form Validation] ✅✅✅ ALL VALIDATIONS PASSED - allowing submit');
     });
   } else {
     console.log('[Form Validation] Form not found!');

@@ -130,13 +130,13 @@
               <% if is_first %>
                 <div class="absolute -top-1.5 -left-1.5 bg-[#ff9e56] text-white text-[10px] px-1.5 py-0.5 rounded-br-lg rounded-tl-lg scale-90">最早可约</div>
               <% end %>
-              <span class="text-xs <%= is_first ? 'text-gray-800' : 'text-gray-500' %> font-medium <%= is_first ? 'mt-1' : '' %>"><%= date.strftime('%a') %></span>
+              <span class="text-xs <%= is_first ? 'text-gray-800' : 'text-gray-500' %> font-medium <%= is_first ? 'mt-1' : '' %>">周<%= %w[日 一 二 三 四 五 六][date.wday] %></span>
               <span class="text-sm font-bold <%= is_first ? 'text-gray-900' : 'text-gray-800' %>"><%= date.strftime('%m-%d') %></span>
               <span class="text-xs text-gray-800">¥<%= @selected_product&.price || 192 %>起</span>
             </button>
           <% else %>
             <div class="shrink-0 w-[72px] h-[72px] bg-[#f5f7fa] rounded-lg flex flex-col justify-center items-center opacity-60">
-              <span class="text-xs text-gray-400"><%= date.strftime('%a') %></span>
+              <span class="text-xs text-gray-400">周<%= %w[日 一 二 三 四 五 六][date.wday] %></span>
               <span class="text-sm font-medium text-gray-400"><%= date.strftime('%m-%d') %></span>
               <span class="text-xs text-gray-400">不可约</span>
             </div>
@@ -167,9 +167,11 @@
       <h3 class="font-bold text-base mb-3">讲解套餐</h3>
       
       <% @products.each_with_index do |product, index| %>
-        <div class="bg-[#fffbf0] p-4 rounded-lg relative border border-yellow-50 <%= 'mt-3' if index > 0 %>"
+        <div class="bg-[#fffbf0] p-4 rounded-lg relative border <%= index == 0 ? 'border-[#fadd54]' : 'border-yellow-50' %> <%= 'mt-3' if index > 0 %> cursor-pointer hover:border-[#fadd54] transition-colors"
              data-deep-booking-target="productCard"
-             data-product-id="<%= product.id %>">
+             data-product-id="<%= product.id %>"
+             data-product-price="<%= product.price %>"
+             data-action="click->deep-booking#selectProduct">
           <div class="flex justify-between items-start">
             <h4 class="font-bold text-gray-900 text-lg"><%= product.title %></h4>
             <div class="text-right">
@@ -199,15 +201,13 @@
           <% end %>
           
           <!-- Checkmark icon bottom right -->
-          <% if index == 0 %>
-            <div class="absolute bottom-0 right-0">
-              <div class="w-6 h-4 bg-[#fadd54] rounded-tl-lg flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
-                  <path d="M20 6L9 17l-5-5"/>
-                </svg>
-              </div>
+          <div class="absolute bottom-0 right-0 <%= 'hidden' unless index == 0 %>">
+            <div class="w-6 h-4 bg-[#fadd54] rounded-tl-lg flex items-center justify-center">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
             </div>
-          <% end %>
+          </div>
         </div>
       <% end %>
     </div>
@@ -215,7 +215,7 @@
     <!-- 推荐部分 -->
     <div class="px-4 mt-6 pb-4 bg-white pt-4">
       <h3 class="font-bold text-base mb-3 flex items-center gap-1">
-        为你推荐 <span class="text-[#566aff]">故宫博物院</span> 的其他讲解商品
+        为你推荐其他热门讲解商品
       </h3>
       
       <div class="flex gap-3 overflow-x-auto no-scrollbar">
