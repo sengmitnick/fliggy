@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["type", "priceDisplay", "priceDecimal", "passengerCount", "modal", "modalTitle", "countPanel", "adultsCount", "childrenCount"]
+  static targets = ["type", "priceDisplay", "priceDecimal", "passengerCount", "modal", "modalTitle", "countPanel", "adultsCount", "childrenCount", "bookingButton"]
 
   declare readonly typeTargets: HTMLElement[]
   declare readonly hasTypeTarget: boolean
@@ -21,6 +21,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasAdultsCountTarget: boolean
   declare readonly childrenCountTarget: HTMLElement
   declare readonly hasChildrenCountTarget: boolean
+  declare readonly bookingButtonTargets: HTMLAnchorElement[]
+  declare readonly hasBookingButtonTarget: boolean
 
   private adults: number = 1
   private children: number = 0
@@ -70,16 +72,17 @@ export default class extends Controller<HTMLElement> {
       this.updatePrices(passengerCount)
       this.updatePassengerCountText(passengerCount)
       
-      // Update the booking button links
-      const bookingButtons = document.querySelectorAll('a[href*="new_abroad_ticket_order"]')
-      bookingButtons.forEach((button) => {
-        const href = button.getAttribute("href")
-        if (href) {
-          const newUrl = new URL(href, window.location.origin)
-          newUrl.searchParams.set("passenger_type", selectedType)
-          button.setAttribute("href", newUrl.toString())
-        }
-      })
+      // Update the booking button links using Stimulus targets
+      if (this.hasBookingButtonTarget) {
+        this.bookingButtonTargets.forEach((button) => {
+          const href = button.getAttribute("href")
+          if (href) {
+            const newUrl = new URL(href, window.location.origin)
+            newUrl.searchParams.set("passenger_type", selectedType)
+            button.setAttribute("href", newUrl.toString())
+          }
+        })
+      }
     }
   }
 
@@ -218,16 +221,17 @@ export default class extends Controller<HTMLElement> {
     this.updatePrices(totalCount)
     this.updatePassengerCountText(totalCount)
     
-    // Update booking button links
-    const bookingButtons = document.querySelectorAll('a[href*="new_abroad_ticket_order"]')
-    bookingButtons.forEach((button) => {
-      const href = button.getAttribute("href")
-      if (href) {
-        const newUrl = new URL(href, window.location.origin)
-        newUrl.searchParams.set("passenger_type", passengerType)
-        button.setAttribute("href", newUrl.toString())
-      }
-    })
+    // Update booking button links using Stimulus targets
+    if (this.hasBookingButtonTarget) {
+      this.bookingButtonTargets.forEach((button) => {
+        const href = button.getAttribute("href")
+        if (href) {
+          const newUrl = new URL(href, window.location.origin)
+          newUrl.searchParams.set("passenger_type", passengerType)
+          button.setAttribute("href", newUrl.toString())
+        }
+      })
+    }
     
     // Deselect all preset type buttons
     if (this.hasTypeTarget) {
