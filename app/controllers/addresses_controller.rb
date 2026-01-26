@@ -4,6 +4,11 @@ class AddressesController < ApplicationController
 
   def index
     @addresses = current_user.addresses.order(is_default: :desc, created_at: :desc)
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @addresses }
+    end
   end
 
   def new

@@ -19,6 +19,10 @@ class Address < ApplicationRecord
     "#{province}#{city}#{district}#{detail}"
   end
 
+  def as_json(options = {})
+    super(options).merge('full_address' => full_address)
+  end
+
   private
 
   def set_default_address

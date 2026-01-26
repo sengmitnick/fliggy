@@ -216,6 +216,7 @@ Rails.application.routes.draw do
   resources :abroad_tickets, only: [:index, :show] do
     collection do
       get :search
+      get :find_by_time_slot
     end
   end
   # End routes for abroad_tickets
