@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["type", "priceDisplay", "priceDecimal", "passengerCount"]
+  static targets = ["type", "priceDisplay", "priceDecimal", "passengerCount", "modal", "modalTitle", "countPanel", "adultsCount", "childrenCount"]
 
   declare readonly typeTargets: HTMLElement[]
   declare readonly hasTypeTarget: boolean
@@ -11,9 +11,25 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasPriceDecimalTarget: boolean
   declare readonly passengerCountTargets: HTMLElement[]
   declare readonly hasPassengerCountTarget: boolean
+  declare readonly modalTarget: HTMLElement
+  declare readonly hasModalTarget: boolean
+  declare readonly modalTitleTarget: HTMLElement
+  declare readonly hasModalTitleTarget: boolean
+  declare readonly countPanelTarget: HTMLElement
+  declare readonly hasCountPanelTarget: boolean
+  declare readonly adultsCountTarget: HTMLElement
+  declare readonly hasAdultsCountTarget: boolean
+  declare readonly childrenCountTarget: HTMLElement
+  declare readonly hasChildrenCountTarget: boolean
+
+  private adults: number = 1
+  private children: number = 0
+  private confirmedAdults: number = 1
+  private confirmedChildren: number = 0
 
   connect(): void {
-    // Controller connected
+    // Initialize counters with confirmed values
+    this.updateCounters()
   }
 
   select(event: Event): void {
@@ -105,5 +121,148 @@ export default class extends Controller<HTMLElement> {
         element.textContent = `${count}人共`
       })
     }
+  }
+
+  // Modal methods
+  openModal(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (!this.hasModalTarget) return
+    
+    this.modalTarget.classList.remove("hidden")
+    document.body.style.overflow = "hidden"
+  }
+
+  closeModal(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (!this.hasModalTarget) return
+    
+    // Restore to confirmed state when closing without confirming
+    this.adults = this.confirmedAdults
+    this.children = this.confirmedChildren
+    this.updateCounters()
+    
+    this.modalTarget.classList.add("hidden")
+    document.body.style.overflow = ""
+  }
+
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
+  }
+
+  incrementAdults(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (this.adults < 9) {
+      this.adults++
+      this.updateCounters()
+    }
+  }
+
+  decrementAdults(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (this.adults > 1) {
+      this.adults--
+      this.updateCounters()
+    }
+  }
+
+  incrementChildren(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (this.children < 8) {
+      this.children++
+      this.updateCounters()
+    }
+  }
+
+  decrementChildren(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (this.children > 0) {
+      this.children--
+      this.updateCounters()
+    }
+  }
+
+  reset(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    this.adults = 1
+    this.children = 0
+    this.updateCounters()
+  }
+
+  confirm(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    // Save confirmed state
+    this.confirmedAdults = this.adults
+    this.confirmedChildren = this.children
+    
+    // Generate passenger type string
+    const passengerType = this.generatePassengerType(this.adults, this.children)
+    
+    // Update prices and display
+    const totalCount = this.adults + this.children
+    this.updatePrices(totalCount)
+    this.updatePassengerCountText(totalCount)
+    
+    // Update booking button links
+    const bookingButtons = document.querySelectorAll('a[href*="new_abroad_ticket_order"]')
+    bookingButtons.forEach((button) => {
+      const href = button.getAttribute("href")
+      if (href) {
+        const newUrl = new URL(href, window.location.origin)
+        newUrl.searchParams.set("passenger_type", passengerType)
+        button.setAttribute("href", newUrl.toString())
+      }
+    })
+    
+    // Deselect all preset type buttons
+    if (this.hasTypeTarget) {
+      this.typeTargets.forEach((element) => {
+        element.classList.remove("bg-[#FFFBF0]", "border", "border-[#FFE5B5]")
+        element.classList.add("bg-gray-100")
+        const checkmark = element.querySelector(".absolute")
+        if (checkmark) {
+          checkmark.remove()
+        }
+      })
+    }
+    
+    // Close modal
+    this.modalTarget.classList.add("hidden")
+    document.body.style.overflow = ""
+  }
+
+  private updateCounters(): void {
+    if (this.hasAdultsCountTarget) {
+      this.adultsCountTarget.textContent = this.adults.toString()
+    }
+    if (this.hasChildrenCountTarget) {
+      this.childrenCountTarget.textContent = this.children.toString()
+    }
+    if (this.hasModalTitleTarget) {
+      this.modalTitleTarget.textContent = `当前已选: ${this.adults}成人 ${this.children}儿童`
+    }
+  }
+
+  private generatePassengerType(adults: number, children: number): string {
+    let type = `${adults}adult`
+    if (children > 0) {
+      type += `${children}child`
+    }
+    return type
   }
 }

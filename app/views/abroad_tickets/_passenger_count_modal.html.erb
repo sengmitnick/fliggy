@@ -1,0 +1,104 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" data-abroad-passenger-selector-target="modal" data-action="click->abroad-passenger-selector#closeModal">
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl animate-slide-up" data-action="click->abroad-passenger-selector#stopPropagation" style="max-height: 60vh; display: flex; flex-direction: column;">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+      <h2 class="text-base font-medium" data-abroad-passenger-selector-target="modalTitle">当前已选: 1成人 0儿童</h2>
+      <button type="button" data-action="click->abroad-passenger-selector#closeModal" class="w-10 h-10 flex items-center justify-center text-2xl text-gray-500">×</button>
+    </div>
+
+    <!-- Passenger Count Panel -->
+    <div class="flex-1 overflow-y-auto" data-abroad-passenger-selector-target="countPanel">
+      <div class="px-4 py-6">
+        <div class="flex items-center justify-center mb-6">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='50' fill='%23E8F5FF'/%3E%3Cpath d='M60 35c-8.284 0-15 6.716-15 15s6.716 15 15 15 15-6.716 15-15-6.716-15-15-15zm0 45c-16.569 0-30 7.462-30 16.667V100h60v-3.333C90 87.462 76.569 80 60 80z' fill='%2300A0E9'/%3E%3C/svg%3E" alt="Passenger" class="w-24 h-24">
+        </div>
+
+        <!-- Adults Counter -->
+        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+          <div>
+            <div class="text-base font-medium text-gray-900">成人</div>
+            <div class="text-xs text-gray-400 mt-1">≥12周岁(含)</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              data-action="click->abroad-passenger-selector#decrementAdults"
+              class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-xl font-medium w-8 text-center" data-abroad-passenger-selector-target="adultsCount">1</span>
+            <button
+              type="button"
+              data-action="click->abroad-passenger-selector#incrementAdults"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background: #00A0E9;">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Children Counter -->
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-base font-medium text-gray-900">儿童</div>
+            <div class="text-xs text-gray-400 mt-1">2周岁(含)-12周岁(不含)</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              data-action="click->abroad-passenger-selector#decrementChildren"
+              class="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            <span class="text-xl font-medium w-8 text-center" data-abroad-passenger-selector-target="childrenCount">0</span>
+            <button
+              type="button"
+              data-action="click->abroad-passenger-selector#incrementChildren"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background: #00A0E9;">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-3 px-4 py-4 bg-white border-t border-gray-200">
+      <button 
+        type="button"
+        data-action="click->abroad-passenger-selector#reset"
+        class="flex-1 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 transition-colors">
+        重置
+      </button>
+      <button 
+        type="button"
+        data-action="click->abroad-passenger-selector#confirm"
+        class="flex-1 py-3 rounded-full font-bold text-black transition-colors"
+        style="background: #FFD700;">
+        确定
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+</style>
