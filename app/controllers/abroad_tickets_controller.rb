@@ -25,8 +25,35 @@ class AbroadTicketsController < ApplicationController
                            .by_date(@date)
                            .order(time_slot_start: :asc)
 
-    # Get date range for date picker (7 days before and after)
-    @date_range = ((@date - 3.days)..(@date + 10.days)).to_a
+    # Get date range for date picker
+    # Show yesterday (disabled) + today onwards, so today appears in second position
+    start_date = @date - 1.day
+    @date_range = (start_date..(start_date + 13.days)).to_a
+  end
+
+  def find_by_time_slot
+    @region = params[:region] || 'japan'
+    @origin = params[:origin]
+    @destination = params[:destination]
+    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @time_slot_start = params[:time_slot_start]
+    @time_slot_end = params[:time_slot_end]
+    
+    # Find ticket matching the criteria
+    @ticket = AbroadTicket.available
+                          .by_region(@region)
+                          .by_route(@origin, @destination)
+                          .by_date(@date)
+                          .where(time_slot_start: @time_slot_start, time_slot_end: @time_slot_end)
+                          .first
+    
+    if @ticket
+      # Redirect to the ticket's show page
+      redirect_to abroad_ticket_path(@ticket, origin: @origin, destination: @destination, date: @date.strftime('%Y-%m-%d'))
+    else
+      # No ticket found for this time slot, redirect to search page
+      redirect_to search_abroad_tickets_path(region: @region, origin: @origin, destination: @destination, date: @date.strftime('%Y-%m-%d')), alert: "该时间段暂无可用班次"
+    end
   end
 
   def show
@@ -34,6 +61,26 @@ class AbroadTicketsController < ApplicationController
     @origin = params[:origin] || @ticket.origin
     @destination = params[:destination] || @ticket.destination
     @date = params[:date] ? Date.parse(params[:date]) : @ticket.departure_date
+    
+    # If date parameter is different from ticket's departure_date, find ticket for new date
+    if @date != @ticket.departure_date
+      # Find a ticket with same route and time slot but different date
+      new_ticket = AbroadTicket.available
+                               .by_region(@ticket.region)
+                               .by_route(@ticket.origin, @ticket.destination)
+                               .by_date(@date)
+                               .where(time_slot_start: @ticket.time_slot_start)
+                               .first
+      
+      if new_ticket
+        # Redirect to the new ticket's show page
+        redirect_to abroad_ticket_path(new_ticket, origin: @origin, destination: @destination, date: @date.strftime('%Y-%m-%d'))
+        return
+      else
+        # If no ticket found for new date, show warning and keep current ticket
+        flash.now[:warning] = "该日期暂无相同路线的班次，显示原日期信息"
+      end
+    end
     
     # Get same route tickets for the day (different seat categories)
     @available_tickets = AbroadTicket.available

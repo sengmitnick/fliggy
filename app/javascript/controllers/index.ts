@@ -119,6 +119,8 @@ import BusTicketHistoryController from "./bus_ticket_history_controller"
 import TicketOrderController from "./ticket_order_controller"
 import ActivityOrderController from "./activity_order_controller"
 import GuideSwitcherController from "./guide_switcher_controller"
+import AbroadTimeSlotPickerController from "./abroad_time_slot_picker_controller"
+import AddressModalController from "./address_modal_controller"
 
 const application = Application.start()
 
@@ -241,5 +243,7 @@ application.register("bus-ticket-history", BusTicketHistoryController)
 application.register("ticket-order", TicketOrderController)
 application.register("activity-order", ActivityOrderController)
 application.register("guide-switcher", GuideSwitcherController)
+application.register("abroad-time-slot-picker", AbroadTimeSlotPickerController)
+application.register("address-modal", AddressModalController)
 
 window.Stimulus = application

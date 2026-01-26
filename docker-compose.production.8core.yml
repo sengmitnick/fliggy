@@ -65,11 +65,7 @@ services:
           memory: 512M
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        RAILS_ENV: production
+    image: qinglion-registry.cn-hangzhou.cr.aliyuncs.com/rl/travel01:latest
     container_name: travel01_web
     restart: always
     depends_on:
@@ -136,11 +132,7 @@ services:
           memory: 4G
 
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        RAILS_ENV: production
+    image: qinglion-registry.cn-hangzhou.cr.aliyuncs.com/rl/travel01:latest
     container_name: travel01_worker
     restart: always
     depends_on:

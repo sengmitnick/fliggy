@@ -18,6 +18,7 @@ export default class extends Controller<HTMLElement> {
     "destinationText",
     "dateInput",
     "dateText",
+    "routeModal",
     "stationModal",
     "stationList",
     "searchInput"
@@ -28,6 +29,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   declare readonly formTarget: HTMLFormElement
+  declare readonly hasFormTarget: boolean
   declare readonly regionInputTarget: HTMLInputElement
   declare readonly originInputTarget: HTMLInputElement
   declare readonly destinationInputTarget: HTMLInputElement
@@ -35,6 +37,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly destinationTextTarget: HTMLElement
   declare readonly dateInputTarget: HTMLInputElement
   declare readonly dateTextTarget: HTMLElement
+  declare readonly routeModalTarget: HTMLElement
   declare readonly stationModalTarget: HTMLElement
   declare readonly stationListTarget: HTMLElement
   declare readonly searchInputTarget: HTMLInputElement
@@ -199,6 +202,31 @@ export default class extends Controller<HTMLElement> {
     this.element.dispatchEvent(customEvent)
   }
 
+  openRouteEditor(event: Event): void {
+    event.preventDefault()
+    // Open the route modal with full UI
+    this.routeModalTarget.classList.remove('hidden')
+  }
+
+  closeRouteModal(): void {
+    this.routeModalTarget.classList.add('hidden')
+    this.closeStationModal()
+  }
+
+  submitRouteChange(event: Event): void {
+    event.preventDefault()
+    
+    // Navigate to search page with updated parameters
+    const origin = this.originInputTarget.value
+    const destination = this.destinationInputTarget.value
+    const region = this.regionInputTarget.value
+    const date = this.dateInputTarget.value
+    
+    const url = `/abroad_tickets/search?region=${encodeURIComponent(region)}&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&date=${date}`
+    this.closeRouteModal()
+    window.Turbo.visit(url)
+  }
+
   updateDate(dateStr: string): void {
     // Update the date input and text display
     this.dateInputTarget.value = dateStr
@@ -238,21 +266,40 @@ export default class extends Controller<HTMLElement> {
     
     if (!stationName) return
     
+    // Update the hidden input values
     if (this.currentSelectionType === 'origin') {
       this.originInputTarget.value = stationName
       this.originTextTarget.textContent = stationName
-      // Update English name in the subtitle
+      // Update English name in the subtitle if it exists
       const subtitle = this.originTextTarget.nextElementSibling
       if (subtitle) {
         subtitle.textContent = stationNameEn || ''
       }
+      
+      // Check if we're on search page (no form target means we're on search page)
+      const isSearchPage = !this.hasFormTarget
+      
+      if (isSearchPage) {
+        // On search page, close station modal and return to route modal
+        this.closeStationModal()
+        return
+      }
     } else {
       this.destinationInputTarget.value = stationName
       this.destinationTextTarget.textContent = stationName
-      // Update English name in the subtitle
+      // Update English name in the subtitle if it exists
       const subtitle = this.destinationTextTarget.nextElementSibling
       if (subtitle) {
         subtitle.textContent = stationNameEn || ''
+      }
+      
+      // Check if we're on search page
+      const isSearchPage = !this.hasFormTarget
+      
+      if (isSearchPage) {
+        // On search page, close station modal and return to route modal
+        this.closeStationModal()
+        return
       }
     }
     
@@ -381,6 +428,19 @@ export default class extends Controller<HTMLElement> {
         this.destinationTextTarget.textContent = destinationStation.name
         const subtitle = this.destinationTextTarget.nextElementSibling
         if (subtitle) subtitle.textContent = destinationStation.nameEn
+      }
+      
+      // Check if we're on search page
+      const isSearchPage = !this.hasFormTarget
+      
+      if (isSearchPage) {
+        // On search page, navigate to new URL
+        const region = this.regionInputTarget.value
+        const date = this.dateInputTarget.value
+        const url = `/abroad_tickets/search?region=${encodeURIComponent(region)}&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&date=${date}`
+        this.closeStationModal()
+        window.Turbo.visit(url)
+        return
       }
       
       this.closeStationModal()

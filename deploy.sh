@@ -141,16 +141,27 @@ main() {
             ;;
     esac
 
-    # 7. 构建镜像
-    print_info "步骤 7/9: 构建 Docker 镜像..."
+    # 7. 登录阿里云镜像仓库并拉取镜像
+    print_info "步骤 7/9: 拉取 Docker 镜像..."
 
-    if [ "$USE_NGINX" = "true" ]; then
-        docker-compose -f $COMPOSE_FILE build --no-cache
+    # 阿里云镜像仓库配置
+    REGISTRY="qinglion-registry.cn-hangzhou.cr.aliyuncs.com"
+    USERNAME="seng@1805254468384588"
+    PASSWORD="b6XKKS7hPhQjEC"
+
+    print_info "登录阿里云镜像仓库..."
+    echo "$PASSWORD" | docker login --username="$USERNAME" --password-stdin "$REGISTRY"
+
+    if [ $? -eq 0 ]; then
+        print_success "镜像仓库登录成功"
     else
-        # 不使用 Nginx 时，只构建 web 和 worker
-        docker-compose -f $COMPOSE_FILE build --no-cache web worker
+        print_error "镜像仓库登录失败"
+        exit 1
     fi
-    print_success "镜像构建完成"
+
+    print_info "拉取最新镜像..."
+    docker-compose -f $COMPOSE_FILE pull web worker
+    print_success "镜像拉取完成"
 
     # 8. 启动服务
     print_info "步骤 8/9: 启动服务..."
@@ -252,19 +263,6 @@ RUBY
         print_warning "注意: WEB_PORT ($WEB_PORT) 不在甲方规范要求的 5001-5050 范围内"
         print_warning "建议修改 .env 中的 WEB_PORT 为 5001-5050 之间的值"
     fi
-
-    echo ""
-    print_info "详细文档请参考:"
-    echo "   - 部署指南: docs/DEPLOYMENT_GUIDE.md"
-    echo "   - APK 重建: docs/APK_REBUILD_GUIDE.md (自定义域名后重新生成 APK)"
-    echo "   - 手机应用环境交付规范.md"
-    echo ""
-    print_warning "📱 Android APK 重建说明:"
-    echo "   当前 APK 绑定到开发环境域名，如需为当前部署地址生成 APK:"
-    echo "   1. 运行重建脚本: bash rebuild_apk.sh"
-    echo "   2. 输入实际部署地址（IP:端口 或 域名）"
-    echo "   3. 等待构建完成，获得新的 app-release-signed.apk"
-    echo "   详细说明: docs/APK_REBUILD_GUIDE.md"
 }
 
 # 执行主函数

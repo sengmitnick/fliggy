@@ -65,11 +65,7 @@ services:
 
   # Rails 应用主服务
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        RAILS_ENV: production
+    image: qinglion-registry.cn-hangzhou.cr.aliyuncs.com/rl/travel01:latest
     container_name: travel01_web
     restart: always
     depends_on:
@@ -154,11 +150,7 @@ services:
 
   # GoodJob 后台任务处理器
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        RAILS_ENV: production
+    image: qinglion-registry.cn-hangzhou.cr.aliyuncs.com/rl/travel01:latest
     container_name: travel01_worker
     restart: always
     depends_on:
