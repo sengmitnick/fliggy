@@ -2,18 +2,19 @@
 
 require_relative 'base_validator'
 
-# 验证用例4: 搜索后天北京到天津最便宜的车票
+# 验证用例4: 搜索后天北京到天津最便宜的车票（1人）
 # 
 # 任务描述:
 #   Agent 需要搜索后天北京到天津的所有车次，
 #   找出价格最便宜的车票（对比不同座位类型），
-#   并创建订单
+#   并创建订单（1人出行）
 # 
 # 评分标准:
-#   - 搜索到了所有可用车次 (20分)
-#   - 正确识别最便宜的车票 (30分)
+#   - 搜索到了所有可用车次 (15分)
+#   - 正确识别最便宜的车票 (25分)
 #   - 成功创建订单 (20分)
-#   - 订单金额准确 (30分)
+#   - 订单金额准确 (20分)
+#   - 出行人数正确（1人） (20分)
 # 
 # 难点:
 #   - 需要对比不同车次和不同座位类型
@@ -30,8 +31,8 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V011SearchCheapestTrainSeatValidator < BaseValidator
   self.validator_id = 'v011_search_cheapest_train_seat_validator'
-  self.title = '搜索后天北京到天津最便宜的车票'
-  self.description = '搜索后天北京到天津的所有车次，找出最便宜的车票（对比不同座位类型）并完成预订'
+  self.title = '搜索后天北京到天津最便宜的车票（1人）'
+  self.description = '搜索后天北京到天津的所有车次，找出最便宜的车票（对比不同座位类型）并完成预订（1人出行）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
@@ -40,6 +41,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     @origin = '北京'
     @destination = '天津'
     @target_date = Date.current + 2.days  # 后天
+    @passenger_count = 1  # 出行人数
     
     # 查找所有车次（注意：查询基线数据）
     trains = Train.where(
@@ -69,11 +71,12 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索后天从#{@origin}到#{@destination}的所有车次，找出最便宜的车票并预订",
+      task: "请搜索后天从#{@origin}到#{@destination}的所有车次，找出最便宜的车票并预订（#{@passenger_count}人出行）",
       departure_city: @origin,
       destination_city: @destination,
       date: @target_date.to_s,
       date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
+      passenger_count: @passenger_count,
       hint: "注意：不同车次和不同座位类型（二等座/一等座/商务座）价格差异很大，需要全面对比",
       total_trains: trains.count,
       price_range: {
@@ -108,7 +111,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     end
     
     # 断言4: 正确识别最便宜的车票（核心评分）
-    add_assertion "选择了最便宜的车票（对比所有座位类型）", weight: 30 do
+    add_assertion "选择了最便宜的车票（对比所有座位类型）", weight: 25 do
       # 重新计算所有车次所有座位类型的价格
       all_trains = Train.where(
         departure_city: @origin,
@@ -145,13 +148,24 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     end
     
     # 断言5: 订单金额准确
-    add_assertion "订单总价准确", weight: 30 do
+    add_assertion "订单总价准确", weight: 20 do
       # 获取座位价格
       seat = @booking.train.train_seats.find_by(seat_type: @booking.seat_type)
       expected_price = seat.price
       
       expect(@booking.total_price).to be_within(1).of(expected_price),
         "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@booking.total_price}"
+    end
+    
+    # 断言6: 出行人数正确（1人）
+    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 20 do
+      # TrainBooking模型是单个乘客，验证passenger_name存在
+      expect(@booking.passenger_name).to be_present,
+        "未找到乘客信息"
+      
+      # 验证身份证号码存在
+      expect(@booking.passenger_id_number).to be_present,
+        "未找到乘客身份证信息"
     end
   end
   
@@ -163,6 +177,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
       target_date: @target_date.to_s,
       origin: @origin,
       destination: @destination,
+      passenger_count: @passenger_count,
       seat_prices: @seat_prices,
       cheapest_option: @cheapest_option
     }
@@ -173,6 +188,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     @target_date = Date.parse(data['target_date'])
     @origin = data['origin']
     @destination = data['destination']
+    @passenger_count = data['passenger_count'] || 1
     @seat_prices = data['seat_prices']
     @cheapest_option = data['cheapest_option']
   end
