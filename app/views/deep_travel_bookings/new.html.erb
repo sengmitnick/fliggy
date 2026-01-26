@@ -23,6 +23,7 @@
     <%= f.hidden_field :adult_count, value: @adult_count %>
     <%= f.hidden_field :child_count, value: @child_count %>
     <%= f.hidden_field :total_price, value: @final_price %>
+    <%= f.hidden_field :fill_travelers_later, value: false %>
 
     <!-- 卡片 1: 行程信息 -->
     <div class="bg-white rounded-xl p-4 shadow-sm">
@@ -209,11 +210,13 @@
     <!-- 底部协议文字 -->
     <div class="flex items-start px-1 mt-4 mb-2">
       <div class="mt-0.5 mr-2">
-        <div class="w-4 h-4 rounded-full border border-gray-400"></div>
+        <%= f.check_box :terms_agreed, 
+            { class: "w-4 h-4 rounded border-gray-400 text-[#577CE8] focus:ring-[#577CE8] cursor-pointer" },
+            true, false %>
       </div>
-      <div class="text-xs text-gray-500 leading-tight">
+      <label for="<%= f.object_name %>_terms_agreed" class="text-xs text-gray-500 leading-tight cursor-pointer">
         请您仔细阅读<span class="text-[#577CE8]">电子合同</span>、<span class="text-[#577CE8]">线路标准退预订须知</span>点击去付款即代表您已阅读并同意条款内容。
-      </div>
+      </label>
     </div>
 
     <!-- 底部固定栏 -->

@@ -1,6 +1,10 @@
 <div class="bg-background min-h-screen pb-24" 
      data-controller="deep-booking"
-     data-deep-booking-guide-id-value="<%= @guide.id %>">
+     data-deep-booking-guide-id-value="<%= @guide.id %>"
+     data-deep-booking-selected-date-value="<%= Date.today.to_s %>"
+     data-deep-booking-adult-count-value="1"
+     data-deep-booking-child-count-value="0"
+     data-deep-booking-price-per-person-value="<%= @selected_product&.price || 192 %>">
   <!-- 顶部深色背景区域 (Profile Section) -->
   <div class="bg-[#48413d] text-white pb-6">
     <!-- 顶部导航栏 -->
@@ -110,7 +114,8 @@
     <!-- 可约日期 -->
     <div class="px-4 py-3 bg-white">
       <h3 class="font-bold text-base mb-3">可约日期</h3>
-      <div class="flex gap-2 overflow-x-auto no-scrollbar items-center">
+      <div class="relative">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar items-center pr-14">
         
         <% today = Date.today %>
         <% 5.times do |i| %>
@@ -138,17 +143,22 @@
           <% end %>
         <% end %>
 
-        <!-- Calendar More -->
-        <button class="shrink-0 w-[40px] h-[72px] flex items-center justify-center"
-                data-action="click->deep-booking#openCalendar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-            <polygon points="12 14 16 18 8 18" fill="#666" stroke="none"/>
-          </svg>
-        </button>
+        </div>
+        
+        <!-- Calendar More - Fixed to Right -->
+        <div class="absolute right-0 top-0 h-[72px] flex items-center">
+          <div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-r from-transparent to-white pointer-events-none"></div>
+          <button class="relative z-10 w-[40px] h-[72px] flex items-center justify-center bg-white"
+                  data-action="click->deep-booking#openCalendar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <polygon points="12 14 16 18 8 18" fill="#666" stroke="none"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 

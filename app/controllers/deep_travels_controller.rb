@@ -29,6 +29,21 @@ class DeepTravelsController < ApplicationController
                 end
   end
   
+  # GET /deep_travels/:id/available_dates
+  def available_dates
+    @guide = DeepTravelGuide.find(params[:id])
+    start_date = params[:start_date]&.to_date || Date.today
+    end_date = params[:end_date]&.to_date || (Date.today + 90.days)
+
+    available_dates = @guide.availabilities
+                           .where(is_available: true)
+                           .where(available_date: start_date..end_date)
+                           .pluck(:available_date)
+                           .map(&:to_s)
+
+    render json: { available_dates: available_dates }
+  end
+
   def show
     @full_render = true
     @guide = DeepTravelGuide.includes(:deep_travel_products, :avatar_attachment, :video_attachment)

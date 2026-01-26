@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_26_035321) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_26_073226) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -628,6 +628,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_035321) do
     t.index ["user_id"], name: "index_custom_travel_requests_on_user_id"
   end
 
+  create_table "deep_travel_availabilities", force: :cascade do |t|
+    t.bigint "deep_travel_guide_id", null: false
+    t.date "available_date", null: false
+    t.boolean "is_available", default: true, null: false
+    t.bigint "data_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_deep_travel_availabilities_on_data_version"
+    t.index ["deep_travel_guide_id", "available_date"], name: "index_deep_travel_avail_on_guide_and_date", unique: true
+    t.index ["deep_travel_guide_id"], name: "index_deep_travel_availabilities_on_deep_travel_guide_id"
+  end
+
   create_table "deep_travel_bookings", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "deep_travel_guide_id"
@@ -648,6 +660,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_035321) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
+    t.boolean "fill_travelers_later", default: false
     t.index ["data_version"], name: "index_deep_travel_bookings_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_bookings_on_deep_travel_guide_id"
     t.index ["deep_travel_product_id"], name: "index_deep_travel_bookings_on_deep_travel_product_id"
@@ -1844,6 +1857,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_035321) do
   add_foreign_key "bus_ticket_passengers", "bus_ticket_orders", on_delete: :cascade
   add_foreign_key "contacts", "users"
   add_foreign_key "custom_travel_requests", "users"
+  add_foreign_key "deep_travel_availabilities", "deep_travel_guides"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"

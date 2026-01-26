@@ -5,6 +5,7 @@ export default class extends Controller<HTMLElement> {
     "productCard",
     "dateModal",
     "countModal",
+    "calendarModal",
     "adultCount",
     "childCount",
     "selectedDate",
@@ -22,6 +23,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly productCardTargets: HTMLElement[]
   declare readonly dateModalTarget?: HTMLElement
   declare readonly countModalTarget?: HTMLElement
+  declare readonly calendarModalTarget?: HTMLElement
   declare readonly adultCountTarget?: HTMLElement
   declare readonly childCountTarget?: HTMLElement
   declare readonly selectedDateTarget?: HTMLElement
@@ -81,9 +83,180 @@ export default class extends Controller<HTMLElement> {
   openCalendar(event: Event): void {
     event.preventDefault()
     console.log("Opening calendar modal")
-    // TODO: Implement calendar modal
-    // For now, just show a toast message
-    this.showToast("日历选择功能即将上线")
+    
+    // Create calendar modal
+    this.createCalendarModal()
+  }
+
+  // 创建日历模态框
+  async createCalendarModal(): Promise<void> {
+    const today = new Date()
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0) // 2个月后
+    
+    // 从后端API获取可约日期
+    let availableDates: Set<string>
+    try {
+      const response = await fetch(`/deep_travels/${this.guideIdValue}/available_dates?start_date=${this.formatDate(startDate)}&end_date=${this.formatDate(endDate)}`)
+      const data = await response.json()
+      availableDates = new Set(data.available_dates)
+    } catch (error) {
+      console.error('Failed to fetch available dates:', error)
+      // 如果API失败，使用空集合
+      availableDates = new Set()
+    }
+    
+    const calendarHTML = this.generateCalendarHTML(startDate, endDate, today, availableDates)
+    
+    const modalHTML = `
+      <div class="fixed inset-0 bg-white z-50 max-w-[414px] mx-auto" data-deep-booking-target="calendarModal">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-200 z-10">
+          <div class="flex items-center justify-between px-4 py-4">
+            <button 
+              data-action="click->deep-booking#closeCalendar" 
+              class="text-2xl text-gray-600">
+              ×
+            </button>
+            <div class="text-base font-bold">选择日期</div>
+            <div class="w-8"></div>
+          </div>
+          
+          <!-- Weekday Headers -->
+          <div class="flex text-center text-sm text-gray-600 py-2 border-b border-gray-100">
+            <div class="flex-1">日</div>
+            <div class="flex-1">一</div>
+            <div class="flex-1">二</div>
+            <div class="flex-1">三</div>
+            <div class="flex-1">四</div>
+            <div class="flex-1">五</div>
+            <div class="flex-1">六</div>
+          </div>
+        </div>
+
+        <!-- Calendar Content -->
+        <div class="overflow-y-auto pb-20" style="height: calc(100vh - 120px);">
+          ${calendarHTML}
+        </div>
+      </div>
+    `
+    
+    this.element.insertAdjacentHTML('beforeend', modalHTML)
+  }
+
+  // 生成日历HTML
+  generateCalendarHTML(startDate: Date, endDate: Date, today: Date, availableDates: Set<string>): string {
+    let html = ''
+    let currentMonth = startDate.getMonth()
+    let currentYear = startDate.getFullYear()
+    
+    while (currentYear < endDate.getFullYear() || 
+           (currentYear === endDate.getFullYear() && currentMonth <= endDate.getMonth())) {
+      
+      const monthStr = `${currentYear}年${String(currentMonth + 1).padStart(2, '0')}月`
+      html += `<div class="text-center py-4 text-lg font-bold text-gray-800">${monthStr}</div>`
+      
+      // 获取当月第一天和最后一天
+      const firstDay = new Date(currentYear, currentMonth, 1)
+      const lastDay = new Date(currentYear, currentMonth + 1, 0)
+      
+      // 生成周
+      const currentDate = new Date(firstDay)
+      currentDate.setDate(1 - firstDay.getDay()) // 从周日开始
+      
+      while (currentDate <= lastDay) {
+        html += '<div class="flex">'
+        
+        for (let i = 0; i < 7; i++) {
+          const dateStr = this.formatDate(currentDate)
+          const isCurrentMonth = currentDate.getMonth() === currentMonth
+          const isToday = this.formatDate(currentDate) === this.formatDate(today)
+          const isAvailable = availableDates.has(dateStr)
+          const isSelected = dateStr === this.selectedDateValue
+          
+          if (!isCurrentMonth) {
+            html += '<div class="flex-1 py-3"></div>'
+          } else if (!isAvailable) {
+            // 不可选日期 - 灰色显示
+            html += `
+              <div class="flex-1 py-2 flex flex-col items-center relative opacity-40">
+                <div class="text-2xl font-bold mt-3 text-gray-400">${currentDate.getDate()}</div>
+                <div class="text-xs text-gray-400 mt-1">不可约</div>
+              </div>
+            `
+          } else {
+            // 可选日期
+            const bgClass = isSelected ? 'bg-[#ffeeb8] rounded-lg' : ''
+            html += `
+              <button 
+                data-action="click->deep-booking#selectCalendarDate"
+                data-date="${dateStr}"
+                class="flex-1 py-2 flex flex-col items-center relative ${bgClass}">
+                ${isToday ? '<div class="absolute top-1 text-xs text-orange-500 font-bold">今天</div>' : ''}
+                ${isSelected ? '<div class="absolute top-1 text-xs font-bold" style="color: #FF8C00;">已选</div>' : ''}
+                <div class="text-2xl font-bold mt-3 ${isSelected ? 'text-gray-900' : 'text-gray-800'}">${currentDate.getDate()}</div>
+                <div class="text-xs ${isSelected ? 'text-gray-900 font-bold' : 'text-green-600'} mt-1">可约</div>
+              </button>
+            `
+          }
+          
+          currentDate.setDate(currentDate.getDate() + 1)
+        }
+        
+        html += '</div>'
+      }
+      
+      currentMonth++
+      if (currentMonth > 11) {
+        currentMonth = 0
+        currentYear++
+      }
+    }
+    
+    return html
+  }
+
+  // 从日历中选择日期
+  selectCalendarDate(event: Event): void {
+    event.preventDefault()
+    const button = event.currentTarget as HTMLButtonElement
+    const date = button.dataset.date
+    
+    if (!date) return
+    
+    this.selectedDateValue = date
+    console.log("Selected date from calendar:", date)
+    
+    // 更新页面上的日期按钮状态
+    const dateButtons = this.element.querySelectorAll('[data-action*="selectDate"]')
+    dateButtons.forEach((btn) => {
+      btn.classList.remove('bg-[#ffeeb8]', 'border-[#ffeeb8]')
+      btn.classList.add('bg-[#f5f7fa]')
+      
+      if (btn.getAttribute('data-date') === date) {
+        btn.classList.remove('bg-[#f5f7fa]')
+        btn.classList.add('bg-[#ffeeb8]', 'border-[#ffeeb8]')
+      }
+    })
+    
+    // 关闭日历
+    this.closeCalendar()
+  }
+
+  // 关闭日历
+  closeCalendar(): void {
+    const modal = this.element.querySelector('[data-deep-booking-target="calendarModal"]')
+    if (modal) {
+      modal.remove()
+    }
+  }
+
+  // 格式化日期为 YYYY-MM-DD
+  formatDate(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   // 打开人数选择弹窗
@@ -100,10 +273,10 @@ export default class extends Controller<HTMLElement> {
     // Create modal HTML
      
     const modalHTML = `
-      <div class="fixed inset-0 bg-black/60 z-40" 
+      <div class="fixed inset-0 bg-black/60 z-50" 
            data-action="click->deep-booking#closeCountModal" 
            data-deep-booking-target="countModal">
-        <div class="absolute bottom-0 w-full max-w-[414px] left-1/2 -translate-x-1/2 bg-white z-50 rounded-t-2xl px-5 pt-5 pb-8 animate-slide-up" 
+        <div class="absolute bottom-0 w-full max-w-[414px] bg-white z-50 rounded-t-2xl px-5 pt-5 pb-8 animate-slide-up" 
              data-action="click->deep-booking#stopPropagation">
           
           <!-- 弹窗标题栏 -->
