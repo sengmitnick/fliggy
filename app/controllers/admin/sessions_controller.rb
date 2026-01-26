@@ -16,7 +16,7 @@ class Admin::SessionsController < Admin::BaseController
     if admin && admin.authenticate(params[:password])
       admin_sign_in(admin)
       AdminOplogService.log_login(admin, request)
-      redirect_to admin_root_path
+      redirect_to redirect_path_after_login
     else
       flash.now[:alert] = 'Username or password is wrong'
       render 'new', status: :unprocessable_entity
@@ -30,6 +30,12 @@ class Admin::SessionsController < Admin::BaseController
   end
 
   private
+
+  def redirect_path_after_login
+    return_to = session.delete(:admin_return_to)
+    return_to || admin_root_path
+  end
+
   def create_first_admin_or_reset_password!
     return unless first_admin?
     admin = Administrator.find_by(name: 'admin')
