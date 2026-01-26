@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_26_073226) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_26_101218) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -682,6 +682,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_073226) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
+    t.string "venue"
     t.index ["data_version"], name: "index_deep_travel_guides_on_data_version"
   end
 

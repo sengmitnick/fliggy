@@ -27,6 +27,28 @@ class DeepTravelsController < ApplicationController
                                   .recent
                                   .limit(20)
                 end
+    
+    # Group products by venue (景点)
+    @venues = {}
+    @products.each do |product|
+      guide = product.deep_travel_guide
+      next unless guide && guide.venue.present?
+      
+      @venues[guide.venue] ||= {
+        location: product.location,
+        title: product.subtitle&.split(' ')&.first || product.title.split(/[【\[]/)[0],
+        guides: [],
+        products: []
+      }
+      
+      # Add guide if not already in the list
+      unless @venues[guide.venue][:guides].any? { |g| g.id == guide.id }
+        @venues[guide.venue][:guides] << guide
+      end
+      
+      # Add product
+      @venues[guide.venue][:products] << product
+    end
   end
   
   # GET /deep_travels/:id/available_dates

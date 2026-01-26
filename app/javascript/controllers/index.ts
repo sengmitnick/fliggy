@@ -117,6 +117,7 @@ import MapGuideController from "./map_guide_controller"
 import BusTicketHistoryController from "./bus_ticket_history_controller"
 import TicketOrderController from "./ticket_order_controller"
 import ActivityOrderController from "./activity_order_controller"
+import GuideSwitcherController from "./guide_switcher_controller"
 
 const application = Application.start()
 
@@ -237,5 +238,6 @@ application.register("map-guide", MapGuideController)
 application.register("bus-ticket-history", BusTicketHistoryController)
 application.register("ticket-order", TicketOrderController)
 application.register("activity-order", ActivityOrderController)
+application.register("guide-switcher", GuideSwitcherController)
 
 window.Stimulus = application
