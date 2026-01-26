@@ -7,18 +7,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly totalPriceTarget: HTMLElement
   declare readonly orderableTypeValue: string
 
-  private basePrice: number = 9.9
-
   connect(): void {
-    // Get base price from first product
-    const firstProduct = document.querySelector('[data-controller="product-card"]')
-    if (firstProduct) {
-      const priceEl = firstProduct.querySelector('.text-xl.font-bold.text-\\[\\#FF4400\\]')
-      if (priceEl) {
-        this.basePrice = parseFloat(priceEl.textContent || '9.9')
-      }
-    }
     this.updateTotalPrice()
+    
+    // Listen for price-changed events
+    this.element.addEventListener('price-changed', () => {
+      this.updateTotalPrice()
+    })
   }
 
   decrease(event: Event): void {
@@ -73,7 +68,34 @@ export default class extends Controller<HTMLElement> {
 
   private updateTotalPrice(): void {
     const quantity = parseInt(this.quantityTarget.textContent || '1')
-    const total = this.basePrice * quantity
+    
+    // Get current price from selected card
+    const unitPrice = this.getSelectedCardPrice()
+    
+    const total = unitPrice * quantity
     this.totalPriceTarget.textContent = total.toFixed(1)
+  }
+
+  private getSelectedCardPrice(): number {
+    // Find the selected card (with yellow border)
+    const selectedCard = document.querySelector('[data-controller~="product-card"].border-\\[\\#FFCC00\\]')
+    
+    if (selectedCard) {
+      const priceElement = selectedCard.querySelector('[data-sim-card-filter-target="price"]')
+      if (priceElement && priceElement.textContent) {
+        return parseFloat(priceElement.textContent)
+      }
+    }
+    
+    // Fallback: get price from first card if no card is selected
+    const firstCard = document.querySelector('[data-controller~="product-card"]')
+    if (firstCard) {
+      const priceElement = firstCard.querySelector('[data-sim-card-filter-target="price"]')
+      if (priceElement && priceElement.textContent) {
+        return parseFloat(priceElement.textContent)
+      }
+    }
+    
+    return 9.9 // Default fallback
   }
 }

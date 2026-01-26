@@ -114,6 +114,39 @@ export default class extends Controller<HTMLElement> {
         priceElement.textContent = newPrice.toFixed(1)
       }
     })
+
+    // Update total price if a card is selected
+    this.updateTotalPriceForSelectedCard()
+    
+    // Trigger quantity-based total price update
+    this.triggerQuantityUpdate()
+  }
+
+  private updateTotalPriceForSelectedCard(): void {
+    // Find the selected card (with yellow border)
+    const selectedCard = this.productCardTargets.find(card => 
+      card.classList.contains('border-[#FFCC00]')
+    )
+
+    if (selectedCard) {
+      const priceElement = selectedCard.querySelector('[data-sim-card-filter-target="price"]')
+      const totalPriceElement = document.querySelector('[data-sim-card-booking-target="totalPrice"]')
+      
+      if (priceElement && totalPriceElement) {
+        const price = priceElement.textContent || '9.9'
+        totalPriceElement.textContent = price
+      }
+    }
+  }
+
+  private triggerQuantityUpdate(): void {
+    // Find the sim-card-booking controller and trigger its update
+    const bookingController = document.querySelector('[data-controller="sim-card-booking"]')
+    if (bookingController) {
+      // Dispatch a custom event to trigger the booking controller's update
+      const event = new CustomEvent('price-changed')
+      bookingController.dispatchEvent(event)
+    }
   }
 
   private calculatePrice(basePrice: number): number {

@@ -3,6 +3,10 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   connect(): void {
     console.log("ProductCard connected")
+    // Update total price if this is the first selected card
+    if (this.element.classList.contains('border-[#FFCC00]')) {
+      this.updateTotalPrice()
+    }
   }
 
   select(event: Event): void {
@@ -38,6 +42,36 @@ export default class extends Controller<HTMLElement> {
           + 'm-2 15l-5-5 1.41-1.41L10 12.17l7.59-7.59L19 6l-9 9z"/>'
           + '</svg>'
         icon.outerHTML = checkmarkSvg
+      }
+    }
+
+    // Update total price
+    this.updateTotalPrice()
+    
+    // Trigger quantity-based total price update
+    this.triggerQuantityUpdate()
+  }
+
+  private updateTotalPrice(): void {
+    // Get the price from this card
+    const priceElement = this.element.querySelector('[data-sim-card-filter-target="price"]')
+    const totalPriceElement = document.querySelector('[data-sim-card-booking-target="totalPrice"]')
+    
+    if (priceElement && totalPriceElement) {
+      const price = priceElement.textContent || '9.9'
+      totalPriceElement.textContent = price
+    }
+  }
+
+  private triggerQuantityUpdate(): void {
+    // Find the sim-card-booking controller and trigger its update
+    const bookingController = document.querySelector('[data-controller="sim-card-booking"]')
+    if (bookingController) {
+      const quantityElement = bookingController.querySelector('[data-sim-card-booking-target="quantity"]')
+      if (quantityElement) {
+        // Dispatch a custom event to trigger the booking controller's update
+        const event = new CustomEvent('price-changed')
+        bookingController.dispatchEvent(event)
       }
     }
   }
