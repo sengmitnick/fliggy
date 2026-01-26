@@ -1,5 +1,5 @@
 <div class="bg-surface text-gray-900 font-sans min-h-screen relative max-w-md mx-auto overflow-y-auto no-scrollbar"
-     data-controller="abroad-date-picker abroad-time-slot-picker"
+     data-controller="abroad-date-picker abroad-time-slot-picker abroad-passenger-selector"
      data-abroad-date-picker-current-date-value="<%= @ticket.departure_date.strftime('%Y-%m-%d') %>"
      data-abroad-time-slot-picker-current-time-slot-start-value="<%= @ticket.time_slot_start %>"
      data-abroad-time-slot-picker-current-time-slot-end-value="<%= @ticket.time_slot_end %>"
@@ -119,7 +119,8 @@
   <!-- 车票类型标题 -->
   <div class="flex justify-between items-end px-4 mt-6 mb-3">
     <h2 class="text-lg font-bold text-gray-900">车票类型</h2>
-    <div class="flex items-center text-gray-800 text-xs">
+    <div class="flex items-center text-gray-800 text-xs cursor-pointer"
+         onclick="window.showToast('精彩即将上线', 'info')">
       <span>车票&行李说明</span>
       <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -128,7 +129,7 @@
   </div>
 
   <!-- 乘客人数 Tab -->
-  <div class="flex space-x-2 px-3 overflow-x-auto no-scrollbar pb-1" data-controller="abroad-passenger-selector">
+  <div class="flex space-x-2 px-3 overflow-x-auto no-scrollbar pb-1">
     <% passenger_types = ['1adult', '2adult', '2adult1child', '2adult2child'] %>
     <% passenger_types.each do |type| %>
       <div class="relative flex-shrink-0 <%= type == '1adult' ? 'bg-[#FFFBF0] border border-[#FFE5B5]' : 'bg-gray-100' %> text-gray-900 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer"
@@ -188,10 +189,12 @@
 
     <div class="flex justify-end items-end mt-2">
       <div class="mr-3 mb-1">
-        <span class="text-xs text-accent">1人共</span>
+        <span class="text-xs text-accent" data-abroad-passenger-selector-target="passengerCount">1人共</span>
         <span class="text-lg font-bold text-accent ml-0.5">¥</span>
-        <span class="text-2xl font-bold text-accent"><%= @ticket.price.to_i %></span>
-        <span class="text-xs text-accent">.<%= sprintf('%02d', (@ticket.price % 1 * 100).to_i) %></span>
+        <span class="text-2xl font-bold text-accent" 
+              data-abroad-passenger-selector-target="priceDisplay" 
+              data-base-price="<%= @ticket.price %>"><%= @ticket.price.to_i %></span>
+        <span class="text-xs text-accent" data-abroad-passenger-selector-target="priceDecimal">.<%= sprintf('%02d', (@ticket.price % 1 * 100).to_i) %></span>
       </div>
       <%= link_to new_abroad_ticket_order_path(abroad_ticket_id: @ticket.id, seat_category: '自由席', passenger_type: '1adult'), 
                   class: "bg-orange-600 text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>
@@ -224,10 +227,12 @@
 
     <div class="flex justify-end items-end mt-2">
       <div class="mr-3 mb-1">
-        <span class="text-xs text-accent">1人共</span>
+        <span class="text-xs text-accent" data-abroad-passenger-selector-target="passengerCount">1人共</span>
         <span class="text-lg font-bold text-accent ml-0.5">¥</span>
-        <span class="text-2xl font-bold text-accent"><%= (@ticket.price * 1.06).to_i %></span>
-        <span class="text-xs text-accent">.<%= sprintf('%02d', ((@ticket.price * 1.06) % 1 * 100).to_i) %></span>
+        <span class="text-2xl font-bold text-accent" 
+              data-abroad-passenger-selector-target="priceDisplay" 
+              data-base-price="<%= @ticket.price * 1.06 %>"><%= (@ticket.price * 1.06).to_i %></span>
+        <span class="text-xs text-accent" data-abroad-passenger-selector-target="priceDecimal">.<%= sprintf('%02d', ((@ticket.price * 1.06) % 1 * 100).to_i) %></span>
       </div>
       <%= link_to new_abroad_ticket_order_path(abroad_ticket_id: @ticket.id, seat_category: '指定席', passenger_type: '1adult'), 
                   class: "bg-orange-600 text-white rounded-lg px-6 py-2.5 font-bold text-lg shadow-sm active:bg-orange-700" do %>

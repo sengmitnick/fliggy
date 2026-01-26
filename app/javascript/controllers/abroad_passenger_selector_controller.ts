@@ -1,13 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["type"]
+  static targets = ["type", "priceDisplay", "priceDecimal", "passengerCount"]
 
   declare readonly typeTargets: HTMLElement[]
   declare readonly hasTypeTarget: boolean
+  declare readonly priceDisplayTargets: HTMLElement[]
+  declare readonly hasPriceDisplayTarget: boolean
+  declare readonly priceDecimalTargets: HTMLElement[]
+  declare readonly hasPriceDecimalTarget: boolean
+  declare readonly passengerCountTargets: HTMLElement[]
+  declare readonly hasPassengerCountTarget: boolean
 
   connect(): void {
-    console.log("AbroadPassengerSelector connected")
+    // Controller connected
   }
 
   select(event: Event): void {
@@ -42,24 +48,62 @@ export default class extends Controller<HTMLElement> {
     `
     clickedElement.insertAdjacentHTML("beforeend", checkmarkHTML)
 
-    // Update the URL parameters to include the selected passenger type
+    // Calculate total passenger count and update prices
     if (selectedType) {
-      const url = new URL(window.location.href)
-      const ticketId = url.searchParams.get("abroad_ticket_id")
-      const seatCategory = url.searchParams.get("seat_category")
+      const passengerCount = this.calculatePassengerCount(selectedType)
+      this.updatePrices(passengerCount)
+      this.updatePassengerCountText(passengerCount)
       
-      if (ticketId && seatCategory) {
-        // Update the booking button links
-        const bookingButtons = document.querySelectorAll('a[href*="new_abroad_ticket_order"]')
-        bookingButtons.forEach((button) => {
-          const href = button.getAttribute("href")
-          if (href) {
-            const newUrl = new URL(href, window.location.origin)
-            newUrl.searchParams.set("passenger_type", selectedType)
-            button.setAttribute("href", newUrl.toString())
-          }
-        })
-      }
+      // Update the booking button links
+      const bookingButtons = document.querySelectorAll('a[href*="new_abroad_ticket_order"]')
+      bookingButtons.forEach((button) => {
+        const href = button.getAttribute("href")
+        if (href) {
+          const newUrl = new URL(href, window.location.origin)
+          newUrl.searchParams.set("passenger_type", selectedType)
+          button.setAttribute("href", newUrl.toString())
+        }
+      })
+    }
+  }
+
+  private calculatePassengerCount(type: string): number {
+    // Extract number of adults and children from type string
+    // e.g., "1adult" = 1, "2adult" = 2, "2adult1child" = 3, "2adult2child" = 4
+    const adultMatch = type.match(/(\d+)adult/)
+    const childMatch = type.match(/(\d+)child/)
+    
+    const adults = adultMatch ? parseInt(adultMatch[1]) : 0
+    const children = childMatch ? parseInt(childMatch[1]) : 0
+    
+    return adults + children
+  }
+
+  private updatePrices(passengerCount: number): void {
+    if (this.hasPriceDisplayTarget) {
+      this.priceDisplayTargets.forEach((priceElement, index) => {
+        const basePrice = parseFloat(priceElement.dataset.basePrice || "0")
+        const totalPrice = basePrice * passengerCount
+        
+        // Update integer part
+        const integerPart = Math.floor(totalPrice)
+        const decimalPart = Math.round((totalPrice % 1) * 100)
+        
+        priceElement.textContent = integerPart.toString()
+        
+        // Update decimal part using target
+        if (this.hasPriceDecimalTarget && this.priceDecimalTargets[index]) {
+          this.priceDecimalTargets[index].textContent = `.${decimalPart.toString().padStart(2, "0")}`
+        }
+      })
+    }
+  }
+
+  private updatePassengerCountText(count: number): void {
+    if (this.hasPassengerCountTarget) {
+      this.passengerCountTargets.forEach((element) => {
+        element.textContent = `${count}人共`
+      })
     }
   }
 }
