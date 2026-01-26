@@ -200,8 +200,8 @@ all_flights = []
     {
       departure_city: "北京",
       destination_city: "上海",
-      departure_time: base_datetime.change(hour: 12, min: 0),
-      arrival_time: base_datetime.change(hour: 14, min: 30),
+      departure_time: base_datetime.change(hour: 9, min: 0),
+      arrival_time: base_datetime.change(hour: 11, min: 30),
       departure_airport: "大兴",
       arrival_airport: "浦东T2",
       airline: "东方航空",
@@ -218,8 +218,8 @@ all_flights = []
     {
       departure_city: "北京",
       destination_city: "上海",
-      departure_time: base_datetime.change(hour: 16, min: 30),
-      arrival_time: base_datetime.change(hour: 19, min: 0),
+      departure_time: base_datetime.change(hour: 10, min: 30),
+      arrival_time: base_datetime.change(hour: 13, min: 0),
       departure_airport: "首都T2",
       arrival_airport: "虹桥T2",
       airline: "南方航空",
