@@ -71,7 +71,7 @@ class V033RentSuvBeijingValidator < BaseValidator
     add_assertion "租赁天数正确（2天）", weight: 30 do
       return_date = @order.return_datetime.to_date
       pickup_date = @order.pickup_datetime.to_date
-      actual_days = (return_date - pickup_date).to_i
+      actual_days = (return_date - pickup_date).to_i + 1
       
       expect(actual_days).to eq(@rental_days),
         "租赁天数不正确。期望: #{@rental_days}天, 实际: #{actual_days}天"
@@ -101,8 +101,8 @@ class V033RentSuvBeijingValidator < BaseValidator
     ).sample
     
     total_price = target_car.price_per_day * @rental_days
-    pickup_datetime = @pickup_date.to_time + 9.hours
-    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time + 18.hours
+    pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
+    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
     
     CarOrder.create!(
       car_id: target_car.id,

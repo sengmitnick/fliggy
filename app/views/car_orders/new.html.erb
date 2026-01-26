@@ -15,9 +15,12 @@
     return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Date.today + 2.days)
     days_count = (return_date - pickup_date).to_i
     
-    # 使用固定时间 13:55:00
-    pickup_datetime = "#{pickup_date.strftime('%Y-%m-%d')} 13:55:00"
-    return_datetime = "#{return_date.strftime('%Y-%m-%d')} 13:55:00"
+    # 从搜索参数获取时间，如果没有则使用默认时间 09:00
+    pickup_time = params[:pickup_time].present? ? params[:pickup_time] : '09:00'
+    return_time = params[:return_time].present? ? params[:return_time] : '09:00'
+    
+    pickup_datetime = "#{pickup_date.strftime('%Y-%m-%d')} #{pickup_time}:00"
+    return_datetime = "#{return_date.strftime('%Y-%m-%d')} #{return_time}:00"
     
     # 获取第一个乘客信息（如果存在）
     first_passenger = @passengers.first
@@ -89,11 +92,11 @@
     <div class="bg-white rounded-xl p-4">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-lg font-bold"><%= pickup_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[pickup_date.wday] %> 13:55</span></div>
+          <div class="text-lg font-bold"><%= pickup_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[pickup_date.wday] %> <%= pickup_time %></span></div>
         </div>
         <div class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border"><%= days_count %>天</div>
         <div>
-          <div class="text-lg font-bold"><%= return_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[return_date.wday] %> 13:55</span></div>
+          <div class="text-lg font-bold"><%= return_date.strftime('%-m月%-d日') %> <span class="text-sm font-normal">周<%= weekday_names[return_date.wday] %> <%= return_time %></span></div>
         </div>
       </div>
       <div class="mt-4 flex items-start space-x-2">
