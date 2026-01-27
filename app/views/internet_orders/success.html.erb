@@ -35,7 +35,7 @@
 
     <div class="flex justify-between items-center">
       <span class="text-gray-600">支付金额</span>
-      <span class="font-bold text-[#FF4400] text-xl">¥<%= @order.total_price %></span>
+      <span class="font-bold text-[#FF4400] text-xl">¥<%= sprintf('%.2f', @order.total_price.to_f) %></span>
     </div>
   </div>
 

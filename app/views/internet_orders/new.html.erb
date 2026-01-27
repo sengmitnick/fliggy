@@ -4,7 +4,29 @@
   
   <!-- 顶部导航 -->
   <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
-    <%= link_to :back, class: "mr-4" do %>
+    <% 
+      # Build return URL with ALL preserved state parameters
+      return_params = {}
+      # Tab from orderable_type
+      return_params[:tab] = case params[:orderable_type]
+        when 'InternetSimCard' then 'sim_card'
+        when 'InternetDataPlan' then 'data_plan'
+        when 'InternetWifi' then 'wifi'
+        else 'sim_card'
+      end
+      # Preserve all filter and selection parameters
+      return_params[:region] = params[:region] if params[:region].present?
+      return_params[:days] = params[:days] if params[:days].present?
+      return_params[:data] = params[:data] if params[:data].present?
+      return_params[:orderable_id] = params[:orderable_id] if params[:orderable_id].present?
+      return_params[:quantity] = params[:quantity] if params[:quantity].present?
+      return_params[:price] = params[:price] if params[:price].present?
+      return_params[:total] = params[:total] if params[:total].present?
+      return_params[:address_id] = params[:address_id] if params[:address_id].present?
+      
+      return_url = internet_services_path(return_params)
+    %>
+    <%= link_to return_url, class: "mr-4" do %>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
@@ -74,9 +96,9 @@
             <div class="text-xs text-gray-500 mb-1">小计</div>
             <div class="text-[#FF4400] font-bold text-lg">
               <% if params[:total].present? %>
-                ¥<span class="font-medium" data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.1f', params[:total].to_f) %></span>
+                ¥<span class="font-medium" data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.2f', params[:total].to_f) %></span>
               <% else %>
-                ¥<span data-internet-order-form-target="totalPriceDisplay"><%= @orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7 %></span>
+                ¥<span data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.2f', (@orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7).to_f) %></span>
               <% end %>
             </div>
           </div>
@@ -232,7 +254,7 @@
         <span class="text-sm text-gray-600 mr-2">总计:</span>
         <span class="text-xs text-[#FF4400]">¥</span>
         <span class="text-2xl font-bold text-[#FF4400]" data-internet-order-form-target="totalPrice">
-          <%= sprintf('%.1f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
+          <%= sprintf('%.2f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
         </span>
       </div>
       <%= f.submit "确认支付", class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full" %>

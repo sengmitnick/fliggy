@@ -88,7 +88,7 @@
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-border">
           <div class="flex items-baseline space-x-1">
             <span class="text-xs text-text-muted">实付</span>
-            <span class="text-lg font-bold text-error">¥<%= order.total_price.to_f %></span>
+            <span class="text-lg font-bold text-error">¥<%= sprintf('%.2f', order.total_price.to_f) %></span>
           </div>
           
           <div class="flex space-x-2">

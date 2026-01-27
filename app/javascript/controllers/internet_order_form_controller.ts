@@ -75,11 +75,27 @@ export default class extends Controller<HTMLElement> {
     if (this.formElement) {
       this.formElement.addEventListener('submit', this.handleFormSubmit.bind(this))
     }
+    
+    // Listen for payment modal closed event to restore button
+    this.element.addEventListener('payment-modal-closed', this.handlePaymentModalClosed.bind(this))
   }
 
   disconnect(): void {
     if (this.formElement) {
       this.formElement.removeEventListener('submit', this.handleFormSubmit.bind(this))
+    }
+    this.element.removeEventListener('payment-modal-closed', this.handlePaymentModalClosed.bind(this))
+  }
+
+  handlePaymentModalClosed(event: Event): void {
+    console.log('Payment modal closed, restoring button state')
+    const form = this.formElement
+    if (!form) return
+    
+    const submitButton = form.querySelector('[type="submit"]') as HTMLButtonElement
+    if (submitButton) {
+      submitButton.disabled = false
+      submitButton.textContent = '确认支付'
     }
   }
 
@@ -351,7 +367,7 @@ export default class extends Controller<HTMLElement> {
   }
   
   private updateAllPriceDisplays(total: number): void {
-    const totalStr = total.toFixed(1)
+    const totalStr = total.toFixed(2)
     
     // Update bottom bar total price
     if (this.hasTotalPriceTarget) {
