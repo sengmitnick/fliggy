@@ -1,4 +1,10 @@
-<div class="min-h-screen bg-gray-100 pb-20">
+<div class="min-h-screen bg-gray-100 pb-20" 
+     data-controller="payment-confirmation"
+     data-payment-confirmation-amount-value="<%= @order.total_price.to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value="<%= pay_hotel_package_order_path(@order) %>"
+     data-payment-confirmation-success-url-value="<%= success_hotel_package_order_path(@order) %>">
+  
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
@@ -35,21 +41,21 @@
     <h2 class="font-bold mb-3">套餐信息</h2>
     <div class="flex">
       <div class="w-20 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-        <% if @order.package_option.hotel_package.brand_logo.attached? %>
-          <%= image_tag @order.package_option.hotel_package.brand_logo, class: "w-full h-full object-cover" %>
+        <% if @package.brand_logo.attached? %>
+          <%= image_tag @package.brand_logo, class: "w-full h-full object-cover" %>
         <% else %>
           <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200" class="w-full h-full object-cover">
         <% end %>
       </div>
       <div class="ml-3 flex-1">
         <h3 class="font-medium text-sm line-clamp-2">
-          <%= @order.package_option.hotel_package.title %>
+          <%= @package.title %>
         </h3>
         <div class="text-xs text-gray-500 mt-1">
-          <%= @order.package_option.name %> | <%= @order.package_option.description %>
+          <%= @package_option.name %> | <%= @package_option.description %>
         </div>
         <div class="text-sm text-gray-900 mt-1">
-          ¥<%= @order.package_option.price.to_i %> × <%= @order.quantity %>
+          ¥<%= @package_option.price.to_i %> × <%= @order.quantity %>
         </div>
       </div>
     </div>
@@ -79,9 +85,14 @@
   <!-- 底部按钮 -->
   <% if @order.status == 'pending' %>
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
-      <button class="w-full bg-gradient-to-r from-[#FF9000] to-[#FF5000] text-white font-bold text-base py-3 rounded-full">
+      <button type="button"
+              data-action="click->payment-confirmation#showPasswordModal"
+              class="w-full bg-gradient-to-r from-[#FF9000] to-[#FF5000] text-white font-bold text-base py-3 rounded-full">
         立即支付
       </button>
     </div>
   <% end %>
+
+  <!-- Payment Confirmation Modals -->
+  <%= render 'shared/payment_confirmation_modals', amount: @order.total_price.to_i, user_email: current_user.email %>
 </div>
