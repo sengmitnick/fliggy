@@ -3,6 +3,12 @@
 namespace :rls do
   desc "强制启用所有业务表的 RLS 策略（修复多会话隔离问题）"
   task force_enable: :environment do
+    # 如果提供了 ADMIN_DB_URL，使用超级管理员连接
+    if ENV['ADMIN_DB_URL'].present?
+      puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
+      ActiveRecord::Base.establish_connection(ENV['ADMIN_DB_URL'])
+    end
+
     excluded_tables = %w[
       schema_migrations ar_internal_metadata active_storage_blobs
       active_storage_attachments active_storage_variant_records
@@ -31,6 +37,11 @@ namespace :rls do
         puts "  ✗ #{table}: #{e.message}"
         failure_count += 1
       end
+    end
+
+    # 恢复默认连接
+    if ENV['ADMIN_DB_URL'].present?
+      ActiveRecord::Base.establish_connection(Rails.env.to_sym)
     end
 
     puts "\n" + "=" * 80

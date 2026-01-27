@@ -11,16 +11,21 @@ namespace :validator do
     puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
     begin
-      # 建立超级用户连接（用于清理数据库）
-      # 优先使用环境变量，如果没有则使用默认测试环境配置
-      admin_username = ENV['DB_USER'] || 'postgres'
-      admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
+      # 建立超级用户连接（用于清理数据库和数据包加载）
+      # 优先使用 ADMIN_DB_URL（生产环境），否则使用环境变量或默认配置
+      if ENV['ADMIN_DB_URL'].present?
+        puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
+        admin_conn = ActiveRecord::Base.establish_connection(ENV['ADMIN_DB_URL']).connection
+      else
+        admin_username = ENV['DB_USER'] || 'postgres'
+        admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
 
-      admin_config = ActiveRecord::Base.connection_db_config.configuration_hash.merge(
-        username: admin_username,
-        password: admin_password
-      )
-      admin_conn = ActiveRecord::Base.establish_connection(admin_config).connection
+        admin_config = ActiveRecord::Base.connection_db_config.configuration_hash.merge(
+          username: admin_username,
+          password: admin_password
+        )
+        admin_conn = ActiveRecord::Base.establish_connection(admin_config).connection
+      end
       
       # 禁用外键约束检查
       admin_conn.execute("SET session_replication_role = 'replica';")

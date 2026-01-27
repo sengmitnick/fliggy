@@ -243,24 +243,78 @@ EOF_SQL
 
     # 等待服务完全启动
     print_info "等待服务完全启动..."
-    echo "   自动执行: rails db:prepare (创建数据库 + 运行迁移)"
-    echo "   自动执行: 数据包加载 (城市、航班、酒店等测试数据)"
-    echo "   自动执行: 多会话隔离修复 (FORCE RLS)"
-    sleep 20
+    MAX_WAIT=60
+    WAIT_COUNT=0
+    until docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "puts 'ready'" >/dev/null 2>&1 || [ $WAIT_COUNT -eq $MAX_WAIT ]; do
+        sleep 2
+        WAIT_COUNT=$((WAIT_COUNT + 2))
+        echo -n "."
+    done
+    echo ""
 
-    # 9. 验证部署状态
-    print_info "步骤 9/9: 验证部署状态..."
+    if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+        print_error "应用启动超时"
+        exit 1
+    fi
+    print_success "应用已启动（db:prepare 迁移已完成）"
 
-    # 检查服务健康状态
-    echo "   检查服务状态..."
-    if docker-compose -f $COMPOSE_FILE ps | grep -q "Up.*healthy"; then
-        print_success "服务健康检查通过"
+    # 9. 初始化数据和安全策略
+    print_info "步骤 9/9: 初始化数据和安全策略..."
+
+    # 9.1 加载数据包（使用超级管理员权限）
+    print_info "使用超级管理员加载数据包..."
+    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD='${DB_PASSWORD}' ADMIN_DB_URL='postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}' bundle exec rake validator:reset_baseline" 2>&1 | tee /tmp/data_load.log
+
+    if grep -q "基线数据重置成功" /tmp/data_load.log; then
+        print_success "数据包加载完成"
     else
-        print_warning "服务正在启动中，等待健康检查..."
-        sleep 10
+        print_error "数据包加载失败，请检查日志"
+        cat /tmp/data_load.log
+        exit 1
     fi
 
-    # 自动创建默认管理员账号
+    # 9.2 启用 RLS 强制策略
+    print_info "启用多会话隔离（RLS FORCE）..."
+    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD='${DB_PASSWORD}' ADMIN_DB_URL='postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}' bundle exec rake rls:force_enable" 2>&1
+
+    if [ $? -eq 0 ]; then
+        print_success "RLS 策略已启用"
+    else
+        print_error "RLS 策略启用失败"
+        exit 1
+    fi
+
+    # 9.3 验证多会话隔离
+    print_info "验证多会话隔离功能..."
+    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
+# 检查 RLS 是否强制启用
+result = ActiveRecord::Base.connection.execute(
+  "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('hotel_bookings', 'flight_bookings', 'car_bookings')"
+)
+
+all_enabled = result.all? { |r| r['relforcerowsecurity'] == 't' }
+
+if all_enabled
+  puts '✓ 多会话隔离验证通过 (所有预订表已启用 FORCE RLS)'
+else
+  puts '✗ 多会话隔离验证失败'
+  result.each do |r|
+    status = r['relforcerowsecurity'] == 't' ? '✓' : '✗'
+    puts "  #{status} #{r['relname']}: #{r['relforcerowsecurity']}"
+  end
+  exit 1
+end
+RUBY
+)" 2>&1
+
+    if [ $? -eq 0 ]; then
+        print_success "多会话隔离验证通过"
+    else
+        print_error "多会话隔离验证失败"
+        exit 1
+    fi
+
+    # 9.4 创建默认管理员账号
     print_info "创建默认管理员账号..."
     docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
 admin = Administrator.find_or_initialize_by(name: 'admin')
@@ -274,26 +328,15 @@ else
   puts "✓ 管理员已存在: #{admin.name} (#{admin.role})"
 end
 RUBY
-)" 2>/dev/null || print_warning "应用尚未完全启动，请稍后手动创建管理员"
+)" 2>&1
 
-    # 验证多会话隔离功能
-    print_info "验证多会话隔离功能..."
-    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
-# 快速检查 RLS 状态
-check = ActiveRecord::Base.connection.execute(
-  \"SELECT relforcerowsecurity FROM pg_class WHERE relname = 'hotel_bookings'\"
-).first
-if check && check['relforcerowsecurity'] == 't'
-  puts '✓ 多会话隔离功能已启用 (FORCE RLS)'
-else
-  puts '⚠ 多会话隔离功能未启用，正在修复...'
-  system('bundle exec rake rls:force_enable > /dev/null 2>&1')
-  puts '✓ 多会话隔离功能已修复'
-end
-RUBY
-)" 2>/dev/null || print_warning "多会话隔离检查跳过"
+    if [ $? -eq 0 ]; then
+        print_success "管理员账号就绪"
+    else
+        print_warning "管理员账号创建失败，请手动创建"
+    fi
 
-    print_success "部署验证完成"
+    print_success "数据和安全策略初始化完成"
 
     # 完成
     echo ""
