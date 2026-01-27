@@ -185,9 +185,21 @@ export default class extends Controller<HTMLElement> {
       if (index === selectedIndex) {
         label.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
         label.classList.remove('border-gray-200')
+        
+        // Show checkmark icon
+        const svg = label.querySelector('svg')
+        if (svg) {
+          svg.classList.remove('hidden')
+        }
       } else {
         label.classList.remove('border-[#FFDD00]', 'bg-[#FFFEF8]')
         label.classList.add('border-gray-200')
+        
+        // Hide checkmark icon
+        const svg = label.querySelector('svg')
+        if (svg) {
+          svg.classList.add('hidden')
+        }
       }
       
       // Enable/disable对应的hidden fields
@@ -210,9 +222,21 @@ export default class extends Controller<HTMLElement> {
       if (index === selectedIndex) {
         label.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
         label.classList.remove('border-gray-200')
+        
+        // Show checkmark icon
+        const svg = label.querySelector('svg')
+        if (svg) {
+          svg.classList.remove('hidden')
+        }
       } else {
         label.classList.remove('border-[#FFDD00]', 'bg-[#FFFEF8]')
         label.classList.add('border-gray-200')
+        
+        // Hide checkmark icon
+        const svg = label.querySelector('svg')
+        if (svg) {
+          svg.classList.add('hidden')
+        }
       }
       
       // Enable/disable对应的hidden fields
