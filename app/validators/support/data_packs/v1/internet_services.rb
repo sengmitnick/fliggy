@@ -1,10 +1,24 @@
-# 境外上网服务种子数据
+# frozen_string_literal: true
+
+# internet_services_v1 数据包
+# 境外上网服务（流量卡、流量包、随身WiFi）
+#
+# 用途：
+# - 提供境外上网服务的测试数据
+# - 支持多国家/地区的流量卡、流量包、WiFi产品
+#
+# 加载方式：
+# rake validator:reset_baseline
+
+puts "正在加载 internet_services_v1 数据包..."
 
 timestamp = Time.current
 
-# 境外电话卡数据
+# ============================================
+# 境外电话卡数据（InternetSimCard）
+# ============================================
 sim_cards_data = [
-  # 日本地区 SIM卡（支持 BookJapanSimCardValidator）
+  # === 日本地区 ===
   {
     name: "日本7天无限流量卡",
     region: "日本",
@@ -44,7 +58,380 @@ sim_cards_data = [
     created_at: timestamp,
     updated_at: timestamp
   },
-  # 香港地区 SIM卡
+  {
+    name: "日本3天流量卡",
+    region: "日本",
+    validity_days: 3,
+    data_limit: "5GB/天",
+    price: 28.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 6000,
+    shop_name: "日本通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 韩国地区 ===
+  {
+    name: "韩国7天无限流量卡",
+    region: "韩国",
+    validity_days: 7,
+    data_limit: "无限流量",
+    price: 58.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 10000,
+    shop_name: "韩国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国5天大流量卡",
+    region: "韩国",
+    validity_days: 5,
+    data_limit: "10GB/天",
+    price: 42.0,
+    features: ["5G网络", "高速流量", "热点分享"],
+    sales_count: 8000,
+    shop_name: "韩国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国3天流量卡",
+    region: "韩国",
+    validity_days: 3,
+    data_limit: "5GB/天",
+    price: 25.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 6500,
+    shop_name: "韩国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 泰国地区 ===
+  {
+    name: "泰国7天无限流量卡",
+    region: "泰国",
+    validity_days: 7,
+    data_limit: "无限流量",
+    price: 48.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 9000,
+    shop_name: "泰国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国5天大流量卡",
+    region: "泰国",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 35.0,
+    features: ["4G网络", "高速流量"],
+    sales_count: 7000,
+    shop_name: "泰国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国3天流量卡",
+    region: "泰国",
+    validity_days: 3,
+    data_limit: "5GB/天",
+    price: 22.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 5500,
+    shop_name: "泰国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 新加坡地区 ===
+  {
+    name: "新加坡7天无限流量卡",
+    region: "新加坡",
+    validity_days: 7,
+    data_limit: "无限流量",
+    price: 55.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 8500,
+    shop_name: "新加坡通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "新加坡5天大流量卡",
+    region: "新加坡",
+    validity_days: 5,
+    data_limit: "10GB/天",
+    price: 40.0,
+    features: ["5G网络", "高速流量"],
+    sales_count: 6800,
+    shop_name: "新加坡通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "新加坡3天流量卡",
+    region: "新加坡",
+    validity_days: 3,
+    data_limit: "5GB/天",
+    price: 26.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 5000,
+    shop_name: "新加坡通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 马来西亚地区 ===
+  {
+    name: "马来西亚7天无限流量卡",
+    region: "马来西亚",
+    validity_days: 7,
+    data_limit: "无限流量",
+    price: 45.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 7500,
+    shop_name: "马来西亚通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "马来西亚5天大流量卡",
+    region: "马来西亚",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 33.0,
+    features: ["4G网络", "高速流量"],
+    sales_count: 6000,
+    shop_name: "马来西亚通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "马来西亚3天流量卡",
+    region: "马来西亚",
+    validity_days: 3,
+    data_limit: "5GB/天",
+    price: 20.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 4500,
+    shop_name: "马来西亚通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 美国地区 ===
+  {
+    name: "美国15天无限流量卡",
+    region: "美国",
+    validity_days: 15,
+    data_limit: "无限流量",
+    price: 138.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 12000,
+    shop_name: "美国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国7天大流量卡",
+    region: "美国",
+    validity_days: 7,
+    data_limit: "10GB/天",
+    price: 78.0,
+    features: ["5G网络", "高速流量", "热点分享"],
+    sales_count: 9500,
+    shop_name: "美国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国5天流量卡",
+    region: "美国",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 58.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 7000,
+    shop_name: "美国通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 英国地区 ===
+  {
+    name: "英国10天无限流量卡",
+    region: "英国",
+    validity_days: 10,
+    data_limit: "无限流量",
+    price: 98.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 8000,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "英国7天大流量卡",
+    region: "英国",
+    validity_days: 7,
+    data_limit: "10GB/天",
+    price: 72.0,
+    features: ["5G网络", "高速流量"],
+    sales_count: 6500,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "英国5天流量卡",
+    region: "英国",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 52.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 5000,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 法国地区 ===
+  {
+    name: "法国10天无限流量卡",
+    region: "法国",
+    validity_days: 10,
+    data_limit: "无限流量",
+    price: 95.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 7500,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "法国7天大流量卡",
+    region: "法国",
+    validity_days: 7,
+    data_limit: "10GB/天",
+    price: 70.0,
+    features: ["5G网络", "高速流量"],
+    sales_count: 6000,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "法国5天流量卡",
+    region: "法国",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 50.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 4800,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 德国地区 ===
+  {
+    name: "德国10天无限流量卡",
+    region: "德国",
+    validity_days: 10,
+    data_limit: "无限流量",
+    price: 92.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 7200,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "德国7天大流量卡",
+    region: "德国",
+    validity_days: 7,
+    data_limit: "10GB/天",
+    price: 68.0,
+    features: ["5G网络", "高速流量"],
+    sales_count: 5800,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "德国5天流量卡",
+    region: "德国",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 48.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 4500,
+    shop_name: "欧洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 澳大利亚地区 ===
+  {
+    name: "澳大利亚15天无限流量卡",
+    region: "澳大利亚",
+    validity_days: 15,
+    data_limit: "无限流量",
+    price: 128.0,
+    features: ["4G/5G网络", "热点分享", "插卡即用"],
+    sales_count: 6500,
+    shop_name: "澳洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "澳大利亚7天大流量卡",
+    region: "澳大利亚",
+    validity_days: 7,
+    data_limit: "10GB/天",
+    price: 75.0,
+    features: ["5G网络", "高速流量", "热点分享"],
+    sales_count: 5500,
+    shop_name: "澳洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "澳大利亚5天流量卡",
+    region: "澳大利亚",
+    validity_days: 5,
+    data_limit: "8GB/天",
+    price: 55.0,
+    features: ["4G网络", "插卡即用"],
+    sales_count: 4200,
+    shop_name: "澳洲通信专营店",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 中国香港地区 ===
   {
     name: "插卡即用",
     region: "中国香港",
@@ -99,11 +486,411 @@ sim_cards_data = [
   }
 ]
 
-# 批量插入电话卡
-InternetSimCard.insert_all(sim_cards_data) if sim_cards_data.any?
-
-# 境外流量包数据
+# ============================================
+# 境外流量包数据（InternetDataPlan）
+# ============================================
 data_plans_data = [
+  # === 日本地区 ===
+  {
+    name: "日本1天漫游包",
+    region: "日本",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 28,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本3天漫游包+10元话费券",
+    region: "日本",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 68,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本7天漫游包+20元话费券",
+    region: "日本",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 128,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 韩国地区 ===
+  {
+    name: "韩国1天漫游包",
+    region: "韩国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 25,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国3天漫游包+10元话费券",
+    region: "韩国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 62,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国7天漫游包+20元话费券",
+    region: "韩国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 118,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 泰国地区 ===
+  {
+    name: "泰国1天漫游包",
+    region: "泰国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 22,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国3天漫游包+10元话费券",
+    region: "泰国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 58,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国7天漫游包+20元话费券",
+    region: "泰国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 108,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 新加坡地区 ===
+  {
+    name: "新加坡1天漫游包",
+    region: "新加坡",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 26,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "新加坡3天漫游包+10元话费券",
+    region: "新加坡",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 65,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "新加坡7天漫游包+20元话费券",
+    region: "新加坡",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 125,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 马来西亚地区 ===
+  {
+    name: "马来西亚1天漫游包",
+    region: "马来西亚",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 20,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "马来西亚3天漫游包+10元话费券",
+    region: "马来西亚",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 55,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "马来西亚7天漫游包+20元话费券",
+    region: "马来西亚",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 102,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 美国地区 ===
+  {
+    name: "美国1天漫游包",
+    region: "美国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 38,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国3天漫游包+15元话费券",
+    region: "美国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 95,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国7天漫游包+30元话费券",
+    region: "美国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 188,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 英国地区 ===
+  {
+    name: "英国1天漫游包",
+    region: "英国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 35,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "英国3天漫游包+15元话费券",
+    region: "英国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 88,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "英国7天漫游包+25元话费券",
+    region: "英国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 168,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 法国地区 ===
+  {
+    name: "法国1天漫游包",
+    region: "法国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 33,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "法国3天漫游包+15元话费券",
+    region: "法国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 85,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "法国7天漫游包+25元话费券",
+    region: "法国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 162,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 德国地区 ===
+  {
+    name: "德国1天漫游包",
+    region: "德国",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 32,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "德国3天漫游包+15元话费券",
+    region: "德国",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 82,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "德国7天漫游包+25元话费券",
+    region: "德国",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 158,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 澳大利亚地区 ===
+  {
+    name: "澳大利亚1天漫游包",
+    region: "澳大利亚",
+    validity_days: 1,
+    data_limit: "0.5GB/天",
+    price: 36,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "澳大利亚3天漫游包+15元话费券",
+    region: "澳大利亚",
+    validity_days: 3,
+    data_limit: "0.5GB/天",
+    price: 92,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "澳大利亚7天漫游包+30元话费券",
+    region: "澳大利亚",
+    validity_days: 7,
+    data_limit: "0.5GB/天",
+    price: 178,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 中国香港地区 ===
   {
     name: "香港1天漫游包+10元话费券",
     region: "中国香港",
@@ -171,12 +958,357 @@ data_plans_data = [
   }
 ]
 
-# 批量插入流量包
-InternetDataPlan.insert_all(data_plans_data) if data_plans_data.any?
-
-# 随身WiFi数据
+# ============================================
+# 随身WiFi数据（InternetWifi）
+# ============================================
 wifis_data = [
-  # 欧洲多国覆盖WiFi（支持 SearchMultiCountryWifiValidator）
+  # === 日本地区 ===
+  {
+    name: "日本随身WiFi·4G无限量",
+    region: "日本",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 18,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 12000,
+    shop_name: "日本漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本随身WiFi·5G高速",
+    region: "日本",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 28,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 10000,
+    shop_name: "日本漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "日本随身WiFi·4G经济版",
+    region: "日本",
+    network_type: "4G",
+    data_limit: "1GB/天",
+    daily_price: 12,
+    features: ["4G网络", "经济实惠", "多人共享"],
+    sales_count: 8000,
+    shop_name: "日本漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 韩国地区 ===
+  {
+    name: "韩国随身WiFi·4G无限量",
+    region: "韩国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 16,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 10000,
+    shop_name: "韩国漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国随身WiFi·5G高速",
+    region: "韩国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 26,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 8500,
+    shop_name: "韩国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "韩国随身WiFi·4G经济版",
+    region: "韩国",
+    network_type: "4G",
+    data_limit: "1GB/天",
+    daily_price: 10,
+    features: ["4G网络", "经济实惠", "多人共享"],
+    sales_count: 7000,
+    shop_name: "韩国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 泰国地区 ===
+  {
+    name: "泰国随身WiFi·4G无限量",
+    region: "泰国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 15,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 9000,
+    shop_name: "泰国漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国随身WiFi·5G高速",
+    region: "泰国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 24,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 7500,
+    shop_name: "泰国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "泰国随身WiFi·4G经济版",
+    region: "泰国",
+    network_type: "4G",
+    data_limit: "800MB/天",
+    daily_price: 9,
+    features: ["4G网络", "经济实惠", "多人共享"],
+    sales_count: 6500,
+    shop_name: "泰国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 新加坡地区 ===
+  {
+    name: "新加坡随身WiFi·4G无限量",
+    region: "新加坡",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 17,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 8000,
+    shop_name: "新加坡漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "新加坡随身WiFi·5G高速",
+    region: "新加坡",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 27,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 6800,
+    shop_name: "新加坡漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 马来西亚地区 ===
+  {
+    name: "马来西亚随身WiFi·4G无限量",
+    region: "马来西亚",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 14,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 7500,
+    shop_name: "马来西亚漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "马来西亚随身WiFi·5G高速",
+    region: "马来西亚",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 23,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 6200,
+    shop_name: "马来西亚漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 美国地区 ===
+  {
+    name: "美国随身WiFi·4G无限量",
+    region: "美国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 30,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 10000,
+    shop_name: "美国漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国随身WiFi·5G高速",
+    region: "美国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 42,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 8500,
+    shop_name: "美国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美国随身WiFi·4G经济版",
+    region: "美国",
+    network_type: "4G",
+    data_limit: "1GB/天",
+    daily_price: 22,
+    features: ["4G网络", "经济实惠", "多人共享"],
+    sales_count: 7000,
+    shop_name: "美国漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 英国地区 ===
+  {
+    name: "英国随身WiFi·4G无限量",
+    region: "英国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 28,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 7500,
+    shop_name: "欧洲漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "英国随身WiFi·5G高速",
+    region: "英国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 38,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 6500,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 法国地区 ===
+  {
+    name: "法国随身WiFi·4G无限量",
+    region: "法国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 27,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 7200,
+    shop_name: "欧洲漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "法国随身WiFi·5G高速",
+    region: "法国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 37,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 6200,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 德国地区 ===
+  {
+    name: "德国随身WiFi·4G无限量",
+    region: "德国",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 26,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 7000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "德国随身WiFi·5G高速",
+    region: "德国",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 36,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 6000,
+    shop_name: "欧洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 澳大利亚地区 ===
+  {
+    name: "澳大利亚随身WiFi·4G无限量",
+    region: "澳大利亚",
+    network_type: "4G",
+    data_limit: "无限量",
+    daily_price: 29,
+    features: ["4G网络", "无限流量", "多人共享", "免押金"],
+    sales_count: 6500,
+    shop_name: "澳洲漫游专营店",
+    deposit: 0,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "澳大利亚随身WiFi·5G高速",
+    region: "澳大利亚",
+    network_type: "5G",
+    data_limit: "无限量",
+    daily_price: 40,
+    features: ["5G网络", "无限流量", "多人共享", "含充电宝"],
+    sales_count: 5500,
+    shop_name: "澳洲漫游专营店",
+    deposit: 500,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 欧洲多国覆盖WiFi ===
   {
     name: "欧洲8国通用WiFi",
     region: "欧洲8国通用",
@@ -233,7 +1365,7 @@ wifis_data = [
     created_at: timestamp,
     updated_at: timestamp
   },
-  # 香港地区WiFi
+  # === 中国香港地区WiFi ===
   {
     name: "4G网·无限量",
     region: "中国香港",
@@ -306,6 +1438,19 @@ wifis_data = [
   }
 ]
 
-# 批量插入WiFi设备
-InternetWifi.insert_all(wifis_data) if wifis_data.any?
+# ============================================
+# 批量插入数据
+# ============================================
+puts "插入境外电话卡数据..."
+InternetSimCard.insert_all(sim_cards_data) if sim_cards_data.any?
+puts "✓ 已插入 #{sim_cards_data.count} 条电话卡数据"
 
+puts "插入境外流量包数据..."
+InternetDataPlan.insert_all(data_plans_data) if data_plans_data.any?
+puts "✓ 已插入 #{data_plans_data.count} 条流量包数据"
+
+puts "插入随身WiFi数据..."
+InternetWifi.insert_all(wifis_data) if wifis_data.any?
+puts "✓ 已插入 #{wifis_data.count} 条WiFi数据"
+
+puts "✓ internet_services_v1 数据包加载完成"

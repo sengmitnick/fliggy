@@ -6,7 +6,7 @@
   <div class="bg-white rounded-xl p-1 shadow-sm flex items-center justify-between">
     <div class="pl-3 font-medium text-gray-800">取件方式</div>
     <div class="flex bg-gray-50 rounded-lg p-1">
-      <div data-action="click->wifi-booking#selectDelivery" data-method="mail" 
+      <div data-action="click->wifi-booking#showComingSoon" data-method="mail" 
            data-wifi-booking-target="mailTab"
            class="px-6 py-1.5 text-sm text-gray-500 cursor-pointer">邮寄</div>
       <div data-action="click->wifi-booking#selectDelivery" data-method="pickup" 
@@ -66,7 +66,7 @@
     <!-- 取还日期 -->
     <div class="flex justify-between items-center">
       <span class="font-medium text-gray-900">取还日期</span>
-      <div class="flex items-center space-x-1 cursor-pointer">
+      <div class="flex items-center space-x-1 cursor-pointer" data-action="click->wifi-booking#openDatePicker">
         <span class="text-gray-900 text-sm" data-wifi-booking-target="dateRange">
           <%= Date.today.strftime('%m月%d日') %>-<%= (Time.zone.today + 7).strftime('%m月%d日') %>(共7天)
         </span>
@@ -183,6 +183,44 @@
     <div class="text-xs text-gray-500 space-y-2 leading-relaxed pb-2">
       <p>1. 预订日前2天18:00前可免费取消；</p>
       <p>2. 预订日前2天18:00后不可取消，不可改期。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 日期选择器模态框 -->
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end" 
+     data-wifi-booking-target="datePickerModal">
+  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold">选择日期</h3>
+      <button data-action="click->wifi-booking#closeDatePicker" class="text-gray-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- 日期输入 -->
+    <div class="space-y-4">
+      <div>
+        <label class="text-sm text-gray-600">开始日期</label>
+        <input type="date" data-wifi-booking-target="startDate" 
+               class="w-full border border-gray-300 rounded-lg p-2 mt-1"
+               data-action="change->wifi-booking#updateDateRange">
+      </div>
+      <div>
+        <label class="text-sm text-gray-600">结束日期</label>
+        <input type="date" data-wifi-booking-target="endDate"
+               class="w-full border border-gray-300 rounded-lg p-2 mt-1"
+               data-action="change->wifi-booking#updateDateRange">
+      </div>
+    </div>
+    
+    <div class="mt-6">
+      <button data-action="click->wifi-booking#confirmDateSelection"
+              class="w-full bg-[#FFDD00] text-black font-bold py-3 rounded-full">
+        确认
+      </button>
     </div>
   </div>
 </div>

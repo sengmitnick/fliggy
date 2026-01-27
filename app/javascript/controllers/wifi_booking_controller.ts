@@ -2,7 +2,8 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = ["quantity", "totalPrice", "contactName", "contactPhone", "dateRange",
-    "mailTab", "pickupTab", "addressSection", "mailAddress"]
+    "mailTab", "pickupTab", "addressSection", "mailAddress",
+    "datePickerModal", "startDate", "endDate"]
   
   declare readonly quantityTarget: HTMLElement
   declare readonly totalPriceTarget: HTMLElement
@@ -18,6 +19,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasPickupTabTarget: boolean
   declare readonly hasAddressSectionTarget: boolean
   declare readonly hasMailAddressTarget: boolean
+  declare readonly datePickerModalTarget: HTMLElement
+  declare readonly startDateTarget: HTMLInputElement
+  declare readonly endDateTarget: HTMLInputElement
+  declare readonly hasDatePickerModalTarget: boolean
+  declare readonly hasStartDateTarget: boolean
+  declare readonly hasEndDateTarget: boolean
+  declare readonly hasDateRangeTarget: boolean
 
   private selectedPlanId: string = ""
   private dailyPrice: number = 17
@@ -52,18 +60,20 @@ export default class extends Controller<HTMLElement> {
     // Update UI - remove all selections first
     const allCards = this.element.querySelectorAll('[data-wifi-id]')
     allCards.forEach(c => {
-      c.classList.remove('bg-[#FFFDF2]', 'border-[#FFDD00]')
+      c.classList.remove('bg-[#FFFDF2]', 'border', 'border-[#FFDD00]')
       c.classList.add('bg-white')
-      const checkmark = c.querySelector('.bg-[#FFDD00]')
-      if (checkmark) {
-        checkmark.outerHTML = '<div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>'
+      // 查找黄色对勾，替换为空心圆圈
+      const checkmarkContainer = c.querySelector('.bg-\\[\\#FFDD00\\].rounded-full')
+      if (checkmarkContainer) {
+        checkmarkContainer.outerHTML = '<div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>'
       }
     })
     
     // Add selection to clicked card
-    card.classList.add('bg-[#FFFDF2]', 'border-[#FFDD00]')
+    card.classList.add('bg-[#FFFDF2]', 'border', 'border-[#FFDD00]')
     card.classList.remove('bg-white')
-    const circle = card.querySelector('.border-gray-300')
+    // 查找空心圆圈，替换为黄色对勾
+    const circle = card.querySelector('.border-gray-300.rounded-full')
     if (circle) {
       const checkmarkSVG = '<svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">'
         + '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>'
@@ -103,6 +113,87 @@ export default class extends Controller<HTMLElement> {
         if (this.hasMailAddressTarget) this.mailAddressTarget.classList.add('hidden')
       }
     }
+  }
+
+  showComingSoon(event: Event): void {
+    event.preventDefault()
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('精彩即将上线')
+    }
+  }
+
+  // 打开日期选择器
+  openDatePicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasDatePickerModalTarget) {
+      this.datePickerModalTarget.classList.remove('hidden')
+      // 初始化为当前日期
+      const today = new Date()
+      const endDate = new Date(today)
+      endDate.setDate(endDate.getDate() + 7)
+      
+      if (this.hasStartDateTarget) {
+        this.startDateTarget.value = this.formatDateForInput(today)
+      }
+      if (this.hasEndDateTarget) {
+        this.endDateTarget.value = this.formatDateForInput(endDate)
+      }
+    }
+  }
+
+  // 关闭日期选择器
+  closeDatePicker(): void {
+    if (this.hasDatePickerModalTarget) {
+      this.datePickerModalTarget.classList.add('hidden')
+    }
+  }
+
+  // 确认日期选择
+  confirmDateSelection(): void {
+    this.updateDateDisplay()
+    this.closeDatePicker()
+  }
+
+  // 更新日期范围（验证结束日期>=开始日期）
+  updateDateRange(): void {
+    if (this.hasStartDateTarget && this.hasEndDateTarget) {
+      const start = new Date(this.startDateTarget.value)
+      const end = new Date(this.endDateTarget.value)
+      if (end < start) {
+        this.endDateTarget.value = this.startDateTarget.value
+      }
+    }
+  }
+
+  // 更新日期显示
+  private updateDateDisplay(): void {
+    if (this.hasStartDateTarget && this.hasEndDateTarget && this.hasDateRangeTarget) {
+      const start = new Date(this.startDateTarget.value)
+      const end = new Date(this.endDateTarget.value)
+      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+      
+      this.days = days
+      this.updateTotalPrice()
+      
+      const startStr = this.formatDateDisplay(start)
+      const endStr = this.formatDateDisplay(end)
+      this.dateRangeTarget.textContent = `${startStr}-${endStr}(共${days}天)`
+    }
+  }
+
+  // 格式化日期为input[type="date"]格式 (YYYY-MM-DD)
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // 格式化日期为显示格式 (MM月DD日)
+  private formatDateDisplay(date: Date): string {
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    return `${month}月${day}日`
   }
 
   increase(): void {
