@@ -23,6 +23,12 @@ class VisaOrdersController < ApplicationController
     @unit_price = @visa_product.price.to_f
     @total_price = (@unit_price * @traveler_count) + @insurance_price
     
+    # Calculate timeline stages based on processing_days
+    total_days = @visa_product.processing_days
+    @review_days = (total_days * 0.33).ceil  # 商家审核约占1/3
+    @embassy_days = total_days - @review_days  # 使领馆处理占剩余时间
+    @delivery_days = 0  # 寄回签证当天处理
+    
     # Get user's default contact info
     @contact_name = current_user.passengers.first&.name || ''
     @contact_phone = current_user.passengers.first&.phone || ''

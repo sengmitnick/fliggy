@@ -117,7 +117,7 @@
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
           </div>
           <span class="text-xs text-text-dark">商家审核</span>
-          <span class="text-[10px] text-text-light mt-0.5">3工作日</span>
+          <span class="text-[10px] text-text-light mt-0.5"><%= @review_days %>工作日</span>
         </div>
 
         <div class="flex flex-col items-center">
@@ -125,7 +125,7 @@
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
           </div>
           <span class="text-xs text-text-dark">使领馆…</span>
-          <span class="text-[10px] text-text-light mt-0.5">6工作日</span>
+          <span class="text-[10px] text-text-light mt-0.5"><%= @embassy_days %>工作日</span>
         </div>
 
         <div class="flex flex-col items-center">
@@ -133,7 +133,7 @@
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <span class="text-xs text-text-dark">寄回签证</span>
-          <span class="text-[10px] text-text-light mt-0.5">0工作日</span>
+          <span class="text-[10px] text-text-light mt-0.5"><%= @delivery_days %>工作日</span>
         </div>
       </div>
 
