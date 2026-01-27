@@ -290,16 +290,14 @@
           <%= image_tag "home/演出.png", class: "w-full h-auto", alt: "演出·赛事" %>
         </button>
          <!-- Live Stream Card -->
-        <button class="relative overflow-hidden rounded-xl hover:opacity-90 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <%= link_to live_rooms_path, class: "block relative overflow-hidden rounded-xl hover:opacity-90 transition-opacity duration-200" do %>
           <%= image_tag "home/直播.png", class: "w-full h-auto", alt: "爆款直播" %>
-        </button>
+        <% end %>
       </div>
     </div>
 
     <!-- Banner -->
-    <button class="mx-4 relative mb-4 overflow-hidden rounded-2xl hover:opacity-90 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
-      <%= image_tag "home/活动.png", class: "w-full h-auto", alt: "活动" %>
-    </button>
+    
 
     <div class="py-12"></div>
 
