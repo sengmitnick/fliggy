@@ -21,8 +21,8 @@ $$;
 -- 授予数据库连接权限
 GRANT CONNECT ON DATABASE <%= ENV['DB_NAME'] || 'travel01_production' %> TO app_user;
 
--- 授予 public schema 使用权限
-GRANT USAGE ON SCHEMA public TO app_user;
+-- 授予 public schema 使用权限和创建表权限
+GRANT USAGE, CREATE ON SCHEMA public TO app_user;
 
 -- 授予所有现有表的权限
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
