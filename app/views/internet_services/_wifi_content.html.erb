@@ -360,9 +360,9 @@
     </div>
     <div class="text-[10px] text-gray-400">押金¥<%= @wifis.first&.deposit&.to_i || 500 %>将在归还后7个工作日内退回</div>
   </div>
-  <%= link_to "立即支付", new_internet_order_path(orderable_type: 'InternetWifi', orderable_id: @wifis.first&.id),
+  <%= link_to "立即支付", "#",
       id: "wifi-payment-link",
       class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700] inline-block",
-      data: { turbo: false } %>
+      data: { action: "click->wifi-booking#checkout", turbo: false } %>
   </div>
 </div>

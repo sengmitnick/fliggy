@@ -61,7 +61,6 @@ export default class extends Controller<HTMLElement> {
       if (price) this.dailyPrice = parseFloat(price)
     }
     this.updateTotalPrice()
-    this.updatePaymentButton()
   }
 
   selectPlan(event: Event): void {
@@ -72,9 +71,6 @@ export default class extends Controller<HTMLElement> {
     this.selectedPlanId = planId
     this.dailyPrice = price
     this.updateTotalPrice()
-    
-    // 更新支付按钮的orderableId
-    this.updatePaymentButton()
     
     // Update UI - remove all selections first
     const allCards = this.element.querySelectorAll('[data-wifi-id]')
@@ -373,16 +369,22 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  private updatePaymentButton(): void {
-    console.log('[WiFi] updatePaymentButton called, selectedPlanId:', this.selectedPlanId)
-    const paymentLink = this.element.querySelector('a#wifi-payment-link') as HTMLAnchorElement
-    console.log('[WiFi] Found paymentLink:', paymentLink)
-    if (paymentLink && this.selectedPlanId) {
-      // 更新link的href，修改orderable_id参数
-      const url = new URL(paymentLink.href)
-      url.searchParams.set('orderable_id', this.selectedPlanId)
-      paymentLink.href = url.toString()
-      console.log('[WiFi] Updated paymentLink href to:', paymentLink.href)
-    }
+  checkout(event: Event): void {
+    event.preventDefault()
+    
+    const orderableType = 'InternetWifi'
+    const orderableId = this.selectedPlanId
+    const quantity = this.quantityTarget.textContent || '1'
+    const days = this.days
+    const unitPrice = this.dailyPrice
+    const qty = parseInt(quantity)
+    const totalPrice = (unitPrice * days * qty) + this.deposit
+    
+    // Navigate to order page with params
+    const baseUrl = '/internet_orders/new'
+    const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
+    const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
+    const url = `${baseUrl}?${params}&${priceParams}`
+    window.location.href = url
   }
 }

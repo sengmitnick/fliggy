@@ -80,15 +80,35 @@
                   <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
                 <% end %>
               <% elsif @orderable.is_a?(InternetDataPlan) %>
-                <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% if params[:days].present? %>
+                  <p>有效期: <span class="font-medium text-gray-900"><%= params[:days] %>天</span></p>
+                <% else %>
+                  <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% end %>
                 <p>运营商: <%= @orderable.carrier %></p>
-                <p>单价: ¥<%= @orderable.price %></p>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span></p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.price %></p>
+                <% end %>
               <% elsif @orderable.is_a?(InternetWifi) %>
                 <p>网络: <%= @orderable.network_type %></p>
                 <p>押金: ¥<%= @orderable.deposit %></p>
-                <p>单价: ¥<%= @orderable.daily_price %>/天</p>
-                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 台</p>
-                <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span>/天</p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.daily_price %>/天</p>
+                <% end %>
+                <% if params[:quantity].present? %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay"><%= params[:quantity] %></span> 台</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 台</p>
+                <% end %>
+                <% if params[:days].present? %>
+                  <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay"><%= params[:days] %></span> 天</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
+                <% end %>
               <% end %>
             </div>
           </div>
@@ -254,7 +274,11 @@
         <span class="text-sm text-gray-600 mr-2">总计:</span>
         <span class="text-xs text-[#FF4400]">¥</span>
         <span class="text-2xl font-bold text-[#FF4400]" data-internet-order-form-target="totalPrice">
-          <%= sprintf('%.2f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
+          <% if params[:total].present? %>
+            <%= sprintf('%.2f', params[:total].to_f) %>
+          <% else %>
+            <%= sprintf('%.2f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
+          <% end %>
         </span>
       </div>
       <%= f.submit "确认支付", class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full" %>
