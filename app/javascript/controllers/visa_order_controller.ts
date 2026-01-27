@@ -1,13 +1,72 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["totalPrice", "deliveryAddress"]
+  static targets = ["totalPrice", "deliveryAddress", "contactName", "contactPhone", "payButton"]
 
   declare readonly totalPriceTarget: HTMLElement
   declare readonly deliveryAddressTarget: HTMLInputElement
+  declare readonly contactNameTarget: HTMLInputElement
+  declare readonly contactPhoneTarget: HTMLInputElement
+  declare readonly payButtonTarget: HTMLButtonElement
+
+  // Store base price from button's data attribute
+  private basePrice: number = 0
+  private travelerCount: number = 1
 
   connect(): void {
     console.log("VisaOrder controller connected")
+    
+    // Get base price and traveler count from pay button
+    const button = this.payButtonTarget
+    const totalPrice = parseFloat(button.dataset.totalPrice || '0')
+    const insurancePrice = parseFloat(button.dataset.insurancePrice || '0')
+    this.travelerCount = parseInt(button.dataset.travelerCount || '1')
+    
+    // Calculate base price (total - insurance)
+    this.basePrice = totalPrice - insurancePrice
+    
+    // Listen to insurance radio changes
+    this.setupInsuranceListeners()
+  }
+
+  private setupInsuranceListeners(): void {
+    const insuranceRadios = document.querySelectorAll<HTMLInputElement>('input[name="insurance"]')
+    insuranceRadios.forEach(radio => {
+      radio.addEventListener('change', () => this.updatePrice())
+    })
+  }
+
+  private updatePrice(): void {
+    const selectedInsurance = document.querySelector<HTMLInputElement>('input[name="insurance"]:checked')
+    if (!selectedInsurance) return
+
+    const insuranceType = selectedInsurance.value
+    let insurancePrice = 0
+
+    // Calculate insurance price based on type
+    switch (insuranceType) {
+      case 'basic':
+        insurancePrice = 50
+        break
+      case 'premium':
+        insurancePrice = 100
+        break
+      default:
+        insurancePrice = 0
+    }
+
+    // Calculate new total price
+    const newTotalPrice = this.basePrice + insurancePrice
+
+    // Update display
+    this.totalPriceTarget.textContent = newTotalPrice.toFixed(0)
+
+    // Update pay button data attributes
+    this.payButtonTarget.dataset.totalPrice = newTotalPrice.toString()
+    this.payButtonTarget.dataset.insuranceType = insuranceType
+    this.payButtonTarget.dataset.insurancePrice = insurancePrice.toString()
+
+    console.log('Price updated:', { insuranceType, insurancePrice, newTotalPrice })
   }
 
   async submitOrder(event: Event): Promise<void> {
@@ -15,15 +74,15 @@ export default class extends Controller<HTMLElement> {
     
     const button = event.currentTarget as HTMLButtonElement
     
-    // Get order data from button dataset
+    // Get order data from hidden fields and button dataset
     const visaProductId = button.dataset.visaProductId || ''
     const travelerCount = parseInt(button.dataset.travelerCount || '1')
     const totalPrice = parseFloat(button.dataset.totalPrice || '0')
     const insuranceType = button.dataset.insuranceType || 'none'
     const insurancePrice = parseFloat(button.dataset.insurancePrice || '0')
-    const contactName = button.dataset.contactName || ''
-    const contactPhone = button.dataset.contactPhone || ''
-    const deliveryAddress = button.dataset.deliveryAddress || ''
+    const contactName = this.contactNameTarget.value || button.dataset.contactName || ''
+    const contactPhone = this.contactPhoneTarget.value || button.dataset.contactPhone || ''
+    const deliveryAddress = this.deliveryAddressTarget.value || button.dataset.deliveryAddress || ''
 
     // Basic validation
     if (!contactName || contactName.trim() === '') {

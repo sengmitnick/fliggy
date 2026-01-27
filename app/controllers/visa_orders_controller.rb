@@ -29,9 +29,13 @@ class VisaOrdersController < ApplicationController
     @embassy_days = total_days - @review_days  # 使领馆处理占剩余时间
     @delivery_days = 0  # 寄回签证当天处理
     
-    # Get user's default contact info
-    @contact_name = current_user.passengers.first&.name || ''
-    @contact_phone = current_user.passengers.first&.phone || ''
+    # Load user contacts
+    @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc)
+    @default_contact = @contacts.find_by(is_default: true) || @contacts.first
+    
+    # Get user's default contact info from contacts or passengers
+    @contact_name = @default_contact&.name || current_user.passengers.first&.name || ''
+    @contact_phone = @default_contact&.phone || current_user.passengers.first&.phone || ''
     
     # Load user addresses
     @addresses = current_user.addresses.delivery.order(is_default: :desc, created_at: :desc)
@@ -52,6 +56,7 @@ class VisaOrdersController < ApplicationController
     @visa_order = VisaOrder.new(visa_order_params)
     @visa_order.user = current_user
     @visa_order.visa_product = @visa_product
+    @visa_order.unit_price = @visa_product.price
     @visa_order.status = 'pending'
     @visa_order.payment_status = 'unpaid'
     
