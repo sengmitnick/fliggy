@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例13: 购买日本7天无限流量SIM卡（数量1张）
+# 验证用例: 购买日本7天无限流量SIM卡（数量1张）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索日本地区的SIM卡，
