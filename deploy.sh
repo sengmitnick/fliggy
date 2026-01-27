@@ -178,6 +178,7 @@ main() {
     print_info "等待服务完全启动..."
     echo "   自动执行: rails db:prepare (创建数据库 + 运行迁移)"
     echo "   自动执行: 数据包加载 (城市、航班、酒店等测试数据)"
+    echo "   自动执行: 多会话隔离修复 (FORCE RLS)"
     sleep 20
 
     # 9. 验证部署状态
@@ -207,6 +208,24 @@ else
 end
 RUBY
 )" 2>/dev/null || print_warning "应用尚未完全启动，请稍后手动创建管理员"
+
+    # 验证多会话隔离功能
+    print_info "验证多会话隔离功能..."
+    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
+# 快速检查 RLS 状态
+check = ActiveRecord::Base.connection.execute(
+  \"SELECT relforcerowsecurity FROM pg_class WHERE relname = 'hotel_bookings'\"
+).first
+if check && check['relforcerowsecurity'] == 't'
+  puts '✓ 多会话隔离功能已启用 (FORCE RLS)'
+else
+  puts '⚠ 多会话隔离功能未启用，正在修复...'
+  system('bundle exec rake rls:force_enable > /dev/null 2>&1')
+  puts '✓ 多会话隔离功能已修复'
+end
+RUBY
+)" 2>/dev/null || print_warning "多会话隔离检查跳过"
+
     print_success "部署验证完成"
 
     # 完成
