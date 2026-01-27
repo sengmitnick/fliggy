@@ -58,6 +58,10 @@ namespace :validator do
       # 恢复到默认连接（根据当前 Rails 环境）
       ActiveRecord::Base.establish_connection(Rails.env.to_sym)
 
+      # 清除 schema cache 并重新加载
+      ActiveRecord::Base.connection.schema_cache.clear!
+      ActiveRecord::Base.descendants.each(&:reset_column_information)
+
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"

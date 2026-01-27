@@ -258,6 +258,18 @@ EOF_SQL
     fi
     print_success "应用已启动（db:prepare 迁移已完成）"
 
+    # 8.1 重新授予 app_user 权限（迁移后的表）
+    print_info "重新授予 app_user 权限（迁移后的表）..."
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;\""
+
+    if [ $? -eq 0 ]; then
+        print_success "app_user 权限更新成功"
+    else
+        print_error "app_user 权限更新失败"
+        exit 1
+    fi
+
     # 9. 初始化数据和安全策略
     print_info "步骤 9/9: 初始化数据和安全策略..."
 
