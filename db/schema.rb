@@ -1656,6 +1656,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_095519) do
     t.index ["data_version"], name: "index_trains_on_data_version"
   end
 
+  create_table "transfer_locations", force: :cascade do |t|
+    t.string "city"
+    t.string "name"
+    t.string "location_type", default: "airport"
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["city"], name: "index_transfer_locations_on_city"
+    t.index ["data_version"], name: "index_transfer_locations_on_data_version"
+    t.index ["location_type"], name: "index_transfer_locations_on_location_type"
+  end
+
   create_table "transfer_packages", force: :cascade do |t|
     t.string "name"
     t.string "vehicle_category"
