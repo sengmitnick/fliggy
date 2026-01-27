@@ -32,8 +32,12 @@ class ConvertAllDataVersionToString < ActiveRecord::Migration[7.2]
     puts "发现 #{tables.count} 个表需要处理"
     puts ""
 
+    # 抑制 ActiveRecord 的详细迁移日志
+    old_verbose = ActiveRecord::Migration.verbose
+    ActiveRecord::Migration.verbose = false
+
     tables.each do |table|
-      puts "  → 处理表: #{table}"
+      print "  → 处理表: #{table.ljust(40)}"
 
       begin
         # 检查当前列类型
@@ -69,13 +73,16 @@ class ConvertAllDataVersionToString < ActiveRecord::Migration[7.2]
           )
         SQL
 
-        puts "    ✓ 已转换为 string (#{current_type} -> varchar(50)) 并更新 RLS 策略"
+        puts " ✓"
       rescue StandardError => e
-        puts "    ✗ 处理失败: #{e.message}"
-        puts "    提示: 请手动检查此表"
+        puts " ✗"
+        puts "    错误: #{e.message}"
         # 继续处理下一个表，不中断整个迁移
       end
     end
+
+    # 恢复原始设置
+    ActiveRecord::Migration.verbose = old_verbose
 
     puts "\n✓ 完成！共处理 #{tables.count} 个表"
     puts "=" * 80
