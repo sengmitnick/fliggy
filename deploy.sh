@@ -302,10 +302,15 @@ EOF_SQL
     # 9.4 验证多会话隔离
     print_info "验证多会话隔离功能..."
     docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
-# 检查 RLS 是否强制启用
+# 检查 RLS 是否强制启用（检查实际存在的业务表）
 result = ActiveRecord::Base.connection.execute(
-  "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('hotel_bookings', 'flight_bookings', 'car_bookings')"
+  "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('hotel_bookings', 'train_bookings', 'car_orders', 'bookings')"
 )
+
+if result.count == 0
+  puts '⚠️  未找到预订表，跳过 RLS 验证'
+  exit 0
+end
 
 all_enabled = result.all? { |r| r['relforcerowsecurity'] == 't' }
 
