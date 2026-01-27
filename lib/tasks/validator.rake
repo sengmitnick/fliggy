@@ -34,7 +34,9 @@ namespace :validator do
       end
 
       # 建立独立的临时连接（不影响 ActiveRecord::Base）
-      admin_conn = ActiveRecord::Base.postgresql_connection(admin_config)
+      adapter_method = "#{admin_config[:adapter]}_adapter".to_sym
+      adapter_class = ActiveRecord::ConnectionAdapters.const_get(adapter_method.to_s.camelize)
+      admin_conn = adapter_class.new(admin_config)
       
       # 禁用外键约束检查
       admin_conn.execute("SET session_replication_role = 'replica';")
