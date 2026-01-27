@@ -273,11 +273,28 @@ all_hotels = Hotel.pluck(:id, :hotel_type, :price, :star_level).map do |id, type
   { id: id, type: type, price: price, star: star }
 end
 
-# 确保有Demo用户
-demo_user = User.find_or_create_by(email: "demo@example.com") do |u|
-  u.password_digest = BCrypt::Password.create("password123")
+# 创建多个真实用户
+real_users_data = [
+  { email: "zhangwei@163.com", name: "张伟" },
+  { email: "liping@qq.com", name: "李婷" },
+  { email: "wanghao@gmail.com", name: "王昊" },
+  { email: "liujing@126.com", name: "刘静" },
+  { email: "chenlei@sina.com", name: "陈雷" },
+  { email: "yangmei@hotmail.com", name: "杨梅" },
+  { email: "zhoujie@outlook.com", name: "周杰" },
+  { email: "wuxin@163.com", name: "吴鑫" },
+  { email: "zhengmin@qq.com", name: "郑敏" },
+  { email: "sunxiaoyu@gmail.com", name: "孙小雨" }
+]
+
+real_users = []
+real_users_data.each do |user_data|
+  user = User.find_or_create_by(email: user_data[:email]) do |u|
+    u.name = user_data[:name]
+    u.password_digest = BCrypt::Password.create("password123")
+  end
+  real_users << user
 end
-demo_user_id = demo_user.id
 
 # 设施数据
 facilities_templates = [
@@ -422,7 +439,7 @@ all_hotels.each do |hotel_info|
   comments.sample(rand(2..4)).each do |comment|
     reviews_data << {
       hotel_id: hotel_id,
-      user_id: demo_user_id,
+      user_id: real_users.sample.id,  # 从真实用户中随机选择
       rating: (4.0 + rand * 1.0).round(1),
       comment: comment,
       created_at: timestamp,

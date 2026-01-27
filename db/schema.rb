@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_26_144323) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -205,6 +205,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_144323) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "data_version", default: 0, null: false
+    t.integer "stock"
     t.index ["attraction_id"], name: "index_attraction_activities_on_attraction_id"
   end
 
@@ -239,6 +240,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_144323) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "data_version", default: 0, null: false
+    t.boolean "is_free"
   end
 
   create_table "booking_options", force: :cascade do |t|

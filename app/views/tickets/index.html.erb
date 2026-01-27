@@ -224,11 +224,13 @@
                     <span class="text-xs text-gray-400 ml-1"><%= ticket[:sales] %></span>
                   <% end %>
                 </div>
-                <div class="text-right">
-                  <span class="text-[#FF5722] font-bold">
-                    <span class="text-xs">¥</span><span class="text-lg"><%= ticket[:price] %></span><span class="text-xs"><%= ticket[:price_suffix] %></span>
-                  </span>
-                </div>
+                <% if ticket[:price].to_i > 0 %>
+                  <div class="text-right">
+                    <span class="text-[#FF5722] font-bold">
+                      <span class="text-xs">门票 ¥</span><span class="text-lg"><%= ticket[:price] %></span><span class="text-xs"><%= ticket[:price_suffix] %></span>
+                    </span>
+                  </div>
+                <% end %>
               </div>
             </div>
           </div>
