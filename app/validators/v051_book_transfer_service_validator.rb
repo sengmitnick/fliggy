@@ -2,19 +2,28 @@
 
 require_relative 'base_validator'
 
-# 验证用例51: 预订接送机服务（选择最便宜的服务商）
+# 验证用例51: 预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索接送机服务，
-#   选择价格最低的套餐并成功创建订单
+#   用户后天从北京飞往上海，需要在上海虹桥T2机场接机送到市区。
+#   Agent 需要找到对应航班，预订接机服务，选择价格最低的套餐并成功创建订单
+# 
+# 业务流程:
+#   1. 用户选择"接我"服务（from_airport = 从机场接到市区）
+#   2. 根据航班的起降城市，确定降落机场（如：北京→上海，降落在上海虹桥T2）
+#   3. 上车点：降落机场（location_from = 虹桥T2，自动确定）
+#   4. 下车点：上海火车站（location_to = 上海火车站，距离虹桥约20公里）
+#   5. 浏览可用车型套餐，选择最便宜的
 # 
 # 复杂度分析:
-#   1. 需要搜索"机场接机"服务类型的套餐
-#   2. 需要对比不同供应商的价格（阳光出行、伙力专车等）
-#   3. 需要对比不同车型的价格（经济5座、舒适5座、经济7座）
-#   4. 需要选择最低价格的套餐
-#   5. 需要填写乘车信息（联系人、手机、上车地点等）
-#   ❌ 不能一次性提供：需要先搜索→对比价格→选择最优→预订
+#   1. 需要理解"接机"含义：from_airport = 从机场出发，送到市区
+#   2. 需要根据航班降落城市确定机场（location_from = 虹桥T2）
+#   3. 需要选择下车地点为上海火车站
+#   4. 需要对比不同供应商的价格（阳光出行、伙力专车等）
+#   5. 需要对比不同车型的价格（经济5座、舒适5座、经济7座）
+#   6. 需要选择最低价格的套餐
+#   7. 需要填写乘车信息（联系人、手机号）
+#   ❌ 不能一次性提供：需要先理解航班→确定机场→选地址→对比价格→预订
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
@@ -33,18 +42,26 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V051BookTransferServiceValidator < BaseValidator
   self.validator_id = 'v051_book_transfer_service_validator'
-  self.title = '预订接送机服务（选择最便宜的服务商）'
-  self.description = '需要搜索机场接机服务，选择价格最低的套餐并成功创建订单'
+  self.title = '预订虹桥机场接机送到上海火车站（北京→上海）'
+  self.description = '后天北京飞上海，虹桥T2机场接机送到上海火车站，选择最便宜的套餐'
   self.timeout_seconds = 240
   
   # 准备阶段：设置任务参数
   def prepare
     # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    @service_type = 'from_airport' # 机场接机
-    @transfer_type = 'airport_pickup' # 机场接送
-    @location_from = '首都国际机场T3航站楼'
-    @location_to = '北京市朝阳区建国路118号'
-    @pickup_datetime = Date.current + 7.days + 14.hours # 7天后下午2点
+    @service_type = 'from_airport' # 接机服务：从机场接到市区
+    @transfer_type = 'airport_pickup' # 服务类型：机场接送
+    
+    # 模拟场景：用户乘坐航班从北京飞往上海，抵达上海后需要从虹桥T2机场接到上海火车站
+    @departure_city = '北京' # 航班出发城市
+    @arrival_city = '上海' # 航班降落城市
+    @arrival_airport = '虹桥T2' # 降落机场（上车点）
+    @destination_address = '上海站' # 下车点（上海火车站，明确要求）
+    @flight_date = (Date.current + 2.days).strftime('%Y-%m-%d') # 后天
+    
+    @location_from = @arrival_airport # 上车点 = 虹桥T2
+    @location_to = @destination_address # 下车点 = 上海站
+    @pickup_datetime = Date.current + 2.days + 10.hours # 后天上午10点（预计落地时间）
     
     # 查找所有可用的接送机套餐（注意：查询基线数据 data_version=0）
     @available_packages = TransferPackage.where(
@@ -54,12 +71,18 @@ class V051BookTransferServiceValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订机场接机服务（#{@location_from} → #{@location_to}），选择价格最便宜的服务商",
-      service_type: @service_type,
-      location_from: @location_from,
-      location_to: @location_to,
+      task: "请预订机场接机服务，选择价格最便宜的服务商",
+      scenario: "后天从北京飞往上海，在虹桥T2机场接机，送到上海火车站",
+      flight_info: {
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        flight_date: @flight_date
+      },
+      service_type: "接机（from_airport）",
+      pickup_location: "#{@arrival_airport}（上车点，自动确定）",
+      dropoff_location: @destination_address,
       pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
-      hint: "系统中有多个服务商提供接送机服务，请对比价格后选择最便宜的",
+      flow_hint: "1. 找到北京→上海的航班 → 2. 确认降落机场为虹桥T2 → 3. 选择接机服务 → 4. 上车点自动=虹桥T2 → 5. 下车点选择'上海站'（上海火车站） → 6. 对比车型价格 → 7. 选择最便宜的套餐",
       available_packages_count: @available_packages.count
     }
   end
@@ -123,6 +146,11 @@ class V051BookTransferServiceValidator < BaseValidator
     {
       service_type: @service_type,
       transfer_type: @transfer_type,
+      departure_city: @departure_city,
+      arrival_city: @arrival_city,
+      arrival_airport: @arrival_airport,
+      destination_address: @destination_address,
+      flight_date: @flight_date,
       location_from: @location_from,
       location_to: @location_to,
       pickup_datetime: @pickup_datetime.to_s
@@ -133,6 +161,11 @@ class V051BookTransferServiceValidator < BaseValidator
   def restore_from_state(data)
     @service_type = data['service_type']
     @transfer_type = data['transfer_type']
+    @departure_city = data['departure_city']
+    @arrival_city = data['arrival_city']
+    @arrival_airport = data['arrival_airport']
+    @destination_address = data['destination_address']
+    @flight_date = data['flight_date']
     @location_from = data['location_from']
     @location_to = data['location_to']
     @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
