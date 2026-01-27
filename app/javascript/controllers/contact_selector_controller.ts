@@ -72,6 +72,12 @@ export default class extends Controller<HTMLElement> {
       }
     }
     
+    // Update visible display element (for visa orders)
+    const nameDisplayElement = document.getElementById('contact-name-display')
+    if (nameDisplayElement) {
+      nameDisplayElement.textContent = contactName
+    }
+    
     // Update email display if exists
     if (this.hasEmailDisplayTarget && this.emailDisplayTarget) {
       if (contactEmail) {
@@ -83,6 +89,17 @@ export default class extends Controller<HTMLElement> {
         this.emailDisplayTarget.closest('div')?.classList.remove('hidden')
       } else {
         this.emailDisplayTarget.closest('div')?.classList.add('hidden')
+      }
+    }
+    
+    // Update visible display element (for visa orders)
+    const emailDisplayElement = document.getElementById('contact-email-display')
+    if (emailDisplayElement) {
+      if (contactEmail) {
+        emailDisplayElement.textContent = contactEmail
+        emailDisplayElement.closest('div')?.classList.remove('hidden')
+      } else {
+        emailDisplayElement.closest('div')?.classList.add('hidden')
       }
     }
     
@@ -98,6 +115,12 @@ export default class extends Controller<HTMLElement> {
       } else {
         this.phoneDisplayTarget.closest('div')?.classList.add('hidden')
       }
+    }
+    
+    // Update visible display element (for visa orders)
+    const phoneDisplayElement = document.getElementById('contact-phone-display')
+    if (phoneDisplayElement) {
+      phoneDisplayElement.textContent = contactPhone
     }
     
     // Update phone input if exists (for ticket orders)
