@@ -11,39 +11,36 @@ namespace :validator do
     puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
     begin
-      # 创建临时的超级用户连接（不改变 ActiveRecord::Base 的默认连接）
+      # 使用 PG gem 直接建立临时连接（不通过 ActiveRecord，避免影响全局状态）
       # 优先使用 ADMIN_DB_URL（生产环境），否则使用环境变量或默认配置
-      admin_config = if ENV['ADMIN_DB_URL'].present?
+
+      if ENV['ADMIN_DB_URL'].present?
         puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
-        # 解析 ADMIN_DB_URL 为配置 hash
-        db_config = ActiveRecord::DatabaseConfigurations::UrlConfig.new(
-          Rails.env,
-          "admin",
-          ENV['ADMIN_DB_URL']
-        )
-        db_config.configuration_hash
+        admin_conn = PG.connect(ENV['ADMIN_DB_URL'])
       else
+        current_config = ActiveRecord::Base.connection_db_config.configuration_hash
         admin_username = ENV['DB_USER'] || 'postgres'
-        admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
+        admin_password = ENV['DB_PASSWORD'] || current_config[:password] || 'pgBqpmYZ'
 
         puts "  → 使用超级用户连接（#{admin_username}）"
-        ActiveRecord::Base.connection_db_config.configuration_hash.merge(
-          username: admin_username,
+        admin_conn = PG.connect(
+          host: current_config[:host] || 'localhost',
+          port: current_config[:port] || 5432,
+          dbname: current_config[:database],
+          user: admin_username,
           password: admin_password
         )
       end
-
-      # 建立独立的临时连接（不影响 ActiveRecord::Base）
-      adapter_method = "#{admin_config[:adapter]}_adapter".to_sym
-      adapter_class = ActiveRecord::ConnectionAdapters.const_get(adapter_method.to_s.camelize)
-      admin_conn = adapter_class.new(admin_config)
       
       # 禁用外键约束检查
-      admin_conn.execute("SET session_replication_role = 'replica';")
-      
+      admin_conn.exec("SET session_replication_role = 'replica';")
+
       # 获取所有表名（排除 schema_migrations, ar_internal_metadata, good_jobs 相关表）
-      tables = admin_conn.tables - [
-        'schema_migrations', 
+      tables_result = admin_conn.exec(
+        "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
+      )
+      tables = tables_result.map { |row| row['tablename'] } - [
+        'schema_migrations',
         'ar_internal_metadata',
         'good_jobs',
         'good_job_batches',
@@ -51,35 +48,36 @@ namespace :validator do
         'good_job_processes',
         'good_job_settings'
       ]
-      
+
       deleted_total = 0
       tables.each do |table|
-        count = admin_conn.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
+        count_result = admin_conn.exec("SELECT COUNT(*) FROM #{table}")
+        count = count_result[0]['count'].to_i
         if count > 0
           # RESTART IDENTITY resets the sequence counters
-          admin_conn.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
+          admin_conn.exec("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
           deleted_total += count
           puts "  → #{table}: 清空 #{count} 条记录"
         end
       end
-      
+
       # 恢复外键约束检查
-      admin_conn.execute("SET session_replication_role = 'origin';")
+      admin_conn.exec("SET session_replication_role = 'origin';")
 
       # 关闭临时连接
-      admin_conn.disconnect!
+      admin_conn.close
 
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"
       # 确保恢复外键约束检查并关闭临时连接
       begin
-        if defined?(admin_conn) && admin_conn
-          admin_conn.execute("SET session_replication_role = 'origin';")
-          admin_conn.disconnect!
+        if defined?(admin_conn) && admin_conn && !admin_conn.finished?
+          admin_conn.exec("SET session_replication_role = 'origin';")
+          admin_conn.close
         end
-      rescue
-        # ignore
+      rescue => cleanup_error
+        puts "  清理连接时出错: #{cleanup_error.message}"
       end
       exit 1
     end
