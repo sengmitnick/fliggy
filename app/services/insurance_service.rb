@@ -166,7 +166,7 @@ class InsuranceService < ApplicationService
     when HotelBooking
       booking.city
     when TrainBooking
-      booking.arrival_station
+      booking.train.arrival_city
     else
       '未知目的地'
     end

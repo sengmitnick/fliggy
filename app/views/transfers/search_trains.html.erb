@@ -52,7 +52,7 @@
 
     <!-- Date Selection -->
     <div class="flex items-center justify-between py-6 border-b border-border cursor-pointer">
-      <%= date_field_tag :departure_date, params[:departure_date] || Date.today, class: 'text-text-secondary text-lg tracking-wide flex-1 border-0 p-0 focus:ring-0' %>
+      <%= date_field_tag :departure_date, params[:departure_date] || Time.zone.today, class: 'text-text-secondary text-lg tracking-wide flex-1 border-0 p-0 focus:ring-0' %>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 18l6-6-6-6"/>
       </svg>
@@ -80,7 +80,7 @@
               <div class="flex-1">
                 <div class="font-bold text-text-primary text-lg"><%= train.train_number %></div>
                 <div class="text-sm text-text-secondary mt-1">
-                  <%= train.departure_station %> → <%= train.arrival_station %>
+                  <%= train.departure_city %> → <%= train.arrival_city %>
                 </div>
                 <div class="text-xs text-text-muted mt-1">
                   <%= train.departure_time&.strftime('%m月%d日 %H:%M') %> - <%= train.arrival_time&.strftime('%H:%M') %>

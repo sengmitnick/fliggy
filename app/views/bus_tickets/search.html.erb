@@ -39,9 +39,9 @@
         <% 
           date = date_info[:date]
           is_selected = date == @date
-          day_label = if date == Date.today
+          day_label = if date == Time.zone.today
                         '今天'
-                      elsif date == Date.today + 1
+                      elsif date == Time.zone.today + 1
                         '明天'
                       else
                         date.strftime('%A').split('')[1..2].join # 周几
@@ -64,9 +64,9 @@
                       when 5 then '周五'
                       when 6 then '周六'
                       end
-          day_label = '今天' if date == Date.today
-          day_label = '明天' if date == Date.today + 1
-          day_label = '后天' if date == Date.today + 2
+          day_label = '今天' if date == Time.zone.today
+          day_label = '明天' if date == Time.zone.today + 1
+          day_label = '后天' if date == Time.zone.today + 2
         %>
         <%= link_to search_bus_tickets_path(origin: @origin, destination: @destination, date: date), 
           class: "flex-shrink-0 flex flex-col items-center justify-center w-[72px] h-[52px] rounded-lg #{ is_selected ? 'bg-[#fceea3] text-gray-900' : 'text-gray-800' }" do %>

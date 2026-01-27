@@ -120,21 +120,48 @@
     </div>
   </div>
 
-  <!-- Bottom Payment Button -->
-  <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-border shadow-lg">
-    <div class="px-4 py-3 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-foreground-muted">总计</div>
-        <div class="text-xl font-bold text-primary">¥<%= @booking.total_price.to_i %></div>
+  <!-- Bottom Payment Button / Status Bar -->
+  <% if @booking.status == 'confirmed' %>
+    <!-- Already Paid - Show Status -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-border shadow-lg">
+      <div class="px-4 py-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <div class="text-sm font-semibold text-foreground">订单已确认</div>
+              <div class="text-xs text-foreground-muted">商家将尽快联系您</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-foreground-muted">总计</div>
+            <div class="text-lg font-bold text-primary">¥<%= @booking.total_price.to_i %></div>
+          </div>
+        </div>
+        <%= link_to '返回首页', tour_groups_path, class: "btn-primary w-full py-3 rounded-lg text-center font-semibold" %>
       </div>
-      <button type="button" 
-              data-action="click->payment-confirmation#showPasswordModal" 
-              class="btn-primary px-8 py-3 rounded-lg text-lg font-semibold">
-        立即支付
-      </button>
     </div>
-  </div>
+  <% else %>
+    <!-- Pending Payment - Show Pay Button -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-border shadow-lg">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div>
+          <div class="text-xs text-foreground-muted">总计</div>
+          <div class="text-xl font-bold text-primary">¥<%= @booking.total_price.to_i %></div>
+        </div>
+        <button type="button" 
+                data-action="click->payment-confirmation#showPasswordModal" 
+                class="btn-primary px-8 py-3 rounded-lg text-lg font-semibold">
+          立即支付
+        </button>
+      </div>
+    </div>
+  <% end %>
 
-  <!-- Payment Confirmation Modals -->
-  <%= render 'shared/payment_confirmation_modals' %>
+  <!-- Payment Confirmation Modals (Only for pending orders) -->
+  <% if @booking.status == 'pending' %>
+    <%= render 'shared/payment_confirmation_modals' %>
+  <% end %>
 </div>

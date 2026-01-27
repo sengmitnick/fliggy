@@ -1,6 +1,5 @@
 # Abroad Tickets Seed Data
 
-puts "Creating abroad tickets..."
 
 # Japan Train Tickets - Tokyo to Shin-Osaka Route
 japan_routes = [
@@ -107,4 +106,3 @@ end
 # 批量插入所有票据
 AbroadTicket.insert_all(all_tickets_data) if all_tickets_data.any?
 
-puts "Created #{AbroadTicket.count} abroad tickets"

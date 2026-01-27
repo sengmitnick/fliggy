@@ -54,8 +54,8 @@ class DeepTravelsController < ApplicationController
   # GET /deep_travels/:id/available_dates
   def available_dates
     @guide = DeepTravelGuide.find(params[:id])
-    start_date = params[:start_date]&.to_date || Date.today
-    end_date = params[:end_date]&.to_date || (Date.today + 90.days)
+    start_date = params[:start_date]&.to_date || Time.zone.today
+    end_date = params[:end_date]&.to_date || (Time.zone.today + 90.days)
 
     available_dates = @guide.availabilities
                            .where(is_available: true)

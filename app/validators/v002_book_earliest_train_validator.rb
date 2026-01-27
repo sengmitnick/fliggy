@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例3: 预订明天上海到杭州最早的高铁（二等座）
+# 验证用例: 预订明天上海到杭州最早的高铁（二等座）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天上海到杭州的所有高铁，
@@ -43,7 +43,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
      .order(:departure_time)
      .first
     
@@ -61,7 +61,7 @@ class V002BookEarliestTrainValidator < BaseValidator
         departure_city: @origin,
         arrival_city: @destination,
         data_version: 0
-      ).where("DATE(departure_time) = ?", @target_date).count,
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date).count,
       earliest_time: @earliest_departure_time&.strftime('%H:%M')
     }
   end
@@ -98,7 +98,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       all_trains = Train.where(
         departure_city: @origin,
         arrival_city: @destination
-      ).where("DATE(departure_time) = ?", @target_date)
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
       # 找出最早的发车时间
       earliest_time = all_trains.minimum(:departure_time)
@@ -149,7 +149,7 @@ class V002BookEarliestTrainValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
      .order(:departure_time)
      .first
     

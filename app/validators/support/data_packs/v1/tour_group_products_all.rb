@@ -100,12 +100,10 @@ all_products_data = []
 start_date = Date.today
 end_date = start_date + 6.days  # 生成7天的数据
 
-destinations_config.each_with_index do |dest_config, dest_idx|
+destinations_config.each do |dest_config|
   destination = dest_config[:name]
   departure_cities = dest_config[:departure_cities]
   attractions = dest_config[:attractions] || [destination]
-  
-  puts "  [#{dest_idx + 1}/#{destinations_config.count}] 正在为 #{destination} 生成产品..."
   
   # 每个目的地选择2-3个主要出发城市
   selected_departures = departure_cities.sample([departure_cities.count, 3].min)

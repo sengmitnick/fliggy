@@ -6,7 +6,6 @@
 puts "正在加载景点数据包..."
 
 # 清理现有数据
-puts "🧹 清理现有景点数据..."
 AttractionReview.destroy_all
 ActivityOrder.destroy_all
 TicketOrder.destroy_all
@@ -17,7 +16,6 @@ Attraction.destroy_all
 timestamp = Time.current
 
 # ==================== 景点数据 ====================
-puts "\n🎡 批量创建景点..."
 
 attractions_data = [
   {
@@ -131,13 +129,11 @@ attractions_data = [
 ]
 
 Attraction.insert_all(attractions_data)
-puts "✓ 已批量创建 #{Attraction.count} 个景点"
 
 # 获取景点ID映射
 attractions_map = Attraction.pluck(:slug, :id).to_h
 
 # ==================== 门票数据 ====================
-puts "\n🎫 批量创建门票..."
 
 tickets_data = [
   # 深圳欢乐港湾门票

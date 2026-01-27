@@ -37,7 +37,7 @@
   <div data-date-picker-target="exactDateContent" class="overflow-y-auto pb-20" style="height: calc(100vh - 120px);">
     <%
       # Start from the 1st day of current month to ensure proper alignment
-      today = Date.today
+      today = Time.zone.today
       start_date = Date.new(today.year, today.month, 1)
       end_date = today + 60.days
       
@@ -112,7 +112,7 @@
               <div class="flex-1 py-3"></div>
             <% else %>
               <%
-                # Use client's today from data attribute if available, otherwise fallback to server Date.today
+                # Use client's today from data attribute if available, otherwise fallback to server Time.zone.today
                 # This will be set by JavaScript on page load with client's timezone
                 client_today_str = nil # Will be read from data-client-today attribute via JavaScript
                 
@@ -205,7 +205,7 @@
         <!-- 月份网格 -->
         <div class="grid grid-cols-4 gap-3 mb-4">
           <%
-            current_month = Date.today.beginning_of_month
+            current_month = Time.zone.today.beginning_of_month
             12.times do |i|
               month_date = current_month + i.months
               month_value = month_date.strftime('%Y-%m')

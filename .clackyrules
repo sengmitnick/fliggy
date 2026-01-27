@@ -97,12 +97,12 @@ Do not recreate administrator functionality in User model. Administrator system 
 
 ## Data Packs - Test/Validation Data Management
 
-**CRITICAL: Data Packs Directory Structure**
+**CRITICAL: Data Packs Loading Method**
+- **ONLY supported command**: `rake validator:reset_baseline`
 - **Location**: `app/validators/support/data_packs/v1/` (NOT `db/seeds/`)
-- **Purpose**: Store validation and test data for different modules
+- **Purpose**: Store complete validation and test data for different modules
 - **Naming**: Use descriptive names like `insurances.rb`, `cruises.rb`, `hotels_all.rb`
 - **Pattern**: Use `insert_all` for batch operations, NOT `find_or_create_by!`
-- **Loading**: `rails runner "load Rails.root.join('app/validators/support/data_packs/v1/xxx.rb')"`
 
 **File Structure Template**:
 ```ruby
@@ -115,7 +115,7 @@ Do not recreate administrator functionality in User model. Administrator system 
 # - 功能说明
 #
 # 加载方式：
-# rails runner "load Rails.root.join('app/validators/support/data_packs/v1/xxx.rb')"
+# rake validator:reset_baseline
 
 puts "正在加载 module_name_v1 数据包..."
 
@@ -128,10 +128,14 @@ ModelName.insert_all([
 puts "✓ 数据包加载完成"
 ```
 
-**NEVER**:
-- ❌ Place test/validation data in `db/seeds/` directory
-- ❌ Use `find_or_create_by!` for data packs (use `insert_all` instead)
-- ❌ Mix production seed data with test data
+**MANDATORY RULES**:
+- ✅ ONLY use `rake validator:reset_baseline` to load all data packs
+- ✅ Ensure data packs are COMPLETE with all required fields and associations
+- ✅ Test data completeness before committing data pack files
+- ❌ NEVER use `rails runner "load ..."` for data pack loading
+- ❌ NEVER place test/validation data in `db/seeds/` directory
+- ❌ NEVER use `find_or_create_by!` for data packs (use `insert_all` instead)
+- ❌ NEVER mix production seed data with test data
 
 ## Some important tips when coding
 

@@ -1,7 +1,6 @@
 # Abroad Shopping Seeds
 # 境外购物数据包 - 使用批量插入优化
 
-puts "Creating Abroad Brands and Shops..."
 
 timestamp = Time.current
 
@@ -105,7 +104,6 @@ brands_data = [
 ]
 
 AbroadBrand.insert_all(brands_data)
-puts "✓ 批量创建了 #{brands_data.count} 个品牌"
 
 # 重新加载以获取ID映射
 brands_map = AbroadBrand.pluck(:name, :id).to_h
@@ -210,7 +208,6 @@ shops_data = [
 ]
 
 AbroadShop.insert_all(shops_data)
-puts "✓ 批量创建了 #{shops_data.count} 个门店"
 
 # 重新加载以获取ID映射
 shops_map = AbroadShop.pluck(:name, :id).to_h
@@ -314,7 +311,6 @@ coupons_data << {
 
 AbroadCoupon.insert_all(coupons_data)
 
-puts "✓ 批量创建了 #{coupons_data.count} 张优惠券"
 puts "\n✅ 境外购物数据加载完成！"
 puts "  - 品牌总数: #{AbroadBrand.count}"
 puts "  - 门店总数: #{AbroadShop.count}"

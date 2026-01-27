@@ -36,7 +36,7 @@ class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
     {
       task: "请预订一张后天从#{@origin}到#{@destination}的高铁票（一等座）",
@@ -99,7 +99,7 @@ class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date).sample
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date).sample
     
     seat = target_train.train_seats.find_by(seat_type: @seat_type)
     

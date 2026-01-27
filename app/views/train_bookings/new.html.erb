@@ -96,6 +96,7 @@
   <%= form_with url: train_bookings_path, method: :post, class: "container mx-auto px-4 py-4", data: { action: "submit->train-booking#handleSubmit" } do |f| %>
     <%= f.hidden_field :train_id, value: @train.id, name: 'train_booking[train_id]' %>
     <%= f.hidden_field :seat_type, value: @selected_seat_type, id: 'booking_seat_type', name: 'train_booking[seat_type]' %>
+    <%= f.hidden_field :booking_option_id, value: @booking_option_id, id: 'booking_option_id', name: 'train_booking[booking_option_id]' %>
     <%= f.hidden_field :total_price, value: @selected_price, id: 'booking_total_price', name: 'train_booking[total_price]' %>
     <%= f.hidden_field :carriage_number, id: 'booking_carriage_number', name: 'train_booking[carriage_number]', data: { train_booking_target: "selectedCarriage" } %>
     <%= f.hidden_field :insurance_type, id: 'booking_insurance_type', name: 'train_booking[insurance_type]', value: 'none' %>
@@ -294,13 +295,13 @@
           </div>
           
           <button type="submit" 
-                  class="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg">
+                  class="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-6 py-3 rounded-full font-bold text-base shadow-lg">
             联络优惠
           </button>
           
           <button type="button"
                   data-action="click->train-booking#handleNormalBooking"
-                  class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold">
+                  class="bg-gray-100 text-gray-700 px-4 py-3 rounded-full font-bold text-base">
             普通预订
           </button>
         </div>

@@ -6,6 +6,13 @@ class BusTicketOrdersController < ApplicationController
     @insurance_type = params[:insurance_type] || 'none'
     @passengers = current_user.passengers.order(is_self: :desc, created_at: :asc)
     
+    # Get user's contacts for quick selection
+    @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
+    
+    # Get default contact for pre-filling
+    default_contact = current_user.contacts.find_by(is_default: true)
+    @default_contact_phone = default_contact&.phone || current_user.phone || ''
+    
     # Restore selected passenger IDs from URL params
     @selected_passenger_ids = params[:selected_passenger_ids]&.split(',') || []
     

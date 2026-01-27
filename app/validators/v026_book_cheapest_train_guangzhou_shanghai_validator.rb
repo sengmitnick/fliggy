@@ -37,7 +37,7 @@ class V026BookCheapestTrainGuangzhouShanghaiValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
     train_prices = available_trains.map do |train|
       seat = train.train_seats.find_by(seat_type: @seat_type)
@@ -83,7 +83,7 @@ class V026BookCheapestTrainGuangzhouShanghaiValidator < BaseValidator
       all_trains = Train.where(
         departure_city: @origin,
         arrival_city: @destination
-      ).where("DATE(departure_time) = ?", @target_date)
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
       train_prices = all_trains.map do |train|
         seat = train.train_seats.find_by(seat_type: @seat_type)
@@ -123,7 +123,7 @@ class V026BookCheapestTrainGuangzhouShanghaiValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
     cheapest_train = available_trains.min_by do |train|
       seat = train.train_seats.find_by(seat_type: @seat_type)

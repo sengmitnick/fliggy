@@ -6,7 +6,7 @@ class TourGroupBookingsController < ApplicationController
     @package = @product.tour_packages.find(params[:package_id])
     
     # 从参数中获取选择的信息
-    @travel_date = params[:travel_date].present? ? Date.parse(params[:travel_date]) : Date.today
+    @travel_date = params[:travel_date].present? ? Date.parse(params[:travel_date]) : Time.zone.today
     @adult_count = (params[:adult_count] || 1).to_i
     @child_count = (params[:child_count] || 0).to_i
     
@@ -49,7 +49,7 @@ class TourGroupBookingsController < ApplicationController
       redirect_to tour_group_booking_path(@booking), notice: '订单创建成功，请确认并支付'
     else
       # 设置视图需要的实例变量（用于重新渲染表单）
-      @travel_date = @booking.travel_date || Date.today
+      @travel_date = @booking.travel_date || Time.zone.today
       @adult_count = @booking.adult_count || 1
       @child_count = @booking.child_count || 0
       render :new, status: :unprocessable_entity

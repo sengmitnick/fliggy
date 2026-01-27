@@ -10,7 +10,6 @@
 # 加载方式：
 # rails runner "load Rails.root.join('app/validators/support/data_packs/v1/chartered_tours.rb')"
 
-puts "正在加载包车游数据包 v1..."
 
 # 确保武汉城市存在
 wuhan = City.find_or_create_by!(name: '武汉') do |city|
@@ -19,7 +18,6 @@ wuhan = City.find_or_create_by!(name: '武汉') do |city|
   city.is_hot = true
 end
 
-puts "  ✓ 城市: #{wuhan.name}"
 
 # 1. 创建景点（使用省/市/区字符串字段）
 attractions_data = [
@@ -154,7 +152,6 @@ attractions_data = [
 Attraction.insert_all(attractions_data)
 attractions = Attraction.by_city(wuhan.name).index_by(&:name)
 
-puts "  ✓ 景点: #{attractions.size}个"
 
 # 2. 创建车型
 vehicle_types_data = [
@@ -229,7 +226,6 @@ vehicle_types_data = [
 VehicleType.insert_all(vehicle_types_data)
 vehicle_types = VehicleType.all.index_by(&:name)
 
-puts "  ✓ 车型: #{vehicle_types.size}种"
 
 # 3. 创建包车路线
 routes_data = [
@@ -310,7 +306,6 @@ routes_data = [
 CharterRoute.insert_all(routes_data)
 charter_routes = CharterRoute.by_city(wuhan.id)
 
-puts "  ✓ 路线: #{charter_routes.size}条"
 
 # 4. 创建路线-景点关联
 route_attractions_data = []
@@ -414,9 +409,7 @@ end
 
 RouteAttraction.insert_all(route_attractions_data) if route_attractions_data.any?
 
-puts "  ✓ 路线景点关联: #{route_attractions_data.size}条"
 
-puts "✓ 包车游数据包加载完成！"
 puts ""
 puts "数据统计："
 puts "  - 城市: 1个 (#{wuhan.name})"

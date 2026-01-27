@@ -22,7 +22,7 @@
         
         <% 
           # Generate calendar for next 60 days
-          today = Date.today
+          today = Time.zone.today
           dates = (0...60).map { |i| today + i.days }
           
           # Group dates by month

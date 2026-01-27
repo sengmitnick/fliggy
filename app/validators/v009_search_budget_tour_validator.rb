@@ -2,11 +2,11 @@
 
 require_relative 'base_validator'
 
-# 验证用例6: 搜索预算5000元以内的云南旅游产品（任意天数、任意类型、1人出行）
+# 验证用例: 搜索预算5000元以内的昆明旅游产品（任意天数、任意类型、1人出行）
 # 
 # 任务描述:
-#   Agent 需要搜索云南的旅游产品，
-#   找出符合预算（≤5000元/人）的产品（任意天数、任意旅游类型），
+#   Agent 需要在跟团游搜索页面中选择"昆明"作为目的地，
+#   筛选出符合预算（≤5000元/人）的产品（任意天数、任意旅游类型），
 #   并选择其中最受欢迎的（销量最高）完成预订（1人出行）
 # 
 # 评分标准:
@@ -31,18 +31,18 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V009SearchBudgetTourValidator < BaseValidator
   self.validator_id = 'v009_search_budget_tour_validator'
-  self.title = '搜索预算5000元以内的云南旅游产品（任意天数、任意类型、1人出行）'
-  self.description = '搜索云南的旅游产品（任意天数、任意旅游类型），找出预算内（≤5000元/人）最受欢迎的产品并预订（1人出行）'
+  self.title = '搜索预算5000元以内的昆明旅游产品（任意天数、任意类型、1人出行）'
+  self.description = '在搜索页选择"昆明"作为目的地城市，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行）'
   self.timeout_seconds = 300
   
   # 准备阶段：插入测试数据
   def prepare
     # 数据已经通过 load_data_pack 自动加载
-    @destination = '云南'
+    @destination = '昆明'
     @budget = 5000
     @adult_count = 1  # 出行人数
     
-    # 查找所有云南的产品（注意：查询基线数据）
+    # 查找所有昆明的产品（注意：查询基线数据）
     all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
     
     # 筛选符合预算的产品
@@ -53,13 +53,13 @@ class V009SearchBudgetTourValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请搜索#{@destination}的旅游产品（任意天数、任意旅游类型），找出预算#{@budget}元以内最受欢迎的产品并预订（#{@adult_count}人出行）",
+      task: "请访问跟团游搜索页面，选择'#{@destination}'作为目的地城市，找出预算#{@budget}元以内最受欢迎的产品并预订（#{@adult_count}人出行）",
       destination: @destination,
       budget: @budget,
       adult_count: @adult_count,
       tour_types: "任意类型（跟团游、独立成团、自由出行均可）",
       duration: "任意天数",
-      hint: "系统中有多个产品可选，需要筛选价格并对比销量",
+      hint: "使用城市选择器选择'昆明'作为目的地，然后筛选价格≤#{@budget}元的产品，对比销量找出最受欢迎的产品",
       total_products: all_products.count,
       budget_products_count: @budget_products.count,
       price_range: {
@@ -80,11 +80,11 @@ class V009SearchBudgetTourValidator < BaseValidator
     
     return unless @booking
     
-    # 断言2: 目的地正确
-    add_assertion "目的地正确（云南）", weight: 10 do
+    # 断言2: 目的地正确（昆明）
+    add_assertion "目的地正确（#{@destination}）", weight: 10 do
       destination = @booking.tour_group_product.destination
       expect(destination).to include(@destination),
-        "目的地不正确。预期包含: #{@destination}, 实际: #{destination}"
+        "目的地不正确。预期包含: #{@destination}，实际: #{destination}"
     end
     
     # 断言3: 价格符合预算
@@ -98,7 +98,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     
     # 断言4: 选择了销量最高的产品（核心评分）
     add_assertion "选择了预算内销量最高的产品", weight: 25 do
-      # 重新查找所有符合预算的云南产品
+      # 重新查找所有符合预算的昆明产品
       all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
       budget_products = all_products.select { |p| p.price <= @budget }
       
@@ -155,12 +155,12 @@ class V009SearchBudgetTourValidator < BaseValidator
     @most_popular = TourGroupProduct.find_by(id: data['most_popular_id']) if data['most_popular_id']
   end
   
-  # 模拟 AI Agent 操作：搜索云南预算内最受欢迎产品并预订
+  # 模拟 AI Agent 操作：搜索昆明预算内最受欢迎产品并预订
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    # 2. 查找符合预算的云南产品
+    # 2. 查找符合预算的昆明产品（destination = '昆明'）
     all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
     budget_products = all_products.select { |p| p.price <= @budget }
     

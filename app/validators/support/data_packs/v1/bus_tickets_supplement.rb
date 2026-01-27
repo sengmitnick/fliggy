@@ -3,7 +3,6 @@
 # 汽车票数据补充包 - 补充杭州→上海的晚班车
 # 加载方式: rails runner "load Rails.root.join('app/validators/support/data_packs/v1/bus_tickets_supplement.rb')"
 
-puts "🚌 补充汽车票数据..."
 
 timestamp = Time.current
 
@@ -76,9 +75,7 @@ end
 # 批量插入所有数据
 if all_tickets_data.any?
   BusTicket.insert_all(all_tickets_data)
-  puts "  ✓ 已补充杭州→上海晚班车: #{all_tickets_data.count} 个班次"
 else
   puts "  ⚠️ 没有数据需要创建"
 end
 
-puts "\n✅ 汽车票数据补充完成"

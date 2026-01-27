@@ -139,7 +139,7 @@
                 <% if @transfer_params && @transfer_params[:train_id].present? %>
                   <% train = Train.find_by(id: @transfer_params[:train_id]) %>
                   <% if train %>
-                    <h2 class="text-xl font-bold text-text-primary"><%= train.arrival_station %></h2>
+                    <h2 class="text-xl font-bold text-text-primary"><%= train.arrival_city %></h2>
                     <div class="text-xs text-text-secondary mt-1">
                       <%= train.train_number %> 预计当地<%= train.arrival_time&.strftime('%m月%d日 %A %H:%M') %>到达后用车
                     </div>

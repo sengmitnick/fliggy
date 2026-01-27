@@ -1,5 +1,4 @@
 # 境外上网服务种子数据
-puts "Creating internet services data..."
 
 timestamp = Time.current
 
@@ -310,6 +309,3 @@ wifis_data = [
 # 批量插入WiFi设备
 InternetWifi.insert_all(wifis_data) if wifis_data.any?
 
-puts "Created #{InternetSimCard.count} sim cards"
-puts "Created #{InternetDataPlan.count} data plans"
-puts "Created #{InternetWifi.count} wifi devices"

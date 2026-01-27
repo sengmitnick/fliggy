@@ -143,21 +143,27 @@
       </div>
     </div>
 
-    <!-- 3. 取票电话 -->
-    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" data-action="click->bus-ticket-order#editContactPhone">
-      <div class="flex items-center flex-1">
-        <span class="text-gray-500 mr-4 text-[15px]">
-          取票电话
-          <span class="text-red-500 ml-0.5">*</span>
-        </span>
+    <!-- 3. 联系人信息 -->
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-semibold text-gray-900">联系人信息</h3>
+        <button type="button" 
+                class="text-sm text-primary hover:underline"
+                data-action="click->bus-ticket-order#openContactSelector">
+          选择常用联系人
+        </button>
+      </div>
+      
+      <div class="flex items-center">
+        <span class="text-gray-500 mr-4 text-[15px]">取票电话<span class="text-red-500 ml-0.5">*</span></span>
         <input type="tel" 
                class="text-[17px] font-medium bg-transparent border-none outline-none w-full"
                placeholder="请输入取票电话"
                maxlength="11"
                required
+               value="<%= @default_contact_phone %>"
                data-bus-ticket-order-target="contactPhone">
       </div>
-      
     </div>
 
     <!-- 4. 保险模块 -->
@@ -356,4 +362,50 @@
   
   <!-- Payment Confirmation Modals -->
   <%= render 'shared/payment_confirmation_modals' %>
+  
+  <!-- Contact Selector Modal -->
+  <div id="contactSelectorModal" 
+       class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-[1px]" 
+       data-bus-ticket-order-target="contactModal">
+    <div class="absolute bottom-0 left-0 w-full bg-surface-alt rounded-t-2xl transform transition-transform duration-300">
+      <div class="relative bg-white rounded-t-2xl px-4 py-4 border-b border-gray-100">
+        <h3 class="text-center text-lg font-medium text-black">请选择联系人</h3>
+        <button type="button" 
+                class="absolute right-4 top-4 text-gray-500 hover:text-gray-700" 
+                data-action="click->bus-ticket-order#closeContactSelector">
+          <svg class="w-6 h-6 border border-gray-800 rounded-full p-1 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 h-[400px] bg-white overflow-y-auto">
+        <% if @contacts.any? %>
+          <% @contacts.each do |contact| %>
+            <div class="flex items-center justify-between bg-surface p-4 rounded-lg mb-2 cursor-pointer hover:bg-gray-100"
+                 data-bus-ticket-order-target="contactItem"
+                 data-action="click->bus-ticket-order#selectContact"
+                 data-contact-phone="<%= contact.phone %>">
+              <div class="flex flex-col">
+                <span class="text-base font-bold text-gray-900 mb-1"><%= contact.name %></span>
+                <% if contact.phone.present? %>
+                  <span class="text-sm text-gray-500"><%= contact.phone %></span>
+                <% end %>
+              </div>
+              <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600 hidden" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center text-gray-400 py-8">
+            <p>暂无常用联系人</p>
+            <p class="text-sm mt-2">您可以在<a href="<%= contacts_path %>" class="text-blue-500">常用信息</a>中添加</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>

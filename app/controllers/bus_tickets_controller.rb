@@ -13,7 +13,7 @@ class BusTicketsController < ApplicationController
   def count_filtered_results
     @origin = params[:origin]
     @destination = params[:destination]
-    @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
+    @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
     
     # 基础查询
     @bus_tickets = BusTicket.where(
@@ -33,7 +33,7 @@ class BusTicketsController < ApplicationController
   def search
     @origin = params[:departure_city] || params[:origin] || '深圳'
     @destination = params[:destination_city] || params[:destination] || '广州'
-    @date = params[:date].present? ? Date.parse(params[:date]) : Date.today
+    @date = params[:date].present? ? Date.parse(params[:date]) : Time.zone.today
     
     # Search bus tickets with base criteria
     @bus_tickets = BusTicket.where(
@@ -66,7 +66,7 @@ class BusTicketsController < ApplicationController
     @nearby_dates = []
     (-1..5).each do |offset|
       date = @date + offset.days
-      next if date < Date.today
+      next if date < Time.zone.today
       
       count = BusTicket.where(
         origin: @origin,

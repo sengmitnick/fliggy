@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例4: 搜索后天北京到天津最便宜的车票（1人）
+# 验证用例: 搜索后天北京到天津最便宜的车票（1人）
 # 
 # 任务描述:
 #   Agent 需要搜索后天北京到天津的所有车次，
@@ -48,7 +48,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
     # 计算每趟车每种座位类型的价格
     @seat_prices = []
@@ -117,7 +117,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
         departure_city: @origin,
         arrival_city: @destination,
         data_version: 0
-      ).where("DATE(departure_time) = ?", @target_date)
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
       # 找出最低价格
       cheapest_price = Float::INFINITY
@@ -206,7 +206,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
       departure_city: @origin,
       arrival_city: @destination,
       data_version: 0
-    ).where("DATE(departure_time) = ?", @target_date)
+    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
     cheapest_price = Float::INFINITY
     target_train = nil

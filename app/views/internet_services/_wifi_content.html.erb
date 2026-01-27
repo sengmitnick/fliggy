@@ -68,7 +68,7 @@
       <span class="font-medium text-gray-900">取还日期</span>
       <div class="flex items-center space-x-1 cursor-pointer">
         <span class="text-gray-900 text-sm" data-wifi-booking-target="dateRange">
-          <%= Date.today.strftime('%m月%d日') %>-<%= (Date.today + 7).strftime('%m月%d日') %>(共7天)
+          <%= Date.today.strftime('%m月%d日') %>-<%= (Time.zone.today + 7).strftime('%m月%d日') %>(共7天)
         </span>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

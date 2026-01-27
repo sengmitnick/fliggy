@@ -1,5 +1,4 @@
 # Flight Packages (机票次卡) Seed Data
-puts "Creating flight packages..."
 
 FlightPackage.destroy_all
 

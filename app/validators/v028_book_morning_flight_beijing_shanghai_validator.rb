@@ -37,7 +37,7 @@ class V028BookMorningFlightBeijingShanghaiValidator < BaseValidator
       destination_city: @destination,
       flight_date: @target_date,
       data_version: 0
-    ).where("EXTRACT(HOUR FROM departure_time) < 12")
+    ).where("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') < 12")
     
     {
       task: "请预订一张后天从#{@origin}到#{@destination}的早班航班（12点前起飞）",
@@ -101,7 +101,7 @@ class V028BookMorningFlightBeijingShanghaiValidator < BaseValidator
       destination_city: @destination,
       flight_date: @target_date,
       data_version: 0
-    ).where("EXTRACT(HOUR FROM departure_time) < 12").sample
+    ).where("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') < 12").sample
     
     raise "No morning flights found for #{@origin} to #{@destination} on #{@target_date}" if target_flight.nil?
     

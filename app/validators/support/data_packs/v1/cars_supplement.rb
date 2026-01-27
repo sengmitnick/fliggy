@@ -3,7 +3,6 @@
 # 租车数据补充包 - 补充广州的豪华轿车
 # 加载方式: rails runner "load Rails.root.join('app/validators/support/data_packs/v1/cars_supplement.rb')"
 
-puts "🚗 补充租车数据..."
 
 timestamp = Time.current
 
@@ -132,6 +131,4 @@ cars_data = [
 ]
 
 Car.insert_all(cars_data)
-puts "  ✓ 已补充广州豪华轿车: #{cars_data.count} 辆"
 
-puts "\n✅ 租车数据补充完成"

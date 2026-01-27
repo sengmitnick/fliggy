@@ -30,6 +30,10 @@ class BookingsController < ApplicationController
       bus_ticket_orders = current_user.bus_ticket_orders.includes(:bus_ticket)
                                       .order(created_at: :desc)
       
+      # Fetch train bookings
+      train_bookings = current_user.train_bookings.includes(:train)
+                                   .order(created_at: :desc)
+      
       # Fetch visa orders
       visa_orders = current_user.visa_orders.includes(visa_product: :country)
                                 .order(created_at: :desc)
@@ -79,6 +83,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'pending')
       hotel_package_orders = hotel_package_orders.where(status: 'pending')
       bus_ticket_orders = bus_ticket_orders.where(status: 'pending')
+      train_bookings = train_bookings.where(status: 'pending')
       visa_orders = visa_orders.where(status: 'pending')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'pending')
       internet_orders = internet_orders.where(status: 'pending')
@@ -91,34 +96,37 @@ class BookingsController < ApplicationController
       ticket_orders = ticket_orders.where(status: 'pending')
     when 'upcoming'
       flight_bookings = flight_bookings.where(status: ['paid', 'completed'])
-                                       .where('bookings.created_at >= ?', Date.today)
+                                       .where('bookings.created_at >= ?', Time.zone.today)
       hotel_bookings = hotel_bookings.where(status: ['paid', 'confirmed'])
-                                     .where('hotel_bookings.check_in_date >= ?', Date.today)
+                                     .where('hotel_bookings.check_in_date >= ?', Time.zone.today)
       tour_group_bookings = tour_group_bookings.where(status: 'confirmed')
-                                               .where('tour_group_bookings.travel_date >= ?', Date.today)
+                                               .where('tour_group_bookings.travel_date >= ?', Time.zone.today)
       car_orders = car_orders.where(status: 'paid')
                              .where('car_orders.pickup_datetime >= ?', DateTime.now)
       hotel_package_orders = hotel_package_orders.where(status: 'paid')
       bus_ticket_orders = bus_ticket_orders.where(status: 'paid')
                                            .joins(:bus_ticket)
-                                           .where('bus_tickets.departure_date >= ?', Date.today)
+                                           .where('bus_tickets.departure_date >= ?', Time.zone.today)
+      train_bookings = train_bookings.where(status: 'paid')
+                                     .joins(:train)
+                                     .where('trains.departure_time >= ?', DateTime.now)
       visa_orders = visa_orders.where(status: ['paid', 'processing'])
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'paid')
                                                  .joins(:abroad_ticket)
-                                                 .where('abroad_tickets.departure_date >= ?', Date.today)
+                                                 .where('abroad_tickets.departure_date >= ?', Time.zone.today)
       internet_orders = internet_orders.where(status: 'paid')
       transfer_orders = transfer_orders.where(status: 'paid')
                                        .where('transfers.pickup_datetime >= ?', DateTime.now)
       custom_travel_requests = custom_travel_requests.where(status: ['contacted', 'matched'])
       cruise_orders = cruise_orders.where(status: ['paid', 'completed'])
       insurance_orders = insurance_orders.where(status: 'paid')
-                                         .where('insurance_orders.start_date >= ?', Date.today)
+                                         .where('insurance_orders.start_date >= ?', Time.zone.today)
       charter_bookings = charter_bookings.where(status: 'paid')
-                                         .where('charter_bookings.departure_date >= ?', Date.today)
+                                         .where('charter_bookings.departure_date >= ?', Time.zone.today)
       activity_orders = activity_orders.where(status: ['paid', 'confirmed'])
-                                       .where('activity_orders.visit_date >= ?', Date.today)
+                                       .where('activity_orders.visit_date >= ?', Time.zone.today)
       ticket_orders = ticket_orders.where(status: ['paid', 'confirmed'])
-                                   .where('ticket_orders.visit_date >= ?', Date.today)
+                                   .where('ticket_orders.visit_date >= ?', Time.zone.today)
     when 'review'
       # 待评价状态 - 已完成但未评价的订单（未实现评价系统，暂时为空）
       flight_bookings = flight_bookings.none
@@ -127,6 +135,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.none
       hotel_package_orders = hotel_package_orders.none
       bus_ticket_orders = bus_ticket_orders.none
+      train_bookings = train_bookings.none
       visa_orders = visa_orders.none
       abroad_ticket_orders = abroad_ticket_orders.none
       internet_orders = internet_orders.none
@@ -144,6 +153,7 @@ class BookingsController < ApplicationController
       car_orders = car_orders.where(status: 'cancelled')
       hotel_package_orders = hotel_package_orders.where(status: 'cancelled')
       bus_ticket_orders = bus_ticket_orders.where(status: 'cancelled')
+      train_bookings = train_bookings.where(status: 'cancelled')
       visa_orders = visa_orders.where(status: 'cancelled')
       abroad_ticket_orders = abroad_ticket_orders.where(status: 'cancelled')
       internet_orders = internet_orders.where(status: 'cancelled')
@@ -164,6 +174,7 @@ class BookingsController < ApplicationController
       car_orders.to_a,
       hotel_package_orders.to_a,
       bus_ticket_orders.to_a,
+      train_bookings.to_a,
       visa_orders.to_a,
       abroad_ticket_orders.to_a,
       internet_orders.to_a,

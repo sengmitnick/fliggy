@@ -22,10 +22,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly flightListTarget: HTMLElement
   declare readonly initialSortValue: string
 
-  // Sort state
+  // Sort state - only one can be active at a time
   private currentSort: string = "default" // default, direct_priority, price_asc, departure_early, departure_late, arrival_early, arrival_late, duration_short
-  private directPriorityActive: boolean = false
-  private pricePriorityActive: boolean = false
 
   connect(): void {
     console.log("FlightSort controller connected")
@@ -33,27 +31,19 @@ export default class extends Controller<HTMLElement> {
     // Initialize sort state based on initialSort value
     if (this.initialSortValue === "price_asc") {
       this.currentSort = "price_asc"
-      this.pricePriorityActive = true
-      this.pricePriorityButtonTarget.classList.add("border-b-2", "border-black")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
+      this.updateActiveButton("price")
     }
   }
 
   // Toggle direct flight priority
   toggleDirectPriority(): void {
-    this.directPriorityActive = !this.directPriorityActive
-    
-    if (this.directPriorityActive) {
-      this.currentSort = "direct_priority"
-      this.directPriorityButtonTarget.classList.add("border-b-2", "border-black")
-      this.directPriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
-      this.directPriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
-    } else {
+    // If already active, deactivate; otherwise activate
+    if (this.currentSort === "direct_priority") {
       this.currentSort = "default"
-      this.directPriorityButtonTarget.classList.remove("border-b-2", "border-black")
-      this.directPriorityButtonTarget.querySelector("span")?.classList.remove("font-bold")
-      this.directPriorityButtonTarget.querySelector("span")?.classList.add("text-gray-600")
+      this.clearAllActiveStates()
+    } else {
+      this.currentSort = "direct_priority"
+      this.updateActiveButton("direct")
     }
     
     this.applySort()
@@ -61,18 +51,13 @@ export default class extends Controller<HTMLElement> {
 
   // Toggle price priority (low price first)
   togglePricePriority(): void {
-    this.pricePriorityActive = !this.pricePriorityActive
-    
-    if (this.pricePriorityActive) {
-      this.currentSort = "price_asc"
-      this.pricePriorityButtonTarget.classList.add("border-b-2", "border-black")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
-    } else {
+    // If already active, deactivate; otherwise activate
+    if (this.currentSort === "price_asc") {
       this.currentSort = "default"
-      this.pricePriorityButtonTarget.classList.remove("border-b-2", "border-black")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("font-bold")
-      this.pricePriorityButtonTarget.querySelector("span")?.classList.add("text-gray-600")
+      this.clearAllActiveStates()
+    } else {
+      this.currentSort = "price_asc"
+      this.updateActiveButton("price")
     }
     
     this.applySort()
@@ -113,6 +98,9 @@ export default class extends Controller<HTMLElement> {
     // Update time sort button text and state
     this.updateTimeSortButtonText(sortType)
     
+    // Clear other buttons' active states
+    this.updateActiveButton("time")
+    
     this.applySort()
     this.closeModal()
   }
@@ -133,8 +121,46 @@ export default class extends Controller<HTMLElement> {
       if (span) {
         span.textContent = buttonText
       }
-      
-      // Update button active state
+    }
+  }
+  
+  // Clear all buttons' active states
+  private clearAllActiveStates(): void {
+    // Clear direct priority button
+    this.directPriorityButtonTarget.classList.remove("border-b-2", "border-black")
+    this.directPriorityButtonTarget.querySelector("span")?.classList.remove("font-bold")
+    this.directPriorityButtonTarget.querySelector("span")?.classList.add("text-gray-600")
+    
+    // Clear price priority button
+    this.pricePriorityButtonTarget.classList.remove("border-b-2", "border-black")
+    this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("font-bold")
+    this.pricePriorityButtonTarget.querySelector("span")?.classList.add("text-gray-600")
+    
+    // Clear time sort button
+    this.timeSortButtonTarget.classList.remove("border-b-2", "border-black")
+    this.timeSortButtonTarget.querySelector("span")?.classList.remove("font-bold")
+    this.timeSortButtonTarget.querySelector("span")?.classList.add("text-gray-600")
+    const timeSpan = this.timeSortButtonTarget.querySelector("span")
+    if (timeSpan) {
+      timeSpan.textContent = "时间排序"
+    }
+  }
+  
+  // Update active button state (clear others and activate one)
+  private updateActiveButton(type: "direct" | "price" | "time"): void {
+    // Clear all first
+    this.clearAllActiveStates()
+    
+    // Activate the selected button
+    if (type === "direct") {
+      this.directPriorityButtonTarget.classList.add("border-b-2", "border-black")
+      this.directPriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
+      this.directPriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
+    } else if (type === "price") {
+      this.pricePriorityButtonTarget.classList.add("border-b-2", "border-black")
+      this.pricePriorityButtonTarget.querySelector("span")?.classList.add("font-bold")
+      this.pricePriorityButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
+    } else if (type === "time") {
       this.timeSortButtonTarget.classList.add("border-b-2", "border-black")
       this.timeSortButtonTarget.querySelector("span")?.classList.add("font-bold")
       this.timeSortButtonTarget.querySelector("span")?.classList.remove("text-gray-600")
@@ -151,10 +177,10 @@ export default class extends Controller<HTMLElement> {
     
     switch (this.currentSort) {
       case "direct_priority":
-        // Sort by direct flights first (no transfer indicator)
+        // Sort by direct flights first (using data attribute)
         sortedCards = flightCards.sort((a, b) => {
-          const aDirect = !a.textContent?.includes("中国香港") && !a.textContent?.includes("杭州")
-          const bDirect = !b.textContent?.includes("中国香港") && !b.textContent?.includes("杭州")
+          const aDirect = a.dataset.flightSortIsDirect === 'true'
+          const bDirect = b.dataset.flightSortIsDirect === 'true'
           
           if (aDirect && !bDirect) return -1
           if (!aDirect && bDirect) return 1
@@ -227,16 +253,13 @@ export default class extends Controller<HTMLElement> {
 
   // Extract price from flight card
   private extractPrice(card: HTMLElement): number {
-    const priceText = card.querySelector(".text-red-500.font-bold")?.textContent
-    if (!priceText) return 0
-    
-    const match = priceText.match(/¥(\d+)/)
-    return match ? parseInt(match[1]) : 0
+    const price = card.dataset.flightSortPrice
+    return price ? parseInt(price) : 0
   }
 
   // Extract departure time from flight card (convert to minutes since midnight)
   private extractDepartureTime(card: HTMLElement): number {
-    const timeText = card.querySelector(".text-3xl.font-bold")?.textContent
+    const timeText = card.dataset.flightSortDepartureTime
     if (!timeText) return 0
     
     const match = timeText.match(/(\d+):(\d+)/)
@@ -249,10 +272,7 @@ export default class extends Controller<HTMLElement> {
 
   // Extract arrival time from flight card
   private extractArrivalTime(card: HTMLElement): number {
-    const timeElements = card.querySelectorAll(".text-3xl.font-bold")
-    if (timeElements.length < 2) return 0
-    
-    const timeText = timeElements[1].textContent
+    const timeText = card.dataset.flightSortArrivalTime
     if (!timeText) return 0
     
     const match = timeText.match(/(\d+):(\d+)/)
@@ -270,15 +290,7 @@ export default class extends Controller<HTMLElement> {
 
   // Extract duration from flight card
   private extractDuration(card: HTMLElement): number {
-    const durationText = card.textContent
-    if (!durationText) return 0
-    
-    // Look for patterns like "总4h", "总18h40m", etc.
-    const match = durationText.match(/总(\d+)h(?:(\d+)m)?/)
-    if (!match) return 0
-    
-    const hours = parseInt(match[1])
-    const minutes = match[2] ? parseInt(match[2]) : 0
-    return hours * 60 + minutes
+    const duration = card.dataset.flightSortDuration
+    return duration ? parseInt(duration) : 0
   }
 }

@@ -7,8 +7,8 @@ class HotelBookingsController < ApplicationController
     @booking = HotelBooking.new(
       hotel: @hotel,
       hotel_room: @hotel_room,
-      check_in_date: params[:check_in] || Date.today,
-      check_out_date: params[:check_out] || (Date.today + 1.day),
+      check_in_date: params[:check_in] || Time.zone.today,
+      check_out_date: params[:check_out] || (Time.zone.today + 1.day),
       rooms_count: params[:rooms]&.to_i || 1,
       adults_count: params[:adults]&.to_i || 1,
       children_count: params[:children]&.to_i || 0,

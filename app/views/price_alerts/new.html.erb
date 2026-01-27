@@ -80,7 +80,7 @@
         </label>
         <%= f.date_field :departure_date, 
           class: "w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base",
-          min: Date.today %>
+          min: Time.zone.today %>
         <p class="text-xs text-gray-500 mt-2">留空表示监控所有日期的价格</p>
       </div>
 

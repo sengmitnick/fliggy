@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_26_101218) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_26_144323) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1610,6 +1610,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_101218) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
+    t.bigint "booking_option_id"
+    t.index ["booking_option_id"], name: "index_train_bookings_on_booking_option_id"
     t.index ["data_version"], name: "index_train_bookings_on_data_version"
     t.index ["train_id"], name: "index_train_bookings_on_train_id"
     t.index ["user_id"], name: "index_train_bookings_on_user_id"
@@ -1874,5 +1876,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_26_101218) do
   add_foreign_key "sessions", "users"
   add_foreign_key "tour_group_products", "attractions"
   add_foreign_key "tour_group_products", "travel_agencies"
+  add_foreign_key "train_bookings", "booking_options"
   add_foreign_key "transfers", "transfer_packages"
 end

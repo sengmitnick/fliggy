@@ -20,7 +20,7 @@ class CharteredToursController < ApplicationController
                                      .limit(3)
     
     # 设置默认出发日期为明天
-    @default_departure_date = (Date.today + 1.day).strftime('%m月%d日')
+    @default_departure_date = (Time.zone.today + 1.day).strftime('%m月%d日')
   end
 
   def vehicles

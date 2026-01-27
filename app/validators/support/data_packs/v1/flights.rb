@@ -862,7 +862,6 @@ Flight.insert_all(all_flights)
 total_flights = (start_date..end_date).count * 36
 Flight.where(data_version: 0).find_each(&:generate_offers)
 
-puts "✓ flights_v1 数据包加载完成（共 #{total_flights} 个航班）"
 puts "  - 深圳到北京: 每天4个航班，最低价 550元（共 #{(start_date..end_date).count * 4} 个）"
 puts "  - 上海到深圳: 每天2个航班，最低价 450元（共 #{(start_date..end_date).count * 2} 个）"
 puts "  - 北京往返上海: 每天各3个航班（共 #{(start_date..end_date).count * 6} 个）"

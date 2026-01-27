@@ -2,6 +2,7 @@ class TrainBooking < ApplicationRecord
   include DataVersionable
   belongs_to :user
   belongs_to :train
+  belongs_to :booking_option, optional: true
 
   validates :passenger_name, :passenger_id_number, :contact_phone, :total_price, :seat_type, presence: true
   validates :contact_phone, format: { with: /\A1[3-9]\d{9}\z/, message: "手机号码格式不正确" }
