@@ -46,6 +46,17 @@ class ModelsGenerator < Rails::Generators::Base
       model_name = group[0]
       attributes = group[1..-1] || []
 
+      # Auto-add data_version column for business tables (exclude system models)
+      excluded_models = %w[Administrator Session AdminOplog ValidatorExecution]
+      unless is_destroying || excluded_models.include?(model_name.classify)
+        # Check if data_version is already in attributes
+        has_data_version = attributes.any? { |attr| attr.start_with?('data_version') }
+        unless has_data_version
+          attributes << 'data_version:integer:default=0'
+          say "  → Auto-adding data_version column (required for RLS)", :yellow
+        end
+      end
+
       action_msg = is_destroying ? "Destroying" : "Generating"
       say "\n#{index + 1}. #{action_msg} model: #{model_name} #{attributes.join(' ')}", :cyan
 

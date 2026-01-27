@@ -81,6 +81,9 @@ class ForceRlsOnAllTables < ActiveRecord::Migration[7.2]
     # 过滤掉系统表
     business_tables = all_tables - excluded_tables
 
-    business_tables.sort
+    # 只返回有 data_version 列的表（避免处理尚未添加该列的表）
+    business_tables.select do |table|
+      column_exists?(table, :data_version)
+    end.sort
   end
 end
