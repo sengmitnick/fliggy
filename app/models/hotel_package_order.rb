@@ -10,6 +10,7 @@ class HotelPackageOrder < ApplicationRecord
   validates :booking_type, inclusion: { in: %w[stockup instant] }
   validates :contact_name, presence: true
   validates :contact_phone, presence: true
+  validates :check_in_date, presence: true
 
   before_create :generate_order_number
   before_create :set_purchased_at

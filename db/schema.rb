@@ -964,6 +964,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
     t.string "contact_name"
     t.string "contact_phone"
     t.bigint "data_version", default: 0, null: false
+    t.date "check_in_date"
+    t.date "check_out_date"
     t.index ["data_version"], name: "index_hotel_package_orders_on_data_version"
     t.index ["hotel_package_id"], name: "index_hotel_package_orders_on_hotel_package_id"
     t.index ["order_number"], name: "index_hotel_package_orders_on_order_number"
@@ -1101,6 +1103,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
     t.text "policy_file_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
+    t.index ["data_version"], name: "index_insurance_orders_on_data_version"
     t.index ["insurance_product_id"], name: "index_insurance_orders_on_insurance_product_id"
     t.index ["order_number"], name: "index_insurance_orders_on_order_number", unique: true
     t.index ["related_booking_type", "related_booking_id"], name: "index_insurance_orders_on_related_booking"
@@ -1142,9 +1146,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
     t.integer "sort_order", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0, null: false
     t.index ["active", "sort_order"], name: "index_insurance_products_on_active_and_sort_order"
     t.index ["code"], name: "index_insurance_products_on_code", unique: true
     t.index ["company"], name: "index_insurance_products_on_company"
+    t.index ["data_version"], name: "index_insurance_products_on_data_version"
     t.index ["embedding_code"], name: "index_insurance_products_on_embedding_code"
     t.index ["product_type"], name: "index_insurance_products_on_product_type"
   end
