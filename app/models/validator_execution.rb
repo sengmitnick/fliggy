@@ -51,17 +51,10 @@ class ValidatorExecution < ApplicationRecord
     state_data['validator_class']
   end
   
-  # 设置为活跃状态（同时取消同一用户的其他活跃会话）
+  # 设置为活跃状态（允许同一用户拥有多个活跃会话）
   def activate!
-    transaction do
-      # 取消同一用户的其他活跃会话
-      ValidatorExecution.where(user_id: user_id, is_active: true)
-                        .where.not(id: id)
-                        .update_all(is_active: false)
-      
-      # 激活当前会话
-      update!(is_active: true)
-    end
+    # 直接激活当前会话，不取消其他会话
+    update!(is_active: true)
   end
   
   # 取消活跃状态
@@ -69,9 +62,9 @@ class ValidatorExecution < ApplicationRecord
     update!(is_active: false)
   end
   
-  # 类方法：获取用户的活跃验证会话
+  # 类方法：获取用户的活跃验证会话列表（支持多个并发会话）
   def self.active_for_user(user_id)
-    active.for_user(user_id).order(created_at: :desc).first
+    active.for_user(user_id).order(created_at: :desc)
   end
   
   # 类方法：清理过期的验证会话（超过 1 小时未使用）
