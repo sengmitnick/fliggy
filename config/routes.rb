@@ -302,6 +302,7 @@ Rails.application.routes.draw do
   resources :hotel_package_orders, only: [:new, :create, :show] do
     member do
       get :success
+      patch :pay
     end
   end
   # End routes for hotel_package_orders

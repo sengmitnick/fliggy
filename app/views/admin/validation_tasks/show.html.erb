@@ -22,18 +22,35 @@
       </li>
     </ol>
     
-    <% if @next_task %>
-      <%= link_to admin_validation_task_path(@next_task[:id]), class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors" do %>
-        <span>下一个任务</span>
-        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
+    <div class="flex items-center space-x-3">
+      <!-- 上一个任务按钮 -->
+      <% if @prev_task %>
+        <%= link_to admin_validation_task_path(@prev_task[:id]), class: "inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors" do %>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          <span>上一个任务</span>
+        <% end %>
+      <% else %>
+        <span class="inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
+          <span>已是第一个</span>
+        </span>
       <% end %>
-    <% else %>
-      <span class="inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
-        <span>已是最后一个</span>
-      </span>
-    <% end %>
+      
+      <!-- 下一个任务按钮 -->
+      <% if @next_task %>
+        <%= link_to admin_validation_task_path(@next_task[:id]), class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors" do %>
+          <span>下一个任务</span>
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        <% end %>
+      <% else %>
+        <span class="inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
+          <span>已是最后一个</span>
+        </span>
+      <% end %>
+    </div>
   </nav>
 
   <!-- Task Info Card -->

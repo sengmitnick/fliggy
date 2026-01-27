@@ -1,4 +1,6 @@
 class InsuranceProduct < ApplicationRecord
+  include DataVersionable
+  
   # Validations
   validates :name, presence: true
   validates :company, presence: true

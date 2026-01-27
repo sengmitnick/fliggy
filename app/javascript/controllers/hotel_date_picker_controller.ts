@@ -25,7 +25,8 @@ export default class extends Controller<HTMLElement> {
   static values = {
     checkIn: String,
     checkOut: String,
-    selectingCheckIn: Boolean
+    selectingCheckIn: Boolean,
+    displayMode: { type: String, default: 'nights' } // 'nights' for hotels, 'days' for insurance
   }
 
   declare readonly modalTarget: HTMLElement
@@ -42,6 +43,7 @@ export default class extends Controller<HTMLElement> {
   declare checkInValue: string
   declare checkOutValue: string
   declare selectingCheckInValue: boolean
+  declare displayModeValue: string
 
   private currentMonth: Date = new Date()
   private checkInDate: Date | null = null
@@ -411,8 +413,16 @@ export default class extends Controller<HTMLElement> {
     }
     
     if (this.checkInDate && this.checkOutDate && this.hasNightsDisplayTarget) {
-      const nights = Math.floor((this.checkOutDate.getTime() - this.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
-      this.nightsDisplayTarget.textContent = `${nights}晚`
+      const diffDays = Math.floor((this.checkOutDate.getTime() - this.checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+      
+      if (this.displayModeValue === 'days') {
+        // For insurance: show total days (including start and end date)
+        const days = diffDays + 1
+        this.nightsDisplayTarget.textContent = `${days}天`
+      } else {
+        // For hotels: show nights (excluding end date)
+        this.nightsDisplayTarget.textContent = `${diffDays}晚`
+      }
     }
   }
 

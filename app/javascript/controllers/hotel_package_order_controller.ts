@@ -11,12 +11,7 @@ export default class extends Controller<HTMLElement> {
     "instantTab",
     "bookingTypeInput",
     "contactNameInput",
-    "contactPhoneInput",
-    "confirmModal",
-    "confirmQuantity",
-    "confirmContact",
-    "confirmBookingType",
-    "confirmTotalPrice"
+    "contactPhoneInput"
   ]
 
   declare readonly quantityInputTarget: HTMLInputElement
@@ -29,14 +24,6 @@ export default class extends Controller<HTMLElement> {
   declare readonly bookingTypeInputTarget: HTMLInputElement
   declare readonly contactNameInputTarget: HTMLInputElement
   declare readonly contactPhoneInputTarget: HTMLInputElement
-  declare readonly confirmModalTarget: HTMLElement
-  declare readonly confirmQuantityTarget: HTMLElement
-  declare readonly confirmContactTarget: HTMLElement
-  declare readonly confirmBookingTypeTarget: HTMLElement
-  declare readonly confirmTotalPriceTarget: HTMLElement
-
-  private pendingFormData: FormData | null = null
-  private allowSubmission: boolean = false
 
   connect(): void {
     console.log("HotelPackageOrder connected")
@@ -77,9 +64,6 @@ export default class extends Controller<HTMLElement> {
     
     // Update bottom price (integer only)
     this.bottomPriceTarget.textContent = Math.round(totalPrice).toString()
-    
-    // Update payment confirmation amount
-    this.updatePaymentConfirmationAmount(Math.round(totalPrice))
   }
 
   updateButtonStates(): void {
@@ -146,122 +130,12 @@ export default class extends Controller<HTMLElement> {
   }
 
   handleSubmit(event: Event): void {
-    // Allow submission if flag is set
-    if (this.allowSubmission) {
-      console.log('Allowing form submission')
-      return
-    }
-    
-    event.preventDefault()
-    
-    // Validate contact info
+    // Validate contact info before submission
     if (!this.contactNameInputTarget.value || !this.contactPhoneInputTarget.value) {
+      event.preventDefault()
       alert('请选择联系人')
       return
     }
-    
-    // Store form data for later submission
-    // stimulus-validator: disable-next-line
-    const form = this.element.querySelector('form') as HTMLFormElement
-    if (form) {
-      this.pendingFormData = new FormData(form)
-    }
-    
-    // Update modal with current form values
-    this.updateConfirmModal()
-    
-    // Show modal
-    this.showConfirmModal()
-  }
-
-  updateConfirmModal(): void {
-    // Update quantity
-    const quantity = this.quantityInputTarget.value
-    this.confirmQuantityTarget.textContent = quantity
-    
-    // Update contact
-    const contactName = this.contactNameInputTarget.value
-    const contactPhone = this.contactPhoneInputTarget.value
-    this.confirmContactTarget.textContent = `${contactName} ${contactPhone}`
-    
-    // Update booking type
-    const bookingType = this.bookingTypeInputTarget.value
-    this.confirmBookingTypeTarget.textContent = bookingType === 'stockup' ? '先囤后约' : '立即预约'
-    
-    // Update total price
-    const totalPrice = this.bottomPriceTarget.textContent
-    this.confirmTotalPriceTarget.textContent = totalPrice || '0'
-  }
-
-  showConfirmModal(): void {
-    this.confirmModalTarget.classList.remove('hidden')
-    
-    // Auto-close and show password modal after 2-3 seconds
-    const waitTime = Math.floor(Math.random() * (3000 - 2000 + 1)) + 2000
-    setTimeout(() => {
-      this.closeConfirmModal()
-      this.showPaymentPasswordModal()
-    }, waitTime)
-  }
-
-  closeConfirmModal(): void {
-    this.confirmModalTarget.classList.add('hidden')
-  }
-
-  showPaymentPasswordModal(): void {
-    // Get payment confirmation controller and show password modal
-    const paymentController = this.application.getControllerForElementAndIdentifier(
-      this.element,
-      'payment-confirmation'
-    ) as any
-    
-    if (paymentController && typeof paymentController.showPasswordModal === 'function') {
-      paymentController.showPasswordModal()
-      
-      // Listen for payment success to submit form
-      this.setupPaymentSuccessListener()
-    }
-  }
-
-  setupPaymentSuccessListener(): void {
-    // Override the payment confirmation's processActualPayment to submit our form
-    const paymentController = this.application.getControllerForElementAndIdentifier(
-      this.element,
-      'payment-confirmation'
-    ) as any
-    
-    if (paymentController) {
-      // Completely override the processActualPayment method
-      paymentController.processActualPayment = async () => {
-        // Submit the form immediately - no API call needed
-        this.submitFormWithData()
-      }
-    }
-  }
-
-  submitFormWithData(): void {
-    // stimulus-validator: disable-next-line
-    const form = this.element.querySelector('form') as HTMLFormElement
-    if (form) {
-      console.log('Setting allowSubmission flag and submitting form...')
-      // Set flag to allow submission
-      this.allowSubmission = true
-      // Submit the form using Turbo
-      form.requestSubmit()
-    } else {
-      console.error('Form not found')
-    }
-  }
-
-  updatePaymentConfirmationAmount(amount: number): void {
-    // Update the payment confirmation controller's amount value
-    const paymentController = this.application.getControllerForElementAndIdentifier(
-      this.element,
-      'payment-confirmation'
-    ) as any
-    
-    if (paymentController) {
-      paymentController.amountValue = amount.toString()
-    }
+    // Form will be submitted normally to create pending order
   }
 }

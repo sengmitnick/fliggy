@@ -16,8 +16,9 @@ class Admin::ValidationTasksController < Admin::BaseController
       return
     end
     
-    # 查找下一个任务
+    # 查找上一个和下一个任务
     current_index = @tasks.index { |t| t[:id] == @task[:id] }
+    @prev_task = @tasks[current_index - 1] if current_index && current_index > 0
     @next_task = @tasks[current_index + 1] if current_index && current_index < @tasks.length - 1
   end
 
