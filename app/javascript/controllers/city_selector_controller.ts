@@ -252,6 +252,12 @@ export default class extends Controller<HTMLElement> {
           return
         }
         
+        // Special handling for tickets page - reload with new city parameter
+        if (window.location.pathname === '/tickets') {
+          Turbo.visit(`/tickets?city=${encodeURIComponent(cityName)}`)
+          return
+        }
+        
         // Special handling for hotels/search page - reload with new city parameter
         if (window.location.pathname === '/hotels/search') {
           const url = new URL(window.location.href)
