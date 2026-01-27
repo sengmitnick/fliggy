@@ -18,72 +18,90 @@
     <!-- 首页 Tab -->
     <%= link_to root_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
       <% if active_tab == :home %>
-        <%= image_tag "bottom_navigation/Tab首页-激活.png", class: "w-[40%] h-auto object-contain", style: "max-height: 48px;", alt: "首页" %>
+        <svg class="w-6 h-6 text-[#7D7DE9]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+        </svg>
+        <span class="text-[#7D7DE9] text-xs font-medium">首页</span>
       <% else %>
-        <%= image_tag "bottom_navigation/Tab首页.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "首页" %>
-        <span>首页</span>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span class="text-xs text-gray-600">首页</span>
       <% end %>
     <% end %>
 
     <!-- 会员 Tab -->
     <% if active_tab == :member %>
       <%= link_to members_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
-        <%= image_tag "bottom_navigation/Tab会员-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
-        <span class="text-[#7D7DE9]">会员</span>
+        <svg class="w-6 h-6 text-[#7D7DE9]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+        </svg>
+        <span class="text-[#7D7DE9] text-xs font-medium">会员</span>
       <% end %>
     <% else %>
       <%= link_to members_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
-        <%= image_tag "bottom_navigation/Tab会员.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "会员" %>
-        <span>会员</span>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <span class="text-xs text-gray-600">会员</span>
       <% end %>
     <% end %>
 
     <!-- 消息 Tab -->
     <% if active_tab == :message %>
-      <%= link_to messages_path, class: "flex flex-col items-center justify-center py-1 relative" do %>
-        <%= image_tag "bottom_navigation/Tab消息-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
-        <span class="text-[#7D7DE9]">消息</span>
+      <%= link_to messages_path, class: "flex flex-col items-center justify-center gap-1 py-1 relative" do %>
+        <svg class="w-6 h-6 text-[#7D7DE9]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3.293 3.293 3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+        </svg>
+        <span class="text-[#7D7DE9] text-xs font-medium">消息</span>
         <% if unread_notifications_count > 0 %>
-          <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
-            <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
-          </div>
+          <div class="absolute top-0 right-1/4 w-2 h-2 bg-red-500 rounded-full"></div>
         <% end %>
       <% end %>
     <% else %>
-      <%= link_to messages_path, class: "flex flex-col items-center justify-center py-1 relative" do %>
-        <%= image_tag "bottom_navigation/Tab消息.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "消息" %>
-        <span>消息</span>
+      <%= link_to messages_path, class: "flex flex-col items-center justify-center gap-1 py-1 relative" do %>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-xs text-gray-600">消息</span>
         <% if unread_notifications_count > 0 %>
-          <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
-            <div class="ml-[20px] w-2 h-2 bg-red-500 rounded-full"></div>
-          </div>
+          <div class="absolute top-0 right-1/4 w-2 h-2 bg-red-500 rounded-full"></div>
         <% end %>
       <% end %>
     <% end %>
 
     <!-- 行程 Tab -->
     <% if active_tab == :trip %>
-      <%= link_to trips_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "bottom_navigation/Tab行程-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
-        <span class="text-[#7D7DE9]">行程</span>
+      <%= link_to trips_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
+        <svg class="w-6 h-6 text-[#7D7DE9]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+          <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-[#7D7DE9] text-xs font-medium">行程</span>
       <% end %>
     <% else %>
-      <%= link_to trips_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "bottom_navigation/Tab行程.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "行程" %>
-        <span>行程</span>
+      <%= link_to trips_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+        </svg>
+        <span class="text-xs text-gray-600">行程</span>
       <% end %>
     <% end %>
 
     <!-- 我的 Tab -->
     <% if active_tab == :profile %>
-      <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "bottom_navigation/Tab我的-激活.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
-        <span class="text-[#7D7DE9]">我的</span>
+      <%= link_to profile_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
+        <svg class="w-6 h-6 text-[#7D7DE9]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+        <span class="text-[#7D7DE9] text-xs font-medium">我的</span>
       <% end %>
     <% else %>
-      <%= link_to profile_path, class: "flex flex-col items-center justify-center py-1" do %>
-        <%= image_tag "bottom_navigation/Tab我的.png", class: "w-[30%] h-auto object-contain", style: "max-height: 36px;", alt: "我的" %>
-        <span>我的</span>
+      <%= link_to profile_path, class: "flex flex-col items-center justify-center gap-1 py-1" do %>
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+        <span class="text-xs text-gray-600">我的</span>
       <% end %>
     <% end %>
   </div>
