@@ -54,23 +54,60 @@ class ApplicationController < ActionController::Base
   end
   
   # 恢复验证器执行上下文（设置 data_version）
+  # 
+  # 多会话支持流程：
+  # 1. APK 通过 Deeplink 传递 session_id: ai.clacky.trip01://?session_id=xxx
+  # 2. ValidatorSessionBinder 中间件提取并存储到独立 cookie: validator_session_id
+  # 3. 此方法优先使用 cookie 中的 session_id，确保用户明确知道操作的会话
+  # 4. 如果未绑定，回退到最新活跃会话（兼容单会话模式）
+  # 
+  # WHY COOKIE INSTEAD OF RAILS SESSION?
+  # - Rails session is shared across all tabs → multi-tab validation fails
+  # - Independent cookie allows each tab to maintain its own session_id
   def restore_validator_context
     return unless user_signed_in?
     
     begin
-      # 查找当前用户的活跃验证会话
-      execution = ValidatorExecution.active_for_user(current_user.id)
+      execution = nil
+      
+      # 优先级 1: 从独立 cookie 读取绑定的会话 ID（APK Deeplink 传参）
+      cookie_session_id = cookies['validator_session_id']
+      if cookie_session_id.present?
+        execution = ValidatorExecution.find_by(
+          execution_id: cookie_session_id,
+          user_id: current_user.id
+        )
+        
+        if execution
+          Rails.logger.info "[Validator Context] Using bound session from cookie: #{execution.execution_id}"
+        else
+          Rails.logger.warn "[Validator Context] Bound session not found: #{cookie_session_id}, falling back to latest active session"
+          cookies.delete('validator_session_id')  # 清理无效的 session_id
+        end
+      end
+      
+      # 优先级 2: 查找最新活跃会话（兼容旧行为，单会话模式）
+      unless execution
+        execution = ValidatorExecution.active_for_user(current_user.id).first
+        if execution
+          Rails.logger.info "[Validator Context] Using latest active session: #{execution.execution_id}"
+        end
+      end
+      
       return unless execution
       
       # 获取 data_version
       data_version = execution.data_version
       return unless data_version
       
-      # 设置 PostgreSQL 会话变量（连接级别）
-      # 使用 SET SESSION 而非 SET LOCAL，确保整个连接生命周期有效
-      # 这样 AI 创建的数据会自动标记为当前验证器版本
-      # RLS 策略也会自动过滤查询，只返回基线 + 当前版本的数据
-      ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '#{data_version}'")
+      # 设置 PostgreSQL 会话变量（请求级别）
+      # ⚠️ 必须每次请求都设置，因为 Rails 连接池会复用连接
+      # 如果不在每个请求重新设置，不同 session_id 会共享同一个连接的 data_version
+      # 导致会话隔离失败！
+      # 
+      # 这里使用普通的 SET（等同于 SET SESSION），但通过 before_action 确保每次请求都执行
+      # 这样即使连接被复用，data_version 也会被正确更新
+      ActiveRecord::Base.connection.execute("SET app.data_version = '#{data_version}'")
       
       Rails.logger.debug "[Validator Context] Restored data_version=#{data_version} for user #{current_user.id} (execution #{execution.execution_id})"
     rescue StandardError => e

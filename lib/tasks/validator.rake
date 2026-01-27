@@ -11,11 +11,19 @@ namespace :validator do
     puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
     begin
+      # 建立超级用户连接（用于清理数据库）
+      # 使用 test 环境的 postgres 配置（密码：pgBqpmYZ）
+      admin_config = ActiveRecord::Base.connection_db_config.configuration_hash.merge(
+        username: 'postgres',
+        password: 'pgBqpmYZ'
+      )
+      admin_conn = ActiveRecord::Base.establish_connection(admin_config).connection
+      
       # 禁用外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'replica';")
+      admin_conn.execute("SET session_replication_role = 'replica';")
       
       # 获取所有表名（排除 schema_migrations, ar_internal_metadata, good_jobs 相关表）
-      tables = ActiveRecord::Base.connection.tables - [
+      tables = admin_conn.tables - [
         'schema_migrations', 
         'ar_internal_metadata',
         'good_jobs',
@@ -27,23 +35,31 @@ namespace :validator do
       
       deleted_total = 0
       tables.each do |table|
-        count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
+        count = admin_conn.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
         if count > 0
           # RESTART IDENTITY resets the sequence counters
-          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
+          admin_conn.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
           deleted_total += count
           puts "  → #{table}: 清空 #{count} 条记录"
         end
       end
       
       # 恢复外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';")
+      admin_conn.execute("SET session_replication_role = 'origin';")
+      
+      # 恢复到 app_user 连接
+      ActiveRecord::Base.establish_connection(:development)
       
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"
-      # 确保恢复外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';") rescue nil
+      # 确保恢复外键约束检查和连接
+      begin
+        admin_conn.execute("SET session_replication_role = 'origin';") if defined?(admin_conn)
+      rescue
+        # ignore
+      end
+      ActiveRecord::Base.establish_connection(:development) rescue nil
       exit 1
     end
     

@@ -24,6 +24,38 @@ fi
 echo "If running the rails server then create or migrate existing database"
 
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
+  # 生产环境：创建 app_user 角色（RLS 策略需要）
+  if [ "${RAILS_ENV}" == "production" ]; then
+    echo "[Production] Initializing database roles for RLS policies..."
+    
+    # 获取数据库连接信息
+    DB_USER="${DB_USER:-travel01}"
+    DB_PASSWORD="${DB_PASSWORD}"
+    DB_HOST="${DB_HOST:-db}"
+    DB_NAME="${DB_NAME:-travel01_production}"
+    
+    # 使用 psql 创建角色（需要超级用户权限）
+    PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "
+      DO \$\$
+      BEGIN
+         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
+            CREATE ROLE app_user WITH LOGIN NOSUPERUSER PASSWORD '${DB_PASSWORD}';
+            RAISE NOTICE 'Created role: app_user';
+         END IF;
+      END
+      \$\$;
+      
+      GRANT CONNECT ON DATABASE ${DB_NAME} TO app_user;
+      GRANT USAGE, CREATE ON SCHEMA public TO app_user;
+      GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+      GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_user;
+    " 2>/dev/null || echo "[Warning] Failed to create app_user role (may already exist or insufficient permissions)"
+    
+    echo "[Production] Role initialization complete"
+  fi
+  
   ./bin/rails db:prepare
 fi
 
