@@ -3,7 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = ["quantity", "totalPrice", "contactName", "contactPhone", "dateRange",
     "mailTab", "pickupTab", "addressSection", "mailAddress",
-    "datePickerModal", "startDate", "endDate"]
+    "datePickerModal", "startDate", "endDate", "addressPickerModal",
+    "pickupLocationModal", "pickupLocationCity", "pickupLocationDistrict",
+    "cityTab", "cityContent", "pickupLocationRadio"]
   
   declare readonly quantityTarget: HTMLElement
   declare readonly totalPriceTarget: HTMLElement
@@ -15,6 +17,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly addressSectionTarget: HTMLElement
   declare readonly mailAddressTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
+  declare readonly hasContactNameTarget: boolean
+  declare readonly hasContactPhoneTarget: boolean
   declare readonly hasMailTabTarget: boolean
   declare readonly hasPickupTabTarget: boolean
   declare readonly hasAddressSectionTarget: boolean
@@ -26,11 +30,26 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasStartDateTarget: boolean
   declare readonly hasEndDateTarget: boolean
   declare readonly hasDateRangeTarget: boolean
+  declare readonly addressPickerModalTarget: HTMLElement
+  declare readonly hasAddressPickerModalTarget: boolean
+  declare readonly pickupLocationModalTarget: HTMLElement
+  declare readonly pickupLocationCityTarget: HTMLElement
+  declare readonly pickupLocationDistrictTarget: HTMLElement
+  declare readonly cityTabTargets: HTMLElement[]
+  declare readonly cityContentTargets: HTMLElement[]
+  declare readonly pickupLocationRadioTargets: HTMLElement[]
+  declare readonly hasPickupLocationModalTarget: boolean
+  declare readonly hasPickupLocationCityTarget: boolean
+  declare readonly hasPickupLocationDistrictTarget: boolean
 
   private selectedPlanId: string = ""
   private dailyPrice: number = 17
   private days: number = 7
   private currentDeliveryMethod: string = 'pickup'
+  private deposit: number = 500  // 押金
+  private selectedPickupLocationId: string = ""
+  private selectedCity: string = ""
+  private tempSelectedPickupLocation: { id: string, city: string, district: string } | null = null
 
   connect(): void {
     // 初始化默认选中的套餐价格
@@ -155,12 +174,18 @@ export default class extends Controller<HTMLElement> {
   }
 
   // 更新日期范围（验证结束日期>=开始日期）
-  updateDateRange(): void {
+  updateDateRange(event: Event): void {
     if (this.hasStartDateTarget && this.hasEndDateTarget) {
       const start = new Date(this.startDateTarget.value)
       const end = new Date(this.endDateTarget.value)
       if (end < start) {
         this.endDateTarget.value = this.startDateTarget.value
+      }
+      
+      // 如果是结束日期变化，自动确认并关闭
+      const target = event.target as HTMLInputElement
+      if (target === this.endDateTarget && this.endDateTarget.value) {
+        this.confirmDateSelection()
       }
     }
   }
@@ -196,6 +221,136 @@ export default class extends Controller<HTMLElement> {
     return `${month}月${day}日`
   }
 
+  // 打开收货地址选择器
+  openAddressPicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasAddressPickerModalTarget) {
+      this.addressPickerModalTarget.classList.remove('hidden')
+    }
+  }
+
+  // 关闭收货地址选择器
+  closeAddressPicker(): void {
+    if (this.hasAddressPickerModalTarget) {
+      this.addressPickerModalTarget.classList.add('hidden')
+    }
+  }
+
+  // 选择收货地址
+  selectAddress(event: Event): void {
+    const card = event.currentTarget as HTMLElement
+    const name = card.dataset.addressName || ""
+    const phone = card.dataset.addressPhone || ""
+    
+    // 填充姓名和电话
+    if (this.hasContactNameTarget && name) {
+      this.contactNameTarget.value = name
+    }
+    if (this.hasContactPhoneTarget && phone) {
+      this.contactPhoneTarget.value = phone
+    }
+    
+    // 关闭模态框
+    this.closeAddressPicker()
+  }
+
+  // 打开自取地点选择器
+  openPickupLocationPicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasPickupLocationModalTarget) {
+      this.pickupLocationModalTarget.classList.remove('hidden')
+    }
+  }
+
+  // 关闭自取地点选择器
+  closePickupLocationPicker(): void {
+    if (this.hasPickupLocationModalTarget) {
+      this.pickupLocationModalTarget.classList.add('hidden')
+      // 重置临时选择
+      this.tempSelectedPickupLocation = null
+      this.clearPickupLocationRadios()
+    }
+  }
+
+  // 选择城市
+  selectCity(event: Event): void {
+    const tab = event.currentTarget as HTMLElement
+    const city = tab.dataset.city || ""
+    
+    // 更新城市Tab样式
+    this.cityTabTargets.forEach(t => {
+      if (t === tab) {
+        t.classList.add('bg-white', 'text-gray-900', 'border-l-2', 'border-[#FFDD00]')
+        t.classList.remove('text-gray-600')
+      } else {
+        t.classList.remove('bg-white', 'text-gray-900', 'border-l-2', 'border-[#FFDD00]')
+        t.classList.add('text-gray-600')
+      }
+    })
+    
+    // 显示对应城市的地点列表
+    this.cityContentTargets.forEach(content => {
+      if (content.dataset.city === city) {
+        content.classList.remove('hidden')
+      } else {
+        content.classList.add('hidden')
+      }
+    })
+    
+    this.selectedCity = city
+  }
+
+  // 选择自取地点
+  selectPickupLocation(event: Event): void {
+    const locationDiv = event.currentTarget as HTMLElement
+    const locationId = locationDiv.dataset.locationId || ""
+    const city = locationDiv.dataset.locationCity || ""
+    const district = locationDiv.dataset.locationDistrict || ""
+    
+    // 保存临时选择
+    this.tempSelectedPickupLocation = { id: locationId, city, district }
+    
+    // 清除所有单选框的选中状态
+    this.clearPickupLocationRadios()
+    
+    // 更新当前选中的单选框样式
+    const radio = locationDiv.querySelector('[data-wifi-booking-target="pickupLocationRadio"]') as HTMLElement
+    if (radio) {
+      radio.classList.remove('border-gray-300')
+      radio.classList.add('bg-[#FFDD00]', 'border-[#FFDD00]')
+      const checkmarkSVG = '<svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" '
+        + 'viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" '
+        + 'stroke-width="3" d="M5 13l4 4L19 7"></path></svg>'
+      radio.innerHTML = checkmarkSVG
+    }
+  }
+
+  // 确认自取地点选择
+  confirmPickupLocation(): void {
+    if (this.tempSelectedPickupLocation) {
+      this.selectedPickupLocationId = this.tempSelectedPickupLocation.id
+      
+      // 更新显示
+      if (this.hasPickupLocationCityTarget) {
+        this.pickupLocationCityTarget.textContent = this.tempSelectedPickupLocation.city
+      }
+      if (this.hasPickupLocationDistrictTarget) {
+        this.pickupLocationDistrictTarget.textContent = this.tempSelectedPickupLocation.district
+      }
+    }
+    
+    this.closePickupLocationPicker()
+  }
+
+  // 清除所有单选框的选中状态
+  private clearPickupLocationRadios(): void {
+    this.pickupLocationRadioTargets.forEach(radio => {
+      radio.classList.remove('bg-[#FFDD00]', 'border-[#FFDD00]')
+      radio.classList.add('border-gray-300')
+      radio.innerHTML = ''
+    })
+  }
+
   increase(): void {
     const currentQty = parseInt(this.quantityTarget.textContent || "1")
     this.quantityTarget.textContent = (currentQty + 1).toString()
@@ -212,7 +367,7 @@ export default class extends Controller<HTMLElement> {
 
   private updateTotalPrice(): void {
     const quantity = parseInt(this.quantityTarget.textContent || "1")
-    const total = this.dailyPrice * this.days * quantity
+    const total = this.dailyPrice * this.days * quantity + this.deposit  // 加上押金
     if (this.hasTotalPriceTarget) {
       this.totalPriceTarget.textContent = total.toFixed(0)
     }

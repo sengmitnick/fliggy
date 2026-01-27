@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_27_090919) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_27_103844) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1338,6 +1338,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_090919) do
     t.index ["data_version"], name: "index_passengers_on_data_version"
     t.index ["user_id", "is_self"], name: "index_passengers_on_user_id_and_is_self"
     t.index ["user_id"], name: "index_passengers_on_user_id"
+  end
+
+  create_table "pickup_locations", force: :cascade do |t|
+    t.string "city"
+    t.string "district"
+    t.text "detail"
+    t.string "phone"
+    t.string "business_hours"
+    t.text "notes"
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0
   end
 
   create_table "price_alerts", force: :cascade do |t|

@@ -79,10 +79,10 @@
     <!-- 收货/取件地址 -->
     <div class="flex justify-between items-start" data-wifi-booking-target="addressSection">
       <span class="font-medium text-gray-900 mt-1">取件地址</span>
-      <div class="flex items-center space-x-1 text-right cursor-pointer">
+      <div class="flex items-center space-x-1 text-right cursor-pointer" data-action="click->wifi-booking#openPickupLocationPicker">
         <div>
-          <div class="text-gray-900 text-sm">深圳 市区</div>
-          <div class="text-gray-400 text-xs">(24小时 (北京时间) )</div>
+          <div class="text-gray-900 text-sm" data-wifi-booking-target="pickupLocationCity">南宁</div>
+          <div class="text-gray-400 text-xs" data-wifi-booking-target="pickupLocationDistrict">市区</div>
         </div>
         <svg class="w-4 h-4 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -125,9 +125,9 @@
     <!-- 联系人姓名 -->
     <div class="flex justify-between items-center">
       <span class="font-medium text-gray-900">联系人姓名</span>
-      <div class="flex items-center space-x-1">
-        <% if current_user.passengers.any? %>
-          <input type="text" value="<%= current_user.passengers.first.name %>" 
+      <div class="flex items-center space-x-1 cursor-pointer" data-action="click->wifi-booking#openAddressPicker">
+        <% if current_user.addresses.any? %>
+          <input type="text" value="<%= current_user.addresses.first.name %>" 
                  class="text-right text-sm text-gray-900 outline-none w-32" 
                  placeholder="请输入联系人姓名"
                  data-wifi-booking-target="contactName">
@@ -146,8 +146,8 @@
     <!-- 联系人电话 -->
     <div class="flex justify-between items-center pb-3">
       <span class="font-medium text-gray-900">联系人电话</span>
-      <% if current_user.passengers.any? %>
-        <input type="tel" value="<%= current_user.passengers.first.phone %>" 
+      <% if current_user.addresses.any? %>
+        <input type="tel" value="<%= current_user.addresses.first.phone %>" 
                class="text-right text-sm text-gray-900 outline-none w-40" 
                placeholder="请输入联系人电话"
                data-wifi-booking-target="contactPhone">
@@ -164,7 +164,7 @@
   <div class="bg-[#F7F8FA] rounded-xl pt-4 pb-2 px-4">
     <div class="flex justify-between items-center mb-2">
       <span class="font-medium text-gray-900">预订须知</span>
-      <div class="flex items-center text-blue-500 text-xs cursor-pointer">
+      <div class="flex items-center text-blue-500 text-xs cursor-pointer" onclick="window.showToast('精彩即将上线')">
         <span>查看预订须知</span>
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -188,9 +188,9 @@
 </div>
 
 <!-- 日期选择器模态框 -->
-<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end" 
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
      data-wifi-booking-target="datePickerModal">
-  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto p-4">
+  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto p-4 pb-24">
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-bold">选择日期</h3>
       <button data-action="click->wifi-booking#closeDatePicker" class="text-gray-400">
@@ -225,13 +225,138 @@
   </div>
 </div>
 
+<!-- 收货地址选择器模态框 -->
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
+     data-wifi-booking-target="addressPickerModal">
+  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto p-4 pb-24">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold">选择收货地址</h3>
+      <button data-action="click->wifi-booking#closeAddressPicker" class="text-gray-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- 收货地址列表 -->
+    <div class="space-y-2 max-h-96 overflow-y-auto">
+      <% if current_user.addresses.any? %>
+        <% current_user.addresses.each do |address| %>
+          <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if address.is_default %>"
+               data-action="click->wifi-booking#selectAddress"
+               data-address-name="<%= address.name %>"
+               data-address-phone="<%= address.phone %>">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center mb-1">
+                  <span class="font-medium text-gray-900"><%= address.name %></span>
+                  <span class="ml-2 text-gray-600"><%= address.phone %></span>
+                  <% if address.is_default %>
+                    <span class="ml-2 text-xs bg-[#FFDD00] text-black px-2 py-0.5 rounded">默认</span>
+                  <% end %>
+                </div>
+                <div class="text-sm text-gray-500"><%= address.full_address %></div>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8 text-gray-500">
+          <p>暂无收货地址</p>
+          <p class="text-sm mt-2">请手动输入联系人信息</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- 自取地点选择器模态框 -->
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
+     data-wifi-booking-target="pickupLocationModal">
+  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto h-[80vh] flex flex-col">
+    <!-- 标题 -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+      <h3 class="text-lg font-bold">自取地点选择</h3>
+      <button data-action="click->wifi-booking#closePickupLocationPicker" class="text-gray-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- 主体内容 - 两栏布局 -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- 左侧城市列表 -->
+      <div class="w-32 bg-gray-50 overflow-y-auto">
+        <% PickupLocation.active.pluck(:city).uniq.each_with_index do |city, index| %>
+          <div class="px-4 py-3 text-sm cursor-pointer <%= index == 0 ? 'bg-white text-gray-900 border-l-2 border-[#FFDD00]' : 'text-gray-600' %>" 
+               data-action="click->wifi-booking#selectCity"
+               data-city="<%= city %>"
+               data-wifi-booking-target="cityTab">
+            <%= city %>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- 右侧地点详情 -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <% PickupLocation.active.pluck(:city).uniq.each_with_index do |city, city_index| %>
+          <div class="<%= city_index == 0 ? '' : 'hidden' %>" data-wifi-booking-target="cityContent" data-city="<%= city %>">
+            <h4 class="text-base font-bold mb-3 text-gray-900">市区</h4>
+            
+            <% PickupLocation.active.where(city: city).each do |location| %>
+              <div class="mb-4 pb-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 rounded-lg p-3 -mx-3"
+                   data-action="click->wifi-booking#selectPickupLocation"
+                   data-location-id="<%= location.id %>"
+                   data-location-city="<%= location.city %>"
+                   data-location-district="<%= location.district %>">
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex-1">
+                    <div class="font-medium text-gray-900 mb-1"><%= location.district %></div>
+                    <div class="text-xs text-gray-500 leading-relaxed mb-2">
+                      <%= location.detail %>
+                    </div>
+                    <div class="flex items-center text-xs text-gray-400 space-x-4">
+                      <span>(<%= location.phone %>)</span>
+                      <span>(<%= location.business_hours %>)</span>
+                    </div>
+                    <% if location.notes.present? %>
+                      <div class="text-xs text-gray-400 mt-1">
+                        <%= location.notes %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="ml-2 flex-shrink-0">
+                    <div class="w-5 h-5 border border-gray-300 rounded-full" data-wifi-booking-target="pickupLocationRadio"></div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- 底部确认按钮 -->
+    <div class="p-4 border-t border-gray-200">
+      <button data-action="click->wifi-booking#confirmPickupLocation"
+              class="w-full bg-[#FFDD00] text-black font-bold py-3 rounded-full">
+        确定
+      </button>
+    </div>
+  </div>
+</div>
+
   <!-- 底部支付栏 -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex justify-between items-center z-50 max-w-[390px] mx-auto">
   <div class="flex flex-col">
     <div class="flex items-baseline">
       <span class="text-sm text-gray-600 mr-2">总计:</span>
       <span class="text-xs text-[#FF4400]">¥</span>
-      <span class="text-2xl font-bold text-[#FF4400]" data-wifi-booking-target="totalPrice"><%= (@wifis.first&.daily_price&.to_i || 17) * 7 %></span>
+      <span class="text-2xl font-bold text-[#FF4400]" data-wifi-booking-target="totalPrice"><%= (@wifis.first&.daily_price&.to_i || 17) * 7 + (@wifis.first&.deposit&.to_i || 500) %></span>
     </div>
     <div class="text-[10px] text-gray-400">押金¥<%= @wifis.first&.deposit&.to_i || 500 %>将在归还后7个工作日内退回</div>
   </div>
