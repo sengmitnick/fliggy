@@ -275,7 +275,7 @@ EOF_SQL
 
     # 9.1 加载数据包（使用超级管理员权限）
     print_info "使用超级管理员加载数据包..."
-    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD='${DB_PASSWORD}' ADMIN_DB_URL='postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}' bundle exec rake validator:reset_baseline" 2>&1 | tee /tmp/data_load.log
+    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD=\"${DB_PASSWORD}\" ADMIN_DB_URL=\"postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}\" bundle exec rake validator:reset_baseline" 2>&1 | tee /tmp/data_load.log
 
     if grep -q "基线数据重置成功" /tmp/data_load.log; then
         print_success "数据包加载完成"
@@ -287,7 +287,7 @@ EOF_SQL
 
     # 9.2 启用 RLS 强制策略
     print_info "启用多会话隔离（RLS FORCE）..."
-    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD='${DB_PASSWORD}' ADMIN_DB_URL='postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}' bundle exec rake rls:force_enable" 2>&1
+    docker-compose -f $COMPOSE_FILE exec -T web bash -c "PGPASSWORD=\"${DB_PASSWORD}\" ADMIN_DB_URL=\"postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}\" bundle exec rake rls:force_enable" 2>&1
 
     if [ $? -eq 0 ]; then
         print_success "RLS 策略已启用"

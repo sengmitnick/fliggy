@@ -79,7 +79,7 @@ namespace :validator do
     puts "\n📦 Step 2: 重新加载数据包..."
 
     # 强制重新建立连接（确保连接池完全刷新）
-    ActiveRecord::Base.clear_all_connections!
+    ActiveRecord::Base.connection_handler.clear_all_connections!(:all)
     ActiveRecord::Base.establish_connection(Rails.env.to_sym)
 
     # 设置 PostgreSQL 会话变量 app.data_version='0'
