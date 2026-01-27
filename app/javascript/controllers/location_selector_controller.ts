@@ -12,6 +12,8 @@ export default class extends Controller<HTMLElement> {
   static values = {
     locationType: String, // "from" or "to"
     currentCity: String, // current selected city
+    arrivalCity: String, // arrival city from flight (for transfers)
+    apiEndpoint: { type: String, default: "/cars/locations" }, // API endpoint for locations
   }
 
   declare readonly modalTarget: HTMLElement
@@ -23,6 +25,9 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasLocationDisplayTarget: boolean
   declare readonly locationTypeValue: string
   declare currentCityValue: string
+  declare readonly arrivalCityValue: string
+  declare readonly hasArrivalCityValue: boolean
+  declare readonly apiEndpointValue: string
 
   private selectedLocation: { name: string; address: string } | null = null
 
@@ -41,7 +46,14 @@ export default class extends Controller<HTMLElement> {
 
   // Initialize current city from the page
   private initializeCurrentCity(): void {
-    // Try to get city from car-rental-tabs city display
+    // For transfers page: use arrival city from flight data
+    if (this.hasArrivalCityValue && this.arrivalCityValue) {
+      this.currentCityValue = this.arrivalCityValue
+      console.log('LocationSelector: Using arrival city from flight:', this.currentCityValue)
+      return
+    }
+    
+    // For car rental page: try to get city from car-rental-tabs city display
     const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
     if (cityDisplay && cityDisplay.textContent) {
       this.currentCityValue = cityDisplay.textContent.trim()
@@ -63,51 +75,56 @@ export default class extends Controller<HTMLElement> {
 
   openModal(): void {
     console.log('[LocationSelector] ========== openModal START ===========')
-    // CRITICAL: Always sync with DOM to ensure we have the current city
-    // This handles both initial load and city changes
     
-    // Check if we're selecting return location (异地还车)
-    const carRentalController = this.application.getControllerForElementAndIdentifier(
-      document.querySelector('[data-controller*="car-rental-tabs"]') as Element,
-      'car-rental-tabs'
-    ) as any
-    
-    let cityToUse = ''
-    if (carRentalController) {
-      const selectionType = (carRentalController as any).currentSelectionType
-      console.log('[LocationSelector] Selection type:', selectionType)
+    // For transfers page: use arrival city from flight data (already set in initializeCurrentCity)
+    if (this.hasArrivalCityValue && this.arrivalCityValue) {
+      console.log('[LocationSelector] Using arrival city for transfers:', this.arrivalCityValue)
+      this.currentCityValue = this.arrivalCityValue
+    } else {
+      // For car rental page: sync with DOM to ensure we have the current city
+      // Check if we're selecting return location (异地还车)
+      const carRentalController = this.application.getControllerForElementAndIdentifier(
+        document.querySelector('[data-controller*="car-rental-tabs"]') as Element,
+        'car-rental-tabs'
+      ) as any
       
-      if (selectionType === 'return') {
-        // Use return city for return location selection
-        const returnCityDisplay = document.querySelector('[data-car-rental-tabs-target="returnCityDisplay"]')
-        if (returnCityDisplay && returnCityDisplay.textContent) {
-          cityToUse = returnCityDisplay.textContent.trim()
-          console.log('[LocationSelector] Using return city:', cityToUse)
+      let cityToUse = ''
+      if (carRentalController) {
+        const selectionType = (carRentalController as any).currentSelectionType
+        console.log('[LocationSelector] Selection type:', selectionType)
+        
+        if (selectionType === 'return') {
+          // Use return city for return location selection
+          const returnCityDisplay = document.querySelector('[data-car-rental-tabs-target="returnCityDisplay"]')
+          if (returnCityDisplay && returnCityDisplay.textContent) {
+            cityToUse = returnCityDisplay.textContent.trim()
+            console.log('[LocationSelector] Using return city:', cityToUse)
+          }
         }
       }
-    }
-    
-    // If no return city specified, use pickup city
-    if (!cityToUse) {
-      const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
-      if (cityDisplay && cityDisplay.textContent) {
-        cityToUse = cityDisplay.textContent.trim()
-        console.log('[LocationSelector] Using pickup city:', cityToUse)
+      
+      // If no return city specified, use pickup city
+      if (!cityToUse) {
+        const cityDisplay = document.querySelector('[data-car-rental-tabs-target="cityDisplay"]')
+        if (cityDisplay && cityDisplay.textContent) {
+          cityToUse = cityDisplay.textContent.trim()
+          console.log('[LocationSelector] Using pickup city:', cityToUse)
+        }
       }
-    }
-    
-    // Clean the city name
-    if (cityToUse) {
-      // Trim first, then remove zero-width characters and normalize consecutive spaces
-      cityToUse = cityToUse.replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
-      cityToUse = cityToUse.replace(/\s+/g, '') // Remove all spaces (Chinese city names don't have spaces)
-      console.log('[LocationSelector] DOM city cleaned:', JSON.stringify(cityToUse))
-      console.log('[LocationSelector] DOM city bytes:', Array.from(cityToUse).map(c => c.charCodeAt(0)))
-      console.log('[LocationSelector] Current city value before:', JSON.stringify(this.currentCityValue))
-      console.log('[LocationSelector] Match check:', this.currentCityValue === cityToUse)
-      if (this.currentCityValue !== cityToUse) {
-        console.log('[LocationSelector] Syncing city from DOM:', this.currentCityValue, '->', cityToUse)
-        this.currentCityValue = cityToUse
+      
+      // Clean the city name
+      if (cityToUse) {
+        // Trim first, then remove zero-width characters and normalize consecutive spaces
+        cityToUse = cityToUse.replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width spaces
+        cityToUse = cityToUse.replace(/\s+/g, '') // Remove all spaces (Chinese city names don't have spaces)
+        console.log('[LocationSelector] DOM city cleaned:', JSON.stringify(cityToUse))
+        console.log('[LocationSelector] DOM city bytes:', Array.from(cityToUse).map(c => c.charCodeAt(0)))
+        console.log('[LocationSelector] Current city value before:', JSON.stringify(this.currentCityValue))
+        console.log('[LocationSelector] Match check:', this.currentCityValue === cityToUse)
+        if (this.currentCityValue !== cityToUse) {
+          console.log('[LocationSelector] Syncing city from DOM:', this.currentCityValue, '->', cityToUse)
+          this.currentCityValue = cityToUse
+        }
       }
     }
     
@@ -207,7 +224,7 @@ export default class extends Controller<HTMLElement> {
     console.log('[LocationSelector] Loading locations for city:', city)
     
     try {
-      const url = `/cars/locations?city=${encodeURIComponent(city)}`
+      const url = `${this.apiEndpointValue}?city=${encodeURIComponent(city)}`
       console.log('[LocationSelector] Fetching from URL:', url)
       const response = await fetch(url)
       console.log('[LocationSelector] Response received - status:', response.status, 'ok:', response.ok)
@@ -300,7 +317,7 @@ export default class extends Controller<HTMLElement> {
                 type="button"
                 data-action="click->location-selector#selectLocation"
                 data-location-name="${location}"
-                data-location-address="租车点"
+                data-location-address="接送点"
                 class="w-full text-left p-3 rounded-lg hover:bg-surface-hover transition-colors">
                 <div class="flex items-start">
                   <svg class="w-5 h-5 text-text-muted mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -308,7 +325,7 @@ export default class extends Controller<HTMLElement> {
                   </svg>
                   <div class="flex-1">
                     <div class="text-text-primary font-medium">${location}</div>
-                    <div class="text-xs text-text-muted mt-0.5">租车点</div>
+                    <div class="text-xs text-text-muted mt-0.5">接送点</div>
                   </div>
                 </div>
               </button>
@@ -323,7 +340,7 @@ export default class extends Controller<HTMLElement> {
       console.log('[LocationSelector] No locations found, showing fallback message')
       html = `
         <div class="text-center py-8 text-text-muted">
-          <p>该城市暂无租车点</p>
+          <p>该城市暂无接送点</p>
         </div>
       `
     }

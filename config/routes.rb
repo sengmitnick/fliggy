@@ -177,6 +177,7 @@ Rails.application.routes.draw do
       get :search_trains
       get :select_location
       get :packages
+      get :locations
     end
     member do
       get :success
