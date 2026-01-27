@@ -10,10 +10,7 @@
     <div class="flex items-center">
       <span class="font-medium mr-4 whitespace-nowrap">取卡方式</span>
       <div class="flex space-x-3 w-full">
-        <button data-action="sim-card-filter#selectDelivery" data-method="mail" 
-                class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700 font-medium">邮寄</button>
-        <button data-action="sim-card-filter#selectDelivery" data-method="pickup"
-                class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700">自取</button>
+        <div class="flex-1 py-1.5 bg-[#FFF8D8] border border-[#FFCC00] rounded text-sm text-gray-900 font-medium text-center">邮寄</div>
       </div>
     </div>
 
@@ -67,7 +64,7 @@
             </div>
           </div>
           <div class="flex flex-col items-end justify-between h-full min-h-[70px]">
-            <span class="text-xs text-gray-400 flex items-center">详情 
+            <span class="text-xs text-gray-400 flex items-center cursor-pointer" onclick="window.showToast('精彩即将上线')">详情 
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>

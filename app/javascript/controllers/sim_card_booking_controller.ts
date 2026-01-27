@@ -61,8 +61,29 @@ export default class extends Controller<HTMLElement> {
     const orderableType = this.orderableTypeValue
     const quantity = this.quantityTarget.textContent
 
-    // Navigate to order page with params
-    const url = `/internet_orders/new?orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
+    // Get selected filter values from the filter controller element
+    const filterElement = document.querySelector('[data-controller~="sim-card-filter"]') as HTMLElement
+    let days = '1'
+    let data = '共3GB'
+    
+    if (filterElement) {
+      // Read from data-sim-card-filter-days-value and data-sim-card-filter-data-value
+      days = filterElement.dataset.simCardFilterDaysValue || '1'
+      data = filterElement.dataset.simCardFilterDataValue || '共3GB'
+    }
+
+    // Get unit price from selected card
+    const unitPrice = this.getSelectedCardPrice()
+    
+    // Calculate total price
+    const qty = parseInt(quantity || '1')
+    const totalPrice = unitPrice * qty
+
+    // Navigate to order page with params including filter values, price, quantity, and total
+    const baseUrl = '/internet_orders/new'
+    const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
+    const filterParams = `days=${days}&data=${encodeURIComponent(data)}&price=${unitPrice}&total=${totalPrice}`
+    const url = `${baseUrl}?${params}&${filterParams}`
     window.location.href = url
   }
 

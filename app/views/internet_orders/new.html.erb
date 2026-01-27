@@ -37,10 +37,26 @@
             <h2 class="font-bold text-base mb-2"><%= @orderable.name %></h2>
             <div class="text-sm text-gray-600 space-y-1">
               <% if @orderable.is_a?(InternetSimCard) %>
-                <p>有效期: <%= @orderable.validity_days %>天</p>
-                <p>流量: <%= @orderable.data_limit %></p>
-                <p>单价: ¥<%= @orderable.price %></p>
-                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
+                <% if params[:days].present? %>
+                  <p>有效期: <span class="font-medium text-gray-900"><%= params[:days] %>天</span></p>
+                <% else %>
+                  <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% end %>
+                <% if params[:data].present? %>
+                  <p>流量: <span class="font-medium text-gray-900"><%= params[:data] %></span></p>
+                <% else %>
+                  <p>流量: <%= @orderable.data_limit %></p>
+                <% end %>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span></p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.price %></p>
+                <% end %>
+                <% if params[:quantity].present? %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay"><%= params[:quantity] %></span> 张</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
+                <% end %>
               <% elsif @orderable.is_a?(InternetDataPlan) %>
                 <p>有效期: <%= @orderable.validity_days %>天</p>
                 <p>运营商: <%= @orderable.carrier %></p>
@@ -57,7 +73,11 @@
           <div class="text-right">
             <div class="text-xs text-gray-500 mb-1">小计</div>
             <div class="text-[#FF4400] font-bold text-lg">
-              ¥<span data-internet-order-form-target="totalPriceDisplay"><%= @orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7 %></span>
+              <% if params[:total].present? %>
+                ¥<span class="font-medium" data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.1f', params[:total].to_f) %></span>
+              <% else %>
+                ¥<span data-internet-order-form-target="totalPriceDisplay"><%= @orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7 %></span>
+              <% end %>
             </div>
           </div>
         </div>
@@ -193,7 +213,7 @@
           <div class="flex items-center space-x-3">
             <button type="button" data-action="internet-order-form#decrease" 
                     class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">-</button>
-            <span class="font-medium text-lg" data-internet-order-form-target="quantity">1</span>
+            <span class="font-medium text-lg" data-internet-order-form-target="quantity"><%= params[:quantity].presence || '1' %></span>
             <button type="button" data-action="internet-order-form#increase" 
                     class="w-8 h-8 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center">+</button>
           </div>
@@ -207,7 +227,7 @@
         <span class="text-sm text-gray-600 mr-2">总计:</span>
         <span class="text-xs text-[#FF4400]">¥</span>
         <span class="text-2xl font-bold text-[#FF4400]" data-internet-order-form-target="totalPrice">
-          <%= @orderable&.try(:price) || @orderable&.try(:daily_price) || 0 %>
+          <%= sprintf('%.1f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
         </span>
       </div>
       <%= f.submit "确认支付", class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full" %>

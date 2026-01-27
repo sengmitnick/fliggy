@@ -8,6 +8,7 @@ export default class extends Controller<HTMLElement> {
     "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay"
   ]
   declare readonly quantityTarget: HTMLElement
+  declare readonly hasQuantityTarget: boolean
   declare readonly totalPriceTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
   declare readonly quantityFieldTarget: HTMLInputElement
@@ -38,11 +39,32 @@ export default class extends Controller<HTMLElement> {
     const orderTypeField = this.element.querySelector('input[name="internet_order[order_type]"]') as HTMLInputElement
     this.isWifiOrder = orderTypeField?.value === 'wifi'
     
+    // Initialize quantity from params if available
+    const urlParams = new URLSearchParams(window.location.search)
+    const quantityParam = urlParams.get('quantity')
+    const priceParam = urlParams.get('price')
+    
+    if (quantityParam && this.hasQuantityTarget) {
+      const qty = parseInt(quantityParam)
+      this.quantityTarget.textContent = qty.toString()
+      this.updateQuantityField(qty)
+    }
+    
+    // If price param exists, use it as basePrice (overrides database value)
+    if (priceParam) {
+      this.basePrice = parseFloat(priceParam)
+    }
+    
     // For WiFi orders, recalculate initial total price (quantity × days × daily_price)
     if (this.isWifiOrder && this.hasRentalDaysTarget) {
       const days = parseInt(this.rentalDaysTarget.value) || 7
-      const quantity = 1
+      const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.textContent || '1') : 1
       const total = this.basePrice * days * quantity
+      this.updateAllPriceDisplays(total)
+    } else if (quantityParam && priceParam) {
+      // For SIM cards with params, recalculate total
+      const qty = parseInt(quantityParam)
+      const total = this.basePrice * qty
       this.updateAllPriceDisplays(total)
     }
     
@@ -305,7 +327,7 @@ export default class extends Controller<HTMLElement> {
   }
   
   private updateAllPriceDisplays(total: number): void {
-    const totalStr = total.toFixed(0)
+    const totalStr = total.toFixed(1)
     
     // Update bottom bar total price
     if (this.hasTotalPriceTarget) {
