@@ -163,14 +163,52 @@ main() {
     docker-compose -f $COMPOSE_FILE pull web worker
     print_success "镜像拉取完成"
 
-    # 8. 启动服务
+    # 8. 启动数据库和 Redis，创建 app_user
     print_info "步骤 8/9: 启动服务..."
 
-    if [ "$USE_NGINX" = "true" ]; then
-        docker-compose -f $COMPOSE_FILE up -d
+    # 先启动数据库和 Redis
+    print_info "启动数据库和 Redis..."
+    docker-compose -f $COMPOSE_FILE up -d db redis
+
+    # 等待数据库就绪
+    print_info "等待数据库就绪..."
+    sleep 15
+
+    # 创建 app_user 角色（关键步骤！）
+    print_info "创建 app_user 数据库角色..."
+    docker-compose -f $COMPOSE_FILE exec -T db psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} <<EOF
+DO \$\$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
+      CREATE ROLE app_user WITH LOGIN NOSUPERUSER PASSWORD '${DB_PASSWORD}';
+      RAISE NOTICE 'Created app_user';
+   ELSE
+      RAISE NOTICE 'app_user already exists';
+   END IF;
+END \$\$;
+
+GRANT CONNECT ON DATABASE ${DB_NAME:-travel01_production} TO app_user;
+GRANT USAGE, CREATE ON SCHEMA public TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_user;
+ALTER ROLE app_user SET search_path TO public;
+EOF
+
+    if [ $? -eq 0 ]; then
+        print_success "app_user 角色创建成功"
     else
-        # 不使用 Nginx 时，排除 nginx 服务
-        docker-compose -f $COMPOSE_FILE up -d db redis web worker
+        print_error "app_user 角色创建失败"
+        exit 1
+    fi
+
+    # 启动 web 和 worker
+    print_info "启动应用服务..."
+    if [ "$USE_NGINX" = "true" ]; then
+        docker-compose -f $COMPOSE_FILE up -d web worker nginx
+    else
+        docker-compose -f $COMPOSE_FILE up -d web worker
     fi
     print_success "服务已启动"
 
