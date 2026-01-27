@@ -1,4 +1,4 @@
-<div class="bg-gray-800 h-screen w-full overflow-hidden relative">
+<div class="bg-gray-800 h-screen w-full overflow-hidden relative" data-controller="transfer-passenger-selector">
   <!-- Top Map Background Area -->
   <div class="absolute top-0 w-full h-1/3 bg-slate-700 z-0">
     <div class="w-full h-full opacity-30"></div>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Content Split: Sidebar + List -->
-    <div class="flex flex-1 overflow-hidden relative pb-[140px]">
+    <div class="flex flex-1 overflow-hidden relative pb-[200px]">
       
       <!-- Left Sidebar -->
       <aside class="w-24 bg-[#F5F5F5] h-full overflow-y-auto no-scrollbar">
@@ -80,8 +80,10 @@
             <%= hidden_field_tag 'transfer[pickup_datetime]', @pickup_datetime %>
             <%= hidden_field_tag 'transfer[flight_number]', @flight&.flight_number %>
             <%= hidden_field_tag 'transfer[train_number]', @train&.train_number %>
-            <%= hidden_field_tag 'transfer[passenger_name]', current_user.name %>
-            <%= hidden_field_tag 'transfer[passenger_phone]', current_user.phone.presence || '13800138000' %>
+            <%= hidden_field_tag 'transfer[passenger_name]', current_user.name, 
+                  data: { transfer_passenger_selector_target: "passengerNameInput" } %>
+            <%= hidden_field_tag 'transfer[passenger_phone]', current_user.phone.presence || '13800138000', 
+                  data: { transfer_passenger_selector_target: "passengerPhoneInput" } %>
             <%= hidden_field_tag 'transfer[transfer_package_id]', packages_in_category.first&.id, id: "package_id_#{category}" %>
 
             <% packages_in_category.each_with_index do |package, index| %>
@@ -134,6 +136,31 @@
       </section>
     </div>
 
+    <!-- Passenger Info Card (above bottom button) -->
+    <div class="absolute bottom-[100px] left-0 right-0 bg-surface border-t border-border p-4 z-20">
+      <div class="bg-blue-50 rounded-lg p-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+            </svg>
+            <div>
+              <div class="text-xs text-gray-500">乘车人</div>
+              <div class="text-sm font-medium text-gray-900" data-transfer-passenger-selector-target="selectedPassenger">
+                <%= current_user.name %>
+              </div>
+            </div>
+          </div>
+          <button 
+            type="button"
+            data-action="click->transfer-passenger-selector#openModal"
+            class="text-blue-600 text-sm font-medium hover:text-blue-700">
+            选择
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Fixed Bottom Button -->
     <div class="absolute bottom-0 left-0 right-0 bg-surface border-t border-border p-4 z-20">
       <div class="flex items-center justify-between mb-3">
@@ -148,6 +175,9 @@
     </div>
 
   </main>
+
+  <!-- Transfer Passenger Selector Modal -->
+  <%= render 'shared/transfer_passenger_selector_modal' %>
 </div>
 
 <script>
