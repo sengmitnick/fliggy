@@ -77,7 +77,7 @@ main() {
     echo "请选择部署规格:"
     echo "  1) 8核32G (甲方生产环境，默认)"
     echo "  2) 2核8G (本地测试/展示)"
-    read -p "请输入选择 [1-2] (默认: 1): " server_spec </dev/tty
+    read -p "请输入选择 [1-2] (默认: 1): " server_spec
 
     server_spec=${server_spec:-1}
 
@@ -114,7 +114,7 @@ main() {
     echo "是否使用 Nginx 反向代理?"
     echo "  1) 不使用 Nginx (直接访问 Rails，默认)"
     echo "  2) 使用 Nginx (需要配置 nginx.conf)"
-    read -p "请输入选择 [1-2] (默认: 1): " nginx_choice </dev/tty
+    read -p "请输入选择 [1-2] (默认: 1): " nginx_choice
 
     nginx_choice=${nginx_choice:-1}
     USE_NGINX="false"
@@ -176,25 +176,54 @@ main() {
 
     # 创建 app_user 角色（关键步骤！）
     print_info "创建 app_user 数据库角色..."
-    docker-compose -f $COMPOSE_FILE exec -T db psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} <<EOF
-DO \$\$
+
+    # 从 .env 文件读取配置
+    if [ -f .env ]; then
+        set -a
+        source .env
+        set +a
+    fi
+
+    # 等待 PostgreSQL 完全就绪 (通过实际连接测试)
+    print_info "等待 PostgreSQL 完全就绪..."
+    MAX_WAIT=60
+    WAIT_COUNT=0
+    until docker exec travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c 'SELECT 1;'" >/dev/null 2>&1 || [ $WAIT_COUNT -eq $MAX_WAIT ]; do
+        sleep 2
+        WAIT_COUNT=$((WAIT_COUNT + 2))
+        echo -n "."
+    done
+    echo ""
+
+    if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+        print_error "数据库连接超时"
+        exit 1
+    else
+        print_success "数据库已就绪"
+    fi
+
+    # 使用容器名称执行 SQL，先通过 bash -c 来确保命令正确执行
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production}" <<'EOF_SQL'
+DO $$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
-      CREATE ROLE app_user WITH LOGIN NOSUPERUSER PASSWORD '${DB_PASSWORD}';
+      CREATE ROLE app_user WITH LOGIN NOSUPERUSER;
       RAISE NOTICE 'Created app_user';
    ELSE
       RAISE NOTICE 'app_user already exists';
    END IF;
-END \$\$;
+END $$;
+EOF_SQL
 
-GRANT CONNECT ON DATABASE ${DB_NAME:-travel01_production} TO app_user;
-GRANT USAGE, CREATE ON SCHEMA public TO app_user;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_user;
-ALTER ROLE app_user SET search_path TO public;
-EOF
+    # 设置 app_user 密码和权限（使用单独的命令以避免变量替换问题）
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER ROLE app_user WITH PASSWORD '${DB_PASSWORD}';\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT CONNECT ON DATABASE ${DB_NAME:-travel01_production} TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, CREATE ON SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER ROLE app_user SET search_path TO public;\""
 
     if [ $? -eq 0 ]; then
         print_success "app_user 角色创建成功"
