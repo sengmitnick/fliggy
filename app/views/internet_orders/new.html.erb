@@ -149,13 +149,17 @@
                 </div>
               </label>
             <% end %>
-            <%= link_to new_address_path, class: "block text-center text-blue-500 text-sm py-2" do %>
+            <button type="button" 
+                    onclick="window.showToast('精彩即将上线', 'info')" 
+                    class="block text-center text-blue-500 text-sm py-2 w-full">
               + 添加新地址
-            <% end %>
+            </button>
           <% else %>
-            <%= link_to new_address_path, class: "block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded" do %>
+            <button type="button" 
+                    onclick="window.showToast('精彩即将上线', 'info')" 
+                    class="block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded w-full">
               + 添加收货地址
-            <% end %>
+            </button>
           <% end %>
         </div>
 
