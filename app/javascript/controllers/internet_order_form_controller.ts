@@ -43,6 +43,7 @@ export default class extends Controller<HTMLElement> {
     const urlParams = new URLSearchParams(window.location.search)
     const quantityParam = urlParams.get('quantity')
     const priceParam = urlParams.get('price')
+    const totalParam = urlParams.get('total')
     
     if (quantityParam && this.hasQuantityTarget) {
       const qty = parseInt(quantityParam)
@@ -55,8 +56,12 @@ export default class extends Controller<HTMLElement> {
       this.basePrice = parseFloat(priceParam)
     }
     
-    // For WiFi orders, recalculate initial total price (quantity × days × daily_price)
-    if (this.isWifiOrder && this.hasRentalDaysTarget) {
+    // If total param exists (from previous page), use it directly (includes deposit)
+    if (totalParam) {
+      const total = parseFloat(totalParam)
+      this.updateAllPriceDisplays(total)
+    } else if (this.isWifiOrder && this.hasRentalDaysTarget) {
+      // For WiFi orders without total param, recalculate (quantity × days × daily_price)
       const days = parseInt(this.rentalDaysTarget.value) || 7
       const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.textContent || '1') : 1
       const total = this.basePrice * days * quantity
@@ -66,6 +71,19 @@ export default class extends Controller<HTMLElement> {
       const qty = parseInt(quantityParam)
       const total = this.basePrice * qty
       this.updateAllPriceDisplays(total)
+    }
+    
+    // Initialize delivery method button styles based on current selection
+    const mailRadio = this.element.querySelector('input[name="internet_order[delivery_method]"][value="mail"]') as HTMLInputElement
+    const pickupRadio = this.element.querySelector('input[name="internet_order[delivery_method]"][value="pickup"]') as HTMLInputElement
+    const mailLabel = this.element.querySelector('[data-internet-order-form-target="mailLabel"]')
+    const pickupLabel = this.element.querySelector('[data-internet-order-form-target="pickupLabel"]')
+    
+    if (mailRadio?.checked && mailLabel) {
+      mailLabel.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
+    }
+    if (pickupRadio?.checked && pickupLabel) {
+      pickupLabel.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
     }
     
     // Store form reference

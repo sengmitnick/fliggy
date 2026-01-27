@@ -44,7 +44,7 @@ export default class extends Controller<HTMLElement> {
 
   private selectedPlanId: string = ""
   private dailyPrice: number = 17
-  private days: number = 7
+  private days: number = 0
   private currentDeliveryMethod: string = 'pickup'
   private deposit: number = 500  // 押金
   private selectedPickupLocationId: string = ""
@@ -142,16 +142,13 @@ export default class extends Controller<HTMLElement> {
     event.preventDefault()
     if (this.hasDatePickerModalTarget) {
       this.datePickerModalTarget.classList.remove('hidden')
-      // 初始化为当前日期
-      const today = new Date()
-      const endDate = new Date(today)
-      endDate.setDate(endDate.getDate() + 7)
-      
-      if (this.hasStartDateTarget) {
-        this.startDateTarget.value = this.formatDateForInput(today)
+      // 不再初始化默认日期，用户需要手动选择
+      if (this.hasStartDateTarget && !this.startDateTarget.value) {
+        // 如果没有日期，清空输入框
+        this.startDateTarget.value = ''
       }
-      if (this.hasEndDateTarget) {
-        this.endDateTarget.value = this.formatDateForInput(endDate)
+      if (this.hasEndDateTarget && !this.endDateTarget.value) {
+        this.endDateTarget.value = ''
       }
     }
   }
@@ -189,6 +186,16 @@ export default class extends Controller<HTMLElement> {
   // 更新日期显示
   private updateDateDisplay(): void {
     if (this.hasStartDateTarget && this.hasEndDateTarget && this.hasDateRangeTarget) {
+      if (!this.startDateTarget.value || !this.endDateTarget.value) {
+        // 如果没有选择日期，显示提示文字
+        this.dateRangeTarget.textContent = '请选择取还日期'
+        this.dateRangeTarget.classList.remove('text-gray-900')
+        this.dateRangeTarget.classList.add('text-gray-400')
+        this.days = 0
+        this.updateTotalPrice()
+        return
+      }
+      
       const start = new Date(this.startDateTarget.value)
       const end = new Date(this.endDateTarget.value)
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
@@ -199,6 +206,8 @@ export default class extends Controller<HTMLElement> {
       const startStr = this.formatDateDisplay(start)
       const endStr = this.formatDateDisplay(end)
       this.dateRangeTarget.textContent = `${startStr}-${endStr}(共${days}天)`
+      this.dateRangeTarget.classList.remove('text-gray-400')
+      this.dateRangeTarget.classList.add('text-gray-900')
     }
   }
 
@@ -372,6 +381,14 @@ export default class extends Controller<HTMLElement> {
   checkout(event: Event): void {
     event.preventDefault()
     
+    // 检查是否选择了自取点
+    if (!this.selectedPickupLocationId) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('请先选择取件地址', 'warning')
+      }
+      return
+    }
+    
     const orderableType = 'InternetWifi'
     const orderableId = this.selectedPlanId
     const quantity = this.quantityTarget.textContent || '1'
@@ -384,7 +401,8 @@ export default class extends Controller<HTMLElement> {
     const baseUrl = '/internet_orders/new'
     const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
     const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
-    const url = `${baseUrl}?${params}&${priceParams}`
+    const pickupParams = `&pickup_location_id=${this.selectedPickupLocationId}`
+    const url = `${baseUrl}?${params}&${priceParams}${pickupParams}`
     window.location.href = url
   }
 }

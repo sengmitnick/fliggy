@@ -141,94 +141,44 @@
         </div>
       <% else %>
         <!-- 电话卡和WiFi需要配送信息 -->
-        <div class="mb-4">
-          <label class="block font-bold text-base mb-2">配送方式</label>
-          <div class="flex space-x-3">
-            <%= f.radio_button :delivery_method, 'mail', checked: true, class: "hidden", 
-                data: { action: "internet-order-form#selectDeliveryMethod" } %>
-            <label for="internet_order_delivery_method_mail" 
-                   class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
-                   data-internet-order-form-target="mailLabel">
-              邮寄
-            </label>
+        <div class="mb-4 flex justify-between items-center">
+          <label class="font-bold text-base">配送方式</label>
+          <div>
+            <% default_pickup = params[:pickup_location_id].present? %>
+            <%= f.radio_button :delivery_method, 'pickup', checked: true, class: "hidden" %>
             
-            <label class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
-                   onclick="window.showToast('精彩即将上线', 'info')">
-              自取
-            </label>
+            <% if params[:pickup_location_id].present? %>
+              <% pickup_location = PickupLocation.find_by(id: params[:pickup_location_id]) %>
+              <% if pickup_location %>
+                <span class="text-sm text-gray-900">
+                  自取 - <%= pickup_location.city %> <%= pickup_location.district %>
+                </span>
+              <% end %>
+            <% end %>
           </div>
         </div>
 
-        <div data-internet-order-form-target="mailSection">
-          <% if @addresses.any? %>
-            <% 
-              # Determine default selected index based on address_id param
-              selected_index = 0
-              if params[:address_id].present?
-                address_index = @addresses.find_index { |addr| addr.id.to_s == params[:address_id] }
-                selected_index = address_index if address_index
-              end
-            %>
-            <% @addresses.each_with_index do |address, index| %>
-              <label class="block p-3 mb-2 border rounded <%= index == selected_index ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
-                <%= f.fields_for :delivery_info do |delivery| %>
-                  <%= delivery.hidden_field :address_id, value: address.id, disabled: index != selected_index %>
-                  <%= delivery.hidden_field :name, value: address.name, disabled: index != selected_index %>
-                  <%= delivery.hidden_field :phone, value: address.phone, disabled: index != selected_index %>
-                  <%= delivery.hidden_field :full_address, value: address.full_address, disabled: index != selected_index %>
-                <% end %>
-                <%= radio_button_tag 'selected_address', index, index == selected_index, 
-                    class: "hidden", 
-                    data: { action: "change->internet-order-form#selectAddress" } %>
-                <div class="flex justify-between">
-                  <div>
-                    <div class="font-medium"><%= address.name %> <%= address.phone %></div>
-                    <div class="text-sm text-gray-600 mt-1"><%= address.full_address %></div>
-                  </div>
-                  <svg class="w-5 h-5 text-[#FFCC00] <%= 'hidden' unless index == selected_index %>" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        <div data-internet-order-form-target="pickupSection">
+          <% if params[:pickup_location_id].present? %>
+            <% pickup_location = PickupLocation.find_by(id: params[:pickup_location_id]) %>
+            <% if pickup_location %>
+              <div class="bg-[#F7F8FA] rounded-lg p-4 mb-3">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-gray-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
-                </div>
-              </label>
-            <% end %>
-            <button type="button" 
-                    onclick="window.showToast('精彩即将上线', 'info')" 
-                    class="block text-center text-blue-500 text-sm py-2 w-full">
-              + 添加新地址
-            </button>
-          <% else %>
-            <button type="button" 
-                    onclick="window.showToast('精彩即将上线', 'info')" 
-                    class="block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded w-full">
-              + 添加收货地址
-            </button>
-          <% end %>
-        </div>
-
-        <div data-internet-order-form-target="pickupSection" class="hidden">
-          <% if @passengers.any? %>
-            <% @passengers.each_with_index do |passenger, index| %>
-              <label class="block p-3 mb-2 border rounded <%= index == 0 ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
-                <%= f.fields_for :contact_info do |contact| %>
-                  <%= contact.hidden_field :passenger_id, value: passenger.id, disabled: index != 0 %>
-                  <%= contact.hidden_field :name, value: passenger.name, disabled: index != 0 %>
-                  <%= contact.hidden_field :phone, value: passenger.phone, disabled: index != 0 %>
-                <% end %>
-                <%= radio_button_tag 'selected_passenger', index, index == 0, 
-                    class: "hidden", 
-                    data: { action: "change->internet-order-form#selectPassenger" } %>
-                <div class="flex justify-between">
-                  <div>
-                    <div class="font-medium"><%= passenger.name %> <%= passenger.phone %></div>
+                  <div class="flex-1">
+                    <div class="font-medium text-gray-900 mb-1"><%= pickup_location.city %> - <%= pickup_location.district %></div>
+                    <div class="text-sm text-gray-600 leading-relaxed"><%= pickup_location.detail %></div>
+                    <div class="flex items-center text-xs text-gray-500 mt-2 space-x-3">
+                      <span><%= pickup_location.phone %></span>
+                      <span><%= pickup_location.business_hours %></span>
+                    </div>
                   </div>
-                  <svg class="w-5 h-5 text-[#FFCC00] <%= 'hidden' unless index == 0 %>" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
                 </div>
-              </label>
+              </div>
             <% end %>
-          <% else %>
-            <p class="text-center text-gray-500 py-3">暂无出行人信息</p>
           <% end %>
         </div>
       <% end %>
