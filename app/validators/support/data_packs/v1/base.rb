@@ -377,9 +377,6 @@ cities_data = [
   { name: "内罗毕", pinyin: "neiluobi", airport_code: "NBO", region: "肯尼亚", is_hot: false, themes: [] }
 ]
 
-# 确保 City 模型的 schema 信息是最新的
-City.reset_column_information
-
 # 批量插入优化：使用 Rails 原生 insert_all
 existing_cities = City.pluck(:name).to_set
 new_cities_data = cities_data.reject { |data| existing_cities.include?(data[:name]) }

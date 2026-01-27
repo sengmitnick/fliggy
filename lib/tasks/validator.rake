@@ -11,20 +11,25 @@ namespace :validator do
     puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
     begin
-      # 建立超级用户连接（用于清理数据库和数据包加载）
+      # 创建临时的超级用户连接（不改变 ActiveRecord::Base 的默认连接）
       # 优先使用 ADMIN_DB_URL（生产环境），否则使用环境变量或默认配置
-      if ENV['ADMIN_DB_URL'].present?
+      admin_config = if ENV['ADMIN_DB_URL'].present?
         puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
-        admin_conn = ActiveRecord::Base.establish_connection(ENV['ADMIN_DB_URL']).connection
+        ActiveRecord::Base::ConnectionSpecification::Resolver.new({}).resolve(ENV['ADMIN_DB_URL'])
       else
         admin_username = ENV['DB_USER'] || 'postgres'
         admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
 
-        admin_config = ActiveRecord::Base.connection_db_config.configuration_hash.merge(
+        puts "  → 使用超级用户连接（#{admin_username}）"
+        ActiveRecord::Base.connection_db_config.configuration_hash.merge(
           username: admin_username,
           password: admin_password
         )
-        admin_conn = ActiveRecord::Base.establish_connection(admin_config).connection
+      end
+
+      # 建立独立的临时连接（不影响 ActiveRecord::Base）
+      admin_conn = ActiveRecord::Base.connection_pool.with_connection do
+        ActiveRecord::Base.postgresql_connection(admin_config)
       end
       
       # 禁用外键约束检查
@@ -55,32 +60,26 @@ namespace :validator do
       # 恢复外键约束检查
       admin_conn.execute("SET session_replication_role = 'origin';")
 
-      # 恢复到默认连接（根据当前 Rails 环境）
-      ActiveRecord::Base.establish_connection(Rails.env.to_sym)
-
-      # 清除 schema cache 并重新加载
-      ActiveRecord::Base.connection.schema_cache.clear!
-      ActiveRecord::Base.descendants.each(&:reset_column_information)
+      # 关闭临时连接
+      admin_conn.disconnect!
 
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"
-      # 确保恢复外键约束检查和连接
+      # 确保恢复外键约束检查并关闭临时连接
       begin
-        admin_conn.execute("SET session_replication_role = 'origin';") if defined?(admin_conn)
+        if defined?(admin_conn) && admin_conn
+          admin_conn.execute("SET session_replication_role = 'origin';")
+          admin_conn.disconnect!
+        end
       rescue
         # ignore
       end
-      ActiveRecord::Base.establish_connection(Rails.env.to_sym) rescue nil
       exit 1
     end
-    
+
     # Step 2: 重新加载数据包
     puts "\n📦 Step 2: 重新加载数据包..."
-
-    # 强制重新建立连接（确保连接池完全刷新）
-    ActiveRecord::Base.connection_handler.clear_all_connections!(:all)
-    ActiveRecord::Base.establish_connection(Rails.env.to_sym)
 
     # 设置 PostgreSQL 会话变量 app.data_version='0'
     ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
