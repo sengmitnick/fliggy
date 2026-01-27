@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例53: 购买流量包（中国香港、1天、选最便宜35元）
+# 验证用例53: 购买流量包（中国香港、1天、选最便宜）
 # 
 # 任务描述:
 #   搜索流量包 → 对比价格 → 选最便宜的 → 填写手机号 → 创建订单
@@ -37,7 +37,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V053BuyDataPlanValidator < BaseValidator
   self.validator_id = 'v053_buy_data_plan_validator'
-  self.title = '购买流量包（中国香港、1天、选最便宜35元）'
+  self.title = '购买流量包（中国香港、1天、选最便宜）'
   self.description = '需要搜索流量包产品，选择价格最低的套餐并成功创建订单'
   self.timeout_seconds = 240
   

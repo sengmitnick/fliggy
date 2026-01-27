@@ -2,7 +2,7 @@
 
 require_relative 'base_validator'
 
-# 验证用例52: 预订境外随身WiFi（中国香港、租用1台、7天后取件、共租5天、选最便宜13元/天）
+# 验证用例52: 预订境外随身WiFi（中国香港、租用1台、7天后取件、共租5天、选最便宜）
 # 
 # 任务描述:
 #   搜索WiFi → 对比价格 → 选最便宜的 → 填写信息 → 创建订单
@@ -40,7 +40,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V052BookInternetWifiValidator < BaseValidator
   self.validator_id = 'v052_book_internet_wifi_validator'
-  self.title = '预订境外随身WiFi（中国香港、1台、5天、选最便宜13元/天）'
+  self.title = '预订境外随身WiFi（中国香港、1台、5天、选最便宜）'
   self.description = '需要搜索境外WiFi租赁服务，选择日租金最低的产品并成功创建订单'
   self.timeout_seconds = 240
   
