@@ -12,10 +12,13 @@ namespace :validator do
     
     begin
       # 建立超级用户连接（用于清理数据库）
-      # 使用 test 环境的 postgres 配置（密码：pgBqpmYZ）
+      # 优先使用环境变量，如果没有则使用默认测试环境配置
+      admin_username = ENV['DB_USER'] || 'postgres'
+      admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
+
       admin_config = ActiveRecord::Base.connection_db_config.configuration_hash.merge(
-        username: 'postgres',
-        password: 'pgBqpmYZ'
+        username: admin_username,
+        password: admin_password
       )
       admin_conn = ActiveRecord::Base.establish_connection(admin_config).connection
       
@@ -46,10 +49,10 @@ namespace :validator do
       
       # 恢复外键约束检查
       admin_conn.execute("SET session_replication_role = 'origin';")
-      
-      # 恢复到 app_user 连接
-      ActiveRecord::Base.establish_connection(:development)
-      
+
+      # 恢复到默认连接（根据当前 Rails 环境）
+      ActiveRecord::Base.establish_connection(Rails.env.to_sym)
+
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"
@@ -59,7 +62,7 @@ namespace :validator do
       rescue
         # ignore
       end
-      ActiveRecord::Base.establish_connection(:development) rescue nil
+      ActiveRecord::Base.establish_connection(Rails.env.to_sym) rescue nil
       exit 1
     end
     
