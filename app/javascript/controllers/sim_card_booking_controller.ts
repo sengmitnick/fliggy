@@ -79,11 +79,16 @@ export default class extends Controller<HTMLElement> {
     const qty = parseInt(quantity || '1')
     const totalPrice = unitPrice * qty
 
-    // Navigate to order page with params including filter values, price, quantity, and total
+    // Get selected address ID
+    const addressIdInput = document.querySelector('[data-address-id-input]') as HTMLInputElement
+    const addressId = addressIdInput?.value || ''
+
+    // Navigate to order page with params including filter values, price, quantity, total, and address_id
     const baseUrl = '/internet_orders/new'
     const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
     const filterParams = `days=${days}&data=${encodeURIComponent(data)}&price=${unitPrice}&total=${totalPrice}`
-    const url = `${baseUrl}?${params}&${filterParams}`
+    const addressParam = addressId ? `&address_id=${addressId}` : ''
+    const url = `${baseUrl}?${params}&${filterParams}${addressParam}`
     window.location.href = url
   }
 

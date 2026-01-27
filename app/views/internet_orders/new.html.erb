@@ -110,11 +110,8 @@
               邮寄
             </label>
             
-            <%= f.radio_button :delivery_method, 'pickup', class: "hidden",
-                data: { action: "internet-order-form#selectDeliveryMethod" } %>
-            <label for="internet_order_delivery_method_pickup" 
-                   class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
-                   data-internet-order-form-target="pickupLabel">
+            <label class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
+                   onclick="window.showToast('精彩即将上线', 'info')">
               自取
             </label>
           </div>
@@ -122,15 +119,23 @@
 
         <div data-internet-order-form-target="mailSection">
           <% if @addresses.any? %>
+            <% 
+              # Determine default selected index based on address_id param
+              selected_index = 0
+              if params[:address_id].present?
+                address_index = @addresses.find_index { |addr| addr.id.to_s == params[:address_id] }
+                selected_index = address_index if address_index
+              end
+            %>
             <% @addresses.each_with_index do |address, index| %>
-              <label class="block p-3 mb-2 border rounded <%= index == 0 ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
+              <label class="block p-3 mb-2 border rounded <%= index == selected_index ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
                 <%= f.fields_for :delivery_info do |delivery| %>
-                  <%= delivery.hidden_field :address_id, value: address.id, disabled: index != 0 %>
-                  <%= delivery.hidden_field :name, value: address.name, disabled: index != 0 %>
-                  <%= delivery.hidden_field :phone, value: address.phone, disabled: index != 0 %>
-                  <%= delivery.hidden_field :full_address, value: address.full_address, disabled: index != 0 %>
+                  <%= delivery.hidden_field :address_id, value: address.id, disabled: index != selected_index %>
+                  <%= delivery.hidden_field :name, value: address.name, disabled: index != selected_index %>
+                  <%= delivery.hidden_field :phone, value: address.phone, disabled: index != selected_index %>
+                  <%= delivery.hidden_field :full_address, value: address.full_address, disabled: index != selected_index %>
                 <% end %>
-                <%= radio_button_tag 'selected_address', index, index == 0, 
+                <%= radio_button_tag 'selected_address', index, index == selected_index, 
                     class: "hidden", 
                     data: { action: "change->internet-order-form#selectAddress" } %>
                 <div class="flex justify-between">
@@ -138,7 +143,7 @@
                     <div class="font-medium"><%= address.name %> <%= address.phone %></div>
                     <div class="text-sm text-gray-600 mt-1"><%= address.full_address %></div>
                   </div>
-                  <svg class="w-5 h-5 text-[#FFCC00] <%= 'hidden' unless index == 0 %>" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-[#FFCC00] <%= 'hidden' unless index == selected_index %>" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
                 </div>
