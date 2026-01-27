@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_27_072009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1654,6 +1654,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_040219) do
     t.datetime "updated_at", null: false
     t.bigint "data_version", default: 0, null: false
     t.index ["data_version"], name: "index_trains_on_data_version"
+  end
+
+  create_table "transfer_locations", force: :cascade do |t|
+    t.string "city"
+    t.string "name"
+    t.string "location_type", default: "airport"
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "data_version", default: 0, null: false
+    t.index ["city"], name: "index_transfer_locations_on_city"
+    t.index ["data_version"], name: "index_transfer_locations_on_data_version"
+    t.index ["location_type"], name: "index_transfer_locations_on_location_type"
   end
 
   create_table "transfer_packages", force: :cascade do |t|

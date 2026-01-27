@@ -1,6 +1,5 @@
 <!-- Location Selector Modal -->
-<div data-controller="location-selector"
-     data-location-selector-target="modal"
+<div data-location-selector-target="modal"
      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
      data-action="click->location-selector#closeModal">
   
@@ -43,6 +42,7 @@
     <!-- Location List (Dynamically populated) -->
     <div class="flex-1 overflow-y-auto px-6 py-4" data-location-selector-target="locationList">
       <!-- Locations will be dynamically loaded here -->
+      <!-- Data from Car rental pickup locations in the arrival city -->
       <div class="text-center py-8 text-text-muted">
         <p>加载中...</p>
       </div>
