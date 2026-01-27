@@ -15,7 +15,13 @@ namespace :validator do
       # 优先使用 ADMIN_DB_URL（生产环境），否则使用环境变量或默认配置
       admin_config = if ENV['ADMIN_DB_URL'].present?
         puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
-        ActiveRecord::Base::ConnectionSpecification::Resolver.new({}).resolve(ENV['ADMIN_DB_URL'])
+        # 解析 ADMIN_DB_URL 为配置 hash
+        db_config = ActiveRecord::DatabaseConfigurations::UrlConfig.new(
+          Rails.env,
+          "admin",
+          ENV['ADMIN_DB_URL']
+        )
+        db_config.configuration_hash
       else
         admin_username = ENV['DB_USER'] || 'postgres'
         admin_password = ENV['DB_PASSWORD'] || 'pgBqpmYZ'
@@ -28,9 +34,7 @@ namespace :validator do
       end
 
       # 建立独立的临时连接（不影响 ActiveRecord::Base）
-      admin_conn = ActiveRecord::Base.connection_pool.with_connection do
-        ActiveRecord::Base.postgresql_connection(admin_config)
-      end
+      admin_conn = ActiveRecord::Base.postgresql_connection(admin_config)
       
       # 禁用外键约束检查
       admin_conn.execute("SET session_replication_role = 'replica';")
