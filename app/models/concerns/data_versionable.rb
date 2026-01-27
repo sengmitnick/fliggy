@@ -59,7 +59,9 @@ module DataVersionable
     # 注意：保持字符串类型，与 PostgreSQL session 变量类型一致
     self.data_version = (version_str.present? ? version_str : '0')
 
-    # DEBUG: Log what was set
-    Rails.logger.info "[DataVersionable] #{self.class.name}#set_data_version: PostgreSQL returned '#{version_str}' → setting data_version=#{self.data_version}"
+    # DEBUG: 仅在开发环境打印（生产环境太吵）
+    if Rails.env.development?
+      Rails.logger.debug "[DataVersionable] #{self.class.name}#set_data_version: PostgreSQL returned '#{version_str}' → setting data_version=#{self.data_version}"
+    end
   end
 end

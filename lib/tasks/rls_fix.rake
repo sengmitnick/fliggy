@@ -126,8 +126,8 @@ namespace :rls do
     # 创建两个会话
     session_1 = SecureRandom.uuid
     session_2 = SecureRandom.uuid
-    data_version_1 = session_1.hash.abs
-    data_version_2 = session_2.hash.abs
+    data_version_1 = SecureRandom.hex(8)
+    data_version_2 = SecureRandom.hex(8)
 
     puts "\n会话配置:"
     puts "  Session 1: #{session_1} → data_version=#{data_version_1}"

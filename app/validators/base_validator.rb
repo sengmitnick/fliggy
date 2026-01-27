@@ -45,18 +45,30 @@ class BaseValidator
     def to(matcher = nil, *args, &block)
       if matcher.nil?
         # 返回一个 MatcherProxy 对象，支持链式调用
-        MatcherProxy.new(@actual)
+        MatcherProxy.new(@actual, negated: false)
       else
         # 直接调用匹配器
         matcher.call(@actual, *args, &block)
+      end
+    end
+
+    def not_to(matcher = nil, *args, &block)
+      if matcher.nil?
+        # 返回一个反向的 MatcherProxy 对象
+        MatcherProxy.new(@actual, negated: true)
+      else
+        # 直接调用反向匹配器
+        # TODO: 实现反向匹配逻辑
+        raise NotImplementedError, "not_to with direct matcher not yet implemented"
       end
     end
   end
   
   # MatcherProxy 类，提供各种匹配器方法
   class MatcherProxy
-    def initialize(actual)
+    def initialize(actual, negated: false)
       @actual = actual
+      @negated = negated
     end
     
     def eq(expected, message = nil)
@@ -96,9 +108,18 @@ class BaseValidator
     end
     
     def be_nil(message = nil)
-      unless @actual.nil?
-        error_msg = message || "expected: nil\n     got: #{@actual.inspect}"
-        raise ExpectationNotMetError, error_msg
+      if @negated
+        # not_to be_nil
+        if @actual.nil?
+          error_msg = message || "expected: not nil\n     got: nil"
+          raise ExpectationNotMetError, error_msg
+        end
+      else
+        # to be_nil
+        unless @actual.nil?
+          error_msg = message || "expected: nil\n     got: #{@actual.inspect}"
+          raise ExpectationNotMetError, error_msg
+        end
       end
       true
     end

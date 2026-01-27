@@ -21,6 +21,7 @@ gem 'image_processing', '~> 1.2'
 gem 'ostruct', '~> 0.6.3'
 gem "solid_cable", "~> 3.0"
 gem "turbo-rails", "~> 2.0"
+gem "rspec-rails"  # Needed in production for BaseValidator assertions
 
 group :development do
   gem "error_highlight", ">= 0.4.0", platforms: [ :ruby ]
@@ -29,7 +30,6 @@ group :development do
 end
 
 group :development, :test do
-  gem "rspec-rails"
   gem "factory_bot_rails"
   gem "faker"
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ], require: "debug/prelude"
