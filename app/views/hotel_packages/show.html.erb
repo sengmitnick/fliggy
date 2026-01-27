@@ -142,7 +142,7 @@
       <% @package.package_options.active.ordered.each do |option| %>
         <div class="border-b border-gray-100 pb-4">
           <div class="flex justify-between items-center mb-1">
-            <span class="font-medium"><%= option.name %> <%= option.price.to_i %>元 客房<%= option.night_count %>晚<%= option.can_split ? '可拆分' : '' %></span>
+            <span class="font-medium"><%= option.name %> <%= option.price.to_i %>元 客房<%= option.night_count %>晚<%= option.night_count > 1 ? '连住' : '' %></span>
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </div>
           <div class="flex items-center text-xs text-gray-500 mb-4">
@@ -153,7 +153,7 @@
             <span class="text-xs text-blue-600">查看可约酒店及日期 ></span>
             <div class="flex space-x-2">
               <span class="text-orange-600 font-bold text-xl mr-2">¥<%= option.price.to_i %></span>
-              <button class="px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm">预约</button>
+              <button class="px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm" onclick="window.showToast('精彩即将上线，敬请期待')">预约</button>
               <%= link_to "囤货", new_hotel_package_order_path(package_option_id: option.id), class: "px-4 py-1 bg-orange-500 text-white rounded-full text-sm" %>
             </div>
           </div>

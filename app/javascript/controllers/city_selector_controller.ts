@@ -266,6 +266,14 @@ export default class extends Controller<HTMLElement> {
           return
         }
         
+        // Special handling for hotel_packages/search page - reload with new city parameter
+        if (window.location.pathname === '/hotel_packages/search') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('city', cityName)
+          Turbo.visit(url.toString())
+          return
+        }
+        
         // Dispatch city-changed event for tour-group-filter and hotel-services-search to listen
         this.dispatchCityChangedEvent(cityName)
         
