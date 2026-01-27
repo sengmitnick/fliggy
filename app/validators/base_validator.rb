@@ -225,10 +225,11 @@ class BaseValidator
   
   # 执行准备阶段（设置 data_version）
   def execute_prepare
-    # 生成唯一的 data_version（使用随机数，确保在 32 位整数范围内）
-    # PostgreSQL integer 类型范围: -2147483648 到 2147483647
-    # 我们使用正数范围：1 到 2000000000
-    @data_version = rand(1..2_000_000_000)
+    # 生成唯一的 data_version（使用十六进制随机字符串）
+    # 使用 SecureRandom.hex(8) 生成 16 字符的十六进制字符串
+    # 示例: "a3f9c8b2e1d4567f"
+    # 优势: 字符串类型与 PostgreSQL session 变量匹配，无需类型转换
+    @data_version = SecureRandom.hex(8)
     
     # 设置 PostgreSQL 会话变量 app.data_version
     # 使用 SET SESSION 确保连接级别作用域（不仅限于事务内）

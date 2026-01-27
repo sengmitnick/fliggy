@@ -6,7 +6,7 @@
 # Usage: rails g model ModelName attr1:type attr2:type
 #
 # This generator wraps Rails' default model generator and:
-# 1. Auto-adds data_version:integer:default=0 for business tables
+# 1. Auto-adds data_version:string:default='0':limit=50 for business tables
 # 2. Excludes system models (Administrator, Session, etc.)
 #
 class ModelGenerator < Rails::Generators::NamedBase
@@ -41,7 +41,7 @@ class ModelGenerator < Rails::Generators::NamedBase
       has_data_version = enhanced_attributes.any? { |attr| attr.to_s.start_with?('data_version') }
       
       unless has_data_version
-        enhanced_attributes << 'data_version:integer:default=0'
+        enhanced_attributes << 'data_version:string:default=\'0\':limit=50'
         say "  → Auto-adding data_version column (required for RLS)", :yellow
       end
     end

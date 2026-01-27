@@ -52,7 +52,7 @@ class ModelsGenerator < Rails::Generators::Base
         # Check if data_version is already in attributes
         has_data_version = attributes.any? { |attr| attr.start_with?('data_version') }
         unless has_data_version
-          attributes << 'data_version:integer:default=0'
+          attributes << 'data_version:string:default=\'0\':limit=50'
           say "  → Auto-adding data_version column (required for RLS)", :yellow
         end
       end
