@@ -35,6 +35,9 @@ namespace :validator do
       # 禁用外键约束检查
       admin_conn.exec("SET session_replication_role = 'replica';")
 
+      # 抑制 PostgreSQL NOTICE 输出（如 "truncate cascades to table..."）
+      admin_conn.exec("SET client_min_messages TO WARNING;")
+
       # 获取所有表名（排除 schema_migrations, ar_internal_metadata, good_jobs 相关表）
       tables_result = admin_conn.exec(
         "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
