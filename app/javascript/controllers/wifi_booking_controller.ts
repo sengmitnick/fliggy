@@ -4,7 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = ["quantity", "totalPrice", "contactName", "contactPhone", "dateRange",
     "mailTab", "pickupTab", "addressSection", "mailAddress",
     "datePickerModal", "startDate", "endDate", "addressPickerModal",
-    "pickupLocationModal", "pickupLocationCity", "pickupLocationDistrict",
+    "pickupLocationModal", "pickupLocationDisplay",
     "cityTab", "cityContent", "pickupLocationRadio"]
   
   declare readonly quantityTarget: HTMLElement
@@ -33,14 +33,12 @@ export default class extends Controller<HTMLElement> {
   declare readonly addressPickerModalTarget: HTMLElement
   declare readonly hasAddressPickerModalTarget: boolean
   declare readonly pickupLocationModalTarget: HTMLElement
-  declare readonly pickupLocationCityTarget: HTMLElement
-  declare readonly pickupLocationDistrictTarget: HTMLElement
+  declare readonly pickupLocationDisplayTarget: HTMLElement
   declare readonly cityTabTargets: HTMLElement[]
   declare readonly cityContentTargets: HTMLElement[]
   declare readonly pickupLocationRadioTargets: HTMLElement[]
   declare readonly hasPickupLocationModalTarget: boolean
-  declare readonly hasPickupLocationCityTarget: boolean
-  declare readonly hasPickupLocationDistrictTarget: boolean
+  declare readonly hasPickupLocationDisplayTarget: boolean
 
   private selectedPlanId: string = ""
   private dailyPrice: number = 17
@@ -60,6 +58,66 @@ export default class extends Controller<HTMLElement> {
       if (id) this.selectedPlanId = id
       if (price) this.dailyPrice = parseFloat(price)
     }
+    
+    // 从 URL 参数恢复状态
+    const urlParams = new URLSearchParams(window.location.search)
+    
+    // 恢复选中的套餐
+    const orderableId = urlParams.get('orderable_id')
+    if (orderableId) {
+      this.selectedPlanId = orderableId
+      const planCard = this.element.querySelector(`[data-wifi-id="${orderableId}"]`)
+      if (planCard) {
+        // 模拟点击以更新 UI
+        this.selectPlan({ currentTarget: planCard } as any)
+      }
+    }
+    
+    // 恢复数量
+    const quantity = urlParams.get('quantity')
+    if (quantity && this.quantityTarget) {
+      this.quantityTarget.textContent = quantity
+    }
+    
+    // 恢复日期
+    const startDate = urlParams.get('start_date')
+    const endDate = urlParams.get('end_date')
+    if (startDate && endDate && this.hasStartDateTarget && this.hasEndDateTarget) {
+      this.startDateTarget.value = startDate
+      this.endDateTarget.value = endDate
+      this.updateDateDisplay()
+    }
+    
+    // 恢复自取点
+    const pickupLocationId = urlParams.get('pickup_location_id')
+    if (pickupLocationId) {
+      this.selectedPickupLocationId = pickupLocationId
+      // 查找对应的自取点元素来获取 city 和 district
+      const locationCard = this.element.querySelector(`[data-location-id="${pickupLocationId}"]`)
+      if (locationCard) {
+        const city = locationCard.getAttribute('data-location-city') || ''
+        const district = locationCard.getAttribute('data-location-district') || ''
+        // 更新显示
+        if (this.hasPickupLocationDisplayTarget && city && district) {
+          const displayHTML = `
+            <div class="text-gray-900">${city}</div>
+            <div class="text-gray-400 text-xs">${district}</div>
+          `
+          this.pickupLocationDisplayTarget.innerHTML = displayHTML
+        }
+      }
+    }
+    
+    // 恢复联系人信息
+    const contactName = urlParams.get('contact_name')
+    const contactPhone = urlParams.get('contact_phone')
+    if (contactName && this.hasContactNameTarget) {
+      this.contactNameTarget.value = decodeURIComponent(contactName)
+    }
+    if (contactPhone && this.hasContactPhoneTarget) {
+      this.contactPhoneTarget.value = decodeURIComponent(contactPhone)
+    }
+    
     this.updateTotalPrice()
   }
 
@@ -336,11 +394,12 @@ export default class extends Controller<HTMLElement> {
       this.selectedPickupLocationId = this.tempSelectedPickupLocation.id
       
       // 更新显示
-      if (this.hasPickupLocationCityTarget) {
-        this.pickupLocationCityTarget.textContent = this.tempSelectedPickupLocation.city
-      }
-      if (this.hasPickupLocationDistrictTarget) {
-        this.pickupLocationDistrictTarget.textContent = this.tempSelectedPickupLocation.district
+      if (this.hasPickupLocationDisplayTarget) {
+        const displayHTML = `
+          <div class="text-gray-900">${this.tempSelectedPickupLocation.city}</div>
+          <div class="text-gray-400 text-xs">${this.tempSelectedPickupLocation.district}</div>
+        `
+        this.pickupLocationDisplayTarget.innerHTML = displayHTML
       }
     }
     
@@ -381,6 +440,14 @@ export default class extends Controller<HTMLElement> {
   checkout(event: Event): void {
     event.preventDefault()
     
+    // 检查是否选择了取还日期
+    if (this.days === 0 || !this.hasStartDateTarget || !this.startDateTarget.value || !this.endDateTarget.value) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('请先选择取还日期', 'warning')
+      }
+      return
+    }
+    
     // 检查是否选择了自取点
     if (!this.selectedPickupLocationId) {
       if (typeof (window as any).showToast === 'function') {
@@ -396,13 +463,19 @@ export default class extends Controller<HTMLElement> {
     const unitPrice = this.dailyPrice
     const qty = parseInt(quantity)
     const totalPrice = (unitPrice * days * qty) + this.deposit
+    const startDate = this.startDateTarget.value
+    const endDate = this.endDateTarget.value
+    const contactName = this.hasContactNameTarget ? this.contactNameTarget.value : ''
+    const contactPhone = this.hasContactPhoneTarget ? this.contactPhoneTarget.value : ''
     
     // Navigate to order page with params
     const baseUrl = '/internet_orders/new'
     const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
     const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
+    const dateParams = `&start_date=${startDate}&end_date=${endDate}`
+    const contactParams = `&contact_name=${encodeURIComponent(contactName)}&contact_phone=${encodeURIComponent(contactPhone)}`
     const pickupParams = `&pickup_location_id=${this.selectedPickupLocationId}`
-    const url = `${baseUrl}?${params}&${priceParams}${pickupParams}`
+    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${pickupParams}`
     window.location.href = url
   }
 }

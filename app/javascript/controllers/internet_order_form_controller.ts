@@ -5,8 +5,14 @@ export default class extends Controller<HTMLElement> {
     "quantity", "totalPrice", "quantityField", "totalPriceField", 
     "mailSection", "pickupSection", "mailLabel", "pickupLabel", 
     "rentalDays", "rentalDaysField", "rentalInfoField",
-    "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay"
+    "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay",
+    "addressModal", "addressRadio", "selectedAddressCard",
+    "selectedAddressName", "selectedAddressPhone", "selectedAddressText",
+    "addressIdField", "addressNameField", "addressPhoneField", "addressFullAddressField"
   ]
+  static values = {
+    deposit: Number
+  }
   declare readonly quantityTarget: HTMLElement
   declare readonly hasQuantityTarget: boolean
   declare readonly totalPriceTarget: HTMLElement
@@ -17,19 +23,43 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasTotalPriceFieldTarget: boolean
   declare readonly quantityDisplayTarget: HTMLElement
   declare readonly hasQuantityDisplayTarget: boolean
-  declare readonly rentalDaysTarget: HTMLInputElement
+  declare readonly rentalDaysTarget: HTMLElement
   declare readonly hasRentalDaysTarget: boolean
   declare readonly rentalDaysDisplayTarget: HTMLElement
   declare readonly hasRentalDaysDisplayTarget: boolean
   declare readonly totalPriceDisplayTarget: HTMLElement
   declare readonly hasTotalPriceDisplayTarget: boolean
+  declare readonly addressModalTarget: HTMLElement
+  declare readonly hasAddressModalTarget: boolean
+  declare readonly addressRadioTargets: HTMLElement[]
+  declare readonly selectedAddressCardTarget: HTMLElement
+  declare readonly hasSelectedAddressCardTarget: boolean
+  declare readonly selectedAddressNameTarget: HTMLElement
+  declare readonly hasSelectedAddressNameTarget: boolean
+  declare readonly selectedAddressPhoneTarget: HTMLElement
+  declare readonly hasSelectedAddressPhoneTarget: boolean
+  declare readonly selectedAddressTextTarget: HTMLElement
+  declare readonly hasSelectedAddressTextTarget: boolean
+  declare readonly addressIdFieldTarget: HTMLInputElement
+  declare readonly hasAddressIdFieldTarget: boolean
+  declare readonly addressNameFieldTarget: HTMLInputElement
+  declare readonly hasAddressNameFieldTarget: boolean
+  declare readonly addressPhoneFieldTarget: HTMLInputElement
+  declare readonly hasAddressPhoneFieldTarget: boolean
+  declare readonly addressFullAddressFieldTarget: HTMLInputElement
+  declare readonly hasAddressFullAddressFieldTarget: boolean
+  
+  declare depositValue: number
+  declare readonly hasDepositValue: boolean
 
   private basePrice: number = 0
   private formElement: HTMLFormElement | null = null
   private isWifiOrder: boolean = false
+  private selectedAddressId: string | null = null
 
   connect(): void {
     console.log("InternetOrderForm connected")
+    console.log("Deposit value:", this.hasDepositValue ? this.depositValue : 0)
     const totalPriceField = this.element.querySelector('[data-internet-order-form-target="totalPriceField"]') as HTMLInputElement
     if (totalPriceField) {
       this.basePrice = parseFloat(totalPriceField.value) || 0
@@ -61,10 +91,11 @@ export default class extends Controller<HTMLElement> {
       const total = parseFloat(totalParam)
       this.updateAllPriceDisplays(total)
     } else if (this.isWifiOrder && this.hasRentalDaysTarget) {
-      // For WiFi orders without total param, recalculate (quantity × days × daily_price)
-      const days = parseInt(this.rentalDaysTarget.value) || 7
+      // For WiFi orders without total param, recalculate (quantity × days × daily_price + deposit)
+      const days = parseInt(this.rentalDaysTarget.textContent || '7') || 7
       const quantity = this.hasQuantityTarget ? parseInt(this.quantityTarget.textContent || '1') : 1
-      const total = this.basePrice * days * quantity
+      const deposit = this.hasDepositValue ? this.depositValue : 0
+      const total = this.basePrice * days * quantity + deposit
       this.updateAllPriceDisplays(total)
     } else if (quantityParam && priceParam) {
       // For SIM cards with params, recalculate total
@@ -340,6 +371,58 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  increaseRentalDays(): void {
+    if (!this.hasRentalDaysTarget) return
+    
+    const currentDays = parseInt(this.rentalDaysTarget.textContent || '7')
+    const newDays = currentDays + 1
+    this.rentalDaysTarget.textContent = newDays.toString()
+    
+    // Update display in product info section
+    if (this.hasRentalDaysDisplayTarget) {
+      this.rentalDaysDisplayTarget.textContent = newDays.toString()
+    }
+    
+    this.updateRentalDaysField(newDays)
+    this.recalculateTotalPrice()
+  }
+
+  decreaseRentalDays(): void {
+    if (!this.hasRentalDaysTarget) return
+    
+    const currentDays = parseInt(this.rentalDaysTarget.textContent || '7')
+    if (currentDays > 1) {
+      const newDays = currentDays - 1
+      this.rentalDaysTarget.textContent = newDays.toString()
+      
+      // Update display in product info section
+      if (this.hasRentalDaysDisplayTarget) {
+        this.rentalDaysDisplayTarget.textContent = newDays.toString()
+      }
+      
+      this.updateRentalDaysField(newDays)
+      this.recalculateTotalPrice()
+    }
+  }
+
+  private updateRentalDaysField(days: number): void {
+    const rentalDaysField = this.element.querySelector('[data-internet-order-form-target="rentalDaysField"]') as HTMLInputElement
+    if (rentalDaysField) {
+      rentalDaysField.value = days.toString()
+      
+      // 计算return_date
+      const pickupDateField = rentalDaysField.closest('div')?.querySelector('input[name*="[pickup_date]"]') as HTMLInputElement
+      const returnDateField = rentalDaysField.closest('div')?.querySelector('input[name*="[return_date]"]') as HTMLInputElement
+      
+      if (pickupDateField && returnDateField) {
+        const pickupDate = new Date(pickupDateField.value)
+        const returnDate = new Date(pickupDate)
+        returnDate.setDate(returnDate.getDate() + days)
+        returnDateField.value = returnDate.toISOString().split('T')[0]
+      }
+    }
+  }
+
   selectDeliveryMethod(event: Event): void {
     const radio = event.target as HTMLInputElement
     const mailSection = this.element.querySelector('[data-internet-order-form-target="mailSection"]')
@@ -371,10 +454,11 @@ export default class extends Controller<HTMLElement> {
     let total: number
     
     if (this.isWifiOrder) {
-      // WiFi: total = quantity × days × daily_price
+      // WiFi: total = quantity × days × daily_price + deposit
       const quantity = parseInt(this.quantityTarget.textContent || "1")
-      const days = this.hasRentalDaysTarget ? (parseInt(this.rentalDaysTarget.value) || 7) : 7
-      total = this.basePrice * quantity * days
+      const days = this.hasRentalDaysTarget ? (parseInt(this.rentalDaysTarget.textContent || '7') || 7) : 7
+      const deposit = this.hasDepositValue ? this.depositValue : 0
+      total = this.basePrice * quantity * days + deposit
     } else {
       // SIM card or data plan: total = quantity × price
       const quantity = parseInt(this.quantityTarget.textContent || "1")
@@ -401,6 +485,105 @@ export default class extends Controller<HTMLElement> {
     const totalPriceField = this.element.querySelector('[data-internet-order-form-target="totalPriceField"]') as HTMLInputElement
     if (totalPriceField) {
       totalPriceField.value = total.toString()
+    }
+  }
+
+  // Address Modal Methods
+  openAddressModal(): void {
+    if (!this.hasAddressModalTarget) return
+    this.addressModalTarget.classList.remove('hidden')
+    
+    // Highlight currently selected address
+    const currentAddressId = this.hasAddressIdFieldTarget ? this.addressIdFieldTarget.value : null
+    if (currentAddressId) {
+      this.selectedAddressId = currentAddressId
+      this.updateAddressRadioButtons()
+    }
+  }
+
+  closeAddressModal(): void {
+    if (!this.hasAddressModalTarget) return
+    this.addressModalTarget.classList.add('hidden')
+  }
+
+  selectAddressFromModal(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const addressId = target.dataset.addressId
+    
+    if (!addressId) return
+    
+    this.selectedAddressId = addressId
+    this.updateAddressRadioButtons()
+  }
+
+  confirmAddressSelection(): void {
+    if (!this.selectedAddressId) {
+      this.closeAddressModal()
+      return
+    }
+    
+    // Find selected address element in modal
+    const selectedElement = this.element.querySelector(`[data-address-id="${this.selectedAddressId}"]`) as HTMLElement
+    if (!selectedElement) {
+      this.closeAddressModal()
+      return
+    }
+    
+    const addressName = selectedElement.dataset.addressName || ''
+    const addressPhone = selectedElement.dataset.addressPhone || ''
+    const addressFull = selectedElement.dataset.addressFull || ''
+    
+    // Update display card
+    if (this.hasSelectedAddressNameTarget) {
+      this.selectedAddressNameTarget.textContent = `${addressName} `
+    }
+    if (this.hasSelectedAddressPhoneTarget) {
+      this.selectedAddressPhoneTarget.textContent = addressPhone
+    }
+    if (this.hasSelectedAddressTextTarget) {
+      this.selectedAddressTextTarget.textContent = addressFull
+    }
+    
+    // Update hidden fields
+    if (this.hasAddressIdFieldTarget) {
+      this.addressIdFieldTarget.value = this.selectedAddressId
+    }
+    if (this.hasAddressNameFieldTarget) {
+      this.addressNameFieldTarget.value = addressName
+    }
+    if (this.hasAddressPhoneFieldTarget) {
+      this.addressPhoneFieldTarget.value = addressPhone
+    }
+    if (this.hasAddressFullAddressFieldTarget) {
+      this.addressFullAddressFieldTarget.value = addressFull
+    }
+    
+    this.closeAddressModal()
+  }
+
+  private updateAddressRadioButtons(): void {
+    // Reset all radio buttons
+    this.addressRadioTargets.forEach(radio => {
+      radio.classList.remove('bg-[#FFDD00]', 'border-[#FFDD00]')
+      radio.classList.add('border-gray-300')
+      radio.innerHTML = ''
+    })
+    
+    // Highlight selected address
+    if (this.selectedAddressId) {
+      const selectedElement = this.element.querySelector(`[data-address-id="${this.selectedAddressId}"]`) as HTMLElement
+      if (selectedElement) {
+        const radio = selectedElement.querySelector('[data-internet-order-form-target="addressRadio"]') as HTMLElement
+        if (radio) {
+          radio.classList.remove('border-gray-300')
+          radio.classList.add('bg-[#FFDD00]', 'border-[#FFDD00]')
+          radio.innerHTML = `
+            <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+          `
+        }
+      }
     }
   }
 }
