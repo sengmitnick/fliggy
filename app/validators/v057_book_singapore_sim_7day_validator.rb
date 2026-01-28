@@ -2,39 +2,39 @@
 
 require_relative 'base_validator'
 
-# 验证用例: 购买日本5天10GB/天SIM卡（数量1张）
+# 验证用例: 购买新加坡7天无限流量SIM卡（数量1张）
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索日本地区的SIM卡，
-#   找到有效期为5天且每日流量10GB的产品，购买数量1张并成功创建订单
+#   Agent 需要在系统中搜索新加坡地区的SIM卡，
+#   找到有效期为7天且流量无限的产品，购买数量1张并成功创建订单
 # 
 # 评分标准:
 #   - 订单已创建 (15分)
 #   - 订单类型正确（SIM卡） (15分)
-#   - 地区正确（日本） (15分)
-#   - 有效期正确（5天） (15分)
-#   - 流量正确（10GB/天） (15分)
+#   - 地区正确（新加坡） (15分)
+#   - 有效期正确（7天） (15分)
+#   - 流量正确（无限） (15分)
 #   - 购买数量正确（1张） (25分)
 # 
 # 使用方法:
 #   # 准备阶段
-#   POST /api/verify/book_japan_sim_5day/prepare
+#   POST /api/verify/book_singapore_sim_7day/prepare
 #   
 #   # Agent 通过界面操作完成购买...
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-class V054BookJapanSim5dayValidator < BaseValidator
-  self.validator_id = 'v054_book_japan_sim_5day_validator'
-  self.title = '购买日本5天10GB/天SIM卡（数量1张）'
-  self.description = '搜索日本地区的SIM卡，找到5天有效期且每日流量10GB的产品并购买1张'
+class V057BookSingaporeSim7dayValidator < BaseValidator
+  self.validator_id = 'v057_book_singapore_sim_7day_validator'
+  self.title = '购买新加坡7天无限流量SIM卡（数量1张）'
+  self.description = '搜索新加坡地区的SIM卡，找到7天有效期且流量无限的产品并购买1张'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
   def prepare
-    @region = '日本'
-    @validity_days = 5
-    @data_limit_keyword = '10GB/天'
+    @region = '新加坡'
+    @validity_days = 7
+    @data_limit_keyword = '无限'
     @quantity = 1
     
     # 查找符合条件的SIM卡（注意：查询基线数据 data_version=0）
@@ -48,10 +48,10 @@ class V054BookJapanSim5dayValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请购买一张日本5天每日10GB流量的SIM卡（数量1张）",
+      task: "请购买一张新加坡7天无限流量的SIM卡（数量1张）",
       region: @region,
       validity_days: @validity_days,
-      data_requirement: "10GB/天",
+      data_requirement: "无限流量",
       quantity: @quantity,
       hint: "系统中有多款SIM卡可选，请找到符合要求的产品",
       matching_count: @matching_count
@@ -75,20 +75,20 @@ class V054BookJapanSim5dayValidator < BaseValidator
     end
     
     # 断言3: 地区正确
-    add_assertion "地区正确（日本）", weight: 15 do
+    add_assertion "地区正确（新加坡）", weight: 15 do
       expect(@order.region).to eq(@region),
         "地区不正确。预期: #{@region}, 实际: #{@order.region}"
     end
     
-    # 断言4: 有效期正确（5天）
-    add_assertion "有效期正确（5天）", weight: 15 do
+    # 断言4: 有效期正确（7天）
+    add_assertion "有效期正确（7天）", weight: 15 do
       sim_card = @order.orderable
       expect(sim_card.validity_days).to eq(@validity_days),
         "有效期不正确。预期: #{@validity_days}天, 实际: #{sim_card.validity_days}天"
     end
     
-    # 断言5: 流量正确（包含"10GB/天"关键词）
-    add_assertion "流量正确（10GB/天）", weight: 15 do
+    # 断言5: 流量正确（包含"无限"关键词）
+    add_assertion "流量正确（无限）", weight: 15 do
       sim_card = @order.orderable
       expect(sim_card.data_limit).to include(@data_limit_keyword),
         "流量不符合要求。预期包含: #{@data_limit_keyword}, 实际: #{sim_card.data_limit}"
@@ -123,7 +123,7 @@ class V054BookJapanSim5dayValidator < BaseValidator
     @matching_count = data['matching_count']
   end
   
-  # 模拟 AI Agent 操作：购买日本5天10GB/天SIM卡
+  # 模拟 AI Agent 操作：购买新加坡7天无限流量SIM卡
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
