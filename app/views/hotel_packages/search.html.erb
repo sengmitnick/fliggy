@@ -49,47 +49,188 @@
     <%= render 'shared/city_selector_modal' %>
     
     <!-- Filter Pills Row -->
-    <div class="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar border-t border-border">
-      <%= link_to search_hotel_packages_path(city: @city, q: @query, sort_by: 'sales'), 
-          class: "px-3 py-1.5 rounded-full text-sm whitespace-nowrap #{@sort_by == 'sales' ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary'}" do %>
-        月销量排序
-        <svg class="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      <% end %>
+    <div class="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar border-t border-border"
+         data-controller="hotel-package-filter"
+         data-hotel-package-filter-city-value="<%= @city || '武汉' %>"
+         data-hotel-package-filter-query-value="<%= @query || '' %>"
+         data-hotel-package-filter-sort-value="<%= @sort_by || '' %>"
+         data-hotel-package-filter-brand-value="<%= params[:brand] || '' %>"
+         data-hotel-package-filter-star-level-value="<%= params[:star_level] || '' %>"
+         data-hotel-package-filter-district-value="<%= params[:district] || '' %>">
       
-      <button class="px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap">
-        位置距离
+      <!-- 月销量排序按钮 -->
+      <button type="button"
+              data-hotel-package-filter-target="sortButton"
+              data-action="click->hotel-package-filter#openSortModal"
+              class="px-3 py-1.5 rounded-full text-sm whitespace-nowrap <%= @sort_by == 'sales' ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary' %>">
+        <%= @sort_by == 'sales' ? '月销量排序' : @sort_by == 'price_asc' ? '价格从低到高' : @sort_by == 'price_desc' ? '价格从高到低' : '推荐排序' %>
         <svg class="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       
-      <button class="px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap">
-        酒店星级
+      <!-- 位置距离按钮 -->
+      <button type="button"
+              data-hotel-package-filter-target="districtButton"
+              data-action="click->hotel-package-filter#openDistrictModal"
+              class="px-3 py-1.5 rounded-full text-sm whitespace-nowrap <%= params[:district].present? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary' %>">
+        <%= params[:district].present? ? params[:district] : '位置距离' %>
         <svg class="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       
-      <button class="px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap">
-        酒店品牌
+      <!-- 酒店星级按钮 -->
+      <button type="button"
+              data-hotel-package-filter-target="starButton"
+              data-action="click->hotel-package-filter#openStarModal"
+              class="px-3 py-1.5 rounded-full text-sm whitespace-nowrap <%= params[:star_level].present? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary' %>">
+        <%= params[:star_level].present? ? "#{params[:star_level]}星" : '酒店星级' %>
         <svg class="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+      
+      <!-- 酒店品牌按钮 -->
+      <button type="button"
+              data-hotel-package-filter-target="brandButton"
+              data-action="click->hotel-package-filter#openBrandModal"
+              class="px-3 py-1.5 rounded-full text-sm whitespace-nowrap <%= params[:brand].present? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary' %>">
+        <%= params[:brand].present? ? params[:brand] : '酒店品牌' %>
+        <svg class="inline w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      
+      <!-- 排序模态框 -->
+      <div data-hotel-package-filter-target="sortModal"
+           data-action="click->hotel-package-filter#closeAllModals"
+           class="hidden fixed inset-0 bg-black/50 z-50">
+        <div data-action="click->hotel-package-filter#stopPropagation"
+             class="absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl max-w-[450px] mx-auto">
+          <div class="p-4 space-y-2">
+            <h3 class="text-lg font-bold mb-4 text-text-primary">排序方式</h3>
+            <button data-value=""
+                    data-action="click->hotel-package-filter#selectSort"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-surface-elevated <%= @sort_by.blank? ? 'text-primary font-bold' : 'text-text-secondary' %>">
+              推荐排序
+            </button>
+            <button data-value="sales"
+                    data-action="click->hotel-package-filter#selectSort"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-surface-elevated <%= @sort_by == 'sales' ? 'text-primary font-bold' : 'text-text-secondary' %>">
+              月销量排序
+            </button>
+            <button data-value="price_asc"
+                    data-action="click->hotel-package-filter#selectSort"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-surface-elevated <%= @sort_by == 'price_asc' ? 'text-primary font-bold' : 'text-text-secondary' %>">
+              价格从低到高
+            </button>
+            <button data-value="price_desc"
+                    data-action="click->hotel-package-filter#selectSort"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-surface-elevated <%= @sort_by == 'price_desc' ? 'text-primary font-bold' : 'text-text-secondary' %>">
+              价格从高到低
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 商圈模态框 -->
+      <div data-hotel-package-filter-target="districtModal"
+           data-action="click->hotel-package-filter#closeAllModals"
+           class="hidden fixed inset-0 bg-black/50 z-50">
+        <div data-action="click->hotel-package-filter#stopPropagation"
+             class="absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl max-w-[450px] mx-auto max-h-[70vh] overflow-y-auto">
+          <div class="p-4">
+            <h3 class="text-lg font-bold mb-4 text-text-primary">选择商圈</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <button data-value=""
+                      data-action="click->hotel-package-filter#selectDistrict"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:district].blank? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                不限
+              </button>
+              <% @districts.each do |district| %>
+                <button data-value="<%= district %>"
+                        data-action="click->hotel-package-filter#selectDistrict"
+                        class="px-3 py-2 rounded-lg text-sm <%= params[:district] == district ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                  <%= district %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 星级模态框 -->
+      <div data-hotel-package-filter-target="starModal"
+           data-action="click->hotel-package-filter#closeAllModals"
+           class="hidden fixed inset-0 bg-black/50 z-50">
+        <div data-action="click->hotel-package-filter#stopPropagation"
+             class="absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl max-w-[450px] mx-auto">
+          <div class="p-4">
+            <h3 class="text-lg font-bold mb-4 text-text-primary">酒店星级</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <button data-value=""
+                      data-action="click->hotel-package-filter#selectStarLevel"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:star_level].blank? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                不限
+              </button>
+              <button data-value="5"
+                      data-action="click->hotel-package-filter#selectStarLevel"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:star_level] == '5' ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                5星级
+              </button>
+              <button data-value="4"
+                      data-action="click->hotel-package-filter#selectStarLevel"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:star_level] == '4' ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                4星级
+              </button>
+              <button data-value="3"
+                      data-action="click->hotel-package-filter#selectStarLevel"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:star_level] == '3' ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                3星级
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 品牌模态框 -->
+      <div data-hotel-package-filter-target="brandModal"
+           data-action="click->hotel-package-filter#closeAllModals"
+           class="hidden fixed inset-0 bg-black/50 z-50">
+        <div data-action="click->hotel-package-filter#stopPropagation"
+             class="absolute bottom-0 left-0 right-0 bg-surface rounded-t-2xl max-w-[450px] mx-auto max-h-[70vh] overflow-y-auto">
+          <div class="p-4">
+            <h3 class="text-lg font-bold mb-4 text-text-primary">选择品牌</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <button data-value=""
+                      data-action="click->hotel-package-filter#selectBrand"
+                      class="px-3 py-2 rounded-lg text-sm <%= params[:brand].blank? ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                不限
+              </button>
+              <% @brands.each do |brand| %>
+                <button data-value="<%= brand %>"
+                        data-action="click->hotel-package-filter#selectBrand"
+                        class="px-3 py-2 rounded-lg text-sm <%= params[:brand] == brand ? 'bg-primary text-text-primary' : 'bg-surface-elevated text-text-secondary hover:bg-surface-hover' %>">
+                  <%= brand %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Filter Tags -->
   <div class="px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar bg-surface">
     <%= link_to search_hotel_packages_path(city: @city, q: @query, tags: ['refundable']),
-        class: "px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap border border-border" do %>
+        class: "px-3 py-1.5 rounded-full text-sm whitespace-nowrap border #{@filter_tags.include?('refundable') ? 'bg-primary text-text-primary border-primary' : 'bg-surface-elevated text-text-secondary border-border'}" do %>
       不约可退
     <% end %>
     
     <%= link_to search_hotel_packages_path(city: @city, q: @query, tags: ['luxury']),
-        class: "px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap border border-border" do %>
+        class: "px-3 py-1.5 rounded-full text-sm whitespace-nowrap border #{@filter_tags.include?('luxury') ? 'bg-primary text-text-primary border-primary' : 'bg-surface-elevated text-text-secondary border-border'}" do %>
       奢享套房
     <% end %>
     
@@ -98,7 +239,7 @@
     </span>
     
     <%= link_to search_hotel_packages_path(city: @city, q: @query, tags: ['instant_booking']),
-        class: "px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap border border-border" do %>
+        class: "px-3 py-1.5 rounded-full text-sm whitespace-nowrap border #{@filter_tags.include?('instant_booking') ? 'bg-primary text-text-primary border-primary' : 'bg-surface-elevated text-text-secondary border-border'}" do %>
       即买即约
     <% end %>
     
