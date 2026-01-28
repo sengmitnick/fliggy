@@ -51,9 +51,11 @@ class ConvertAllDataVersionToString < ActiveRecord::Migration[7.2]
         end
 
         policy_name = "#{table}_version_policy"
+        isolation_policy_name = "#{table}_isolation_policy"
 
-        # 1. 删除现有的 RLS 策略
+        # 1. 删除现有的所有 RLS 策略（包括旧的 isolation_policy）
         execute "DROP POLICY IF EXISTS #{policy_name} ON #{table}"
+        execute "DROP POLICY IF EXISTS #{isolation_policy_name} ON #{table}"
 
         # 2. 转换列类型
         # PostgreSQL 会自动将 integer/bigint 转换为 text (0 -> '0')
