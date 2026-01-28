@@ -123,9 +123,9 @@ namespace :validator do
         puts "    错误: #{e.message}"
         puts "\n❌ 数据包加载失败，回滚操作..."
         
-        # 删除已加载的数据
-        DataVersionable.models.each do |model|
-          model.where(data_version: 0).delete_all
+        # 删除已加载的数据（使用 destroy_all 以处理外键依赖）
+        DataVersionable.models.reverse.each do |model|
+          model.where(data_version: 0).destroy_all
         end
         
         exit 1
