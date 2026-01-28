@@ -824,6 +824,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110008) do
     t.string "data_version", limit: 50, default: "0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_follows_on_data_version"
     t.index ["followable_type", "followable_id"], name: "index_follows_on_followable"
     t.index ["user_id", "followable_type", "followable_id"], name: "index_follows_on_user_and_followable", unique: true
     t.index ["user_id"], name: "index_follows_on_user_id"
