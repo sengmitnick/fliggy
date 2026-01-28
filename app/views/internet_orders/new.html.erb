@@ -178,19 +178,55 @@
               </div>
               
               <!-- WiFi联系人信息 -->
-              <div class="space-y-3">
-                <div class="flex items-center">
-                  <label class="font-medium text-gray-900 w-24">联系人姓名</label>
+              <div class="mb-3">
+                <label class="font-bold text-base mb-2 block">联系人信息</label>
+                
+                <% if @passengers.any? %>
+                  <% 
+                    # Determine default selected passenger based on passenger_id param or first passenger
+                    selected_index = 0
+                    if params[:passenger_id].present?
+                      passenger_index = @passengers.find_index { |p| p.id.to_s == params[:passenger_id] }
+                      selected_index = passenger_index if passenger_index
+                    end
+                    selected_passenger = @passengers[selected_index]
+                  %>
+                  
+                  <!-- 显示选中的联系人 -->
+                  <div class="bg-[#F7F8FA] rounded-lg p-4 mb-3" data-internet-order-form-target="selectedPassengerCard">
+                    <div class="flex items-start">
+                      <svg class="w-5 h-5 text-gray-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                      </svg>
+                      <div class="flex-1">
+                        <div class="font-medium text-gray-900 mb-1">
+                          <span data-internet-order-form-target="selectedPassengerName"><%= selected_passenger.name %></span>
+                          <span class="ml-2" data-internet-order-form-target="selectedPassengerPhone"><%= selected_passenger.phone %></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button type="button" 
+                          data-action="internet-order-form#openPassengerModal"
+                          class="block text-center text-blue-500 text-sm py-2 w-full">
+                    更换联系人
+                  </button>
+                  
+                  <!-- Hidden fields for selected passenger -->
                   <%= f.fields_for :contact_info do |contact| %>
-                    <%= contact.text_field :name, value: params[:contact_name], class: "flex-1 px-3 py-2 border border-gray-300 rounded", placeholder: "请输入联系人姓名" %>
+                    <%= contact.hidden_field :passenger_id, value: selected_passenger.id, data: { internet_order_form_target: "passengerIdField" } %>
+                    <%= contact.hidden_field :name, value: selected_passenger.name, data: { internet_order_form_target: "passengerNameField" } %>
+                    <%= contact.hidden_field :phone, value: selected_passenger.phone, data: { internet_order_form_target: "passengerPhoneField" } %>
                   <% end %>
-                </div>
-                <div class="flex items-center">
-                  <label class="font-medium text-gray-900 w-24">联系人电话</label>
-                  <%= f.fields_for :contact_info do |contact| %>
-                    <%= contact.text_field :phone, value: params[:contact_phone], class: "flex-1 px-3 py-2 border border-gray-300 rounded", placeholder: "请输入联系人电话" %>
-                  <% end %>
-                </div>
+                  
+                <% else %>
+                  <button type="button" 
+                          onclick="window.showToast('精彩即将上线', 'info')" 
+                          class="block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded w-full">
+                    + 添加常用联系人
+                  </button>
+                <% end %>
               </div>
             <% end %>
           <% end %>
@@ -365,4 +401,52 @@
       </div>
     </div>
   </div>
+  
+  <!-- Passenger Selection Modal for WiFi -->
+  <div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
+       data-internet-order-form-target="passengerModal">
+    <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto h-[70vh] flex flex-col">
+      <!-- 标题 -->
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">选择联系人</h3>
+        <button type="button" data-action="internet-order-form#closePassengerModal" class="text-gray-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 联系人列表 -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <% if @passengers.any? %>
+          <% @passengers.each_with_index do |passenger, index| %>
+            <div class="mb-4 pb-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 rounded-lg p-3 -mx-3"
+                 data-action="click->internet-order-form#selectPassengerFromModal"
+                 data-passenger-id="<%= passenger.id %>"
+                 data-passenger-name="<%= passenger.name %>"
+                 data-passenger-phone="<%= passenger.phone %>">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1"><%= passenger.name %> <%= passenger.phone %></div>
+                </div>
+                <div class="ml-2 flex-shrink-0">
+                  <div class="w-5 h-5 border border-gray-300 rounded-full" data-internet-order-form-target="passengerRadio"></div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- 底部确认按钮 -->
+      <div class="p-4 border-t border-gray-200">
+        <button type="button" data-action="internet-order-form#confirmPassengerSelection"
+                class="w-full bg-[#FFDD00] text-black font-bold py-3 rounded-full">
+          确定
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- WiFi Contact Edit Modal (Removed - Now using Passenger selection) -->
 </div>

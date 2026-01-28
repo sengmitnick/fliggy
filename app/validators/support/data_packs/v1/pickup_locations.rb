@@ -20,7 +20,7 @@ PickupLocation.insert_all([
   {
     city: '南宁',
     district: '市区',
-    detail: '深圳市区深圳市软件产业基地1栋B座1楼外面顺丰快递柜（华祥苑茗茶）旁',
+    detail: '南宁市青秀区民族大道131号航洋国际城B座2楼',
     phone: '18617147510',
     business_hours: '24小时',
     notes: '(漫游超人)(北京时间)',
