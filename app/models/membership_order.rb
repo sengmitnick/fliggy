@@ -1,4 +1,6 @@
 class MembershipOrder < ApplicationRecord
+  include DataVersionable
+  
   belongs_to :user
   belongs_to :membership_product
   

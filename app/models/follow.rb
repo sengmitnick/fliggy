@@ -1,4 +1,6 @@
 class Follow < ApplicationRecord
+  include DataVersionable
+  
   belongs_to :user
   # Note: followable_type and followable_id are stored but not validated as polymorphic
   # This allows following non-ActiveRecord objects like LiveRoom
