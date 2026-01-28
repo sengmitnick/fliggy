@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_28_110007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -817,6 +817,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
     t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
+  create_table "follows", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "followable_type"
+    t.string "followable_id"
+    t.string "data_version", limit: 50, default: "0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_follows_on_data_version"
+    t.index ["followable_type", "followable_id"], name: "index_follows_on_followable"
+    t.index ["user_id", "followable_type", "followable_id"], name: "index_follows_on_user_and_followable", unique: true
+    t.index ["user_id"], name: "index_follows_on_user_id"
+  end
+
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -1015,7 +1028,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
     t.boolean "luxury", default: false
     t.string "slug"
     t.string "data_version", limit: 50, default: "0", null: false
-    t.integer "star_level"
     t.index ["brand_name"], name: "index_hotel_packages_on_brand_name"
     t.index ["data_version"], name: "index_hotel_packages_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_packages_on_hotel_id"
@@ -1316,6 +1328,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
     t.string "data_version", limit: 50, default: "0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
     t.index ["data_version"], name: "index_membership_orders_on_data_version"
     t.index ["membership_product_id"], name: "index_membership_orders_on_membership_product_id"
     t.index ["order_number"], name: "index_membership_orders_on_order_number", unique: true

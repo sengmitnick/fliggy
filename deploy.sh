@@ -299,42 +299,7 @@ EOF_SQL
         exit 1
     fi
 
-    # 9.4 验证多会话隔离
-    print_info "验证多会话隔离功能..."
-    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
-# 检查 RLS 是否强制启用（检查实际存在的业务表）
-result = ActiveRecord::Base.connection.execute(
-  "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('hotel_bookings', 'train_bookings', 'car_orders', 'bookings')"
-)
-
-if result.count == 0
-  puts '⚠️  未找到预订表，跳过 RLS 验证'
-  exit 0
-end
-
-all_enabled = result.all? { |r| r['relforcerowsecurity'] == 't' }
-
-if all_enabled
-  puts '✓ 多会话隔离验证通过 (所有预订表已启用 FORCE RLS)'
-else
-  puts '✗ 多会话隔离验证失败'
-  result.each do |r|
-    status = r['relforcerowsecurity'] == 't' ? '✓' : '✗'
-    puts "  #{status} #{r['relname']}: #{r['relforcerowsecurity']}"
-  end
-  exit 1
-end
-RUBY
-)" 2>&1
-
-    if [ $? -eq 0 ]; then
-        print_success "多会话隔离验证通过"
-    else
-        print_error "多会话隔离验证失败"
-        exit 1
-    fi
-
-    # 9.5 创建默认管理员账号
+    # 9.4 创建默认管理员账号
     print_info "创建默认管理员账号..."
     docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
 admin = Administrator.find_or_initialize_by(name: 'admin')

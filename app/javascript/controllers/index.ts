@@ -125,6 +125,9 @@ import AddressModalController from "./address_modal_controller"
 import LiveRoomFollowController from "./live_room_follow_controller"
 import MembershipPaymentController from "./membership_payment_controller"
 import TransferPassengerSelectorController from "./transfer_passenger_selector_controller"
+import CarSearchEditorController from "./car_search_editor_controller"
+import InsuranceSearchController from "./insurance_search_controller"
+import InsuranceSearchFormController from "./insurance_search_form_controller"
 
 const application = Application.start()
 
@@ -253,5 +256,8 @@ application.register("address-modal", AddressModalController)
 application.register("live-room-follow", LiveRoomFollowController)
 application.register("membership-payment", MembershipPaymentController)
 application.register("transfer-passenger-selector", TransferPassengerSelectorController)
+application.register("car-search-editor", CarSearchEditorController)
+application.register("insurance-search", InsuranceSearchController)
+application.register("insurance-search-form", InsuranceSearchFormController)
 
 window.Stimulus = application
