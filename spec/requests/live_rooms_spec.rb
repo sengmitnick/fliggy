@@ -13,14 +13,14 @@ RSpec.describe "Live rooms", type: :request do
     let(:live_room_name) { "旅游环境01 直播间" }
     
     before do
-      # Authenticate user for follow actions
-      sign_in_as(user)
+      # Use API authentication for JSON requests
+      api_sign_in_as(user)
     end
     
     describe "POST /live_rooms/:id/follow" do
       it "creates a follow record" do
         expect {
-          post follow_live_room_path(live_room_name), headers: { 'Accept' => 'application/json' }
+          post follow_live_room_path(live_room_name, format: :json)
         }.to change { Follow.count }.by(1)
         
         expect(response).to have_http_status(:success)
@@ -38,7 +38,7 @@ RSpec.describe "Live rooms", type: :request do
         )
         
         expect {
-          post follow_live_room_path(live_room_name), headers: { 'Accept' => 'application/json' }
+          post follow_live_room_path(live_room_name, format: :json)
         }.not_to change { Follow.count }
         
         expect(response).to have_http_status(:unprocessable_entity)
@@ -57,7 +57,7 @@ RSpec.describe "Live rooms", type: :request do
         )
         
         expect {
-          delete unfollow_live_room_path(live_room_name), headers: { 'Accept' => 'application/json' }
+          delete unfollow_live_room_path(live_room_name, format: :json)
         }.to change { Follow.count }.by(-1)
         
         expect(response).to have_http_status(:success)
@@ -68,7 +68,7 @@ RSpec.describe "Live rooms", type: :request do
       
       it "handles unfollowing when not following" do
         expect {
-          delete unfollow_live_room_path(live_room_name), headers: { 'Accept' => 'application/json' }
+          delete unfollow_live_room_path(live_room_name, format: :json)
         }.not_to change { Follow.count }
         
         expect(response).to have_http_status(:success)
