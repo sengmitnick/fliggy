@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -817,18 +817,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
     t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
-  create_table "follows", force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.string "followable_type", null: false
-    t.string "followable_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "data_version", limit: 50, default: "0", null: false
-    t.index ["data_version"], name: "index_follows_on_data_version"
-    t.index ["user_id", "followable_type", "followable_id"], name: "index_follows_on_user_and_followable", unique: true
-    t.index ["user_id"], name: "index_follows_on_user_id"
-  end
-
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -1287,14 +1275,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
   end
 
   create_table "live_products", force: :cascade do |t|
-    t.string "productable_type"
-    t.bigint "productable_id"
+    t.string "productable_type", null: false
+    t.bigint "productable_id", null: false
     t.integer "position", default: 0
     t.string "live_room_name"
+    t.string "data_version", limit: 50, default: "0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "data_version", limit: 50, default: "0", null: false
     t.index ["data_version"], name: "index_live_products_on_data_version"
+    t.index ["live_room_name"], name: "index_live_products_on_live_room_name"
     t.index ["productable_type", "productable_id"], name: "index_live_products_on_productable"
   end
 
@@ -1312,20 +1301,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
   create_table "membership_orders", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "membership_product_id", null: false
-    t.integer "quantity", default: 1
-    t.decimal "price_cash", default: "0.0"
-    t.integer "price_mileage", default: 0
-    t.decimal "total_cash", default: "0.0"
-    t.integer "total_mileage", default: 0
-    t.string "status", default: "pending"
-    t.string "order_number"
-    t.text "shipping_address"
-    t.string "contact_phone"
+    t.string "order_number", null: false
+    t.integer "quantity", default: 1, null: false
+    t.decimal "price_cash", precision: 10, scale: 2, default: "0.0"
+    t.decimal "price_mileage", precision: 10, scale: 2, default: "0.0"
+    t.decimal "total_cash", precision: 10, scale: 2, default: "0.0"
+    t.decimal "total_mileage", precision: 10, scale: 2, default: "0.0"
     t.string "contact_name"
-    t.text "notes"
+    t.string "contact_phone"
+    t.text "shipping_address"
+    t.string "status", default: "pending"
+    t.string "data_version", limit: 50, default: "0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "data_version", limit: 50, default: "0", null: false
     t.index ["data_version"], name: "index_membership_orders_on_data_version"
     t.index ["membership_product_id"], name: "index_membership_orders_on_membership_product_id"
     t.index ["order_number"], name: "index_membership_orders_on_order_number", unique: true
@@ -1334,25 +1322,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
   end
 
   create_table "membership_products", force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.string "slug"
     t.string "category", default: "popular"
-    t.decimal "price_cash", default: "0.0"
+    t.decimal "price_cash", precision: 10, scale: 2, default: "0.0"
     t.integer "price_mileage", default: 0
-    t.decimal "original_price"
+    t.decimal "original_price", precision: 10, scale: 2
     t.integer "sales_count", default: 0
     t.integer "stock"
-    t.decimal "rating", default: "5.0"
+    t.decimal "rating", precision: 3, scale: 2, default: "0.0"
     t.text "description"
     t.string "image_url"
-    t.string "region"
+    t.string "region", default: "domestic"
     t.boolean "featured", default: false
+    t.string "data_version", limit: 50, default: "0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "data_version", limit: 50, default: "0", null: false
     t.index ["category"], name: "index_membership_products_on_category"
     t.index ["data_version"], name: "index_membership_products_on_data_version"
     t.index ["featured"], name: "index_membership_products_on_featured"
+    t.index ["region"], name: "index_membership_products_on_region"
     t.index ["slug"], name: "index_membership_products_on_slug", unique: true
   end
 
@@ -1981,7 +1970,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
   add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_availabilities", "deep_travel_guides"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
-  add_foreign_key "follows", "users"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"
   add_foreign_key "hotel_packages", "hotels"
