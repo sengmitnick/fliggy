@@ -136,13 +136,13 @@
 
         <!-- Action Buttons Grid -->
         <div class="grid grid-cols-4 gap-2">
-          <div class="flex flex-col items-center justify-center space-y-1">
+          <div class="flex flex-col items-center justify-center space-y-1" onclick="window.showToast('精彩即将上线，敬请期待')">
             <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
             </svg>
             <span class="text-xs text-text-primary">联系司机</span>
           </div>
-          <div class="flex flex-col items-center justify-center space-y-1">
+          <div class="flex flex-col items-center justify-center space-y-1" onclick="window.showToast('精彩即将上线，敬请期待')">
             <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -154,7 +154,7 @@
             </svg>
             <span class="text-xs text-text-primary">取消订单</span>
           <% end %>
-          <div class="flex flex-col items-center justify-center space-y-1">
+          <div class="flex flex-col items-center justify-center space-y-1" onclick="window.showToast('精彩即将上线，敬请期待')">
             <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -196,7 +196,7 @@
         <span class="text-base font-bold text-text-primary mr-1">总额</span>
         <span class="text-xl font-bold text-[#FF5000]">¥<%= @transfer.actual_price.to_i %></span>
       </div>
-      <div class="flex items-center text-xs text-text-muted">
+      <div class="flex items-center text-xs text-text-muted" onclick="window.showToast('精彩即将上线，敬请期待')">
         明细 
         <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -226,9 +226,7 @@
         <div class="flex items-center">
           <span class="w-24 text-text-muted text-sm">乘车人手机号</span>
           <span class="text-[#111] text-sm mr-2"><%= @transfer.passenger_phone %></span>
-          <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-          </svg>
+          
         </div>
       </div>
     </div>
@@ -264,7 +262,7 @@
 
   <!-- Bottom Fixed Bar -->
   <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border flex items-center justify-between px-4 py-3 z-50 text-sm">
-    <button class="flex items-center justify-center space-x-2 flex-1 border-r border-border">
+    <button class="flex items-center justify-center space-x-2 flex-1 border-r border-border" onclick="window.showToast('精彩即将上线，敬请期待')">
       <span class="w-6 h-6 rounded-full border border-orange-300 flex items-center justify-center text-orange-400">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
@@ -272,7 +270,7 @@
       </span>
       <span class="text-[#111] font-medium">联系客服</span>
     </button>
-    <button class="flex items-center justify-center space-x-2 flex-1">
+    <button class="flex items-center justify-center space-x-2 flex-1" onclick="window.showToast('精彩即将上线，敬请期待')">
       <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
       </svg>

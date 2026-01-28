@@ -30,6 +30,20 @@ if demo_user.persisted?
     puts "     ✓ 设置钱包余额: ¥10,000.00"
   end
   
+  # 设置会员里程
+  if demo_user.membership.nil?
+    demo_user.create_membership!(
+      level: 'F1',
+      points: 50,
+      experience: 0,
+      data_version: 0
+    )
+    puts "     ✓ 设置会员里程: 50"
+  elsif demo_user.membership.points.zero?
+    demo_user.membership.update!(points: 50)
+    puts "     ✓ 更新会员里程: 50"
+  end
+  
   # 添加默认乘机人
   if demo_user.passengers.where(name: '张三').none?
     demo_user.passengers.create!([
@@ -100,6 +114,6 @@ if demo_user.persisted?
     puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴"
   end
   
-  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000)"
+  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 50)"
 end
 

@@ -1,0 +1,26 @@
+<% 
+  # Partial for follow button
+  # Expects: live_room_name (String), is_following (Boolean)
+  live_room_id = live_room_name.parameterize
+%>
+
+<div id="follow-button-<%= live_room_id %>" 
+     data-controller="live-room-follow"
+     data-live-room-follow-room-name-value="<%= live_room_name %>"
+     data-live-room-follow-following-value="<%= is_following.to_s %>">
+  <% if is_following %>
+    <button data-action="click->live-room-follow#unfollow" 
+            class="live-follow-btn live-follow-btn-active">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      <span>已关注</span>
+    </button>
+  <% else %>
+    <button data-action="click->live-room-follow#follow" 
+            class="live-follow-btn">
+      + 关注
+    </button>
+  <% end %>
+</div>

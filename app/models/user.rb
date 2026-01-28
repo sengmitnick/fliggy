@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_many :user_coupons, dependent: :destroy
   has_many :abroad_coupons, through: :user_coupons
+  has_many :follows, dependent: :destroy
 
   MIN_PASSWORD = 4
   GENERATED_EMAIL_SUFFIX = "@generated-mail.clacky.ai"
@@ -66,6 +67,7 @@ class User < ApplicationRecord
   has_many :notification_settings, dependent: :destroy
   has_many :itineraries, dependent: :destroy
   has_many :charter_bookings, dependent: :destroy
+  has_many :membership_orders, dependent: :destroy
   
   after_create :create_default_membership
 
@@ -170,6 +172,24 @@ class User < ApplicationRecord
   def deduct_balance(amount)
     return false if amount.to_f <= 0 || self.balance < amount.to_f
     update(balance: self.balance - amount.to_f)
+  end
+  
+  # Mileage management
+  def add_mileage(amount)
+    return false if amount.to_i <= 0
+    return false unless membership
+    membership.update(points: membership.points + amount.to_i)
+  end
+  
+  def deduct_mileage(amount)
+    return false if amount.to_i <= 0
+    return false unless membership
+    return false if membership.points < amount.to_i
+    membership.update(points: membership.points - amount.to_i)
+  end
+  
+  def available_mileage
+    membership&.points || 0
   end
 
   private

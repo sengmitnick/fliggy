@@ -24,7 +24,14 @@ fi
 echo "If running the rails server then create or migrate existing database"
 
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
-  ./bin/rails db:prepare
+  # 生产环境：跳过 db:prepare（已在部署脚本的初始化容器中完成）
+  if [ "${RAILS_ENV}" == "production" ]; then
+    echo "[Production] Skipping db:prepare - database already initialized by deployment script"
+    echo "[Production] If you need to run migrations manually, use: docker-compose exec web bundle exec rake db:migrate"
+  else
+    # 开发/测试环境：正常运行 db:prepare
+    ./bin/rails db:prepare
+  fi
 fi
 
 exec "${@}"

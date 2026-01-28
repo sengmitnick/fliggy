@@ -11,12 +11,39 @@ namespace :validator do
     puts "\n🗑️  Step 1: 完全清空数据库（模拟新环境）..."
     
     begin
-      # 禁用外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'replica';")
+      # 使用 PG gem 直接建立临时连接（不通过 ActiveRecord，避免影响全局状态）
+      # 优先使用 ADMIN_DB_URL（生产环境），否则使用环境变量或默认配置
+
+      if ENV['ADMIN_DB_URL'].present?
+        puts "  → 使用 ADMIN_DB_URL 连接（超级管理员）"
+        admin_conn = PG.connect(ENV['ADMIN_DB_URL'])
+      else
+        current_config = ActiveRecord::Base.connection_db_config.configuration_hash
+        admin_username = ENV['DB_USER'] || 'postgres'
+        admin_password = ENV['DB_PASSWORD'] || current_config[:password] || 'pgBqpmYZ'
+
+        puts "  → 使用超级用户连接（#{admin_username}）"
+        admin_conn = PG.connect(
+          host: current_config[:host] || 'localhost',
+          port: current_config[:port] || 5432,
+          dbname: current_config[:database],
+          user: admin_username,
+          password: admin_password
+        )
+      end
       
+      # 禁用外键约束检查
+      admin_conn.exec("SET session_replication_role = 'replica';")
+
+      # 抑制 PostgreSQL NOTICE 输出（如 "truncate cascades to table..."）
+      admin_conn.exec("SET client_min_messages TO WARNING;")
+
       # 获取所有表名（排除 schema_migrations, ar_internal_metadata, good_jobs 相关表）
-      tables = ActiveRecord::Base.connection.tables - [
-        'schema_migrations', 
+      tables_result = admin_conn.exec(
+        "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
+      )
+      tables = tables_result.map { |row| row['tablename'] } - [
+        'schema_migrations',
         'ar_internal_metadata',
         'good_jobs',
         'good_job_batches',
@@ -24,32 +51,43 @@ namespace :validator do
         'good_job_processes',
         'good_job_settings'
       ]
-      
+
       deleted_total = 0
       tables.each do |table|
-        count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first['count'].to_i
+        count_result = admin_conn.exec("SELECT COUNT(*) FROM #{table}")
+        count = count_result[0]['count'].to_i
         if count > 0
           # RESTART IDENTITY resets the sequence counters
-          ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
+          admin_conn.exec("TRUNCATE TABLE #{table} RESTART IDENTITY CASCADE")
           deleted_total += count
           puts "  → #{table}: 清空 #{count} 条记录"
         end
       end
-      
+
       # 恢复外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';")
-      
+      admin_conn.exec("SET session_replication_role = 'origin';")
+
+      # 关闭临时连接
+      admin_conn.close
+
       puts "\n✓ 数据库已完全清空，共删除 #{deleted_total} 条记录"
     rescue StandardError => e
       puts "\n❌ 清空数据库失败: #{e.message}"
-      # 确保恢复外键约束检查
-      ActiveRecord::Base.connection.execute("SET session_replication_role = 'origin';") rescue nil
+      # 确保恢复外键约束检查并关闭临时连接
+      begin
+        if defined?(admin_conn) && admin_conn && !admin_conn.finished?
+          admin_conn.exec("SET session_replication_role = 'origin';")
+          admin_conn.close
+        end
+      rescue => cleanup_error
+        puts "  清理连接时出错: #{cleanup_error.message}"
+      end
       exit 1
     end
-    
+
     # Step 2: 重新加载数据包
     puts "\n📦 Step 2: 重新加载数据包..."
-    
+
     # 设置 PostgreSQL 会话变量 app.data_version='0'
     ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
     

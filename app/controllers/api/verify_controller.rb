@@ -230,10 +230,15 @@ module Api
       normalized_score = verify_result[:score] / 100.0
       
       # 判断 execution_status
+      # 系统级错误（非 Agent 做错）的特征：
+      # 1. verify_result[:status] == 'error' (后端异常)
+      # 2. errors 中包含前端系统错误特征（如 "Missing target", "undefined is not a function", "Cannot read property" 等）
       execution_status = if verify_result[:status] == 'error'
-                           'fail'  # 系统级错误
+                           'fail'  # 后端系统级错误
+                         elsif contains_frontend_system_error?(verify_result[:errors])
+                           'fail'  # 前端系统级错误
                          else
-                           'success'  # 验证逻辑正常执行
+                           'success'  # 验证逻辑正常执行（Agent 可能做错，但系统正常）
                          end
       
       # 转换 reason（失败原因）
@@ -270,6 +275,34 @@ module Api
           }
         }
       }
+    end
+    
+    # 检测错误信息中是否包含前端系统错误特征
+    # 这些错误表明前端代码/环境出问题，而非 Agent 操作错误
+    def contains_frontend_system_error?(errors)
+      return false if errors.nil? || errors.empty?
+      
+      # 前端系统错误的关键词特征
+      frontend_error_patterns = [
+        /Missing target element/i,              # Stimulus target 缺失
+        /is not defined/i,                     # JS 变量未定义
+        /undefined is not a function/i,        # 调用未定义的函数
+        /Cannot read property.*of undefined/i, # 访问 undefined 的属性
+        /Cannot read property.*of null/i,      # 访问 null 的属性
+        /SyntaxError:/i,                       # JS 语法错误
+        /ReferenceError:/i,                    # JS 引用错误
+        /TypeError:.*is not a function/i,      # 类型错误
+        /Controller.*is not registered/i,      # Stimulus controller 未注册
+        /Action.*not found/i,                  # Stimulus action 不存在
+        /Failed to fetch/i,                    # 网络请求失败（可能是系统问题）
+        /NetworkError/i,                       # 网络错误
+        /CORS.*blocked/i                       # CORS 跨域错误
+      ]
+      
+      # 检查每个 error 是否匹配前端错误特征
+      errors.any? do |error_msg|
+        frontend_error_patterns.any? { |pattern| error_msg.to_s.match?(pattern) }
+      end
     end
   end
 end

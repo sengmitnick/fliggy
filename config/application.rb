@@ -4,6 +4,7 @@ require "rails/all"
 Bundler.require(*Rails.groups)
 require_relative '../lib/middleware/clacky_health_check'
 require_relative '../lib/env_checker'
+require_relative '../app/middleware/validator_session_binder'
 
 require 'open-uri'
 
@@ -34,6 +35,7 @@ module Myapp
 
     config.autoload_lib(ignore: %w[assets tasks generators rails middleware source_mapping])
     config.middleware.insert_before Rails::Rack::Logger, ClackyHealthCheck
+    config.middleware.use ValidatorSessionBinder  # Bind session_id from URL params to Rails session
 
     # Ignore data_packs directory in validators (seed data files, not autoloadable classes)
     Rails.autoloaders.main.ignore("#{Rails.root}/app/validators/support/data_packs")

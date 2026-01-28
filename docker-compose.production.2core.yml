@@ -72,7 +72,7 @@ services:
       RAILS_ENV: production
       NODE_ENV: production
       RACK_ENV: production
-      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
+      DATABASE_URL: postgresql://app_user:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CABLE_URL: redis://:${REDIS_PASSWORD}@redis:6379/1
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:?请在.env文件中设置SECRET_KEY_BASE}
@@ -118,7 +118,7 @@ services:
     environment:
       RAILS_ENV: production
       NODE_ENV: production
-      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
+      DATABASE_URL: postgresql://app_user:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       GOOD_JOB_MAX_THREADS: ${GOOD_JOB_MAX_THREADS:-3}

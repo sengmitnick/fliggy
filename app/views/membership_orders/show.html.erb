@@ -1,0 +1,152 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-surface border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to membership_orders_path, class: "text-primary" do %>
+        <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+      <% end %>
+      
+      <h1 class="flex-1 text-center text-primary text-lg font-semibold">订单详情</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto pb-20">
+    <!-- Order Status -->
+    <div class="bg-gradient-to-r from-[hsl(var(--color-primary-dark))] to-[hsl(var(--color-primary))] px-6 py-6">
+      <div class="text-white">
+        <div class="text-2xl font-bold mb-2"><%= @order.status_name %></div>
+        <p class="text-sm text-white/80">
+          <% if @order.status == 'paid' %>
+            您的订单已支付成功，我们会尽快为您发货
+          <% elsif @order.status == 'shipping' %>
+            您的订单正在配送中
+          <% elsif @order.status == 'completed' %>
+            订单已完成，感谢您的购买
+          <% elsif @order.status == 'cancelled' %>
+            订单已取消
+          <% else %>
+            等待支付
+          <% end %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Delivery Address -->
+    <div class="bg-surface mb-3">
+      <div class="px-4 py-4 border-b border-border">
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-danger flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-primary font-semibold"><%= @order.contact_name %></span>
+              <span class="text-primary"><%= @order.contact_phone %></span>
+            </div>
+            
+            <div class="text-secondary text-sm">
+              <%= @order.shipping_address %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="bg-surface mb-3">
+      <div class="px-4 py-4">
+        <div class="flex gap-3 mb-4">
+          <div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-elevated flex-shrink-0">
+            <% product = @order.membership_product %>
+            <% if product.image.attached? %>
+              <%= image_tag product.image.variant(resize_to_fill: [160, 160]), class: "w-full h-full object-cover", alt: product.name %>
+            <% elsif product.image_url.present? %>
+              <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+            <% else %>
+              <div class="w-full h-full flex items-center justify-center">
+                <span class="text-muted text-xs">暂无图片</span>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="flex-1 min-w-0">
+            <h3 class="text-primary text-sm mb-2 line-clamp-2"><%= product.name %></h3>
+            
+            <div class="flex items-center justify-between">
+              <div class="text-danger text-sm">
+                <% if @order.price_mileage > 0 %>
+                  <span class="font-bold"><%= @order.price_mileage %></span>里程
+                <% end %>
+                <% if @order.price_cash > 0 %>
+                  <%= @order.price_mileage > 0 ? ' + ' : '' %>
+                  <span class="font-bold">¥<%= @order.price_cash %></span>
+                <% end %>
+              </div>
+              
+              <div class="text-secondary text-sm">
+                x<%= @order.quantity %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="border-t border-border pt-4">
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="text-secondary">商品总价</span>
+            <span class="text-primary"><%= @order.total_display %></span>
+          </div>
+          
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="text-secondary">运费</span>
+            <span class="text-primary">免运费</span>
+          </div>
+          
+          <div class="flex items-center justify-between pt-2 border-t border-border">
+            <span class="text-secondary">实付款</span>
+            <span class="text-danger text-lg font-bold"><%= @order.total_display %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Info -->
+    <div class="bg-surface mb-3">
+      <div class="px-4 py-3 border-b border-border">
+        <h3 class="text-primary font-semibold mb-3">订单信息</h3>
+        
+        <div class="space-y-2">
+          <div class="flex items-start justify-between text-sm">
+            <span class="text-secondary">订单编号</span>
+            <span class="text-primary text-right"><%= @order.order_number %></span>
+          </div>
+          
+          <div class="flex items-start justify-between text-sm">
+            <span class="text-secondary">下单时间</span>
+            <span class="text-primary text-right"><%= @order.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+          </div>
+          
+          <% if @order.notes.present? %>
+            <div class="flex items-start justify-between text-sm">
+              <span class="text-secondary">备注</span>
+              <span class="text-primary text-right"><%= @order.notes %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <% if @order.can_cancel? %>
+      <div class="px-4 py-4">
+        <%= button_to membership_order_path(@order), method: :delete, 
+            data: { turbo_confirm: "确定要取消订单吗?取消后里程和余额将退回账户" },
+            class: "w-full py-3 border-2 border-danger text-danger rounded-full font-semibold" do %>
+          取消订单
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

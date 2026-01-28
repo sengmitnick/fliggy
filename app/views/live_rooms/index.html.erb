@@ -12,7 +12,7 @@
       
       <!-- Top Bar -->
       <div class="live-top-bar">
-        <%= link_to hotels_path, class: "live-close-btn" do %>
+        <%= link_to root_path, class: "live-close-btn" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -25,15 +25,15 @@
           <%= image_tag "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80", class: "w-full h-full object-cover", alt: "Host" %>
         </div>
         <div class="live-host-details">
-          <div class="live-host-name">去哪儿官方直播间</div>
+          <div class="live-host-name"><%= @live_room.host_name %></div>
           <div class="live-viewer-count">
             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
             </svg>
-            <span>3.2万</span>
+            <span><%= number_to_human(@live_room.viewer_count, precision: 2, format: '%n%u', units: { thousand: 'K', million: 'M' }) %></span>
           </div>
         </div>
-        <button class="live-follow-btn">+ 关注</button>
+        <%= render 'live_rooms/follow_button', live_room_name: @live_room.name, is_following: @is_following %>
       </div>
       
       <!-- Live Badge -->
@@ -44,302 +44,52 @@
       
       <!-- Product Cards -->
       <div class="live-products">
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">🔥 春节特惠 · 五星酒店5折起</div>
-            <div class="live-product-price">
-              <span class="live-product-price-symbol">¥</span>
-              <span class="live-product-price-value">299</span>
-              <span class="live-product-price-unit">起</span>
+        <% @live_products.each do |live_product| %>
+          <% product = live_product.productable %>
+          <% 
+            # Determine the link based on product type
+            # TourGroupProduct -> Uses tour_groups controller
+            # HotelPackage -> Uses hotel_packages controller
+            product_link = if product.is_a?(TourGroupProduct)
+              tour_group_path(product)
+            elsif product.is_a?(HotelPackage)
+              hotel_package_path(product)
+            else
+              '#'
+            end
+          %>
+          <%= link_to product_link, class: "live-product-card" do %>
+            <div class="live-product-image">
+              <% if product.is_a?(TourGroupProduct) %>
+                <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.title %>
+              <% elsif product.is_a?(HotelPackage) %>
+                <%= image_tag product.brand_logo_url, class: "w-full h-full object-cover", alt: product.title %>
+              <% end %>
             </div>
-          </div>
-        </div>
-        
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">💎 希尔顿欢朋 · 20GO币起</div>
-            <div class="live-product-price">
-              <span class="live-product-price-symbol">¥</span>
-              <span class="live-product-price-value">199</span>
-              <span class="live-product-price-unit">起</span>
+            <div class="live-product-info">
+              <% if product.is_a?(TourGroupProduct) %>
+                <div class="live-product-title">🔥 <%= product.title.truncate(20) %></div>
+                <div class="live-product-price">
+                  <span class="live-product-price-symbol">￥</span>
+                  <span class="live-product-price-value"><%= product.price.to_i %></span>
+                  <span class="live-product-price-unit">起</span>
+                </div>
+              <% elsif product.is_a?(HotelPackage) %>
+                <div class="live-product-title">💎 <%= product.title.truncate(20) %></div>
+                <div class="live-product-price">
+                  <span class="live-product-price-symbol">￥</span>
+                  <span class="live-product-price-value"><%= product.price.to_i %></span>
+                  <span class="live-product-price-unit">起</span>
+                </div>
+              <% end %>
             </div>
-          </div>
-        </div>
+          <% end %>
+        <% end %>
       </div>
       
       <!-- Bottom Actions -->
       <div class="live-bottom-bar">
         <div class="live-title">超值酒店5折起 · 限时秒杀</div>
-        <button class="live-shop-btn">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <span>购物车</span>
-        </button>
-      </div>
-      
-      <!-- Swipe Hint -->
-      <div class="live-swipe-hint">
-        <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-        </svg>
-        <span>上滑查看更多直播间</span>
-      </div>
-    </div>
-    
-    <!-- Slide 2: Hilton Live Room -->
-    <div class="live-slide" data-live-room-target="slide" data-index="1">
-      <div class="live-bg">
-        <div class="live-bg-brand" style="background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);">
-          <div class="live-bg-brand-logo">H</div>
-        </div>
-        <div class="live-bg-overlay"></div>
-      </div>
-      
-      <div class="live-top-bar">
-        <%= link_to hotels_path, class: "live-close-btn" do %>
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        <% end %>
-      </div>
-      
-      <div class="live-host-info">
-        <div class="live-host-avatar" style="background: linear-gradient(135deg, #1976D2 0%, #2196F3 100%);">
-          <div class="text-white text-2xl font-black">H</div>
-        </div>
-        <div class="live-host-details">
-          <div class="live-host-name">希尔顿官方直播间</div>
-          <div class="live-viewer-count">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-            </svg>
-            <span>2.1万</span>
-          </div>
-        </div>
-        <button class="live-follow-btn">+ 关注</button>
-      </div>
-      
-      <div class="live-badge">
-        <span class="live-badge-dot"></span>
-        <span class="live-badge-text">LIVE</span>
-      </div>
-      
-      <div class="live-products">
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">🏨 希尔顿欢朋 · 会员专享</div>
-            <div class="live-product-price">
-              <span class="live-product-price-points">20GO币</span>
-              <span class="live-product-price-unit">起/晚</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="live-bottom-bar">
-        <div class="live-title">希尔顿欢朋系列 · 积分兑换优惠</div>
-        <button class="live-shop-btn">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <span>购物车</span>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Slide 3: Marriott Live Room -->
-    <div class="live-slide" data-live-room-target="slide" data-index="2">
-      <div class="live-bg">
-        <div class="live-bg-brand" style="background: linear-gradient(135deg, #C62828 0%, #E53935 100%);">
-          <div class="live-bg-brand-logo">M</div>
-        </div>
-        <div class="live-bg-overlay"></div>
-      </div>
-      
-      <div class="live-top-bar">
-        <%= link_to hotels_path, class: "live-close-btn" do %>
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        <% end %>
-      </div>
-      
-      <div class="live-host-info">
-        <div class="live-host-avatar" style="background: linear-gradient(135deg, #C62828 0%, #E53935 100%);">
-          <div class="text-white text-2xl font-black">M</div>
-        </div>
-        <div class="live-host-details">
-          <div class="live-host-name">万豪官方直播间</div>
-          <div class="live-viewer-count">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-            </svg>
-            <span>1.5万</span>
-          </div>
-        </div>
-        <button class="live-follow-btn">+ 关注</button>
-      </div>
-      
-      <div class="live-badge">
-        <span class="live-badge-dot"></span>
-        <span class="live-badge-text">LIVE</span>
-      </div>
-      
-      <div class="live-products">
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">🌟 万豪旅享家 · 会员专场</div>
-            <div class="live-product-price">
-              <span class="live-product-price-points">25GO币</span>
-              <span class="live-product-price-unit">起/晚</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="live-bottom-bar">
-        <div class="live-title">万豪旅享家会员专场 · 积分兑换</div>
-        <button class="live-shop-btn">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <span>购物车</span>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Slide 4: IHG Live Room -->
-    <div class="live-slide" data-live-room-target="slide" data-index="3">
-      <div class="live-bg">
-        <div class="live-bg-brand" style="background: linear-gradient(135deg, #388E3C 0%, #4CAF50 100%);">
-          <div class="live-bg-brand-logo" style="font-size: 1.5rem;">IHG</div>
-        </div>
-        <div class="live-bg-overlay"></div>
-      </div>
-      
-      <div class="live-top-bar">
-        <%= link_to hotels_path, class: "live-close-btn" do %>
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        <% end %>
-      </div>
-      
-      <div class="live-host-info">
-        <div class="live-host-avatar" style="background: linear-gradient(135deg, #388E3C 0%, #4CAF50 100%);">
-          <div class="text-white text-xl font-black">IHG</div>
-        </div>
-        <div class="live-host-details">
-          <div class="live-host-name">洲际官方直播间</div>
-          <div class="live-viewer-count">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-            </svg>
-            <span>8420</span>
-          </div>
-        </div>
-        <button class="live-follow-btn">+ 关注</button>
-      </div>
-      
-      <div class="live-badge">
-        <span class="live-badge-dot"></span>
-        <span class="live-badge-text">LIVE</span>
-      </div>
-      
-      <div class="live-products">
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">🏆 洲际优悦会 · 假日酒店</div>
-            <div class="live-product-price">
-              <span class="live-product-price-points">30GO币</span>
-              <span class="live-product-price-unit">起/晚</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="live-bottom-bar">
-        <div class="live-title">洲际优悦会 · 假日酒店专场</div>
-        <button class="live-shop-btn">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-          <span>购物车</span>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Slide 5: Atour Live Room -->
-    <div class="live-slide" data-live-room-target="slide" data-index="4">
-      <div class="live-bg">
-        <div class="live-bg-brand" style="background: linear-gradient(135deg, #7B1FA2 0%, #9C27B0 100%);">
-          <div class="live-bg-brand-logo" style="font-size: 1.8rem;">亚朵</div>
-        </div>
-        <div class="live-bg-overlay"></div>
-      </div>
-      
-      <div class="live-top-bar">
-        <%= link_to hotels_path, class: "live-close-btn" do %>
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        <% end %>
-      </div>
-      
-      <div class="live-host-info">
-        <div class="live-host-avatar" style="background: linear-gradient(135deg, #7B1FA2 0%, #9C27B0 100%);">
-          <div class="text-white text-lg font-black">亚朵</div>
-        </div>
-        <div class="live-host-details">
-          <div class="live-host-name">亚朵官方直播间</div>
-          <div class="live-viewer-count">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
-            </svg>
-            <span>6230</span>
-          </div>
-        </div>
-        <button class="live-follow-btn">+ 关注</button>
-      </div>
-      
-      <div class="live-badge">
-        <span class="live-badge-dot"></span>
-        <span class="live-badge-text">LIVE</span>
-      </div>
-      
-      <div class="live-products">
-        <div class="live-product-card">
-          <div class="live-product-image">
-            <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=80", class: "w-full h-full object-cover", alt: "Product" %>
-          </div>
-          <div class="live-product-info">
-            <div class="live-product-title">📚 亚朵酒店 · 人文生活</div>
-            <div class="live-product-price">
-              <span class="live-product-price-points">20GO币</span>
-              <span class="live-product-price-unit">起/晚</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="live-bottom-bar">
-        <div class="live-title">亚朵酒店 · 人文生活方式</div>
         <button class="live-shop-btn">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -516,6 +266,28 @@
   font-weight: 700;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(255,23,68,0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.live-follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,23,68,0.4);
+}
+
+.live-follow-btn-active {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.live-follow-btn-active:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* Live Badge */
@@ -662,26 +434,6 @@
   gap: 0.5rem;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(255,215,0,0.3);
-}
-
-/* Swipe Hint */
-.live-swipe-hint {
-  position: absolute;
-  bottom: 7rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: white;
-  opacity: 0.8;
-}
-
-.live-swipe-hint span {
-  font-size: 0.75rem;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
 /* Animations */
