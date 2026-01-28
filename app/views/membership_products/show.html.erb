@@ -1,0 +1,164 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-surface border-b border-border">
+    <div class="flex items-center justify-between px-4 py-3">
+      <%= link_to :back, class: "text-primary" do %>
+        <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+      <% end %>
+      
+      <div class="flex items-center gap-4">
+        <button class="text-primary" onclick="window.showToast('分享功能开发中')">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+        
+        <button class="text-primary" onclick="window.showToast('更多功能开发中')">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto pb-20">
+    <!-- Product Image Slider -->
+    <div class="relative bg-surface-elevated">
+      <div class="aspect-square">
+        <% if @product.image.attached? %>
+          <%= image_tag @product.image.variant(resize_to_limit: [800, 800]), class: "w-full h-full object-cover", alt: @product.name %>
+        <% elsif @product.image_url.present? %>
+          <%= image_tag @product.image_url, class: "w-full h-full object-cover", alt: @product.name %>
+        <% else %>
+          <div class="w-full h-full flex items-center justify-center bg-surface-elevated">
+            <span class="text-muted">暂无图片</span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Product Price Card -->
+    <div class="bg-gradient-to-r from-[#2E1A47] to-[#4A2C6A] mx-4 mt-4 rounded-xl p-4">
+      <div class="flex items-baseline gap-2 mb-2">
+        <% if @product.price_mileage > 0 %>
+          <span class="text-white text-3xl font-bold"><%= @product.price_mileage %></span>
+          <span class="text-white text-sm">里程</span>
+        <% end %>
+        
+        <% if @product.price_cash > 0 %>
+          <span class="text-white text-xl"><%= @product.price_mileage > 0 ? '+' : '' %></span>
+          <span class="text-white text-3xl font-bold"><%= @product.price_cash %></span>
+          <span class="text-white text-sm">元</span>
+        <% end %>
+        
+        <% if @product.original_price.present? && @product.original_price > @product.price_cash %>
+          <span class="text-white/60 text-sm line-through ml-2">¥<%= @product.original_price %></span>
+        <% end %>
+      </div>
+      
+      <div class="text-white/80 text-xs">
+        飞猪会员专享
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="bg-surface mx-4 mt-3 rounded-xl p-4">
+      <h1 class="text-primary text-lg font-semibold mb-3"><%= @product.name %></h1>
+      
+      <div class="text-muted text-xs mb-2">
+        已售<%= @product.sales_count %>+
+      </div>
+    </div>
+
+    <!-- Specifications -->
+    <div class="bg-surface mx-4 mt-3 rounded-xl p-4">
+      <div class="flex items-center justify-between py-2 border-b border-border">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span class="text-sm text-secondary">共1种规格可选</span>
+        </div>
+        <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Delivery Info -->
+    <div class="bg-surface mx-4 mt-3 rounded-xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+        </svg>
+        <span class="text-sm text-secondary">快递 · 免运费</span>
+      </div>
+    </div>
+
+    <!-- Service Info -->
+    <div class="bg-surface mx-4 mt-3 rounded-xl p-4">
+      <div class="flex items-center justify-between py-2 border-b border-border">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span class="text-sm text-secondary">由【唯甄优选】提供商品服务</span>
+        </div>
+        <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <% if @product.description.present? %>
+      <div class="bg-surface mx-4 mt-3 rounded-xl p-4">
+        <h2 class="text-primary text-base font-semibold mb-3">商品详情</h2>
+        <div class="text-secondary text-sm whitespace-pre-wrap">
+          <%= @product.description %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Mall Banner -->
+    
+
+    <!-- Contact Info -->
+    <div class="bg-surface-elevated mx-4 mt-3 mb-4 rounded-xl p-4">
+      <h2 class="text-primary text-base font-semibold mb-3">商品详情</h2>
+      <p class="text-secondary text-sm mb-2">
+        可联系商家客服人员为您解答该商品相关问题
+      </p>
+      <p class="text-secondary text-sm mb-1">
+        商家客服电话：+86-13305680206
+      </p>
+      <p class="text-muted text-xs">
+        客服工作时间：9:00-23:00（北京时间）
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-4 safe-area-bottom">
+    <div class="flex items-center gap-3">
+      <button class="flex flex-col items-center justify-center text-secondary" onclick="window.showToast('商城功能开发中')">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span class="text-xs">商城</span>
+      </button>
+      
+      <% if @product.in_stock? %>
+        <%= link_to new_membership_order_path(product_id: @product.id), 
+            class: "flex-1 bg-gradient-to-r from-[hsl(var(--color-primary-dark))] to-[hsl(var(--color-primary))] text-white text-center py-3 rounded-full font-semibold" do %>
+          立即购买
+        <% end %>
+      <% else %>
+        <button disabled class="flex-1 bg-neutral text-white text-center py-3 rounded-full font-semibold">
+          已售罄
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

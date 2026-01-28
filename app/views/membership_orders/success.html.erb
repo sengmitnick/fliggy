@@ -1,0 +1,56 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-surface border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to membership_orders_path, class: "text-primary" do %>
+        <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+      <% end %>
+      
+      <h1 class="flex-1 text-center text-primary text-lg font-semibold">支付成功</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col items-center justify-center px-6">
+    <!-- Success Icon -->
+    <div class="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-6">
+      <svg class="w-12 h-12 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    
+    <h2 class="text-primary text-2xl font-bold mb-2">支付成功</h2>
+    <p class="text-secondary text-sm mb-8">您的订单已提交,我们会尽快为您发货</p>
+    
+    <!-- Order Info -->
+    <div class="w-full bg-surface-elevated rounded-xl p-4 mb-8">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-secondary text-sm">订单号</span>
+        <span class="text-primary text-sm font-medium"><%= @order.order_number %></span>
+      </div>
+      
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-secondary text-sm">支付金额</span>
+        <span class="text-danger text-base font-bold"><%= @order.total_display %></span>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <span class="text-secondary text-sm">配送地址</span>
+        <span class="text-primary text-sm text-right flex-1 ml-4"><%= @order.shipping_address %></span>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="w-full space-y-3">
+      <%= link_to membership_order_path(@order), 
+          class: "block w-full bg-gradient-to-r from-[hsl(var(--color-primary-dark))] to-[hsl(var(--color-primary))] text-white text-center py-3 rounded-full font-semibold" do %>
+        查看订单详情
+      <% end %>
+      
+      <%= link_to membership_products_path, 
+          class: "block w-full bg-surface-elevated text-primary text-center py-3 rounded-full font-semibold border border-border" do %>
+        继续购物
+      <% end %>
+    </div>
+  </div>
+</div>

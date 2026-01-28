@@ -1,0 +1,256 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-surface border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to :back, class: "text-primary" do %>
+        <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+      <% end %>
+      
+      <h1 class="flex-1 text-center text-primary text-lg font-semibold">飞猪会员商城</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <%= form_with model: @order, url: membership_orders_path, method: :post, class: "flex-1 overflow-y-auto", data: { controller: "address-modal membership-payment" } do |f| %>
+    <%= f.hidden_field :membership_product_id, value: @product.id %>
+    <%= f.hidden_field :quantity, value: @order.quantity %>
+    <%= f.hidden_field :payment_method, value: "花呗" %>
+    
+    <!-- Receiver Address -->
+    <div class="bg-surface mb-3">
+      <div class="px-4 py-4 border-b border-border">
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-danger flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-base font-semibold text-primary">收货地址</h3>
+              <button type="button" 
+                      class="text-sm text-primary hover:underline"
+                      data-action="click->address-modal#open">
+                选择收货地址
+              </button>
+            </div>
+            
+            <% if @address.persisted? %>
+              <div data-address-display>
+                <div class="flex items-center mb-2">
+                  <span class="text-base font-bold text-primary"><%= @address.name %></span>
+                  <span class="ml-2 text-sm text-secondary"><%= @address.phone %></span>
+                </div>
+                <div class="bg-surface-elevated rounded-lg p-3">
+                  <div class="text-sm text-secondary">
+                    <%= @address.full_address %>
+                  </div>
+                </div>
+              </div>
+              <%= f.hidden_field :contact_name, value: @address.name, data: { 'address-id-input': true } %>
+              <%= f.hidden_field :contact_phone, value: @address.phone %>
+              <%= f.hidden_field :shipping_address, value: @address.full_address %>
+            <% else %>
+              <div data-address-display class="text-secondary text-sm">
+                请选择收货地址
+              </div>
+              <%= f.hidden_field :contact_name, value: "", data: { 'address-id-input': true } %>
+              <%= f.hidden_field :contact_phone, value: "" %>
+              <%= f.hidden_field :shipping_address, value: "" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="bg-surface mb-3 px-4 py-4">
+      <div class="flex gap-3">
+        <div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-elevated flex-shrink-0">
+          <% if @product.image.attached? %>
+            <%= image_tag @product.image.variant(resize_to_fill: [160, 160]), class: "w-full h-full object-cover", alt: @product.name %>
+          <% elsif @product.image_url.present? %>
+            <%= image_tag @product.image_url, class: "w-full h-full object-cover", alt: @product.name %>
+          <% else %>
+            <div class="w-full h-full flex items-center justify-center">
+              <span class="text-muted text-xs">暂无图片</span>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex-1 min-w-0">
+          <h3 class="text-primary text-sm mb-2 line-clamp-2"><%= @product.name %></h3>
+          
+          <div class="flex items-center justify-between">
+            <div class="text-danger text-sm">
+              <% if @product.price_mileage > 0 %>
+                <span class="font-bold"><%= @product.price_mileage %></span>里程
+              <% end %>
+              <% if @product.price_cash > 0 %>
+                <%= @product.price_mileage > 0 ? ' + ' : '' %>
+                <span class="font-bold">¥<%= @product.price_cash %></span>
+              <% end %>
+            </div>
+            
+            <div class="text-secondary text-sm">
+              x<%= @order.quantity %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Method -->
+    <div class="bg-surface mb-3">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-border">
+        <span class="text-secondary text-sm">配送方式</span>
+        <span class="text-primary text-sm">快递 包邮（专属权益）</span>
+      </div>
+      
+      <div class="px-4 py-3 flex items-center justify-between">
+        <span class="text-secondary text-sm">使用里程</span>
+        <span class="text-primary text-lg font-bold">
+          <%= @product.price_mileage * @order.quantity %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-surface mb-3 px-4 py-3">
+      <%= f.text_area :notes, placeholder: "备注信息（选填）", rows: 3,
+          class: "form-textarea w-full text-sm" %>
+    </div>
+
+    <!-- Warning -->
+    <div class="bg-warning-bg mx-4 mb-4 p-3 rounded-lg flex items-start gap-2">
+      <svg class="w-5 h-5 text-warning flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <p class="text-warning text-xs">
+        自己付款，需要报销时请下单后填写信息开具发票
+      </p>
+    </div>
+
+    <!-- Bottom Payment Bar -->
+    <div class="sticky bottom-0 left-0 right-0 bg-surface border-t border-border p-4">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-secondary text-sm">合计</span>
+        <div class="text-danger text-lg font-bold">
+          <% if @product.price_mileage > 0 %>
+            <%= @product.price_mileage * @order.quantity %>里程
+          <% end %>
+          <% if @product.price_cash > 0 %>
+            <%= @product.price_mileage > 0 ? ' + ' : '' %>¥<%= @product.price_cash * @order.quantity %>
+          <% end %>
+        </div>
+      </div>
+      
+      <div data-membership-payment-amount="<%= (@product.price_cash * @order.quantity).to_f %>"></div>
+      <button type="button" 
+              data-action="click->membership-payment#showPasswordModal"
+              class="w-full bg-gradient-to-r from-[hsl(var(--color-primary-dark))] to-[hsl(var(--color-primary))] text-white text-center py-3 rounded-full font-semibold">
+        去支付(<%= @order.quantity %>)
+      </button>
+    </div>
+
+    <!-- Address Selection Modal -->
+    <div data-address-modal-target="modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" data-action="click->address-modal#closeOnBackdrop"></div>
+        
+        <div class="relative bg-surface rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h3 class="text-lg font-bold text-primary">选择收货地址</h3>
+            <button type="button" data-action="click->address-modal#close" class="text-muted hover:text-secondary">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Address List -->
+          <div class="flex-1 overflow-y-auto" data-address-modal-target="addressList">
+            <!-- Addresses will be loaded here dynamically -->
+          </div>
+
+          <!-- Add New Address Button -->
+          <div class="border-t border-border px-4 py-3">
+            <%= link_to new_address_path, class: "w-full py-3 rounded-full border border-border flex items-center justify-center text-secondary font-medium" do %>
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+              </svg>
+              新增收货地址
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Membership Payment Password Modal -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-end" data-membership-payment-target="passwordModal">
+      <div class="bg-white w-full rounded-t-3xl animate-slide-up">
+        <div class="flex items-center justify-between p-4 border-b">
+          <button type="button" data-action="click->membership-payment#closePasswordModal" class="text-gray-400 text-2xl">×</button>
+          <div class="text-lg font-medium">请输入支付密码</div>
+          <div class="w-8"></div>
+        </div>
+        
+        <!-- Amount Display -->
+        <div class="text-center py-6">
+          <div class="text-sm text-gray-600 mb-2">支付金额</div>
+          <div class="text-4xl font-bold">¥<span data-membership-payment-target="passwordAmount"></span></div>
+          <% if @product.price_mileage > 0 %>
+            <div class="text-sm text-gray-600 mt-2">及 <%= @product.price_mileage * @order.quantity %>里程</div>
+          <% end %>
+        </div>
+
+        <!-- Password Dots Display -->
+        <div class="flex justify-center gap-3 py-6" data-membership-payment-target="passwordDots">
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-gray-300 password-dot"></div>
+        </div>
+
+        <!-- Numeric Keypad -->
+        <div class="px-6 pb-6">
+          <div class="grid grid-cols-3 gap-4">
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="1" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">1</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="2" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">2</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="3" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">3</button>
+            
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="4" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">4</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="5" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">5</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="6" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">6</button>
+            
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="7" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">7</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="8" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">8</button>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="9" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">9</button>
+            
+            <div class="h-16"></div>
+            <button type="button" data-action="click->membership-payment#inputPassword" data-number="0" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200">0</button>
+            <button type="button" data-action="click->membership-payment#deletePassword" 
+                    class="h-16 text-2xl font-medium text-gray-800 bg-gray-100 rounded-lg active:bg-gray-200 flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

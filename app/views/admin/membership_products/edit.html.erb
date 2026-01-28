@@ -1,0 +1,237 @@
+<% content_for :title, "Edit Membership product" %>
+
+<div class="container-md">
+  <!-- Page Title -->
+  <div class="flex items-center space-x-4 mb-6">
+    <%= link_to admin_membership_product_path(@membership_product.id), class: "btn-ghost text-sm py-1 px-3" do %>
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+      Back to Membership product
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">Edit Membership product</h1>
+  </div>
+
+  <!-- Form -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <div class="card-body">
+      <%= form_with model: [:admin, @membership_product], local: true, class: "space-y-6" do |form| %>
+        <%= render 'shared/form_error_message', model: @membership_product %>
+
+        <!-- Name -->
+        <div class="mb-4">
+          <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Name<% if field_required?(@membership_product, :name) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :name, {
+            placeholder: "Enter name...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :name) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:name].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:name].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Slug -->
+        <div class="mb-4">
+          <%= form.label :slug, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Slug<% if field_required?(@membership_product, :slug) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :slug, {
+            placeholder: "Enter slug...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :slug) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:slug].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:slug].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-4">
+          <%= form.label :category, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Category<% if field_required?(@membership_product, :category) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :category, {
+            placeholder: "Enter category...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :category) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:category].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:category].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price cash -->
+        <div class="mb-4">
+          <%= form.label :price_cash, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price cash<% if field_required?(@membership_product, :price_cash) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price_cash, {
+            placeholder: "Enter price cash...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :price_cash) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:price_cash].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:price_cash].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Price mileage -->
+        <div class="mb-4">
+          <%= form.label :price_mileage, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Price mileage<% if field_required?(@membership_product, :price_mileage) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :price_mileage, {
+            placeholder: "Enter price mileage...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :price_mileage) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:price_mileage].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:price_mileage].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Original price -->
+        <div class="mb-4">
+          <%= form.label :original_price, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Original price<% if field_required?(@membership_product, :original_price) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :original_price, {
+            placeholder: "Enter original price...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :original_price) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:original_price].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:original_price].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Sales count -->
+        <div class="mb-4">
+          <%= form.label :sales_count, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Sales count<% if field_required?(@membership_product, :sales_count) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :sales_count, {
+            placeholder: "Enter sales count...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :sales_count) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:sales_count].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:sales_count].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Stock -->
+        <div class="mb-4">
+          <%= form.label :stock, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Stock<% if field_required?(@membership_product, :stock) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :stock, {
+            placeholder: "Enter stock...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :stock) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:stock].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:stock].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-4">
+          <%= form.label :rating, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Rating<% if field_required?(@membership_product, :rating) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.number_field :rating, {
+            placeholder: "Enter rating...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :rating) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:rating].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:rating].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Description<% if field_required?(@membership_product, :description) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_area :description, {
+            rows: 5,
+            placeholder: "Enter description...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :description) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:description].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:description].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Image url -->
+        <div class="mb-4">
+          <%= form.label :image_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image url<% if field_required?(@membership_product, :image_url) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :image_url, {
+            placeholder: "Enter image url...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :image_url) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:image_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:image_url].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Region -->
+        <div class="mb-4">
+          <%= form.label :region, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Region<% if field_required?(@membership_product, :region) %> <span class="text-red-500">*</span><% end %>
+          <% end %>
+          <%= form.text_field :region, {
+            placeholder: "Enter region...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          }.merge(field_required?(@membership_product, :region) ? { required: true } : {}) %>
+          <% if @membership_product.errors[:region].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:region].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Featured -->
+        <div class="mb-4">
+          <label class="flex items-center cursor-pointer">
+            <%= form.check_box :featured,
+                  class: "mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700" %>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
+          </label>
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+          <%= form.label :image, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Image
+          <% end %>
+          
+          <!-- Current attachments -->
+          <% if @membership_product.image.attached? %>
+            <div class="mb-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current file:</p>
+              <div class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                </svg>
+                <%= @membership_product.image.filename %>
+              </div>
+            </div>
+          <% end %>
+          
+          <%= form.file_field :image, {
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          } %>
+          <p class="text-sm text-gray-500 mt-1">Select a new file to replace the current one, or leave empty to keep current file</p>
+          <% if @membership_product.errors[:image].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @membership_product.errors[:image].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <%= link_to admin_membership_product_path(@membership_product.id), class: "btn-ghost" do %>
+            Cancel
+          <% end %>
+          <%= form.submit "Update Membership product", class: "btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

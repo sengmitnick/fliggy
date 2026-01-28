@@ -164,8 +164,17 @@ When installing any new gem or npm packages, always specify a version you are mo
   - **Default values**: `field:type:default=value` (e.g., `status:string:default=draft`, `count:integer:default=0`)
   - **Serialize**: `field:text:serialize` (only for text/string; json/jsonb auto-handled)
 - **Protected names**: Cannot use `user`, `order`, `payment`, etc. (suggests alternatives)
+- ✅ **Auto-adds data_version**: Automatically adds `data_version:string:default='0':limit=50` to all business tables (required for RLS)
 
-Use `rails generate model xxx` only when generating a single model (supports same enhanced syntax as above).
+Use `rails generate model xxx` only when generating a single model (supports same enhanced syntax as above, also auto-adds data_version).
+
+**⚠️ CRITICAL: data_version Field Management**
+- ✅ **ALWAYS use `rails g models` or `rails g model`** - Both generators automatically add `data_version:string:default='0':limit=50` to business tables
+- ✅ **System tables excluded**: Administrator, Session, AdminOplog, ValidatorExecution, ActiveStorage* tables don't need data_version
+- ❌ **NEVER manually create migration files for new tables** - ALWAYS use `rails g models` or `rails g model`
+- ❌ **NEVER use `rails g migration CreateXxx`** - This bypasses data_version auto-generation
+- ❌ **NEVER add data_version manually** - The generator does it automatically
+- 🎯 **Why this matters**: All business tables require data_version for multi-tenant data isolation via PostgreSQL Row Level Security
 
 Use `rails generate service xxx` to generate a service file, not generate by yourself.
 
