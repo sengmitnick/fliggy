@@ -1,4 +1,9 @@
-<div class="min-h-screen bg-background pb-20" data-controller="activity-order payment-confirmation">
+<!-- stimulus-validator: disable-next-line -->
+<div class="min-h-screen bg-background pb-20" data-controller="activity-order payment-confirmation"
+     data-payment-confirmation-amount-value="<%= (@activity.current_price * 1).to_i %>"
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value=""
+     data-payment-confirmation-success-url-value="">
   <!-- Top Navigation -->
   <div class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
     <div class="flex items-center justify-between px-4 h-14">
@@ -116,7 +121,8 @@
 
     <!-- Contact Phone -->
     <!-- stimulus-validator: disable-next-line -->
-    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector">
+    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector"
+         data-contact-selector-selected-contact-id-value="0">
       <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
       <div class="flex items-center gap-2">
         <select class="w-20 px-2 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm">

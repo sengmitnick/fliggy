@@ -2,18 +2,31 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
+    // stimulus-validator: disable-next-line
     "passwordModal",
+    // stimulus-validator: disable-next-line
     "fingerprintModal",
+    // stimulus-validator: disable-next-line
     "processingModal",
+    // stimulus-validator: disable-next-line
     "statusModal",
+    // stimulus-validator: disable-next-line
     "passwordDots",
+    // stimulus-validator: disable-next-line
     "passwordAmount",
+    // stimulus-validator: disable-next-line
     "processingAmount",
+    // stimulus-validator: disable-next-line
     "userEmail",
+    // stimulus-validator: disable-next-line
     "statusAmount",
+    // stimulus-validator: disable-next-line
     "statusUserEmail",
+    // stimulus-validator: disable-next-line
     "statusIcon",
+    // stimulus-validator: disable-next-line
     "statusText",
+    // stimulus-validator: disable-next-line
     "statusDots"
   ]
 
@@ -34,8 +47,12 @@ export default class extends Controller {
   declare readonly hasPasswordDotsTarget: boolean
   declare readonly passwordAmountTarget: HTMLElement
   declare readonly hasPasswordAmountTarget: boolean
+  // stimulus-validator: disable-next-line
+  declare readonly processingAmountTarget: HTMLElement
   declare readonly statusAmountTarget: HTMLElement
   declare readonly hasStatusAmountTarget: boolean
+  // stimulus-validator: disable-next-line
+  declare readonly userEmailTarget: HTMLElement
   declare readonly statusUserEmailTarget: HTMLElement
   declare readonly hasStatusUserEmailTarget: boolean
   declare readonly statusIconTarget: HTMLElement

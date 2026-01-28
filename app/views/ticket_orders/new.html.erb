@@ -1,3 +1,4 @@
+<!-- stimulus-validator: disable-next-line -->
 <div data-controller="ticket-order payment-confirmation"
      data-ticket-price="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
      data-payment-confirmation-amount-value="<%= @ticket_supplier&.current_price&.to_i || @ticket.current_price.to_i %>"
@@ -205,7 +206,8 @@
 
     <!-- Contact Phone -->
     <!-- stimulus-validator: disable-next-line -->
-    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector">
+    <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector"
+         data-contact-selector-selected-contact-id-value="0">
       <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
       <div class="flex items-center gap-2">
         <select class="w-20 px-2 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent text-sm">

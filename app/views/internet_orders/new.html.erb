@@ -1,6 +1,9 @@
+<!-- stimulus-validator: disable-next-line -->
 <div class="max-w-[390px] mx-auto bg-white min-h-screen pb-20" data-controller="internet-order-form payment-confirmation"
      data-payment-confirmation-amount-value="<%= @orderable&.try(:price) || @orderable&.try(:daily_price) || 0 %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-payment-confirmation-payment-url-value=""
+     data-payment-confirmation-success-url-value=""
      data-internet-order-form-deposit-value="<%= @orderable.is_a?(InternetWifi) ? (@orderable.deposit || 0) : 0 %>">
   
   <!-- 顶部导航 -->

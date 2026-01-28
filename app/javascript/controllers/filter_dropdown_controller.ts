@@ -14,7 +14,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   disconnect(): void {
-    this.closeAllDropdowns()
+    this.closeAll()
   }
 
   // 切换下拉菜单
@@ -28,12 +28,12 @@ export default class extends Controller<HTMLElement> {
 
     // 如果点击的是已打开的下拉菜单，则关闭它
     if (this.activeDropdown === dropdown) {
-      this.closeAllDropdowns()
+      this.closeAll()
       return
     }
 
     // 关闭其他下拉菜单，打开当前的
-    this.closeAllDropdowns()
+    this.closeAll()
     this.openDropdown(dropdown)
   }
 
@@ -47,7 +47,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   // 关闭所有下拉菜单
-  closeAllDropdowns(): void {
+  closeAll(): void {
     this.dropdownTargets.forEach(dropdown => {
       dropdown.classList.add('hidden')
     })
@@ -59,13 +59,13 @@ export default class extends Controller<HTMLElement> {
 
   // 点击遮罩层关闭
   closeOnOverlay(): void {
-    this.closeAllDropdowns()
+    this.closeAll()
   }
 
   // 选择选项后关闭（可选）
   selectOption(): void {
     // 延迟关闭，让链接有时间导航
-    setTimeout(() => this.closeAllDropdowns(), 100)
+    setTimeout(() => this.closeAll(), 100)
   }
 
   // 切换分组的展开/收起

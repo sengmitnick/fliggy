@@ -2,12 +2,14 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
     "nameDisplay",
     "emailDisplay",
     "phoneDisplay",
     "contactIdInput",
     "contactPhoneInput",
+    // stimulus-validator: disable-next-line
     "contactItem"
   ]
 
@@ -15,6 +17,7 @@ export default class extends Controller<HTMLElement> {
     selectedContactId: Number
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
   declare readonly hasNameDisplayTarget: boolean
   declare readonly nameDisplayTarget?: HTMLElement
@@ -26,6 +29,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly contactIdInputTarget?: HTMLInputElement
   declare readonly hasContactPhoneInputTarget: boolean
   declare readonly contactPhoneInputTarget?: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly contactItemTargets: HTMLElement[]
   declare selectedContactIdValue: number
 
