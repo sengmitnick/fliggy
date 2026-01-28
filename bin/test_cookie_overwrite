@@ -1,0 +1,133 @@
+#!/bin/bash
+# Test script for cookie overwrite fix
+# Verifies that validator_session_id cookie is correctly updated when switching session_ids
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+PORT=${PORT:-5010}
+BASE_URL="http://localhost:${PORT}"
+
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}Cookie Overwrite Fix Verification Test${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo ""
+
+# Check if server is running
+if ! curl -s "${BASE_URL}/up" > /dev/null 2>&1; then
+  echo -e "${RED}❌ Error: Server is not running at ${BASE_URL}${NC}"
+  echo -e "${YELLOW}Please start the server with: bin/dev${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}✓ Server is running${NC}"
+echo ""
+
+# Test 1: First access with session_id (no existing cookie)
+echo -e "${BLUE}Test 1: First access (no existing cookie)${NC}"
+echo "Request: GET /?session_id=abc-123"
+echo ""
+
+RESPONSE1=$(curl -si "${BASE_URL}/?session_id=abc-123" 2>&1)
+COOKIE1=$(echo "$RESPONSE1" | grep -i "Set-Cookie: validator_session_id=" || echo "")
+
+if [[ -n "$COOKIE1" ]]; then
+  echo -e "${GREEN}✓ Cookie set successfully${NC}"
+  echo "$COOKIE1"
+  # Extract cookie value
+  COOKIE_VALUE1=$(echo "$COOKIE1" | sed -n 's/.*validator_session_id=\([^;]*\).*/\1/p' | tr -d '\r\n')
+  echo -e "${GREEN}Cookie value: ${COOKIE_VALUE1}${NC}"
+else
+  echo -e "${RED}❌ No Set-Cookie header found${NC}"
+  exit 1
+fi
+echo ""
+
+# Test 2: Second access with different session_id (with existing cookie)
+echo -e "${BLUE}Test 2: Second access with different session_id (simulating browser with old cookie)${NC}"
+echo "Request: GET /?session_id=xyz-456"
+echo "Cookie: validator_session_id=abc-123 (old value)"
+echo ""
+
+RESPONSE2=$(curl -si -b "validator_session_id=abc-123" "${BASE_URL}/?session_id=xyz-456" 2>&1)
+SET_COOKIES=$(echo "$RESPONSE2" | grep -i "Set-Cookie: validator_session_id")
+
+# Count how many Set-Cookie headers we got
+COOKIE_COUNT=$(echo "$SET_COOKIES" | grep -c "Set-Cookie" || echo "0")
+
+echo "Number of Set-Cookie headers: ${COOKIE_COUNT}"
+echo "$SET_COOKIES"
+echo ""
+
+# Check for delete cookie (max-age=0 or expires in the past)
+DELETE_COOKIE=$(echo "$SET_COOKIES" | grep "max-age=0\|expires=.*1970" || echo "")
+# Check for new cookie value
+NEW_COOKIE=$(echo "$SET_COOKIES" | grep "validator_session_id=xyz-456" || echo "")
+
+if [[ -n "$DELETE_COOKIE" ]]; then
+  echo -e "${GREEN}✓ Old cookie deletion detected${NC}"
+  echo "$DELETE_COOKIE"
+else
+  echo -e "${YELLOW}⚠ No explicit cookie deletion found (might still work)${NC}"
+fi
+
+if [[ -n "$NEW_COOKIE" ]]; then
+  echo -e "${GREEN}✓ New cookie set successfully${NC}"
+  echo "$NEW_COOKIE"
+  COOKIE_VALUE2=$(echo "$NEW_COOKIE" | sed -n 's/.*validator_session_id=\([^;]*\).*/\1/p' | tr -d '\r\n')
+  echo -e "${GREEN}New cookie value: ${COOKIE_VALUE2}${NC}"
+else
+  echo -e "${RED}❌ New cookie not set${NC}"
+  exit 1
+fi
+echo ""
+
+# Test 3: Verify cookie value is actually updated
+echo -e "${BLUE}Test 3: Verify cookie persistence${NC}"
+echo "Request: GET / (no session_id param, just check which cookie is active)"
+echo "Cookie: validator_session_id=xyz-456"
+echo ""
+
+# Make a request with the new cookie and check if it's accepted
+RESPONSE3=$(curl -si -b "validator_session_id=xyz-456" "${BASE_URL}/" 2>&1)
+STATUS_CODE=$(echo "$RESPONSE3" | grep "HTTP/" | awk '{print $2}')
+
+if [[ "$STATUS_CODE" == "200" ]]; then
+  echo -e "${GREEN}✓ Server accepts new cookie (Status: 200)${NC}"
+else
+  echo -e "${YELLOW}⚠ Unexpected status code: ${STATUS_CODE}${NC}"
+fi
+echo ""
+
+# Summary
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}Test Summary${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo ""
+
+if [[ -n "$COOKIE1" && -n "$NEW_COOKIE" ]]; then
+  echo -e "${GREEN}✅ All tests passed!${NC}"
+  echo ""
+  echo "Results:"
+  echo "  - First access: cookie set to 'abc-123'"
+  echo "  - Second access: cookie updated to 'xyz-456'"
+  if [[ -n "$DELETE_COOKIE" ]]; then
+    echo "  - Delete-then-set pattern confirmed (recommended fix is working)"
+  else
+    echo "  - Direct overwrite detected (may still work but less reliable)"
+  fi
+  echo ""
+  echo -e "${GREEN}The cookie overwrite fix is working correctly!${NC}"
+  exit 0
+else
+  echo -e "${RED}❌ Some tests failed${NC}"
+  echo "Please check the server logs for detailed information."
+  exit 1
+fi

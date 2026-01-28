@@ -11,5 +11,7 @@ class CreateFollows < ActiveRecord::Migration[7.2]
     end
 
     add_index :follows, [:user_id, :followable_type, :followable_id], unique: true, name: 'index_follows_on_user_and_followable'
+    add_index :follows, [:followable_type, :followable_id], name: 'index_follows_on_followable'
+    add_index :follows, :data_version
   end
 end

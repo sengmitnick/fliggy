@@ -55,6 +55,7 @@ import TrainSeatSelectorController from "./train_seat_selector_controller"
 import TourGroupFilterController from "./tour_group_filter_controller"
 import CarRentalTabsController from "./car_rental_tabs_controller"
 import HotelPackageSearchController from "./hotel_package_search_controller"
+import HotelPackageFilterController from "./hotel_package_filter_controller"
 import HotelPackageOrderController from "./hotel_package_order_controller"
 import PwaInstallController from "./pwa_install_controller"
 import BusDatePickerController from "./bus_date_picker_controller"
@@ -124,6 +125,9 @@ import AddressModalController from "./address_modal_controller"
 import LiveRoomFollowController from "./live_room_follow_controller"
 import MembershipPaymentController from "./membership_payment_controller"
 import TransferPassengerSelectorController from "./transfer_passenger_selector_controller"
+import CarSearchEditorController from "./car_search_editor_controller"
+import InsuranceSearchController from "./insurance_search_controller"
+import InsuranceSearchFormController from "./insurance_search_form_controller"
 
 const application = Application.start()
 
@@ -182,6 +186,7 @@ application.register("train-seat-selector", TrainSeatSelectorController)
 application.register("tour-group-filter", TourGroupFilterController)
 application.register("car-rental-tabs", CarRentalTabsController)
 application.register("hotel-package-search", HotelPackageSearchController)
+application.register("hotel-package-filter", HotelPackageFilterController)
 application.register("hotel-package-order", HotelPackageOrderController)
 application.register("pwa-install", PwaInstallController)
 application.register("bus-date-picker", BusDatePickerController)
@@ -251,5 +256,8 @@ application.register("address-modal", AddressModalController)
 application.register("live-room-follow", LiveRoomFollowController)
 application.register("membership-payment", MembershipPaymentController)
 application.register("transfer-passenger-selector", TransferPassengerSelectorController)
+application.register("car-search-editor", CarSearchEditorController)
+application.register("insurance-search", InsuranceSearchController)
+application.register("insurance-search-form", InsuranceSearchFormController)
 
 window.Stimulus = application

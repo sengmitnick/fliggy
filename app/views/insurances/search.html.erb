@@ -14,44 +14,94 @@
         <% when 'transport' %>
           交通意外保险
         <% else %>
-          保险产品
+          保险产品搜索
         <% end %>
       </h1>
       <div class="w-6 h-6"></div>
     </div>
 
     <!-- 筛选标签栏 -->
-    <div class="px-4 py-2 border-t border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
-      <!-- 目的地类型Tab -->
-      <div class="flex gap-2 flex-shrink-0">
-        <%= link_to search_insurances_path(destination_type: 'domestic'), 
-          class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'domestic' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
-          国内游
-        <% end %>
-        <%= link_to search_insurances_path(destination_type: 'international'), 
-          class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'international' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
-          出境游
-        <% end %>
-        <%= link_to search_insurances_path(destination_type: 'transport'), 
-          class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'transport' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
-          交通
-        <% end %>
+    <div class="px-4 py-2 border-t border-gray-100">
+      <div class="flex gap-2 overflow-x-auto no-scrollbar">
+        <!-- 目的地类型Tab -->
+        <div class="flex gap-2 flex-shrink-0">
+          <% 
+            # Toggle logic: if already selected, remove it; otherwise set it
+            domestic_type = params[:destination_type] == 'domestic' ? nil : 'domestic'
+            international_type = params[:destination_type] == 'international' ? nil : 'international'
+            transport_type = params[:destination_type] == 'transport' ? nil : 'transport'
+          %>
+          <%= link_to search_insurances_path(destination_type: domestic_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+            class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'domestic' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
+            国内游
+          <% end %>
+          <%= link_to search_insurances_path(destination_type: international_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+            class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'international' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
+            出境游
+          <% end %>
+          <%= link_to search_insurances_path(destination_type: transport_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+            class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'transport' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
+            交通
+          <% end %>
+        </div>
+
+        <!-- 综合筛选按钮 -->
+        <div data-controller="insurance-filter" data-insurance-filter-mode-value="search">
+          <button type="button"
+                  data-action="click->insurance-filter#open"
+                  class="px-4 py-1.5 rounded-full text-sm font-medium bg-white text-gray-700 border border-gray-200 flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
+            <span data-insurance-filter-target="displayText">筛选</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          
+          <!-- 隐藏字段存储当前筛选条件 -->
+          <input type="hidden" data-insurance-filter-target="scenesInput" value="<%= @scenes %>">
+          <input type="hidden" data-insurance-filter-target="companyInput" value="<%= @company %>">
+          
+          <!-- 筛选弹窗 -->
+          <%= render 'shared/insurance_filter_modal' %>
+        </div>
       </div>
 
-      <!-- 保险公司筛选 -->
-      <% if @available_companies.any? %>
-        <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white text-gray-700 border border-gray-200 flex items-center gap-1 flex-shrink-0">
-          保险公司
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
+      <!-- 已选筛选条件标签 -->
+      <% selected_tags = [] %>
+      <% if @scenes.present? %>
+        <% @scenes.split(',').each do |scene| %>
+          <% selected_tags << { type: 'scenes', label: scene, value: scene } %>
+        <% end %>
+      <% end %>
+      <% if @company.present? %>
+        <% @company.split(',').each do |company| %>
+          <% selected_tags << { type: 'company', label: company, value: company } %>
+        <% end %>
       <% end %>
 
-      <!-- 场景筛选 -->
-      <% if @available_scenes.any? %>
-        <button class="px-4 py-1.5 rounded-full text-sm font-medium bg-white text-gray-700 border border-gray-200 flex items-center gap-1 flex-shrink-0">
-          适用场景
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
+      <% if selected_tags.any? %>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <% selected_tags.each do |tag| %>
+            <% 
+              # Build URL params for removal
+              new_params = params.permit(:destination_type, :destination, :start_date, :end_date, :scenes, :company).to_h
+              if tag[:type] == 'scenes'
+                new_scenes = (@scenes.split(',') - [tag[:value]]).join(',')
+                new_params[:scenes] = new_scenes.present? ? new_scenes : nil
+              elsif tag[:type] == 'company'
+                new_companies = (@company.split(',') - [tag[:value]]).join(',')
+                new_params[:company] = new_companies.present? ? new_companies : nil
+              end
+              new_params.compact!
+            %>
+            <%= link_to search_insurances_path(new_params), 
+              class: "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20" do %>
+              <%= tag[:label] %>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <% end %>
+          <% end %>
+          <%= link_to search_insurances_path(params.permit(:destination_type, :destination, :start_date, :end_date).to_h), 
+            class: "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-gray-600 border border-gray-300" do %>
+            清空筛选
+          <% end %>
+        </div>
       <% end %>
     </div>
   </header>

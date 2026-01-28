@@ -10,6 +10,13 @@ class InsurancesController < ApplicationController
     @domestic_count = InsuranceProduct.active.domestic.count
     @international_count = InsuranceProduct.active.international.count
     @transport_count = InsuranceProduct.active.transport.count
+    
+    # Preserve filter params for backfill
+    @scenes = params[:scenes]
+    @company = params[:company]
+    @destination = params[:destination]
+    @start_date = params[:start_date]
+    @end_date = params[:end_date]
   end
 
   def search
@@ -48,7 +55,8 @@ class InsurancesController < ApplicationController
 
     # Filter by scenes (activities)
     if params[:scenes].present?
-      @products = @products.with_scenes(params[:scenes])
+      scenes_array = params[:scenes].is_a?(String) ? params[:scenes].split(',') : params[:scenes]
+      @products = @products.with_scenes(scenes_array)
     end
 
     # Filter by date range (calculate days)
@@ -63,11 +71,13 @@ class InsurancesController < ApplicationController
       end
     end
 
-    # Filter by destination
+    # Preserve filter params for backfill and display
     @destination = params[:destination]
     @start_date = params[:start_date]
     @end_date = params[:end_date]
     @city_id = @city&.id
+    @scenes = params[:scenes]
+    @company = params[:company]
 
     # Sort
     @products = @products.sorted
