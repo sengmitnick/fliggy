@@ -207,12 +207,14 @@
         <label class="text-sm text-gray-600">开始日期</label>
         <input type="date" data-wifi-booking-target="startDate" 
                class="w-full border border-gray-300 rounded-lg p-2 mt-1"
+               min="<%= Date.today.to_s %>"
                data-action="change->wifi-booking#updateDateRange">
       </div>
       <div>
         <label class="text-sm text-gray-600">结束日期</label>
         <input type="date" data-wifi-booking-target="endDate"
                class="w-full border border-gray-300 rounded-lg p-2 mt-1"
+               min="<%= Date.today.to_s %>"
                data-action="change->wifi-booking#updateDateRange">
       </div>
     </div>
