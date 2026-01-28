@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -817,6 +817,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
     t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
+  create_table "follows", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "followable_type", null: false
+    t.bigint "followable_id", null: false
+    t.string "data_version", limit: 50, default: "0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["followable_type", "followable_id"], name: "index_follows_on_followable"
+    t.index ["user_id", "followable_type", "followable_id"], name: "index_follows_on_user_and_followable", unique: true
+    t.index ["user_id"], name: "index_follows_on_user_id"
+  end
+
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -1428,7 +1440,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "data_version", default: 0
+    t.string "data_version", limit: 50, default: "0", null: false
   end
 
   create_table "price_alerts", force: :cascade do |t|
@@ -1984,6 +1996,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
   add_foreign_key "custom_travel_requests", "users"
   add_foreign_key "deep_travel_availabilities", "deep_travel_guides"
   add_foreign_key "deep_travel_products", "deep_travel_guides"
+  add_foreign_key "follows", "users"
   add_foreign_key "hotel_package_orders", "package_options"
   add_foreign_key "hotel_package_orders", "passengers"
   add_foreign_key "hotel_packages", "hotels"

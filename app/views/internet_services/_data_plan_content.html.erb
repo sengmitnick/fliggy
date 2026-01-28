@@ -19,9 +19,26 @@
     </div>
     
     <!-- 黄色标签 -->
-    <div class="inline-flex items-center bg-[#FFF8D6] border border-[#FFEBA4] rounded px-2 py-1 mb-2">
-      <span class="text-xs text-gray-800">国际漫游天包</span>
-      <div class="ml-1 w-2 h-2 bg-[#FFD200] rounded-full flex items-center justify-center text-[6px]">✓</div>
+    <div class="flex items-center gap-2 mb-2">
+      <div class="inline-flex items-center bg-[#FFF8D6] border border-[#FFEBA4] rounded px-2 py-1 cursor-pointer" 
+           data-action="click->data-plan#switchPlanType" 
+           data-plan-type="天包"
+           data-data-plan-target="typeTab">
+        <span class="text-xs text-gray-800">国际漫游天包</span>
+        <div class="ml-1 w-2 h-2 bg-[#FFD200] rounded-full flex items-center justify-center text-[6px]">✓</div>
+      </div>
+      <div class="inline-flex items-center bg-gray-100 border border-gray-200 rounded px-2 py-1 cursor-pointer" 
+           data-action="click->data-plan#switchPlanType" 
+           data-plan-type="月包"
+           data-data-plan-target="typeTab">
+        <span class="text-xs text-gray-600">国际漫游月包</span>
+      </div>
+      <div class="inline-flex items-center bg-gray-100 border border-gray-200 rounded px-2 py-1 cursor-pointer" 
+           data-action="click->data-plan#switchPlanType" 
+           data-plan-type="语音包"
+           data-data-plan-target="typeTab">
+        <span class="text-xs text-gray-600">语音包</span>
+      </div>
     </div>
 
     <!-- 蓝色说明 -->
@@ -39,7 +56,9 @@
       <div class="relative <%= index == 0 ? 'bg-[#FFF9E6] border border-[#FFD200]' : 'bg-[#F7F8FA]' %> rounded-lg p-3 flex flex-col justify-between h-[100px]" 
            data-action="click->data-plan#selectPlan" 
            data-plan-id="<%= plan.id %>" 
-           data-plan-price="<%= plan.price %>">
+           data-plan-price="<%= plan.price %>"
+           data-plan-type="<%= plan.plan_type %>"
+           data-data-plan-target="planCard">
         <div class="text-sm font-bold text-gray-800 leading-snug">
           <%= plan.name %>
         </div>

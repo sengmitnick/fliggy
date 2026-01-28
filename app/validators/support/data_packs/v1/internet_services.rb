@@ -500,6 +500,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -513,6 +514,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -526,6 +528,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -540,6 +543,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -553,6 +557,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -566,6 +571,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -580,6 +586,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -593,6 +600,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -606,6 +614,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -620,6 +629,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -633,6 +643,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -646,6 +657,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -660,6 +672,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -673,6 +686,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -686,6 +700,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -700,6 +715,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -713,6 +729,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -726,6 +743,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -740,6 +758,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -753,6 +772,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -766,6 +786,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -780,6 +801,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -793,6 +815,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -806,6 +829,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -820,6 +844,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -833,6 +858,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -846,6 +872,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -860,6 +887,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -873,6 +901,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -886,6 +915,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -900,6 +930,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP。当日用量达到0.4GB将降速至384kbps，次日0时恢复（以北京时间为准）",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -913,6 +944,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -926,6 +958,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -939,6 +972,7 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
@@ -952,6 +986,93 @@ data_plans_data = [
     phone_number: "180 2712 8600",
     carrier: "中国电信",
     description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "天包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 中国香港地区 - 月包 ===
+  {
+    name: "香港30天漫游月包+50元话费券",
+    region: "中国香港",
+    validity_days: 30,
+    data_limit: "12GB/月",
+    price: 288,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "月包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "香港60天漫游月包+100元话费券",
+    region: "中国香港",
+    validity_days: 60,
+    data_limit: "24GB/月",
+    price: 528,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "月包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "香港90天漫游月包+150元话费券",
+    region: "中国香港",
+    validity_days: 90,
+    data_limit: "36GB/月",
+    price: 788,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "4G/5G漫游，网速更快且支持境内APP",
+    plan_type: "月包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  # === 中国香港地区 - 语音包 ===
+  {
+    name: "香港语音包100分钟",
+    region: "中国香港",
+    validity_days: 30,
+    data_limit: "100分钟语音",
+    price: 68,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "支持境外拨打回境内，接听免费",
+    plan_type: "语音包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "香港语音包200分钟",
+    region: "中国香港",
+    validity_days: 30,
+    data_limit: "200分钟语音",
+    price: 128,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "支持境外拨打回境内，接听免费",
+    plan_type: "语音包",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "香港语音包500分钟",
+    region: "中国香港",
+    validity_days: 30,
+    data_limit: "500分钟语音",
+    price: 288,
+    phone_number: "180 2712 8600",
+    carrier: "中国电信",
+    description: "支持境外拨打回境内，接听免费",
+    plan_type: "语音包",
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
