@@ -7,14 +7,14 @@ RSpec.describe "Tickets", type: :request do
 
 
   describe "GET /tickets/:id" do
-    let(:ticket_record) { create(:ticket) }
-
+    let(:attraction) { create(:attraction) }  # 显式创建 attraction
+    let(:ticket_record) { create(:ticket, attraction: attraction) }  # 关联到同一个 attraction
 
     it "returns http success" do
       get ticket_path(ticket_record)
       # tickets#show redirects to attraction_path, so expect redirect
       expect(response).to have_http_status(:redirect)
-      expect(response).to redirect_to(attraction_path(ticket_record.attraction))
+      expect(response).to redirect_to(attraction_path(attraction))  # 使用显式创建的 attraction
     end
   end
 
