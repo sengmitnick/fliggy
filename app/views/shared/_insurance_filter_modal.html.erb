@@ -1,0 +1,56 @@
+<div data-insurance-filter-target="modal" 
+     data-action="click->insurance-filter#closeOnBackdrop"
+     class="hidden fixed inset-0 bg-black/50 z-50 flex items-end">
+  <div class="bg-white w-full rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto" data-action="click->insurance-filter#stopPropagation">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold">选择适用场景/保险公司</h3>
+      <button type="button" 
+              data-action="click->insurance-filter#close"
+              class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <!-- 适用场景 -->
+    <div class="mb-6">
+      <h4 class="text-sm font-bold text-gray-900 mb-3">适用场景</h4>
+      <div class="grid grid-cols-3 gap-2">
+        <% %w[海岛游 亲子游 携宠出行 携宠旅游 自驾游 户外运动 可办申根签 滑雪 潜水 高原游 短途旅行 东南亚旅行 可选全年计划 航空保障 交通综合 航班延误保障 航班取消保障 家庭保障].each do |scene| %>
+          <button type="button"
+                  data-insurance-filter-target="sceneItem"
+                  data-action="click->insurance-filter#toggleScene"
+                  data-scene="<%= scene %>"
+                  class="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-800 hover:bg-primary hover:text-white transition">
+            <%= scene %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- 保险公司 -->
+    <div class="mb-6">
+      <h4 class="text-sm font-bold text-gray-900 mb-3">保险公司</h4>
+      <div class="grid grid-cols-3 gap-2">
+        <% %w[京东安联 华泰财险 众安保险 华泰财险 众安保险 美亚保险 安盛保险 太平洋保险].each do |company| %>
+          <button type="button"
+                  data-insurance-filter-target="companyItem"
+                  data-action="click->insurance-filter#toggleCompany"
+                  data-company="<%= company %>"
+                  class="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-800 hover:bg-primary hover:text-white transition">
+            <%= company %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- 底部按钮 -->
+    <div class="flex gap-3">
+      <button type="button"
+              data-action="click->insurance-filter#reset"
+              class="flex-1 py-3 bg-gray-100 text-gray-900 rounded-lg font-medium">重置</button>
+      <button type="button"
+              data-action="click->insurance-filter#confirm"
+              class="flex-1 py-3 bg-primary text-white rounded-lg font-medium">确认</button>
+    </div>
+  </div>
+</div>
