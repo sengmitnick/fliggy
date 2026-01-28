@@ -50,11 +50,20 @@ class ValidatorSessionBinder
     # Extract session_id from URL parameters
     if request.params['session_id'].present?
       session_id = request.params['session_id']
+      old_cookie_value = request.cookies[COOKIE_NAME]
       
       Rails.logger.info "[ValidatorSessionBinder] Detected session_id=#{session_id} from URL param"
+      Rails.logger.info "[ValidatorSessionBinder] Old cookie value: #{old_cookie_value.inspect}"
       
       # Call the next middleware/app first
       status, headers, body = @app.call(env)
+      
+      # CRITICAL FIX: Explicitly delete old cookie before setting new one
+      # Why: Rack::Utils.set_cookie_header! may NOT overwrite existing cookies reliably
+      # When browser already has validator_session_id=old_value, setting a new value
+      # might fail silently in some Rack versions/browsers.
+      # Solution: Always delete first, then set new value
+      Rack::Utils.delete_cookie_header!(headers, COOKIE_NAME, { path: '/' })
       
       # Set independent cookie for this session_id
       # ⚠️ CRITICAL: Use separate cookie instead of Rails session
@@ -67,7 +76,7 @@ class ValidatorSessionBinder
         expires: Time.now + 24.hours  # Valid for 24 hours
       })
       
-      Rails.logger.info "[ValidatorSessionBinder] Set cookie #{COOKIE_NAME}=#{session_id}"
+      Rails.logger.info "[ValidatorSessionBinder] Deleted old cookie (if exists), set new cookie #{COOKIE_NAME}=#{session_id}"
       
       return [status, headers, body]
     end

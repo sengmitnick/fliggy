@@ -11,5 +11,6 @@ FactoryBot.define do
     status { "pending" }
     contact_name { "张三" }
     contact_phone { "13800138000" }
+    check_in_date { 3.days.from_now.to_date }
   end
 end
