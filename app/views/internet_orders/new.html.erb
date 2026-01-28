@@ -1,10 +1,38 @@
 <div class="max-w-[390px] mx-auto bg-white min-h-screen pb-20" data-controller="internet-order-form payment-confirmation"
      data-payment-confirmation-amount-value="<%= @orderable&.try(:price) || @orderable&.try(:daily_price) || 0 %>"
-     data-payment-confirmation-user-email-value="<%= current_user.email %>">
+     data-payment-confirmation-user-email-value="<%= current_user.email %>"
+     data-internet-order-form-deposit-value="<%= @orderable.is_a?(InternetWifi) ? (@orderable.deposit || 0) : 0 %>">
   
   <!-- 顶部导航 -->
   <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
-    <%= link_to :back, class: "mr-4" do %>
+    <% 
+      # Build return URL with ALL preserved state parameters
+      return_params = {}
+      # Tab from orderable_type
+      return_params[:tab] = case params[:orderable_type]
+        when 'InternetSimCard' then 'sim_card'
+        when 'InternetDataPlan' then 'data_plan'
+        when 'InternetWifi' then 'wifi'
+        else 'sim_card'
+      end
+      # Preserve all filter and selection parameters
+      return_params[:region] = params[:region] if params[:region].present?
+      return_params[:days] = params[:days] if params[:days].present?
+      return_params[:start_date] = params[:start_date] if params[:start_date].present?
+      return_params[:end_date] = params[:end_date] if params[:end_date].present?
+      return_params[:data] = params[:data] if params[:data].present?
+      return_params[:orderable_id] = params[:orderable_id] if params[:orderable_id].present?
+      return_params[:quantity] = params[:quantity] if params[:quantity].present?
+      return_params[:price] = params[:price] if params[:price].present?
+      return_params[:total] = params[:total] if params[:total].present?
+      return_params[:address_id] = params[:address_id] if params[:address_id].present?
+      return_params[:pickup_location_id] = params[:pickup_location_id] if params[:pickup_location_id].present?
+      return_params[:contact_name] = params[:contact_name] if params[:contact_name].present?
+      return_params[:contact_phone] = params[:contact_phone] if params[:contact_phone].present?
+      
+      return_url = internet_services_path(return_params)
+    %>
+    <%= link_to return_url, class: "mr-4" do %>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
@@ -37,27 +65,67 @@
             <h2 class="font-bold text-base mb-2"><%= @orderable.name %></h2>
             <div class="text-sm text-gray-600 space-y-1">
               <% if @orderable.is_a?(InternetSimCard) %>
-                <p>有效期: <%= @orderable.validity_days %>天</p>
-                <p>流量: <%= @orderable.data_limit %></p>
-                <p>单价: ¥<%= @orderable.price %></p>
-                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
+                <% if params[:days].present? %>
+                  <p>有效期: <span class="font-medium text-gray-900"><%= params[:days] %>天</span></p>
+                <% else %>
+                  <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% end %>
+                <% if params[:data].present? %>
+                  <p>流量: <span class="font-medium text-gray-900"><%= params[:data] %></span></p>
+                <% else %>
+                  <p>流量: <%= @orderable.data_limit %></p>
+                <% end %>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span></p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.price %></p>
+                <% end %>
+                <% if params[:quantity].present? %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay"><%= params[:quantity] %></span> 张</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 张</p>
+                <% end %>
               <% elsif @orderable.is_a?(InternetDataPlan) %>
-                <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% if params[:days].present? %>
+                  <p>有效期: <span class="font-medium text-gray-900"><%= params[:days] %>天</span></p>
+                <% else %>
+                  <p>有效期: <%= @orderable.validity_days %>天</p>
+                <% end %>
                 <p>运营商: <%= @orderable.carrier %></p>
-                <p>单价: ¥<%= @orderable.price %></p>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span></p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.price %></p>
+                <% end %>
               <% elsif @orderable.is_a?(InternetWifi) %>
                 <p>网络: <%= @orderable.network_type %></p>
                 <p>押金: ¥<%= @orderable.deposit %></p>
-                <p>单价: ¥<%= @orderable.daily_price %>/天</p>
-                <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 台</p>
-                <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
+                <% if params[:price].present? %>
+                  <p>单价: <span class="font-medium text-gray-900">¥<%= params[:price] %></span>/天</p>
+                <% else %>
+                  <p>单价: ¥<%= @orderable.daily_price %>/天</p>
+                <% end %>
+                <% if params[:quantity].present? %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay"><%= params[:quantity] %></span> 台</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">数量: <span data-internet-order-form-target="quantityDisplay">1</span> 台</p>
+                <% end %>
+                <% if params[:days].present? %>
+                  <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay"><%= params[:days] %></span> 天</p>
+                <% else %>
+                  <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
+                <% end %>
               <% end %>
             </div>
           </div>
           <div class="text-right">
             <div class="text-xs text-gray-500 mb-1">小计</div>
             <div class="text-[#FF4400] font-bold text-lg">
-              ¥<span data-internet-order-form-target="totalPriceDisplay"><%= @orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7 %></span>
+              <% if params[:total].present? %>
+                ¥<span class="font-medium" data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.2f', params[:total].to_f) %></span>
+              <% else %>
+                ¥<span data-internet-order-form-target="totalPriceDisplay"><%= sprintf('%.2f', (@orderable.try(:price) || (@orderable.try(:daily_price) || 0) * 7).to_f) %></span>
+              <% end %>
             </div>
           </div>
         </div>
@@ -79,108 +147,134 @@
         </div>
       <% else %>
         <!-- 电话卡和WiFi需要配送信息 -->
-        <div class="mb-4">
-          <label class="block font-bold text-base mb-2">配送方式</label>
-          <div class="flex space-x-3">
-            <%= f.radio_button :delivery_method, 'mail', checked: true, class: "hidden", 
-                data: { action: "internet-order-form#selectDeliveryMethod" } %>
-            <label for="internet_order_delivery_method_mail" 
-                   class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
-                   data-internet-order-form-target="mailLabel">
-              邮寄
-            </label>
+        <% if params[:orderable_type] == 'InternetWifi' %>
+          <!-- WiFi只显示自取点信息 -->
+          <% if params[:pickup_location_id].present? %>
+            <div class="mb-4">
+              <div class="flex justify-between items-center">
+                <label class="font-bold text-base">配送方式</label>
+                <span class="text-sm text-gray-900">自取</span>
+              </div>
+            </div>
             
-            <%= f.radio_button :delivery_method, 'pickup', class: "hidden",
-                data: { action: "internet-order-form#selectDeliveryMethod" } %>
-            <label for="internet_order_delivery_method_pickup" 
-                   class="flex-1 py-2 text-center bg-gray-50 rounded cursor-pointer border-2 border-transparent"
-                   data-internet-order-form-target="pickupLabel">
-              自取
-            </label>
+            <% pickup_location = PickupLocation.find_by(id: params[:pickup_location_id]) %>
+            <% if pickup_location %>
+              <div class="bg-[#F7F8FA] rounded-lg p-4 mb-3">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-gray-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <div class="flex-1">
+                    <div class="font-medium text-gray-900 mb-1"><%= pickup_location.city %> - <%= pickup_location.district %></div>
+                    <div class="text-sm text-gray-600 leading-relaxed"><%= pickup_location.detail %></div>
+                    <div class="flex items-center text-xs text-gray-500 mt-2 space-x-3">
+                      <span><%= pickup_location.phone %></span>
+                      <span><%= pickup_location.business_hours %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- WiFi联系人信息 -->
+              <div class="space-y-3">
+                <div class="flex items-center">
+                  <label class="font-medium text-gray-900 w-24">联系人姓名</label>
+                  <%= f.fields_for :contact_info do |contact| %>
+                    <%= contact.text_field :name, value: params[:contact_name], class: "flex-1 px-3 py-2 border border-gray-300 rounded", placeholder: "请输入联系人姓名" %>
+                  <% end %>
+                </div>
+                <div class="flex items-center">
+                  <label class="font-medium text-gray-900 w-24">联系人电话</label>
+                  <%= f.fields_for :contact_info do |contact| %>
+                    <%= contact.text_field :phone, value: params[:contact_phone], class: "flex-1 px-3 py-2 border border-gray-300 rounded", placeholder: "请输入联系人电话" %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        <% else %>
+          <!-- 电话卡：只有邮寄配送方式 -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center">
+              <label class="font-bold text-base">配送方式</label>
+              <span class="text-sm text-gray-900">邮寄</span>
+            </div>
           </div>
-        </div>
 
-        <div data-internet-order-form-target="mailSection">
           <% if @addresses.any? %>
-            <% @addresses.each_with_index do |address, index| %>
-              <label class="block p-3 mb-2 border rounded <%= index == 0 ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
-                <%= f.fields_for :delivery_info do |delivery| %>
-                  <%= delivery.hidden_field :address_id, value: address.id, disabled: index != 0 %>
-                  <%= delivery.hidden_field :name, value: address.name, disabled: index != 0 %>
-                  <%= delivery.hidden_field :phone, value: address.phone, disabled: index != 0 %>
-                  <%= delivery.hidden_field :full_address, value: address.full_address, disabled: index != 0 %>
-                <% end %>
-                <%= radio_button_tag 'selected_address', index, index == 0, 
-                    class: "hidden", 
-                    data: { action: "change->internet-order-form#selectAddress" } %>
-                <div class="flex justify-between">
-                  <div>
-                    <div class="font-medium"><%= address.name %> <%= address.phone %></div>
-                    <div class="text-sm text-gray-600 mt-1"><%= address.full_address %></div>
+            <% 
+              # Determine default selected index based on address_id param
+              selected_index = 0
+              if params[:address_id].present?
+                address_index = @addresses.find_index { |addr| addr.id.to_s == params[:address_id] }
+                selected_index = address_index if address_index
+              end
+              selected_address = @addresses[selected_index]
+            %>
+            
+            <!-- 显示选中的地址 -->
+            <div class="bg-[#F7F8FA] rounded-lg p-4 mb-3" data-internet-order-form-target="selectedAddressCard">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-gray-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1">
+                    <span data-internet-order-form-target="selectedAddressName"><%= selected_address.name %></span>
+                    <span data-internet-order-form-target="selectedAddressPhone"><%= selected_address.phone %></span>
                   </div>
-                  <% if index == 0 %>
-                    <svg class="w-5 h-5 text-[#FFCC00]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                  <% end %>
+                  <div class="text-sm text-gray-600 leading-relaxed" data-internet-order-form-target="selectedAddressText">
+                    <%= selected_address.full_address %>
+                  </div>
                 </div>
-              </label>
+              </div>
+            </div>
+            
+            <button type="button" 
+                    data-action="internet-order-form#openAddressModal"
+                    class="block text-center text-blue-500 text-sm py-2 w-full">
+              更换地址
+            </button>
+            
+            <!-- Hidden fields for selected address -->
+            <%= f.fields_for :delivery_info do |delivery| %>
+              <%= delivery.hidden_field :address_id, value: selected_address.id, data: { internet_order_form_target: "addressIdField" } %>
+              <%= delivery.hidden_field :name, value: selected_address.name, data: { internet_order_form_target: "addressNameField" } %>
+              <%= delivery.hidden_field :phone, value: selected_address.phone, data: { internet_order_form_target: "addressPhoneField" } %>
+              <%= delivery.hidden_field :full_address, value: selected_address.full_address, data: { internet_order_form_target: "addressFullAddressField" } %>
             <% end %>
-            <%= link_to new_address_path, class: "block text-center text-blue-500 text-sm py-2" do %>
-              + 添加新地址
-            <% end %>
+            
           <% else %>
-            <%= link_to new_address_path, class: "block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded" do %>
+            <button type="button" 
+                    onclick="window.showToast('精彩即将上线', 'info')" 
+                    class="block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded w-full">
               + 添加收货地址
-            <% end %>
+            </button>
           <% end %>
-        </div>
-
-        <div data-internet-order-form-target="pickupSection" class="hidden">
-          <% if @passengers.any? %>
-            <% @passengers.each_with_index do |passenger, index| %>
-              <label class="block p-3 mb-2 border rounded <%= index == 0 ? 'border-[#FFDD00] bg-[#FFFEF8]' : 'border-gray-200' %> cursor-pointer">
-                <%= f.fields_for :contact_info do |contact| %>
-                  <%= contact.hidden_field :passenger_id, value: passenger.id, disabled: index != 0 %>
-                  <%= contact.hidden_field :name, value: passenger.name, disabled: index != 0 %>
-                  <%= contact.hidden_field :phone, value: passenger.phone, disabled: index != 0 %>
-                <% end %>
-                <%= radio_button_tag 'selected_passenger', index, index == 0, 
-                    class: "hidden", 
-                    data: { action: "change->internet-order-form#selectPassenger" } %>
-                <div class="flex justify-between">
-                  <div>
-                    <div class="font-medium"><%= passenger.name %> <%= passenger.phone %></div>
-                  </div>
-                  <% if index == 0 %>
-                    <svg class="w-5 h-5 text-[#FFCC00]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                  <% end %>
-                </div>
-              </label>
-            <% end %>
-          <% else %>
-            <p class="text-center text-gray-500 py-3">暂无出行人信息</p>
-          <% end %>
-        </div>
+        <% end %>
       <% end %>
     </div>
 
     <!-- WiFi租用信息 -->
     <% if params[:orderable_type] == 'InternetWifi' %>
       <div class="bg-white p-4 mb-2">
-        <div class="mb-4">
-          <label class="block font-bold text-base mb-2">租用天数</label>
-          <input type="number" value="7" min="1" 
-                 data-action="input->internet-order-form#updateRentalDays"
-                 data-internet-order-form-target="rentalDays"
-                 class="w-full px-3 py-2 border border-gray-300 rounded">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-base">租用天数</span>
+          <div class="flex items-center space-x-3">
+            <button type="button" data-action="internet-order-form#decreaseRentalDays" 
+                    class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">-</button>
+            <span class="font-medium text-lg" data-internet-order-form-target="rentalDays"><%= params[:days].presence || '7' %></span>
+            <button type="button" data-action="internet-order-form#increaseRentalDays" 
+                    class="w-8 h-8 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center">+</button>
+          </div>
         </div>
         <%= f.fields_for :rental_info, data: { internet_order_form_target: "rentalInfoField" } do |rental| %>
+          <% rental_days = (params[:days].presence || '7').to_i %>
           <%= rental.hidden_field :pickup_date, value: Time.zone.today.to_s %>
-          <%= rental.hidden_field :return_date, value: (Time.zone.today + 7).to_s %>
-          <%= rental.hidden_field :days, value: 7, data: { internet_order_form_target: "rentalDaysField" } %>
+          <%= rental.hidden_field :return_date, value: (Time.zone.today + rental_days).to_s %>
+          <%= rental.hidden_field :days, value: rental_days, data: { internet_order_form_target: "rentalDaysField" } %>
         <% end %>
       </div>
     <% end %>
@@ -193,7 +287,7 @@
           <div class="flex items-center space-x-3">
             <button type="button" data-action="internet-order-form#decrease" 
                     class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center">-</button>
-            <span class="font-medium text-lg" data-internet-order-form-target="quantity">1</span>
+            <span class="font-medium text-lg" data-internet-order-form-target="quantity"><%= params[:quantity].presence || '1' %></span>
             <button type="button" data-action="internet-order-form#increase" 
                     class="w-8 h-8 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center">+</button>
           </div>
@@ -207,7 +301,11 @@
         <span class="text-sm text-gray-600 mr-2">总计:</span>
         <span class="text-xs text-[#FF4400]">¥</span>
         <span class="text-2xl font-bold text-[#FF4400]" data-internet-order-form-target="totalPrice">
-          <%= @orderable&.try(:price) || @orderable&.try(:daily_price) || 0 %>
+          <% if params[:total].present? %>
+            <%= sprintf('%.2f', params[:total].to_f) %>
+          <% else %>
+            <%= sprintf('%.2f', (@orderable&.try(:price) || @orderable&.try(:daily_price) || 0).to_f) %>
+          <% end %>
         </span>
       </div>
       <%= f.submit "确认支付", class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full" %>
@@ -216,4 +314,54 @@
 
   <!-- Payment Confirmation Modals -->
   <%= render 'shared/payment_confirmation_modals' %>
+  
+  <!-- Address Selection Modal -->
+  <div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
+       data-internet-order-form-target="addressModal">
+    <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto h-[70vh] flex flex-col">
+      <!-- 标题 -->
+      <div class="flex justify-between items-center p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">选择收货地址</h3>
+        <button type="button" data-action="internet-order-form#closeAddressModal" class="text-gray-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 地址列表 -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <% if @addresses.any? %>
+          <% @addresses.each_with_index do |address, index| %>
+            <div class="mb-4 pb-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50 rounded-lg p-3 -mx-3"
+                 data-action="click->internet-order-form#selectAddressFromModal"
+                 data-address-id="<%= address.id %>"
+                 data-address-name="<%= address.name %>"
+                 data-address-phone="<%= address.phone %>"
+                 data-address-full="<%= address.full_address %>">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1"><%= address.name %> <%= address.phone %></div>
+                  <div class="text-sm text-gray-600 leading-relaxed">
+                    <%= address.full_address %>
+                  </div>
+                </div>
+                <div class="ml-2 flex-shrink-0">
+                  <div class="w-5 h-5 border border-gray-300 rounded-full" data-internet-order-form-target="addressRadio"></div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- 底部确认按钮 -->
+      <div class="p-4 border-t border-gray-200">
+        <button type="button" data-action="internet-order-form#confirmAddressSelection"
+                class="w-full bg-[#FFDD00] text-black font-bold py-3 rounded-full">
+          确定
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1197,6 +1197,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.string "plan_type", default: "daily"
     t.index ["data_version"], name: "index_internet_data_plans_on_data_version"
   end
 
@@ -1426,6 +1427,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110000) do
     t.index ["data_version"], name: "index_passengers_on_data_version"
     t.index ["user_id", "is_self"], name: "index_passengers_on_user_id_and_is_self"
     t.index ["user_id"], name: "index_passengers_on_user_id"
+  end
+
+  create_table "pickup_locations", force: :cascade do |t|
+    t.string "city"
+    t.string "district"
+    t.text "detail"
+    t.string "phone"
+    t.string "business_hours"
+    t.text "notes"
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_version", default: 0
   end
 
   create_table "price_alerts", force: :cascade do |t|

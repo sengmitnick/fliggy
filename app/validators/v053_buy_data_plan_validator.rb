@@ -2,26 +2,30 @@
 
 require_relative 'base_validator'
 
-# 验证用例53: 购买流量包（选择最便宜的套餐）
+# 验证用例53: 购买流量包（中国香港、1天、选最便宜）
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索流量包产品，
-#   选择价格最低的流量包并成功创建订单
+#   搜索流量包 → 对比价格 → 选最便宜的 → 填写手机号 → 创建订单
+#   
+#   可选流量包: 中国香港1天(35元)、3天(88元)、5天(108元/128元)、7天(168元)
+#   最便宜: 香港1天漫游包+10元话费券，35元
+#   运营商: 中国电信 180 2712 8600
+#   流量: 0.4GB/天，4G/5G漫游
+#   手机号: 13800138000
 # 
-# 复杂度分析:
-#   1. 需要搜索可用的流量包产品（从多个地区中选择）
-#   2. 需要对比不同流量包的价格
-#   3. 需要考虑有效天数和价格的关系
-#   4. 需要选择价格最低的流量包
-#   5. 需要填写订单信息（联系人、手机号等）
-#   ❌ 不能一次性提供：需要先搜索→对比价格→选择最优→购买
+# 操作步骤:
+#   1. 浏览流量包: 中国香港1天、3天、5天、7天
+#   2. 对比价格: 35元(1天)、88元(3天)、108元(5天)、128元(5天)、168元(7天)
+#   3. 选最便宜: 35元（香港1天漫游包+10元话费券）
+#   4. 填写手机号: 13800138000
+#   5. 计算总价: 35×1=35元
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 订单类型正确（data_plan）(15分)
-#   - 选择了具体的流量包产品 (15分)
-#   - 选择了最便宜的流量包 (30分)
-#   - 订单价格正确 (20分)
+#   - 订单类型=data_plan (15分)
+#   - 选了具体流量包产品 (15分)
+#   - 选了最便宜35元的香港1天漫游包 (30分)
+#   - 总价=35元 (20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -33,7 +37,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V053BuyDataPlanValidator < BaseValidator
   self.validator_id = 'v053_buy_data_plan_validator'
-  self.title = '购买流量包（选择最便宜的套餐）'
+  self.title = '购买流量包（中国香港、1天、选最便宜）'
   self.description = '需要搜索流量包产品，选择价格最低的套餐并成功创建订单'
   self.timeout_seconds = 240
   
@@ -47,9 +51,9 @@ class V053BuyDataPlanValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请购买流量包（#{@quantity}份），选择价格最便宜的产品",
+      task: "购买流量包: 1份、选最便宜的、填手机号",
       quantity: @quantity,
-      hint: "系统中有多个地区的流量包产品，请对比价格后选择最便宜的",
+      hint: "流量包选项: 中国香港1天(35元)、3天(88元)、5天(108元/128元)、7天(168元)。对比后选最便宜35元的。手机号: 13800138000",
       available_data_plans_count: @available_data_plans.count
     }
   end
@@ -151,7 +155,6 @@ class V053BuyDataPlanValidator < BaseValidator
       total_price: total_price,
       delivery_method: nil,
       contact_info: JSON.generate({
-        name: '张三',
         phone: '13800138000'
       }),
       rental_info: JSON.generate({

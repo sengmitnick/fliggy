@@ -91,8 +91,8 @@
     <span class="text-xs text-[#FF4400]">¥</span>
     <span class="text-2xl font-bold text-[#FF4400]" data-data-plan-target="totalPrice"><%= @data_plans.first&.price&.to_i || 35 %></span>
   </div>
-  <%= link_to "立即支付", new_internet_order_path(orderable_type: 'InternetDataPlan', orderable_id: @data_plans.first&.id),
+  <%= link_to "立即支付", "#",
       class: "bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700] inline-block",
-      data: { data_plan_target: "paymentButton" } %>
+      data: { action: "click->data-plan#checkout", data_plan_target: "paymentButton" } %>
   </div>
 </div>

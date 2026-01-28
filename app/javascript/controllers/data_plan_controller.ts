@@ -58,4 +58,32 @@ export default class extends Controller<HTMLElement> {
     `
     card.insertAdjacentHTML('beforeend', checkmarkHTML)
   }
+
+  checkout(event: Event): void {
+    event.preventDefault()
+    
+    // Get selected plan info
+    const orderableType = 'InternetDataPlan'
+    const orderableId = this.selectedPlanId
+    const price = this.selectedPrice
+    
+    // Get validity days from selected plan
+    const selectedCard = this.element.querySelector(`[data-plan-id="${orderableId}"]`) as HTMLElement
+    let days = '1' // default
+    if (selectedCard) {
+      // Try to extract days from plan name (e.g., "中国香港1天")
+      const planName = selectedCard.querySelector('.font-bold')?.textContent || ''
+      const daysMatch = planName.match(/(\d+)天/)
+      if (daysMatch) {
+        days = daysMatch[1]
+      }
+    }
+    
+    // Navigate to order page with params
+    const baseUrl = '/internet_orders/new'
+    const params = `orderable_type=${orderableType}&orderable_id=${orderableId}`
+    const priceParams = `days=${days}&price=${price}&total=${price}`
+    const url = `${baseUrl}?${params}&${priceParams}`
+    window.location.href = url
+  }
 }

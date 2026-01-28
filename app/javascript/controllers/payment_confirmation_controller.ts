@@ -76,7 +76,7 @@ export default class extends Controller {
       this.updatePasswordDots()
     }
     if (this.hasPasswordAmountTarget) {
-      this.passwordAmountTarget.textContent = this.amountValue
+      this.passwordAmountTarget.textContent = parseFloat(this.amountValue).toFixed(2)
     }
     this.passwordModalTarget.classList.remove('hidden')
   }
@@ -244,7 +244,7 @@ export default class extends Controller {
     if (!this.hasStatusModalTarget) return
     
     if (this.hasStatusAmountTarget) {
-      this.statusAmountTarget.textContent = this.amountValue
+      this.statusAmountTarget.textContent = parseFloat(this.amountValue).toFixed(2)
     }
     if (this.hasStatusUserEmailTarget) {
       this.statusUserEmailTarget.textContent = this.userEmailValue

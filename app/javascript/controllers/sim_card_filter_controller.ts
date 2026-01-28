@@ -16,31 +16,10 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("SimCardFilter connected")
-    // Set initial selection for mail delivery
-    const mailButton = this.element.querySelector('[data-method="mail"]')
-    if (mailButton) {
-      mailButton.classList.add('font-medium')
-    }
+    // Mail delivery is the only option (no need to set initial selection)
   }
 
-  selectDelivery(event: Event): void {
-    const button = event.currentTarget as HTMLElement
-    const method = button.dataset.method
-    
-    const allButtons = this.element.querySelectorAll('[data-method]')
-    allButtons.forEach(b => {
-      b.classList.remove('font-medium')
-      b.classList.add('text-gray-700')
-    })
-    
-    button.classList.add('font-medium')
-    
-    // Update value and recalculate prices
-    if (method) {
-      this.deliveryValue = method
-      this.updateAllPrices()
-    }
-  }
+  // Delivery method selection removed - mail is the only option
 
   selectDays(event: Event): void {
     const button = event.currentTarget as HTMLElement
@@ -152,11 +131,6 @@ export default class extends Controller<HTMLElement> {
   private calculatePrice(basePrice: number): number {
     let price = basePrice
     
-    // Delivery method adjustment
-    if (this.deliveryValue === 'pickup') {
-      price -= 5 // 自取便宜5元
-    }
-    
     // Days multiplier
     const daysMultiplier: {[key: number]: number} = {
       1: 1,
@@ -181,11 +155,6 @@ export default class extends Controller<HTMLElement> {
     }
     
     price += (dataAdjustment[this.dataValue] || 0)
-    
-    // Apply delivery discount after calculation
-    if (this.deliveryValue === 'pickup') {
-      price -= 5
-    }
     
     return Math.max(price, 0.1) // Minimum price 0.1
   }

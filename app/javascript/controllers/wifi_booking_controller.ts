@@ -2,7 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = ["quantity", "totalPrice", "contactName", "contactPhone", "dateRange",
-    "mailTab", "pickupTab", "addressSection", "mailAddress"]
+    "mailTab", "pickupTab", "addressSection", "mailAddress",
+    "datePickerModal", "startDate", "endDate", "addressPickerModal",
+    "pickupLocationModal", "pickupLocationDisplay",
+    "cityTab", "cityContent", "pickupLocationRadio"]
   
   declare readonly quantityTarget: HTMLElement
   declare readonly totalPriceTarget: HTMLElement
@@ -14,15 +17,37 @@ export default class extends Controller<HTMLElement> {
   declare readonly addressSectionTarget: HTMLElement
   declare readonly mailAddressTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
+  declare readonly hasContactNameTarget: boolean
+  declare readonly hasContactPhoneTarget: boolean
   declare readonly hasMailTabTarget: boolean
   declare readonly hasPickupTabTarget: boolean
   declare readonly hasAddressSectionTarget: boolean
   declare readonly hasMailAddressTarget: boolean
+  declare readonly datePickerModalTarget: HTMLElement
+  declare readonly startDateTarget: HTMLInputElement
+  declare readonly endDateTarget: HTMLInputElement
+  declare readonly hasDatePickerModalTarget: boolean
+  declare readonly hasStartDateTarget: boolean
+  declare readonly hasEndDateTarget: boolean
+  declare readonly hasDateRangeTarget: boolean
+  declare readonly addressPickerModalTarget: HTMLElement
+  declare readonly hasAddressPickerModalTarget: boolean
+  declare readonly pickupLocationModalTarget: HTMLElement
+  declare readonly pickupLocationDisplayTarget: HTMLElement
+  declare readonly cityTabTargets: HTMLElement[]
+  declare readonly cityContentTargets: HTMLElement[]
+  declare readonly pickupLocationRadioTargets: HTMLElement[]
+  declare readonly hasPickupLocationModalTarget: boolean
+  declare readonly hasPickupLocationDisplayTarget: boolean
 
   private selectedPlanId: string = ""
   private dailyPrice: number = 17
-  private days: number = 7
+  private days: number = 0
   private currentDeliveryMethod: string = 'pickup'
+  private deposit: number = 500  // 押金
+  private selectedPickupLocationId: string = ""
+  private selectedCity: string = ""
+  private tempSelectedPickupLocation: { id: string, city: string, district: string } | null = null
 
   connect(): void {
     // 初始化默认选中的套餐价格
@@ -33,8 +58,67 @@ export default class extends Controller<HTMLElement> {
       if (id) this.selectedPlanId = id
       if (price) this.dailyPrice = parseFloat(price)
     }
+    
+    // 从 URL 参数恢复状态
+    const urlParams = new URLSearchParams(window.location.search)
+    
+    // 恢复选中的套餐
+    const orderableId = urlParams.get('orderable_id')
+    if (orderableId) {
+      this.selectedPlanId = orderableId
+      const planCard = this.element.querySelector(`[data-wifi-id="${orderableId}"]`)
+      if (planCard) {
+        // 模拟点击以更新 UI
+        this.selectPlan({ currentTarget: planCard } as any)
+      }
+    }
+    
+    // 恢复数量
+    const quantity = urlParams.get('quantity')
+    if (quantity && this.quantityTarget) {
+      this.quantityTarget.textContent = quantity
+    }
+    
+    // 恢复日期
+    const startDate = urlParams.get('start_date')
+    const endDate = urlParams.get('end_date')
+    if (startDate && endDate && this.hasStartDateTarget && this.hasEndDateTarget) {
+      this.startDateTarget.value = startDate
+      this.endDateTarget.value = endDate
+      this.updateDateDisplay()
+    }
+    
+    // 恢复自取点
+    const pickupLocationId = urlParams.get('pickup_location_id')
+    if (pickupLocationId) {
+      this.selectedPickupLocationId = pickupLocationId
+      // 查找对应的自取点元素来获取 city 和 district
+      const locationCard = this.element.querySelector(`[data-location-id="${pickupLocationId}"]`)
+      if (locationCard) {
+        const city = locationCard.getAttribute('data-location-city') || ''
+        const district = locationCard.getAttribute('data-location-district') || ''
+        // 更新显示
+        if (this.hasPickupLocationDisplayTarget && city && district) {
+          const displayHTML = `
+            <div class="text-gray-900">${city}</div>
+            <div class="text-gray-400 text-xs">${district}</div>
+          `
+          this.pickupLocationDisplayTarget.innerHTML = displayHTML
+        }
+      }
+    }
+    
+    // 恢复联系人信息
+    const contactName = urlParams.get('contact_name')
+    const contactPhone = urlParams.get('contact_phone')
+    if (contactName && this.hasContactNameTarget) {
+      this.contactNameTarget.value = decodeURIComponent(contactName)
+    }
+    if (contactPhone && this.hasContactPhoneTarget) {
+      this.contactPhoneTarget.value = decodeURIComponent(contactPhone)
+    }
+    
     this.updateTotalPrice()
-    this.updatePaymentButton()
   }
 
   selectPlan(event: Event): void {
@@ -46,24 +130,23 @@ export default class extends Controller<HTMLElement> {
     this.dailyPrice = price
     this.updateTotalPrice()
     
-    // 更新支付按钮的orderableId
-    this.updatePaymentButton()
-    
     // Update UI - remove all selections first
     const allCards = this.element.querySelectorAll('[data-wifi-id]')
     allCards.forEach(c => {
-      c.classList.remove('bg-[#FFFDF2]', 'border-[#FFDD00]')
+      c.classList.remove('bg-[#FFFDF2]', 'border', 'border-[#FFDD00]')
       c.classList.add('bg-white')
-      const checkmark = c.querySelector('.bg-[#FFDD00]')
-      if (checkmark) {
-        checkmark.outerHTML = '<div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>'
+      // 查找黄色对勾，替换为空心圆圈
+      const checkmarkContainer = c.querySelector('.bg-\\[\\#FFDD00\\].rounded-full')
+      if (checkmarkContainer) {
+        checkmarkContainer.outerHTML = '<div class="w-5 h-5 ml-2 border border-gray-300 rounded-full"></div>'
       }
     })
     
     // Add selection to clicked card
-    card.classList.add('bg-[#FFFDF2]', 'border-[#FFDD00]')
+    card.classList.add('bg-[#FFFDF2]', 'border', 'border-[#FFDD00]')
     card.classList.remove('bg-white')
-    const circle = card.querySelector('.border-gray-300')
+    // 查找空心圆圈，替换为黄色对勾
+    const circle = card.querySelector('.border-gray-300.rounded-full')
     if (circle) {
       const checkmarkSVG = '<svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">'
         + '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>'
@@ -105,6 +188,233 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  showComingSoon(event: Event): void {
+    event.preventDefault()
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('精彩即将上线')
+    }
+  }
+
+  // 打开日期选择器
+  openDatePicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasDatePickerModalTarget) {
+      this.datePickerModalTarget.classList.remove('hidden')
+      // 不再初始化默认日期，用户需要手动选择
+      if (this.hasStartDateTarget && !this.startDateTarget.value) {
+        // 如果没有日期，清空输入框
+        this.startDateTarget.value = ''
+      }
+      if (this.hasEndDateTarget && !this.endDateTarget.value) {
+        this.endDateTarget.value = ''
+      }
+    }
+  }
+
+  // 关闭日期选择器
+  closeDatePicker(): void {
+    if (this.hasDatePickerModalTarget) {
+      this.datePickerModalTarget.classList.add('hidden')
+    }
+  }
+
+  // 确认日期选择
+  confirmDateSelection(): void {
+    this.updateDateDisplay()
+    this.closeDatePicker()
+  }
+
+  // 更新日期范围（验证结束日期>=开始日期）
+  updateDateRange(event: Event): void {
+    if (this.hasStartDateTarget && this.hasEndDateTarget) {
+      const start = new Date(this.startDateTarget.value)
+      const end = new Date(this.endDateTarget.value)
+      if (end < start) {
+        this.endDateTarget.value = this.startDateTarget.value
+      }
+      
+      // 如果是结束日期变化，自动确认并关闭
+      const target = event.target as HTMLInputElement
+      if (target === this.endDateTarget && this.endDateTarget.value) {
+        this.confirmDateSelection()
+      }
+    }
+  }
+
+  // 更新日期显示
+  private updateDateDisplay(): void {
+    if (this.hasStartDateTarget && this.hasEndDateTarget && this.hasDateRangeTarget) {
+      if (!this.startDateTarget.value || !this.endDateTarget.value) {
+        // 如果没有选择日期，显示提示文字
+        this.dateRangeTarget.textContent = '请选择取还日期'
+        this.dateRangeTarget.classList.remove('text-gray-900')
+        this.dateRangeTarget.classList.add('text-gray-400')
+        this.days = 0
+        this.updateTotalPrice()
+        return
+      }
+      
+      const start = new Date(this.startDateTarget.value)
+      const end = new Date(this.endDateTarget.value)
+      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+      
+      this.days = days
+      this.updateTotalPrice()
+      
+      const startStr = this.formatDateDisplay(start)
+      const endStr = this.formatDateDisplay(end)
+      this.dateRangeTarget.textContent = `${startStr}-${endStr}(共${days}天)`
+      this.dateRangeTarget.classList.remove('text-gray-400')
+      this.dateRangeTarget.classList.add('text-gray-900')
+    }
+  }
+
+  // 格式化日期为input[type="date"]格式 (YYYY-MM-DD)
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  // 格式化日期为显示格式 (MM月DD日)
+  private formatDateDisplay(date: Date): string {
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    return `${month}月${day}日`
+  }
+
+  // 打开收货地址选择器
+  openAddressPicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasAddressPickerModalTarget) {
+      this.addressPickerModalTarget.classList.remove('hidden')
+    }
+  }
+
+  // 关闭收货地址选择器
+  closeAddressPicker(): void {
+    if (this.hasAddressPickerModalTarget) {
+      this.addressPickerModalTarget.classList.add('hidden')
+    }
+  }
+
+  // 选择收货地址
+  selectAddress(event: Event): void {
+    const card = event.currentTarget as HTMLElement
+    const name = card.dataset.addressName || ""
+    const phone = card.dataset.addressPhone || ""
+    
+    // 填充姓名和电话
+    if (this.hasContactNameTarget && name) {
+      this.contactNameTarget.value = name
+    }
+    if (this.hasContactPhoneTarget && phone) {
+      this.contactPhoneTarget.value = phone
+    }
+    
+    // 关闭模态框
+    this.closeAddressPicker()
+  }
+
+  // 打开自取地点选择器
+  openPickupLocationPicker(event: Event): void {
+    event.preventDefault()
+    if (this.hasPickupLocationModalTarget) {
+      this.pickupLocationModalTarget.classList.remove('hidden')
+    }
+  }
+
+  // 关闭自取地点选择器
+  closePickupLocationPicker(): void {
+    if (this.hasPickupLocationModalTarget) {
+      this.pickupLocationModalTarget.classList.add('hidden')
+      // 重置临时选择
+      this.tempSelectedPickupLocation = null
+      this.clearPickupLocationRadios()
+    }
+  }
+
+  // 选择城市
+  selectCity(event: Event): void {
+    const tab = event.currentTarget as HTMLElement
+    const city = tab.dataset.city || ""
+    
+    // 更新城市Tab样式
+    this.cityTabTargets.forEach(t => {
+      if (t === tab) {
+        t.classList.add('bg-white', 'text-gray-900', 'border-l-2', 'border-[#FFDD00]')
+        t.classList.remove('text-gray-600')
+      } else {
+        t.classList.remove('bg-white', 'text-gray-900', 'border-l-2', 'border-[#FFDD00]')
+        t.classList.add('text-gray-600')
+      }
+    })
+    
+    // 显示对应城市的地点列表
+    this.cityContentTargets.forEach(content => {
+      if (content.dataset.city === city) {
+        content.classList.remove('hidden')
+      } else {
+        content.classList.add('hidden')
+      }
+    })
+    
+    this.selectedCity = city
+  }
+
+  // 选择自取地点
+  selectPickupLocation(event: Event): void {
+    const locationDiv = event.currentTarget as HTMLElement
+    const locationId = locationDiv.dataset.locationId || ""
+    const city = locationDiv.dataset.locationCity || ""
+    const district = locationDiv.dataset.locationDistrict || ""
+    
+    // 保存临时选择
+    this.tempSelectedPickupLocation = { id: locationId, city, district }
+    
+    // 清除所有单选框的选中状态
+    this.clearPickupLocationRadios()
+    
+    // 更新当前选中的单选框样式
+    const radio = locationDiv.querySelector('[data-wifi-booking-target="pickupLocationRadio"]') as HTMLElement
+    if (radio) {
+      radio.classList.remove('border-gray-300')
+      radio.classList.add('bg-[#FFDD00]', 'border-[#FFDD00]')
+      const checkmarkSVG = '<svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" '
+        + 'viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" '
+        + 'stroke-width="3" d="M5 13l4 4L19 7"></path></svg>'
+      radio.innerHTML = checkmarkSVG
+    }
+  }
+
+  // 确认自取地点选择
+  confirmPickupLocation(): void {
+    if (this.tempSelectedPickupLocation) {
+      this.selectedPickupLocationId = this.tempSelectedPickupLocation.id
+      
+      // 更新显示
+      if (this.hasPickupLocationDisplayTarget) {
+        const displayHTML = `
+          <div class="text-gray-900">${this.tempSelectedPickupLocation.city}</div>
+          <div class="text-gray-400 text-xs">${this.tempSelectedPickupLocation.district}</div>
+        `
+        this.pickupLocationDisplayTarget.innerHTML = displayHTML
+      }
+    }
+    
+    this.closePickupLocationPicker()
+  }
+
+  // 清除所有单选框的选中状态
+  private clearPickupLocationRadios(): void {
+    this.pickupLocationRadioTargets.forEach(radio => {
+      radio.classList.remove('bg-[#FFDD00]', 'border-[#FFDD00]')
+      radio.classList.add('border-gray-300')
+      radio.innerHTML = ''
+    })
+  }
+
   increase(): void {
     const currentQty = parseInt(this.quantityTarget.textContent || "1")
     this.quantityTarget.textContent = (currentQty + 1).toString()
@@ -121,22 +431,51 @@ export default class extends Controller<HTMLElement> {
 
   private updateTotalPrice(): void {
     const quantity = parseInt(this.quantityTarget.textContent || "1")
-    const total = this.dailyPrice * this.days * quantity
+    const total = this.dailyPrice * this.days * quantity + this.deposit  // 加上押金
     if (this.hasTotalPriceTarget) {
       this.totalPriceTarget.textContent = total.toFixed(0)
     }
   }
 
-  private updatePaymentButton(): void {
-    console.log('[WiFi] updatePaymentButton called, selectedPlanId:', this.selectedPlanId)
-    const paymentLink = this.element.querySelector('a#wifi-payment-link') as HTMLAnchorElement
-    console.log('[WiFi] Found paymentLink:', paymentLink)
-    if (paymentLink && this.selectedPlanId) {
-      // 更新link的href，修改orderable_id参数
-      const url = new URL(paymentLink.href)
-      url.searchParams.set('orderable_id', this.selectedPlanId)
-      paymentLink.href = url.toString()
-      console.log('[WiFi] Updated paymentLink href to:', paymentLink.href)
+  checkout(event: Event): void {
+    event.preventDefault()
+    
+    // 检查是否选择了取还日期
+    if (this.days === 0 || !this.hasStartDateTarget || !this.startDateTarget.value || !this.endDateTarget.value) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('请先选择取还日期', 'warning')
+      }
+      return
     }
+    
+    // 检查是否选择了自取点
+    if (!this.selectedPickupLocationId) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('请先选择取件地址', 'warning')
+      }
+      return
+    }
+    
+    const orderableType = 'InternetWifi'
+    const orderableId = this.selectedPlanId
+    const quantity = this.quantityTarget.textContent || '1'
+    const days = this.days
+    const unitPrice = this.dailyPrice
+    const qty = parseInt(quantity)
+    const totalPrice = (unitPrice * days * qty) + this.deposit
+    const startDate = this.startDateTarget.value
+    const endDate = this.endDateTarget.value
+    const contactName = this.hasContactNameTarget ? this.contactNameTarget.value : ''
+    const contactPhone = this.hasContactPhoneTarget ? this.contactPhoneTarget.value : ''
+    
+    // Navigate to order page with params
+    const baseUrl = '/internet_orders/new'
+    const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
+    const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
+    const dateParams = `&start_date=${startDate}&end_date=${endDate}`
+    const contactParams = `&contact_name=${encodeURIComponent(contactName)}&contact_phone=${encodeURIComponent(contactPhone)}`
+    const pickupParams = `&pickup_location_id=${this.selectedPickupLocationId}`
+    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${pickupParams}`
+    window.location.href = url
   }
 }

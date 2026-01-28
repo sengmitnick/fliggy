@@ -1,8 +1,17 @@
 <!-- 筛选区域和商品列表 -->
+<% 
+  # Get filter values from URL params or use defaults
+  selected_days = params[:days].present? ? params[:days].to_i : 1
+  selected_data = params[:data].presence || '共3GB'
+  selected_orderable_id = params[:orderable_id]
+  selected_quantity = params[:quantity].present? ? params[:quantity].to_i : 1
+  selected_total = params[:total].present? ? params[:total].to_f : nil
+  selected_address_id = params[:address_id]
+%>
 <div data-controller="sim-card-filter" 
      data-sim-card-filter-delivery-value="mail"
-     data-sim-card-filter-days-value="1"
-     data-sim-card-filter-data-value="共3GB">
+     data-sim-card-filter-days-value="<%= selected_days %>"
+     data-sim-card-filter-data-value="<%= selected_data %>">
   
   <!-- 筛选条件 -->
   <div class="bg-white px-4 py-2 space-y-4">
@@ -10,10 +19,7 @@
     <div class="flex items-center">
       <span class="font-medium mr-4 whitespace-nowrap">取卡方式</span>
       <div class="flex space-x-3 w-full">
-        <button data-action="sim-card-filter#selectDelivery" data-method="mail" 
-                class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700 font-medium">邮寄</button>
-        <button data-action="sim-card-filter#selectDelivery" data-method="pickup"
-                class="flex-1 py-1.5 bg-gray-50 rounded text-sm text-gray-700">自取</button>
+        <div class="flex-1 py-1.5 bg-[#FFF8D8] border border-[#FFCC00] rounded text-sm text-gray-900 font-medium text-center">邮寄</div>
       </div>
     </div>
 
@@ -22,9 +28,16 @@
       <span class="font-medium mr-4 mt-1.5 whitespace-nowrap">天数</span>
       <div class="grid grid-cols-4 gap-2 w-full">
         <% [1, 3, 4, 5, 7, 10, 15, 30].each do |days| %>
+          <% is_selected = (days == selected_days) %>
           <button data-action="sim-card-filter#selectDays" data-days="<%= days %>"
-                  class="relative py-1.5 bg-gray-50 rounded text-sm text-gray-700">
+                  class="relative py-1.5 <%= is_selected ? 'bg-[#FFF8D8] border-[#FFCC00] font-medium' : 'bg-gray-50' %> rounded text-sm <%= is_selected ? 'text-gray-900' : 'text-gray-700' %>">
             <%= days %>天
+            <% if is_selected %>
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#FFCC00] rounded-tl-lg"></div>
+              <svg class="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 text-black z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
+              </svg>
+            <% end %>
           </button>
         <% end %>
       </div>
@@ -35,8 +48,16 @@
       <span class="font-medium mr-4 mt-1.5 whitespace-nowrap">流量</span>
       <div class="flex space-x-2">
         <% ['共3GB', '共5GB', '共10GB', '无限量'].each do |data| %>
+          <% is_selected = (data == selected_data) %>
           <button data-action="sim-card-filter#selectData" data-data="<%= data %>"
-                  class="px-3 py-1.5 bg-gray-50 rounded text-sm text-gray-700"><%= data %></button>
+                  class="relative px-3 py-1.5 <%= is_selected ? 'bg-[#FFF8D8] border-[#FFCC00] font-medium' : 'bg-gray-50' %> rounded text-sm <%= is_selected ? 'text-gray-900' : 'text-gray-700' %>"><%= data %>
+            <% if is_selected %>
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-[#FFCC00] rounded-tl-lg"></div>
+              <svg class="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 text-black z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
+              </svg>
+            <% end %>
+          </button>
         <% end %>
       </div>
     </div>
@@ -45,7 +66,16 @@
   <!-- 商品列表 -->
   <div class="bg-white px-3 pb-2">
     <% @sim_cards.each_with_index do |card, index| %>
-      <div class="border <%= index == 0 ? 'border-[#FFCC00] bg-[#FFFEF8]' : 'border-gray-100 bg-white' %> rounded-lg p-3 mt-3 relative" 
+      <% 
+        # Check if this card should be selected based on URL params
+        is_card_selected = selected_orderable_id.present? ? (card.id.to_s == selected_orderable_id) : (index == 0)
+        
+        # Calculate price for this card based on selected filters
+        days_multiplier = {1 => 1, 3 => 2.5, 4 => 3.2, 5 => 3.8, 7 => 5, 10 => 6.5, 15 => 9, 30 => 15}
+        data_adjustment = {'共3GB' => 0, '共5GB' => 10, '共10GB' => 20, '无限量' => 30}
+        calculated_price = (card.price * (days_multiplier[selected_days] || 1) + (data_adjustment[selected_data] || 0)).round(1)
+      %>
+      <div class="border <%= is_card_selected ? 'border-[#FFCC00] bg-[#FFFEF8]' : 'border-gray-100 bg-white' %> rounded-lg p-3 mt-3 relative" 
            data-controller="product-card" 
            data-product-id="<%= card.id %>" 
            data-product-type="InternetSimCard"
@@ -67,15 +97,15 @@
             </div>
           </div>
           <div class="flex flex-col items-end justify-between h-full min-h-[70px]">
-            <span class="text-xs text-gray-400 flex items-center">详情 
+            <span class="text-xs text-gray-400 flex items-center cursor-pointer" onclick="window.showToast('精彩即将上线')">详情 
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </span>
             <div class="flex items-center mt-4">
               <span class="text-xs text-[#FF4400] mr-0.5">¥</span>
-              <span class="text-xl font-bold text-[#FF4400] mr-2" data-sim-card-filter-target="price"><%= card.price %></span>
-              <% if index == 0 %>
+              <span class="text-xl font-bold text-[#FF4400] mr-2" data-sim-card-filter-target="price"><%= calculated_price %></span>
+              <% if is_card_selected %>
                 <svg class="w-5 h-5 text-[#FFCC00] fill-current" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 12.17l7.59-7.59L19 6l-9 9z"/>
                 </svg>
@@ -97,7 +127,7 @@
     <span class="font-bold text-base">预订数量</span>
     <div class="flex items-center space-x-3">
       <button data-action="sim-card-booking#decrease" class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300 font-bold">-</button>
-      <span class="font-medium text-lg" data-sim-card-booking-target="quantity">1</span>
+      <span class="font-medium text-lg" data-sim-card-booking-target="quantity"><%= selected_quantity %></span>
       <button data-action="sim-card-booking#increase" class="w-6 h-6 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center font-bold">+</button>
     </div>
   </div>
@@ -106,17 +136,24 @@
   <div class="flex items-start">
     <span class="font-bold text-base mr-4 whitespace-nowrap pt-1">收货地址</span>
     <div class="flex-1">
-      <% if current_user.addresses.delivery.default.first %>
-        <% address = current_user.addresses.delivery.default.first %>
+      <% 
+        # Determine which address to display based on URL params or default
+        displayed_address = if selected_address_id.present?
+          current_user.addresses.delivery.find_by(id: selected_address_id) || current_user.addresses.delivery.default.first
+        else
+          current_user.addresses.delivery.default.first
+        end
+      %>
+      <% if displayed_address %>
         <div class="flex justify-between items-start">
           <div data-address-display>
             <div class="flex items-center mb-2">
-              <span class="text-base font-bold"><%= address.name %></span>
-              <span class="ml-2 text-sm text-gray-600"><%= address.phone %></span>
+              <span class="text-base font-bold"><%= displayed_address.name %></span>
+              <span class="ml-2 text-sm text-gray-600"><%= displayed_address.phone %></span>
             </div>
             <div class="bg-blue-50 rounded-lg p-3">
               <div class="text-sm text-gray-700">
-                <%= address.full_address %>
+                <%= displayed_address.full_address %>
               </div>
             </div>
           </div>
@@ -126,7 +163,7 @@
             </svg>
           </button>
         </div>
-        <input type="hidden" data-address-id-input value="<%= address.id %>">
+        <input type="hidden" data-address-id-input value="<%= displayed_address.id %>">
       <% else %>
         <%= link_to new_address_path, class: "flex items-center text-blue-500" do %>
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +180,19 @@
   <div class="flex items-baseline">
     <span class="text-sm text-gray-600 mr-2">总计:</span>
     <span class="text-xs text-[#FF4400]">¥</span>
-    <span class="text-2xl font-bold text-[#FF4400]" data-sim-card-booking-target="totalPrice">9.9</span>
+    <% 
+      # Calculate initial total price from URL params or from selected card
+      initial_total = if selected_total
+        selected_total.round(1)
+      else
+        selected_card = @sim_cards.find { |c| c.id.to_s == selected_orderable_id } || @sim_cards.first
+        days_multiplier = {1 => 1, 3 => 2.5, 4 => 3.2, 5 => 3.8, 7 => 5, 10 => 6.5, 15 => 9, 30 => 15}
+        data_adjustment = {'共3GB' => 0, '共5GB' => 10, '共10GB' => 20, '无限量' => 30}
+        unit_price = (selected_card.price * (days_multiplier[selected_days] || 1) + (data_adjustment[selected_data] || 0))
+        (unit_price * selected_quantity).round(1)
+      end
+    %>
+    <span class="text-2xl font-bold text-[#FF4400]" data-sim-card-booking-target="totalPrice"><%= initial_total %></span>
   </div>
   <button data-action="sim-card-booking#checkout"
       class="bg-[#FFDD00] text-black font-bold px-8 py-2.5 rounded-full hover:bg-[#FFD700]">
@@ -174,12 +223,14 @@
 
         <!-- Add New Address Button -->
         <div class="border-t border-gray-200 px-4 py-3">
-          <%= link_to new_address_path, class: "w-full py-3 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 font-medium" do %>
+          <button type="button" 
+                  onclick="window.showToast('精彩即将上线', 'info')" 
+                  class="w-full py-3 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 font-medium">
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
             </svg>
             新增收货地址
-          <% end %>
+          </button>
         </div>
       </div>
     </div>

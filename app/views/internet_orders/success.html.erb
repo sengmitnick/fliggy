@@ -35,7 +35,7 @@
 
     <div class="flex justify-between items-center">
       <span class="text-gray-600">支付金额</span>
-      <span class="font-bold text-[#FF4400] text-xl">¥<%= @order.total_price %></span>
+      <span class="font-bold text-[#FF4400] text-xl">¥<%= sprintf('%.2f', @order.total_price.to_f) %></span>
     </div>
   </div>
 
@@ -51,13 +51,20 @@
     </div>
   <% end %>
 
-  <% if @order.contact_info.present? %>
+  <% if @order.delivery_info.present? || @order.contact_info.present? %>
     <div class="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
       <h3 class="font-bold text-blue-900 mb-2">👤 联系人信息</h3>
-      <% contact = @order.contact_info.is_a?(String) ? JSON.parse(@order.contact_info) : @order.contact_info %>
-      <p class="text-blue-800 text-sm">
-        <%= contact['name'] %> <%= contact['phone'] %>
-      </p>
+      <% if @order.delivery_info.present? %>
+        <% delivery = @order.delivery_info.is_a?(String) ? JSON.parse(@order.delivery_info) : @order.delivery_info %>
+        <p class="text-blue-800 text-sm">
+          <%= delivery['name'] %> <%= delivery['phone'] %>
+        </p>
+      <% elsif @order.contact_info.present? %>
+        <% contact = @order.contact_info.is_a?(String) ? JSON.parse(@order.contact_info) : @order.contact_info %>
+        <p class="text-blue-800 text-sm">
+          <%= contact['name'] %> <%= contact['phone'] %>
+        </p>
+      <% end %>
     </div>
   <% end %>
 
