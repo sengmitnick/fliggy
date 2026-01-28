@@ -2,20 +2,19 @@
 
 require_relative 'base_validator'
 
-# 验证用例48: 预订武汉地区酒店套餐（2晚，5天后入住，最佳性价比套餐选项）
+# 验证用例48: 囤货武汉地区酒店套餐（2晚，最佳性价比套餐选项）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索武汉地区的酒店套餐，
-#   预订5天后入住的2晚套餐，并从该套餐的多个选项中选择性价比最佳的选项
+#   囤货购买2晚套餐（先囤再约），并从该套餐的多个选项中选择性价比最佳的选项
 # 
 # 复杂度分析:
 #   1. 需要搜索"武汉"地区的酒店套餐（从多个城市中筛选）
 #   2. 需要选择2晚的套餐（筛选night_count）
-#   3. 需要指定入住日期为5天后
-#   4. 需要理解套餐选项的差异（标准套餐、含早套餐、豪华套餐）
-#   5. 需要从多个套餐选项中选择性价比最佳的（价格合理+包含服务多）
-#   6. 需要填写入住信息（联系人、手机等）
-#   ❌ 不能一次性提供：需要先搜索套餐→对比选项→评估性价比→预订
+#   3. 需要理解套餐选项的差异（标准套餐、含早套餐、豪华套餐）
+#   4. 需要从多个套餐选项中选择性价比最佳的（价格合理+包含服务多）
+#   5. 需要填写购买信息（联系人、手机等）
+#   ❌ 不能一次性提供：需要先搜索套餐→对比选项→评估性价比→囤货购买
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
@@ -28,14 +27,14 @@ require_relative 'base_validator'
 #   # 准备阶段
 #   POST /api/tasks/v048_book_hotel_package_validator/start
 #   
-#   # Agent 通过界面操作完成预订...
+#   # Agent 通过界面操作完成囤货购买...
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
 class V048BookHotelPackageValidator < BaseValidator
   self.validator_id = 'v048_book_hotel_package_validator'
-  self.title = '预订武汉地区酒店套餐（2晚，5天后入住，最佳性价比选项）'
-  self.description = '需要搜索武汉地区的2晚酒店套餐，预订5天后入住，从套餐选项中选择性价比最佳的（含早或豪华套餐）'
+  self.title = '囤货武汉地区酒店套餐（2晚，最佳性价比选项）'
+  self.description = '需要搜索武汉地区的2晚酒店套餐，囤货购买（先囤再约），从套餐选项中选择性价比最佳的（含早或豪华套餐）'
   self.timeout_seconds = 240
   
   # 准备阶段：设置任务参数
@@ -44,8 +43,6 @@ class V048BookHotelPackageValidator < BaseValidator
     @city = '武汉'
     @night_count = 2
     @quantity = 1
-    @check_in_date = Date.current + 5.days  # 5天后入住
-    @check_out_date = @check_in_date + @night_count.days  # 退房日期
     
     # 查找武汉地区的2晚套餐（注意：查询基线数据 data_version=0）
     @available_packages = HotelPackage.where(
@@ -56,13 +53,11 @@ class V048BookHotelPackageValidator < BaseValidator
     
     # 返回给 Agent 的任务信息
     {
-      task: "请预订#{@city}地区的酒店套餐（#{@night_count}晚，1份），入住日期为#{@check_in_date.strftime('%Y年%m月%d日')}，请选择性价比最好的套餐选项",
+      task: "请囤货购买#{@city}地区的酒店套餐（#{@night_count}晚，1份），先囤货后预约，请选择性价比最好的套餐选项",
       city: @city,
       night_count: @night_count,
       quantity: @quantity,
-      check_in_date: @check_in_date.to_s,
-      check_out_date: @check_out_date.to_s,
-      hint: "系统中的酒店套餐通常有多个选项（标准套餐、含早套餐、豪华套餐），请根据价格和包含的服务选择最佳选项。含早或豪华套餐性价比更高。",
+      hint: "系统中的酒店套餐通常有多个选项（标准套餐、含早套餐、豪华套餐），请根据价格和包含的服务选择最佳选项。含早或豪华套餐性价比更高。囤货购买后可以稍后再预约具体入住日期。",
       available_packages_count: @available_packages.count
     }
   end
@@ -123,9 +118,7 @@ class V048BookHotelPackageValidator < BaseValidator
     {
       city: @city,
       night_count: @night_count,
-      quantity: @quantity,
-      check_in_date: @check_in_date.to_s,
-      check_out_date: @check_out_date.to_s
+      quantity: @quantity
     }
   end
   
@@ -134,8 +127,6 @@ class V048BookHotelPackageValidator < BaseValidator
     @city = data['city']
     @night_count = data['night_count']
     @quantity = data['quantity']
-    @check_in_date = Date.parse(data['check_in_date'])
-    @check_out_date = Date.parse(data['check_out_date'])
     
     # 重新加载可用套餐列表
     @available_packages = HotelPackage.where(
@@ -145,7 +136,7 @@ class V048BookHotelPackageValidator < BaseValidator
     )
   end
   
-  # 模拟 AI Agent 操作：预订武汉地区性价比最佳的酒店套餐
+  # 模拟 AI Agent 操作：囤货购买武汉地区性价比最佳的酒店套餐
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -174,7 +165,7 @@ class V048BookHotelPackageValidator < BaseValidator
     
     raise "未找到可用的套餐选项" unless target_option
     
-    # 6. 创建酒店套餐订单
+    # 6. 创建酒店套餐订单（囤货模式：不需要入住日期）
     package_order = HotelPackageOrder.create!(
       hotel_package_id: target_package.id,
       package_option_id: target_option.id,
@@ -182,12 +173,11 @@ class V048BookHotelPackageValidator < BaseValidator
       passenger_id: passenger.id,
       quantity: @quantity,
       total_price: target_option.price * @quantity,
-      booking_type: 'instant',  # 立即预订
+      booking_type: 'stockup',  # 囤货模式（注意：无下划线）
       status: 'pending',
       contact_name: passenger.name,
-      contact_phone: passenger.phone,
-      check_in_date: @check_in_date,
-      check_out_date: @check_out_date
+      contact_phone: passenger.phone
+      # 囤货模式不需要 check_in_date 和 check_out_date
     )
     
     # 返回操作信息
@@ -202,6 +192,7 @@ class V048BookHotelPackageValidator < BaseValidator
       price: target_option.price,
       quantity: @quantity,
       total_price: package_order.total_price,
+      booking_type: 'stockup',
       user_email: user.email
     }
   end

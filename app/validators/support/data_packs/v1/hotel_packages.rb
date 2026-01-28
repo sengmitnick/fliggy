@@ -32,13 +32,22 @@ HotelPackage.where(data_version: 0).destroy_all
 hotel_packages = []
 current_time = Time.current
 
+# Helper: 根据品牌和城市查找酒店ID
+def find_hotel_id(brand_name, city)
+  Hotel.find_by(brand: brand_name, city: city)&.id
+end
+
 # ============================================================
 # 武汉地区套餐（用于 v048 验证器）
 # ============================================================
 
 # 1. 华住品牌 - 2晚连住套餐
+brand_name = "华住"
+city = "武汉"
 hotel_packages << {
-  brand_name: "华住",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 4,
   title: "【官方直营】华住美仑品牌全国140+店客房2晚连住通兑 全程不加价",
   description: "含早餐，可叠加会员权益，全国140+门店通用，客房2晚连住",
   price: 699,
@@ -49,7 +58,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在品牌旗下任意门店使用\n3. 需提前3天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
   region: "华中地区",
   package_type: "vip",
-  city: "武汉",
+  city: city,
   night_count: 2,
   refundable: false,
   instant_booking: true,
@@ -61,8 +70,12 @@ hotel_packages << {
 }
 
 # 2. 万豪品牌 - 2晚连住套餐
+brand_name = "万豪"
+city = "武汉"
 hotel_packages << {
-  brand_name: "万豪",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "万豪酒店客房2晚连住通兑套餐 高端商务之选",
   description: "包含双早，行政酒廊权益，全国万豪旗下酒店通用，客房2晚连住",
   price: 1299,
@@ -73,7 +86,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在品牌旗下任意门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
   region: "华中地区",
   package_type: "vip",
-  city: "武汉",
+  city: city,
   night_count: 2,
   refundable: true,
   instant_booking: true,
@@ -85,8 +98,12 @@ hotel_packages << {
 }
 
 # 3. 希尔顿品牌 - 2晚连住套餐
+brand_name = "希尔顿"
+city = "武汉"
 hotel_packages << {
-  brand_name: "希尔顿",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "希尔顿酒店套餐 家庭亲子首选 客房2晚连住",
   description: "含双早+双晚餐，儿童免费，全国希尔顿品牌通用，客房2晚连住",
   price: 1099,
@@ -97,7 +114,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在品牌旗下任意门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
   region: "华中地区",
   package_type: "standard",
-  city: "武汉",
+  city: city,
   night_count: 2,
   refundable: true,
   instant_booking: false,
@@ -109,8 +126,12 @@ hotel_packages << {
 }
 
 # 4. 洲际品牌 - 1晚套餐（武汉）
+brand_name = "洲际"
+city = "武汉"
 hotel_packages << {
-  brand_name: "洲际",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "洲际酒店商务快捷1晚套餐 武汉门店通用",
   description: "商务出行首选，含双人早餐，免费停车",
   price: 499,
@@ -121,7 +142,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在武汉地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价",
   region: "华中地区",
   package_type: "standard",
-  city: "武汉",
+  city: city,
   night_count: 1,
   refundable: false,
   instant_booking: true,
@@ -133,8 +154,12 @@ hotel_packages << {
 }
 
 # 5. 凯悦品牌 - 1-2晚灵活组合套餐（武汉）
+brand_name = "凯悦"
+city = "武汉"
 hotel_packages << {
-  brand_name: "凯悦",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "凯悦酒店灵活组合套餐 1晚起订 武汉通用",
   description: "可选1晚住宿或2晚连住，含早餐，免费健身房",
   price: 599,
@@ -145,7 +170,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在武汉地区门店使用\n3. 需提前2天预约\n4. 可退款，需扣除10%手续费\n5. 可选1晚住宿或2晚连住（连住优惠）",
   region: "华中地区",
   package_type: "vip",
-  city: "武汉",
+  city: city,
   night_count: 1, # 基础是1晚，但有2晚选项
   refundable: true,
   instant_booking: true,
@@ -156,144 +181,24 @@ hotel_packages << {
   updated_at: current_time
 }
 
-# ============================================================
-# 其他城市套餐
-# ============================================================
-
-# 6. 上海 - 洲际品牌 2晚连住套餐
+# 6. 如家品牌 - 经济型1晚套餐（武汉）
+brand_name = "如家"
+city = "武汉"
 hotel_packages << {
-  brand_name: "洲际",
-  title: "洲际酒店奢华体验套餐 客房2晚连住",
-  description: "豪华房型升级，SPA体验，米其林餐厅体验，客房2晚连住",
-  price: 1899,
-  original_price: 2599,
-  sales_count: 567,
-  is_featured: false,
-  valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在上海地区门店使用\n3. 需提前3天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
-  region: "华东地区",
-  package_type: "vip",
-  city: "上海",
-  night_count: 2,
-  refundable: false,
-  instant_booking: true,
-  luxury: true,
-  brand_logo_url: brands[3][:logo],
-  data_version: 0,
-  created_at: current_time,
-  updated_at: current_time
-}
-
-# 7. 上海 - 香格里拉品牌 1晚套餐
-hotel_packages << {
-  brand_name: "香格里拉",
-  title: "香格里拉酒店商务1晚套餐 上海门店",
-  description: "行政楼层，含早餐+欢迎礼遇",
-  price: 799,
-  original_price: 1099,
-  sales_count: 1456,
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 3,
+  title: "如家酒店经济舒适1晚套餐 武汉门店通用",
+  description: "经济实惠，干净卫生，含早餐，交通便利",
+  price: 199,
+  original_price: 299,
+  sales_count: 5680,
   is_featured: true,
   valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在上海地区门店使用\n3. 需提前2天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价",
-  region: "华东地区",
+  terms: "1. 套餐有效期365天\n2. 可在武汉地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价",
+  region: "华中地区",
   package_type: "standard",
-  city: "上海",
-  night_count: 1,
-  refundable: true,
-  instant_booking: true,
-  luxury: true,
-  brand_logo_url: brands[5][:logo],
-  data_version: 0,
-  created_at: current_time,
-  updated_at: current_time
-}
-
-# 8. 北京 - 凯悦品牌 2晚连住套餐
-hotel_packages << {
-  brand_name: "凯悦",
-  title: "凯悦酒店度假套餐 限时特惠 客房2晚连住",
-  description: "含三餐自助，免费延迟退房，景区门票折扣，客房2晚连住",
-  price: 1499,
-  original_price: 1999,
-  sales_count: 2100,
-  is_featured: true,
-  valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在北京地区门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
-  region: "华北地区",
-  package_type: "limited",
-  city: "北京",
-  night_count: 2,
-  refundable: true,
-  instant_booking: true,
-  luxury: false,
-  brand_logo_url: brands[4][:logo],
-  data_version: 0,
-  created_at: current_time,
-  updated_at: current_time
-}
-
-# 9. 北京 - 万豪品牌 1晚套餐
-hotel_packages << {
-  brand_name: "万豪",
-  title: "万豪酒店商旅快捷1晚套餐 北京通用",
-  description: "商务房型，含早餐，行政酒廊",
-  price: 599,
-  original_price: 899,
-  sales_count: 1780,
-  is_featured: false,
-  valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在北京地区门店使用\n3. 需提前1天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价",
-  region: "华北地区",
-  package_type: "standard",
-  city: "北京",
-  night_count: 1,
-  refundable: true,
-  instant_booking: true,
-  luxury: false,
-  brand_logo_url: brands[1][:logo],
-  data_version: 0,
-  created_at: current_time,
-  updated_at: current_time
-}
-
-# 10. 深圳 - 香格里拉品牌 2晚连住套餐
-hotel_packages << {
-  brand_name: "香格里拉",
-  title: "香格里拉酒店尊享套餐 客房2晚连住",
-  description: "行政套房，管家服务，机场接送，专属礼遇，客房2晚连住",
-  price: 2299,
-  original_price: 3299,
-  sales_count: 345,
-  is_featured: false,
-  valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在深圳地区门店使用\n3. 需提前5天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
-  region: "华南地区",
-  package_type: "vip",
-  city: "深圳",
-  night_count: 2,
-  refundable: false,
-  instant_booking: false,
-  luxury: true,
-  brand_logo_url: brands[5][:logo],
-  data_version: 0,
-  created_at: current_time,
-  updated_at: current_time
-}
-
-# 11. 深圳 - 华住品牌 1晚套餐
-hotel_packages << {
-  brand_name: "华住",
-  title: "华住精选商旅1晚套餐 深圳门店通用",
-  description: "经济实惠，含早餐，交通便利",
-  price: 299,
-  original_price: 399,
-  sales_count: 3450,
-  is_featured: true,
-  valid_days: 365,
-  terms: "1. 套餐有效期365天\n2. 可在深圳地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价",
-  region: "华南地区",
-  package_type: "standard",
-  city: "深圳",
+  city: city,
   night_count: 1,
   refundable: false,
   instant_booking: true,
@@ -304,9 +209,241 @@ hotel_packages << {
   updated_at: current_time
 }
 
-# 12. 广州 - 希尔顿品牌 1-2晚灵活组合套餐
+# 7. 汉庭品牌 - 经济型2晚连住套餐（武汉）
+brand_name = "汉庭"
+city = "武汉"
 hotel_packages << {
-  brand_name: "希尔顿",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 3,
+  title: "汉庭酒店超值2晚连住套餐 武汉门店通用",
+  description: "商务出行首选，含双早，WiFi免费，客房2晚连住",
+  price: 358,
+  original_price: 498,
+  sales_count: 4320,
+  is_featured: false,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在武汉地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华中地区",
+  package_type: "standard",
+  city: city,
+  night_count: 2,
+  refundable: false,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[0][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 8. 7天品牌 - 快捷经济1晚套餐（武汉）
+brand_name = "7天"
+city = "武汉"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 3,
+  title: "7天酒店快捷1晚套餐 武汉多店通用",
+  description: "性价比之选，基础设施齐全，近地铁站",
+  price: 159,
+  original_price: 229,
+  sales_count: 6780,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在武汉地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价",
+  region: "华中地区",
+  package_type: "standard",
+  city: city,
+  night_count: 1,
+  refundable: false,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[0][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# ============================================================
+# 其他城市套餐
+# ============================================================
+
+# 9. 上海 - 洲际品牌 2晚连住套餐
+brand_name = "洲际"
+city = "上海"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
+  title: "洲际酒店奢华体验套餐 客房2晚连住",
+  description: "豪华房型升级，SPA体验，米其林餐厅体验，客房2晚连住",
+  price: 1899,
+  original_price: 2599,
+  sales_count: 567,
+  is_featured: false,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在上海地区门店使用\n3. 需提前3天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华东地区",
+  package_type: "vip",
+  city: city,
+  night_count: 2,
+  refundable: false,
+  instant_booking: true,
+  luxury: true,
+  brand_logo_url: brands[3][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 10. 上海 - 香格里拉品牌 1晚套餐
+brand_name = "香格里拉"
+city = "上海"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
+  title: "香格里拉酒店商务1晚套餐 上海门店",
+  description: "行政楼层，含早餐+欢迎礼遇",
+  price: 799,
+  original_price: 1099,
+  sales_count: 1456,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在上海地区门店使用\n3. 需提前2天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价",
+  region: "华东地区",
+  package_type: "standard",
+  city: city,
+  night_count: 1,
+  refundable: true,
+  instant_booking: true,
+  luxury: true,
+  brand_logo_url: brands[5][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 11. 北京 - 凯悦品牌 2晚连住套餐
+brand_name = "凯悦"
+city = "北京"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
+  title: "凯悦酒店度假套餐 限时特惠 客房2晚连住",
+  description: "含三餐自助，免费延迟退房，景区门票折扣，客房2晚连住",
+  price: 1499,
+  original_price: 1999,
+  sales_count: 2100,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在北京地区门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华北地区",
+  package_type: "limited",
+  city: city,
+  night_count: 2,
+  refundable: true,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[4][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 12. 北京 - 万豪品牌 1晚套餐
+brand_name = "万豪"
+city = "北京"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
+  title: "万豪酒店商旅快捷1晚套餐 北京通用",
+  description: "商务房型，含早餐，行政酒廊",
+  price: 599,
+  original_price: 899,
+  sales_count: 1780,
+  is_featured: false,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在北京地区门店使用\n3. 需提前1天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价",
+  region: "华北地区",
+  package_type: "standard",
+  city: city,
+  night_count: 1,
+  refundable: true,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[1][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 13. 深圳 - 香格里拉品牌 2晚连住套餐
+brand_name = "香格里拉"
+city = "深圳"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
+  title: "香格里拉酒店尊享套餐 客房2晚连住",
+  description: "行政套房，管家服务，机场接送，专属礼遇，客房2晚连住",
+  price: 2299,
+  original_price: 3299,
+  sales_count: 345,
+  is_featured: false,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在深圳地区门店使用\n3. 需提前5天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华南地区",
+  package_type: "vip",
+  city: city,
+  night_count: 2,
+  refundable: false,
+  instant_booking: false,
+  luxury: true,
+  brand_logo_url: brands[5][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 14. 深圳 - 华住品牌 1晚套餐
+brand_name = "华住"
+city = "深圳"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 4,
+  title: "华住精选商旅1晚套餐 深圳门店通用",
+  description: "经济实惠，含早餐，交通便利",
+  price: 299,
+  original_price: 399,
+  sales_count: 3450,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在深圳地区门店使用\n3. 需提前1天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价",
+  region: "华南地区",
+  package_type: "standard",
+  city: city,
+  night_count: 1,
+  refundable: false,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[0][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 15. 广州 - 希尔顿品牌 1-2晚灵活组合套餐
+brand_name = "希尔顿"
+city = "广州"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "希尔顿商务精选灵活套餐 1晚起订 广州通用",
   description: "可选1晚住宿或2晚连住，工作日专用，含早餐，免费会议室使用",
   price: 699,
@@ -317,7 +454,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在广州地区门店使用\n3. 需提前2天预约\n4. 不可退款，可转让\n5. 可选1晚住宿或2晚连住（连住优惠）",
   region: "华南地区",
   package_type: "limited",
-  city: "广州",
+  city: city,
   night_count: 1, # 基础是1晚，但有2晚选项
   refundable: false,
   instant_booking: true,
@@ -328,9 +465,13 @@ hotel_packages << {
   updated_at: current_time
 }
 
-# 13. 成都 - 洲际品牌 2晚连住套餐
+# 16. 成都 - 洲际品牌 2晚连住套餐
+brand_name = "洲际"
+city = "成都"
 hotel_packages << {
-  brand_name: "洲际",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "洲际周末度假套餐 客房2晚连住",
   description: "周末专用，含双人早餐+欢迎水果，客房2晚连住",
   price: 1299,
@@ -341,7 +482,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在成都地区门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
   region: "西南地区",
   package_type: "standard",
-  city: "成都",
+  city: city,
   night_count: 2,
   refundable: true,
   instant_booking: false,
@@ -352,9 +493,13 @@ hotel_packages << {
   updated_at: current_time
 }
 
-# 14. 成都 - 凯悦品牌 1晚套餐
+# 17. 成都 - 凯悦品牌 1晚套餐
+brand_name = "凯悦"
+city = "成都"
 hotel_packages << {
-  brand_name: "凯悦",
+  brand_name: brand_name,
+  hotel_id: find_hotel_id(brand_name, city),
+  star_level: 5,
   title: "凯悦酒店商务1晚套餐 成都通用",
   description: "商务楼层，含早餐，免费健身房和泳池",
   price: 499,
@@ -365,7 +510,7 @@ hotel_packages << {
   terms: "1. 套餐有效期365天\n2. 可在成都地区门店使用\n3. 需提前1天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价",
   region: "西南地区",
   package_type: "standard",
-  city: "成都",
+  city: city,
   night_count: 1,
   refundable: true,
   instant_booking: true,
