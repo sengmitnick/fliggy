@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_27_074654) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_27_081602) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1287,6 +1287,49 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_074654) do
     t.index ["data_version"], name: "index_membership_benefits_on_data_version"
   end
 
+  create_table "membership_orders", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "membership_product_id", null: false
+    t.integer "quantity", default: 1
+    t.decimal "price_cash", default: "0.0"
+    t.integer "price_mileage", default: 0
+    t.decimal "total_cash", default: "0.0"
+    t.integer "total_mileage", default: 0
+    t.string "status", default: "pending"
+    t.string "order_number"
+    t.text "shipping_address"
+    t.string "contact_phone"
+    t.string "contact_name"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["membership_product_id"], name: "index_membership_orders_on_membership_product_id"
+    t.index ["order_number"], name: "index_membership_orders_on_order_number", unique: true
+    t.index ["status"], name: "index_membership_orders_on_status"
+    t.index ["user_id"], name: "index_membership_orders_on_user_id"
+  end
+
+  create_table "membership_products", force: :cascade do |t|
+    t.string "name"
+    t.string "slug"
+    t.string "category", default: "popular"
+    t.decimal "price_cash", default: "0.0"
+    t.integer "price_mileage", default: 0
+    t.decimal "original_price"
+    t.integer "sales_count", default: 0
+    t.integer "stock"
+    t.decimal "rating", default: "5.0"
+    t.text "description"
+    t.string "image_url"
+    t.string "region"
+    t.boolean "featured", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_membership_products_on_category"
+    t.index ["featured"], name: "index_membership_products_on_featured"
+    t.index ["slug"], name: "index_membership_products_on_slug", unique: true
+  end
+
   create_table "memberships", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "level", default: "F1"
@@ -1898,6 +1941,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_27_074654) do
   add_foreign_key "insurance_orders", "users"
   add_foreign_key "itineraries", "users"
   add_foreign_key "itinerary_items", "itineraries"
+  add_foreign_key "membership_orders", "membership_products"
+  add_foreign_key "membership_orders", "users"
   add_foreign_key "memberships", "users"
   add_foreign_key "notification_settings", "users"
   add_foreign_key "notifications", "users"

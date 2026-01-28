@@ -122,6 +122,7 @@ import GuideSwitcherController from "./guide_switcher_controller"
 import AbroadTimeSlotPickerController from "./abroad_time_slot_picker_controller"
 import AddressModalController from "./address_modal_controller"
 import LiveRoomFollowController from "./live_room_follow_controller"
+import MembershipPaymentController from "./membership_payment_controller"
 
 const application = Application.start()
 
@@ -247,5 +248,6 @@ application.register("guide-switcher", GuideSwitcherController)
 application.register("abroad-time-slot-picker", AbroadTimeSlotPickerController)
 application.register("address-modal", AddressModalController)
 application.register("live-room-follow", LiveRoomFollowController)
+application.register("membership-payment", MembershipPaymentController)
 
 window.Stimulus = application

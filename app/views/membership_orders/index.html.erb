@@ -1,0 +1,110 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-surface border-b border-border">
+    <div class="flex items-center px-4 py-3">
+      <%= link_to :back, class: "text-primary" do %>
+        <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+      <% end %>
+      
+      <h1 class="flex-1 text-center text-primary text-lg font-semibold">我的订单</h1>
+      <div class="w-6"></div>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto pb-20">
+    <% if @orders.any? %>
+      <% @orders.each do |order| %>
+        <%= link_to membership_order_path(order), class: "block bg-surface mb-3 border-b border-border" do %>
+          <!-- Order Header -->
+          <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+            <span class="text-secondary text-sm">订单号: <%= order.order_number %></span>
+            <span class="text-sm <%= order.status == 'paid' ? 'text-success' : 'text-warning' %>">
+              <%= order.status_name %>
+            </span>
+          </div>
+          
+          <!-- Product Info -->
+          <div class="px-4 py-4">
+            <div class="flex gap-3 mb-3">
+              <div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-elevated flex-shrink-0">
+                <% product = order.membership_product %>
+                <% if product.image.attached? %>
+                  <%= image_tag product.image.variant(resize_to_fill: [160, 160]), class: "w-full h-full object-cover", alt: product.name %>
+                <% elsif product.image_url.present? %>
+                  <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+                <% else %>
+                  <div class="w-full h-full flex items-center justify-center">
+                    <span class="text-muted text-xs">暂无图片</span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <h3 class="text-primary text-sm mb-2 line-clamp-2"><%= product.name %></h3>
+                
+                <div class="flex items-center justify-between">
+                  <div class="text-danger text-sm">
+                    <% if order.price_mileage > 0 %>
+                      <span class="font-bold"><%= order.price_mileage %></span>里程
+                    <% end %>
+                    <% if order.price_cash > 0 %>
+                      <%= order.price_mileage > 0 ? ' + ' : '' %>
+                      <span class="font-bold">¥<%= order.price_cash %></span>
+                    <% end %>
+                  </div>
+                  
+                  <div class="text-secondary text-sm">
+                    x<%= order.quantity %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Total -->
+            <div class="flex items-center justify-end pt-3 border-t border-border">
+              <span class="text-secondary text-sm mr-2">合计:</span>
+              <span class="text-danger text-base font-bold"><%= order.total_display %></span>
+            </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="px-4 py-3 border-t border-border flex items-center justify-end gap-3">
+            <% if order.can_cancel? %>
+              <%= button_to membership_order_path(order), method: :delete, 
+                  data: { turbo_confirm: "确定要取消订单吗?" },
+                  class: "px-4 py-2 border border-border rounded-full text-secondary text-sm" do %>
+                取消订单
+              <% end %>
+            <% end %>
+            
+            <span class="px-4 py-2 bg-primary text-white rounded-full text-sm">
+              查看详情
+            </span>
+          </div>
+        <% end %>
+      <% end %>
+      
+      <!-- Pagination -->
+      <% if @orders.total_pages > 1 %>
+        <div class="px-4 mt-6">
+          <%= paginate @orders, theme: 'twitter-bootstrap-4' %>
+        </div>
+      <% end %>
+    <% else %>
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center py-20">
+        <svg class="w-24 h-24 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        <p class="text-muted text-sm mb-6">暂无订单</p>
+        <%= link_to membership_products_path, 
+            class: "px-6 py-2 bg-primary text-white rounded-full text-sm" do %>
+          去购物
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Bottom Navigation -->
+  <%= render 'shared/bottom_navigation', active_tab: :profile %>
+</div>

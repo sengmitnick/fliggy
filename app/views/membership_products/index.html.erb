@@ -1,0 +1,128 @@
+<div class="h-screen flex flex-col bg-surface">
+  <!-- Header -->
+  <div class="sticky top-0 z-50 bg-gradient-to-r from-[hsl(var(--color-primary-dark))] to-[hsl(var(--color-primary))] px-4 py-3 flex items-center justify-between">
+    <%= link_to :back, class: "text-text-inverse" do %>
+      <%= image_tag "返回.png", class: "w-6 h-6", alt: "返回" %>
+    <% end %>
+    
+    <div class="flex-1 mx-4">
+      <h1 class="text-text-inverse text-lg font-semibold">会员商城</h1>
+      <p class="text-text-inverse text-sm opacity-90">里程 <%= current_user.available_mileage %> 可用</p>
+    </div>
+    
+    <%= link_to membership_orders_path, class: "flex items-center gap-1 text-text-inverse" do %>
+      <%= image_tag "profile/全部订单.png", class: "w-5 h-5", alt: "订单" %>
+      <span class="text-sm">订单</span>
+    <% end %>
+  </div>
+
+  <div class="flex-1 overflow-y-auto">
+    <!-- Category Tabs -->
+    <div class="sticky top-0 z-40 bg-surface border-b border-border">
+      <div class="flex items-center overflow-x-auto no-scrollbar px-4 py-3 gap-6">
+        <%= link_to membership_products_path(region: params[:region], sort_by: params[:sort_by]), 
+            class: "whitespace-nowrap text-sm #{params[:category].blank? ? 'text-primary font-semibold border-b-2 border-primary pb-1' : 'text-secondary'}" do %>
+          热门商品
+        <% end %>
+        
+        <% @categories.except('popular').each do |key, name| %>
+          <%= link_to membership_products_path(category: key, region: params[:region], sort_by: params[:sort_by]), 
+              class: "whitespace-nowrap text-sm #{params[:category] == key ? 'text-primary font-semibold border-b-2 border-primary pb-1' : 'text-secondary'}" do %>
+            <%= name %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="bg-surface-elevated px-4 py-3 flex items-center justify-between border-b border-border">
+      <!-- Sort Dropdown -->
+      <div class="flex items-center gap-3">
+        <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: nil), 
+            class: "text-sm #{params[:sort_by].blank? ? 'text-primary font-semibold' : 'text-secondary'}" do %>
+          综合排序 
+          <span class="ml-1">▼</span>
+        <% end %>
+      </div>
+      
+      <!-- Region Filter -->
+      <div class="flex items-center gap-2">
+        <%= link_to membership_products_path(category: params[:category], region: 'all', sort_by: params[:sort_by]), 
+            class: "text-sm px-3 py-1 rounded-full #{params[:region].blank? || params[:region] == 'all' ? 'bg-primary text-text-inverse' : 'bg-surface text-secondary'}" do %>
+          里程区间
+          <span class="ml-1">▼</span>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="p-4">
+      <div class="grid grid-cols-2 gap-3">
+        <% @products.each do |product| %>
+          <%= link_to membership_product_path(product), class: "block bg-surface rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" do %>
+            <!-- Product Image -->
+            <div class="relative aspect-square bg-surface-elevated">
+              <% if product.image.attached? %>
+                <%= image_tag product.image.variant(resize_to_fill: [300, 300]), class: "w-full h-full object-cover", alt: product.name %>
+              <% elsif product.image_url.present? %>
+                <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center">
+                  <span class="text-muted text-xs">暂无图片</span>
+                </div>
+              <% end %>
+              
+              <% if product.featured %>
+                <div class="absolute top-2 left-2 bg-danger text-text-inverse text-xs px-2 py-1 rounded">
+                  优选好货
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="p-3">
+              <h3 class="text-sm text-primary mb-2 line-clamp-2 h-10"><%= product.name %></h3>
+              
+              <!-- Price -->
+              <div class="flex items-baseline gap-1 mb-1">
+                <% if product.price_mileage > 0 %>
+                  <span class="text-danger text-lg font-bold"><%= product.price_mileage %></span>
+                  <span class="text-danger text-xs">里程</span>
+                <% end %>
+                
+                <% if product.price_cash > 0 %>
+                  <span class="text-danger text-sm"><%= product.price_mileage > 0 ? '+' : '' %></span>
+                  <span class="text-danger text-lg font-bold"><%= product.price_cash %></span>
+                  <span class="text-danger text-xs">元</span>
+                <% end %>
+                
+                <% if product.original_price.present? && product.original_price > product.price_cash %>
+                  <span class="text-muted text-xs line-through ml-1">¥<%= product.original_price %></span>
+                <% end %>
+              </div>
+              
+              <!-- Sales Count -->
+              <div class="text-muted text-xs">
+                已售<%= product.sales_count %>+
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- Pagination -->
+      <% if @products.total_pages > 1 %>
+        <div class="mt-6 flex justify-center">
+          <%= paginate @products, theme: 'twitter-bootstrap-4' %>
+        </div>
+      <% end %>
+      
+      <!-- Empty State -->
+      <% if @products.empty? %>
+        <div class="text-center py-12">
+          <p class="text-muted text-sm">暂无商品</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

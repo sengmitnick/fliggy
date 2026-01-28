@@ -253,10 +253,10 @@
             <span class="text-[12px] text-secondary">能量红包</span>
           </button>
 
-          <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to membership_products_path, class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/会员商城.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "会员商城" %>
             <span class="text-[12px] text-secondary">会员商城</span>
-          </button>
+          <% end %>
         </div>
       </div>
 

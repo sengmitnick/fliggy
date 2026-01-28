@@ -7,14 +7,18 @@ export default class extends Controller<HTMLElement> {
   declare readonly addressListTarget: HTMLElement
 
   connect(): void {
-    // Load addresses when controller connects
-    this.loadAddresses()
+    console.log('[AddressModal] Controller connected')
+    // Controller connected, but we'll load addresses when modal opens
   }
 
   open(event: Event): void {
+    console.log('[AddressModal] Opening modal')
     event.preventDefault()
     this.modalTarget.classList.remove('hidden')
     document.body.style.overflow = 'hidden'
+    // Load addresses when modal opens
+    console.log('[AddressModal] Calling loadAddresses()')
+    this.loadAddresses()
   }
 
   close(event?: Event): void {
@@ -44,18 +48,33 @@ export default class extends Controller<HTMLElement> {
     if (addressDisplay) {
       addressDisplay.innerHTML = `
         <div class="flex items-center mb-2">
-          <span class="text-base font-bold">${addressName}</span>
-          <span class="ml-2 text-sm text-gray-600">${addressPhone}</span>
+          <span class="text-base font-bold text-primary">${addressName}</span>
+          <span class="ml-2 text-sm text-secondary">${addressPhone}</span>
         </div>
-        <div class="bg-blue-50 rounded-lg p-3">
-          <div class="text-sm text-gray-700">
+        <div class="bg-surface-elevated rounded-lg p-3">
+          <div class="text-sm text-secondary">
             ${addressFull}
           </div>
         </div>
       `
     }
 
-    // Store selected address ID for booking
+    // Update hidden fields for membership order form
+    const contactNameInput = document.querySelector('[name="membership_order[contact_name]"]') as HTMLInputElement
+    const contactPhoneInput = document.querySelector('[name="membership_order[contact_phone]"]') as HTMLInputElement
+    const shippingAddressInput = document.querySelector('[name="membership_order[shipping_address]"]') as HTMLInputElement
+    
+    if (contactNameInput) {
+      contactNameInput.value = addressName
+    }
+    if (contactPhoneInput) {
+      contactPhoneInput.value = addressPhone
+    }
+    if (shippingAddressInput) {
+      shippingAddressInput.value = addressFull
+    }
+
+    // Store selected address ID for booking (for other forms like sim card)
     const bookingForm = document.querySelector('[data-address-id-input]') as HTMLInputElement
     if (bookingForm) {
       bookingForm.value = addressId || ''
@@ -65,9 +84,15 @@ export default class extends Controller<HTMLElement> {
   }
 
   private async loadAddresses(): Promise<void> {
+    console.log('[AddressModal] loadAddresses() called')
     try {
-      const response = await fetch('/addresses.json')
+      console.log('[AddressModal] Fetching /addresses.json')
+      const response = await fetch('/addresses.json', {
+        credentials: 'same-origin'
+      })
+      console.log('[AddressModal] Response status:', response.status)
       const addresses = await response.json()
+      console.log('[AddressModal] Loaded addresses:', addresses.length)
       
       if (addresses.length === 0) {
         this.addressListTarget.innerHTML = `
