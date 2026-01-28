@@ -8,7 +8,10 @@ export default class extends Controller<HTMLElement> {
     "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay",
     "addressModal", "addressRadio", "selectedAddressCard",
     "selectedAddressName", "selectedAddressPhone", "selectedAddressText",
-    "addressIdField", "addressNameField", "addressPhoneField", "addressFullAddressField"
+    "addressIdField", "addressNameField", "addressPhoneField", "addressFullAddressField",
+    "passengerModal", "passengerRadio", "selectedPassengerCard",
+    "selectedPassengerName", "selectedPassengerPhone",
+    "passengerIdField", "passengerNameField", "passengerPhoneField"
   ]
   static values = {
     deposit: Number
@@ -585,5 +588,117 @@ export default class extends Controller<HTMLElement> {
         }
       }
     }
+  }
+
+  // Passenger Selection Modal Methods (for WiFi contact)
+  openPassengerModal(): void {
+    const passengerModal = this.element.querySelector('[data-internet-order-form-target="passengerModal"]') as HTMLElement
+    if (!passengerModal) return
+    
+    // Get current selected passenger ID
+    const passengerIdField = this.element.querySelector('[data-internet-order-form-target="passengerIdField"]') as HTMLInputElement
+    const currentPassengerId = passengerIdField?.value
+    
+    // Mark the currently selected passenger
+    const passengerRadios = this.element.querySelectorAll('[data-internet-order-form-target="passengerRadio"]')
+    passengerRadios.forEach((radio) => {
+      const parentDiv = radio.closest('[data-passenger-id]') as HTMLElement
+      if (parentDiv && parentDiv.dataset.passengerId === currentPassengerId) {
+        radio.classList.remove('border-gray-300')
+        radio.classList.add('border-blue-500', 'bg-blue-500')
+        const checkmarkSvg = '<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">'
+          + '<path fill-rule="evenodd" '
+          + 'd="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" '
+          + 'clip-rule="evenodd"></path></svg>'
+        radio.innerHTML = checkmarkSvg
+      } else {
+        radio.classList.add('border-gray-300')
+        radio.classList.remove('border-blue-500', 'bg-blue-500')
+        radio.innerHTML = ''
+      }
+    })
+    
+    passengerModal.classList.remove('hidden')
+  }
+
+  closePassengerModal(): void {
+    const passengerModal = this.element.querySelector('[data-internet-order-form-target="passengerModal"]') as HTMLElement
+    if (!passengerModal) return
+    passengerModal.classList.add('hidden')
+  }
+
+  selectPassengerFromModal(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const passengerId = target.dataset.passengerId
+    
+    // Update all radio buttons
+    const passengerRadios = this.element.querySelectorAll('[data-internet-order-form-target="passengerRadio"]')
+    passengerRadios.forEach((radio) => {
+      const parentDiv = radio.closest('[data-passenger-id]') as HTMLElement
+      if (parentDiv && parentDiv.dataset.passengerId === passengerId) {
+        radio.classList.remove('border-gray-300')
+        radio.classList.add('border-blue-500', 'bg-blue-500')
+        const checkmarkSvg = '<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">'
+          + '<path fill-rule="evenodd" '
+          + 'd="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" '
+          + 'clip-rule="evenodd"></path></svg>'
+        radio.innerHTML = checkmarkSvg
+      } else {
+        radio.classList.add('border-gray-300')
+        radio.classList.remove('border-blue-500', 'bg-blue-500')
+        radio.innerHTML = ''
+      }
+    })
+  }
+
+  confirmPassengerSelection(): void {
+    // Find the selected passenger
+    const passengerRadios = this.element.querySelectorAll('[data-internet-order-form-target="passengerRadio"]')
+    let selectedPassenger: HTMLElement | null = null
+    
+    passengerRadios.forEach((radio) => {
+      if (radio.classList.contains('bg-blue-500')) {
+        selectedPassenger = radio.closest('[data-passenger-id]') as HTMLElement
+      }
+    })
+    
+    if (!selectedPassenger) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('请选择一个联系人')
+      }
+      return
+    }
+    
+    const passengerId = (selectedPassenger as HTMLElement).dataset.passengerId || ''
+    const passengerName = (selectedPassenger as HTMLElement).dataset.passengerName || ''
+    const passengerPhone = (selectedPassenger as HTMLElement).dataset.passengerPhone || ''
+    
+    // Update display
+    const nameDisplay = this.element.querySelector('[data-internet-order-form-target="selectedPassengerName"]') as HTMLElement
+    const phoneDisplay = this.element.querySelector('[data-internet-order-form-target="selectedPassengerPhone"]') as HTMLElement
+    
+    if (nameDisplay) {
+      nameDisplay.textContent = passengerName
+    }
+    if (phoneDisplay) {
+      phoneDisplay.textContent = passengerPhone
+    }
+    
+    // Update hidden fields
+    const passengerIdField = this.element.querySelector('[data-internet-order-form-target="passengerIdField"]') as HTMLInputElement
+    const passengerNameField = this.element.querySelector('[data-internet-order-form-target="passengerNameField"]') as HTMLInputElement
+    const passengerPhoneField = this.element.querySelector('[data-internet-order-form-target="passengerPhoneField"]') as HTMLInputElement
+    
+    if (passengerIdField) {
+      passengerIdField.value = passengerId
+    }
+    if (passengerNameField) {
+      passengerNameField.value = passengerName
+    }
+    if (passengerPhoneField) {
+      passengerPhoneField.value = passengerPhone
+    }
+    
+    this.closePassengerModal()
   }
 }
