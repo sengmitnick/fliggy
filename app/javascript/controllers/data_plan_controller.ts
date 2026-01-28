@@ -1,13 +1,17 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["totalPrice", "paymentButton", "typeTab", "planCard"]
+  static targets = ["totalPrice", "paymentButton", "typeTab", "planCard", "phoneInput", "carrierLabel"]
   declare readonly totalPriceTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
   declare readonly paymentButtonTarget: HTMLAnchorElement
   declare readonly hasPaymentButtonTarget: boolean
   declare readonly typeTabTargets: HTMLElement[]
   declare readonly planCardTargets: HTMLElement[]
+  declare readonly phoneInputTarget: HTMLInputElement
+  declare readonly hasPhoneInputTarget: boolean
+  declare readonly carrierLabelTarget: HTMLElement
+  declare readonly hasCarrierLabelTarget: boolean
 
   private selectedPlanId: string = ""
   private selectedPrice: number = 35
@@ -17,6 +21,55 @@ export default class extends Controller<HTMLElement> {
     console.log("DataPlan connected")
     // 初始化时只显示天包
     this.filterPlansByType("天包")
+    // 初始化时检测运营商
+    if (this.hasPhoneInputTarget) {
+      this.detectCarrier()
+    }
+  }
+
+  detectCarrier(event?: Event): void {
+    if (!this.hasPhoneInputTarget || !this.hasCarrierLabelTarget) return
+    
+    const phone = this.phoneInputTarget.value.replace(/\s+/g, '')
+    let carrier = '未知运营商'
+    
+    if (phone.length >= 3) {
+      const prefix = phone.substring(0, 3)
+      
+      // 中国移动：134-139, 147, 148, 150-152, 157-159, 165, 172, 178, 182-184, 187, 188, 195, 197, 198
+      const chinamobile = [
+        '134', '135', '136', '137', '138', '139', '147', '148', '150', '151', '152',
+        '157', '158', '159', '165', '172', '178', '182', '183', '184', '187', '188',
+        '195', '197', '198'
+      ]
+      
+      // 中国联通：130, 131, 132, 145, 146, 155, 156, 166, 167, 171, 175, 176, 185, 186, 196
+      const chinaunicom = [
+        '130', '131', '132', '145', '146', '155', '156', '166', '167',
+        '171', '175', '176', '185', '186', '196'
+      ]
+      
+      // 中国电信：133, 149, 153, 173, 174, 177, 180, 181, 189, 190, 191, 193, 199
+      const chinatelecom = [
+        '133', '149', '153', '173', '174', '177', '180', '181',
+        '189', '190', '191', '193', '199'
+      ]
+      
+      // 中国广电：192
+      const chinabr = ['192']
+      
+      if (chinamobile.includes(prefix)) {
+        carrier = '中国移动'
+      } else if (chinaunicom.includes(prefix)) {
+        carrier = '中国联通'
+      } else if (chinatelecom.includes(prefix)) {
+        carrier = '中国电信'
+      } else if (chinabr.includes(prefix)) {
+        carrier = '中国广电'
+      }
+    }
+    
+    this.carrierLabelTarget.textContent = carrier
   }
 
   switchPlanType(event: Event): void {
@@ -132,6 +185,13 @@ export default class extends Controller<HTMLElement> {
   selectPlan(event: Event): void {
     const card = event.currentTarget as HTMLElement
     this.selectPlanCard(card)
+  }
+
+  showComingSoon(event: Event): void {
+    event.preventDefault()
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('精彩即将上线')
+    }
   }
 
   checkout(event: Event): void {
