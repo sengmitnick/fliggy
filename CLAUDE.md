@@ -95,6 +95,48 @@ When developing features that require User or Order models, **DO NOT create them
 Do not recreate administrator functionality in User model. Administrator system already exists. Adding admin page low priority.
 
 
+## Data Packs - Test/Validation Data Management
+
+**CRITICAL: Data Packs Loading Method**
+- **ONLY supported command**: `rake validator:reset_baseline`
+- **Location**: `app/validators/support/data_packs/v1/` (NOT `db/seeds/`)
+- **Purpose**: Store complete validation and test data for different modules
+- **Naming**: Use descriptive names like `insurances.rb`, `cruises.rb`, `hotels_all.rb`
+- **Pattern**: Use `insert_all` for batch operations, NOT `find_or_create_by!`
+
+**File Structure Template**:
+```ruby
+# frozen_string_literal: true
+
+# module_name_v1 数据包
+# 模块描述
+#
+# 用途：
+# - 功能说明
+#
+# 加载方式：
+# rake validator:reset_baseline
+
+puts "正在加载 module_name_v1 数据包..."
+
+# Use insert_all for batch operations
+ModelName.insert_all([
+  { field1: 'value1', field2: 'value2' },
+  { field1: 'value3', field2: 'value4' }
+])
+
+puts "✓ 数据包加载完成"
+```
+
+**MANDATORY RULES**:
+- ✅ ONLY use `rake validator:reset_baseline` to load all data packs
+- ✅ Ensure data packs are COMPLETE with all required fields and associations
+- ✅ Test data completeness before committing data pack files
+- ❌ NEVER use `rails runner "load ..."` for data pack loading
+- ❌ NEVER place test/validation data in `db/seeds/` directory
+- ❌ NEVER use `find_or_create_by!` for data packs (use `insert_all` instead)
+- ❌ NEVER mix production seed data with test data
+
 ## Some important tips when coding
 
 **CRITICAL: Demo File Management**
@@ -145,16 +187,15 @@ Use `rails generate stimulus_controller xxx` to create new Stimulus controller, 
 - ❌ NOT `<turbo-frame>` tags (we don't use Frame feature)
 
 **Frontend (Stimulus):**
-- ❌ NO `fetch()` - breaks Turbo Drive, requires manual DOM updates
+- ⚠️ `fetch()`: Allowed for AJAX-heavy features (payment confirmation, city search, infinite scroll) - use sparingly
 - ❌ NO `preventDefault() + requestSubmit()` - preventDefault blocks submission
-- ✅ Stimulus for UI only (toggle, show/hide) - NOT for data submission
+- ✅ Stimulus for UI only (toggle, show/hide) - prefer form submission over fetch
 
 **Backend (Controllers):**
 - ✅ Prefer HTML: Render normal HTML views by default
 - ✅ Use Turbo Stream when needed: For partial updates, create `action.turbo_stream.erb` templates
-- ❌ NO `respond_to` blocks - unnecessary branching
-- ❌ NO `format.html/json/xml` - violates architecture
-- ❌ NO `render json:` - JSON data passing is disabled (API namespace `app/controllers/api/` exempt)
+- ⚠️ `respond_to` blocks: Allowed for payment/order creation endpoints that need JSON fallback
+- ⚠️ `render json:`: Allowed for AJAX endpoints (payment verification, order status, etc.) - use sparingly
 - ❌ NO `head :ok` - frontend cannot determine UI updates
 
 **ActionCable Channel Pattern:**
@@ -169,6 +210,23 @@ Use `rails generate stimulus_controller xxx` to create new Stimulus controller, 
 - ALL stimulus validator errors are REAL errors, NOT false positives - fix them immediately
 - NEVER dismiss or ignore stimulus validator failures as "misleading" or "incorrect"
 - These tests validate critical controller-view integration - failures mean broken functionality
+
+**⚠️ STIMULUS CONTROLLER & VIEW STYLE SYNCHRONIZATION - CRITICAL**:
+- When modifying view templates with Stimulus targets, ALWAYS check corresponding controller logic
+- When changing CSS classes in views that are manipulated by controllers, ALWAYS update controller code
+- **Pattern to follow**:
+  1. If view uses `class="text-gray-900 text-gray-500"` for active/inactive states
+  2. Controller MUST manipulate these EXACT classes: `classList.add('text-gray-900')` / `classList.remove('text-gray-500')`
+  3. NEVER leave controller manipulating old classes (e.g., `border-blue-500`) when view uses new classes
+- **Before modifying view styles**:
+  1. Search codebase for the Stimulus target name (e.g., `tabDomestic`)
+  2. Check if any controller methods manipulate classes on that target
+  3. Update controller logic to match new class names
+- **After modifying controller logic**:
+  1. Verify view template has the matching CSS classes
+  2. Test the interaction in browser to ensure styles change correctly
+- **Common failure pattern**: View uses `text-gray-900/text-gray-500`, controller still manipulates `border-blue-500/border-transparent` → styles don't change
+- **Fix protocol**: Always run `npm run build` after updating TypeScript controllers to regenerate JavaScript bundles
 
 Use FriendlyId (already configured) if need slug URLs. For user-facing content use `friendly_id :title, use: :slugged`, for admin/API use simple IDs.
 
@@ -186,6 +244,10 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 - View/Controller changes: `bundle exec rspec spec/requests/xxx_spec.rb` must pass
 - Major changes or before delivery: Run full `rake test` to ensure stability
 
+**Testing Order (CRITICAL - Follow this sequence):**
+1. **ERB HTML Validation**: Run `bin/validate_erb_html` to check HTML structure validity
+2. **Unit/Request Tests**: Run `rake test` to verify backend logic
+
 `rake test` is configured to only show 5 failed test cases at a time, so you should repeatedly run rake test if these have errors (no more than 10 rounds) until all tests pass
 
 For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
@@ -200,6 +262,27 @@ Use `bundle exec rspec spec/requests/xxx_spec.rb --format documentation`( not -v
 **When you see "Views for xxx are not yet developed" error during testing, immediately create the corresponding view file, then re-run the tests.**
 
 Temporary files should be written in the `tmp` directory.
+
+## ERB HTML Validation
+
+**Purpose**: Validate HTML structure in ERB templates before running other tests.
+
+**Commands**:
+- Validate all: `bin/validate_erb_html` or `rake erb:validate`
+- Validate single file: `bin/validate_erb_html app/views/xxx.html.erb` or `rake erb:validate_file[app/views/xxx.html.erb]`
+
+**When to use**:
+- ALWAYS run before Playwright tests when frontend pages are involved
+- After creating or modifying any `.html.erb` files
+- Before committing view changes
+
+**What it checks**:
+- HTML tag matching (opening/closing tags)
+- Proper nesting structure
+- Valid HTML5 syntax
+- Filters out ERB-specific false positives
+
+See `docs/ERB_HTML_VALIDATION.md` for detailed documentation.
 
 ## Debugging Frontend Errors
 

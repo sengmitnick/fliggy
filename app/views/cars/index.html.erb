@@ -376,7 +376,9 @@
   </div>
 
   <!-- 地点选择器模态框 -->
-  <%= render 'shared/location_selector_modal' %>
+  <div data-controller="location-selector" data-location-selector-api-endpoint-value="/cars/locations">
+    <%= render 'shared/location_selector_modal' %>
+  </div>
 
   <!-- 日期时间选择器模态框 -->
   <div data-controller="car-datetime-picker">

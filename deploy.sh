@@ -77,7 +77,7 @@ main() {
     echo "请选择部署规格:"
     echo "  1) 8核32G (甲方生产环境，默认)"
     echo "  2) 2核8G (本地测试/展示)"
-    read -p "请输入选择 [1-2] (默认: 1): " server_spec </dev/tty
+    read -p "请输入选择 [1-2] (默认: 1): " server_spec
 
     server_spec=${server_spec:-1}
 
@@ -114,7 +114,7 @@ main() {
     echo "是否使用 Nginx 反向代理?"
     echo "  1) 不使用 Nginx (直接访问 Rails，默认)"
     echo "  2) 使用 Nginx (需要配置 nginx.conf)"
-    read -p "请输入选择 [1-2] (默认: 1): " nginx_choice </dev/tty
+    read -p "请输入选择 [1-2] (默认: 1): " nginx_choice
 
     nginx_choice=${nginx_choice:-1}
     USE_NGINX="false"
@@ -163,36 +163,178 @@ main() {
     docker-compose -f $COMPOSE_FILE pull web worker
     print_success "镜像拉取完成"
 
-    # 8. 启动服务
-    print_info "步骤 8/9: 启动服务..."
+    # 8. 启动数据库和 Redis，创建 app_user 和运行迁移
+    print_info "步骤 8/9: 数据库初始化..."
 
+    # 从 .env 文件读取配置
+    if [ -f .env ]; then
+        set -a
+        source .env
+        set +a
+    fi
+
+    # 8.1 启动数据库和 Redis
+    print_info "启动数据库和 Redis..."
+    docker-compose -f $COMPOSE_FILE up -d db redis
+
+    # 8.2 等待数据库就绪
+    print_info "等待数据库就绪..."
+    MAX_WAIT=60
+    WAIT_COUNT=0
+    until docker exec travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c 'SELECT 1;'" >/dev/null 2>&1 || [ $WAIT_COUNT -eq $MAX_WAIT ]; do
+        sleep 2
+        WAIT_COUNT=$((WAIT_COUNT + 2))
+        echo -n "."
+    done
+    echo ""
+
+    if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+        print_error "数据库连接超时"
+        exit 1
+    fi
+    print_success "数据库已就绪"
+
+    # 8.3 创建 app_user 角色
+    print_info "创建 app_user 数据库角色..."
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production}" <<'EOF_SQL'
+DO $$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
+      CREATE ROLE app_user WITH LOGIN NOSUPERUSER;
+      RAISE NOTICE 'Created app_user';
+   ELSE
+      RAISE NOTICE 'app_user already exists';
+   END IF;
+END $$;
+EOF_SQL
+
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER ROLE app_user WITH PASSWORD '${DB_PASSWORD}';\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT CONNECT ON DATABASE ${DB_NAME:-travel01_production} TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, CREATE ON SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"ALTER ROLE app_user SET search_path TO public;\""
+
+    if [ $? -eq 0 ]; then
+        print_success "app_user 角色创建成功"
+    else
+        print_error "app_user 角色创建失败"
+        exit 1
+    fi
+
+    # 8.4 运行数据库迁移和数据初始化（使用一次性容器）
+    print_info "运行数据库迁移和数据初始化..."
+    ADMIN_DB_URL_VALUE="postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}"
+
+    docker-compose -f $COMPOSE_FILE run --rm \
+      -e ADMIN_DB_URL="${ADMIN_DB_URL_VALUE}" \
+      -e TEMP_DATABASE_URL="${ADMIN_DB_URL_VALUE}" \
+      web bash -c "
+        echo '开始数据库迁移...' && \
+        bundle exec rake db:prepare && \
+        echo '✓ 数据库迁移完成' && \
+        echo '开始加载数据包...' && \
+        bundle exec rake validator:reset_baseline && \
+        echo '✓ 数据包加载完成'
+      "
+
+    if [ $? -eq 0 ]; then
+        print_success "数据库迁移和数据初始化完成"
+    else
+        print_error "数据库初始化失败"
+        exit 1
+    fi
+
+    # 8.5 重新授予 app_user 权限（迁移后的表）
+    print_info "重新授予 app_user 权限（迁移后的表）..."
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;\""
+    docker exec -i travel01_postgres bash -c "PGPASSWORD='${DB_PASSWORD}' psql -U ${DB_USER:-travel01} -d ${DB_NAME:-travel01_production} -c \"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;\""
+
+    if [ $? -eq 0 ]; then
+        print_success "app_user 权限更新成功"
+    else
+        print_error "app_user 权限更新失败"
+        exit 1
+    fi
+
+    # 9. 启动应用服务并配置安全策略
+    print_info "步骤 9/9: 启动应用服务并配置安全策略..."
+
+    # 9.1 启动 web 和 worker（不再自动运行 db:prepare，因为已经在初始化容器中完成）
+    print_info "启动应用服务..."
     if [ "$USE_NGINX" = "true" ]; then
-        docker-compose -f $COMPOSE_FILE up -d
+        docker-compose -f $COMPOSE_FILE up -d web worker nginx
     else
-        # 不使用 Nginx 时，排除 nginx 服务
-        docker-compose -f $COMPOSE_FILE up -d db redis web worker
+        docker-compose -f $COMPOSE_FILE up -d web worker
     fi
-    print_success "服务已启动"
 
-    # 等待服务完全启动
+    # 9.2 等待服务完全启动
     print_info "等待服务完全启动..."
-    echo "   自动执行: rails db:prepare (创建数据库 + 运行迁移)"
-    echo "   自动执行: 数据包加载 (城市、航班、酒店等测试数据)"
-    sleep 20
+    MAX_WAIT=60
+    WAIT_COUNT=0
+    until docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "puts 'ready'" >/dev/null 2>&1 || [ $WAIT_COUNT -eq $MAX_WAIT ]; do
+        sleep 2
+        WAIT_COUNT=$((WAIT_COUNT + 2))
+        echo -n "."
+    done
+    echo ""
 
-    # 9. 验证部署状态
-    print_info "步骤 9/9: 验证部署状态..."
+    if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+        print_error "应用启动超时"
+        exit 1
+    fi
+    print_success "应用服务已启动"
 
-    # 检查服务健康状态
-    echo "   检查服务状态..."
-    if docker-compose -f $COMPOSE_FILE ps | grep -q "Up.*healthy"; then
-        print_success "服务健康检查通过"
+    # 9.3 启用 RLS 强制策略
+    print_info "启用多会话隔离（RLS FORCE）..."
+    ADMIN_DB_URL_VALUE="postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}"
+    docker-compose -f $COMPOSE_FILE exec -T -e ADMIN_DB_URL="${ADMIN_DB_URL_VALUE}" web bundle exec rake rls:force_enable 2>&1
+
+    if [ $? -eq 0 ]; then
+        print_success "RLS 策略已启用"
     else
-        print_warning "服务正在启动中，等待健康检查..."
-        sleep 10
+        print_error "RLS 策略启用失败"
+        exit 1
     fi
 
-    # 自动创建默认管理员账号
+    # 9.4 验证多会话隔离
+    print_info "验证多会话隔离功能..."
+    docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
+# 检查 RLS 是否强制启用（检查实际存在的业务表）
+result = ActiveRecord::Base.connection.execute(
+  "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('hotel_bookings', 'train_bookings', 'car_orders', 'bookings')"
+)
+
+if result.count == 0
+  puts '⚠️  未找到预订表，跳过 RLS 验证'
+  exit 0
+end
+
+all_enabled = result.all? { |r| r['relforcerowsecurity'] == 't' }
+
+if all_enabled
+  puts '✓ 多会话隔离验证通过 (所有预订表已启用 FORCE RLS)'
+else
+  puts '✗ 多会话隔离验证失败'
+  result.each do |r|
+    status = r['relforcerowsecurity'] == 't' ? '✓' : '✗'
+    puts "  #{status} #{r['relname']}: #{r['relforcerowsecurity']}"
+  end
+  exit 1
+end
+RUBY
+)" 2>&1
+
+    if [ $? -eq 0 ]; then
+        print_success "多会话隔离验证通过"
+    else
+        print_error "多会话隔离验证失败"
+        exit 1
+    fi
+
+    # 9.5 创建默认管理员账号
     print_info "创建默认管理员账号..."
     docker-compose -f $COMPOSE_FILE exec -T web /app/bin/rails runner "$(cat <<'RUBY'
 admin = Administrator.find_or_initialize_by(name: 'admin')
@@ -206,8 +348,15 @@ else
   puts "✓ 管理员已存在: #{admin.name} (#{admin.role})"
 end
 RUBY
-)" 2>/dev/null || print_warning "应用尚未完全启动，请稍后手动创建管理员"
-    print_success "部署验证完成"
+)" 2>&1
+
+    if [ $? -eq 0 ]; then
+        print_success "管理员账号就绪"
+    else
+        print_warning "管理员账号创建失败，请手动创建"
+    fi
+
+    print_success "数据和安全策略初始化完成"
 
     # 完成
     echo ""

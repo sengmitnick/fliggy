@@ -162,9 +162,9 @@ services:
       RAILS_ENV: production
       NODE_ENV: production
       
-      # 数据库配置
-      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
-      
+      # 数据库配置 - 使用 app_user（支持 RLS 多会话隔离）
+      DATABASE_URL: postgresql://app_user:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
+
       # Redis 配置
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       

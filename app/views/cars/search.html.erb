@@ -240,7 +240,9 @@
 </style>
 
 <!-- Location Selector Modal -->
-<%= render 'shared/location_selector_modal' %>
+<div data-controller="location-selector" data-location-selector-api-endpoint-value="/cars/locations">
+  <%= render 'shared/location_selector_modal' %>
+</div>
 
 <!-- City Selector Modal -->
 <div data-controller="city-selector" data-city-selector-enable-multi-select-value="false">

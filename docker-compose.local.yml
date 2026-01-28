@@ -1,0 +1,175 @@
+# ==========================================
+# 本地测试配置 - 使用本地构建镜像
+# ==========================================
+# 使用方式: docker-compose -f docker-compose.local.yml up --build -d
+#
+# 与生产环境的区别:
+# 1. 使用本地 Dockerfile 构建镜像（而非阿里云镜像）
+# 2. 简化了数据库用户配置（直接使用 POSTGRES_USER）
+# 3. 降低了资源限制，适合本地开发测试
+# 4. 启用了更详细的日志输出
+# ==========================================
+
+services:
+  # PostgreSQL 数据库
+  db:
+    image: postgres:16-alpine
+    container_name: travel01_local_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-travel01}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-travel01_password}
+      POSTGRES_DB: ${DB_NAME:-travel01_production}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+      - ./backup:/backup
+    ports:
+      - "${DB_PORT:-5433}:5432"  # 使用 5433 避免与本地 PostgreSQL 冲突
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-travel01}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - travel01_local_network
+
+  # Redis (用于 ActionCable 和缓存)
+  redis:
+    image: redis:7-alpine
+    container_name: travel01_local_redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-travel01_redis}
+    volumes:
+      - redis_local_data:/data
+    ports:
+      - "${REDIS_PORT:-6380}:6379"  # 使用 6380 避免与本地 Redis 冲突
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - travel01_local_network
+
+  # Rails 应用主服务 - 本地构建
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travel01_local_web
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+      RACK_ENV: production
+
+      # 数据库配置 - 直接使用 POSTGRES_USER（简化配置）
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD:-travel01_password}@db:5432/${DB_NAME:-travel01_production}
+
+      # Redis 配置
+      REDIS_URL: redis://:${REDIS_PASSWORD:-travel01_redis}@redis:6379/0
+      CABLE_URL: redis://:${REDIS_PASSWORD:-travel01_redis}@redis:6379/1
+
+      # Rails 密钥
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-cd0841b69196c7799ac33cc8539929375a1f897d4aab43135a12402296ca9ec6c09b30c733c973cee190ccf9979f8b68591dda0680fbfcf37cb3e816b2693e3d}
+
+      # 应用配置
+      PUBLIC_HOST: ${PUBLIC_HOST:-http://localhost:5011}
+      APP_PORT: 3000
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}  # 本地测试使用更少的 worker
+
+      # 日志配置
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-debug}  # 本地测试使用 debug 级别
+
+    volumes:
+      # 持久化存储
+      - storage_local_data:/app/storage
+      - log_local_data:/app/log
+      - ./backup:/app/backup
+      # 临时文件和缓存
+      - tmp_local_data:/app/tmp
+      # 本地开发：挂载代码目录（可选，用于热重载）
+      # - .:/app
+    ports:
+      - "${WEB_PORT:-5011}:3000"  # 使用 5011 避免与其他服务冲突
+    networks:
+      - travel01_local_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # GoodJob 后台任务处理器 - 本地构建
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: travel01_local_worker
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+
+      # 数据库配置
+      DATABASE_URL: postgresql://${DB_USER:-travel01}:${DB_PASSWORD:-travel01_password}@db:5432/${DB_NAME:-travel01_production}
+
+      # Redis 配置
+      REDIS_URL: redis://:${REDIS_PASSWORD:-travel01_redis}@redis:6379/0
+
+      # Rails 密钥
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-cd0841b69196c7799ac33cc8539929375a1f897d4aab43135a12402296ca9ec6c09b30c733c973cee190ccf9979f8b68591dda0680fbfcf37cb3e816b2693e3d}
+
+      # GoodJob 配置
+      GOOD_JOB_MAX_THREADS: ${GOOD_JOB_MAX_THREADS:-3}
+      GOOD_JOB_POLL_INTERVAL: ${GOOD_JOB_POLL_INTERVAL:-10}
+      GOOD_JOB_QUEUES: ${GOOD_JOB_QUEUES:-*}
+
+      # 日志配置
+      RAILS_LOG_TO_STDOUT: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+
+    volumes:
+      - storage_local_data:/app/storage
+      - log_local_data:/app/log
+      - tmp_local_data:/app/tmp
+      # 本地开发：挂载代码目录（可选）
+      # - .:/app
+    command: bundle exec good_job start
+    networks:
+      - travel01_local_network
+
+# 持久化数据卷（使用独立命名避免与生产环境冲突）
+volumes:
+  postgres_local_data:
+    driver: local
+  redis_local_data:
+    driver: local
+  storage_local_data:
+    driver: local
+  log_local_data:
+    driver: local
+  tmp_local_data:
+    driver: local
+
+# 网络配置
+networks:
+  travel01_local_network:
+    driver: bridge

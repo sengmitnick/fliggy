@@ -14,6 +14,12 @@ Rails.application.config.after_initialize do
   # 在所有环境中自动加载基线数据（首次启动时）
   unless Rails.env.test?
     begin
+      # 检查表是否存在（避免在迁移过程中出错）
+      unless ActiveRecord::Base.connection.table_exists?('cities')
+        # 表还不存在，跳过初始化（可能是在迁移过程中）
+        next
+      end
+
       # 检查是否已存在基线数据（使用City作为标志，因为所有数据包都依赖它）
       # 如果 City 表中不存在 data_version=0 的数据，说明需要初始化
       if City.where(data_version: 0).count == 0

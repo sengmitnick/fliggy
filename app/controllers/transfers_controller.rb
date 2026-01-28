@@ -181,8 +181,8 @@ class TransfersController < ApplicationController
       # Clear session params
       session.delete(:transfer_params)
       
-      # Redirect to show page with pay_now=true to trigger payment modal
-      redirect_to transfer_path(@transfer, pay_now: true)
+      # Redirect to show page
+      redirect_to transfer_path(@transfer)
     else
       flash[:alert] = @transfer.errors.full_messages.join(', ')
       redirect_back fallback_location: transfers_path
@@ -232,6 +232,23 @@ class TransfersController < ApplicationController
     if params[:status].present? && ['pending', 'paid', 'completed', 'cancelled'].include?(params[:status])
       @transfers = @transfers.where(status: params[:status])
     end
+  end
+
+  # GET /transfers/locations - API endpoint to get transfer locations by city
+  def locations
+    city = params[:city]
+    if city.blank?
+      render json: { error: 'City parameter is required' }, status: :bad_request
+      return
+    end
+
+    # Get locations from TransferLocation model (independent from Car rentals)
+    locations = TransferLocation.locations_by_city(city)
+
+    render json: {
+      city: city,
+      locations: locations
+    }
   end
 
   # PATCH /transfers/:id/cancel - Cancel order
