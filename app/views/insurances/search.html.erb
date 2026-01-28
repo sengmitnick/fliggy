@@ -14,7 +14,7 @@
         <% when 'transport' %>
           交通意外保险
         <% else %>
-          保险产品
+          保险产品搜索
         <% end %>
       </h1>
       <div class="w-6 h-6"></div>
@@ -25,15 +25,21 @@
       <div class="flex gap-2 overflow-x-auto no-scrollbar">
         <!-- 目的地类型Tab -->
         <div class="flex gap-2 flex-shrink-0">
-          <%= link_to search_insurances_path(destination_type: 'domestic', scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+          <% 
+            # Toggle logic: if already selected, remove it; otherwise set it
+            domestic_type = params[:destination_type] == 'domestic' ? nil : 'domestic'
+            international_type = params[:destination_type] == 'international' ? nil : 'international'
+            transport_type = params[:destination_type] == 'transport' ? nil : 'transport'
+          %>
+          <%= link_to search_insurances_path(destination_type: domestic_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
             class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'domestic' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
             国内游
           <% end %>
-          <%= link_to search_insurances_path(destination_type: 'international', scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+          <%= link_to search_insurances_path(destination_type: international_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
             class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'international' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
             出境游
           <% end %>
-          <%= link_to search_insurances_path(destination_type: 'transport', scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
+          <%= link_to search_insurances_path(destination_type: transport_type, scenes: @scenes, company: @company, destination: @destination, start_date: @start_date, end_date: @end_date), 
             class: "px-4 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:destination_type] == 'transport' ? 'bg-primary text-gray-900' : 'bg-white text-gray-700 border border-gray-200'}" do %>
             交通
           <% end %>
