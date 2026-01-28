@@ -14,6 +14,7 @@ class CreateMembershipProducts < ActiveRecord::Migration[7.2]
       t.string :image_url
       t.string :region
       t.boolean :featured, default: false
+      t.string :data_version, limit: 50, default: '0', null: false
 
       t.timestamps
     end
@@ -21,5 +22,6 @@ class CreateMembershipProducts < ActiveRecord::Migration[7.2]
     add_index :membership_products, :slug, unique: true
     add_index :membership_products, :category
     add_index :membership_products, :featured
+    add_index :membership_products, :data_version
   end
 end

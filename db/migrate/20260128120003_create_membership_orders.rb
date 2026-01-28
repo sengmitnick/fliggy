@@ -14,11 +14,13 @@ class CreateMembershipOrders < ActiveRecord::Migration[7.2]
       t.string :contact_phone
       t.string :contact_name
       t.text :notes
+      t.string :data_version, limit: 50, default: '0', null: false
 
       t.timestamps
     end
     
     add_index :membership_orders, :order_number, unique: true
     add_index :membership_orders, :status
+    add_index :membership_orders, :data_version
   end
 end
