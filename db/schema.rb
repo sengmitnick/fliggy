@@ -1428,7 +1428,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
     t.boolean "is_active", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "data_version", default: 0
+    t.string "data_version", limit: 50, default: "0", null: false
   end
 
   create_table "price_alerts", force: :cascade do |t|
