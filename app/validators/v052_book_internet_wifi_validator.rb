@@ -12,7 +12,7 @@ require_relative 'base_validator'
 #   租赁参数: 1台，5天，7天后取件
 #   取件地址: 北京市朝阳区建国路118号
 #   联系人: 张三 13800138000
-#   总价: 13×5×1=65元
+#   总价: 13×5×1+500=565元
 # 
 # 操作步骤:
 #   1. 浏览地区: 中国香港、欧洲5国、欧洲6国、欧洲8国、欧洲10国
@@ -21,14 +21,14 @@ require_relative 'base_validator'
 #   4. 填写租赁: start_date=今天+7天、end_date=今天+12天、rental_days=5、unit_price=13.0
 #   5. 填写地址: address="北京市朝阳区建国路118号"、method="mail"
 #   6. 填写联系人: name="张三"、phone="13800138000"
-#   7. 计算总价: 13×5×1=65元
+#   7. 计算总价: 13×5×1+500=565元
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 订单类型=wifi (15分)
 #   - 选了具体WiFi产品 (15分)
 #   - 选了最便宜13元/天的香港4G·500MB (30分)
-#   - 总价=65元、地址=北京市朝阳区建国路118号、租期=5天 (20分)
+#   - 总价=565元（含500元押金）、地址=北京市朝阳区建国路118号、租期=5天 (20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -58,7 +58,7 @@ class V052BookInternetWifiValidator < BaseValidator
       task: "预订WiFi: 1台、5天、选最便宜的、填地址和日期",
       rental_days: @rental_days,
       quantity: @quantity,
-      hint: "地区选项: 中国香港(13元起)、欧洲5国通用(20元)、欧洲6国通用5G(35元)、欧洲8国通用(25元)、欧洲10国通用(30元)。对比后选最便宜13元/天的。租赁: 1台×5天=65元。取件: 7天后、北京市朝阳区建国路118号、邮寄。联系人: 张三/13800138000",
+      hint: "地区选项: 中国香港(13元起)、欧洲5国通用(20元)、欧洲6国通用5G(35元)、欧洲8国通用(25元)、欧洲10国通用(30元)。对比后选最便宜13元/天的。租赁: 1台×5天+押金500=565元。取件: 7天后、北京市朝阳区建国路118号、邮寄。联系人: 张三/13800138000",
       available_wifis_count: @available_wifis.count
     }
   end
@@ -106,11 +106,11 @@ class V052BookInternetWifiValidator < BaseValidator
     # 断言5: 订单价格正确
     add_assertion "订单价格正确", weight: 20 do
       wifi = @internet_order.orderable
-      expected_price = wifi.daily_price * @rental_days * @quantity
+      expected_price = wifi.daily_price * @rental_days * @quantity + 500
       actual_price = @internet_order.total_price
       
       expect(actual_price).to eq(expected_price),
-        "订单价格错误。期望: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台），实际: #{actual_price}元"
+        "订单价格错误。期望: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台 + 500元押金），实际: #{actual_price}元"
     end
   end
   
@@ -160,7 +160,7 @@ class V052BookInternetWifiValidator < BaseValidator
       region: cheapest_wifi.region,
       orderable: cheapest_wifi,
       quantity: @quantity,
-      total_price: cheapest_wifi.daily_price * @rental_days * @quantity,
+      total_price: cheapest_wifi.daily_price * @rental_days * @quantity + 500,
       status: 'pending',
       rental_info: {
         start_date: start_date.to_s,
