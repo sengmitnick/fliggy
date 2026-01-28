@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_28_110006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -815,6 +815,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_28_110005) do
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
     t.index ["data_version"], name: "index_flights_on_data_version"
+  end
+
+  create_table "follows", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "followable_type"
+    t.string "followable_id"
+    t.string "data_version", limit: 50, default: "0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_follows_on_data_version"
+    t.index ["followable_type", "followable_id"], name: "index_follows_on_followable"
+    t.index ["user_id", "followable_type", "followable_id"], name: "index_follows_on_user_and_followable", unique: true
+    t.index ["user_id"], name: "index_follows_on_user_id"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
