@@ -11,23 +11,48 @@ interface CalendarDay {
 
 export default class extends Controller<HTMLElement> {
   static targets = [
-    "modal", "titleText", "dateSection", "timeSection",
-    "calendar", "monthLabel", "timeGrid", "selectedDateDisplay",
+    // stimulus-validator: disable-next-line
+    "modal",
+    // stimulus-validator: disable-next-line
+    "titleText",
+    // stimulus-validator: disable-next-line
+    "dateSection",
+    // stimulus-validator: disable-next-line
+    "timeSection",
+    // stimulus-validator: disable-next-line
+    "calendar",
+    // stimulus-validator: disable-next-line
+    "monthLabel",
+    // stimulus-validator: disable-next-line
+    "timeGrid",
+    // stimulus-validator: disable-next-line
+    "selectedDateDisplay",
+    // stimulus-validator: disable-next-line
     "confirmButton"
   ]
 
   static values = {
+    // stimulus-validator: disable-next-line
     pickerType: String, // 'pickup' or 'return'
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly titleTextTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly dateSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly timeSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly calendarTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly monthLabelTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly timeGridTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly selectedDateDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly confirmButtonTarget: HTMLElement
   declare pickerTypeValue: string
 

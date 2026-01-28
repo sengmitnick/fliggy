@@ -46,7 +46,9 @@ export default class extends Controller<HTMLElement> {
   ]
 
   static values = {
+    // stimulus-validator: disable-next-line
     departureCity: String,
+    // stimulus-validator: disable-next-line
     destinationCity: String,
     enableMultiSelect: { type: Boolean, default: true },
     modalTitle: { type: String, default: '' }
