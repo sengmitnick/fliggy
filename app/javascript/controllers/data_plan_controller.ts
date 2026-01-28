@@ -19,8 +19,47 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("DataPlan connected")
-    // 初始化时只显示天包
-    this.filterPlansByType("天包")
+    
+    // 从 URL 恢复 plan_type 状态（用于返回按钮保留选择）
+    const urlParams = new URLSearchParams(window.location.search)
+    const savedPlanType = urlParams.get('plan_type') || "天包"
+    this.currentPlanType = savedPlanType
+    
+    // 恢复对应标签的选中状态
+    this.typeTabTargets.forEach(tab => {
+      const tabPlanType = tab.dataset.planType || "天包"
+      if (tabPlanType === savedPlanType) {
+        // 选中状态：黄色背景
+        tab.classList.remove('bg-gray-100', 'border-gray-200')
+        tab.classList.add('bg-[#FFF8D6]', 'border-[#FFEBA4]')
+        const span = tab.querySelector('span')
+        if (span) {
+          span.classList.remove('text-gray-600')
+          span.classList.add('text-gray-800')
+        }
+        // 添加对勾（如果还没有）
+        if (!tab.querySelector('.bg-\\[\\#FFD200\\]')) {
+          const checkmarkHTML = `<div class="ml-1 w-2 h-2 bg-[#FFD200] rounded-full flex items-center justify-center text-[6px]">✓</div>`
+          tab.insertAdjacentHTML('beforeend', checkmarkHTML)
+        }
+      } else {
+        // 未选中状态：灰色背景
+        tab.classList.remove('bg-[#FFF8D6]', 'border-[#FFEBA4]')
+        tab.classList.add('bg-gray-100', 'border-gray-200')
+        const span = tab.querySelector('span')
+        if (span) {
+          span.classList.remove('text-gray-800')
+          span.classList.add('text-gray-600')
+        }
+        // 移除对勾
+        const checkmark = tab.querySelector('.bg-\\[\\#FFD200\\]')
+        if (checkmark) checkmark.remove()
+      }
+    })
+    
+    // 过滤并显示对应类型的套餐
+    this.filterPlansByType(savedPlanType)
+    
     // 初始化时检测运营商
     if (this.hasPhoneInputTarget) {
       this.detectCarrier()
@@ -214,11 +253,12 @@ export default class extends Controller<HTMLElement> {
       }
     }
     
-    // Navigate to order page with params
+    // Navigate to order page with params (including plan_type for back navigation)
     const baseUrl = '/internet_orders/new'
     const params = `orderable_type=${orderableType}&orderable_id=${orderableId}`
     const priceParams = `days=${days}&price=${price}&total=${price}`
-    const url = `${baseUrl}?${params}&${priceParams}`
+    const planTypeParam = `plan_type=${encodeURIComponent(this.currentPlanType)}`
+    const url = `${baseUrl}?${params}&${priceParams}&${planTypeParam}`
     window.location.href = url
   }
 }

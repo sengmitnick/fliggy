@@ -29,6 +29,7 @@
       return_params[:pickup_location_id] = params[:pickup_location_id] if params[:pickup_location_id].present?
       return_params[:contact_name] = params[:contact_name] if params[:contact_name].present?
       return_params[:contact_phone] = params[:contact_phone] if params[:contact_phone].present?
+      return_params[:plan_type] = params[:plan_type] if params[:plan_type].present?
       
       return_url = internet_services_path(return_params)
     %>
