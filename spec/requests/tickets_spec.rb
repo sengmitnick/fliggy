@@ -7,12 +7,14 @@ RSpec.describe "Tickets", type: :request do
 
 
   describe "GET /tickets/:id" do
-    let(:ticket_record) { create(:ticket, user: user) }
+    let(:ticket_record) { create(:ticket) }
 
 
     it "returns http success" do
       get ticket_path(ticket_record)
-      expect(response).to be_success_with_view_check('show')
+      # tickets#show redirects to attraction_path, so expect redirect
+      expect(response).to have_http_status(:redirect)
+      expect(response).to redirect_to(attraction_path(ticket_record.attraction))
     end
   end
 

@@ -55,7 +55,9 @@ class TicketsController < ApplicationController
   end
   
   def show
-    @attraction = Attraction.includes(:tickets, :attraction_activities).find(params[:id])
+    # Find ticket by id, then redirect to the attraction page
+    @ticket = Ticket.includes(:attraction).find(params[:id])
+    @attraction = @ticket.attraction
     
     # 重定向到 attractions 的 show 页面
     redirect_to attraction_path(@attraction)
