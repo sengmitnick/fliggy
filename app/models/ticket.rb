@@ -9,7 +9,7 @@ class Ticket < ApplicationRecord
   
   validates :name, presence: true
   validates :current_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :ticket_type, inclusion: { in: %w[adult child family student senior] }
+  validates :ticket_type, inclusion: { in: %w[adult child] }
   
   scope :available, -> { where("stock > 0 OR stock = -1") }
   scope :by_type, ->(type) { where(ticket_type: type) if type.present? }

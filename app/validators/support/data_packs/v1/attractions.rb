@@ -851,24 +851,6 @@ attractions_data.each do |attraction_info|
     created_at: timestamp,
     updated_at: timestamp
   }
-  
-  # 大型乐园额外添加家庭套票
-  if slug =~ /disney|universal|happy-valley|chimelong/
-    tickets_data << {
-      attraction_id: attraction_id,
-      name: "#{name}家庭套票",
-      ticket_type: "family",
-      requirements: "2成人+1儿童",
-      current_price: (base_price * 2.3).round,
-      original_price: (base_price * 2.7).round,
-      stock: -1,
-      validity_days: 1,
-      refund_policy: "需提前24小时申请退款",
-      data_version: 0,
-      created_at: timestamp,
-      updated_at: timestamp
-    }
-  end
 end
 
 Ticket.insert_all(tickets_data) if tickets_data.any?

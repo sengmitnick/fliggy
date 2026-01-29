@@ -2,57 +2,44 @@
 
 require_relative 'base_validator'
 
-# 验证用例69: 预订后天上海迪士尼家庭套餐（2成人+1儿童，最便宜）
+# 验证用例70: 预订3天后北京欢乐谷家庭套餐（2成人+1儿童，最便宜）
 # 
 # 任务描述:
-#   Agent 需要为1个家庭（2成人+1儿童）预订后天的上海迪士尼乐园门票，
+#   Agent 需要为1个家庭（2成人+1儿童）预订3天后的欢乐谷门票，
 #   由于系统不支持家庭套票，需要创建2个独立订单：
 #   - 1个成人票订单（数量2张）
 #   - 1个儿童票订单（数量1张）
 #   并选择最便宜的供应商组合
 # 
 # 复杂度分析:
-#   1. 需要搜索"上海迪士尼乐园"景点
+#   1. 需要搜索"北京欢乐谷"景点
 #   2. 需要理解系统不支持家庭套票，必须分别预订
 #   3. 需要创建2个独立订单（成人票订单 + 儿童票订单）
 #   4. 需要对比供应商价格，选择最优组合
-#   5. 需要填写正确的游玩日期（后天）
+#   5. 需要填写正确的游玩日期（3天后）
 #   ❌ 不能一次性提供：需要先搜索→识别票种→对比价格→创建2个订单
 # 
 # 评分标准:
-#   - 创建了2个订单（成人票+儿童票）(20分)
-#   - 景点正确（上海迪士尼乐园）(15分)
-#   - 成人票数量正确（2张）(15分)
-#   - 儿童票数量正确（1张）(15分)
-#   - 游玩日期正确（后天）(10分)
-#   - 选择了最优惠的供应商组合 (25分)
-# 
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v069_book_shanghai_disney_family_tickets_validator/start
-#   
-#   # Agent 通过界面操作完成预订...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
-class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
-  self.validator_id = 'v069_book_shanghai_disney_family_tickets_validator'
-  self.task_id = '01352bcb-f7ff-4891-a072-114e6565b87d'
-  self.title = '预订后天上海迪士尼家庭套餐（2成人+1儿童，最便宜）'
-  self.description = '为1个家庭预订迪士尼门票（2成人+1儿童），通过2个订单实现，选择最便宜的供应商'
-  self.timeout_seconds = 300
+#   - 创建了2个订单（成人票+儿童票）(25分)
+#   - 景点正确（北京欢乐谷）(15分)
+#   - 成人票数量正确（2张）(10分)
+#   - 儿童票数量正确（1张）(10分)
+#   - 游玩日期正确（3天后）(10分)
+#   - 选择了最便宜的供应商组合 (30分)
+class V070BookBeijingHappyValleyFamilyTicketsValidator < BaseValidator
+  self.validator_id = 'v070_book_beijing_happy_valley_family_tickets_validator'
+  self.task_id = '0c17b98c-3602-4e84-9115-984ead6ebda4'
+  self.title = '预订3天后北京欢乐谷家庭套餐（2成人+1儿童，最便宜）'
+  self.description = '为1个家庭预订欢乐谷门票（2成人+1儿童），通过2个订单实现，选择最便宜的供应商'
+  self.timeout_seconds = 240
   
-  # 准备阶段：设置任务参数
   def prepare
-    # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
-    @attraction_name = '上海迪士尼乐园'
-    @visit_date = Date.current + 2.days  # 后天
-    @adult_count = 2  # 2个成人
-    @child_count = 1  # 1个儿童
+    @attraction_name = '北京欢乐谷'
+    @visit_date = Date.current + 3.days
+    @adult_count = 2
+    @child_count = 1
     
-    # 查找目标景点（注意：查询基线数据 data_version=0）
     @attraction = Attraction.find_by(name: @attraction_name, data_version: 0)
-    
     raise "未找到景点: #{@attraction_name}" unless @attraction
     
     # 查找成人票和儿童票
@@ -71,12 +58,20 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     # 计算最优方案
     calculate_best_combination
     
-    # 返回给 Agent 的任务信息
+    days_until_visit = (@visit_date - Date.current).to_i
+    date_desc = case days_until_visit
+    when 0 then "今天"
+    when 1 then "明天"
+    when 2 then "后天"
+    when 3 then "3天后"
+    else "#{days_until_visit}天后"
+    end
+    
     {
-      task: "请为一家三口（2成人+1儿童）预订后天（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的门票，选择最优惠的供应商组合",
+      task: "请为1个家庭（2成人+1儿童）预订#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的门票，选择最便宜的供应商组合",
       attraction_name: @attraction_name,
       visit_date: @visit_date.to_s,
-      date_description: "后天（#{@visit_date.strftime('%Y年%m月%d日')}）",
+      date_description: "#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）",
       adult_count: @adult_count,
       child_count: @child_count,
       hint: "系统不支持家庭套票，需要分别购买：2张成人票和1张儿童票。请对比供应商价格后选择最优惠的组合方案",
@@ -85,10 +80,9 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     }
   end
   
-  # 验证阶段：检查订单是否符合要求
   def verify
-    # 断言1: 必须创建2个订单（1个成人票+1个儿童票）
-    add_assertion "创建了2个订单（成人票订单+儿童票订单）", weight: 20 do
+    # 断言1: 必须创建2个订单（成人票订单+儿童票订单）
+    add_assertion "创建了2个订单（成人票订单+儿童票订单）", weight: 25 do
       all_orders = TicketOrder.order(created_at: :desc).limit(10).to_a
       expect(all_orders).not_to be_empty, "未找到任何门票订单记录"
       
@@ -113,7 +107,7 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
       @actual_child_count = @child_orders.sum(&:quantity)
     end
     
-    return if @ticket_orders.nil? || @ticket_orders.empty? # 如果没有订单，后续断言无法继续
+    return if @ticket_orders.nil? || @ticket_orders.empty?
     
     # 断言2: 景点正确
     add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
@@ -125,27 +119,27 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     end
     
     # 断言3: 成人票数量正确
-    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 15 do
+    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 10 do
       expect(@actual_adult_count).to eq(@adult_count),
         "成人票数量错误。期望: #{@adult_count}张, 实际: #{@actual_adult_count}张"
     end
     
     # 断言4: 儿童票数量正确
-    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 15 do
+    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 10 do
       expect(@actual_child_count).to eq(@child_count),
         "儿童票数量错误。期望: #{@child_count}张, 实际: #{@actual_child_count}张"
     end
     
     # 断言5: 游玩日期正确
-    add_assertion "游玩日期正确（后天，#{@visit_date}）", weight: 10 do
+    add_assertion "游玩日期正确（3天后，#{@visit_date}）", weight: 10 do
       @ticket_orders.each do |order|
         expect(order.visit_date).to eq(@visit_date),
-          "游玩日期错误。期望: #{@visit_date}（后天）, 实际: #{order.visit_date}"
+          "游玩日期错误。期望: #{@visit_date}（3天后）, 实际: #{order.visit_date}"
       end
     end
     
-    # 断言6: 选择了最优惠的供应商组合（核心评分项）
-    add_assertion "选择了最优惠的供应商组合", weight: 25 do
+    # 断言6: 选择了最便宜的供应商组合（核心评分项）
+    add_assertion "选择了最优惠的供应商组合", weight: 30 do
       # 计算实际总价（只计算成人票和儿童票订单）
       actual_total = @adult_orders.sum(&:total_price) + @child_orders.sum(&:total_price)
       
@@ -234,7 +228,7 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     end
   end
   
-  # 模拟 AI Agent 操作：预订上海迪士尼家庭套餐
+  # 模拟 AI Agent 操作：预订北京欢乐谷家庭套餐
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
