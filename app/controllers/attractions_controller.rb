@@ -26,6 +26,11 @@ class AttractionsController < ApplicationController
   end
 
   def show
+    # Validate city match if city parameter is provided
+    if params[:city].present? && @attraction.city != params[:city]
+      redirect_to attraction_path(@attraction), alert: "城市参数与景点不匹配" and return
+    end
+    
     @tickets = @attraction.tickets.available.order(current_price: :asc)
     @activities = @attraction.attraction_activities.by_type(params[:activity_type]).order(current_price: :asc)
     @tours = @attraction.related_tours(10)
