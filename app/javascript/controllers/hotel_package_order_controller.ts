@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = [
     "quantityInput",
-    "totalPrice",
     "bottomPrice",
     "decreaseBtn",
     "increaseBtn",
@@ -11,11 +10,18 @@ export default class extends Controller<HTMLElement> {
     "instantTab",
     "bookingTypeInput",
     "contactNameInput",
-    "contactPhoneInput"
+    "contactPhoneInput",
+    "passengerRadio",
+    "radioIndicator",
+    "radioInner",
+    "manualNameInput",
+    "manualPhoneInput",
+    "contactModal",
+    "selectedName",
+    "selectedPhone"
   ]
 
   declare readonly quantityInputTarget: HTMLInputElement
-  declare readonly totalPriceTarget: HTMLElement
   declare readonly bottomPriceTarget: HTMLElement
   declare readonly decreaseBtnTarget: HTMLButtonElement
   declare readonly increaseBtnTarget: HTMLButtonElement
@@ -24,10 +30,45 @@ export default class extends Controller<HTMLElement> {
   declare readonly bookingTypeInputTarget: HTMLInputElement
   declare readonly contactNameInputTarget: HTMLInputElement
   declare readonly contactPhoneInputTarget: HTMLInputElement
+  declare readonly passengerRadioTargets: HTMLInputElement[]
+  declare readonly radioIndicatorTargets: HTMLElement[]
+  declare readonly radioInnerTargets: HTMLElement[]
+  declare readonly hasManualNameInputTarget: boolean
+  declare readonly manualNameInputTarget?: HTMLInputElement
+  declare readonly hasManualPhoneInputTarget: boolean
+  declare readonly manualPhoneInputTarget?: HTMLInputElement
+  declare readonly hasContactModalTarget: boolean
+  declare readonly contactModalTarget?: HTMLElement
+  declare readonly hasSelectedNameTarget: boolean
+  declare readonly selectedNameTarget?: HTMLElement
+  declare readonly hasSelectedPhoneTarget: boolean
+  declare readonly selectedPhoneTarget?: HTMLElement
 
   connect(): void {
     console.log("HotelPackageOrder connected")
     this.updateButtonStates()
+    
+    // Auto-select first passenger if exists
+    if (this.passengerRadioTargets.length > 0) {
+      const firstRadio = this.passengerRadioTargets[0]
+      if (firstRadio.checked) {
+        const label = firstRadio.closest('label') as HTMLElement
+        const name = label?.dataset.passengerName || ""
+        const phone = label?.dataset.passengerPhone || ""
+        this.contactNameInputTarget.value = name
+        this.contactPhoneInputTarget.value = phone
+      }
+    }
+    
+    // Sync manual inputs with hidden fields if they exist
+    if (this.hasManualNameInputTarget && this.hasManualPhoneInputTarget) {
+      this.manualNameInputTarget!.addEventListener('input', () => {
+        this.contactNameInputTarget.value = this.manualNameInputTarget!.value
+      })
+      this.manualPhoneInputTarget!.addEventListener('input', () => {
+        this.contactPhoneInputTarget.value = this.manualPhoneInputTarget!.value
+      })
+    }
   }
 
   increaseQuantity(event: Event): void {
@@ -59,9 +100,6 @@ export default class extends Controller<HTMLElement> {
     const unitPrice = parseFloat(this.increaseBtnTarget.dataset.price || "0")
     const totalPrice = quantity * unitPrice
 
-    // Update top price (with 2 decimals)
-    this.totalPriceTarget.textContent = `¥${totalPrice.toFixed(2)}`
-    
     // Update bottom price (integer only)
     this.bottomPriceTarget.textContent = Math.round(totalPrice).toString()
   }
@@ -119,6 +157,20 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  openContactModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasContactModalTarget) {
+      this.contactModalTarget!.classList.remove('hidden')
+    }
+  }
+
+  closeContactModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasContactModalTarget) {
+      this.contactModalTarget!.classList.add('hidden')
+    }
+  }
+
   selectPassenger(event: Event): void {
     const label = event.currentTarget as HTMLElement
     const name = label.dataset.passengerName || ""
@@ -127,15 +179,72 @@ export default class extends Controller<HTMLElement> {
     // Update hidden fields
     this.contactNameInputTarget.value = name
     this.contactPhoneInputTarget.value = phone
+    
+    // Update displayed selected contact if targets exist
+    if (this.hasSelectedNameTarget && this.hasSelectedPhoneTarget) {
+      this.selectedNameTarget!.textContent = name
+      this.selectedPhoneTarget!.textContent = phone
+    }
+    
+    // Update visual radio indicators
+    this.radioInnerTargets.forEach((inner) => {
+      inner.classList.add('hidden')
+    })
+    
+    this.radioIndicatorTargets.forEach((indicator) => {
+      indicator.classList.remove('border-blue-500')
+      indicator.classList.add('border-gray-300')
+    })
+    
+    // Find the radio input and check it
+    const radioInput = label.querySelector('input[type="radio"]') as HTMLInputElement
+    if (radioInput) {
+      radioInput.checked = true
+      
+      // Update the indicator for this radio
+      const indicator = label.querySelector('[data-hotel-package-order-target="radioIndicator"]') as HTMLElement
+      const inner = label.querySelector('[data-hotel-package-order-target="radioInner"]') as HTMLElement
+      
+      if (indicator) {
+        indicator.classList.remove('border-gray-300')
+        indicator.classList.add('border-blue-500')
+      }
+      if (inner) {
+        inner.classList.remove('hidden')
+      }
+    }
+    
+    // Close the modal after selection
+    if (this.hasContactModalTarget) {
+      this.contactModalTarget!.classList.add('hidden')
+    }
   }
 
   handleSubmit(event: Event): void {
     // Validate contact info before submission
-    if (!this.contactNameInputTarget.value || !this.contactPhoneInputTarget.value) {
+    const name = this.contactNameInputTarget.value.trim()
+    const phone = this.contactPhoneInputTarget.value.trim()
+    
+    if (!name) {
       event.preventDefault()
-      alert('请选择联系人')
+      window.showToast('请输入联系人姓名')
       return
     }
+    
+    if (!phone) {
+      event.preventDefault()
+      window.showToast('请输入联系人电话')
+      return
+    }
+    
+    // Simple phone validation
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(phone)) {
+      event.preventDefault()
+      window.showToast('请输入正确的手机号码')
+      return
+    }
+    
     // Form will be submitted normally to create pending order
   }
 }
