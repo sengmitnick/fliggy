@@ -18,7 +18,11 @@ export default class extends Controller<HTMLElement> {
     "manualPhoneInput",
     "contactModal",
     "selectedName",
-    "selectedPhone"
+    "selectedPhone",
+    "bookingModal",
+    "packageOption",
+    "cityFilter",
+    "cityGroup"
   ]
 
   declare readonly quantityInputTarget: HTMLInputElement
@@ -43,6 +47,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly selectedNameTarget?: HTMLElement
   declare readonly hasSelectedPhoneTarget: boolean
   declare readonly selectedPhoneTarget?: HTMLElement
+  declare readonly hasBookingModalTarget: boolean
+  declare readonly bookingModalTarget?: HTMLElement
+  declare readonly packageOptionTargets: HTMLElement[]
+  declare readonly cityFilterTargets: HTMLElement[]
+  declare readonly cityGroupTargets: HTMLElement[]
 
   connect(): void {
     console.log("HotelPackageOrder connected")
@@ -246,5 +255,76 @@ export default class extends Controller<HTMLElement> {
     }
     
     // Form will be submitted normally to create pending order
+  }
+
+  // Booking modal methods
+  openBookingModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasBookingModalTarget) {
+      this.bookingModalTarget!.classList.remove('hidden')
+    }
+  }
+
+  closeBookingModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasBookingModalTarget) {
+      this.bookingModalTarget!.classList.add('hidden')
+    }
+  }
+
+  selectPackageOption(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const packageOptionId = target.dataset.packageOptionId
+    
+    // Update visual selection state
+    this.packageOptionTargets.forEach((option) => {
+      const isSelected = option.dataset.packageOptionId === packageOptionId
+      option.dataset.selected = isSelected.toString()
+      
+      if (isSelected) {
+        option.classList.remove('bg-white', 'border-gray-200')
+        option.classList.add('bg-[#FFF9E6]', 'border-[#FFD700]')
+      } else {
+        option.classList.remove('bg-[#FFF9E6]', 'border-[#FFD700]')
+        option.classList.add('bg-white', 'border-gray-200')
+      }
+    })
+    
+    // Optional: You could reload the page with the new package option
+    // window.location.href = `/hotel_package_orders/new?package_option_id=${packageOptionId}`
+  }
+
+  selectCity(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const selectedCity = target.dataset.city
+    
+    // Update filter visual state
+    this.cityFilterTargets.forEach((filter) => {
+      const isSelected = filter.dataset.city === selectedCity
+      filter.dataset.selected = isSelected.toString()
+      
+      if (isSelected) {
+        filter.classList.remove('bg-white', 'text-gray-700', 'border-gray-200')
+        filter.classList.add('bg-[#FFF9E6]', 'text-[#FF5000]', 'border-[#FFD700]')
+      } else {
+        filter.classList.remove('bg-[#FFF9E6]', 'text-[#FF5000]', 'border-[#FFD700]')
+        filter.classList.add('bg-white', 'text-gray-700', 'border-gray-200')
+      }
+    })
+    
+    // Show/hide city groups based on selection
+    this.cityGroupTargets.forEach((group) => {
+      const groupCity = group.dataset.city
+      
+      if (selectedCity === 'all') {
+        group.classList.remove('hidden')
+      } else {
+        if (groupCity === selectedCity) {
+          group.classList.remove('hidden')
+        } else {
+          group.classList.add('hidden')
+        }
+      }
+    })
   }
 }

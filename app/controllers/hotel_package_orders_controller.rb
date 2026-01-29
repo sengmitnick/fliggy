@@ -6,6 +6,12 @@ class HotelPackageOrdersController < ApplicationController
     @package = @package_option.hotel_package
     @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     @order = HotelPackageOrder.new(quantity: 1)
+    
+    # Get all package options for this package
+    @all_package_options = @package.package_options.ordered.includes(:hotel_package)
+    
+    # Get available hotels grouped by city for booking modal
+    @hotels_by_city = fetch_available_hotels_by_city(@package)
   end
 
   def create
@@ -67,5 +73,38 @@ class HotelPackageOrdersController < ApplicationController
       :contact_name,
       :contact_phone
     )
+  end
+  
+  def fetch_available_hotels_by_city(package)
+    # Get hotels based on package location (city/region)
+    hotels = Hotel.where(is_domestic: true)
+    
+    # Filter by city if specified
+    if package.city.present?
+      # Get hotels from the same city and nearby cities
+      hotels = hotels.where(city: package.city)
+    elsif package.region.present?
+      # Get hotels from the same region
+      hotels = hotels.where(region: package.region)
+    end
+    
+    # Filter by brand if package has brand_name
+    if package.brand_name.present?
+      hotels = hotels.where("brand ILIKE ?", "%#{package.brand_name}%")
+    end
+    
+    # Get featured hotels first, ordered by rating
+    hotels = hotels.order(is_featured: :desc, rating: :desc, display_order: :asc)
+                   .limit(20)
+    
+    # Group by city with count
+    hotels_by_city = {}
+    hotels.each do |hotel|
+      city = hotel.city || '其他城市'
+      hotels_by_city[city] ||= []
+      hotels_by_city[city] << hotel
+    end
+    
+    hotels_by_city
   end
 end
