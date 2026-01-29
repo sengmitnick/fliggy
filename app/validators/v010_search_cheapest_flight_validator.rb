@@ -31,6 +31,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V010SearchCheapestFlightValidator < BaseValidator
   self.validator_id = 'v010_search_cheapest_flight_validator'
+  self.task_id = '3d62bb93-09a6-42c5-8a8e-1e6c999eabb2'
   self.title = '搜索上海到深圳的最便宜航班（后天1人）'
   self.description = '搜索后天上海到深圳的所有航班，找出价格最便宜的并完成预订（考虑折扣，1人出行）'
   self.timeout_seconds = 300
@@ -105,7 +106,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
     end
     
     # 断言4: 正确识别最便宜的航班（核心评分）
-    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 25 do
+    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 30 do
       # 重新计算所有航班价格（注意：查询基线数据）
       all_flights = Flight.where(
         departure_city: @origin,

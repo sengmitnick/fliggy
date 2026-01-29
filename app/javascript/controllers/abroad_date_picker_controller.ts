@@ -8,6 +8,7 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly modalTarget: HTMLElement
   declare readonly dateButtonTargets: HTMLButtonElement[]
+  declare readonly hasDateScrollTarget: boolean
   declare readonly dateScrollTarget: HTMLElement
   declare readonly hasSelectedDateTarget: boolean
   declare readonly selectedDateTarget: HTMLElement

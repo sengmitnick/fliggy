@@ -81,8 +81,8 @@ class TransfersController < ApplicationController
     
     @trains = Train.all
     @trains = @trains.where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", Date.parse(@departure_date)) if @departure_date.present?
-    @trains = @trains.where('departure_station LIKE ? OR arrival_station LIKE ?',
-                           "%#{@departure_station}%", "%#{@arrival_station}%") if @departure_station || @arrival_station
+    @trains = @trains.where('departure_city LIKE ? AND arrival_city LIKE ?',
+                           "%#{@departure_station}%", "%#{@arrival_station}%") if @departure_station && @arrival_station
     
     @trains = @trains.order(departure_time: :asc).limit(50)
     
@@ -93,29 +93,6 @@ class TransfersController < ApplicationController
       arrival_station: @arrival_station,
       departure_date: @departure_date
     )
-  end
-
-  # GET /transfers/select_location - Select pickup/dropoff location
-  def select_location
-    @transfer_type = params[:transfer_type] || session.dig(:transfer_params, :transfer_type) || 'airport_pickup'
-    @service_type = params[:service_type] || session.dig(:transfer_params, :service_type) || 'from_airport'
-    @flight_id = params[:flight_id]
-    @train_id = params[:train_id]
-    
-    # Get flight/train details if selected
-    @flight = Flight.find_by(id: @flight_id) if @flight_id.present?
-    @train = Train.find_by(id: @train_id) if @train_id.present?
-    
-    # Get user's saved addresses for quick selection
-    @saved_addresses = current_user.addresses.order(created_at: :desc).limit(10)
-    
-    # Store params in session
-    session[:transfer_params] = (session[:transfer_params] || {}).merge(
-      transfer_type: @transfer_type,
-      service_type: @service_type,
-      flight_id: @flight_id,
-      train_id: @train_id
-    ).compact
   end
 
   # GET /transfers/packages - List available transfer packages

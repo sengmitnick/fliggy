@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V041BookTourHangzhouValidator < BaseValidator
   self.validator_id = 'v041_book_tour_hangzhou_validator'
+  self.task_id = '919fcf7b-af3e-484c-a6a1-e8d86fbf4ee7'
   self.title = '预订明天杭州3天2晚精品小团（<10人）'
   self.description = '搜索杭州的跟团游产品，找到3天2晚且团队人数<10人的小团'
   self.timeout_seconds = 240

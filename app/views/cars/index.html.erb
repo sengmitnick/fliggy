@@ -377,17 +377,25 @@
   </div>
 
   <!-- 城市选择器模态框 -->
-  <div data-controller="city-selector" data-city-selector-enable-multi-select-value="false">
+  <div data-controller="city-selector" 
+       data-city-selector-enable-multi-select-value="false"
+       data-city-selector-departure-city-value="<%= @current_city %>"
+       data-city-selector-destination-city-value="">
     <%= render 'shared/city_selector_modal' %>
   </div>
 
   <!-- 地点选择器模态框 -->
-  <div data-controller="location-selector" data-location-selector-api-endpoint-value="/cars/locations">
+  <div data-controller="location-selector" 
+       data-location-selector-api-endpoint-value="/cars/locations"
+       data-location-selector-location-type-value=""
+       data-location-selector-current-city-value="<%= @current_city %>"
+       data-location-selector-arrival-city-value="">
     <%= render 'shared/location_selector_modal' %>
   </div>
 
   <!-- 日期时间选择器模态框 -->
-  <div data-controller="car-datetime-picker">
+  <div data-controller="car-datetime-picker"
+       data-car-datetime-picker-picker-type-value="">
     <%= render 'shared/car_datetime_picker_modal' %>
   </div>
 </div>

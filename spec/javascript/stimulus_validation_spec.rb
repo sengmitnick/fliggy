@@ -15,6 +15,52 @@ RSpec.describe 'Stimulus Validation', type: :system do
     pipeline.get_controllers_from_parents(partial_path)
   end
 
+  # Expand partials recursively to include their content in validation
+  def expand_partials(content, current_file_path, depth = 0)
+    # Prevent infinite recursion
+    return content if depth > 10
+
+    # Find all render partial calls
+    expanded = content.dup
+    
+    content.scan(/<%=?\s*render\s+(?:partial:\s*)?['"]([^'"]+)['"]/) do |match|
+      partial_name = match[0]
+      
+      # Resolve partial path
+      if partial_name.include?('/')
+        # Absolute path: shared/insurance_filter_modal -> app/views/shared/_insurance_filter_modal.html.erb
+        partial_path = Rails.root.join("app/views/#{partial_name.gsub(/([^\/]+)$/, '_\\1')}.html.erb")
+      else
+        # Relative path: header -> app/views/current_dir/_header.html.erb
+        current_dir = File.dirname(current_file_path)
+        partial_path = File.join(current_dir, "_#{partial_name}.html.erb")
+      end
+      
+      # Read and expand partial content if it exists
+      if File.exist?(partial_path)
+        partial_content = File.read(partial_path)
+        # Recursively expand nested partials
+        partial_content = expand_partials(partial_content, partial_path.to_s, depth + 1)
+        
+        # Replace the render call with actual partial content
+        # Match the exact render statement format
+        escaped_name = Regexp.escape(partial_name)
+        patterns = [
+          /<%=\s*render\s+partial:\s*['"]#{escaped_name}['"]\s*%>/,
+          /<%=\s*render\s+['"]#{escaped_name}['"]\s*%>/,
+          /<%\s*render\s+partial:\s*['"]#{escaped_name}['"]\s*%>/,
+          /<%\s*render\s+['"]#{escaped_name}['"]\s*%>/
+        ]
+        
+        patterns.each do |pattern|
+          expanded.gsub!(pattern, partial_content)
+        end
+      end
+    end
+    
+    expanded
+  end
+
 
 
   describe 'Core Validation: Targets and Actions' do
@@ -31,7 +77,9 @@ RSpec.describe 'Stimulus Validation', type: :system do
         content = File.read(view_file)
         relative_path = view_file.sub(Rails.root.to_s + '/', '')
 
-        doc = Nokogiri::HTML::DocumentFragment.parse(content)
+        # Expand partial content before parsing
+        expanded_content = expand_partials(content, view_file)
+        doc = Nokogiri::HTML::DocumentFragment.parse(expanded_content)
 
         doc.css('[data-controller]').each do |controller_element|
           controllers = controller_element['data-controller'].split(/\s+/)
@@ -125,8 +173,14 @@ RSpec.describe 'Stimulus Validation', type: :system do
 
             # Check for missing or incorrectly formatted values using AST parser
             controller_data[controller_name][:values].each do |value_name|
-              # Skip values with default values
+              # Skip values with default values (static defaults in static values = {})
               next if controller_data[controller_name][:values_with_defaults].include?(value_name)
+
+              # Skip values with dynamic defaults (initialized in connect() method)
+              next if controller_data[controller_name][:values_with_dynamic_defaults].include?(value_name)
+
+              # Skip optional values (those with hasXXXValue declaration)
+              next if controller_data[controller_name][:optional_values].include?(value_name)
 
               # Skip values with stimulus-validator: disable-next-line comment
               next if controller_data[controller_name][:values_with_skip].include?(value_name)
@@ -302,6 +356,17 @@ RSpec.describe 'Stimulus Validation', type: :system do
             # Check parent files for partials
             if !controller_scope && relative_path.include?('_')
               parent_controllers = get_controllers_from_parents(relative_path)
+              
+              # DEBUG OUTPUT for hotel-traveler-selector
+              if relative_path.include?('hotel_traveler_selector') && controller_name == 'hotel-traveler-selector'
+                puts "\n[DEBUG SPEC] HTML Action Check:"
+                puts "[DEBUG SPEC] Action: #{action}"
+                puts "[DEBUG SPEC] File: #{relative_path}"
+                puts "[DEBUG SPEC] Controller needed: #{controller_name}"
+                puts "[DEBUG SPEC] Parent controllers: #{parent_controllers.inspect}"
+                puts "[DEBUG SPEC] Controller in parents? #{parent_controllers.include?(controller_name)}"
+              end
+              
               if parent_controllers.include?(controller_name)
                 controller_scope = true
               end
@@ -334,7 +399,27 @@ RSpec.describe 'Stimulus Validation', type: :system do
               end
             end
 
-            if !controller_scope && relative_path.include?('_')
+            # CRITICAL FIX 2: If still no scope, check if this action came from a partial
+            # by detecting if it exists in raw content vs expanded content
+            if !controller_scope
+              # Check if action's HTML exists in raw content (not expanded)
+              action_html_pattern = Regexp.escape(action_element.to_html.strip.split("\n").first.strip[0..50])
+              action_in_raw_content = content.match?(/#{action_html_pattern}/)
+              
+              # If action is NOT in raw content but IS in expanded content,
+              # it came from a partial - check if current file has the controller
+              if !action_in_raw_content
+                # For parent files, check controllers defined in THIS file using herb_parser
+                current_file_has_controller = herb_parser.controllers.any? { |c| c[:controller_name] == controller_name }
+                
+                if current_file_has_controller
+                  controller_scope = true
+                end
+              end
+            end
+
+            # Original partial check (keep as fallback for actual partial files)
+            if !controller_scope && File.basename(relative_path).start_with?('_')
               parent_controllers = get_controllers_from_parents(relative_path)
               if parent_controllers.include?(controller_name)
                 controller_scope = true
@@ -361,9 +446,11 @@ RSpec.describe 'Stimulus Validation', type: :system do
               end
             end
 
+            is_partial = File.basename(relative_path).start_with?('_')
+            
             if controller_exists_in_file
               # Controller exists but out of scope
-              if relative_path.include?('_')
+              if is_partial
                 suggestion = "Controller '#{controller_name}' exists but action is out of scope - move action within controller scope or define controller in parent template"
               else
                 suggestion = "Controller '#{controller_name}' exists but action is out of scope - move action within <div data-controller=\"#{controller_name}\">...</div>"
@@ -371,7 +458,7 @@ RSpec.describe 'Stimulus Validation', type: :system do
               error_type = "out_of_scope"
             else
               # Controller doesn't exist in file at all
-              if relative_path.include?('_')
+              if is_partial
                 suggestion = "Controller '#{controller_name}' should be defined in parent template or wrap with <div data-controller=\"#{controller_name}\">...</div>"
               else
                 suggestion = "Wrap with <div data-controller=\"#{controller_name}\">...</div>"
@@ -383,7 +470,7 @@ RSpec.describe 'Stimulus Validation', type: :system do
               action: action,
               controller: controller_name,
               file: relative_path,
-              is_partial: relative_path.include?('_'),
+              is_partial: is_partial,
               parent_files: partial_parent_map[relative_path] || [],
               suggestion: suggestion,
               source: source,
@@ -665,6 +752,15 @@ RSpec.describe 'Stimulus Validation', type: :system do
 
           next if controller_elements.empty?
 
+          # Get all action bindings for this controller in the current view
+          action_bindings = []
+          doc.css('[data-action]').each do |element|
+            actions = element['data-action'].to_s.scan(/(?:^|\s)(#{controller_name})#(\w+)/)
+            actions.each do |_, method_name|
+              action_bindings << method_name
+            end
+          end
+
           # Check each querySelector call
           query_selectors.each do |qs|
             selector = qs['selector']
@@ -682,6 +778,18 @@ RSpec.describe 'Stimulus Validation', type: :system do
             # Skip if marked with stimulus-validator: disable-next-line comment
             if skip_validation
               next
+            end
+
+            # ====== NEW: Skip querySelector if the method is never called via data-action ======
+            # This handles cases where a controller provides optional functionality
+            # that's only used when certain UI elements (like modals) are present
+            if in_method && !action_bindings.include?(in_method)
+              # Check if method is a lifecycle method or public API
+              public_api_methods = ['connect', 'disconnect', 'initialize']
+              unless public_api_methods.include?(in_method)
+                # Method is not bound to any action in this view, skip validation
+                next
+              end
             end
 
             # Track if we found the selector in at least one controller scope

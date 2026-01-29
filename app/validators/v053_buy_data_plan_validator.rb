@@ -42,6 +42,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V053BuyDataPlanValidator < BaseValidator
   self.validator_id = 'v053_buy_data_plan_validator'
+  self.task_id = '22f7ecf1-8018-4a3f-8c00-f6fce7bee108'
   self.title = '购买日本天包流量中最便宜的流量包'
   self.description = '需要搜索日本流量包产品，筛选天包类型，选择价格最低的套餐（28元）并成功创建订单'
   self.timeout_seconds = 240

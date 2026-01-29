@@ -24,6 +24,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V006BookMorningBusValidator < BaseValidator
   self.validator_id = 'v006_book_morning_bus_validator'
+  self.task_id = '2d9b3ddf-7810-4c6e-9dc9-06bb34952efb'
   self.title = '预订明天上午广州到深圳的大巴票'
   self.description = '搜索明天广州到深圳的大巴票，找到上午（12点前）出发的班次并预订'
   self.timeout_seconds = 300

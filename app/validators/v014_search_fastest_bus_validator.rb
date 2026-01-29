@@ -29,6 +29,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V014SearchFastestBusValidator < BaseValidator
   self.validator_id = 'v014_search_fastest_bus_validator'
+  self.task_id = 'fc259aa8-f8e6-4d52-b9df-e72bf3076317'
   self.title = '搜索后天杭州到深圳行程时间最短的班次（1人）'
   self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订（1人乘车）'
   self.timeout_seconds = 300
@@ -128,7 +129,7 @@ class V014SearchFastestBusValidator < BaseValidator
     end
     
     # 断言6: 乘车人数正确（1人）
-    add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 20 do
+    add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 15 do
       expect(@order.passenger_count).to eq(@passenger_count),
         "乘车人数不正确。预期: #{@passenger_count}人, 实际: #{@order.passenger_count}人"
       

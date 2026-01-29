@@ -39,6 +39,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V067BuySingaporeDataPlan3dayValidator < BaseValidator
   self.validator_id = 'v067_buy_singapore_data_plan_3day_validator'
+  self.task_id = 'fa34ffd4-e826-4a88-8733-bba29363a333'
   self.title = '购买新加坡流量包（3天天包、65元）'
   self.description = '搜索新加坡流量包产品，选择3天天包套餐（按天计费）并成功创建订单'
   self.timeout_seconds = 240

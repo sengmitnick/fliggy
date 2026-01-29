@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto bg-white min-h-screen flex flex-col" data-controller="car-search-edit">
+<div class="mx-auto bg-white min-h-screen flex flex-col" data-controller="car-search-edit">
   <!-- 顶部导航 & 搜索栏 -->
   <div class="px-4 py-2 sticky top-0 bg-white z-10">
     <div class="flex items-center space-x-3">
@@ -240,16 +240,24 @@
 </style>
 
 <!-- Location Selector Modal -->
-<div data-controller="location-selector" data-location-selector-api-endpoint-value="/cars/locations">
+<div data-controller="location-selector" 
+     data-location-selector-api-endpoint-value="/cars/locations"
+     data-location-selector-location-type-value=""
+     data-location-selector-current-city-value="<%= params[:city] || '' %>"
+     data-location-selector-arrival-city-value="">
   <%= render 'shared/location_selector_modal' %>
 </div>
 
 <!-- City Selector Modal -->
-<div data-controller="city-selector" data-city-selector-enable-multi-select-value="false">
+<div data-controller="city-selector" 
+     data-city-selector-enable-multi-select-value="false"
+     data-city-selector-departure-city-value="<%= params[:city] || '' %>"
+     data-city-selector-destination-city-value="">
   <%= render 'shared/city_selector_modal' %>
 </div>
 
 <!-- Car DateTime Picker Modal -->
-<div data-controller="car-datetime-picker">
+<div data-controller="car-datetime-picker"
+     data-car-datetime-picker-picker-type-value="">
   <%= render 'shared/car_datetime_picker_modal' %>
 </div>

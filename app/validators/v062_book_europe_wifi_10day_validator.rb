@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V062BookEuropeWifi10dayValidator < BaseValidator
   self.validator_id = 'v062_book_europe_wifi_10day_validator'
+  self.task_id = '6d96f11c-0653-4ae3-87b9-810157adff1f'
   self.title = '预订欧洲通用WiFi（1台、10天、欧洲10国通用）'
   self.description = '搜索欧洲WiFi租赁服务，选择欧洲10国通用WiFi·豪华版并成功创建10天租赁订单'
   self.timeout_seconds = 240

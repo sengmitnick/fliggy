@@ -1,18 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="deep-travel"
+// Note: This controller is attached to the guide categories container but has no active functionality yet.
+// All methods below are unused - they were intended for future video/tab features.
 export default class extends Controller {
-  static targets = ["video", "videoContainer", "tab", "content"]
-
-  declare readonly videoTarget: HTMLVideoElement
-  declare readonly videoContainerTarget: HTMLElement
-  declare readonly tabTargets: HTMLElement[]
-  declare readonly contentTargets: HTMLElement[]
-
   connect() {
     console.log("Deep travel controller connected")
   }
 
+  // Unused methods - kept for future feature implementation
   playVideo(event: Event) {
     const video = event.currentTarget as HTMLVideoElement
     if (video.paused) {
@@ -35,24 +31,7 @@ export default class extends Controller {
     const clickedTab = event.currentTarget as HTMLElement
     const tabName = clickedTab.dataset.tab
 
-    // Update tab styles
-    this.tabTargets.forEach(tab => {
-      if (tab === clickedTab) {
-        tab.classList.add('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
-        tab.classList.remove('text-gray-600')
-      } else {
-        tab.classList.remove('text-gray-900', 'border-b-2', 'border-yellow-400', 'bg-yellow-50')
-        tab.classList.add('text-gray-600')
-      }
-    })
-
-    // Show/hide content
-    this.contentTargets.forEach(content => {
-      if (content.dataset.content === tabName) {
-        content.classList.remove('hidden')
-      } else {
-        content.classList.add('hidden')
-      }
-    })
+    // Note: These methods will be used when tab/video features are implemented
+    console.log('Tab switching not yet implemented:', tabName)
   }
 }

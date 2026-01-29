@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V038BookTourBeijingValidator < BaseValidator
   self.validator_id = 'v038_book_tour_beijing_validator'
+  self.task_id = '7e12c3ec-f7d0-4e6f-9f78-82db90598ec7'
   self.title = '预订明天北京4天3晚跟团游（2成人）'
   self.description = '搜索北京的跟团游产品，找到4天3晚的产品并预订2位成人'
   self.timeout_seconds = 240

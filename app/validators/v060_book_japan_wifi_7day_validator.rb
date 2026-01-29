@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V060BookJapanWifi7dayValidator < BaseValidator
   self.validator_id = 'v060_book_japan_wifi_7day_validator'
+  self.task_id = '68b99d80-bc33-4659-9f14-7c4f80578a72'
   self.title = '预订日本随身WiFi（2台、7天、4G无限量）'
   self.description = '搜索日本WiFi租赁服务，选择4G无限量版并成功创建7天2台租赁订单'
   self.timeout_seconds = 240

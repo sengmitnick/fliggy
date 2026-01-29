@@ -27,6 +27,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly groupSizeInputTarget: HTMLInputElement
   declare readonly destinationButtonTargets: HTMLElement[]
   declare readonly durationButtonTargets: HTMLElement[]
+  declare readonly hasGroupSizeButtonTarget: boolean
   declare readonly groupSizeButtonTargets: HTMLElement[]
   declare readonly departureDisplayTarget: HTMLElement
   declare readonly durationModalTarget: HTMLElement

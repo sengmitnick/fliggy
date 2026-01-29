@@ -18,6 +18,7 @@
 
 ### 核心特性
 
+- ✅ **UUID 任务标识**: 使用 `task_id` (UUID) 作为主要标识符，避免与其他供应商名字冲突
 - ✅ **RLS + data_version 隔离**: 基于 PostgreSQL 行级安全策略的数据版本隔离
 - ✅ **基线数据共享**: 系统启动时加载基线数据（data_version=0），所有验证器共享
 - ✅ **数据持久化**: 验证期间数据始终可用，支持真实用户操作
@@ -27,6 +28,55 @@
 - ✅ **交互式 CLI**: 友好的命令行工具
 
 ---
+
+## 任务标识符 (Task Identifier)
+
+### 为什么需要 task_id (UUID)?
+
+原来的 `validator_id` 是一个语义化的字符串（如 `v001_book_budget_hotel_validator`），在多供应商环境中存在名字冲突风险。
+
+**问题示例**:
+- 供应商 A: `v001_book_budget_hotel_validator`
+- 供应商 B: `v001_book_budget_hotel_validator` ← 冲突！
+
+**解决方案**: 新增 `task_id` 字段，使用 UUID 格式保证全局唯一性。
+
+### 字段说明
+
+| 字段          | 类型   | 示例                                    | 用途                          |
+|--------------|--------|----------------------------------------|----------------------------------|
+| `task_id`    | UUID   | `c0342467-8568-4bce-964c-4133c8367e7d` | 主要标识符，保证全局唯一       |
+| `validator_id` | String | `v001_book_budget_hotel_validator`     | 向后兼容，可读性更好         |
+
+### 使用示例
+
+```ruby
+class V001BookBudgetHotelValidator < BaseValidator
+  self.validator_id = 'v001_book_budget_hotel_validator'  # 旧标识符（向后兼容）
+  self.task_id = 'c0342467-8568-4bce-964c-4133c8367e7d'   # 新标识符（UUID）
+  self.title = '预订后天入住一晚深圳的经济型酒店'
+  # ...
+end
+```
+
+### API 响应示例
+
+```json
+{
+  "id": "c0342467-8568-4bce-964c-4133c8367e7d",  // 优先使用 task_id
+  "task_id": "c0342467-8568-4bce-964c-4133c8367e7d",
+  "validator_id": "v001_book_budget_hotel_validator",  // 向后兼容
+  "title": "预订后天入住一晚深圳的经济型酒店",
+  "description": "...",
+  "timeout": 300
+}
+```
+
+### 向后兼容
+
+- `metadata` 方法优先返回 `task_id`，如果不存在则返回 `validator_id`
+- API 同时返回两个字段，客户端可以选择使用
+- 旧代码使用 `validator_id` 仍然可以正常工作
 
 ## 核心设计理念
 
@@ -211,7 +261,8 @@ BaseValidator (抽象基类)
 
 BookFlightValidator (具体验证器)
 ├── 继承 BaseValidator
-├── validator_id = 'book_flight_sz_to_bj'
+├── validator_id = 'book_flight_sz_to_bj'  # 旧标识符（向后兼容）
+├── task_id = '550e8400-e29b-41d4-a716-446655440000'  # 新标识符（UUID，避免冲突）
 ├── data_pack_version = 'v1/flights'
 ├── prepare() 实现
 │   ├── 设置任务参数（日期、城市）
@@ -736,7 +787,8 @@ end
 
 ```ruby
 class BookFlightValidator < BaseValidator
-  self.validator_id = 'book_flight_sz_to_bj'
+  self.validator_id = 'book_flight_sz_to_bj'  # 旧标识符（向后兼容）
+  self.task_id = '550e8400-e29b-41d4-a716-446655440000'  # 新标识符（UUID）
   self.data_pack_version = 'v1/flights'
   
   def prepare
@@ -781,7 +833,8 @@ end
 ```ruby
 # app/validators/book_hotel_validator.rb
 class BookHotelValidator < BaseValidator
-  self.validator_id = 'book_hotel_shenzhen'
+  self.validator_id = 'book_hotel_shenzhen'  # 旧标识符（向后兼容）
+  self.task_id = 'f25a6149-ef4c-4812-8a81-2965ba558232'  # 新标识符（UUID，避免与其他供应商冲突）
   self.title = '预订深圳酒店'
   self.description = '搜索并预订深圳指定日期的酒店'
   self.data_pack_version = 'v1/hotels'

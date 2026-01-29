@@ -50,7 +50,7 @@ if demo_user.persisted?
       {
         name: '张三',
         id_type: '身份证',
-        id_number: '110101199001011234',
+        id_number: '110101199001011234',  # 1990年出生 - 成人（34岁）
         phone: '13800138000',
         is_self: true,
         data_version: 0
@@ -58,12 +58,40 @@ if demo_user.persisted?
       {
         name: '李四',
         id_type: '身份证',
-        id_number: '110101199002022345',
+        id_number: '110101199002022345',  # 1990年出生 - 成人（34岁）
         phone: '13900139000',
+        data_version: 0
+      },
+      {
+        name: '王芳',
+        id_type: '身份证',
+        id_number: '110101198506153456',  # 1985年出生 - 成人（39岁）
+        phone: '13700137001',
+        data_version: 0
+      },
+      {
+        name: '刘强',
+        id_type: '身份证',
+        id_number: '110101198803214567',  # 1988年出生 - 成人（36岁）
+        phone: '13600136001',
+        data_version: 0
+      },
+      {
+        name: '小明',
+        id_type: '身份证',
+        id_number: '110101201507085678',  # 2015年出生 - 儿童（9岁）
+        phone: '13500135001',
+        data_version: 0
+      },
+      {
+        name: '小红',
+        id_type: '身份证',
+        id_number: '110101201808126789',  # 2018年出生 - 儿童（6岁）
+        phone: '13400134001',
         data_version: 0
       }
     ])
-    puts "     ✓ 添加默认乘机人: 张三, 李四"
+    puts "     ✓ 添加默认乘机人: 张三, 李四, 王芳, 刘强, 小明, 小红"
   end
   
   # 添加联系人

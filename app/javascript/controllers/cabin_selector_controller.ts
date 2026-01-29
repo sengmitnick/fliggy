@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = ["button", "hiddenInput"]
   static values = {
-    selected: String
+    selected: { type: String, default: 'all' }
   }
 
   declare readonly buttonTargets: HTMLButtonElement[]

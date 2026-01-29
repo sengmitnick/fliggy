@@ -47,7 +47,7 @@
         <div class="flex flex-wrap gap-2">
           <% @cities.take(6).each do |city| %>
             <%= link_to attractions_path(city: city), 
-                data: { turbo: false },
+                data: { turbo: false, turbo_track: "reload" },
                 class: "#{city == @city ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md' : 'bg-gray-50 border-2 border-transparent'} px-4 py-2 rounded-lg flex items-center gap-1 text-sm transition-all" do %>
               <span class="text-base">🎫</span>
               <span class="<%= city == @city ? 'font-bold' : 'font-medium' %>"><%= city %></span>
@@ -60,12 +60,12 @@
       <div class="mb-4">
         <div class="flex gap-3">
           <%= link_to attractions_path(city: @city, sort_by: 'rating'),
-              data: { turbo: false },
+              data: { turbo: false, turbo_track: "reload" },
               class: "#{@sort_by == 'rating' ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md font-bold' : 'bg-gray-50 border-2 border-transparent font-medium'} flex-1 py-3 rounded-lg text-sm text-center transition-all" do %>
             评分最高
           <% end %>
           <%= link_to attractions_path(city: @city, sort_by: 'review_count'),
-              data: { turbo: false },
+              data: { turbo: false, turbo_track: "reload" },
               class: "#{@sort_by == 'review_count' ? 'bg-[#FFE8CC] border-2 border-[#FFD700] shadow-md font-bold' : 'bg-gray-50 border-2 border-transparent font-medium'} flex-1 py-3 rounded-lg text-sm text-center transition-all" do %>
             人气最高
           <% end %>
@@ -91,7 +91,7 @@
     <% if @attractions.any? %>
       <div class="space-y-4">
         <% @attractions.each do |attraction| %>
-          <%= link_to attraction_path(attraction), data: { turbo: false }, class: "block" do %>
+          <%= link_to attraction_path(attraction), data: { turbo: false, turbo_track: "reload" }, class: "block" do %>
             <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div class="flex gap-3">
                 <!-- Attraction Image -->

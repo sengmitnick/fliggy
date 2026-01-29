@@ -16,6 +16,7 @@ class StimulusValidationPipeline
   end
 
   # Get controllers from parent files (recursive)
+  # Returns array of controller names that are in scope at the partial's render location
   def get_controllers_from_parents(partial_path)
     controllers = []
 
@@ -23,6 +24,16 @@ class StimulusValidationPipeline
     parent_files.each do |parent_file|
       parent_content = File.read(Rails.root.join(parent_file))
       parent_doc = Nokogiri::HTML::DocumentFragment.parse(parent_content)
+
+      # Find the render line for this partial
+      render_line = find_render_line(parent_content, partial_path)
+
+      # DEBUG OUTPUT
+      if partial_path.include?('hotel_traveler_selector')
+        puts "\n[DEBUG] Processing partial: #{partial_path}"
+        puts "[DEBUG] Parent file: #{parent_file}"
+        puts "[DEBUG] Render line: #{render_line}"
+      end
 
       # Extract controllers from ALL HTML data-controller attributes in parent file
       # (not just top-level ones, since partials can be nested deep in the structure)
@@ -32,26 +43,38 @@ class StimulusValidationPipeline
         end
       end
 
-      # Extract controllers from ERB syntax: data: { controller: "..." }
-      # Pattern: data: { controller: "controller-name" } or data: { "controller" => "controller-name" }
-      parent_content.scan(/data:\s*\{[^}]*['"]controller['"]\s*[=:]>?\s*['"]([^'"]+)['"]/) do |match|
-        match[0].split(/\s+/).each do |controller|
-          controllers << controller.strip
-        end
+      # Extract controllers from ERB syntax with scope checking
+      controllers_with_scopes = find_controllers_with_scopes(parent_content)
+      
+      # DEBUG OUTPUT
+      if partial_path.include?('hotel_traveler_selector')
+        puts "[DEBUG] Controllers with scopes found: #{controllers_with_scopes.inspect}"
       end
-
-      # Extract controllers from Rails hash syntax: controller: "controller-name"
-      # This is the most common pattern in Rails ERB templates
-      parent_content.scan(/controller:\s*['"]([^'"]+)['"]/) do |match|
-        match[0].split(/\s+/).each do |controller|
-          controllers << controller.strip
+      
+      # Only include controllers whose scope includes the render line
+      if render_line
+        controllers_with_scopes.each do |controller_info|
+          if render_line >= controller_info[:start_line] && render_line <= controller_info[:end_line]
+            controllers << controller_info[:name]
+            # DEBUG OUTPUT
+            if partial_path.include?('hotel_traveler_selector')
+              puts "[DEBUG] ✅ Controller '#{controller_info[:name]}' IN SCOPE (render at #{render_line}, scope: #{controller_info[:start_line]}-#{controller_info[:end_line]})"
+            end
+          else
+            # DEBUG OUTPUT
+            if partial_path.include?('hotel_traveler_selector')
+              puts "[DEBUG] ❌ Controller '#{controller_info[:name]}' OUT OF SCOPE (render at #{render_line}, scope: #{controller_info[:start_line]}-#{controller_info[:end_line]})"
+            end
+          end
         end
-      end
-
-      # Also check for data-controller in ERB output tags: <%= ... data-controller="..." ... %>
-      parent_content.scan(/data-controller=['"]([^'"]+)['"]/) do |match|
-        match[0].split(/\s+/).each do |controller|
-          controllers << controller.strip
+      else
+        # If we can't find render line, fall back to including all controllers (old behavior)
+        controllers_with_scopes.each do |controller_info|
+          controllers << controller_info[:name]
+        end
+        # DEBUG OUTPUT
+        if partial_path.include?('hotel_traveler_selector')
+          puts "[DEBUG] ⚠️  No render line found, using fallback"
         end
       end
 
@@ -60,7 +83,144 @@ class StimulusValidationPipeline
       end
     end
 
+    # DEBUG OUTPUT
+    if partial_path.include?('hotel_traveler_selector')
+      puts "[DEBUG] Final controllers list: #{controllers.uniq.inspect}\n"
+    end
+
     controllers.uniq
+  end
+
+  # Find the line number where a partial is rendered
+  def find_render_line(content, partial_path)
+    # Extract partial name from path: app/views/shared/_hotel_traveler_selector_modal.html.erb -> hotel_traveler_selector_modal
+    partial_name = File.basename(partial_path, '.html.erb').sub(/^_/, '')
+    
+    # Also extract the directory: app/views/shared/_xxx.html.erb -> shared
+    partial_dir = File.dirname(partial_path).sub('app/views/', '')
+    
+    lines = content.split("\n")
+    lines.each_with_index do |line, index|
+      # Match: render 'shared/hotel_traveler_selector_modal' or render 'hotel_traveler_selector_modal'
+      if line.match?(/render\s+(?:partial:\s*)?['"](?:#{partial_dir}\/)?#{partial_name}['"]/) ||
+         line.match?(/render\s+(?:partial:\s*)?['"]#{partial_name}['"]/)
+        return index + 1  # Line numbers are 1-indexed
+      end
+    end
+    
+    nil
+  end
+
+  # Find all controllers with their scope boundaries (start and end lines)
+  def find_controllers_with_scopes(content)
+    controllers = []
+    lines = content.split("\n")
+    
+    lines.each_with_index do |line, index|
+      line_num = index + 1
+      
+      # Check for Rails hash syntax: data: { controller: "..." }
+      if line.include?('controller:') && line =~ /controller:\s*['"]([^'"]+)['"]/
+        controller_names = $1.split(/\s+/)
+        scope_end = find_scope_end_for_line(lines, index)
+        
+        controller_names.each do |name|
+          controllers << {
+            name: name.strip,
+            start_line: line_num,
+            end_line: scope_end
+          }
+        end
+      end
+      
+      # Check for HTML data-controller attribute
+      if line.include?('data-controller=') && line =~ /data-controller=['"]([^'"]+)['"]/
+        controller_names = $1.split(/\s+/)
+        scope_end = find_scope_end_for_line(lines, index)
+        
+        controller_names.each do |name|
+          controllers << {
+            name: name.strip,
+            start_line: line_num,
+            end_line: scope_end
+          }
+        end
+      end
+    end
+    
+    controllers
+  end
+
+  # Find scope end for a controller definition at given line index
+  def find_scope_end_for_line(lines, start_index)
+    start_line = lines[start_index]
+    
+    # Check if this is a Rails helper (form_with, link_to, etc.) with a block
+    if start_line.include?('<%=') && (start_line.include?('form_with') || start_line.include?('link_to') || start_line.include?('do |'))
+      return find_erb_block_end(lines, start_index)
+    end
+    
+    # Check if this is a regular HTML tag
+    if start_line =~ /<(\w+)/
+      tag_name = $1
+      return find_html_tag_end(lines, start_index, tag_name)
+    end
+    
+    # Default: scope extends to end of file
+    lines.length
+  end
+
+  # Find the end of an ERB block (matching <% end %>)
+  def find_erb_block_end(lines, start_index)
+    depth = 0
+    block_started = false
+    
+    (start_index...lines.length).each do |i|
+      line = lines[i]
+      
+      # Count 'do' blocks
+      block_starts = line.scan(/\bdo(?:\s*\|[^|]*\||\s*(?:%>|$))/).length
+      
+      # Count if/unless/case/for/while blocks
+      block_starts += 1 if line =~ /<%\s*(?:if|unless|case|for|while)\b/
+      
+      if block_starts > 0
+        depth += block_starts
+        block_started = true if i == start_index
+      end
+      
+      # Count 'end' statements
+      if line =~ /<%\s*end\s*%>/
+        depth -= 1
+        return i + 1 if depth == 0 && block_started
+      end
+    end
+    
+    # No matching end found
+    lines.length
+  end
+
+  # Find the end of an HTML tag
+  def find_html_tag_end(lines, start_index, tag_name)
+    depth = 0
+    tag_found = false
+    
+    (start_index...lines.length).each do |i|
+      line = lines[i]
+      
+      # Count opening tags
+      depth += line.scan(/<#{tag_name}(?:\s|>)/).length
+      tag_found = true if depth > 0
+      
+      # Count closing tags
+      closing_count = line.scan(/<\/#{tag_name}>/).length
+      depth -= closing_count
+      
+      return i + 1 if depth == 0 && tag_found
+    end
+    
+    # No matching closing tag found
+    lines.length
   end
 
   private
@@ -85,6 +245,8 @@ class StimulusValidationPipeline
           outlets: parsed_data['outlets'] || [],
           values: parsed_data['values'] || [],
           values_with_defaults: parsed_data['valuesWithDefaults'] || [],
+          values_with_dynamic_defaults: parsed_data['valuesWithDynamicDefaults'] || [],
+          optional_values: parsed_data['optionalValues'] || [],
           methods: parsed_data['methods'] || [],
           querySelectors: parsed_data['querySelectors'] || [],
           anti_patterns: parsed_data['antiPatterns'] || [],

@@ -137,6 +137,228 @@ puts "✓ 数据包加载完成"
 - ❌ NEVER use `find_or_create_by!` for data packs (use `insert_all` instead)
 - ❌ NEVER mix production seed data with test data
 
+## Validator verify Method Best Practices
+
+**⚠️ CRITICAL: Query Rules in First Assertion**
+
+The FIRST assertion must query orders and establish baseline data for subsequent assertions. Follow these MANDATORY rules:
+
+**1. Query Pattern (MUST follow exactly):**
+```ruby
+def verify
+  # 断言1: 必须创建订单 / 完成某个基础操作
+  add_assertion "创建了订单/完成了操作", weight: 20 do
+    # ✅ MUST include: .where(data_version: @data_version)
+    # ✅ MUST filter by core business entity (e.g., attraction name, hotel name)
+    # ❌ NEVER filter by attributes to be validated (e.g., visit_date, room_type)
+    all_records = ModelName
+      .joins(:associations)
+      .includes(:associations)
+      .where(associations: { core_entity: @entity_value })  # Filter by entity
+      .where(data_version: @data_version)                    # Session isolation
+      .order(created_at: :desc)
+      .to_a
+    
+    expect(all_records).not_to be_empty, "未找到任何记录"
+    
+    # Store in instance variable for subsequent assertions
+    @orders = all_records.select { |o| o.meets_basic_criteria? }
+    
+    # Validate basic requirements (count, existence)
+    expect(@orders.size).to be >= expected_count
+  end
+  
+  return if @orders.nil? || @orders.empty?  # Guard clause
+  
+  # 断言2-N: Validate specific attributes separately
+  add_assertion "属性A正确", weight: 15 do
+    @orders.each do |order|
+      expect(order.attribute_a).to eq(@expected_a)
+    end
+  end
+end
+```
+
+**2. Query Filters - What to Include/Exclude:**
+
+**✅ MUST include in query:**
+- `.where(data_version: @data_version)` - Session isolation (MANDATORY)
+- Core business entity filters (e.g., `attraction.name`, `hotel.name`, `flight.flight_number`)
+- Filters that define the SCOPE of operation (e.g., `user_id`, `booking_type`)
+
+**❌ NEVER include in query:**
+- Attributes to be validated (e.g., `visit_date`, `room_type`, `seat_class`)
+- These should be validated in SEPARATE assertions for better scoring granularity
+
+**Why?** If you filter by `visit_date` in the query and it's wrong, the error will be "未找到订单" instead of "游玩日期错误", losing scoring precision.
+
+**3. Assertion Structure and Dependency:**
+
+**Pattern:**
+```ruby
+# 断言1: Existence + Count (weight: 20-25%)
+# - Query with data_version + core entity filters
+# - Store results in @instance_variable
+# - Validate count/existence
+
+return if @orders.nil? || @orders.empty?  # Guard clause
+
+# 断言2: Core Entity Correct (weight: 10-15%)
+# - Validate the core entity is correct
+# - E.g., attraction name, hotel name, flight number
+
+# 断言3-N: Specific Attributes (weight: 10-15% each)
+# - Each validates ONE specific attribute
+# - E.g., visit_date, quantity, price, room_type
+# - Use @orders from first assertion
+
+# 断言N: Business Logic / Optimization (weight: 20-30%)
+# - Validate complex logic (e.g., best price selection)
+# - This is often the highest-weight assertion
+```
+
+**4. Common Patterns:**
+
+**Example 1: Ticket Booking**
+```ruby
+def verify
+  add_assertion "创建了2个订单（成人票+儿童票）", weight: 20 do
+    all_orders = TicketOrder
+      .joins(ticket: :attraction)
+      .includes(:ticket)
+      .where(tickets: { attractions: { name: @attraction_name } })
+      .where(data_version: @data_version)
+      .order(created_at: :desc)
+      .to_a
+    
+    @ticket_orders = all_orders.select { |o| ['adult', 'child'].include?(o.ticket.ticket_type) }
+    expect(@ticket_orders.size).to be >= 2
+  end
+  
+  return if @ticket_orders.nil? || @ticket_orders.empty?
+  
+  add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
+    @ticket_orders.each { |o| expect(o.ticket.attraction.name).to eq(@attraction_name) }
+  end
+  
+  add_assertion "游玩日期正确（#{@visit_date}）", weight: 10 do
+    @ticket_orders.each { |o| expect(o.visit_date).to eq(@visit_date) }
+  end
+end
+```
+
+**Example 2: Hotel Booking**
+```ruby
+def verify
+  add_assertion "创建了酒店订单", weight: 25 do
+    all_orders = HotelOrder
+      .joins(:hotel)
+      .includes(:room)
+      .where(hotels: { name: @hotel_name })
+      .where(data_version: @data_version)
+      .order(created_at: :desc)
+      .to_a
+    
+    @hotel_orders = all_orders
+    expect(@hotel_orders).not_to be_empty
+  end
+  
+  return if @hotel_orders.nil? || @hotel_orders.empty?
+  
+  add_assertion "酒店正确（#{@hotel_name}）", weight: 15 do
+    @hotel_orders.each { |o| expect(o.hotel.name).to eq(@hotel_name) }
+  end
+  
+  add_assertion "入住日期正确（#{@check_in_date}）", weight: 10 do
+    @hotel_orders.each { |o| expect(o.check_in_date).to eq(@check_in_date) }
+  end
+end
+```
+
+**5. Error Messages:**
+
+**✅ Good error messages:**
+```ruby
+expect(order.visit_date).to eq(@visit_date),
+  "游玩日期错误。期望: #{@visit_date}（后天）, 实际: #{order.visit_date}"
+
+expect(@orders.size).to be >= 2,
+  "订单数量不足。期望至少2个订单，实际找到#{@orders.size}个订单"
+```
+
+**❌ Bad error messages:**
+```ruby
+expect(order.visit_date).to eq(@visit_date), "日期错误"
+expect(@orders.size).to be >= 2  # No message at all
+```
+
+**6. Weight Distribution Guidelines:**
+
+- **Existence + Count**: 20-25% (first assertion)
+- **Core Entity Correct**: 10-15% (e.g., hotel name, attraction name)
+- **Basic Attributes**: 10-15% each (e.g., date, quantity, room type)
+- **Business Logic**: 20-30% (e.g., price optimization, complex validation)
+
+**Total**: Should sum to 100%
+
+**7. Common Mistakes to Avoid:**
+
+❌ **Mistake 1**: Filtering by validation attribute in query
+```ruby
+# BAD: visit_date in query
+all_orders = TicketOrder.where(visit_date: @visit_date, data_version: @data_version)
+expect(all_orders).not_to be_empty  # Error: "未找到订单" (unhelpful)
+
+# GOOD: visit_date in separate assertion
+all_orders = TicketOrder.where(data_version: @data_version)
+add_assertion "游玩日期正确" do
+  all_orders.each { |o| expect(o.visit_date).to eq(@visit_date) }  # Error: "游玩日期错误" (helpful)
+end
+```
+
+❌ **Mistake 2**: Forgetting data_version filter
+```ruby
+# BAD: No data_version filter
+all_orders = TicketOrder.where(user_id: @user_id).order(created_at: :desc).limit(10)
+# Problem: May pick up orders from other validator sessions
+
+# GOOD: Include data_version
+all_orders = TicketOrder.where(user_id: @user_id, data_version: @data_version)
+```
+
+❌ **Mistake 3**: Not using guard clause
+```ruby
+# BAD: No guard clause
+add_assertion "创建了订单" do
+  @orders = TicketOrder.where(data_version: @data_version)
+end
+add_assertion "日期正确" do
+  @orders.each { |o| expect(o.visit_date).to eq(@date) }  # Crashes if @orders is empty
+end
+
+# GOOD: Guard clause
+add_assertion "创建了订单" do
+  @orders = TicketOrder.where(data_version: @data_version)
+end
+return if @orders.nil? || @orders.empty?  # Guard
+add_assertion "日期正确" do
+  @orders.each { |o| expect(o.visit_date).to eq(@date) }
+end
+```
+
+**8. Testing Your Validator:**
+
+After creating/modifying a validator, ALWAYS run:
+```bash
+rake validator:simulate  # Test all validators
+```
+
+If any validator fails, investigate:
+1. Check the error message - is it specific enough?
+2. Verify data_version filtering is correct
+3. Ensure query filters are appropriate (entity filters only, not validation attributes)
+4. Confirm assertion dependencies are handled with guard clauses
+
 ## Some important tips when coding
 
 **CRITICAL: Demo File Management**

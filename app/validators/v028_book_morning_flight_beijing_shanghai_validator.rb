@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V028BookMorningFlightBeijingShanghaiValidator < BaseValidator
   self.validator_id = 'v028_book_morning_flight_beijing_shanghai_validator'
+  self.task_id = '2d0d99a3-006c-4113-8ad1-6d9c37f7396f'
   self.title = '预订后天北京到上海早班航班（12点前起飞）'
   self.description = '搜索后天北京到上海的航班，找到12点前起飞的早班航班并完成预订'
   self.timeout_seconds = 240

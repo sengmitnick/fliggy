@@ -31,6 +31,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V011SearchCheapestTrainSeatValidator < BaseValidator
   self.validator_id = 'v011_search_cheapest_train_seat_validator'
+  self.task_id = 'd75371f7-bbc5-489d-a7e6-c1a4a8222c82'
   self.title = '搜索后天北京到天津最便宜的车票（1人）'
   self.description = '搜索后天北京到天津的所有车次，找出最便宜的车票（对比不同座位类型）并完成预订（1人出行）'
   self.timeout_seconds = 300
@@ -158,7 +159,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     end
     
     # 断言6: 出行人数正确（1人）
-    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 20 do
+    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 15 do
       # TrainBooking模型是单个乘客，验证passenger_name存在
       expect(@booking.passenger_name).to be_present,
         "未找到乘客信息"

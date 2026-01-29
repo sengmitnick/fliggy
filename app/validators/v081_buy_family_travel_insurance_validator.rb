@@ -35,6 +35,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V081BuyFamilyTravelInsuranceValidator < BaseValidator
   self.validator_id = 'v081_buy_family_travel_insurance_validator'
+  self.task_id = 'ba8f8cf7-8220-4b08-8c2f-23b58edb3926'
   self.title = '购买家庭旅游保险（三亚出行，3人，7天，适合亲子游）'
   self.description = '为家庭（2成人+1儿童）购买三亚出行的旅游保险，选择适合亲子游场景的产品'
   self.timeout_seconds = 240

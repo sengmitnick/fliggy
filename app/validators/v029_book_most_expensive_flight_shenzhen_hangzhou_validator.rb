@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V029BookMostExpensiveFlightShenzhenHangzhouValidator < BaseValidator
   self.validator_id = 'v029_book_most_expensive_flight_shenzhen_hangzhou_validator'
+  self.task_id = 'a83f2e9b-740d-4542-87e8-8e5d44e5cf6d'
   self.title = '预订明天深圳到杭州最贵的航班'
   self.description = '搜索明天深圳到杭州的航班，找到价格最高的航班并完成预订'
   self.timeout_seconds = 240

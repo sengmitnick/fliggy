@@ -55,7 +55,8 @@
   <!-- Search Bar -->
   <div class="sticky top-0 z-20 bg-surface border-b border-border px-4 py-3" 
        data-controller="city-selector" 
-       data-city-selector-departure-city-value="武汉">
+       data-city-selector-departure-city-value="武汉"
+       data-city-selector-destination-city-value="">
     <%= form_with url: search_hotel_packages_path, method: :get, data: { turbo: false }, class: "flex gap-3" do |f| %>
       <!-- City Selector -->
       <button type="button" 

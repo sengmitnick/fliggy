@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V033RentSuvBeijingValidator < BaseValidator
   self.validator_id = 'v033_rent_suv_beijing_validator'
+  self.task_id = '6eb27ac0-25d9-4fd8-bb9b-3834d06e4ffa'
   self.title = '租赁后天北京SUV（2天）'
   self.description = '搜索北京的租车服务，找到SUV车型并租赁2天'
   self.timeout_seconds = 240

@@ -30,6 +30,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V020BookHotelShenzhenTwoNightsValidator < BaseValidator
   self.validator_id = 'v020_book_hotel_shenzhen_two_nights_validator'
+  self.task_id = 'cebea439-0ffc-4798-9edb-e5cef8d09100'
   self.title = '预订明天深圳酒店（入住2晚）'
   self.description = '搜索深圳的酒店，选择任意一家并完成明天入住2晚的预订'
   self.timeout_seconds = 240

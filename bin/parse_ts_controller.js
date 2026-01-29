@@ -28,6 +28,8 @@ const result = {
   outlets: [],
   values: [],
   valuesWithDefaults: [],
+  valuesWithDynamicDefaults: [], // Values initialized in connect()
+  optionalValues: [], // Values with hasXXXValue declaration
   methods: [],
   querySelectors: [],
   antiPatterns: [],
@@ -164,6 +166,37 @@ function checkPropertySkipComment(node) {
   return false;
 }
 
+// Helper function to extract value assignments in connect() method
+function extractConnectValueAssignments(node) {
+  const assignments = [];
+
+  function traverse(node) {
+    // Look for patterns like: this.xxxValue = ...
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      const left = node.left;
+      
+      // Check if it's this.xxxValue
+      if (ts.isPropertyAccessExpression(left) &&
+          left.expression.kind === ts.SyntaxKind.ThisKeyword &&
+          ts.isIdentifier(left.name)) {
+        
+        const propertyName = left.name.text;
+        const valueMatch = propertyName.match(/^(\w+)Value$/);
+        
+        if (valueMatch) {
+          const valueName = valueMatch[1];
+          assignments.push(valueName);
+        }
+      }
+    }
+
+    ts.forEachChild(node, traverse);
+  }
+
+  traverse(node);
+  return assignments;
+}
+
 // Helper function to extract querySelector calls
 function extractQuerySelectors(node, methodName = null) {
   if (ts.isCallExpression(node)) {
@@ -267,6 +300,14 @@ function visitNode(node) {
           result.optionalTargets.push(targetName);
         }
 
+        // Check if it's a hasXXXValue property (indicates optional value)
+        const hasValueMatch = propertyName.match(/^has(\w+)Value$/);
+        if (hasValueMatch) {
+          // Convert hasSelectedIdValue -> selectedId
+          const valueName = hasValueMatch[1].charAt(0).toLowerCase() + hasValueMatch[1].slice(1);
+          result.optionalValues.push(valueName);
+        }
+
         // Check if it's a declare readonly xxxTarget or xxxTargets property
         const targetMatch = propertyName.match(/^(\w+)Targets?$/);
         if (targetMatch && hasSkipComment) {
@@ -285,6 +326,12 @@ function visitNode(node) {
       // Check for method declarations
       if (ts.isMethodDeclaration(member) && ts.isIdentifier(member.name)) {
         const methodName = member.name.text;
+
+        // Special handling for connect() method - extract value assignments
+        if (methodName === 'connect' && member.body) {
+          const assignments = extractConnectValueAssignments(member.body);
+          result.valuesWithDynamicDefaults.push(...assignments);
+        }
 
         // Exclude lifecycle methods
         if (!['connect', 'disconnect', 'constructor'].includes(methodName)) {

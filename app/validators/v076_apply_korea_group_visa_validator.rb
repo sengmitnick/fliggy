@@ -34,6 +34,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V076ApplyKoreaGroupVisaValidator < BaseValidator
   self.validator_id = 'v076_apply_korea_group_visa_validator'
+  self.task_id = 'c8b9e386-8c54-40ca-a684-bcb5f833bb16'
   self.title = '办理韩国团体签证（5人，成功率100%，最便宜）'
   self.description = '为5人团队办理韩国团体签证，要求成功率100%且价格最便宜'
   self.timeout_seconds = 240

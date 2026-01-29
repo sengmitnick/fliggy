@@ -37,6 +37,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly destinationTextTarget: HTMLElement
   declare readonly dateInputTarget: HTMLInputElement
   declare readonly dateTextTarget: HTMLElement
+  declare readonly hasRouteModalTarget: boolean
   declare readonly routeModalTarget: HTMLElement
   declare readonly stationModalTarget: HTMLElement
   declare readonly stationListTarget: HTMLElement

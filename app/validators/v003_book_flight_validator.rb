@@ -36,6 +36,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V003BookFlightValidator < BaseValidator
   self.validator_id = 'v003_book_flight_validator'
+  self.task_id = '5fb8453d-648a-4944-bb52-7e0e7eb4f58c'
   self.title = ' 预订深圳到北京后天的最低价机票'
   self.description = '需要在系统中搜索深圳到北京后天的航班，找到价格最低的航班并成功创建订单。'
   self.timeout_seconds = 300

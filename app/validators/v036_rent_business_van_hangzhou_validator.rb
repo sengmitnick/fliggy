@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V036RentBusinessVanHangzhouValidator < BaseValidator
   self.validator_id = 'v036_rent_business_van_hangzhou_validator'
+  self.task_id = '73f0ea71-c91a-4c62-b5f0-fcaadc96b5a7'
   self.title = '租赁明天杭州商务车（2天，5座以上）'
   self.description = '搜索杭州的租车服务，找到商务车车型（5座以上）并租赁2天'
   self.timeout_seconds = 240

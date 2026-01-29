@@ -26,9 +26,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly travelerIdInputTargets: HTMLInputElement[]
 
   declare selectedPassengerIdValue: string
+  declare readonly hasSelectedPassengerIdValue: boolean
   declare selectedPassengerNameValue: string
+  declare readonly hasSelectedPassengerNameValue: boolean
   declare selectedPassengerIdNumberValue: string
+  declare readonly hasSelectedPassengerIdNumberValue: boolean
   declare travelerIndexValue: number
+  declare readonly hasTravelerIndexValue: boolean
   declare usedPassengerIdsValue: string[]
   declare hasUsedPassengerIdsValue: boolean
 

@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V030BookEarliestFlightGuangzhouBeijingValidator < BaseValidator
   self.validator_id = 'v030_book_earliest_flight_guangzhou_beijing_validator'
+  self.task_id = '530b0d27-0eff-46b7-a7b1-d7226603ad4b'
   self.title = '预订后天广州到北京最早起飞的航班'
   self.description = '搜索后天广州到北京的航班，找到起飞时间最早的航班并完成预订'
   self.timeout_seconds = 240

@@ -34,6 +34,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V016BookDeepTravelGuideValidator < BaseValidator
   self.validator_id = 'v016_book_deep_travel_guide_validator'
+  self.task_id = '749afa1f-b65f-4f1e-a886-3afc82d59cb1'
   self.title = '为1位成人预订7天后的高评分深度旅行向导服务'
   self.description = '需要搜索评分≥4.8分、服务客户≥1000人的深度旅行向导，为1位成人预订7天后的向导服务，并选择经验最丰富（服务客户数最多）的向导'
   self.timeout_seconds = 300

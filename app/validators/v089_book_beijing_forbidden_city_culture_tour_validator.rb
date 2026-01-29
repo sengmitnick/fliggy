@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例89: 预订北京故宫文化深度游（高评分文化讲解）
 class V089BookBeijingForbiddenCityCultureTourValidator < BaseValidator
   self.validator_id = 'v089_book_beijing_forbidden_city_culture_tour_validator'
+  self.task_id = 'a5f889d8-3913-4451-97a9-3fce8e3e463b'
   self.title = '预订北京故宫文化深度游（历史学者讲解，评分≥4.9）'
   self.description = '预订5天后的故宫文化深度游，要求评分≥4.9分的历史学者讲解，选择服务最多的向导'
   self.timeout_seconds = 240

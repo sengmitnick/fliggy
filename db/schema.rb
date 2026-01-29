@@ -715,6 +715,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_120547) do
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_products_on_deep_travel_guide_id"
   end
 
+  create_table "deep_travel_reviews", force: :cascade do |t|
+    t.bigint "deep_travel_guide_id"
+    t.bigint "user_id"
+    t.decimal "rating", default: "5.0"
+    t.text "content"
+    t.integer "helpful_count", default: 0
+    t.date "visit_date"
+    t.string "data_version", default: "'0'"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deep_travel_guide_id"], name: "index_deep_travel_reviews_on_deep_travel_guide_id"
+    t.index ["user_id"], name: "index_deep_travel_reviews_on_user_id"
+  end
+
   create_table "destinations", force: :cascade do |t|
     t.string "name"
     t.string "region"

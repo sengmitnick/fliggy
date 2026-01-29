@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V083BuyAnnualTravelPlanValidator < BaseValidator
   self.validator_id = 'v083_buy_annual_travel_plan_validator'
+  self.task_id = 'a4b9bf4f-8238-4401-8ff3-a58352e12aea'
   self.title = '购买全年境外旅行计划（商务人士，全年无限次出行）'
   self.description = '为经常出境的商务人士购买全年旅行计划，支持全年无限次出行'
   self.timeout_seconds = 240

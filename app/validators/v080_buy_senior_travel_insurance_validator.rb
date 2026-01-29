@@ -34,6 +34,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V080BuySeniorTravelInsuranceValidator < BaseValidator
   self.validator_id = 'v080_buy_senior_travel_insurance_validator'
+  self.task_id = 'b0be2515-74d7-4a7d-823d-cac17397ff55'
   self.title = '购买老人旅游保险（65岁，北京出行，5天，高保额）'
   self.description = '为65岁老人购买境内旅游保险，选择医疗保额最高的产品'
   self.timeout_seconds = 240

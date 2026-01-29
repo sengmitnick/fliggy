@@ -1,4 +1,17 @@
-<div class="min-h-screen bg-white" data-controller="city-selector hotel-search hotel-date-picker hotel-guest-selector hotel-price-filter hotel-filter-persistence" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-destination-city-value="" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
+<div class="min-h-screen bg-white" data-controller="city-selector hotel-search hotel-date-picker hotel-guest-selector hotel-price-filter hotel-filter-persistence" 
+     data-city-selector-departure-city-value="<%= @city %>" 
+     data-city-selector-destination-city-value="" 
+     data-city-selector-enable-multi-select-value="false" 
+     data-city-selector-modal-title-value="选择城市"
+     data-hotel-date-picker-check-in-value="<%= @check_in %>"
+     data-hotel-date-picker-check-out-value="<%= @check_out %>"
+     data-hotel-date-picker-selecting-check-in-value="true"
+     data-hotel-guest-selector-rooms-value="<%= @rooms %>"
+     data-hotel-guest-selector-adults-value="<%= @adults %>"
+     data-hotel-guest-selector-children-value="<%= @children %>"
+     data-hotel-price-filter-min-price-value="<%= @price_min || 0 %>"
+     data-hotel-price-filter-max-price-value="<%= @price_max || 3000 %>"
+     data-hotel-price-filter-stars-value="<%= @star_level || 0 %>">
   <!-- Header Banner -->
   <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
 

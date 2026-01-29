@@ -2,26 +2,28 @@
 
 require_relative 'base_validator'
 
-# 验证用例69: 预订后天上海迪士尼家庭票（2成人+1儿童，选最优惠组合）
+# 验证用例69: 预订后天上海迪士尼家庭套餐（2成人+1儿童，最便宜）
 # 
 # 任务描述:
-#   Agent 需要为一家三口（2成人+1儿童）预订上海迪士尼门票，
-#   对比单独购买和家庭套票价格，选择最优惠方案并成功创建订单
+#   Agent 需要为1个家庭（2成人+1儿童）预订后天的上海迪士尼乐园门票，
+#   由于系统不支持家庭套票，需要创建2个独立订单：
+#   - 1个成人票订单（数量2张）
+#   - 1个儿童票订单（数量1张）
+#   并选择最便宜的供应商组合
 # 
 # 复杂度分析:
 #   1. 需要搜索"上海迪士尼乐园"景点
-#   2. 需要识别成人票和儿童票
-#   3. 需要计算组合方案价格（2成人+1儿童单独购买 vs 家庭套票）
-#   4. 需要对比多个供应商的价格
-#   5. 需要选择最优惠的购买方案
-#   6. 可能需要创建2个订单（成人票+儿童票）或1个套票订单
-#   ❌ 不能一次性提供：需要先搜索→对比票种→计算总价→选择方案
+#   2. 需要理解系统不支持家庭套票，必须分别预订
+#   3. 需要创建2个独立订单（成人票订单 + 儿童票订单）
+#   4. 需要对比供应商价格，选择最优组合
+#   5. 需要填写正确的游玩日期（后天）
+#   ❌ 不能一次性提供：需要先搜索→识别票种→对比价格→创建2个订单
 # 
 # 评分标准:
-#   - 订单已创建且数量正确 (20分)
+#   - 创建了2个订单（成人票+儿童票）(20分)
 #   - 景点正确（上海迪士尼乐园）(15分)
-#   - 成人票数量=2张 (15分)
-#   - 儿童票数量=1张 (15分)
+#   - 成人票数量正确（2张）(15分)
+#   - 儿童票数量正确（1张）(15分)
 #   - 游玩日期正确（后天）(10分)
 #   - 选择了最优惠的供应商组合 (25分)
 # 
@@ -35,8 +37,9 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
   self.validator_id = 'v069_book_shanghai_disney_family_tickets_validator'
-  self.title = '预订后天上海迪士尼家庭票（2成人+1儿童，最优惠组合）'
-  self.description = '为一家三口预订迪士尼门票，对比成人票和儿童票价格，选择最优惠的供应商组合'
+  self.task_id = '01352bcb-f7ff-4891-a072-114e6565b87d'
+  self.title = '预订后天上海迪士尼家庭套餐（2成人+1儿童，最便宜）'
+  self.description = '为1个家庭预订迪士尼门票（2成人+1儿童），通过2个订单实现，选择最便宜的供应商'
   self.timeout_seconds = 300
   
   # 准备阶段：设置任务参数
@@ -76,7 +79,7 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
       date_description: "后天（#{@visit_date.strftime('%Y年%m月%d日')}）",
       adult_count: @adult_count,
       child_count: @child_count,
-      hint: "系统中有多个供应商提供成人票和儿童票，请对比价格后选择最优惠的组合方案（2成人票+1儿童票）",
+      hint: "系统不支持家庭套票，需要分别购买：2张成人票和1张儿童票。请对比供应商价格后选择最优惠的组合方案",
       available_adult_tickets: @adult_tickets.count,
       available_child_tickets: @child_tickets.count
     }
@@ -84,68 +87,93 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
   
   # 验证阶段：检查订单是否符合要求
   def verify
-    # 断言1: 必须有订单创建
-    add_assertion "订单已创建", weight: 20 do
-      @ticket_orders = TicketOrder.order(created_at: :desc).limit(5).to_a
-      expect(@ticket_orders).not_to be_empty, "未找到任何门票订单记录"
+    # 断言1: 创建了成人票和儿童票订单
+    add_assertion "创建了成人票和儿童票订单", weight: 20 do
+      # 查询当前会话的订单（按景点和 data_version 筛选）
+      all_orders = TicketOrder
+        .joins(ticket: :attraction)
+        .includes(:ticket)
+        .where(tickets: { attractions: { name: @attraction_name } })
+        .where(data_version: @data_version)
+        .order(created_at: :desc)
+        .to_a
       
-      # 统计成人票和儿童票数量
-      @actual_adult_count = 0
-      @actual_child_count = 0
+      expect(all_orders).not_to be_empty, "未找到任何#{@attraction_name}的门票订单记录"
       
-      @ticket_orders.each do |order|
-        ticket = order.ticket
-        if ticket.ticket_type == 'adult'
-          @actual_adult_count += order.quantity
-        elsif ticket.ticket_type == 'child'
-          @actual_child_count += order.quantity
-        end
-      end
+      # 只保留成人票和儿童票订单（排除其他类型）
+      @all_ticket_orders = all_orders.select { |o| ['adult', 'child'].include?(o.ticket.ticket_type) }
+      
+      expect(@all_ticket_orders).not_to be_empty,
+        "未找到成人票或儿童票订单（找到#{all_orders.size}个订单，但都不是成人票/儿童票）"
+      
+      # 分离成人票和儿童票（不管日期）
+      all_adult_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
+      all_child_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'child' }
+      
+      expect(all_adult_orders).not_to be_empty, "未找到任何成人票订单"
+      expect(all_child_orders).not_to be_empty, "未找到任何儿童票订单"
     end
     
-    return if @ticket_orders.empty? # 如果没有订单，后续断言无法继续
+    return if @all_ticket_orders.nil? || @all_ticket_orders.empty?
     
     # 断言2: 景点正确
     add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
-      @ticket_orders.each do |order|
+      @all_ticket_orders.each do |order|
         attraction = order.ticket.attraction
         expect(attraction.name).to eq(@attraction_name),
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     end
     
-    # 断言3: 成人票数量正确
-    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 15 do
-      expect(@actual_adult_count).to eq(@adult_count),
-        "成人票数量错误。期望: #{@adult_count}张, 实际: #{@actual_adult_count}张"
-    end
-    
-    # 断言4: 儿童票数量正确
-    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 15 do
-      expect(@actual_child_count).to eq(@child_count),
-        "儿童票数量错误。期望: #{@child_count}张, 实际: #{@actual_child_count}张"
-    end
-    
-    # 断言5: 游玩日期正确
+    # 断言3: 游玩日期正确（后天）
     add_assertion "游玩日期正确（后天，#{@visit_date}）", weight: 10 do
-      @ticket_orders.each do |order|
-        expect(order.visit_date).to eq(@visit_date),
-          "游玩日期错误。期望: #{@visit_date}（后天）, 实际: #{order.visit_date}"
-      end
+      # 筛选出日期正确的订单
+      @correct_date_orders = @all_ticket_orders.select { |o| o.visit_date == @visit_date }
+      
+      expect(@correct_date_orders).not_to be_empty,
+        "未找到日期为#{@visit_date}（后天）的订单。" \
+        "找到的订单日期为: #{@all_ticket_orders.map(&:visit_date).uniq.join(', ')}"
+      
+      # 分离成人票和儿童票（日期正确的）
+      @adult_orders = @correct_date_orders.select { |o| o.ticket.ticket_type == 'adult' }
+      @child_orders = @correct_date_orders.select { |o| o.ticket.ticket_type == 'child' }
+      
+      expect(@adult_orders).not_to be_empty, "未找到日期为#{@visit_date}的成人票订单"
+      expect(@child_orders).not_to be_empty, "未找到日期为#{@visit_date}的儿童票订单"
+    end
+    
+    return if @correct_date_orders.nil? || @correct_date_orders.empty?
+    
+    # 断言4: 成人票数量正确（2张）
+    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 15 do
+      actual_adult_count = @adult_orders.sum(&:quantity)
+      
+      expect(actual_adult_count).to eq(@adult_count),
+        "成人票总数量错误。期望: #{@adult_count}张, 实际: #{actual_adult_count}张 " \
+        "（来自#{@adult_orders.size}个订单: #{@adult_orders.map { |o| "#{o.quantity}张" }.join(' + ')}）"
+    end
+    
+    # 断言5: 儿童票数量正确（1张）
+    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 15 do
+      actual_child_count = @child_orders.sum(&:quantity)
+      
+      expect(actual_child_count).to eq(@child_count),
+        "儿童票总数量错误。期望: #{@child_count}张, 实际: #{actual_child_count}张 " \
+        "（来自#{@child_orders.size}个订单: #{@child_orders.map { |o| "#{o.quantity}张" }.join(' + ')}）"
     end
     
     # 断言6: 选择了最优惠的供应商组合（核心评分项）
     add_assertion "选择了最优惠的供应商组合", weight: 25 do
-      # 计算实际总价
-      actual_total = @ticket_orders.sum(&:total_price)
+      # 计算实际总价（只计算日期正确的成人票和儿童票订单）
+      actual_total = @adult_orders.sum(&:total_price) + @child_orders.sum(&:total_price)
       
-      # 与最优方案对比（允许±10元误差，因为可能有不同的合理组合）
+      # 与最优方案对比（允许5%误差）
       best_total = @best_adult_price * @adult_count + @best_child_price * @child_count
       
       expect(actual_total).to be <= (best_total * 1.05),
         "未选择最优惠的供应商组合。" \
-        "最优方案总价: #{best_total}元（成人#{@best_adult_price}元×#{@adult_count} + 儿童#{@best_child_price}元×#{@child_count}），" \
-        "实际总价: #{actual_total}元"
+        "最优方案总价: #{best_total.round(2)}元（成人#{@best_adult_price}元×#{@adult_count} + 儿童#{@best_child_price}元×#{@child_count}），" \
+        "实际总价: #{actual_total.round(2)}元（成人票: #{@adult_orders.sum(&:total_price).round(2)}元 + 儿童票: #{@child_orders.sum(&:total_price).round(2)}元）"
     end
   end
   
@@ -224,7 +252,7 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     end
   end
   
-  # 模拟 AI Agent 操作：预订上海迪士尼家庭票
+  # 模拟 AI Agent 操作：预订上海迪士尼家庭套餐
   def simulate
     # 1. 查找测试用户（数据包中已创建）
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -284,7 +312,7 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
       quantity: @adult_count,
       total_price: best_adult_supplier.current_price * @adult_count,
       status: 'pending',
-      notes: '家庭票-成人'
+      notes: '家庭套餐-成人票'
     )
     
     # 7. 创建儿童票订单（1张）
@@ -297,12 +325,12 @@ class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
       quantity: @child_count,
       total_price: best_child_supplier.current_price * @child_count,
       status: 'pending',
-      notes: '家庭票-儿童'
+      notes: '家庭套餐-儿童票'
     )
     
     # 返回操作信息
     {
-      action: 'create_family_tickets',
+      action: 'create_family_package_orders',
       adult_order_id: adult_order.id,
       child_order_id: child_order.id,
       attraction_name: attraction.name,
