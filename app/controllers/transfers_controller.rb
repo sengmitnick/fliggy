@@ -81,7 +81,7 @@ class TransfersController < ApplicationController
     
     @trains = Train.all
     @trains = @trains.where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", Date.parse(@departure_date)) if @departure_date.present?
-    @trains = @trains.where('departure_station LIKE ? OR arrival_station LIKE ?',
+    @trains = @trains.where('departure_city LIKE ? OR arrival_city LIKE ?',
                            "%#{@departure_station}%", "%#{@arrival_station}%") if @departure_station || @arrival_station
     
     @trains = @trains.order(departure_time: :asc).limit(50)
