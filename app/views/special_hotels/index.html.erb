@@ -1,4 +1,10 @@
-<div class="min-h-screen bg-gray-50" data-controller="city-selector special-hotel-search" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市" data-special-hotel-search-city-value="<%= @city %>" data-special-hotel-search-query-value="<%= params[:query] || '' %>">
+<div class="min-h-screen bg-gray-50" data-controller="city-selector special-hotel-search" 
+     data-city-selector-departure-city-value="<%= @city %>" 
+     data-city-selector-destination-city-value=""
+     data-city-selector-enable-multi-select-value="false" 
+     data-city-selector-modal-title-value="选择城市" 
+     data-special-hotel-search-city-value="<%= @city %>" 
+     data-special-hotel-search-query-value="<%= params[:query] || '' %>">
   <!-- Top Banner -->
   <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #FF3B30 0%, #FF6B6B 50%, #FFA07A 100%);">
     <!-- Back Button -->
@@ -165,13 +171,13 @@
           </button>
         </div>
         <div class="space-y-2">
-          <button data-action="click->special-hotel-filter#selectSort" data-value="price" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort].blank? || params[:sort] == 'price' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="sortOption" data-action="click->special-hotel-filter#selectSort" data-value="price" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort].blank? || params[:sort] == 'price' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             价格优先（默认）
           </button>
-          <button data-action="click->special-hotel-filter#selectSort" data-value="rating" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'rating' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="sortOption" data-action="click->special-hotel-filter#selectSort" data-value="rating" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'rating' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             好评优先
           </button>
-          <button data-action="click->special-hotel-filter#selectSort" data-value="distance" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'distance' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="sortOption" data-action="click->special-hotel-filter#selectSort" data-value="distance" class="w-full text-left px-4 py-3 rounded-lg <%= params[:sort] == 'distance' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             距离优先
           </button>
         </div>
@@ -191,11 +197,11 @@
             </button>
           </div>
           <div class="grid grid-cols-3 gap-2">
-            <button data-action="click->special-hotel-filter#selectDistrict" data-value="" class="px-4 py-3 rounded-lg text-center <%= params[:district].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
+            <button data-special-hotel-filter-target="districtOption" data-action="click->special-hotel-filter#selectDistrict" data-value="" class="px-4 py-3 rounded-lg text-center <%= params[:district].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
               全部
             </button>
             <% @districts.each do |district| %>
-              <button data-action="click->special-hotel-filter#selectDistrict" data-value="<%= district %>" class="px-4 py-3 rounded-lg text-center <%= params[:district] == district ? 'bg-primary text-white' : 'bg-gray-50' %>">
+              <button data-special-hotel-filter-target="districtOption" data-action="click->special-hotel-filter#selectDistrict" data-value="<%= district %>" class="px-4 py-3 rounded-lg text-center <%= params[:district] == district ? 'bg-primary text-white' : 'bg-gray-50' %>">
                 <%= district %>
               </button>
             <% end %>
@@ -216,19 +222,19 @@
           </button>
         </div>
         <div class="space-y-2">
-          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="priceOption" data-action="click->special-hotel-filter#selectPriceRange" data-value="" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range].blank? ? 'bg-primary text-white' : 'bg-gray-50' %>">
             不限价格
           </button>
-          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="0-100" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '0-100' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="priceOption" data-action="click->special-hotel-filter#selectPriceRange" data-value="0-100" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '0-100' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             ¥100以下
           </button>
-          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="100-200" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '100-200' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="priceOption" data-action="click->special-hotel-filter#selectPriceRange" data-value="100-200" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '100-200' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             ¥100-200
           </button>
-          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="200-300" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '200-300' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="priceOption" data-action="click->special-hotel-filter#selectPriceRange" data-value="200-300" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '200-300' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             ¥200-300
           </button>
-          <button data-action="click->special-hotel-filter#selectPriceRange" data-value="300+" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '300+' ? 'bg-primary text-white' : 'bg-gray-50' %>">
+          <button data-special-hotel-filter-target="priceOption" data-action="click->special-hotel-filter#selectPriceRange" data-value="300+" class="w-full text-left px-4 py-3 rounded-lg <%= params[:price_range] == '300+' ? 'bg-primary text-white' : 'bg-gray-50' %>">
             ¥300以上
           </button>
         </div>

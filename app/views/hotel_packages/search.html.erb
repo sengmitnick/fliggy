@@ -2,7 +2,8 @@
   <!-- Search Bar -->
   <div class="sticky top-0 z-20 bg-surface border-b border-border" 
        data-controller="city-selector" 
-       data-city-selector-departure-city-value="<%= @city || '武汉' %>">
+       data-city-selector-departure-city-value="<%= @city || '武汉' %>"
+       data-city-selector-destination-city-value="">
     <div class="px-4 py-3">
       <%= form_with url: search_hotel_packages_path, method: :get, data: { turbo: false }, class: "flex gap-2 items-center" do |f| %>
         <!-- Back Button -->
