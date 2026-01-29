@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例71: 预订本周末广州长隆野生动物世界成人票（4张）
 class V071BookGuangzhouChimelongStudentTicketValidator < BaseValidator
   self.validator_id = 'v071_book_guangzhou_chimelong_student_ticket_validator'
+  self.task_id = '5349ccad-e036-400c-a6e1-ffce23767534'
   self.title = '预订本周末广州长隆野生动物世界成人票（4张，最便宜）'
   self.description = '为4位成人预订本周末的长隆野生动物世界门票并选择最便宜供应商'
   self.timeout_seconds = 240

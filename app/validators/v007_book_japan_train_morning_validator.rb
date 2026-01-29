@@ -25,6 +25,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V007BookJapanTrainMorningValidator < BaseValidator
   self.validator_id = 'v007_book_japan_train_morning_validator'
+  self.task_id = 'e29cd5e5-5173-4c40-b61f-924be315c7a2'
   self.title = '预订后天东京到京都的上午新干线车票'
   self.description = '搜索后天东京到京都的新干线车票，选择上午（12:00之前）的班次并预订'
   self.timeout_seconds = 300

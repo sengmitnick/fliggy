@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V040BookTourGuangzhouValidator < BaseValidator
   self.validator_id = 'v040_book_tour_guangzhou_validator'
+  self.task_id = 'ad551c7d-fd66-466b-b84b-f041af95feaf'
   self.title = '预订大后天广州5天4晚跟团游（1成人1儿童）'
   self.description = '搜索广州的跟团游产品，找到5天4晚的产品并预订1成人1儿童'
   self.timeout_seconds = 240

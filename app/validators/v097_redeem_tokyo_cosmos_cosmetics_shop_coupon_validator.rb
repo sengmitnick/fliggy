@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例97: 兑换东京科摩思药妆店优惠券（满额立减7%）
 class V097RedeemTokyoCosmosCosmeticsShopCouponValidator < BaseValidator
   self.validator_id = 'v097_redeem_tokyo_cosmos_cosmetics_shop_coupon_validator'
+  self.task_id = 'c25157f9-a90e-48be-b0f5-f3b8b941e478'
   self.title = '兑换东京科摩思药妆店优惠券（满额立减7%）'
   self.description = '兑换东京歌舞伎町科摩思药妆店的优惠券，选择折扣最高的'
   self.timeout_seconds = 180

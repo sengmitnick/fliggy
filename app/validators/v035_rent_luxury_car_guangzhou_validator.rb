@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V035RentLuxuryCarGuangzhouValidator < BaseValidator
   self.validator_id = 'v035_rent_luxury_car_guangzhou_validator'
+  self.task_id = '024489de-0ebb-4238-ac62-d5adef07a43e'
   self.title = '租赁后天广州豪华轿车（3天）'
   self.description = '搜索广州的租车服务，找到豪华轿车车型并租赁3天'
   self.timeout_seconds = 240

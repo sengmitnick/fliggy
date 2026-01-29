@@ -36,6 +36,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V079BuyInternationalTravelInsuranceThailandValidator < BaseValidator
   self.validator_id = 'v079_buy_international_travel_insurance_thailand_validator'
+  self.task_id = 'cf2c9d61-fcb6-4467-8b45-4ab03e553a23'
   self.title = '购买境外旅游保险（泰国出行，10天，2人，最便宜）'
   self.description = '为泰国出行购买境外旅游保险（10天后出发），选择适合亚洲地区且价格最便宜的产品'
   self.timeout_seconds = 240

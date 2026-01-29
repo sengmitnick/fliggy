@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V047BookAttractionTicketValidator < BaseValidator
   self.validator_id = 'v047_book_attraction_ticket_validator'
+  self.task_id = '72f0aacf-7273-46bb-a334-35194205d1d1'
   self.title = '预订明天深圳欢乐港湾成人票（1张，最便宜供应商）'
   self.description = '需要搜索深圳欢乐港湾的门票，选择成人票中最便宜的供应商并成功创建订单'
   self.timeout_seconds = 240

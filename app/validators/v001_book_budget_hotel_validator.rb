@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V001BookBudgetHotelValidator < BaseValidator
   self.validator_id = 'v001_book_budget_hotel_validator'
+  self.task_id = 'c0342467-8568-4bce-964c-4133c8367e7d'
   self.title = ' 预订后天入住一晚深圳的经济型酒店'
   self.description = '需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单'
   self.timeout_seconds = 300

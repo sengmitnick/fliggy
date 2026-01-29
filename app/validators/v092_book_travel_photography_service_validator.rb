@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例92: 预订旅拍服务（高粉丝跟拍摄影师）
 class V092BookTravelPhotographyServiceValidator < BaseValidator
   self.validator_id = 'v092_book_travel_photography_service_validator'
+  self.task_id = 'aca21330-8a40-44bc-873b-4f93472a424d'
   self.title = '预订旅拍服务（粉丝数≥15000的跟拍摄影师）'
   self.description = '预订10天后的旅拍服务，要求粉丝数≥15000的跟拍摄影师，选择评分最高的'
   self.timeout_seconds = 240

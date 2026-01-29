@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例87: 预订浦东机场接机服务（舒适5座，要求随时退）
 class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
   self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
+  self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
   self.title = '预订浦东机场接机服务（舒适5座，要求随时退政策）'
   self.description = '3天后从浦东T2接机，需要舒适5座且支持随时退政策'
   self.timeout_seconds = 240

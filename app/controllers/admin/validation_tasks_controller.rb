@@ -9,7 +9,8 @@ class Admin::ValidationTasksController < Admin::BaseController
   # GET /admin/validation_tasks/:id
   def show
     @tasks = load_all_validators
-    @task = @tasks.find { |t| t[:id] == params[:id] }
+    # 优先通过 validator_id 查找（URL 友好），也支持 task_id（UUID）
+    @task = @tasks.find { |t| t[:validator_id] == params[:id] || t[:task_id] == params[:id] }
     
     if @task.nil?
       redirect_to admin_validation_tasks_path, alert: "任务不存在"
@@ -17,7 +18,7 @@ class Admin::ValidationTasksController < Admin::BaseController
     end
     
     # 查找上一个和下一个任务
-    current_index = @tasks.index { |t| t[:id] == @task[:id] }
+    current_index = @tasks.index { |t| t[:validator_id] == @task[:validator_id] }
     @prev_task = @tasks[current_index - 1] if current_index && current_index > 0
     @next_task = @tasks[current_index + 1] if current_index && current_index < @tasks.length - 1
   end
@@ -47,8 +48,8 @@ class Admin::ValidationTasksController < Admin::BaseController
     end.compact
   end
 
-  # 根据ID查找验证器
+  # 根据ID查找验证器（支持 validator_id 或 task_id）
   def find_validator_by_id(id)
-    load_all_validators.find { |task| task[:id] == id }
+    load_all_validators.find { |task| task[:validator_id] == id || task[:task_id] == id }
   end
 end

@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V056BookThailandSim5dayValidator < BaseValidator
   self.validator_id = 'v056_book_thailand_sim_5day_validator'
+  self.task_id = '78281c9c-a2e5-4a59-aa7e-f013fb164c5a'
   self.title = '购买泰国5天8GB/天SIM卡（数量1张）'
   self.description = '搜索泰国地区的SIM卡，找到5天有效期且每日流量8GB的产品并购买1张'
   self.timeout_seconds = 300

@@ -30,6 +30,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V019BookBudgetHotelGuangzhouValidator < BaseValidator
   self.validator_id = 'v019_book_budget_hotel_guangzhou_validator'
+  self.task_id = '7b8e1ba1-622b-44a7-ab82-d733845f73d5'
   self.title = '预订大后天广州便宜酒店（价格≤300元）'
   self.description = '搜索广州的酒店，找到价格≤300元/晚的酒店并完成大后天入住1晚的预订'
   self.timeout_seconds = 240

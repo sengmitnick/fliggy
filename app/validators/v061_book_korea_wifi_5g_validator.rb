@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V061BookKoreaWifi5gValidator < BaseValidator
   self.validator_id = 'v061_book_korea_wifi_5g_validator'
+  self.task_id = 'e8212b70-653b-4752-89e7-513eb4730cf2'
   self.title = '预订韩国随身WiFi（1台、5天、5G高速）'
   self.description = '搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单'
   self.timeout_seconds = 240

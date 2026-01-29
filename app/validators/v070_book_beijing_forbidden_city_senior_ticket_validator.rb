@@ -25,6 +25,7 @@ require_relative 'base_validator'
 #   - 选择了最便宜的供应商 (20分)
 class V070BookBeijingForbiddenCitySeniorTicketValidator < BaseValidator
   self.validator_id = 'v070_book_beijing_forbidden_city_senior_ticket_validator'
+  self.task_id = '0c17b98c-3602-4e84-9115-984ead6ebda4'
   self.title = '预订3天后北京欢乐谷家庭套票（2成人+1儿童，最便宜）'
   self.description = '为1个家庭预订欢乐谷家庭套票（2成人+1儿童），选择最便宜的供应商'
   self.timeout_seconds = 240

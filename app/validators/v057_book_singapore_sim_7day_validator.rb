@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V057BookSingaporeSim7dayValidator < BaseValidator
   self.validator_id = 'v057_book_singapore_sim_7day_validator'
+  self.task_id = '24205fa9-acae-42c0-ae53-fae2238238d2'
   self.title = '购买新加坡7天无限流量SIM卡（数量1张）'
   self.description = '搜索新加坡地区的SIM卡，找到7天有效期且流量无限的产品并购买1张'
   self.timeout_seconds = 300

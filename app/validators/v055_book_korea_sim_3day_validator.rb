@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V055BookKoreaSim3dayValidator < BaseValidator
   self.validator_id = 'v055_book_korea_sim_3day_validator'
+  self.task_id = '6bc431af-a23f-422a-b4cf-17d17ab01d20'
   self.title = '购买韩国3天5GB/天SIM卡（数量1张）'
   self.description = '搜索韩国地区的SIM卡，找到3天有效期且每日流量5GB的产品并购买1张'
   self.timeout_seconds = 300

@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例91: 预订崇礼滑雪私教课（单板双板均可，家庭出行）
 class V091BookChongliSkiingPrivateLessonValidator < BaseValidator
   self.validator_id = 'v091_book_chongli_skiing_private_lesson_validator'
+  self.task_id = '5bc15e2f-a604-469a-99a1-ccce0e9eabed'
   self.title = '预订崇礼滑雪私教课（单板双板均可，家庭出行2大1小）'
   self.description = '预订下周末崇礼万龙滑雪场私教课，家庭出行2大1小，选择评分最高的滑雪教练'
   self.timeout_seconds = 240

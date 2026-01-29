@@ -1042,38 +1042,4 @@ abroad_products = [
 
 DeepTravelProduct.insert_all(abroad_products)
 
-# ==================== 数据统计 ====================
-puts "\n" + "="*60
-puts "✅ 深度旅行数据包加载完成！"
-puts "="*60
-
-puts "\n【地区统计】"
-puts "  北京地区: 2个景点, 8位讲解员, 8个产品"
-puts "    - 故宫博物院: 5位讲解员"
-puts "    - 颐和园: 3位讲解员"
-puts "  陕西地区: 2个景点, 6位讲解员, 6个产品"
-puts "    - 秦始皇帝陵博物院: 3位讲解员"
-puts "    - 西安城墙: 3位讲解员"
-puts "  华东地区: 2个景点, 6位讲解员, 6个产品"
-puts "    - 上海外滩: 3位讲解员"
-puts "    - 苏州园林: 3位讲解员"
-puts "  华中地区: 2个景点, 6位讲解员, 6个产品"
-puts "    - 武汉黄鹤楼: 3位讲解员"
-puts "    - 长沙岳麓书院: 3位讲解员"
-puts "  境外精选: 2个景点, 6位讲解员, 6个产品"
-puts "    - 东京浅草寺: 3位讲解员"
-puts "    - 巴黎卢浮宫: 3位讲解员"
-
-puts "\n【总计】"
-puts "  总景点数: #{DeepTravelGuide.distinct.pluck(:venue).count}"
-puts "  总讲解员数: #{DeepTravelGuide.count}"
-puts "  总产品数: #{DeepTravelProduct.count}"
-
-puts "\n【标签覆盖】"
-puts "  ✅ 境内精选（北京+华东+华中+陕西）"
-puts "  ✅ 境外精选"
-puts "  ✅ 北京"
-puts "  ✅ 华东"
-puts "  ✅ 华中"
-puts "  ✅ 陕西"
-puts "\n所有地区标签均有完整数据！"
+puts "✓ 深度旅行数据包加载完成"

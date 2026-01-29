@@ -31,6 +31,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V009SearchBudgetTourValidator < BaseValidator
   self.validator_id = 'v009_search_budget_tour_validator'
+  self.task_id = '1d9a9d05-c081-476c-b60f-307fa723a85c'
   self.title = '搜索预算5000元以内的昆明旅游产品（任意天数、任意类型、1人出行）'
   self.description = '在搜索页选择"昆明"作为目的地城市，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行）'
   self.timeout_seconds = 300

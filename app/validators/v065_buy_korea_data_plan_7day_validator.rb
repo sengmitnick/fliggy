@@ -39,6 +39,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V065BuyKoreaDataPlan7dayValidator < BaseValidator
   self.validator_id = 'v065_buy_korea_data_plan_7day_validator'
+  self.task_id = 'fde6e0b2-b769-44c0-ba1a-016d34820123'
   self.title = '购买韩国流量包（30天月包、328元）'
   self.description = '搜索韩国流量包产品，选择30天月包套餐（按月计费）并成功创建订单'
   self.timeout_seconds = 240

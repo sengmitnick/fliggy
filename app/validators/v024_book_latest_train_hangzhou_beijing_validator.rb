@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V024BookLatestTrainHangzhouBeijingValidator < BaseValidator
   self.validator_id = 'v024_book_latest_train_hangzhou_beijing_validator'
+  self.task_id = '432ed3bc-72d8-4243-8408-9bda6ef0a064'
   self.title = '预订明天杭州到北京最晚的高铁'
   self.description = '在明天的车次中找到发车时间最晚的高铁并完成预订'
   self.timeout_seconds = 240

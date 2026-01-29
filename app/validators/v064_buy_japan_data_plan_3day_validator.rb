@@ -39,6 +39,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V064BuyJapanDataPlan3dayValidator < BaseValidator
   self.validator_id = 'v064_buy_japan_data_plan_3day_validator'
+  self.task_id = 'cae2d1e3-98d3-4b68-94c2-a90d2647e2cb'
   self.title = '购买日本流量包（3天天包、68元）'
   self.description = '搜索日本流量包产品，选择3天天包套餐（按天计费）并成功创建订单'
   self.timeout_seconds = 240

@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V037BookTourShanghaiValidator < BaseValidator
   self.validator_id = 'v037_book_tour_shanghai_validator'
+  self.task_id = '1bd41d87-7ea1-4d1b-850e-bccde2ac43b1'
   self.title = '预订大后天上海周边3天2晚跟团游'
   self.description = '搜索上海周边的跟团游产品，找到3天2晚的产品并完成预订'
   self.timeout_seconds = 240

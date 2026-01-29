@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例90: 预订三亚潜水体验（PADI认证教练，最低价格）
 class V090BookSanyaDivingExperienceValidator < BaseValidator
   self.validator_id = 'v090_book_sanya_diving_experience_validator'
+  self.task_id = 'b0ae1fdc-ef74-465b-ade9-04b581d0eb17'
   self.title = '预订三亚潜水体验（PADI认证教练，选择最低价格产品）'
   self.description = '预订3天后的三亚潜水体验，要求PADI认证潜水教练，选择该教练最便宜的产品'
   self.timeout_seconds = 240

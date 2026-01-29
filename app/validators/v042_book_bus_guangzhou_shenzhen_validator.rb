@@ -21,6 +21,7 @@ require_relative 'base_validator'
 #
 class V042BookBusGuangzhouShenzhenValidator < BaseValidator
   self.validator_id = 'v042_book_bus_guangzhou_shenzhen_validator'
+  self.task_id = '3f4a628e-1e34-4a6d-8884-a2114a59a3d8'
   self.title = '预订明天广州到深圳任意汽车票'
   self.description = '搜索广州到深圳的汽车票，选择任意一班车并完成预订'
   self.timeout_seconds = 240

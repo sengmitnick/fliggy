@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V054BookJapanSim5dayValidator < BaseValidator
   self.validator_id = 'v054_book_japan_sim_5day_validator'
+  self.task_id = 'f3339f0c-cc3f-45bf-9565-315994f07e25'
   self.title = '购买日本5天10GB/天SIM卡（数量1张）'
   self.description = '搜索日本地区的SIM卡，找到5天有效期且每日流量10GB的产品并购买1张'
   self.timeout_seconds = 300

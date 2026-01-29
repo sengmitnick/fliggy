@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例93: 预订本地司导服务（经验年限≥10年）
 class V093BookLocalDriverGuideServiceValidator < BaseValidator
   self.validator_id = 'v093_book_local_driver_guide_service_validator'
+  self.task_id = '5da3a869-cfbc-4ea3-bd95-c84f378ae696'
   self.title = '预订本地司导服务（经验≥10年，价格最低）'
   self.description = '预订明天的本地司导服务，要求经验≥10年，选择价格最低的产品'
   self.timeout_seconds = 240

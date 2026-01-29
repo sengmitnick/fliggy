@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V059BookThailandWifi3dayValidator < BaseValidator
   self.validator_id = 'v059_book_thailand_wifi_3day_validator'
+  self.task_id = '6b2013cb-010e-4832-8605-40a394c83748'
   self.title = '预订泰国随身WiFi（1台、3天、4G经济版）'
   self.description = '搜索泰国WiFi租赁服务，选择4G经济版并成功创建3天租赁订单'
   self.timeout_seconds = 240

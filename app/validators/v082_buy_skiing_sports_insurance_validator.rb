@@ -34,6 +34,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V082BuySkiingSportsInsuranceValidator < BaseValidator
   self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
+  self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
   self.title = '购买滑雪运动保险（长白山，3天，运动医疗保额最高）'
   self.description = '为长白山滑雪之旅购买运动保险，选择运动医疗保额最高的专业滑雪保险'
   self.timeout_seconds = 240

@@ -40,6 +40,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V066BuyThailandDataPlan1dayValidator < BaseValidator
   self.validator_id = 'v066_buy_thailand_data_plan_1day_validator'
+  self.task_id = '5911f0c3-51a6-470b-a262-304a3c34c010'
   self.title = '购买泰国流量包（语音包、68元）'
   self.description = '搜索泰国流量包产品，选择语音包套餐（支持境外拨打回境内）并成功创建订单'
   self.timeout_seconds = 240

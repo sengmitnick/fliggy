@@ -35,6 +35,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V015SearchHighRatedHotelValidator < BaseValidator
   self.validator_id = 'v015_search_high_rated_hotel_validator'
+  self.task_id = 'fc7fa502-3236-4832-a95c-a72859407f3d'
   self.title = '搜索北京评分最高的高档酒店（4星级及以上，2人入1间）'
   self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店（2人入1间）'
   self.timeout_seconds = 300

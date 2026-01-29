@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例88: 预订跨城机场接机服务（经济5座，浦东→杭州）
 class V088BookCrossCityAirportPickupValidator < BaseValidator
   self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
+  self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
   self.title = '预订浦东机场接机送到杭州（跨城接机，经济5座）'
   self.description = '5天后从浦东T1机场接机直接送到杭州市区酒店，选择经济5座'
   self.timeout_seconds = 240

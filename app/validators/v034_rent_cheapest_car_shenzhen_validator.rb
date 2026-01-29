@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V034RentCheapestCarShenzhenValidator < BaseValidator
   self.validator_id = 'v034_rent_cheapest_car_shenzhen_validator'
+  self.task_id = '58fc94c1-6e60-45d2-8aea-c0fa3cc69ff6'
   self.title = '租赁明天深圳最便宜的车（预算≤100元/天）'
   self.description = '搜索深圳的租车服务，找到价格≤100元/天的车辆并租赁1天'
   self.timeout_seconds = 240

@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例85: 预订虹桥火车站接站服务（经济7座，家庭出行）
 class V085BookTrainStationPickupValidator < BaseValidator
   self.validator_id = 'v085_book_train_station_pickup_validator'
+  self.task_id = '74f8237a-b1b5-4670-b135-2867748d0721'
   self.title = '预订虹桥火车站接站服务（家庭出行，经济7座）'
   self.description = '后天从虹桥火车站接站送到酒店，一家5口人，选择经济7座车型'
   self.timeout_seconds = 240

@@ -14,7 +14,8 @@
 - **方法**: POST
 - **功能**: 创建新的验证会话（等同于 `/api/verify/:id/prepare`）
 - **参数**: 
-  - `:id` - 任务 ID（task_id，即 validator_id）
+  - `:id` - 任务 ID（**优先使用 `task_id` (UUID)**，也支持 `validator_id` 向后兼容）
+  - 示例: `5fb8453d-648a-4944-bb52-7e0e7eb4f58c` (UUID) 或 `v003_book_flight_validator` (旧格式)
 - **返回格式**:
 ```json
 {
@@ -28,7 +29,8 @@
     "lowest_price": "550.0"
   },
   "session_id": "242dd189-9dc8-4f83-8da1-ad1c1c09fada",
-  "task_id": "book_flight_sz_to_bj"
+  "task_id": "5fb8453d-648a-4944-bb52-7e0e7eb4f58c",        // UUID 格式
+  "validator_id": "v003_book_flight_validator"           // 向后兼容
 }
 ```
 
@@ -38,7 +40,7 @@
 - **参数**:
 ```json
 {
-  "task_id": "book_flight_sz_to_bj",
+  "task_id": "5fb8453d-648a-4944-bb52-7e0e7eb4f58c",  // UUID 格式（推荐） 或 validator_id 字符串（兼容）
   "session_id": "242dd189-9dc8-4f83-8da1-ad1c1c09fada"
 }
 ```
@@ -100,7 +102,7 @@
 
 ### 测试 1: 创建训练会话
 ```bash
-curl -X POST 'http://localhost:3000/api/tasks/book_flight_sz_to_bj/start'
+curl -X POST 'http://localhost:3000/api/tasks/5fb8453d-648a-4944-bb52-7e0e7eb4f58c/start'
 ```
 **结果**: ✅ 成功返回 `session_id` 和 `task` 信息
 
@@ -108,7 +110,7 @@ curl -X POST 'http://localhost:3000/api/tasks/book_flight_sz_to_bj/start'
 ```bash
 curl -X POST 'http://localhost:3000/api/verify/run' \
   -H 'Content-Type: application/json' \
-  -d '{"task_id":"book_flight_sz_to_bj","session_id":"<session_id>"}'
+  -d '{"task_id":"5fb8453d-648a-4944-bb52-7e0e7eb4f58c","session_id":"<session_id>"}'
 ```
 **结果**: ✅ 返回 `score: 0.0`，错误原因明确
 
@@ -161,8 +163,8 @@ RLS 策略自动过滤：
 ### 完整流程
 
 ```bash
-# 1. 创建会话
-response=$(curl -s -X POST 'http://localhost:3000/api/tasks/book_flight_sz_to_bj/start')
+# 1. 创建会话（使用 UUID 格式的 task_id）
+response=$(curl -s -X POST 'http://localhost:3000/api/tasks/5fb8453d-648a-4944-bb52-7e0e7eb4f58c/start')
 session_id=$(echo "$response" | jq -r '.session_id')
 task=$(echo "$response" | jq -r '.task.task')
 
@@ -175,7 +177,7 @@ echo "会话ID: $session_id"
 # 3. 验证结果
 curl -s -X POST 'http://localhost:3000/api/verify/run' \
   -H 'Content-Type: application/json' \
-  -d "{\"task_id\":\"book_flight_sz_to_bj\",\"session_id\":\"$session_id\"}" \
+  -d "{\"task_id\":\"5fb8453d-648a-4944-bb52-7e0e7eb4f58c\",\"session_id\":\"$session_id\"}" \
   | jq .
 
 # 输出示例:
@@ -197,18 +199,36 @@ curl -s -X POST 'http://localhost:3000/api/verify/run' \
 - **新接口**: `/api/tasks/:id/start` 和 `/api/verify/run` 作为兼容层
 - **内部实现**: 两套接口共享相同的业务逻辑
 
-### 支持的 task_id（validator_id）
+### 支持的任务标识符
+
+**推荐使用**: `task_id` (UUID 格式)
+**向后兼容**: `validator_id` (字符串格式)
 
 运行以下命令查看所有可用任务：
 ```bash
+# 查看 UUID 格式的 task_id（推荐）
+curl -X GET 'http://localhost:3000/api/verify' | jq '.validators[].task_id'
+
+# 查看字符串格式的 validator_id（兼容）
 curl -X GET 'http://localhost:3000/api/verify' | jq '.validators[].validator_id'
 ```
 
 示例输出：
+```json
+// task_id (UUID)
+"5fb8453d-648a-4944-bb52-7e0e7eb4f58c"
+"3d62bb93-09a6-42c5-8a8e-1e6c999eabb2"
+
+// validator_id (字符串)
+"v003_book_flight_validator"
+"v010_search_cheapest_flight_validator"
 ```
-"book_flight_sz_to_bj"
-"search_cheapest_flight"
-```
+
+#### 为什么推荐使用 task_id?
+
+- ✅ **全局唯一**: UUID 保证在多供应商环境下不会冲突
+- ✅ **标准化**: 符合 UUID v4 国际标准
+- ✅ **向后兼容**: validator_id 仍然可用，但不推荐新应用使用
 
 ---
 

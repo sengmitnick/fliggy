@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V049ApplyVisaServiceValidator < BaseValidator
   self.validator_id = 'v049_apply_visa_service_validator'
+  self.task_id = '98c2a07d-46cc-4dba-ab27-fc783c9d3c09'
   self.title = '办理泰国旅游签证（1人，最快出签）'
   self.description = '需要搜索泰国旅游签证服务，选择办理时长最短的服务商并成功创建订单'
   self.timeout_seconds = 240

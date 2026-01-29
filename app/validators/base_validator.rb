@@ -206,12 +206,14 @@ class BaseValidator
   attr_reader :execution_id, :errors, :score, :assertions
   
   class << self
-    attr_accessor :validator_id, :title, :description, :timeout_seconds
+    attr_accessor :validator_id, :task_id, :title, :description, :timeout_seconds
     
     # 返回验证器元信息
     def metadata
       {
-        id: validator_id,
+        id: task_id || validator_id,  # 优先使用 task_id（UUID），向后兼容 validator_id
+        validator_id: validator_id,    # 保留旧字段用于兼容
+        task_id: task_id,              # 新字段（UUID）
         title: title,
         description: description,
         timeout: timeout_seconds
@@ -313,7 +315,8 @@ class BaseValidator
   # 执行完整的自动化测试流程（prepare -> simulate -> verify）
   def execute_simulate
     result = {
-      validator_id: self.class.validator_id,
+      task_id: self.class.task_id,
+      validator_id: self.class.validator_id,  # 保留向后兼容
       title: self.class.title,
       status: 'unknown',
       prepare_info: nil,

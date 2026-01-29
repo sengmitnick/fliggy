@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例94: 预订成田机场免税店优惠券（全日空免税，最高折扣）
 class V094RedeemNaritaAirportDutyFreeShopCouponValidator < BaseValidator
   self.validator_id = 'v094_redeem_narita_airport_duty_free_shop_coupon_validator'
+  self.task_id = 'ecf457a8-face-4e6a-9380-668b730c5fc2'
   self.title = '兑换成田机场免税店优惠券（全日空免税，最高折扣）'
   self.description = '兑换成田机场全日空免税店优惠券，选择折扣最高的券'
   self.timeout_seconds = 180

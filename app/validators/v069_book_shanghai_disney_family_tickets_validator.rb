@@ -35,6 +35,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
   self.validator_id = 'v069_book_shanghai_disney_family_tickets_validator'
+  self.task_id = '01352bcb-f7ff-4891-a072-114e6565b87d'
   self.title = '预订后天上海迪士尼家庭票（2成人+1儿童，最优惠组合）'
   self.description = '为一家三口预订迪士尼门票，对比成人票和儿童票价格，选择最优惠的供应商组合'
   self.timeout_seconds = 300

@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V031BookEconomyClassFlightHangzhouShenzhenValidator < BaseValidator
   self.validator_id = 'v031_book_economy_class_flight_hangzhou_shenzhen_validator'
+  self.task_id = '8a584a64-cfdb-471b-88f4-93b13e200d0b'
   self.title = '预订明天杭州到深圳经济舱航班'
   self.description = '搜索明天杭州到深圳的航班，选择经济舱航班并完成预订'
   self.timeout_seconds = 240

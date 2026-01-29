@@ -30,6 +30,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V021BookBusinessHotelHangzhouValidator < BaseValidator
   self.validator_id = 'v021_book_business_hotel_hangzhou_validator'
+  self.task_id = 'f25a6149-ef4c-4812-8a81-2965ba558232'
   self.title = '预订后天杭州商务酒店'
   self.description = '搜索杭州的酒店，找到类型为"商务酒店"的酒店并完成后天入住1晚的预订'
   self.timeout_seconds = 240

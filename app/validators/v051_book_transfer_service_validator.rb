@@ -42,6 +42,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V051BookTransferServiceValidator < BaseValidator
   self.validator_id = 'v051_book_transfer_service_validator'
+  self.task_id = 'fa751c19-28f4-4c7e-abdc-76fbef90ca1f'
   self.title = '预订虹桥机场接机送到上海火车站（北京→上海）'
   self.description = '后天北京飞上海，虹桥T2机场接机送到上海火车站，选择最便宜的套餐'
   self.timeout_seconds = 240

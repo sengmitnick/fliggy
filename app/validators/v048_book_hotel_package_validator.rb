@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V048BookHotelPackageValidator < BaseValidator
   self.validator_id = 'v048_book_hotel_package_validator'
+  self.task_id = '42336f26-7a26-4d2a-a07e-4f6841c05257'
   self.title = '囤货武汉地区酒店套餐（2晚，最佳性价比选项）'
   self.description = '需要搜索武汉地区的2晚酒店套餐，囤货购买（先囤再约），从套餐选项中选择性价比最佳的（含早或豪华套餐）'
   self.timeout_seconds = 240

@@ -29,6 +29,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V017BookAnyHotelShanghaiValidator < BaseValidator
   self.validator_id = 'v017_book_any_hotel_shanghai_validator'
+  self.task_id = 'ab3c6f57-e4e4-4574-9806-25ed3c2ffa8f'
   self.title = '预订明天上海任意酒店（入住1晚）'
   self.description = '在上海搜索酒店，选择任意一家并完成明天入住1晚的预订'
   self.timeout_seconds = 240

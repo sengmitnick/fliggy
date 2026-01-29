@@ -23,6 +23,7 @@ require_relative 'base_validator'
 #
 class V045BookBusShenzhenGuangzhouValidator < BaseValidator
   self.validator_id = 'v045_book_bus_shenzhen_guangzhou_validator'
+  self.task_id = '7de96a19-469c-4768-8dec-ed836ac17124'
   self.title = '预订大后天深圳到广州最便宜汽车票（预算≤50元）'
   self.description = '搜索深圳到广州的汽车票，找到价格≤50元的班次'
   self.timeout_seconds = 240

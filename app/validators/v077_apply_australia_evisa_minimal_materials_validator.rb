@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V077ApplyAustraliaEvisaMinimalMaterialsValidator < BaseValidator
   self.validator_id = 'v077_apply_australia_evisa_minimal_materials_validator'
+  self.task_id = '0c821879-db54-42b8-9526-3336bb7af223'
   self.title = '办理澳大利亚电子签证（材料最少，上门取件）'
   self.description = '办理澳大利亚电子签证，选择所需材料最少且支持上门取件的产品'
   self.timeout_seconds = 240

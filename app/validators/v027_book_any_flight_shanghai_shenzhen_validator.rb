@@ -21,6 +21,7 @@ require_relative 'base_validator'
 #
 class V027BookAnyFlightShanghaiShenzhenValidator < BaseValidator
   self.validator_id = 'v027_book_any_flight_shanghai_shenzhen_validator'
+  self.task_id = '4e165a52-184e-42c9-b89c-ef507e259ccb'
   self.title = '预订明天上海到深圳任意航班'
   self.description = '搜索明天上海到深圳的航班，选择任意一个航班并完成预订'
   self.timeout_seconds = 240

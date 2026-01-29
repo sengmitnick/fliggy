@@ -50,6 +50,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V005BookEconomyCarValidator < BaseValidator
   self.validator_id = 'v005_book_economy_car_validator'
+  self.task_id = 'd62b9468-fc02-43ad-aa50-642bf54d0bc1'
   self.title = '租赁后天深圳的经济型轿车（3天，预算≤200元/天）'
   self.description = '搜索深圳的租车服务，找到经济型轿车（预算≤200元/天）并租赁3天'
   self.timeout_seconds = 300

@@ -30,6 +30,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V018BookHighRatedHotelBeijingValidator < BaseValidator
   self.validator_id = 'v018_book_high_rated_hotel_beijing_validator'
+  self.task_id = '34128065-50e8-4ab7-ba42-591180c6c91d'
   self.title = '预订后天北京高评分酒店（评分≥4.5）'
   self.description = '搜索北京的酒店，找到评分≥4.5分的酒店并完成后天入住1晚的预订'
   self.timeout_seconds = 240

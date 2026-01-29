@@ -30,6 +30,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V012SearchCheapestEuropeTrainValidator < BaseValidator
   self.validator_id = 'v012_search_cheapest_europe_train_validator'
+  self.task_id = '4d893f09-9fc7-4b28-a51a-a3b529160719'
   self.title = '搜索明天欧洲境内最便宜的火车票（1人）'
   self.description = '搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订（1人出行）'
   self.timeout_seconds = 300
