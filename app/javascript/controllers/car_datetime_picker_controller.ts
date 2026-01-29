@@ -32,7 +32,6 @@ export default class extends Controller<HTMLElement> {
   ]
 
   static values = {
-    // stimulus-validator: disable-next-line
     pickerType: String, // 'pickup' or 'return'
   }
 
@@ -54,6 +53,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly selectedDateDisplayTarget: HTMLElement
   // stimulus-validator: disable-next-line
   declare readonly confirmButtonTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare pickerTypeValue: string
 
   private currentMonth: Date = new Date()

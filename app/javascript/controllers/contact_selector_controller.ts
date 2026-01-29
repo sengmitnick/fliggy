@@ -32,6 +32,7 @@ export default class extends Controller<HTMLElement> {
   // stimulus-validator: disable-next-line
   declare readonly contactItemTargets: HTMLElement[]
   declare selectedContactIdValue: number
+  declare readonly hasSelectedContactIdValue: boolean
 
   connect(): void {
     console.log("ContactSelector connected", { selectedContactId: this.selectedContactIdValue })

@@ -1,4 +1,14 @@
-<div class="min-h-screen bg-[#F7F8FA]" data-controller="homestay-search city-selector hotel-date-picker hotel-guest-selector" data-city-selector-departure-city-value="<%= @city %>" data-city-selector-destination-city-value="" data-city-selector-enable-multi-select-value="false" data-city-selector-modal-title-value="选择城市">
+<div class="min-h-screen bg-[#F7F8FA]" data-controller="homestay-search city-selector hotel-date-picker hotel-guest-selector" 
+     data-city-selector-departure-city-value="<%= @city %>" 
+     data-city-selector-destination-city-value="" 
+     data-city-selector-enable-multi-select-value="false" 
+     data-city-selector-modal-title-value="选择城市"
+     data-hotel-date-picker-check-in-value="<%= @check_in %>"
+     data-hotel-date-picker-check-out-value="<%= @check_out %>"
+     data-hotel-date-picker-selecting-check-in-value="true"
+     data-hotel-guest-selector-rooms-value="<%= @rooms %>"
+     data-hotel-guest-selector-adults-value="<%= @adults %>"
+     data-hotel-guest-selector-children-value="<%= @children %>">
   <!-- Header Banner -->
   <div class="relative h-[280px] w-full text-white overflow-hidden">
     <%= image_tag "https://images.unsplash.com/photo-1523592121529-f6dde35f079e?q=80&w=800&auto=format&fit=crop", class: "absolute w-full h-full object-cover top-0 left-0 z-0", alt: "民宿背景" %>

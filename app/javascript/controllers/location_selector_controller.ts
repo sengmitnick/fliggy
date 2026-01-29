@@ -13,11 +13,8 @@ export default class extends Controller<HTMLElement> {
   ]
 
   static values = {
-    // stimulus-validator: disable-next-line
     locationType: String, // "from" or "to"
-    // stimulus-validator: disable-next-line
     currentCity: String, // current selected city
-    // stimulus-validator: disable-next-line
     arrivalCity: String, // arrival city from flight (for transfers)
     apiEndpoint: { type: String, default: "/cars/locations" }, // API endpoint for locations
   }
@@ -32,8 +29,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly locationDisplayTarget: HTMLElement
   declare readonly hasLocationInputTarget: boolean
   declare readonly hasLocationDisplayTarget: boolean
+  // stimulus-validator: disable-next-line
   declare readonly locationTypeValue: string
+  // stimulus-validator: disable-next-line
   declare currentCityValue: string
+  // stimulus-validator: disable-next-line
   declare readonly arrivalCityValue: string
   declare readonly hasArrivalCityValue: boolean
   declare readonly apiEndpointValue: string

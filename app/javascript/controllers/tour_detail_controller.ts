@@ -4,7 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = []
 
   static values = {
-    selectedPackageId: Number
+    selectedPackageId: { type: Number, default: 0 }
   }
 
   // Declare your targets and values

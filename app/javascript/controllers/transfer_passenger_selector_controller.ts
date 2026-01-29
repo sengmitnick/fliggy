@@ -22,8 +22,11 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasSelectedPassengerTarget: boolean
   declare readonly checkboxTargets: HTMLInputElement[]
 
+  // stimulus-validator: disable-next-line
   declare selectedPassengerIdValue: string
+  // stimulus-validator: disable-next-line
   declare selectedPassengerNameValue: string
+  // stimulus-validator: disable-next-line
   declare selectedPassengerPhoneValue: string
 
   connect(): void {

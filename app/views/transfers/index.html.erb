@@ -1,5 +1,7 @@
 <div class="min-h-screen bg-[#F9F9F9]" data-controller="location-selector"
      data-location-selector-api-endpoint-value="/transfers/locations"
+     data-location-selector-location-type-value=""
+     data-location-selector-current-city-value="<%= @transfer_params && @transfer_params[:flight_id].present? ? (Flight.find_by(id: @transfer_params[:flight_id])&.destination_city || '') : '' %>"
      <% if @transfer_params && @transfer_params[:flight_id].present? %>
        <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
        <% if flight %>
