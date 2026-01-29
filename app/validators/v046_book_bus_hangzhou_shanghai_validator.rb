@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V046BookBusHangzhouShanghaiValidator < BaseValidator
   self.validator_id = 'v046_book_bus_hangzhou_shanghai_validator'
+  self.task_id = 'c8106cd5-941e-4b67-85f1-432f67d556a9'
   self.title = '预订后天杭州到上海晚上汽车票（18:00后）'
   self.description = '搜索杭州到上海的汽车票，找到发车时间在18:00后的班次'
   self.timeout_seconds = 240

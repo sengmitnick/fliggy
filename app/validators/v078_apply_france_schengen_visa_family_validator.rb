@@ -34,6 +34,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V078ApplyFranceSchengenVisaFamilyValidator < BaseValidator
   self.validator_id = 'v078_apply_france_schengen_visa_family_validator'
+  self.task_id = '29391193-cb90-41b1-b5c7-152b6da0630b'
   self.title = '办理法国申根签证（3人家庭，支持拒签重办）'
   self.description = '为3人家庭办理法国申根签证，选择支持拒签后可重新办理的产品'
   self.timeout_seconds = 240

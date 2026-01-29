@@ -7,6 +7,7 @@ class DeepTravelGuide < ApplicationRecord
   # Associations
   has_many :deep_travel_products, dependent: :destroy
   has_many :availabilities, class_name: 'DeepTravelAvailability', dependent: :destroy
+  has_many :deep_travel_reviews, dependent: :destroy
   
   # Validations
   validates :name, presence: true

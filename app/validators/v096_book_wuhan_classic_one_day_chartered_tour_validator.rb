@@ -5,6 +5,7 @@ require_relative 'base_validator'
 # 验证用例96: 预订武汉经典一日包车游（经济7座，家庭出行）
 class V096BookWuhanClassicOneDayCharteredTourValidator < BaseValidator
   self.validator_id = 'v096_book_wuhan_classic_one_day_chartered_tour_validator'
+  self.task_id = 'eba7a78e-2541-4232-b0cf-427687f70264'
   self.title = '预订武汉经典一日包车游（经济7座，家庭5人）'
   self.description = '预订武汉经典一日游包车路线，家庭5人出行，选择经济7座车型，8小时服务'
   self.timeout_seconds = 240

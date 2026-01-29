@@ -35,6 +35,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V075ApplyUsaBusinessVisaFamilyValidator < BaseValidator
   self.validator_id = 'v075_apply_usa_business_visa_family_validator'
+  self.task_id = '100fd8a9-ca4c-48ee-8139-1e599dc77b16'
   self.title = '办理美国商务签证（家庭申请，2人，价格最低）'
   self.description = '为2位家庭成员办理美国商务签证，选择价格最低且支持家庭申请的产品'
   self.timeout_seconds = 240

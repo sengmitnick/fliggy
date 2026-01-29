@@ -161,6 +161,14 @@ module Api
         
         begin
           state_data = execution.state_data
+          unless state_data && state_data['validator_class']
+            return render json: {
+              score: 0.0,
+              reason: "验证会话数据损坏：缺少 validator_class",
+              execution_status: "fail"
+            }, status: :unprocessable_entity
+          end
+          
           validator_class = state_data['validator_class'].constantize
           
           instance = validator_class.new(session_id)
@@ -174,6 +182,7 @@ module Api
           
         rescue StandardError => e
           # 系统级错误（非 Agent 做错）
+          Rails.logger.error "[API Verify] Error: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
           render json: {
             score: 0.0,
             reason: "系统内部错误: #{e.message}",
@@ -185,6 +194,18 @@ module Api
           }, status: :internal_server_error
         end
       end
+    rescue StandardError => e
+      # 捕获 VERIFY_LOCK.synchronize 外层的任何错误
+      Rails.logger.error "[API Verify] Outer error: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+      render json: {
+        score: 0.0,
+        reason: "系统严重错误: #{e.message}",
+        execution_status: "fail",
+        metadata: {
+          error_type: e.class.name,
+          backtrace: e.backtrace.first(3)
+        }
+      }, status: :internal_server_error
     end
     
     private
@@ -203,9 +224,9 @@ module Api
       end.compact.select { |klass| klass < BaseValidator }
     end
     
-    # 根据 ID 查找验证器
+    # 根据 ID 查找验证器（支持 validator_id 或 task_id）
     def find_validator(id)
-      validator = load_all_validators.find { |v| v.validator_id == id }
+      validator = load_all_validators.find { |v| v.validator_id == id || v.task_id == id }
       raise "验证器不存在: '#{id}'" unless validator
       
       validator

@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V032RentAnyCarShanghaiValidator < BaseValidator
   self.validator_id = 'v032_rent_any_car_shanghai_validator'
+  self.task_id = '1607085c-0377-4907-96a1-58b0b2a1791d'
   self.title = '租赁明天上海任意车辆（1天）'
   self.description = '搜索上海的租车服务，选择任意一辆车并租赁1天'
   self.timeout_seconds = 240

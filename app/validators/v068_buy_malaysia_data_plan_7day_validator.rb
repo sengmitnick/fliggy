@@ -39,6 +39,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V068BuyMalaysiaDataPlan7dayValidator < BaseValidator
   self.validator_id = 'v068_buy_malaysia_data_plan_7day_validator'
+  self.task_id = '979cd88d-bd8d-41bd-9ff8-a945286e05b1'
   self.title = '购买马来西亚流量包（30天月包、248元）'
   self.description = '搜索马来西亚流量包产品，选择30天月包套餐（按月计费）并成功创建订单'
   self.timeout_seconds = 240

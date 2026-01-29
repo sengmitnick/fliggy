@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V058BookUsaSim7dayValidator < BaseValidator
   self.validator_id = 'v058_book_usa_sim_7day_validator'
+  self.task_id = 'abd44239-e7bc-4665-ba95-4f6167f22c8e'
   self.title = '购买美国7天10GB/天SIM卡（数量1张）'
   self.description = '搜索美国地区的SIM卡，找到7天有效期且每日流量10GB的产品并购买1张'
   self.timeout_seconds = 300

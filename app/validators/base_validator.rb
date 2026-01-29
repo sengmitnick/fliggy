@@ -206,12 +206,14 @@ class BaseValidator
   attr_reader :execution_id, :errors, :score, :assertions
   
   class << self
-    attr_accessor :validator_id, :title, :description, :timeout_seconds
+    attr_accessor :validator_id, :task_id, :title, :description, :timeout_seconds
     
     # 返回验证器元信息
     def metadata
       {
-        id: validator_id,
+        id: task_id || validator_id,  # 优先使用 task_id（UUID），向后兼容 validator_id
+        validator_id: validator_id,    # 保留旧字段用于兼容
+        task_id: task_id,              # 新字段（UUID）
         title: title,
         description: description,
         timeout: timeout_seconds
@@ -261,10 +263,28 @@ class BaseValidator
     # 执行自定义准备逻辑（通常不需要加载数据，直接使用基线数据即可）
     @prepare_result = prepare
     
+    # 构造统一的返回格式
+    # 1. 添加日期上下文到 title
+    # 2. 将 prepare 返回的数据作为额外参数
+    # 3. 添加 description（来自类变量）
+    result = {
+      title: add_date_context(self.class.title),
+      description: self.class.description
+    }
+    
+    # 如果 prepare 返回了 Hash，合并所有字段（排除 task 和 hint）
+    if @prepare_result.is_a?(Hash)
+      @prepare_result.each do |key, value|
+        # 跳过 task 和 hint 字段（已经统一到 title 和 description）
+        next if [:task, :hint].include?(key)
+        result[key] = value
+      end
+    end
+    
     # 保存执行状态（用于验证阶段恢复）
     save_execution_state
     
-    @prepare_result
+    result
   end
   
   # 执行验证阶段（验证用户操作结果）
@@ -302,7 +322,8 @@ class BaseValidator
     end
     
     # 清理执行状态
-    cleanup_execution_state
+    # ⚠️ 注释掉以便调试和重复验证
+    # cleanup_execution_state
     
     # 验证完成后，回滚到基线状态（删除当前 data_version 的所有数据）
     rollback_to_baseline
@@ -313,7 +334,8 @@ class BaseValidator
   # 执行完整的自动化测试流程（prepare -> simulate -> verify）
   def execute_simulate
     result = {
-      validator_id: self.class.validator_id,
+      task_id: self.class.task_id,
+      validator_id: self.class.validator_id,  # 保留向后兼容
       title: self.class.title,
       status: 'unknown',
       prepare_info: nil,
@@ -351,6 +373,14 @@ class BaseValidator
   end
   
   private
+  
+  # 添加日期上下文到任务标题前面
+  # 示例: "今天是2024年3月15日。请为一家三口预订..."
+  def add_date_context(title)
+    current_date = Date.current
+    date_str = current_date.strftime('%Y年%m月%d日')
+    "今天是#{date_str}。#{title}"
+  end
   
   # 确保基线数据已加载
   def ensure_baseline_data_loaded

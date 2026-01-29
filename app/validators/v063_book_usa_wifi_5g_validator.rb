@@ -33,6 +33,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V063BookUsaWifi5gValidator < BaseValidator
   self.validator_id = 'v063_book_usa_wifi_5g_validator'
+  self.task_id = 'fa80f73a-a50e-42f5-aa04-ff5acb84b351'
   self.title = '预订美国随身WiFi（1台、7天、5G高速）'
   self.description = '搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单'
   self.timeout_seconds = 240

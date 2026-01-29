@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
   self.validator_id = 'v023_book_first_class_train_shanghai_shenzhen_validator'
+  self.task_id = 'a09b2f8a-8e9f-44bc-b9e4-ddf833016e09'
   self.title = '预订后天上海到深圳的一等座'
   self.description = '搜索后天上海到深圳的高铁，选择一等座并完成预订'
   self.timeout_seconds = 240

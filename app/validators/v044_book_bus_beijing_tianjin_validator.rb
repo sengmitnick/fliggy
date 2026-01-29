@@ -22,6 +22,7 @@ require_relative 'base_validator'
 #
 class V044BookBusBeijingTianjinValidator < BaseValidator
   self.validator_id = 'v044_book_bus_beijing_tianjin_validator'
+  self.task_id = '68156569-46f4-4a08-99a1-e25e9c4d498f'
   self.title = '预订明天北京到天津最早汽车票'
   self.description = '搜索北京到天津的汽车票，找到发车时间最早的班次'
   self.timeout_seconds = 240

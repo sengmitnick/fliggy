@@ -175,6 +175,56 @@ namespace :validator do
     puts "🧪 Validator Simulation Tests"
     puts "="*70 + "\n"
     
+    # Step 1: 检查权重总和
+    puts "🔍 Step 1: Checking weight sums..."
+    weight_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      weights = content.scan(/weight:\s*(\d+)/).flatten.map(&:to_i)
+      
+      if weights.empty?
+        weight_errors << {
+          validator: validator_name,
+          error: '未找到任何 weight 定义',
+          sum: 0,
+          weights: []
+        }
+      elsif weights.sum != 100
+        weight_errors << {
+          validator: validator_name,
+          error: "权重总和为 #{weights.sum}，应该为 100",
+          sum: weights.sum,
+          weights: weights
+        }
+      end
+    end
+    
+    if weight_errors.any?
+      puts "\n❌ Weight Sum Errors Found:"
+      puts "-" * 70
+      weight_errors.each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  Error: #{error[:error]}"
+        puts "  Weights: #{error[:weights].inspect}" if error[:weights].any?
+        puts "  Sum: #{error[:sum]}"
+      end
+      puts "-" * 70
+      puts "\n❌ #{weight_errors.size} validator(s) have incorrect weight sums"
+      puts "Please fix the weight sums before running simulations\n"
+      exit 1
+    else
+      puts "✅ All validators have correct weight sums (total = 100)\n"
+    end
+    
+    # Step 2: 运行模拟测试
+    puts "🧪 Step 2: Running simulations..."
+    puts "-" * 70
+    
     # 加载所有 Validator
     validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
     validators = validator_files.map do |file|

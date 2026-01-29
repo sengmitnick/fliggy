@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V008BookJapanSimCardValidator < BaseValidator
   self.validator_id = 'v008_book_japan_sim_card_validator'
+  self.task_id = '7a5cf48f-838f-4e29-a0e1-4dd67250b0d9'
   self.title = '购买日本7天无限流量SIM卡（数量1张）'
   self.description = '搜索日本地区的SIM卡，找到7天有效期且流量无限的产品并购买1张'
   self.timeout_seconds = 300

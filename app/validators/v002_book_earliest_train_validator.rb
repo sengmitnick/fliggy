@@ -26,6 +26,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V002BookEarliestTrainValidator < BaseValidator
   self.validator_id = 'v002_book_earliest_train_validator'
+  self.task_id = '336024a2-f7ac-4ddc-a917-381c76c52a5c'
   self.title = '预订明天上海到杭州最早的高铁（二等座）'
   self.description = '在明天的车次中找到发车时间最早的高铁并完成预订，优先选择二等座'
   self.timeout_seconds = 300

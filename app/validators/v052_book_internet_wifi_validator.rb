@@ -40,6 +40,7 @@ require_relative 'base_validator'
 #   POST /api/verify/:execution_id/result
 class V052BookInternetWifiValidator < BaseValidator
   self.validator_id = 'v052_book_internet_wifi_validator'
+  self.task_id = '05db4166-de34-4d4b-9078-6e672b53bb21'
   self.title = '预订境外随身WiFi（中国香港、1台、5天、选最便宜）'
   self.description = '需要搜索境外WiFi租赁服务，选择日租金最低的产品并成功创建订单'
   self.timeout_seconds = 240

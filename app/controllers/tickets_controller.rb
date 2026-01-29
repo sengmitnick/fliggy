@@ -35,8 +35,11 @@ class TicketsController < ApplicationController
       # 获取最低价格的门票
       min_ticket = attraction.tickets.available.order(:current_price).first
       
+      # 跳过没有门票的景点
+      next if min_ticket.nil?
+      
       {
-        id: attraction.id,
+        id: min_ticket.id,  # 使用门票 ID 而不是景点 ID
         image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800", # 默认图片，后续可以添加 cover_image
         badge: attraction.review_count > 1000 ? '热门' : nil,
         title: attraction.name,
@@ -48,7 +51,7 @@ class TicketsController < ApplicationController
         price: min_ticket&.current_price&.to_i&.to_s || '0',
         price_suffix: '起'
       }
-    end
+    end.compact
     
     # 如果没有数据，显示空结果
     @tickets = [] if @tickets.empty?

@@ -12,6 +12,31 @@ class VisasController < ApplicationController
     # 统计数据
     @total_countries = @countries.count
     @total_users_served = 30000000 # 3000万+
+    
+    # 地区名称转拼音slug（用于锚点ID）
+    @region_slugs = {
+      '东亚' => 'east-asia',
+      '东南亚' => 'southeast-asia',
+      '南亚' => 'south-asia',
+      '中东' => 'middle-east',
+      '中亚' => 'central-asia',
+      '西亚' => 'west-asia',
+      '欧洲' => 'europe',
+      '西欧' => 'west-europe',
+      '东欧' => 'east-europe',
+      '南欧' => 'south-europe',
+      '北欧' => 'north-europe',
+      '大洋洲' => 'oceania',
+      '北美洲' => 'north-america',
+      '北美' => 'north-america-2',
+      '南美洲' => 'south-america',
+      '南美' => 'south-america-2',
+      '非洲' => 'africa',
+      '东非' => 'east-africa',
+      '西非' => 'west-africa',
+      '南非' => 'south-africa',
+      '北非' => 'north-africa'
+    }
   end
 
   def show
