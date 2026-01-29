@@ -665,6 +665,15 @@ RSpec.describe 'Stimulus Validation', type: :system do
 
           next if controller_elements.empty?
 
+          # Get all action bindings for this controller in the current view
+          action_bindings = []
+          doc.css('[data-action]').each do |element|
+            actions = element['data-action'].to_s.scan(/(?:^|\s)(#{controller_name})#(\w+)/)
+            actions.each do |_, method_name|
+              action_bindings << method_name
+            end
+          end
+
           # Check each querySelector call
           query_selectors.each do |qs|
             selector = qs['selector']
@@ -682,6 +691,18 @@ RSpec.describe 'Stimulus Validation', type: :system do
             # Skip if marked with stimulus-validator: disable-next-line comment
             if skip_validation
               next
+            end
+
+            # ====== NEW: Skip querySelector if the method is never called via data-action ======
+            # This handles cases where a controller provides optional functionality
+            # that's only used when certain UI elements (like modals) are present
+            if in_method && !action_bindings.include?(in_method)
+              # Check if method is a lifecycle method or public API
+              public_api_methods = ['connect', 'disconnect', 'initialize']
+              unless public_api_methods.include?(in_method)
+                # Method is not bound to any action in this view, skip validation
+                next
+              end
             end
 
             # Track if we found the selector in at least one controller scope

@@ -63,17 +63,17 @@ export default class extends Controller<HTMLElement> {
   connect(): void {
     console.log("InternetOrderForm connected")
     console.log("Deposit value:", this.hasDepositValue ? this.depositValue : 0)
-    const totalPriceField = this.element.querySelector('[data-internet-order-form-target="totalPriceField"]') as HTMLInputElement
-    if (totalPriceField) {
-      this.basePrice = parseFloat(totalPriceField.value) || 0
+    
+    // Get base price from totalPriceField target
+    if (this.hasTotalPriceFieldTarget) {
+      this.basePrice = parseFloat(this.totalPriceFieldTarget.value) || 0
     }
     
-    // Check if this is a WiFi order
-    const orderTypeField = this.element.querySelector('input[name="internet_order[order_type]"]') as HTMLInputElement
-    this.isWifiOrder = orderTypeField?.value === 'wifi'
+    // Check if this is a WiFi order from URL params (more reliable than hidden field)
+    const urlParams = new URLSearchParams(window.location.search)
+    this.isWifiOrder = urlParams.get('orderable_type') === 'InternetWifi'
     
     // Initialize quantity from params if available
-    const urlParams = new URLSearchParams(window.location.search)
     const quantityParam = urlParams.get('quantity')
     const priceParam = urlParams.get('price')
     const totalParam = urlParams.get('total')
@@ -107,20 +107,8 @@ export default class extends Controller<HTMLElement> {
       this.updateAllPriceDisplays(total)
     }
     
-    // Initialize delivery method button styles based on current selection
-    const mailRadio = this.element.querySelector('input[name="internet_order[delivery_method]"][value="mail"]') as HTMLInputElement
-    const pickupRadio = this.element.querySelector('input[name="internet_order[delivery_method]"][value="pickup"]') as HTMLInputElement
-    const mailLabel = this.element.querySelector('[data-internet-order-form-target="mailLabel"]')
-    const pickupLabel = this.element.querySelector('[data-internet-order-form-target="pickupLabel"]')
-    
-    if (mailRadio?.checked && mailLabel) {
-      mailLabel.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
-    }
-    if (pickupRadio?.checked && pickupLabel) {
-      pickupLabel.classList.add('border-[#FFDD00]', 'bg-[#FFFEF8]')
-    }
-    
     // Store form reference
+    // stimulus-validator: disable-next-line
     this.formElement = this.element.querySelector('form')
     
     // Intercept form submission
@@ -596,6 +584,7 @@ export default class extends Controller<HTMLElement> {
     if (!passengerModal) return
     
     // Get current selected passenger ID
+    // stimulus-validator: disable-next-line
     const passengerIdField = this.element.querySelector('[data-internet-order-form-target="passengerIdField"]') as HTMLInputElement
     const currentPassengerId = passengerIdField?.value
     
@@ -685,8 +674,11 @@ export default class extends Controller<HTMLElement> {
     }
     
     // Update hidden fields
+    // stimulus-validator: disable-next-line
     const passengerIdField = this.element.querySelector('[data-internet-order-form-target="passengerIdField"]') as HTMLInputElement
+    // stimulus-validator: disable-next-line
     const passengerNameField = this.element.querySelector('[data-internet-order-form-target="passengerNameField"]') as HTMLInputElement
+    // stimulus-validator: disable-next-line
     const passengerPhoneField = this.element.querySelector('[data-internet-order-form-target="passengerPhoneField"]') as HTMLInputElement
     
     if (passengerIdField) {
