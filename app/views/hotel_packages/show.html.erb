@@ -339,7 +339,12 @@
     </div>
     <div class="flex-1 flex overflow-hidden rounded-full font-bold">
       <button class="flex-1 bg-yellow-400 text-black py-2.5 text-sm">加入购物车</button>
-      <button class="flex-1 bg-orange-600 text-white py-2.5 text-sm">立即购买</button>
+      <% first_option = @package.package_options.active.ordered.first %>
+      <% if first_option %>
+        <%= link_to "立即购买", new_hotel_package_order_path(package_option_id: first_option.id), class: "flex-1 bg-orange-600 text-white py-2.5 text-sm flex items-center justify-center" %>
+      <% else %>
+        <button class="flex-1 bg-orange-600 text-white py-2.5 text-sm" onclick="window.showToast('暂无可用套餐')">立即购买</button>
+      <% end %>
     </div>
   </div>
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_29_093009) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_29_120547) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1009,7 +1009,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_29_093009) do
     t.string "data_version", limit: 50, default: "0", null: false
     t.date "check_in_date"
     t.date "check_out_date"
+    t.integer "hotel_id"
     t.index ["data_version"], name: "index_hotel_package_orders_on_data_version"
+    t.index ["hotel_id"], name: "index_hotel_package_orders_on_hotel_id"
     t.index ["hotel_package_id"], name: "index_hotel_package_orders_on_hotel_package_id"
     t.index ["order_number"], name: "index_hotel_package_orders_on_order_number"
     t.index ["package_option_id"], name: "index_hotel_package_orders_on_package_option_id"

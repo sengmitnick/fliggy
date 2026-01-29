@@ -8,7 +8,18 @@
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
-      <%= link_to hotel_packages_path, class: "text-2xl mr-4" do %>
+      <% 
+        back_params = {
+          package_option_id: @package_option.id,
+          booking_type: @order.booking_type,
+          quantity: @order.quantity,
+          passenger_id: @order.passenger_id
+        }
+        # CRITICAL: Don't pass dates/hotel in back URL - they will be loaded from @order in controller
+        # The controller will find existing pending order and pre-fill the form with saved data
+        # This ensures data persistence when user clicks back button
+      %>
+      <%= link_to new_hotel_package_order_path(back_params), class: "text-2xl mr-4" do %>
         ←
       <% end %>
       <h1 class="text-lg font-bold">订单详情</h1>
@@ -44,7 +55,7 @@
         <% if @package.brand_logo.attached? %>
           <%= image_tag @package.brand_logo, class: "w-full h-full object-cover" %>
         <% else %>
-          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200" class="w-full h-full object-cover">
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200" alt="套餐图片" class="w-full h-full object-cover">
         <% end %>
       </div>
       <div class="ml-3 flex-1">
