@@ -15,6 +15,52 @@ RSpec.describe 'Stimulus Validation', type: :system do
     pipeline.get_controllers_from_parents(partial_path)
   end
 
+  # Expand partials recursively to include their content in validation
+  def expand_partials(content, current_file_path, depth = 0)
+    # Prevent infinite recursion
+    return content if depth > 10
+
+    # Find all render partial calls
+    expanded = content.dup
+    
+    content.scan(/<%=?\s*render\s+(?:partial:\s*)?['"]([^'"]+)['"]/) do |match|
+      partial_name = match[0]
+      
+      # Resolve partial path
+      if partial_name.include?('/')
+        # Absolute path: shared/insurance_filter_modal -> app/views/shared/_insurance_filter_modal.html.erb
+        partial_path = Rails.root.join("app/views/#{partial_name.gsub(/([^\/]+)$/, '_\\1')}.html.erb")
+      else
+        # Relative path: header -> app/views/current_dir/_header.html.erb
+        current_dir = File.dirname(current_file_path)
+        partial_path = File.join(current_dir, "_#{partial_name}.html.erb")
+      end
+      
+      # Read and expand partial content if it exists
+      if File.exist?(partial_path)
+        partial_content = File.read(partial_path)
+        # Recursively expand nested partials
+        partial_content = expand_partials(partial_content, partial_path.to_s, depth + 1)
+        
+        # Replace the render call with actual partial content
+        # Match the exact render statement format
+        escaped_name = Regexp.escape(partial_name)
+        patterns = [
+          /<%=\s*render\s+partial:\s*['"]#{escaped_name}['"]\s*%>/,
+          /<%=\s*render\s+['"]#{escaped_name}['"]\s*%>/,
+          /<%\s*render\s+partial:\s*['"]#{escaped_name}['"]\s*%>/,
+          /<%\s*render\s+['"]#{escaped_name}['"]\s*%>/
+        ]
+        
+        patterns.each do |pattern|
+          expanded.gsub!(pattern, partial_content)
+        end
+      end
+    end
+    
+    expanded
+  end
+
 
 
   describe 'Core Validation: Targets and Actions' do
@@ -31,7 +77,9 @@ RSpec.describe 'Stimulus Validation', type: :system do
         content = File.read(view_file)
         relative_path = view_file.sub(Rails.root.to_s + '/', '')
 
-        doc = Nokogiri::HTML::DocumentFragment.parse(content)
+        # Expand partial content before parsing
+        expanded_content = expand_partials(content, view_file)
+        doc = Nokogiri::HTML::DocumentFragment.parse(expanded_content)
 
         doc.css('[data-controller]').each do |controller_element|
           controllers = controller_element['data-controller'].split(/\s+/)
