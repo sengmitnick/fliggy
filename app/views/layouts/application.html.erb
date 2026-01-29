@@ -32,7 +32,7 @@
     <%= favicon_link_tag asset_path("app-favicon.svg") unless Rails.env.test? %>
   </head>
   <body class="w-full max-w-md mx-auto flex flex-col text-foreground <%= body_class %> bg-surface relative overflow-x-hidden" style="height: 100vh; box-shadow: 0 0 0 100vw hsl(var(--color-surface-elevated)); clip-path: inset(0 -100vw);">
-    <main class="flex-1 overflow-auto">
+    <main class="flex-1 overflow-auto" style="scroll-behavior: smooth;">
       <%= render 'shared/flash_messages' %>
       <%= yield %>
     </main>

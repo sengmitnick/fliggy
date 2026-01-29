@@ -35,7 +35,7 @@
       
       <!-- 用户浮窗 -->
       <% if current_user %>
-      <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm shadow-lg rounded-full p-2 pr-4 flex items-center gap-3 border border-gray-100 max-w-[90%]">
+      <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm shadow-lg rounded-full p-2 pr-4 flex items-center gap-3 border border-gray-100 max-w-[90%]" onclick="window.showToast('精彩即将上线，敬请期待')">
         <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden flex-shrink-0">
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<%= current_user.id %>" alt="User" class="w-full h-full object-cover">
         </div>
@@ -53,7 +53,7 @@
   <section class="mt-4 px-4">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-extrabold text-gray-900">全球国家地区</h2>
-      <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 w-40">
+      <div class="flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 w-40" onclick="window.showToast('精彩即将上线，敬请期待')">
         <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         <span class="text-xs text-gray-500">搜索国家/地区</span>
       </div>
@@ -61,12 +61,12 @@
 
     <!-- Tabs -->
     <div class="flex gap-6 overflow-x-auto no-scrollbar border-b border-gray-200/50 pb-2">
-      <div class="flex flex-col items-center flex-shrink-0">
+      <a href="#featured-section" class="flex flex-col items-center flex-shrink-0 no-underline">
         <span class="text-lg font-bold text-gray-900">精选</span>
         <div class="w-6 h-1 bg-gray-900 rounded-full mt-1"></div>
-      </div>
-      <% ['亚洲', '欧洲', '大洋洲', '北美洲', '南美洲', '非洲'].each do |region| %>
-        <span class="text-base text-gray-400 flex-shrink-0 font-medium"><%= region %></span>
+      </a>
+      <% @regions.keys.each do |region| %>
+        <a href="#region-<%= @region_slugs[region] %>" class="text-base text-gray-400 flex-shrink-0 font-medium no-underline"><%= region %></a>
       <% end %>
     </div>
   </section>
@@ -89,7 +89,7 @@
   </section>
 
   <!-- 精选国家图标网格 -->
-  <section class="px-4 mt-4 grid grid-cols-4 gap-3 text-center">
+  <section id="featured-section" class="px-4 mt-4 grid grid-cols-4 gap-3 text-center" style="scroll-margin-top: 80px;">
     <% @featured_countries.each do |country| %>
       <%= link_to visa_path(country), class: "bg-white rounded-xl py-3 flex flex-col items-center shadow-sm" do %>
         <div class="w-6 h-6 rounded-full bg-gray-100 mb-2 overflow-hidden border border-gray-200 flex items-center justify-center">
@@ -106,7 +106,7 @@
 
   <!-- 亚洲列表区域 -->
   <% @regions.each do |region, countries| %>
-    <section class="mt-6 px-4">
+    <section id="region-<%= @region_slugs[region] %>" class="mt-6 px-4" style="scroll-margin-top: 80px;">
       <h2 class="text-xl font-extrabold text-gray-900 mb-4"><%= region %></h2>
       
       <div class="grid grid-cols-2 gap-3">
