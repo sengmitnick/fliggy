@@ -37,6 +37,8 @@ class HotelPackageOrdersController < ApplicationController
       redirect_to hotel_package_order_path(@order)
     else
       @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
+      @all_package_options = @package.package_options.ordered.includes(:hotel_package)
+      @hotels_by_city = fetch_available_hotels_by_city(@package)
       render :new, status: :unprocessable_entity
     end
   end
@@ -74,7 +76,9 @@ class HotelPackageOrdersController < ApplicationController
       :quantity,
       :booking_type,
       :contact_name,
-      :contact_phone
+      :contact_phone,
+      :check_in_date,
+      :check_out_date
     )
   end
   

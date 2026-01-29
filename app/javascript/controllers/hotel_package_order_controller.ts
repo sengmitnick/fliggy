@@ -82,16 +82,26 @@ export default class extends Controller<HTMLElement> {
   connect(): void {
     console.log("HotelPackageOrder connected")
     
+    // Initialize bottom price based on quantity from URL or default
+    if (this.hasBottomPriceTarget && this.hasQuantityInputTarget) {
+      const currentQuantity = parseInt(this.quantityInputTarget!.value) || 1
+      const price = parseFloat(this.quantityInputTarget!.dataset.price || '0')
+      if (price > 0) {
+        this.bottomPriceTarget!.textContent = (price * currentQuantity).toFixed(0)
+      }
+    }
+    
     // Only update button states if quantity input exists (stockup mode)
     if (this.hasQuantityInputTarget) {
       this.updateButtonStates()
     }
     
-    // Auto-select first passenger if exists
+    // Auto-select the checked passenger (not necessarily the first one)
     if (this.passengerRadioTargets.length > 0) {
-      const firstRadio = this.passengerRadioTargets[0]
-      if (firstRadio.checked) {
-        const label = firstRadio.closest('label') as HTMLElement
+      // Find the radio button that is actually checked
+      const checkedRadio = this.passengerRadioTargets.find(radio => radio.checked)
+      if (checkedRadio) {
+        const label = checkedRadio.closest('label') as HTMLElement
         const name = label?.dataset.passengerName || ""
         const phone = label?.dataset.passengerPhone || ""
         this.contactNameInputTarget.value = name
@@ -413,25 +423,57 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  // Open date selection for instant booking (from tab click)
+  // Open date selection for instant booking (from tab click or modify button)
   openInstantBookingDateSelection(event: Event): void {
     event.preventDefault()
     
-    // Set selectedHotelId to null to indicate this is for instant booking
-    this.selectedHotelId = null
-    this.selectedHotelName = null
+    // Try to preserve hotel_id from current URL params
+    const urlParams = new URLSearchParams(window.location.search)
+    const hotelIdFromUrl = urlParams.get('hotel_id')
+    
+    if (hotelIdFromUrl) {
+      // Preserve existing hotel selection from URL
+      this.selectedHotelId = hotelIdFromUrl
+      
+      // Try to get hotel name from the displayed element on page
+      const hotelNameElement = document.querySelector('[data-hotel-name]') as HTMLElement
+      if (hotelNameElement) {
+        this.selectedHotelName = hotelNameElement.textContent?.trim() || null
+      } else {
+        // Fallback: try to find hotel name in the booking info section
+        const hotelDisplayElement = document.querySelector('.text-base.font-medium.text-gray-900')
+        if (hotelDisplayElement) {
+          this.selectedHotelName = hotelDisplayElement.textContent?.trim() || null
+        }
+      }
+    } else {
+      // No hotel selected yet (genuine instant booking from tab)
+      this.selectedHotelId = null
+      this.selectedHotelName = null
+    }
     
     if (this.hasDateSelectionModalTarget) {
-      // Clear hotel name display for instant booking
+      // Update hotel name display in modal if hotel is selected
       if (this.hasSelectedHotelNameTarget) {
-        this.selectedHotelNameTarget!.textContent = ''
+        if (this.selectedHotelName) {
+          this.selectedHotelNameTarget!.textContent = this.selectedHotelName
+        } else {
+          this.selectedHotelNameTarget!.textContent = ''
+        }
       }
       
-      // Clear previous dates
+      // Preserve current dates if they exist in URL
       if (this.hasCheckInDateInputTarget) {
-        this.checkInDateInputTarget!.value = ''
+        const checkInFromUrl = urlParams.get('check_in_date')
+        if (checkInFromUrl) {
+          this.checkInDateInputTarget!.value = checkInFromUrl
+          // Trigger check-out date calculation
+          this.updateCheckOutDate(new Event('change'))
+        } else {
+          this.checkInDateInputTarget!.value = ''
+        }
       }
-      if (this.hasCheckOutDateInputTarget) {
+      if (this.hasCheckOutDateInputTarget && !urlParams.get('check_in_date')) {
         this.checkOutDateInputTarget!.value = ''
       }
       
@@ -517,6 +559,36 @@ export default class extends Controller<HTMLElement> {
     // Add hotel_id if available (from hotel list selection)
     if (this.selectedHotelId) {
       redirectUrl += `&hotel_id=${this.selectedHotelId}`
+    }
+    
+    // Preserve passenger_id - try multiple sources in priority order
+    let passengerIdToPreserve = null
+    
+    // Priority 1: Check if there's a currently checked radio button
+    if (this.passengerRadioTargets.length > 0) {
+      const checkedRadio = this.passengerRadioTargets.find(radio => radio.checked)
+      if (checkedRadio && checkedRadio.value) {
+        passengerIdToPreserve = checkedRadio.value
+        console.log('Got passenger_id from checked radio:', passengerIdToPreserve)
+      }
+    }
+    
+    // Priority 2: If still no passenger_id, try to get from URL
+    if (!passengerIdToPreserve) {
+      const urlParams = new URLSearchParams(window.location.search)
+      const passengerIdFromUrl = urlParams.get('passenger_id')
+      if (passengerIdFromUrl) {
+        passengerIdToPreserve = passengerIdFromUrl
+        console.log('Got passenger_id from URL:', passengerIdToPreserve)
+      }
+    }
+    
+    // Add passenger_id to redirect URL if we found one
+    if (passengerIdToPreserve) {
+      redirectUrl += `&passenger_id=${passengerIdToPreserve}`
+      console.log('Final redirect URL:', redirectUrl)
+    } else {
+      console.warn('No passenger_id found, will use default on next page')
     }
     
     window.location.href = redirectUrl

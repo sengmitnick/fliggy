@@ -273,12 +273,12 @@
               -
             </button>
             <%= form.number_field :quantity, 
-                value: 1, 
+                value: (params[:quantity] || 1), 
                 min: 1, 
                 max: 99, 
                 id: "quantity_field",
                 class: "w-8 text-center border-none p-0 focus:outline-none focus:ring-0 text-gray-900",
-                data: { hotel_package_order_target: 'quantityInput' } %>
+                data: { hotel_package_order_target: 'quantityInput', price: @package_option.price } %>
             <button type="button"
                     data-action="click->hotel-package-order#increaseQuantity"
                     data-hotel-package-order-target="increaseBtn"
@@ -351,13 +351,15 @@
       
       <% if @passengers.any? %>
         <!-- 已选联系人显示 -->
+        <% selected_passenger = params[:passenger_id].present? ? @passengers.find_by(id: params[:passenger_id]) : @passengers.first %>
+        <% selected_passenger ||= @passengers.first %>
         <div class="flex items-center justify-between py-3 border border-gray-200 rounded-lg px-4 cursor-pointer"
              data-action="click->hotel-package-order#openContactModal"
              data-hotel-package-order-target="selectedContactDisplay">
           <div class="flex items-center flex-1">
             <div class="flex-1">
-              <div class="font-medium text-black text-[15px]" data-hotel-package-order-target="selectedName"><%= @passengers.first.name %></div>
-              <div class="text-sm text-gray-500 mt-0.5" data-hotel-package-order-target="selectedPhone"><%= @passengers.first.phone %></div>
+              <div class="font-medium text-black text-[15px]" data-hotel-package-order-target="selectedName"><%= selected_passenger.name %></div>
+              <div class="text-sm text-gray-500 mt-0.5" data-hotel-package-order-target="selectedPhone"><%= selected_passenger.phone %></div>
             </div>
           </div>
           <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -379,15 +381,16 @@
             <!-- 联系人列表 -->
             <div class="overflow-y-auto" style="max-height: calc(70vh - 80px);">
               <div class="divide-y divide-gray-100">
-                <% @passengers.each_with_index do |passenger, index| %>
+                <% @passengers.each do |passenger| %>
+                  <% is_selected = (params[:passenger_id].present? && passenger.id.to_s == params[:passenger_id]) || (params[:passenger_id].blank? && passenger == @passengers.first) %>
                   <label class="flex items-center justify-between cursor-pointer px-4 py-4 hover:bg-gray-50"
                          data-action="click->hotel-package-order#selectPassenger"
                          data-passenger-name="<%= passenger.name %>"
                          data-passenger-phone="<%= passenger.phone %>">
                     <div class="flex items-center flex-1">
-                      <%= form.radio_button :passenger_id, passenger.id, class: "hidden", checked: index == 0, data: { hotel_package_order_target: 'passengerRadio' } %>
-                      <div class="w-5 h-5 rounded-full border-2 <%= index == 0 ? 'border-blue-500' : 'border-gray-300' %> mr-3 flex items-center justify-center" data-hotel-package-order-target="radioIndicator">
-                        <div class="w-3 h-3 bg-blue-500 rounded-full <%= index == 0 ? '' : 'hidden' %>" data-hotel-package-order-target="radioInner"></div>
+                      <%= form.radio_button :passenger_id, passenger.id, class: "hidden", checked: is_selected, data: { hotel_package_order_target: 'passengerRadio' } %>
+                      <div class="w-5 h-5 rounded-full border-2 <%= is_selected ? 'border-blue-500' : 'border-gray-300' %> mr-3 flex items-center justify-center" data-hotel-package-order-target="radioIndicator">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full <%= is_selected ? '' : 'hidden' %>" data-hotel-package-order-target="radioInner"></div>
                       </div>
                       <div class="flex-1">
                         <div class="font-medium text-black text-[15px]"><%= passenger.name %></div>
@@ -400,10 +403,10 @@
               
               <!-- 添加新联系人按钮 -->
               <div class="px-4 py-4 border-t border-gray-100">
-                <%= link_to new_passenger_path, class: "flex items-center justify-center text-blue-500 text-sm font-medium py-3 bg-blue-50 rounded-lg hover:bg-blue-100" do %>
+                <div class="flex items-center justify-center text-blue-500 text-sm font-medium py-3 bg-blue-50 rounded-lg hover:bg-blue-100 cursor-pointer" onclick="window.showToast('精彩即将上线')">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                   添加新联系人
-                <% end %>
+                </div>
               </div>
             </div>
           </div>
@@ -481,7 +484,7 @@
         <span class="text-[#FF5000] text-2xl font-bold leading-none" data-hotel-package-order-target="bottomPrice">
           <%= @package_option.price.to_i %>
         </span>
-        <div class="flex items-center text-gray-400 text-xs ml-2 mb-1">
+        <div class="flex items-center text-gray-400 text-xs ml-2 mb-1 cursor-pointer" onclick="window.showToast('精彩即将上线')">
           明细
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
         </div>

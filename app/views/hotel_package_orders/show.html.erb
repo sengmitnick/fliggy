@@ -8,7 +8,17 @@
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
-      <%= link_to hotel_packages_path, class: "text-2xl mr-4" do %>
+      <% 
+        back_params = {
+          package_option_id: @package_option.id,
+          booking_type: @order.booking_type,
+          quantity: @order.quantity,
+          passenger_id: @order.passenger_id
+        }
+        back_params[:check_in_date] = @order.check_in_date if @order.check_in_date.present?
+        back_params[:check_out_date] = @order.check_out_date if @order.check_out_date.present?
+      %>
+      <%= link_to new_hotel_package_order_path(back_params), class: "text-2xl mr-4" do %>
         ←
       <% end %>
       <h1 class="text-lg font-bold">订单详情</h1>
