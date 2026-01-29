@@ -1,15 +1,24 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["option", "checkbox", "totalPrice", "originalPrice"]
+  static targets = [
+    "option",
+    "checkbox",
+    "totalPrice",
+    "originalPrice"
+  ]
   static values = {
     basePrice: Number,
     daysCount: Number
   }
 
+  // stimulus-validator: disable-next-line - 在保障选项卡片中，跨controller实例共享
   declare readonly optionTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line - 在保障选项卡片中，跨controller实例共享
   declare readonly checkboxTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line - 在底部固定栏中，跨controller实例共享
   declare readonly totalPriceTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line - 在底部固定栏中，跨controller实例共享
   declare readonly originalPriceTargets: HTMLElement[]
   declare basePriceValue: number
   declare daysCountValue: number

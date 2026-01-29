@@ -27,14 +27,16 @@
   </div>
 
   <!-- 城市选择器 -->
-  <div class="max-w-md mx-auto px-4 py-4 bg-gradient-to-b from-yellow-300/50 to-transparent">
+  <div class="max-w-md mx-auto px-4 py-4 bg-gradient-to-b from-yellow-300/50 to-transparent"
+       data-controller="city-selector date-picker"
+       data-city-selector-departure-city-value="<%= @selected_city&.name || '武汉' %>"
+       data-city-selector-destination-city-value=""
+       data-date-picker-current-date-value="<%= (Time.zone.today + 1.day).to_s %>"
+       data-date-picker-selected-date-value="<%= (Time.zone.today + 1.day).to_s %>">
     <div class="bg-white rounded-2xl shadow-md p-4">
       <!-- 城市选择 -->
       <button 
-        data-controller="city-selector"
         data-action="click->city-selector#showModal"
-        data-city-selector-departure-city-value="<%= @selected_city&.name || '武汉' %>"
-        data-city-selector-destination-city-value=""
         class="w-full mb-3 flex items-center justify-between">
         <div class="flex items-center">
           <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,10 +55,7 @@
 
       <!-- 日期选择 -->
       <button 
-        data-controller="date-picker"
         data-action="click->date-picker#openModal"
-        data-date-picker-current-date-value="<%= (Time.zone.today + 1.day).to_s %>"
-        data-date-picker-selected-date-value="<%= (Time.zone.today + 1.day).to_s %>"
         class="w-full flex items-center justify-between mb-3 border-t border-gray-100 pt-3">
         <div class="flex items-center">
           <svg class="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

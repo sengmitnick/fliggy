@@ -21,13 +21,19 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasModalTarget: boolean
   declare readonly selectedDateTarget: HTMLElement
   declare readonly dateInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly dateButtonTargets: HTMLButtonElement[]
   declare readonly hasSelectedDateTarget: boolean
   declare readonly hasDateInputTarget: boolean
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly exactTabTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly fuzzyTabTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly exactDateContentTarget: HTMLElement
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly fuzzyDateContentTarget: HTMLElement
+  // stimulus-validator: disable-next-line - 在 shared/_date_picker_modal.html.erb 中
   declare readonly monthButtonTargets: HTMLButtonElement[]
   declare currentDateValue: string
 

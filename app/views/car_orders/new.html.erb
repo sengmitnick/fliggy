@@ -244,10 +244,11 @@
     </div>
 
     <!-- 升级商家保障 -->
-    <div data-controller="car-insurance-selector"
-         data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
-         data-car-insurance-selector-days-count-value="<%= days_count %>">
+    <div>
       <h3 class="font-bold text-lg mb-3">升级商家保障，租车达人必备</h3>
+      <div data-controller="car-insurance-selector"
+           data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
+           data-car-insurance-selector-days-count-value="<%= days_count %>">
       <div class="flex space-x-3 overflow-x-auto no-scrollbar snap-x px-1 pb-4">
         
         <!-- 基础保障卡片 -->
@@ -497,7 +498,7 @@
 
   <!-- 底部固定栏 -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex items-center justify-between z-50"
-       data-controller="car-insurance-selector"
+       data-controller="car-insurance-selector car-order"
        data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
        data-car-insurance-selector-days-count-value="<%= days_count %>">
     <div class="flex flex-col">
