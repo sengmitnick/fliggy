@@ -129,7 +129,7 @@ class V014SearchFastestBusValidator < BaseValidator
     end
     
     # 断言6: 乘车人数正确（1人）
-    add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 20 do
+    add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 15 do
       expect(@order.passenger_count).to eq(@passenger_count),
         "乘车人数不正确。预期: #{@passenger_count}人, 实际: #{@order.passenger_count}人"
       

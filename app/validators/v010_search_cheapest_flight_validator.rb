@@ -106,7 +106,7 @@ class V010SearchCheapestFlightValidator < BaseValidator
     end
     
     # 断言4: 正确识别最便宜的航班（核心评分）
-    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 25 do
+    add_assertion "选择了最便宜的航班（考虑折扣）", weight: 30 do
       # 重新计算所有航班价格（注意：查询基线数据）
       all_flights = Flight.where(
         departure_city: @origin,

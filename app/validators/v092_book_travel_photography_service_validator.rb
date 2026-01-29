@@ -56,7 +56,7 @@ class V092BookTravelPhotographyServiceValidator < BaseValidator
         "未选择粉丝数最多的导游。应选: #{most_followed.name}（粉丝#{most_followed.follower_count}人），实际: #{@booking.deep_travel_guide.name}（粉丝#{@booking.deep_travel_guide.follower_count}人）"
     end
     
-    add_assertion "人数信息正确（2成人）", weight: 20 do
+    add_assertion "人数信息正确（2成人）", weight: 15 do
       expect(@booking.adult_count).to eq(@adult_count),
         "成人数不符合。期望: #{@adult_count}, 实际: #{@booking.adult_count}"
     end

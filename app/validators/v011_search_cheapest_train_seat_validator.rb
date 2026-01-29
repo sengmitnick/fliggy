@@ -159,7 +159,7 @@ class V011SearchCheapestTrainSeatValidator < BaseValidator
     end
     
     # 断言6: 出行人数正确（1人）
-    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 20 do
+    add_assertion "出行人数正确（#{@passenger_count}人）", weight: 15 do
       # TrainBooking模型是单个乘客，验证passenger_name存在
       expect(@booking.passenger_name).to be_present,
         "未找到乘客信息"

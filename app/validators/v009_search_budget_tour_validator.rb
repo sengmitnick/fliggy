@@ -74,7 +74,7 @@ class V009SearchBudgetTourValidator < BaseValidator
   # 验证阶段：检查是否找到并预订了正确的产品
   def verify
     # 断言1: 必须有订单创建
-    add_assertion "订单已创建", weight: 25 do
+    add_assertion "订单已创建", weight: 20 do
       @booking = TourGroupBooking.order(created_at: :desc).first
       expect(@booking).not_to be_nil, "未找到任何跟团游订单记录"
     end
@@ -98,7 +98,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言4: 选择了销量最高的产品（核心评分）
-    add_assertion "选择了预算内销量最高的产品", weight: 25 do
+    add_assertion "选择了预算内销量最高的产品", weight: 30 do
       # 重新查找所有符合预算的昆明产品
       all_products = TourGroupProduct.by_destination(@destination).where(data_version: 0)
       budget_products = all_products.select { |p| p.price <= @budget }
@@ -114,7 +114,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言5: 正确识别价格范围
-    add_assertion "正确识别了价格范围", weight: 15 do
+    add_assertion "正确识别了价格范围", weight: 10 do
       # 验证订单价格在合理范围内
       adult_unit_price = @booking.tour_package.price
       
@@ -128,7 +128,7 @@ class V009SearchBudgetTourValidator < BaseValidator
     end
     
     # 断言6: 出行人数正确（1人）
-    add_assertion "出行人数正确（#{@adult_count}人）", weight: 20 do
+    add_assertion "出行人数正确（#{@adult_count}人）", weight: 15 do
       expect(@booking.adult_count).to eq(@adult_count),
         "出行人数不正确。预期: #{@adult_count}人, 实际: #{@booking.adult_count}人"
     end

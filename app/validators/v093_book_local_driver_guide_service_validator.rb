@@ -56,7 +56,7 @@ class V093BookLocalDriverGuideServiceValidator < BaseValidator
         "未选择经验最丰富的导游。应选: #{most_experienced.name}（经验#{most_experienced.experience_years}年），实际: #{@booking.deep_travel_guide.name}（经验#{@booking.deep_travel_guide.experience_years}年）"
     end
     
-    add_assertion "人数信息正确（3成人）", weight: 20 do
+    add_assertion "人数信息正确（3成人）", weight: 15 do
       expect(@booking.adult_count).to eq(@adult_count),
         "成人数不符合。期望: #{@adult_count}, 实际: #{@booking.adult_count}"
     end
