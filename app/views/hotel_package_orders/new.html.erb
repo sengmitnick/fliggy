@@ -216,6 +216,9 @@
     <%= render 'shared/form_error_message', model: @order %>
     <%= form.hidden_field :package_option_id, value: @package_option.id %>
     <%= form.hidden_field :booking_type, value: (params[:booking_type] || 'stockup'), data: { hotel_package_order_target: 'bookingTypeInput' } %>
+    <%= hidden_field_tag :hotel_id, params[:hotel_id] if params[:hotel_id].present? %>
+    <%= hidden_field_tag :check_in_date, params[:check_in_date] if params[:check_in_date].present? %>
+    <%= hidden_field_tag :check_out_date, params[:check_out_date] if params[:check_out_date].present? %>
 
     <!-- 商品卡片 -->
     <div class="bg-white rounded-b-xl rounded-tr-xl p-4 shadow-sm">

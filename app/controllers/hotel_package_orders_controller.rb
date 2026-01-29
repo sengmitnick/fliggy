@@ -34,7 +34,9 @@ class HotelPackageOrdersController < ApplicationController
     end
     
     if @order.save
-      redirect_to hotel_package_order_path(@order)
+      redirect_params = { id: @order.id }
+      redirect_params[:hotel_id] = params[:hotel_id] if params[:hotel_id].present?
+      redirect_to hotel_package_order_path(redirect_params)
     else
       @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
       @all_package_options = @package.package_options.ordered.includes(:hotel_package)
@@ -47,6 +49,7 @@ class HotelPackageOrdersController < ApplicationController
     @order = HotelPackageOrder.find(params[:id])
     @package = @order.hotel_package
     @package_option = @order.package_option
+    @selected_hotel = Hotel.find_by(id: params[:hotel_id]) if params[:hotel_id].present?
   end
 
   def pay

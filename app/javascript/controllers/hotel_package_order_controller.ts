@@ -304,6 +304,25 @@ export default class extends Controller<HTMLElement> {
       return
     }
     
+    // CRITICAL: Sync date parameters from URL to hidden fields
+    // This ensures that if user modified dates, the latest values are submitted
+    const urlParams = new URLSearchParams(window.location.search)
+    const checkInDate = urlParams.get('check_in_date')
+    const checkOutDate = urlParams.get('check_out_date')
+    
+    if (checkInDate && checkOutDate) {
+      const form = (event.target as HTMLFormElement)
+      const checkInField = form.querySelector('input[name="check_in_date"]') as HTMLInputElement
+      const checkOutField = form.querySelector('input[name="check_out_date"]') as HTMLInputElement
+      
+      if (checkInField) {
+        checkInField.value = checkInDate
+      }
+      if (checkOutField) {
+        checkOutField.value = checkOutDate
+      }
+    }
+    
     // Form will be submitted normally to create pending order
   }
 
@@ -431,6 +450,10 @@ export default class extends Controller<HTMLElement> {
     const urlParams = new URLSearchParams(window.location.search)
     const hotelIdFromUrl = urlParams.get('hotel_id')
     
+    console.log('=== openInstantBookingDateSelection DEBUG ===')
+    console.log('Current URL:', window.location.href)
+    console.log('URL params:', Object.fromEntries(urlParams.entries()))
+    
     if (hotelIdFromUrl) {
       // Preserve existing hotel selection from URL
       this.selectedHotelId = hotelIdFromUrl
@@ -465,11 +488,16 @@ export default class extends Controller<HTMLElement> {
       // Preserve current dates if they exist in URL
       if (this.hasCheckInDateInputTarget) {
         const checkInFromUrl = urlParams.get('check_in_date')
+        console.log('check_in_date from URL:', checkInFromUrl)
+        
         if (checkInFromUrl) {
+          console.log('Setting checkInDateInput.value to:', checkInFromUrl)
           this.checkInDateInputTarget!.value = checkInFromUrl
           // Trigger check-out date calculation
           this.updateCheckOutDate(new Event('change'))
+          console.log('After updateCheckOutDate, checkOutDateInput.value:', this.checkOutDateInputTarget?.value)
         } else {
+          console.log('No check_in_date in URL, clearing input')
           this.checkInDateInputTarget!.value = ''
         }
       }
@@ -477,6 +505,7 @@ export default class extends Controller<HTMLElement> {
         this.checkOutDateInputTarget!.value = ''
       }
       
+      console.log('=== END DEBUG ===')
       this.dateSelectionModalTarget!.classList.remove('hidden')
     }
   }
