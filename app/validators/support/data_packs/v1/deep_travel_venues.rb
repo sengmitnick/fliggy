@@ -21,7 +21,7 @@ beijing_guides = [
   {
     name: "叶强",
     venue: "故宫博物院",
-    title: "全国博物馆景点榜",
+    title: "全国博物馆景点榜 - 历史文化讲解",
     description: "北京导游协会金牌导游 故宫认证讲解员 北京卫视《紫禁城》节目特邀讲解员 擅长皇家文化、建筑艺术讲解",
     follower_count: 100,
     experience_years: 10,
@@ -37,7 +37,7 @@ beijing_guides = [
   {
     name: "张成松",
     venue: "故宫博物院",
-    title: "全国博物馆景点榜",
+    title: "全国博物馆景点榜 - 文化讲解专家",
     description: "国家金牌导游, 全国百佳优秀导游, 北京导游大赛银奖, 北京卫视《我爱北京》特邀嘉宾",
     follower_count: 9,
     experience_years: 10,
@@ -53,7 +53,7 @@ beijing_guides = [
   {
     name: "李明华",
     venue: "故宫博物院",
-    title: "全国博物馆景点榜",
+    title: "全国博物馆景点榜 - 文化讲解",
     description: "故宫资深讲解员，专注故宫文化研究20年，擅长讲述皇帝私生活和后宫秘闻",
     follower_count: 15,
     experience_years: 20,
