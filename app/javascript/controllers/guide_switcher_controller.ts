@@ -3,13 +3,11 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = [
     "avatar",
-    "guideInfo",
-    "bookButton"
+    "guideInfo"
   ]
 
   declare readonly avatarTargets: HTMLElement[]
   declare readonly guideInfoTarget: HTMLElement
-  declare readonly bookButtonTarget: HTMLAnchorElement
 
   switchGuide(event: Event): void {
     const clickedAvatar = event.currentTarget as HTMLElement

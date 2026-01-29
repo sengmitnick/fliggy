@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = [
     "quantity", "totalPrice", "quantityField", "totalPriceField", 
-    "mailSection", "pickupSection", "mailLabel", "pickupLabel", 
     "rentalDays", "rentalDaysField", "rentalInfoField",
     "quantityDisplay", "rentalDaysDisplay", "totalPriceDisplay",
     "addressModal", "addressRadio", "selectedAddressCard",
