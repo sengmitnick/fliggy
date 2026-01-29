@@ -356,6 +356,17 @@ RSpec.describe 'Stimulus Validation', type: :system do
             # Check parent files for partials
             if !controller_scope && relative_path.include?('_')
               parent_controllers = get_controllers_from_parents(relative_path)
+              
+              # DEBUG OUTPUT for hotel-traveler-selector
+              if relative_path.include?('hotel_traveler_selector') && controller_name == 'hotel-traveler-selector'
+                puts "\n[DEBUG SPEC] HTML Action Check:"
+                puts "[DEBUG SPEC] Action: #{action}"
+                puts "[DEBUG SPEC] File: #{relative_path}"
+                puts "[DEBUG SPEC] Controller needed: #{controller_name}"
+                puts "[DEBUG SPEC] Parent controllers: #{parent_controllers.inspect}"
+                puts "[DEBUG SPEC] Controller in parents? #{parent_controllers.include?(controller_name)}"
+              end
+              
               if parent_controllers.include?(controller_name)
                 controller_scope = true
               end
@@ -388,7 +399,27 @@ RSpec.describe 'Stimulus Validation', type: :system do
               end
             end
 
-            if !controller_scope && relative_path.include?('_')
+            # CRITICAL FIX 2: If still no scope, check if this action came from a partial
+            # by detecting if it exists in raw content vs expanded content
+            if !controller_scope
+              # Check if action's HTML exists in raw content (not expanded)
+              action_html_pattern = Regexp.escape(action_element.to_html.strip.split("\n").first.strip[0..50])
+              action_in_raw_content = content.match?(/#{action_html_pattern}/)
+              
+              # If action is NOT in raw content but IS in expanded content,
+              # it came from a partial - check if current file has the controller
+              if !action_in_raw_content
+                # For parent files, check controllers defined in THIS file using herb_parser
+                current_file_has_controller = herb_parser.controllers.any? { |c| c[:controller_name] == controller_name }
+                
+                if current_file_has_controller
+                  controller_scope = true
+                end
+              end
+            end
+
+            # Original partial check (keep as fallback for actual partial files)
+            if !controller_scope && File.basename(relative_path).start_with?('_')
               parent_controllers = get_controllers_from_parents(relative_path)
               if parent_controllers.include?(controller_name)
                 controller_scope = true
@@ -415,9 +446,11 @@ RSpec.describe 'Stimulus Validation', type: :system do
               end
             end
 
+            is_partial = File.basename(relative_path).start_with?('_')
+            
             if controller_exists_in_file
               # Controller exists but out of scope
-              if relative_path.include?('_')
+              if is_partial
                 suggestion = "Controller '#{controller_name}' exists but action is out of scope - move action within controller scope or define controller in parent template"
               else
                 suggestion = "Controller '#{controller_name}' exists but action is out of scope - move action within <div data-controller=\"#{controller_name}\">...</div>"
@@ -425,7 +458,7 @@ RSpec.describe 'Stimulus Validation', type: :system do
               error_type = "out_of_scope"
             else
               # Controller doesn't exist in file at all
-              if relative_path.include?('_')
+              if is_partial
                 suggestion = "Controller '#{controller_name}' should be defined in parent template or wrap with <div data-controller=\"#{controller_name}\">...</div>"
               else
                 suggestion = "Wrap with <div data-controller=\"#{controller_name}\">...</div>"
@@ -437,7 +470,7 @@ RSpec.describe 'Stimulus Validation', type: :system do
               action: action,
               controller: controller_name,
               file: relative_path,
-              is_partial: relative_path.include?('_'),
+              is_partial: is_partial,
               parent_files: partial_parent_map[relative_path] || [],
               suggestion: suggestion,
               source: source,
