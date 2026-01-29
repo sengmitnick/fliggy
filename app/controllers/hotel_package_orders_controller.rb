@@ -12,6 +12,9 @@ class HotelPackageOrdersController < ApplicationController
     
     # Get available hotels grouped by city for booking modal
     @hotels_by_city = fetch_available_hotels_by_city(@package)
+    
+    # Get selected hotel if hotel_id is provided (for instant booking)
+    @selected_hotel = Hotel.find_by(id: params[:hotel_id]) if params[:hotel_id].present?
   end
 
   def create

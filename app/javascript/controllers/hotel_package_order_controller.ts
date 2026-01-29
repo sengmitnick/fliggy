@@ -22,13 +22,23 @@ export default class extends Controller<HTMLElement> {
     "bookingModal",
     "packageOption",
     "cityFilter",
-    "cityGroup"
+    "cityGroup",
+    "dateSelectionModal",
+    "checkInDateInput",
+    "checkOutDateInput",
+    "selectedHotelName",
+    "selectedPackageName",
+    "selectedNightCount"
   ]
 
-  declare readonly quantityInputTarget: HTMLInputElement
-  declare readonly bottomPriceTarget: HTMLElement
-  declare readonly decreaseBtnTarget: HTMLButtonElement
-  declare readonly increaseBtnTarget: HTMLButtonElement
+  declare readonly hasQuantityInputTarget: boolean
+  declare readonly quantityInputTarget?: HTMLInputElement
+  declare readonly hasBottomPriceTarget: boolean
+  declare readonly bottomPriceTarget?: HTMLElement
+  declare readonly hasDecreaseBtnTarget: boolean
+  declare readonly decreaseBtnTarget?: HTMLButtonElement
+  declare readonly hasIncreaseBtnTarget: boolean
+  declare readonly increaseBtnTarget?: HTMLButtonElement
   declare readonly stockupTabTarget: HTMLElement
   declare readonly instantTabTarget: HTMLElement
   declare readonly bookingTypeInputTarget: HTMLInputElement
@@ -52,10 +62,30 @@ export default class extends Controller<HTMLElement> {
   declare readonly packageOptionTargets: HTMLElement[]
   declare readonly cityFilterTargets: HTMLElement[]
   declare readonly cityGroupTargets: HTMLElement[]
+  declare readonly hasDateSelectionModalTarget: boolean
+  declare readonly dateSelectionModalTarget?: HTMLElement
+  declare readonly hasCheckInDateInputTarget: boolean
+  declare readonly checkInDateInputTarget?: HTMLInputElement
+  declare readonly hasCheckOutDateInputTarget: boolean
+  declare readonly checkOutDateInputTarget?: HTMLInputElement
+  declare readonly hasSelectedHotelNameTarget: boolean
+  declare readonly selectedHotelNameTarget?: HTMLElement
+  declare readonly hasSelectedPackageNameTarget: boolean
+  declare readonly selectedPackageNameTarget?: HTMLElement
+  declare readonly hasSelectedNightCountTarget: boolean
+  declare readonly selectedNightCountTarget?: HTMLElement
+
+  private selectedHotelId: string | null = null
+  private selectedHotelName: string | null = null
+  private selectedPackageOptionId: string | null = null
 
   connect(): void {
     console.log("HotelPackageOrder connected")
-    this.updateButtonStates()
+    
+    // Only update button states if quantity input exists (stockup mode)
+    if (this.hasQuantityInputTarget) {
+      this.updateButtonStates()
+    }
     
     // Auto-select first passenger if exists
     if (this.passengerRadioTargets.length > 0) {
@@ -82,11 +112,14 @@ export default class extends Controller<HTMLElement> {
 
   increaseQuantity(event: Event): void {
     event.preventDefault()
-    const currentQuantity = parseInt(this.quantityInputTarget.value) || 1
+    
+    if (!this.hasQuantityInputTarget) return
+    
+    const currentQuantity = parseInt(this.quantityInputTarget!.value) || 1
     const newQuantity = currentQuantity + 1
     
     if (newQuantity <= 99) {
-      this.quantityInputTarget.value = newQuantity.toString()
+      this.quantityInputTarget!.value = newQuantity.toString()
       this.updatePrice()
       this.updateButtonStates()
     }
@@ -94,37 +127,44 @@ export default class extends Controller<HTMLElement> {
 
   decreaseQuantity(event: Event): void {
     event.preventDefault()
-    const currentQuantity = parseInt(this.quantityInputTarget.value) || 1
+    
+    if (!this.hasQuantityInputTarget) return
+    
+    const currentQuantity = parseInt(this.quantityInputTarget!.value) || 1
     const newQuantity = currentQuantity - 1
     
     if (newQuantity >= 1) {
-      this.quantityInputTarget.value = newQuantity.toString()
+      this.quantityInputTarget!.value = newQuantity.toString()
       this.updatePrice()
       this.updateButtonStates()
     }
   }
 
   updatePrice(): void {
-    const quantity = parseInt(this.quantityInputTarget.value) || 1
-    const unitPrice = parseFloat(this.increaseBtnTarget.dataset.price || "0")
+    if (!this.hasQuantityInputTarget || !this.hasIncreaseBtnTarget || !this.hasBottomPriceTarget) return
+    
+    const quantity = parseInt(this.quantityInputTarget!.value) || 1
+    const unitPrice = parseFloat(this.increaseBtnTarget!.dataset.price || "0")
     const totalPrice = quantity * unitPrice
 
     // Update bottom price (integer only)
-    this.bottomPriceTarget.textContent = Math.round(totalPrice).toString()
+    this.bottomPriceTarget!.textContent = Math.round(totalPrice).toString()
   }
 
   updateButtonStates(): void {
-    const quantity = parseInt(this.quantityInputTarget.value) || 1
+    if (!this.hasQuantityInputTarget || !this.hasDecreaseBtnTarget) return
+    
+    const quantity = parseInt(this.quantityInputTarget!.value) || 1
     
     // Update decrease button
     if (quantity <= 1) {
-      this.decreaseBtnTarget.classList.remove("border-blue-500", "bg-blue-50", "text-blue-600")
-      this.decreaseBtnTarget.classList.add("border-gray-200", "text-gray-300")
-      this.decreaseBtnTarget.disabled = true
+      this.decreaseBtnTarget!.classList.remove("border-blue-500", "bg-blue-50", "text-blue-600")
+      this.decreaseBtnTarget!.classList.add("border-gray-200", "text-gray-300")
+      this.decreaseBtnTarget!.disabled = true
     } else {
-      this.decreaseBtnTarget.classList.remove("border-gray-200", "text-gray-300")
-      this.decreaseBtnTarget.classList.add("border-blue-500", "bg-blue-50", "text-blue-600")
-      this.decreaseBtnTarget.disabled = false
+      this.decreaseBtnTarget!.classList.remove("border-gray-200", "text-gray-300")
+      this.decreaseBtnTarget!.classList.add("border-blue-500", "bg-blue-50", "text-blue-600")
+      this.decreaseBtnTarget!.disabled = false
     }
   }
 
@@ -276,22 +316,42 @@ export default class extends Controller<HTMLElement> {
     const target = event.currentTarget as HTMLElement
     const packageOptionId = target.dataset.packageOptionId
     
+    // Store the selected package option ID for later use
+    this.selectedPackageOptionId = packageOptionId || null
+    
     // Update visual selection state
     this.packageOptionTargets.forEach((option) => {
       const isSelected = option.dataset.packageOptionId === packageOptionId
       option.dataset.selected = isSelected.toString()
       
+      // Remove existing checkmark if any
+      const existingCheckmark = option.querySelector('.absolute.top-0.right-0')
+      if (existingCheckmark) {
+        existingCheckmark.remove()
+      }
+      
       if (isSelected) {
         option.classList.remove('bg-white', 'border-gray-200')
         option.classList.add('bg-[#FFF9E6]', 'border-[#FFD700]')
+        
+        // Add checkmark to selected option
+        const checkmark = document.createElement('div')
+        checkmark.className = 'absolute top-0 right-0 w-4 h-4 bg-[#FFD700] rounded-bl-lg flex items-center justify-center'
+        const svgContent = '<svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">'
+          + '<path fill-rule="evenodd" '
+          + 'd="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" '
+          + 'clip-rule="evenodd"></path>'
+          + '</svg>'
+        checkmark.innerHTML = svgContent
+        option.appendChild(checkmark)
       } else {
         option.classList.remove('bg-[#FFF9E6]', 'border-[#FFD700]')
         option.classList.add('bg-white', 'border-gray-200')
       }
     })
     
-    // Optional: You could reload the page with the new package option
-    // window.location.href = `/hotel_package_orders/new?package_option_id=${packageOptionId}`
+    // Do not reload - just update selection state
+    // The selected package option will be used when confirming date selection
   }
 
   selectCity(event: Event): void {
@@ -326,5 +386,139 @@ export default class extends Controller<HTMLElement> {
         }
       }
     })
+  }
+
+  // Date selection modal methods
+  openDateSelectionModal(event: Event): void {
+    event.preventDefault()
+    const button = event.currentTarget as HTMLElement
+    this.selectedHotelId = button.dataset.hotelId || null
+    this.selectedHotelName = button.dataset.hotelName || null
+    
+    if (this.hasDateSelectionModalTarget) {
+      // Update hotel name display
+      if (this.hasSelectedHotelNameTarget && this.selectedHotelName) {
+        this.selectedHotelNameTarget!.textContent = this.selectedHotelName
+      }
+      
+      // Clear previous dates
+      if (this.hasCheckInDateInputTarget) {
+        this.checkInDateInputTarget!.value = ''
+      }
+      if (this.hasCheckOutDateInputTarget) {
+        this.checkOutDateInputTarget!.value = ''
+      }
+      
+      this.dateSelectionModalTarget!.classList.remove('hidden')
+    }
+  }
+
+  // Open date selection for instant booking (from tab click)
+  openInstantBookingDateSelection(event: Event): void {
+    event.preventDefault()
+    
+    // Set selectedHotelId to null to indicate this is for instant booking
+    this.selectedHotelId = null
+    this.selectedHotelName = null
+    
+    if (this.hasDateSelectionModalTarget) {
+      // Clear hotel name display for instant booking
+      if (this.hasSelectedHotelNameTarget) {
+        this.selectedHotelNameTarget!.textContent = ''
+      }
+      
+      // Clear previous dates
+      if (this.hasCheckInDateInputTarget) {
+        this.checkInDateInputTarget!.value = ''
+      }
+      if (this.hasCheckOutDateInputTarget) {
+        this.checkOutDateInputTarget!.value = ''
+      }
+      
+      this.dateSelectionModalTarget!.classList.remove('hidden')
+    }
+  }
+
+  closeDateSelectionModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasDateSelectionModalTarget) {
+      this.dateSelectionModalTarget!.classList.add('hidden')
+    }
+  }
+
+  updateCheckOutDate(event: Event): void {
+    if (!this.hasCheckInDateInputTarget || !this.hasCheckOutDateInputTarget) {
+      return
+    }
+    
+    const checkInDate = this.checkInDateInputTarget!.value
+    if (!checkInDate) {
+      this.checkOutDateInputTarget!.value = ''
+      return
+    }
+    
+    // Get night count from the displayed package
+    const nightCountText = this.hasSelectedNightCountTarget
+      ? this.selectedNightCountTarget!.textContent
+      : '1'
+    const nightCount = parseInt(nightCountText || '1', 10)
+    
+    // Calculate check-out date
+    const checkIn = new Date(checkInDate)
+    const checkOut = new Date(checkIn)
+    checkOut.setDate(checkOut.getDate() + nightCount)
+    
+    // Format to YYYY-MM-DD
+    const year = checkOut.getFullYear()
+    const month = String(checkOut.getMonth() + 1).padStart(2, '0')
+    const day = String(checkOut.getDate()).padStart(2, '0')
+    this.checkOutDateInputTarget!.value = `${year}-${month}-${day}`
+  }
+
+  confirmDateSelection(event: Event): void {
+    event.preventDefault()
+    
+    if (!this.hasCheckInDateInputTarget || !this.checkInDateInputTarget!.value) {
+      window.showToast('请选择入住日期')
+      return
+    }
+    
+    const checkInDate = this.checkInDateInputTarget!.value
+    const checkOutDate = this.hasCheckOutDateInputTarget
+      ? this.checkOutDateInputTarget!.value
+      : ''
+    
+    if (!checkOutDate) {
+      window.showToast('离店日期计算失败，请重试')
+      return
+    }
+    
+    // Get package_option_id: use selected one from modal, or fall back to URL
+    let packageOptionId = this.selectedPackageOptionId
+    if (!packageOptionId) {
+      const urlParams = new URLSearchParams(window.location.search)
+      packageOptionId = urlParams.get('package_option_id')
+    }
+    
+    if (!packageOptionId) {
+      window.showToast('套餐信息丢失，请重试')
+      return
+    }
+    
+    // Determine booking type based on whether hotel was selected
+    const bookingType = this.selectedHotelId ? 'instant' : 'instant'
+    
+    // Redirect to order page with dates and booking type
+    let redirectUrl = `/hotel_package_orders/new?package_option_id=${packageOptionId}`
+      + `&booking_type=${bookingType}`
+      + `&check_in_date=${checkInDate}`
+      + `&check_out_date=${checkOutDate}`
+    
+    // Add hotel_id if available (from hotel list selection)
+    if (this.selectedHotelId) {
+      redirectUrl += `&hotel_id=${this.selectedHotelId}`
+    }
+    
+    window.location.href = redirectUrl
   }
 }
