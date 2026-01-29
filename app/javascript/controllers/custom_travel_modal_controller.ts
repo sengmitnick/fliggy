@@ -29,26 +29,48 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly modalTarget: HTMLElement
   declare readonly overlayTarget: HTMLElement
+  // Form targets - only used in shared/_custom_travel_modal.html.erb, not in _success.html.erb
+  declare readonly hasDepartureCityTarget: boolean
   declare readonly departureCityTarget: HTMLElement
+  declare readonly hasDestinationCityTarget: boolean
   declare readonly destinationCityTarget: HTMLElement
+  declare readonly hasAdultsCountTarget: boolean
   declare readonly adultsCountTarget: HTMLElement
+  declare readonly hasChildrenCountTarget: boolean
   declare readonly childrenCountTarget: HTMLElement
+  declare readonly hasEldersCountTarget: boolean
   declare readonly eldersCountTarget: HTMLElement
+  declare readonly hasDaysCountTarget: boolean
   declare readonly daysCountTarget: HTMLElement
+  declare readonly hasDepartureCityInputTarget: boolean
   declare readonly departureCityInputTarget: HTMLInputElement
+  declare readonly hasDestinationCityInputTarget: boolean
   declare readonly destinationCityInputTarget: HTMLInputElement
+  declare readonly hasAdultsInputTarget: boolean
   declare readonly adultsInputTarget: HTMLInputElement
+  declare readonly hasChildrenInputTarget: boolean
   declare readonly childrenInputTarget: HTMLInputElement
+  declare readonly hasEldersInputTarget: boolean
   declare readonly eldersInputTarget: HTMLInputElement
+  declare readonly hasDaysInputTarget: boolean
   declare readonly daysInputTarget: HTMLInputElement
+  declare readonly hasDepartureDateDisplayTarget: boolean
   declare readonly departureDateDisplayTarget: HTMLElement
+  declare readonly hasDepartureDateInputTarget: boolean
   declare readonly departureDateInputTarget: HTMLInputElement
+  declare readonly hasDatePickerTarget: boolean
   declare readonly datePickerTarget: HTMLElement
+  declare readonly hasCurrentMonthTarget: boolean
   declare readonly currentMonthTarget: HTMLElement
+  declare readonly hasCalendarGridTarget: boolean
   declare readonly calendarGridTarget: HTMLElement
+  declare readonly hasContactTimeDisplayTarget: boolean
   declare readonly contactTimeDisplayTarget: HTMLElement
+  declare readonly hasContactTimeInputTarget: boolean
   declare readonly contactTimeInputTarget: HTMLInputElement
+  declare readonly hasContactTimePickerTarget: boolean
   declare readonly contactTimePickerTarget: HTMLElement
+  declare readonly hasPhoneInputTarget: boolean
   declare readonly phoneInputTarget: HTMLInputElement
 
   private currentDate: Date = new Date()

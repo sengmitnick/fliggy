@@ -21,13 +21,22 @@ export default class extends Controller<HTMLElement> {
   }
 
   declare readonly productCardTargets: HTMLElement[]
-  declare readonly dateModalTarget?: HTMLElement
-  declare readonly countModalTarget?: HTMLElement
-  declare readonly calendarModalTarget?: HTMLElement
-  declare readonly adultCountTarget?: HTMLElement
-  declare readonly childCountTarget?: HTMLElement
-  declare readonly selectedDateTarget?: HTMLElement
-  declare readonly totalPriceTarget?: HTMLElement
+  
+  // Optional targets - only exist in booking flow, not in show page
+  declare readonly hasDateModalTarget: boolean
+  declare readonly dateModalTarget: HTMLElement
+  declare readonly hasCountModalTarget: boolean
+  declare readonly countModalTarget: HTMLElement
+  declare readonly hasCalendarModalTarget: boolean
+  declare readonly calendarModalTarget: HTMLElement
+  declare readonly hasAdultCountTarget: boolean
+  declare readonly adultCountTarget: HTMLElement
+  declare readonly hasChildCountTarget: boolean
+  declare readonly childCountTarget: HTMLElement
+  declare readonly hasSelectedDateTarget: boolean
+  declare readonly selectedDateTarget: HTMLElement
+  declare readonly hasTotalPriceTarget: boolean
+  declare readonly totalPriceTarget: HTMLElement
   
   declare guideIdValue: string
   declare selectedDateValue: string
