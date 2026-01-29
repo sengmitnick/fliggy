@@ -1,4 +1,7 @@
-<div class="bg-gray-800 h-screen w-full overflow-hidden relative" data-controller="transfer-passenger-selector">
+<div class="bg-gray-800 h-screen w-full overflow-hidden relative" data-controller="transfer-passenger-selector"
+     data-transfer-passenger-selector-selected-passenger-id-value=""
+     data-transfer-passenger-selector-selected-passenger-name-value="<%= current_user.name %>"
+     data-transfer-passenger-selector-selected-passenger-phone-value="<%= current_user.phone.presence || '13800138000' %>">
   <!-- Top Map Background Area -->
   <div class="absolute top-0 w-full h-1/3 bg-slate-700 z-0">
     <div class="w-full h-full opacity-30"></div>
