@@ -225,6 +225,144 @@ visa_products_data.concat([
   }
 ])
 
+# 美国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["US"].id,
+    name: "美国旅游商务签证（B1/B2）",
+    product_type: "旅游商务签证",
+    price: 1288,
+    original_price: 1298,
+    residence_area: "全国",
+    processing_days: 30,
+    visa_validity: "10年",
+    max_stay: "180天",
+    success_rate: 95.5,
+    material_count: 8,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 5200,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["US"].id,
+    name: "美国旅游商务签证（拒签退款）",
+    product_type: "旅游商务签证",
+    price: 1688,
+    original_price: 1698,
+    residence_area: "全国",
+    processing_days: 35,
+    visa_validity: "10年",
+    max_stay: "180天",
+    success_rate: 96.8,
+    material_count: 8,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 3800,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 澳大利亚签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["AU"].id,
+    name: "澳大利亚旅游签证（电子签）",
+    product_type: "旅游签证",
+    price: 1088,
+    original_price: 1098,
+    residence_area: "全国",
+    processing_days: 20,
+    visa_validity: "12个月",
+    max_stay: "90天",
+    success_rate: 98.5,
+    material_count: 3,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "武汉碧海蓝天旅游专营店",
+    sales_count: 6500,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["AU"].id,
+    name: "澳大利亚旅游签证（简化材料）",
+    product_type: "旅游签证",
+    price: 1288,
+    original_price: 1298,
+    residence_area: "全国",
+    processing_days: 18,
+    visa_validity: "12个月",
+    max_stay: "90天",
+    success_rate: 99.2,
+    material_count: 2,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: false,
+    supports_family: true,
+    merchant_name: "湖南宝中旅行社专营店",
+    sales_count: 4800,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
+# 法国签证产品
+visa_products_data.concat([
+  {
+    country_id: countries["FR"].id,
+    name: "法国旅游签证（申根签）",
+    product_type: "旅游签证",
+    price: 988,
+    original_price: 998,
+    residence_area: "全国",
+    processing_days: 15,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 97.5,
+    material_count: 6,
+    can_simplify: true,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "湖南新康辉国旅旗舰店",
+    sales_count: 7800,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    country_id: countries["FR"].id,
+    name: "法国商务签证（申根签）",
+    product_type: "商务签证",
+    price: 1288,
+    original_price: 1298,
+    residence_area: "全国",
+    processing_days: 12,
+    visa_validity: "90天",
+    max_stay: "30天",
+    success_rate: 96.2,
+    material_count: 7,
+    can_simplify: false,
+    home_pickup: true,
+    refused_reapply: true,
+    supports_family: true,
+    merchant_name: "中国旅行社总社湖南专营店",
+    sales_count: 4200,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+])
+
 # 越南签证产品
 visa_products_data.concat([
   {
@@ -296,155 +434,239 @@ visa_products_data.concat([
   }
 ])
 
-# 马来西亚签证产品
-visa_products_data.concat([
-  {
+# ============================================
+# 批量生成签证产品（避免文件过大）
+# ============================================
+
+merchants = ["湖南新康辉国旅旗舰店", "武汉碧海蓝天旅游专营店", "湖南宝中旅行社专营店", "中国旅行社总社湖南专营店"]
+
+# 马来西亚签证产品（3个）
+[
+  { type: "电子签证", price: 128, days: 1, materials: 2, pickup: false, validity: "90天", stay: "30天", rate: 100.0 },
+  { type: "旅游签证", price: 188, days: 3, materials: 3, pickup: true, validity: "90天", stay: "30天", rate: 99.5 },
+  { type: "商务签证", price: 388, days: 5, materials: 5, pickup: true, validity: "90天", stay: "30天", rate: 98.0 }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["MY"].id,
-    name: "马来西亚电子签证",
-    product_type: "电子签证",
-    price: 128,
-    original_price: 133,
+    name: "马来西亚#{config[:type]}",
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 10,
     residence_area: "全国",
-    processing_days: 1,
-    visa_validity: "90天",
-    max_stay: "30天",
-    success_rate: 100.0,
-    material_count: 2,
-    can_simplify: true,
-    home_pickup: false,
+    processing_days: config[:days],
+    visa_validity: config[:validity],
+    max_stay: config[:stay],
+    success_rate: config[:rate],
+    material_count: config[:materials],
+    can_simplify: config[:materials] <= 3,
+    home_pickup: config[:pickup],
     refused_reapply: false,
-    supports_family: true,
-    merchant_name: "湖南新康辉国旅旗舰店",
-    sales_count: 12000,
+    supports_family: config[:type] != "商务签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 12000 - i * 3000,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
-# 美国签证产品
-visa_products_data.concat([
-  {
+# 越南签证产品（3个）
+[
+  { type: "电子签证", price: 68, days: 1, materials: 2, validity: "90天" },
+  { type: "旅游签证", price: 118, days: 3, materials: 2, validity: "90天" },
+  { type: "商务签证", price: 288, days: 5, materials: 4, validity: "90天" }
+].each_with_index do |config, i|
+  visa_products_data << {
+    country_id: countries["VN"].id,
+    name: "越南#{config[:type]}",
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 10,
+    residence_area: "全国",
+    processing_days: config[:days],
+    visa_validity: config[:validity],
+    max_stay: "30天",
+    success_rate: 100.0 - i * 0.5,
+    material_count: config[:materials],
+    can_simplify: true,
+    home_pickup: i > 0,
+    refused_reapply: false,
+    supports_family: config[:type] != "商务签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 18000 - i * 5000,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+# 泰国签证产品（扩充到4个）
+[
+  { type: "落地签证", price: 58, days: 0, materials: 1, validity: "15天", stay: "15天" },
+  { type: "商务签证", price: 488, days: 5, materials: 5, validity: "90天", stay: "90天" }
+].each_with_index do |config, i|
+  visa_products_data << {
+    country_id: countries["TH"].id,
+    name: "泰国#{config[:type]}",
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 10,
+    residence_area: "全国",
+    processing_days: config[:days],
+    visa_validity: config[:validity],
+    max_stay: config[:stay],
+    success_rate: 100.0 - i * 0.5,
+    material_count: config[:materials],
+    can_simplify: true,
+    home_pickup: i > 0,
+    refused_reapply: false,
+    supports_family: config[:type] != "商务签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 22000 - i * 8000,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+# 美国签证产品（扩充到4个）
+[
+  { type: "学生签证", name: "美国学生签证（F1/M1）", price: 1888, days: 25, materials: 10, validity: "5年", stay: "按I-20表" },
+  { type: "探亲访友签证", name: "美国探亲访友签证（B2）", price: 1388, days: 28, materials: 9, validity: "10年", stay: "180天" }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["US"].id,
-    name: "美国B1/B2旅游商务签证",
-    product_type: "旅游商务签证",
-    price: 1688,
-    original_price: 1798,
+    name: config[:name],
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 110,
     residence_area: "全国",
-    processing_days: 30,
-    visa_validity: "10年",
-    max_stay: "180天",
-    success_rate: 92.5,
-    material_count: 8,
+    processing_days: config[:days],
+    visa_validity: config[:validity],
+    max_stay: config[:stay],
+    success_rate: 94.5 - i * 0.7,
+    material_count: config[:materials],
     can_simplify: false,
     home_pickup: true,
     refused_reapply: true,
-    supports_family: true,
-    merchant_name: "中国旅行社总社湖南专营店",
-    sales_count: 4500,
+    supports_family: config[:type] == "探亲访友签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 3800 - i * 500,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
-# 澳大利亚签证产品
-visa_products_data.concat([
-  {
+# 澳大利亚签证产品（扩充到4个）
+[
+  { type: "多次签证", name: "澳大利亚三年多次签证", price: 1488, days: 22, materials: 5, validity: "3年" },
+  { type: "商务签证", name: "澳大利亚商务签证", price: 1688, days: 18, materials: 7, validity: "12个月" }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["AU"].id,
-    name: "澳大利亚旅游签证",
-    product_type: "旅游签证",
-    price: 1288,
-    original_price: 1398,
+    name: config[:name],
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 110,
     residence_area: "全国",
-    processing_days: 20,
-    visa_validity: "1年",
+    processing_days: config[:days],
+    visa_validity: config[:validity],
     max_stay: "90天",
-    success_rate: 95.8,
-    material_count: 6,
-    can_simplify: false,
+    success_rate: 97.2 - i * 0.7,
+    material_count: config[:materials],
+    can_simplify: config[:type] == "多次签证",
     home_pickup: true,
     refused_reapply: true,
-    supports_family: true,
-    merchant_name: "湖南宝中旅行社专营店",
-    sales_count: 3200,
+    supports_family: config[:type] != "商务签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 4500 - i * 1600,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
-# 英国签证产品
-visa_products_data.concat([
-  {
+# 英国签证产品（3个）
+[
+  { type: "旅游签证", price: 1588, days: 25, materials: 7 },
+  { type: "商务签证", price: 1788, days: 20, materials: 8 },
+  { type: "学生签证", name: "英国学生签证（Tier 4）", price: 1988, days: 30, materials: 10, validity: "按CAS有效期", stay: "按课程长度" }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["GB"].id,
-    name: "英国旅游签证",
-    product_type: "旅游签证",
-    price: 1588,
-    original_price: 1688,
+    name: config[:name] || "英国#{config[:type]}",
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 100,
     residence_area: "全国",
-    processing_days: 25,
-    visa_validity: "2年",
-    max_stay: "180天",
-    success_rate: 94.2,
-    material_count: 7,
+    processing_days: config[:days],
+    visa_validity: config[:validity] || "2年",
+    max_stay: config[:stay] || "180天",
+    success_rate: 95.5 - i * 1.4,
+    material_count: config[:materials],
     can_simplify: false,
     home_pickup: true,
     refused_reapply: true,
-    supports_family: true,
-    merchant_name: "中国旅行社总社湖南专营店",
-    sales_count: 2800,
+    supports_family: config[:type] == "旅游签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 2800 - i * 600,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
-# 法国签证产品（申根签证）
-visa_products_data.concat([
-  {
+# 法国签证产品（扩充到4个）
+[
+  { type: "探亲访友签证", name: "法国申根探亲签证", price: 1088, days: 18, materials: 7 },
+  { type: "学生签证", name: "法国申根学生签证", price: 1388, days: 20, materials: 9, stay: "按录取通知书" }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["FR"].id,
-    name: "法国申根旅游签证",
-    product_type: "申根签证",
-    price: 998,
-    original_price: 1088,
+    name: config[:name],
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 100,
     residence_area: "全国",
-    processing_days: 15,
+    processing_days: config[:days],
     visa_validity: "90天",
-    max_stay: "90天",
-    success_rate: 96.5,
-    material_count: 6,
+    max_stay: config[:stay] || "30天",
+    success_rate: 97.2 - i * 0.4,
+    material_count: config[:materials],
     can_simplify: false,
     home_pickup: true,
     refused_reapply: true,
-    supports_family: true,
-    merchant_name: "湖南宝中旅行社专营店",
-    sales_count: 3500,
+    supports_family: config[:type] == "探亲访友签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 4500 - i * 1300,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
-# 新西兰签证产品
-visa_products_data.concat([
-  {
+# 新西兰签证产品（3个）
+[
+  { type: "旅游签证", price: 1188, days: 20, materials: 6, validity: "1年" },
+  { type: "多次签证", name: "新西兰两年多次签证", price: 1388, days: 18, materials: 5, validity: "2年" },
+  { type: "商务签证", price: 1488, days: 22, materials: 7, validity: "1年" }
+].each_with_index do |config, i|
+  visa_products_data << {
     country_id: countries["NZ"].id,
-    name: "新西兰旅游签证",
-    product_type: "旅游签证",
-    price: 1188,
-    original_price: 1288,
+    name: config[:name] || "新西兰#{config[:type]}",
+    product_type: config[:type],
+    price: config[:price],
+    original_price: config[:price] + 100,
     residence_area: "全国",
-    processing_days: 20,
-    visa_validity: "1年",
+    processing_days: config[:days],
+    visa_validity: config[:validity],
     max_stay: "90天",
-    success_rate: 96.0,
-    material_count: 6,
-    can_simplify: false,
+    success_rate: 97.5 - i * 0.8,
+    material_count: config[:materials],
+    can_simplify: config[:type] == "多次签证",
     home_pickup: true,
     refused_reapply: true,
-    supports_family: true,
-    merchant_name: "湖南新康辉国旅旗舰店",
-    sales_count: 2500,
+    supports_family: config[:type] != "商务签证",
+    merchant_name: merchants[i % merchants.size],
+    sales_count: 3800 - i * 1200,
     created_at: timestamp,
     updated_at: timestamp
   }
-])
+end
 
 VisaProduct.insert_all(visa_products_data)
 
