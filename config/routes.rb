@@ -192,7 +192,6 @@ Rails.application.routes.draw do
       get :my_orders
       get :search_flights
       get :search_trains
-      get :select_location
       get :packages
       get :locations
     end

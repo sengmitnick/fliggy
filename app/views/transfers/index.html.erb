@@ -49,9 +49,9 @@
 
   <!-- Service Type Tabs -->
   <div class="relative z-10 flex justify-between items-end px-6 mt-4 pb-2">
-    <%= link_to '#', class: "text-text-muted text-sm pb-1" do %>
+    <div class="text-text-muted text-sm pb-1 cursor-pointer" onclick="window.showToast('精彩即将上线，敬请期待')">
       顺风车
-    <% end %>
+    </div>
     <%= link_to transfers_path(type: 'airport_pickup'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type == 'airport_pickup'} #{'text-text-muted text-sm pb-1' unless @transfer_type == 'airport_pickup'}" do %>
       <span>接送机</span>
       <% if @transfer_type == 'airport_pickup' %>
@@ -64,9 +64,9 @@
         <div class="w-6 h-1 bg-black rounded-full mt-1"></div>
       <% end %>
     <% end %>
-    <%= link_to '#', class: "text-text-muted text-sm pb-1" do %>
+    <div class="text-text-muted text-sm pb-1 cursor-pointer" onclick="window.showToast('精彩即将上线，敬请期待')">
       打车
-    <% end %>
+    </div>
   </div>
 
   <!-- Service Direction Toggle (Pickup/Dropoff) -->
@@ -258,7 +258,7 @@
       </div>
       
       <div class="z-10">
-        <button class="bg-[#FF5500] text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow">点击查看 ></button>
+        <button class="bg-[#FF5500] text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow" onclick="window.showToast('精彩即将上线，敬请期待')">点击查看 ></button>
       </div>
 
       <!-- Decorative background elements -->
