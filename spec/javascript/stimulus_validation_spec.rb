@@ -173,8 +173,14 @@ RSpec.describe 'Stimulus Validation', type: :system do
 
             # Check for missing or incorrectly formatted values using AST parser
             controller_data[controller_name][:values].each do |value_name|
-              # Skip values with default values
+              # Skip values with default values (static defaults in static values = {})
               next if controller_data[controller_name][:values_with_defaults].include?(value_name)
+
+              # Skip values with dynamic defaults (initialized in connect() method)
+              next if controller_data[controller_name][:values_with_dynamic_defaults].include?(value_name)
+
+              # Skip optional values (those with hasXXXValue declaration)
+              next if controller_data[controller_name][:optional_values].include?(value_name)
 
               # Skip values with stimulus-validator: disable-next-line comment
               next if controller_data[controller_name][:values_with_skip].include?(value_name)

@@ -85,6 +85,8 @@ class StimulusValidationPipeline
           outlets: parsed_data['outlets'] || [],
           values: parsed_data['values'] || [],
           values_with_defaults: parsed_data['valuesWithDefaults'] || [],
+          values_with_dynamic_defaults: parsed_data['valuesWithDynamicDefaults'] || [],
+          optional_values: parsed_data['optionalValues'] || [],
           methods: parsed_data['methods'] || [],
           querySelectors: parsed_data['querySelectors'] || [],
           anti_patterns: parsed_data['antiPatterns'] || [],
