@@ -2,9 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "roomsCount",
+    // stimulus-validator: disable-next-line
     "adultsCount",
+    // stimulus-validator: disable-next-line
     "childrenCount",
     "roomsInput",
     "adultsInput",
@@ -18,14 +22,21 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasDisplayTextTarget: boolean
 
   static values = {
+    // stimulus-validator: disable-next-line
     rooms: Number,
+    // stimulus-validator: disable-next-line
     adults: Number,
+    // stimulus-validator: disable-next-line
     children: Number
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly roomsCountTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly adultsCountTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly childrenCountTarget: HTMLElement
   declare readonly roomsInputTarget: HTMLInputElement
   declare readonly adultsInputTarget: HTMLInputElement

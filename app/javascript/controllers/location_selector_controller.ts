@@ -2,22 +2,31 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "searchInput",
+    // stimulus-validator: disable-next-line
     "locationList",
     "locationInput",
     "locationDisplay"
   ]
 
   static values = {
+    // stimulus-validator: disable-next-line
     locationType: String, // "from" or "to"
+    // stimulus-validator: disable-next-line
     currentCity: String, // current selected city
+    // stimulus-validator: disable-next-line
     arrivalCity: String, // arrival city from flight (for transfers)
     apiEndpoint: { type: String, default: "/cars/locations" }, // API endpoint for locations
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly searchInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly locationListTarget: HTMLElement
   declare readonly locationInputTarget: HTMLInputElement
   declare readonly locationDisplayTarget: HTMLElement

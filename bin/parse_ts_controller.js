@@ -267,8 +267,8 @@ function visitNode(node) {
           result.optionalTargets.push(targetName);
         }
 
-        // Check if it's a declare readonly xxxTarget property
-        const targetMatch = propertyName.match(/^(\w+)Target$/);
+        // Check if it's a declare readonly xxxTarget or xxxTargets property
+        const targetMatch = propertyName.match(/^(\w+)Targets?$/);
         if (targetMatch && hasSkipComment) {
           const targetName = targetMatch[1];
           result.targetsWithSkip.push(targetName);

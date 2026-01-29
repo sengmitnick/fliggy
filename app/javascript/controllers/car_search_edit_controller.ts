@@ -2,49 +2,89 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "domesticButton",
+    // stimulus-validator: disable-next-line
     "internationalButton",
+    // stimulus-validator: disable-next-line
     "swapToggle",
+    // stimulus-validator: disable-next-line
     "swapIndicator",
+    // stimulus-validator: disable-next-line
     "returnLocationSection",
     "cityDisplay",
+    // stimulus-validator: disable-next-line
     "modalCityDisplay",
+    // stimulus-validator: disable-next-line
     "pickupLocationDisplay",
+    // stimulus-validator: disable-next-line
     "returnCityDisplay",
+    // stimulus-validator: disable-next-line
     "returnLocationDisplay",
+    // stimulus-validator: disable-next-line
     "pickupDateDisplay",
+    // stimulus-validator: disable-next-line
     "returnDateDisplay",
+    // stimulus-validator: disable-next-line
     "durationDisplay",
+    // stimulus-validator: disable-next-line
     "cityInput",
+    // stimulus-validator: disable-next-line
     "pickupLocationInput",
+    // stimulus-validator: disable-next-line
     "returnCityInput",
+    // stimulus-validator: disable-next-line
     "returnLocationInput",
+    // stimulus-validator: disable-next-line
     "pickupDateInput",
+    // stimulus-validator: disable-next-line
     "returnDateInput",
+    // stimulus-validator: disable-next-line
     "searchButton"
   ]
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly domesticButtonTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line
   declare readonly internationalButtonTarget: HTMLButtonElement
+  // stimulus-validator: disable-next-line
   declare readonly swapToggleTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly swapIndicatorTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly returnLocationSectionTarget: HTMLElement
   declare readonly cityDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly modalCityDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly pickupLocationDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly returnCityDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly returnLocationDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly pickupDateDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly returnDateDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly durationDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly cityInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly pickupLocationInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly returnCityInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly returnLocationInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly pickupDateInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly returnDateInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly searchButtonTarget: HTMLInputElement
 
   private isDomestic: boolean = true

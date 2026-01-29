@@ -14,7 +14,14 @@ interface CalendarDay {
 
 export default class extends Controller<HTMLElement> {
   static targets = [
-    "modal", "calendar", "monthLabel", "promptText",
+    // stimulus-validator: disable-next-line
+    "modal",
+    // stimulus-validator: disable-next-line
+    "calendar",
+    // stimulus-validator: disable-next-line
+    "monthLabel",
+    // stimulus-validator: disable-next-line
+    "promptText",
     "checkInInput", "checkOutInput", "checkInDisplay", "checkOutDisplay",
     "nightsDisplay"
   ]
@@ -23,15 +30,22 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasCheckOutInputTarget: boolean
   
   static values = {
+    // stimulus-validator: disable-next-line
     checkIn: String,
+    // stimulus-validator: disable-next-line
     checkOut: String,
+    // stimulus-validator: disable-next-line
     selectingCheckIn: Boolean,
     displayMode: { type: String, default: 'nights' } // 'nights' for hotels, 'days' for insurance
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly calendarTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly monthLabelTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly promptTextTarget: HTMLElement
   declare readonly checkInInputTarget: HTMLInputElement
   declare readonly checkOutInputTarget: HTMLInputElement

@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <%= form_with model: @order, url: membership_orders_path, method: :post, class: "flex-1 overflow-y-auto", data: { controller: "address-modal membership-payment" } do |f| %>
+  <%= form_with model: @order, url: membership_orders_path, method: :post, class: "flex-1 overflow-y-auto", id: "membership-order-form", data: { controller: "address-modal membership-payment" } do |f| %>
     <%= f.hidden_field :membership_product_id, value: @product.id %>
     <%= f.hidden_field :quantity, value: @order.quantity %>
     <%= f.hidden_field :payment_method, value: "花呗" %>

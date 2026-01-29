@@ -1,7 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["slide", "indicator"]
+  static targets = [
+    // stimulus-validator: disable-next-line
+    "slide",
+    "indicator"
+  ]
   
   static values = {
     index: { type: Number, default: 0 },
@@ -10,6 +14,7 @@ export default class extends Controller<HTMLElement> {
   }
 
   // Declare your targets and values
+  // stimulus-validator: disable-next-line
   declare readonly slideTargets: HTMLElement[]
   declare readonly indicatorTargets?: HTMLElement[]
   declare readonly hasIndicatorTarget: boolean

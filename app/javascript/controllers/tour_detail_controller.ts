@@ -1,18 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = [
-    "packageSelector",
-    "priceDisplay"
-  ]
+  static targets = []
 
   static values = {
     selectedPackageId: Number
   }
 
   // Declare your targets and values
-  declare readonly packageSelectorTarget?: HTMLElement
-  declare readonly priceDisplayTarget?: HTMLElement
   declare selectedPackageIdValue: number
 
   connect(): void {

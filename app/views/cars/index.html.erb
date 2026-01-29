@@ -1,4 +1,10 @@
-<div class="min-h-screen bg-[#f7f8fa]" data-controller="car-rental-tabs">
+<div class="min-h-screen bg-[#f7f8fa]" data-controller="car-rental-tabs"
+     data-car-rental-tabs-city-value="<%= @current_city %>"
+     data-car-rental-tabs-pickup-location-value=""
+     data-car-rental-tabs-return-city-value=""
+     data-car-rental-tabs-return-location-value=""
+     data-car-rental-tabs-pickup-date-value=""
+     data-car-rental-tabs-return-date-value="">
   <!-- Header with Banner -->
   <div class="relative">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>

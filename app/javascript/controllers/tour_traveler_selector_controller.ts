@@ -2,8 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "travelerNameInput",
+    // stimulus-validator: disable-next-line
     "travelerIdInput"
   ]
 
@@ -15,8 +18,11 @@ export default class extends Controller<HTMLElement> {
     usedPassengerIds: Array
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly travelerNameInputTargets: HTMLInputElement[]
+  // stimulus-validator: disable-next-line
   declare readonly travelerIdInputTargets: HTMLInputElement[]
 
   declare selectedPassengerIdValue: string

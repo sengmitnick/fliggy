@@ -311,15 +311,24 @@ module StimulusValidationHelpers
       (start_index...lines.length).each do |i|
         line = lines[i]
 
-        # Look for block start (do |...| or do)
-        if line.include?('do |') || line =~ /\bdo\s*$/
-          depth += 1
-          block_started = true
+        # Count block starts:
+        # 1. Blocks with 'do': form_with do, link_to do, .each do, etc.
+        # 2. Blocks without 'do': if, unless, case, for, while
+        block_starts = 0
+        
+        # Match 'do |var|' or 'do' at end of line or before %>
+        line.scan(/\bdo(?:\s*\|[^|]*\||\s*(?:%>|$))/) do
+          block_starts += 1
         end
-
-        # Look for other block starts (if, unless, each, etc.)
-        if line =~ /<% (?:if|unless|case|for|while|begin|[\w\.]+\.(?:each|map|select|times))\b/
-          depth += 1
+        
+        # Match if/unless/case/for/while blocks (without 'do')
+        if line =~ /<%\s*(?:if|unless|case|for|while)\b/
+          block_starts += 1
+        end
+        
+        if block_starts > 0
+          depth += block_starts
+          block_started = true if i == start_index  # Only mark as started if it's the form_with line
         end
 
         # Look for block end

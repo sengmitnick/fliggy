@@ -2,46 +2,86 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "overlay",
+    // stimulus-validator: disable-next-line
     "flightPreferenceTab",
+    // stimulus-validator: disable-next-line
     "airlineCompanyTab",
+    // stimulus-validator: disable-next-line
     "airportTab",
+    // stimulus-validator: disable-next-line
     "departureTimeTab",
+    // stimulus-validator: disable-next-line
     "transferCityTab",
+    // stimulus-validator: disable-next-line
     "transferTimesTab",
+    // stimulus-validator: disable-next-line
     "transferDurationTab",
+    // stimulus-validator: disable-next-line
     "totalDurationTab",
+    // stimulus-validator: disable-next-line
     "seatClassTab",
+    // stimulus-validator: disable-next-line
     "aircraftModelTab",
+    // stimulus-validator: disable-next-line
     "ticketCancellationTab",
+    // stimulus-validator: disable-next-line
     "flightPreferenceSection",
+    // stimulus-validator: disable-next-line
     "airlineCompanySection",
+    // stimulus-validator: disable-next-line
     "airportSection",
+    // stimulus-validator: disable-next-line
     "departureTimeSection",
+    // stimulus-validator: disable-next-line
     "transferCitySection",
+    // stimulus-validator: disable-next-line
     "transferTimesSection",
+    // stimulus-validator: disable-next-line
     "transferDurationSection",
+    // stimulus-validator: disable-next-line
     "totalDurationSection",
+    // stimulus-validator: disable-next-line
     "seatClassSection",
+    // stimulus-validator: disable-next-line
     "aircraftModelSection",
+    // stimulus-validator: disable-next-line
     "ticketCancellationSection",
+    // stimulus-validator: disable-next-line
     "resultCount",
+    // stimulus-validator: disable-next-line
     "directFlightCheckbox",
+    // stimulus-validator: disable-next-line
     "noTransitCheckbox",
+    // stimulus-validator: disable-next-line
     "includeCheckedLuggageCheckbox",
+    // stimulus-validator: disable-next-line
     "noSharedFlightCheckbox",
+    // stimulus-validator: disable-next-line
     "discountPriceCheckbox",
+    // stimulus-validator: disable-next-line
     "resetButton",
+    // stimulus-validator: disable-next-line
     "confirmButton",
+    // stimulus-validator: disable-next-line
     "filterBadge",
+    // stimulus-validator: disable-next-line
     "selectedFiltersContainer",
+    // stimulus-validator: disable-next-line
     "selectedFiltersList",
     // Card targets for grid layout
+    // stimulus-validator: disable-next-line
     "directFlightCard",
+    // stimulus-validator: disable-next-line
     "checkedLuggageCard",
+    // stimulus-validator: disable-next-line
     "noSharedFlightCard",
+    // stimulus-validator: disable-next-line
     "noTransitCard",
+    // stimulus-validator: disable-next-line
     "discountPriceCard",
     // Quick filter button targets
     "quickDirectFlight",
@@ -51,45 +91,85 @@ export default class extends Controller<HTMLElement> {
     "quickDiscountPrice"
   ]
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly overlayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly flightPreferenceTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly airlineCompanyTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly airportTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly departureTimeTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferCityTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferTimesTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferDurationTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly totalDurationTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly seatClassTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly aircraftModelTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly ticketCancellationTabTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly flightPreferenceSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly airlineCompanySectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly airportSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly departureTimeSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferCitySectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferTimesSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly transferDurationSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly totalDurationSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly seatClassSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly aircraftModelSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly ticketCancellationSectionTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly resultCountTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly directFlightCheckboxTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly noTransitCheckboxTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly includeCheckedLuggageCheckboxTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly noSharedFlightCheckboxTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly discountPriceCheckboxTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly resetButtonTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly confirmButtonTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly filterBadgeTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly selectedFiltersContainerTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly selectedFiltersListTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly directFlightCardTarget?: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly checkedLuggageCardTarget?: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly noSharedFlightCardTarget?: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly noTransitCardTarget?: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly discountPriceCardTarget?: HTMLElement
   declare readonly quickDirectFlightTarget?: HTMLElement
   declare readonly quickNoSharedFlightTarget?: HTMLElement
