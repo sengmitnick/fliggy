@@ -7,7 +7,7 @@ class V088BookCrossCityAirportPickupValidator < BaseValidator
   self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
   self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
   self.title = '预订浦东机场接机送到杭州（跨城接机，经济5座）'
-  self.description = '5天后从浦东T1机场接机直接送到杭州市区酒店，选择经济5座'
+  self.description = '5天后从北京飞往上海，在浦东T1机场接机直接送到杭州市区酒店，选择经济5座（需先按起降城市搜索航班，系统会自动识别机场）'
   self.timeout_seconds = 240
   
   def prepare
@@ -31,7 +31,7 @@ class V088BookCrossCityAirportPickupValidator < BaseValidator
       dropoff_location: @dropoff_location,
       pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
       vehicle_category: '经济5座',
-      hint: "跨城接机服务，从上海浦东机场送到杭州市区，选择economy_5车型最便宜的套餐",
+      hint: "跨城接机服务需先按起降城市（北京→上海）搜索航班，系统会自动识别浦东T1机场。然后从上海浦东机场送到杭州市区，选择economy_5车型最便宜的套餐",
       available_packages_count: @available_packages.count
     }
   end

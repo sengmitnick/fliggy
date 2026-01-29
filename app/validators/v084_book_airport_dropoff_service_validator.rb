@@ -7,7 +7,7 @@ class V084BookAirportDropoffServiceValidator < BaseValidator
   self.validator_id = 'v084_book_airport_dropoff_service_validator'
   self.task_id = '31608ddd-05b6-48a6-8e8e-b9a0cf0759b4'
   self.title = '预订浦东机场送机服务（市区→机场，舒适5座）'
-  self.description = '明天从市区送到浦东T1机场赶飞机，选择舒适5座车型'
+  self.description = '明天从上海飞往北京，从市区送到浦东T1机场，选择舒适5座车型（需先按起降城市搜索航班，系统会自动识别机场）'
   self.timeout_seconds = 240
   
   def prepare
@@ -31,7 +31,7 @@ class V084BookAirportDropoffServiceValidator < BaseValidator
       dropoff_location: @dropoff_location,
       pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
       vehicle_category: '舒适5座',
-      hint: "送机服务是从市区送到机场，车型要求comfort_5（舒适5座）",
+      hint: "送机服务需先按起降城市（上海→北京）搜索航班，系统会自动识别浦东T1机场。然后选择comfort_5（舒适5座）车型中价格最低的套餐",
       available_packages_count: @available_packages.count
     }
   end
