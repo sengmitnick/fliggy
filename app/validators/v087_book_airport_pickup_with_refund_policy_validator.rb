@@ -6,8 +6,8 @@ require_relative 'base_validator'
 class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
   self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
   self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
-  self.title = '预订浦东机场接机服务（舒适5座，要求随时退政策）'
-  self.description = '3天后从北京飞往上海，在浦东T2接机，需要舒适5座且支持随时退政策（需先按起降城市搜索航班，系统会自动识别机场）'
+  self.title = '预订浦东机场接机服务（舒适5座，要求可随时取消）'
+  self.description = '3天后从北京飞往上海，在浦东T2接机，需要舒适5座车型，并且要求出发前任何时间都可以免费取消订单（需先按起降城市搜索航班，系统会自动识别机场）'
   self.timeout_seconds = 240
   
   def prepare
@@ -26,14 +26,14 @@ class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
     ).select { |p| p.refund_policy.include?(@required_refund_policy) }
     
     {
-      task: "请预订3天后从#{@pickup_location}接机送到#{@dropoff_location}，要求舒适5座车型且支持'随时退'政策，选择价格最低的套餐",
+      task: "请预订3天后从#{@pickup_location}接机送到#{@dropoff_location}，要求舒适5座车型且支持随时取消（出发前任何时间都可免费取消），选择价格最低的套餐",
       service_type: "接机（from_airport）",
       pickup_location: @pickup_location,
       dropoff_location: @dropoff_location,
       pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
       vehicle_category: '舒适5座',
-      refund_policy: '随时退',
-      hint: "接机服务需先按起降城市（北京→上海）搜索航班，系统会自动识别浦东T2机场。然后筛选comfort_5车型且refund_policy包含'随时退'的套餐，选择最便宜的",
+      cancellation_policy: '随时退（出发前任何时间可免费取消）',
+      hint: "接机服务需先按起降城市（北京→上海）搜索航班，系统会自动识别浦东T2机场。然后筛选舒适5座车型且取消政策显示'随时退'的套餐，选择其中价格最低的",
       available_packages_count: @available_packages.count
     }
   end
