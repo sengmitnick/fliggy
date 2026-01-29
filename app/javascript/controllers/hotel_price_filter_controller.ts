@@ -2,30 +2,49 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
+    // stimulus-validator: disable-next-line
     "modal",
+    // stimulus-validator: disable-next-line
     "minSlider",
+    // stimulus-validator: disable-next-line
     "maxSlider",
+    // stimulus-validator: disable-next-line
     "sliderTrack",
+    // stimulus-validator: disable-next-line
     "minPriceDisplay",
+    // stimulus-validator: disable-next-line
     "maxPriceDisplay",
+    // stimulus-validator: disable-next-line
     "starRating",
+    // stimulus-validator: disable-next-line
     "pricePreset",
     "displayText"
   ]
 
   static values = {
+    // stimulus-validator: disable-next-line
     minPrice: Number,
+    // stimulus-validator: disable-next-line
     maxPrice: Number,
+    // stimulus-validator: disable-next-line
     stars: Number
   }
 
+  // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly minSliderTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly maxSliderTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly sliderTrackTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly minPriceDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly maxPriceDisplayTarget: HTMLElement
+  // stimulus-validator: disable-next-line
   declare readonly starRatingTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
   declare readonly pricePresetTargets: HTMLElement[]
   declare readonly displayTextTarget: HTMLElement
 

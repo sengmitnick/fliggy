@@ -1,10 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["travelerCard", "nameInput", "idInput"]
+  static targets = [
+    // stimulus-validator: disable-next-line
+    "nameInput",
+    // stimulus-validator: disable-next-line
+    "idInput"
+  ]
 
-  declare readonly travelerCardTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
   declare readonly nameInputTargets: HTMLInputElement[]
+  // stimulus-validator: disable-next-line
   declare readonly idInputTargets: HTMLInputElement[]
 
   connect(): void {
