@@ -2,30 +2,29 @@
 
 require_relative 'base_validator'
 
-# 验证用例90: 预订三亚潜水体验（PADI认证教练，最低价格）
+# 验证用例90: 预订上海外滩历史文化讲解（评分最高）
 class V090BookSanyaDivingExperienceValidator < BaseValidator
   self.validator_id = 'v090_book_sanya_diving_experience_validator'
   self.task_id = 'b0ae1fdc-ef74-465b-ade9-04b581d0eb17'
-  self.title = '预订三亚潜水体验（PADI认证教练，选择最低价格产品）'
-  self.description = '预订3天后的三亚潜水体验，要求PADI认证潜水教练，选择该教练最便宜的产品'
+  self.title = '预订上海外滩历史文化讲解（评分最高的特级导游）'
+  self.description = '预订3天后的上海外滩历史文化讲解，要求评分最高的特级导游'
   self.timeout_seconds = 240
   
   def prepare
-    @title_keyword = '潜水教学'
-    @location = '三亚'
+    @venue = '上海外滩'
+    @location = '华东'
     @travel_date = Date.current + 3.days
     @adult_count = 1
     
-    @qualified_guides = DeepTravelGuide.where(data_version: 0)
-                                       .where('title LIKE ?', "%#{@title_keyword}%")
+    @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     
     {
-      task: "请预订3天后（#{@travel_date.strftime('%Y年%m月%d日')}）#{@location}的潜水体验，要求PADI认证潜水教练，为#{@adult_count}位成人，选择该教练价格最便宜的产品",
+      task: "请预订3天后（#{@travel_date.strftime('%Y年%m月%d日')}）#{@venue}的历史文化讲解，要求评分最高的特级导游，为#{@adult_count}位成人",
+      venue: @venue,
       location: @location,
-      title_keyword: @title_keyword,
       travel_date: @travel_date.strftime('%Y-%m-%d'),
       adult_count: @adult_count,
-      hint: "筛选潜水教学类向导，选择三亚地区最便宜的产品",
+      hint: "筛选上海外滩讲解员，选择评分最高的导游",
       qualified_guides_count: @qualified_guides.count
     }
   end
@@ -38,49 +37,47 @@ class V090BookSanyaDivingExperienceValidator < BaseValidator
     
     return unless @booking
     
-    add_assertion "向导类型正确（潜水教学）", weight: 25 do
+    add_assertion "向导景点正确（上海外滩）", weight: 25 do
       guide = @booking.deep_travel_guide
-      expect(guide.title).to include(@title_keyword),
-        "向导类型不符合要求。期望包含: #{@title_keyword}, 实际: #{guide.title}"
+      expect(guide.venue).to eq(@venue),
+        "向导景点不符合要求。期望: #{@venue}, 实际: #{guide.venue}"
     end
     
-    add_assertion "产品地点正确（三亚）", weight: 25 do
+    add_assertion "产品地点正确（华东）", weight: 25 do
       product = @booking.deep_travel_product
       expect(product.location).to eq(@location),
         "产品地点不符合要求。期望: #{@location}, 实际: #{product.location}"
     end
     
-    add_assertion "选择了该教练最便宜的三亚产品", weight: 30 do
-      guide = @booking.deep_travel_guide
-      cheapest_product = guide.deep_travel_products.where(data_version: 0, location: @location)
-                              .order(price: :asc).first
-      expect(@booking.deep_travel_product_id).to eq(cheapest_product.id),
-        "未选择该教练最便宜的三亚产品。应选: #{cheapest_product.title}（#{cheapest_product.price}元），实际: #{@booking.deep_travel_product.title}（#{@booking.deep_travel_product.price}元）"
+    add_assertion "选择了评分最高的外滩导游", weight: 30 do
+      highest_rated = DeepTravelGuide.where(data_version: 0, venue: @venue)
+                                     .order(rating: :desc, served_count: :desc).first
+      expect(@booking.deep_travel_guide_id).to eq(highest_rated.id),
+        "未选择评分最高的导游。应选: #{highest_rated.name}（评分#{highest_rated.rating}），实际: #{@booking.deep_travel_guide.name}（评分#{@booking.deep_travel_guide.rating}）"
     end
   end
   
   def execution_state_data
-    { title_keyword: @title_keyword, location: @location, travel_date: @travel_date.to_s, adult_count: @adult_count }
+    { venue: @venue, location: @location, travel_date: @travel_date.to_s, adult_count: @adult_count }
   end
   
   def restore_from_state(data)
-    @title_keyword = data['title_keyword']
+    @venue = data['venue']
     @location = data['location']
     @travel_date = Date.parse(data['travel_date'])
     @adult_count = data['adult_count']
-    @qualified_guides = DeepTravelGuide.where(data_version: 0).where('title LIKE ?', "%#{@title_keyword}%")
+    @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
   end
   
   def simulate
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    target_guide = DeepTravelGuide.where(data_version: 0)
-                                  .where('title LIKE ?', "%#{@title_keyword}%")
-                                  .first
+    target_guide = DeepTravelGuide.where(data_version: 0, venue: @venue)
+                                  .order(rating: :desc, served_count: :desc).first
     raise "未找到符合条件的向导" unless target_guide
     
     target_product = target_guide.deep_travel_products.where(data_version: 0, location: @location)
-                                 .order(price: :asc).first
+                                 .order(sales_count: :desc).first
     raise "未找到符合条件的产品" unless target_product
     
     total_price = target_product.price * @adult_count

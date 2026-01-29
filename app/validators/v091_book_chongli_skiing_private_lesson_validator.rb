@@ -2,34 +2,31 @@
 
 require_relative 'base_validator'
 
-# 验证用例91: 预订崇礼滑雪私教课（单板双板均可，家庭出行）
+# 验证用例91: 预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）
 class V091BookChongliSkiingPrivateLessonValidator < BaseValidator
   self.validator_id = 'v091_book_chongli_skiing_private_lesson_validator'
   self.task_id = '5bc15e2f-a604-469a-99a1-ccce0e9eabed'
-  self.title = '预订崇礼滑雪私教课（单板双板均可，家庭出行2大1小）'
-  self.description = '预订下周末崇礼万龙滑雪场私教课，家庭出行2大1小，选择评分最高的滑雪教练'
+  self.title = '预订西安秦始皇帝陵博物院讲解（服务人数最多的金牌导游）'
+  self.description = '预订下周末西安秦始皇帝陵博物院讲解，选择服务人数最多的金牌导游'
   self.timeout_seconds = 240
   
   def prepare
-    @title_keyword = '滑雪教学'
-    @location_keyword = '崇礼'
-    @product_keyword = '私教'
+    @venue = '秦始皇帝陵博物院'
+    @location = '陕西'
     @travel_date = Date.current + 7.days
     @adult_count = 2
     @child_count = 1
     
-    @qualified_guides = DeepTravelGuide.where(data_version: 0)
-                                       .where('title LIKE ?', "%#{@title_keyword}%")
+    @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     
     {
-      task: "请预订下周末（#{@travel_date.strftime('%Y年%m月%d日')}）崇礼万龙滑雪场的私教课，家庭出行#{@adult_count}大#{@child_count}小，选择评分最高的滑雪教练",
-      location_keyword: @location_keyword,
-      product_keyword: @product_keyword,
-      title_keyword: @title_keyword,
+      task: "请预订下周末（#{@travel_date.strftime('%Y年%m月%d日')}）西安秦始皇帝陵博物院（兵马俑）的深度讲解，家庭出行#{@adult_count}大#{@child_count}小，选择服务人数最多的金牌导游",
+      venue: @venue,
+      location: @location,
       travel_date: @travel_date.strftime('%Y-%m-%d'),
       adult_count: @adult_count,
       child_count: @child_count,
-      hint: "筛选滑雪教学类向导，选择评分最高的教练，产品需包含'崇礼'和'私教'关键词",
+      hint: "筛选秦始皇帝陵博物院讲解员，选择服务人数最多的导游",
       qualified_guides_count: @qualified_guides.count
     }
   end
@@ -42,25 +39,23 @@ class V091BookChongliSkiingPrivateLessonValidator < BaseValidator
     
     return unless @booking
     
-    add_assertion "向导类型正确（滑雪教学）", weight: 20 do
+    add_assertion "向导景点正确（秦始皇帝陵博物院）", weight: 20 do
       guide = @booking.deep_travel_guide
-      expect(guide.title).to include(@title_keyword),
-        "向导类型不符合要求。期望包含: #{@title_keyword}, 实际: #{guide.title}"
+      expect(guide.venue).to eq(@venue),
+        "向导景点不符合要求。期望: #{@venue}, 实际: #{guide.venue}"
     end
     
-    add_assertion "产品地点包含关键词（崇礼）", weight: 20 do
+    add_assertion "产品地点正确（陕西）", weight: 20 do
       product = @booking.deep_travel_product
-      location_match = product.location.include?(@location_keyword) || product.title.include?(@location_keyword)
-      expect(location_match).to be_truthy,
-        "产品地点不符合要求。期望包含: #{@location_keyword}, 实际: #{product.location} / #{product.title}"
+      expect(product.location).to eq(@location),
+        "产品地点不符合要求。期望: #{@location}, 实际: #{product.location}"
     end
     
-    add_assertion "选择了评分最高的滑雪教练", weight: 25 do
-      highest_rated = DeepTravelGuide.where(data_version: 0)
-                                     .where('title LIKE ?', "%#{@title_keyword}%")
-                                     .order(rating: :desc).first
-      expect(@booking.deep_travel_guide_id).to eq(highest_rated.id),
-        "未选择评分最高的教练。应选: #{highest_rated.name}（评分#{highest_rated.rating}），实际: #{@booking.deep_travel_guide.name}（评分#{@booking.deep_travel_guide.rating}）"
+    add_assertion "选择了服务人数最多的导游", weight: 25 do
+      most_served = DeepTravelGuide.where(data_version: 0, venue: @venue)
+                                   .order(served_count: :desc, rating: :desc).first
+      expect(@booking.deep_travel_guide_id).to eq(most_served.id),
+        "未选择服务人数最多的导游。应选: #{most_served.name}（已服务#{most_served.served_count}人），实际: #{@booking.deep_travel_guide.name}（已服务#{@booking.deep_travel_guide.served_count}人）"
     end
     
     add_assertion "人数信息正确（2大1小）", weight: 20 do
@@ -72,30 +67,27 @@ class V091BookChongliSkiingPrivateLessonValidator < BaseValidator
   end
   
   def execution_state_data
-    { title_keyword: @title_keyword, location_keyword: @location_keyword, product_keyword: @product_keyword,
+    { venue: @venue, location: @location,
       travel_date: @travel_date.to_s, adult_count: @adult_count, child_count: @child_count }
   end
   
   def restore_from_state(data)
-    @title_keyword = data['title_keyword']
-    @location_keyword = data['location_keyword']
-    @product_keyword = data['product_keyword']
+    @venue = data['venue']
+    @location = data['location']
     @travel_date = Date.parse(data['travel_date'])
     @adult_count = data['adult_count']
     @child_count = data['child_count']
-    @qualified_guides = DeepTravelGuide.where(data_version: 0).where('title LIKE ?', "%#{@title_keyword}%")
+    @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
   end
   
   def simulate
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    target_guide = DeepTravelGuide.where(data_version: 0)
-                                  .where('title LIKE ?', "%#{@title_keyword}%")
-                                  .order(rating: :desc).first
+    target_guide = DeepTravelGuide.where(data_version: 0, venue: @venue)
+                                  .order(served_count: :desc, rating: :desc).first
     raise "未找到符合条件的向导" unless target_guide
     
-    target_product = target_guide.deep_travel_products.where(data_version: 0)
-                                 .where('title LIKE ? OR location LIKE ?', "%#{@location_keyword}%", "%#{@location_keyword}%")
+    target_product = target_guide.deep_travel_products.where(data_version: 0, location: @location)
                                  .order(sales_count: :desc).first
     raise "未找到符合条件的产品" unless target_product
     

@@ -73,10 +73,15 @@ class DeepTravelsController < ApplicationController
 
   def show
     @full_render = true
-    @guide = DeepTravelGuide.includes(:deep_travel_products, :avatar_attachment, :video_attachment)
+    @guide = DeepTravelGuide.includes(:deep_travel_products, :deep_travel_reviews, :avatar_attachment, :video_attachment)
                            .find(params[:id])
     @products = @guide.deep_travel_products.order(sales_count: :desc)
     @selected_product = @products.first
+    
+    # Load reviews
+    @reviews = @guide.deep_travel_reviews.includes(:user).recent.limit(10)
+    @review_count = @guide.deep_travel_reviews.count
+    @avg_rating = @guide.rating || 5.0  # Use guide's rating as average
   end
 
   private
