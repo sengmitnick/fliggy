@@ -304,7 +304,8 @@ class BaseValidator
     end
     
     # 清理执行状态
-    cleanup_execution_state
+    # ⚠️ 注释掉以便调试和重复验证
+    # cleanup_execution_state
     
     # 验证完成后，回滚到基线状态（删除当前 data_version 的所有数据）
     rollback_to_baseline

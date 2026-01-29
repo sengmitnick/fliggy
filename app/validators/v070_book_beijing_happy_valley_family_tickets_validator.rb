@@ -81,75 +81,93 @@ class V070BookBeijingHappyValleyFamilyTicketsValidator < BaseValidator
   end
   
   def verify
-    # 断言1: 必须创建2个订单（成人票订单+儿童票订单）
-    add_assertion "创建了2个订单（成人票订单+儿童票订单）", weight: 25 do
-      all_orders = TicketOrder.order(created_at: :desc).limit(10).to_a
-      expect(all_orders).not_to be_empty, "未找到任何门票订单记录"
+    # 断言1: 创建了成人票和儿童票订单
+    add_assertion "创建了成人票和儿童票订单", weight: 25 do
+      # 查询当前会话的订单（按景点和 data_version 筛选）
+      all_orders = TicketOrder
+        .joins(ticket: :attraction)
+        .includes(:ticket)
+        .where(tickets: { attractions: { name: @attraction_name } })
+        .where(data_version: @data_version)
+        .order(created_at: :desc)
+        .to_a
       
-      # 找到符合条件的订单（景点正确，日期正确）
-      @ticket_orders = all_orders.select do |order|
-        order.ticket.attraction_id == @attraction.id && 
-        order.visit_date == @visit_date
-      end
+      expect(all_orders).not_to be_empty, "未找到任何#{@attraction_name}的门票订单记录"
       
-      expect(@ticket_orders.size).to be >= 2,
-        "订单数量不足。期望至少2个订单（1个成人票订单+1个儿童票订单），实际找到#{@ticket_orders.size}个订单"
+      # 只保留成人票和儿童票订单（排除其他类型）
+      @all_ticket_orders = all_orders.select { |o| ['adult', 'child'].include?(o.ticket.ticket_type) }
       
-      # 分离成人票订单和儿童票订单
-      @adult_orders = @ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
-      @child_orders = @ticket_orders.select { |o| o.ticket.ticket_type == 'child' }
+      expect(@all_ticket_orders).not_to be_empty,
+        "未找到成人票或儿童票订单（找到#{all_orders.size}个订单，但都不是成人票/儿童票）"
       
-      expect(@adult_orders).not_to be_empty, "未找到成人票订单"
-      expect(@child_orders).not_to be_empty, "未找到儿童票订单"
+      # 分离成人票和儿童票（不管日期）
+      all_adult_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
+      all_child_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'child' }
       
-      # 统计总数量
-      @actual_adult_count = @adult_orders.sum(&:quantity)
-      @actual_child_count = @child_orders.sum(&:quantity)
+      expect(all_adult_orders).not_to be_empty, "未找到任何成人票订单"
+      expect(all_child_orders).not_to be_empty, "未找到任何儿童票订单"
     end
     
-    return if @ticket_orders.nil? || @ticket_orders.empty?
+    return if @all_ticket_orders.nil? || @all_ticket_orders.empty?
     
     # 断言2: 景点正确
     add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
-      @ticket_orders.each do |order|
+      @all_ticket_orders.each do |order|
         attraction = order.ticket.attraction
         expect(attraction.name).to eq(@attraction_name),
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     end
     
-    # 断言3: 成人票数量正确
-    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 10 do
-      expect(@actual_adult_count).to eq(@adult_count),
-        "成人票数量错误。期望: #{@adult_count}张, 实际: #{@actual_adult_count}张"
-    end
-    
-    # 断言4: 儿童票数量正确
-    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 10 do
-      expect(@actual_child_count).to eq(@child_count),
-        "儿童票数量错误。期望: #{@child_count}张, 实际: #{@actual_child_count}张"
-    end
-    
-    # 断言5: 游玩日期正确
+    # 断言3: 游玩日期正确（3天后）
     add_assertion "游玩日期正确（3天后，#{@visit_date}）", weight: 10 do
-      @ticket_orders.each do |order|
-        expect(order.visit_date).to eq(@visit_date),
-          "游玩日期错误。期望: #{@visit_date}（3天后）, 实际: #{order.visit_date}"
-      end
+      # 筛选出日期正确的订单
+      @correct_date_orders = @all_ticket_orders.select { |o| o.visit_date == @visit_date }
+      
+      expect(@correct_date_orders).not_to be_empty,
+        "未找到日期为#{@visit_date}（3天后）的订单。" \
+        "找到的订单日期为: #{@all_ticket_orders.map(&:visit_date).uniq.join(', ')}"
+      
+      # 分离成人票和儿童票（日期正确的）
+      @adult_orders = @correct_date_orders.select { |o| o.ticket.ticket_type == 'adult' }
+      @child_orders = @correct_date_orders.select { |o| o.ticket.ticket_type == 'child' }
+      
+      expect(@adult_orders).not_to be_empty, "未找到日期为#{@visit_date}的成人票订单"
+      expect(@child_orders).not_to be_empty, "未找到日期为#{@visit_date}的儿童票订单"
     end
     
-    # 断言6: 选择了最便宜的供应商组合（核心评分项）
+    return if @correct_date_orders.nil? || @correct_date_orders.empty?
+    
+    # 断言4: 成人票数量正确（2张）
+    add_assertion "成人票数量正确（#{@adult_count}张）", weight: 10 do
+      actual_adult_count = @adult_orders.sum(&:quantity)
+      
+      expect(actual_adult_count).to eq(@adult_count),
+        "成人票总数量错误。期望: #{@adult_count}张, 实际: #{actual_adult_count}张 " \
+        "（来自#{@adult_orders.size}个订单: #{@adult_orders.map { |o| "#{o.quantity}张" }.join(' + ')}）"
+    end
+    
+    # 断言5: 儿童票数量正确（1张）
+    add_assertion "儿童票数量正确（#{@child_count}张）", weight: 10 do
+      actual_child_count = @child_orders.sum(&:quantity)
+      
+      expect(actual_child_count).to eq(@child_count),
+        "儿童票总数量错误。期望: #{@child_count}张, 实际: #{actual_child_count}张 " \
+        "（来自#{@child_orders.size}个订单: #{@child_orders.map { |o| "#{o.quantity}张" }.join(' + ')}）"
+    end
+    
+    # 断言6: 选择了最优惠的供应商组合（核心评分项）
     add_assertion "选择了最优惠的供应商组合", weight: 30 do
-      # 计算实际总价（只计算成人票和儿童票订单）
+      # 计算实际总价（只计算日期正确的成人票和儿童票订单）
       actual_total = @adult_orders.sum(&:total_price) + @child_orders.sum(&:total_price)
       
-      # 与最优方案对比（允许5%误差，因为可能有不同的合理组合）
+      # 与最优方案对比（允许5%误差）
       best_total = @best_adult_price * @adult_count + @best_child_price * @child_count
       
       expect(actual_total).to be <= (best_total * 1.05),
         "未选择最优惠的供应商组合。" \
-        "最优方案总价: #{best_total}元（成人#{@best_adult_price}元×#{@adult_count} + 儿童#{@best_child_price}元×#{@child_count}），" \
-        "实际总价: #{actual_total}元（成人票订单: #{@adult_orders.sum(&:total_price)}元 + 儿童票订单: #{@child_orders.sum(&:total_price)}元）"
+        "最优方案总价: #{best_total.round(2)}元（成人#{@best_adult_price}元×#{@adult_count} + 儿童#{@best_child_price}元×#{@child_count}），" \
+        "实际总价: #{actual_total.round(2)}元（成人票: #{@adult_orders.sum(&:total_price).round(2)}元 + 儿童票: #{@child_orders.sum(&:total_price).round(2)}元）"
     end
   end
   
