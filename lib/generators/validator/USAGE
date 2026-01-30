@@ -1,0 +1,57 @@
+Description:
+    Generate a new validator with auto-generated UUID and boilerplate code.
+    
+    The generator will:
+    - Automatically find the next validator number (e.g., v098, v099)
+    - Generate a unique UUID for task_id
+    - Create validator file with complete template
+    - Include best practices and examples in comments
+
+Example:
+    rails generate validator book_premium_hotel "预订高档酒店" "用户需要预订五星级酒店，价格不限"
+
+    This will create:
+        app/validators/v098_book_premium_hotel_validator.rb
+
+Arguments:
+    validator_name (required):
+        Snake case name for the validator
+        Example: book_premium_hotel, search_flights, redeem_coupon
+        
+    title (required):
+        Chinese title for the validator
+        Example: "预订高档酒店", "搜索航班", "兑换优惠券"
+        
+    description (required):
+        Chinese description of the task
+        Example: "用户需要预订五星级酒店，价格不限"
+
+After Generation:
+    1. Open the generated file in app/validators/
+    2. Implement the prepare method (set task parameters)
+    3. Implement the verify method (add assertions with weights)
+    4. Implement the simulate method (AI agent automation logic)
+    5. Run: rake validator:simulate to test all validators
+
+Best Practices:
+    - Total assertion weights must sum to 100
+    - First assertion should query records and store in @instance_variable
+    - Use guard clause (return unless @record) after first assertion
+    - Always filter by data_version in queries:
+      * data_version: 0 for baseline data
+      * data_version: @data_version for execution-specific data
+    - Provide clear error messages in expect statements
+    - Follow the query pattern shown in docs/project.md
+
+Example Usage Flow:
+    # Generate validator
+    rails generate validator book_best_hotel "预订最佳酒店" "预订评分最高的经济型酒店"
+    
+    # Edit app/validators/v098_book_best_hotel_validator.rb
+    # Implement prepare, verify, simulate methods
+    
+    # Test the validator
+    rake validator:simulate
+    
+    # Check results
+    # All validators should pass with 100/100 score
