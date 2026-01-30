@@ -26,6 +26,11 @@ class CruisesController < ApplicationController
       @sailings = @sailings.where(cruise_route_id: @selected_route.id)
     end
     
+    # 获取所有可用城市（不受当前筛选影响）
+    base_sailings = CruiseSailing.where(status: 'on_sale')
+    base_sailings = base_sailings.where(cruise_route_id: @selected_route.id) if @selected_route.present?
+    @all_departure_cities = base_sailings.pluck(:departure_port).uniq.compact.sort
+    
     # 按城市筛选
     if params[:city].present?
       @sailings = @sailings.where(departure_port: params[:city])
@@ -46,6 +51,10 @@ class CruisesController < ApplicationController
     @sailings = @sailings
                  .includes(:cruise_ship, :cruise_route, :cruise_products)
                  .order('cruise_sailings.created_at DESC')
+    
+    # 为舱房选择区域准备数据
+    @first_sailing = @sailings.first
+    @cruise_ship = @first_sailing&.cruise_ship
   end
 
   def show

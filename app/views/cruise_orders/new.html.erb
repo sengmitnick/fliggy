@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <%= form_with model: @cruise_order, url: cruise_orders_path, local: true, class: "max-w-7xl mx-auto px-4 py-4 space-y-4" do |f| %>
+  <%= form_with model: @cruise_order, url: cruise_orders_path, class: "max-w-7xl mx-auto px-4 py-4 space-y-4", data: { cruise_order_form_target: "form" } do |f| %>
     <%= render 'shared/form_error_message', model: @cruise_order %>
     <%= f.hidden_field :cruise_product_id, value: @product.id %>
 
@@ -287,9 +287,13 @@
           </div>
         </div>
         
-        <%= f.submit "提交订单", 
+        <%= f.button "提交订单", 
+                    type: "submit",
                     class: "btn-primary px-8 py-3 text-base font-medium",
-                    data: { disable_with: "提交中..." } %>
+                    data: { 
+                      cruise_order_form_target: "submitBtn",
+                      disable_with: "正在创建订单..."
+                    } %>
       </div>
     </div>
   <% end %>

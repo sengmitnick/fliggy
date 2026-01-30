@@ -187,11 +187,9 @@
             <div class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-20"
                  data-cruise-search-target="cityDropdown">
               <div class="p-3 max-h-64 overflow-y-auto">
-                <% departure_cities = @sailings.pluck(:departure_port).uniq.compact %>
-                
                 <%= link_to '全部城市', search_cruises_path(route: params[:route]), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 
-                <% departure_cities.each do |city| %>
+                <% @all_departure_cities.each do |city| %>
                   <%= link_to city, search_cruises_path(route: params[:route], city: city), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 <% end %>
               </div>
@@ -247,43 +245,49 @@
     <!-- Sailing Dates List -->
     <section class="bg-white">
       <div class="max-w-7xl mx-auto px-4 py-4">
+        <h3 class="text-sm font-medium text-gray-500 mb-3">选择出行日期</h3>
         <div class="space-y-3">
-          <% @sailings.group_by(&:cruise_ship_id).first&.last&.take(5)&.each do |sailing| %>
-            <%= link_to cruise_path(sailing.cruise_ship.slug, sailing_id: sailing.id), class: "block" do %>
-              <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200 hover:shadow-sm transition">
-                <!-- Date Info -->
-                <div class="flex-1">
-                  <div class="flex items-baseline gap-2 mb-1">
-                    <span class="text-base font-semibold text-gray-900">
-                      <%= sailing.departure_date.strftime('%m月%d日') %> 出发
-                    </span>
-                    <span class="text-sm text-gray-500">| <%= sailing.departure_port %></span>
+          <% @sailings.order(departure_date: :asc).each_with_index do |sailing, index| %>
+            <div class="relative flex items-center justify-between p-4 rounded-lg border-2 hover:shadow-sm transition cursor-pointer <%= index == 0 ? 'bg-yellow-50 border-yellow-400' : 'bg-white border-gray-200' %>"
+                 data-action="click->cruise-search#selectDate"
+                 data-sailing-id="<%= sailing.id %>"
+                 data-cruise-search-target="dateCard">
+              
+              <!-- Date Info -->
+              <div class="flex-1">
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class="text-base font-semibold text-gray-900">
+                    <%= sailing.departure_date.strftime('%m月%d日') %> 出发
+                  </span>
+                  <span class="text-sm text-gray-500">| <%= sailing.departure_port %></span>
+                </div>
+                <div class="flex items-center gap-4 text-sm text-gray-600">
+                  <div class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span><%= sailing.cruise_route.name %>航线 · <%= sailing.duration_days %>天<%= sailing.duration_nights %>晚</span>
                   </div>
-                  <div class="flex items-center gap-4 text-sm text-gray-600">
-                    <div class="flex items-center gap-1">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      <span><%= sailing.cruise_route.name %>航线 · <%= sailing.duration_days %>天<%= sailing.duration_nights %>晚</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      </svg>
-                      <span><%= sailing.departure_port %> - <%= sailing.arrival_port %></span>
-                    </div>
+                  <div class="flex items-center gap-1">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    </svg>
+                    <span><%= sailing.departure_port %> - <%= sailing.arrival_port %></span>
                   </div>
                 </div>
-
-                <!-- Check Button -->
-                <button class="flex-none ml-4 px-4 py-2 bg-yellow-400 text-gray-900 text-sm font-medium rounded-full hover:bg-yellow-500 transition flex items-center gap-1">
-                  查看行程
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
               </div>
-            <% end %>
+
+              <!-- Check Button -->
+              <button type="button" 
+                      class="flex-none ml-4 px-4 py-2 bg-yellow-400 text-gray-900 text-sm font-medium rounded-full hover:bg-yellow-500 transition flex items-center gap-1 relative z-10"
+                      data-action="click->cruise-search#openItineraryModal"
+                      data-sailing-id="<%= sailing.id %>">
+                查看行程
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
           <% end %>
         </div>
       </div>
@@ -294,83 +298,143 @@
       <div class="max-w-7xl mx-auto px-4">
         <h3 class="text-base font-semibold text-gray-900 mb-4">选择舱房</h3>
         
-        <div class="flex gap-3 overflow-x-auto pb-2">
-          <% 
-            # 获取第一个航班的舱房类型
-            cabin_types = cruise_ship.cabin_types.order(:category).take(4)
-            cabin_types.each_with_index do |cabin_type, index|
-          %>
-            <%= link_to cruise_path(cruise_ship.slug, sailing_id: first_sailing.id, cabin_type_id: cabin_type.id), class: "flex-none w-32" do %>
-              <div class="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition <%= index == 0 ? 'ring-2 ring-yellow-400' : '' %>">
-                <!-- Cabin Image -->
-                <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
-                  <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-24 object-cover" %>
-                <% else %>
-                  <div class="w-full h-24 bg-gray-100 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                  </div>
-                <% end %>
-                
-                <!-- Cabin Info -->
-                <div class="p-3">
-                  <div class="text-sm font-medium text-gray-900 mb-1"><%= cabin_type.name %></div>
-                  <div class="text-xs text-gray-500 mb-2 line-clamp-2">
-                    <%= cabin_type.feature_badges.take(2).join(' · ') %>
-                  </div>
-                  <% 
-                    min_product = first_sailing.cruise_products.where(cabin_type: cabin_type, status: 'on_sale').order(:price_per_person).first
-                  %>
-                  <% if min_product %>
-                    <div class="text-sm">
-                      <span class="text-xs text-primary">¥</span>
-                      <span class="font-bold text-primary"><%= min_product.price_per_person %></span>
+        <% @sailings.order(departure_date: :asc).each_with_index do |sailing, sailing_index| %>
+          <div class="<%= sailing_index == 0 ? '' : 'hidden' %> flex gap-3 overflow-x-auto pb-2"
+               data-cruise-search-target="cabinContainer"
+               data-sailing-id="<%= sailing.id %>">
+            <% 
+              # 获取该航次的邮轮的舱房类型
+              cruise_ship = sailing.cruise_ship
+              cabin_types = cruise_ship.cabin_types.sort_by { |ct| ['interior', 'ocean_view', 'balcony', 'suite'].index(ct.category) || 999 }
+              cabin_types.each_with_index do |cabin_type, index|
+            %>
+              <div class="flex-none w-32 cursor-pointer"
+                   data-action="click->cruise-search#selectCabinType"
+                   data-cabin-type-id="<%= cabin_type.id %>"
+                   data-sailing-id="<%= sailing.id %>"
+                   data-cruise-search-target="cabinCard">
+                <div class="bg-white rounded-lg overflow-hidden border-2 hover:shadow-md transition <%= index == 0 && sailing_index == 0 ? 'border-yellow-400' : 'border-gray-200' %>">
+                  <!-- Cabin Image -->
+                  <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
+                    <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-24 object-cover" %>
+                  <% else %>
+                    <div class="w-full h-24 bg-gray-100 flex items-center justify-center">
+                      <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                      </svg>
                     </div>
                   <% end %>
+                  
+                  <!-- Cabin Info -->
+                  <div class="p-3">
+                    <div class="text-sm font-medium text-gray-900 mb-1"><%= cabin_type.name %></div>
+                    <div class="text-xs text-gray-500 mb-2 line-clamp-2">
+                      <%= cabin_type.feature_badges.take(2).join(' · ') %>
+                    </div>
+                    <% 
+                      min_product = sailing.cruise_products.where(cabin_type: cabin_type, status: 'on_sale').order(:price_per_person).first
+                    %>
+                    <% if min_product %>
+                      <div class="text-sm">
+                        <span class="text-xs text-primary">¥</span>
+                        <span class="font-bold text-primary"><%= min_product.price_per_person %></span>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
               </div>
             <% end %>
-          <% end %>
-        </div>
+          </div>
+        <% end %>
       </div>
     </section>
 
-    <!-- Expandable Description Section -->
-    <section class="bg-white border-t border-gray-100">
+    <!-- Room List Section -->
+    <section class="bg-white">
       <div class="max-w-7xl mx-auto px-4 py-4">
-        <button class="w-full flex items-center justify-between text-left">
-          <div class="flex-1">
-            <h3 class="text-base font-semibold text-gray-900 mb-1">部分遮挡|超值家庭阳...</h3>
-            <div class="flex items-center gap-3 text-xs text-gray-600">
-              <span class="inline-flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-                </svg>
-                6.8-13层
-              </span>
-              <span class="inline-flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
-                </svg>
-                面积18m²
-              </span>
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded">
-                有阳台
-              </span>
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded">
-                有窗户
-              </span>
-            </div>
-          </div>
-          <svg class="w-5 h-5 text-gray-400 flex-none ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-          </svg>
-        </button>
+        <h3 class="text-base font-semibold text-gray-900 mb-4">选择房间</h3>
         
-        <p class="mt-3 text-sm text-gray-600 leading-relaxed">
-          在舒适的阳台上聆听大海的声音，放松身心享受美妙假期。
-        </p>
+        <% @sailings.order(departure_date: :asc).each_with_index do |sailing, sailing_index| %>
+          <% 
+            cruise_ship = sailing.cruise_ship
+            cabin_types = cruise_ship.cabin_types.sort_by { |ct| ['interior', 'ocean_view', 'balcony', 'suite'].index(ct.category) || 999 }
+            cabin_types.each_with_index do |cabin_type, cabin_index|
+          %>
+            <div class="<%= sailing_index == 0 && cabin_index == 0 ? '' : 'hidden' %> space-y-3"
+                 data-cruise-search-target="roomList"
+                 data-sailing-id="<%= sailing.id %>"
+                 data-cabin-type-id="<%= cabin_type.id %>">
+              <% 
+                products = sailing.cruise_products.where(cabin_type: cabin_type, status: 'on_sale').order(:price_per_person)
+                if products.any?
+                  products.each do |product|
+              %>
+                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition">
+                  <div class="flex items-start gap-4">
+                    <!-- Room Image -->
+                    <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
+                      <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
+                        <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-full object-cover" %>
+                      </div>
+                    <% end %>
+                    
+                    <!-- Room Info -->
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-medium text-gray-900 mb-1"><%= cabin_type.name %></h4>
+                      <p class="text-sm text-gray-600 mb-2">
+                        <%= cabin_type.floor_range %> · <%= cabin_type.area %>
+                      </p>
+                      
+                      <!-- Features -->
+                      <div class="flex flex-wrap gap-1.5 mb-2">
+                        <% cabin_type.feature_badges.each do |badge| %>
+                          <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                            <%= badge %>
+                          </span>
+                        <% end %>
+                      </div>
+                      
+                      <!-- Merchant & Badge -->
+                      <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <span><%= product.merchant_name %></span>
+                        <% if product.badge.present? %>
+                          <span class="px-2 py-0.5 <%= product.badge_class %> text-xs rounded">
+                            <%= product.badge %>
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                    
+                    <!-- Price & Action -->
+                    <div class="flex-shrink-0 flex flex-col items-end justify-between">
+                      <div class="text-right mb-3">
+                        <div class="flex items-baseline gap-1">
+                          <span class="text-xs text-gray-500">¥</span>
+                          <span class="text-2xl font-bold text-primary"><%= product.price_per_person %></span>
+                        </div>
+                        <div class="text-xs text-gray-500">/人</div>
+                      </div>
+                      
+                      <%= link_to "预订", cruise_sailing_path(sailing.id, cabin_type_id: cabin_type.id), 
+                                  class: "inline-block px-6 py-2 bg-yellow-400 text-gray-900 text-sm font-medium rounded-full hover:bg-yellow-500 transition" %>
+                    </div>
+                  </div>
+                </div>
+              <% 
+                  end
+                else
+              %>
+                <div class="text-center py-8 text-gray-500">
+                  该舱房类型暂无房间
+                </div>
+              <% 
+                end
+              %>
+            </div>
+          <% 
+            end
+          %>
+        <% end %>
       </div>
     </section>
 
@@ -390,4 +454,11 @@
       <% end %>
     </div>
   <% end %>
+
+  <!-- Itinerary Modal -->
+  <div class="hidden fixed inset-0 bg-black/50 z-50 flex items-end" data-cruise-search-target="itineraryModal">
+    <div class="w-full" data-cruise-search-target="itineraryContent">
+      <!-- Content will be dynamically loaded here -->
+    </div>
+  </div>
 </div>
