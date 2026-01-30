@@ -28,8 +28,8 @@
     <!-- 卡片 1: 行程信息 -->
     <div class="bg-white rounded-xl p-4 shadow-sm">
       <div class="flex items-start space-x-3">
-        <% if @guide.avatar.attached? %>
-          <%= image_tag @guide.avatar, class: "w-16 h-16 rounded-lg object-cover" %>
+        <% if @guide.avatar_url.present? %>
+          <%= image_tag @guide.avatar_url, class: "w-16 h-16 rounded-lg object-cover" %>
         <% else %>
           <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
             <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">

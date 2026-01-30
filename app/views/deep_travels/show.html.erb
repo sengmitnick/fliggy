@@ -30,8 +30,8 @@
         <!-- 头像 -->
         <div class="relative shrink-0">
           <div class="w-20 h-20 rounded-full border-2 border-[#8c7865] overflow-hidden bg-gray-300">
-            <% if @guide.avatar.attached? %>
-              <%= image_tag @guide.avatar.variant(resize_to_fill: [80, 80]), 
+            <% if @guide.avatar_url.present? %>
+              <%= image_tag @guide.avatar_url, 
                            class: "w-full h-full object-cover",
                            alt: @guide.name %>
             <% else %>
@@ -81,14 +81,14 @@
     </div>
 
     <!-- 视频讲解片段 -->
-    <% if @guide.video.attached? %>
+    <% if @guide.video_url.present? %>
       <div class="mt-6 pl-4">
         <h3 class="text-white text-base font-medium mb-3">我在「 故宫博物院 」的讲解片段</h3>
         <div class="flex gap-3 overflow-x-auto no-scrollbar pr-4">
           <!-- Video Card -->
           <div class="shrink-0 w-40 h-56 rounded-lg bg-gray-600 relative overflow-hidden">
             <video class="w-full h-full object-cover" controls>
-              <%= video_tag url_for(@guide.video), class: "w-full h-full" %>
+              <%= video_tag @guide.video_url, class: "w-full h-full" %>
             </video>
           </div>
         </div>
@@ -225,8 +225,8 @@
                             .limit(5).each do |rec_product| %>
           <div class="shrink-0 w-64 bg-gray-50 rounded-lg overflow-hidden flex border border-gray-100">
             <div class="w-24 h-24 bg-gray-300 shrink-0 relative">
-              <% if rec_product.images.attached? && rec_product.images.first %>
-                <%= image_tag rec_product.images.first.variant(resize_to_fill: [96, 96]),
+              <% if rec_product.image_urls.present? && rec_product.image_urls.first %>
+                <%= image_tag rec_product.image_urls.first,
                              class: "w-full h-full object-cover",
                              alt: rec_product.title %>
               <% else %>

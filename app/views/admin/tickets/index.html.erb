@@ -43,7 +43,7 @@
                     <%= ticket.attraction&.name %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    <%= ticket.image.attached? ? ticket.image.filename : 'No file' %>
+                    <%= ticket.image_url.present? ? ticket.image_url : 'No file' %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <%= ticket.created_at.strftime("%Y-%m-%d %H:%M") %>

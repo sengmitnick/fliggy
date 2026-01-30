@@ -1,6 +1,10 @@
 # 统一的酒店数据包 - 合并所有城市
 # 使用 insert_all 批量插入提升性能
 
+
+# 加载图片辅助工具
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "🧹 清理现有酒店数据..."
 HotelFacility.destroy_all
 HotelReview.destroy_all
@@ -70,21 +74,8 @@ features_pool = [
   ["水疗中心", "桑拿", "按摩服务", "美容美发"]
 ]
 
-# 图片URL
-hotel_images = [
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
-  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-  "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800",
-  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-  "https://images.unsplash.com/photo-1549294413-26f195200c16?w=800",
-  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-  "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800",
-  "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=800",
-  "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"
-]
-
-homestay_image = "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800"
+# 图片使用本地图片池
+# 无需硬编码 URLs，直接调用 ImageSeedHelper
 
 # ==================== 批量创建酒店 ====================
 puts "\n🏨 批量创建酒店..."
@@ -129,7 +120,7 @@ cities.each do |city|
       hotel_type: 'hotel',
       is_domestic: true,
       region: '国内',
-      image_url: hotel_images.sample,
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
       data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
@@ -170,7 +161,7 @@ cities.each do |city|
       hotel_type: 'hotel',
       is_domestic: true,
       region: '国内',
-      image_url: hotel_images.sample,
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
       data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
@@ -198,7 +189,7 @@ if cities.include?("北京")
       hotel_type: 'hotel',
       is_domestic: true,
       region: '国内',
-      image_url: hotel_images.sample,
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
       data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
@@ -225,7 +216,7 @@ if cities.include?("杭州")
       hotel_type: 'hotel',
       is_domestic: true,
       region: '国内',
-      image_url: hotel_images.sample,
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
       data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
@@ -255,7 +246,7 @@ cities.each do |city|
       hotel_type: 'homestay',
       is_domestic: true,
       region: '国内',
-      image_url: homestay_image,
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
       data_version: 0,
       created_at: timestamp,
       updated_at: timestamp

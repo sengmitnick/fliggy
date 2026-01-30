@@ -27,15 +27,15 @@
 
   <!-- Image Gallery -->
   <div class="relative bg-surface" data-controller="carousel">
-    <% if @product.main_image.attached? %>
-      <%= image_tag @product.main_image, class: "w-full h-80 object-cover" %>
+    <% if @product.main_image_url.present? %>
+      <%= image_tag @product.main_image_url, class: "w-full h-80 object-cover" %>
     <% elsif @product.image_url.present? %>
       <%= image_tag @product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'" %>
     <% end %>
     
-    <% if @product.gallery_images.attached? && @product.gallery_images.count > 0 %>
+    <% if @product.gallery_image_urls.present? && @product.gallery_image_urls.size > 0 %>
       <div class="absolute bottom-4 right-4 px-3 py-1 bg-surface-dark/80 backdrop-blur-sm rounded-full text-sm text-white">
-        1/<%= @product.gallery_images.count + 1 %>
+        1/<%= @product.gallery_image_urls.size + 1 %>
       </div>
     <% end %>
   </div>
@@ -675,7 +675,7 @@
     <section id="gallery" data-scroll-spy-target="section" class="space-y-4 scroll-mt-28">
       <div class="bg-surface p-4">
         <h3 class="text-lg font-semibold text-foreground mb-4">图片展示</h3>
-        <% if @product.gallery_images.attached? && @product.gallery_images.count > 0 %>
+        <% if @product.gallery_image_urls.present? && @product.gallery_image_urls.size > 0 %>
           <div class="grid grid-cols-2 gap-2">
             <% @product.gallery_images.each do |image| %>
               <%= image_tag image, class: "w-full h-40 object-cover rounded-lg" %>
@@ -771,10 +771,10 @@
                     </div>
                     <p class="text-sm text-foreground-secondary leading-relaxed mb-2"><%= review.comment %></p>
                     
-                    <% if review.images.attached? %>
+                    <% if review.image_urls.present? %>
                       <div class="flex gap-2 mb-2">
-                        <% review.images.each do |image| %>
-                          <%= image_tag image, class: "w-20 h-20 object-cover rounded" %>
+                        <% review.image_urls.first(5).each do |image_url| %>
+                          <%= image_tag image_url, class: "w-20 h-20 object-cover rounded" %>
                         <% end %>
                       </div>
                     <% end %>

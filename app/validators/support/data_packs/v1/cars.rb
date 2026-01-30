@@ -20,7 +20,7 @@ cars_data = [
     pickup_location: "天河国际机场T3",
     features: "舒适轿车 | 5座4门 | 自动挡 | 纯电动",
     tags: "销量第一,机车特惠,VR看车",
-    image_url: "https://images.unsplash.com/photo-1560958089-b8a1929cea89",
+    image_url: "/images/cars/car_01.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 1
@@ -41,7 +41,7 @@ cars_data = [
     pickup_location: "武汉站东广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "高铁便捷,商务首选",
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588",
+    image_url: "/images/cars/car_02.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 2
@@ -62,7 +62,7 @@ cars_data = [
     pickup_location: "汉口站北广场租车点",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.8T",
     tags: "商务优选,车站直达",
-    image_url: "https://images.unsplash.com/photo-1617469767053-d3b523a0b982",
+    image_url: "/images/cars/car_03.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 3
@@ -83,7 +83,7 @@ cars_data = [
     pickup_location: "武昌站南广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "品质保证,可靠舒适",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 4
@@ -104,7 +104,7 @@ cars_data = [
     pickup_location: "光谷广场租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务接待,舒适空间",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 5
@@ -125,7 +125,7 @@ cars_data = [
     pickup_location: "江汉路步行街租车点",
     features: "SUV | 7座5门 | 自动挡 | 2.0T",
     tags: "大空间,家庭出游",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 6
@@ -146,7 +146,7 @@ cars_data = [
     pickup_location: "天河国际机场T3",
     features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
     tags: "豪华商务,尊贵体验",
-    image_url: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8",
+    image_url: "/images/cars/car_06.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 7
@@ -169,7 +169,7 @@ cars_data = [
     pickup_location: "宝安机场T3航站楼租车中心",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "城市热销,经济实惠",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 13
@@ -190,7 +190,7 @@ cars_data = [
     pickup_location: "宝安机场GTC地面交通中心",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.3L",
     tags: "总价最低,机车特惠",
-    image_url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf",
+    image_url: "/images/cars/car_08.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 14
@@ -211,7 +211,7 @@ cars_data = [
     pickup_location: "宝安机场停车场租车点",
     features: "经济轿车 | 5座5门 | 自动挡 | 1.5L",
     tags: "低价好车,城市热销",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 15
@@ -232,7 +232,7 @@ cars_data = [
     pickup_location: "深圳北站西广场租车中心",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "车站便捷,热门车型",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 101
@@ -253,7 +253,7 @@ cars_data = [
     pickup_location: "深圳北站东广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.6L",
     tags: "舒适经济,车站专属",
-    image_url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6",
+    image_url: "/images/cars/car_10.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 102
@@ -274,7 +274,7 @@ cars_data = [
     pickup_location: "深圳站罗湖口岸租车点",
     features: "新能源 | 5座4门 | 自动挡 | 插电混动",
     tags: "新能源,节能环保",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 103
@@ -295,7 +295,7 @@ cars_data = [
     pickup_location: "福田中心区会展中心租车点",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "商务首选,CBD专属",
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588",
+    image_url: "/images/cars/car_02.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 105
@@ -316,7 +316,7 @@ cars_data = [
     pickup_location: "福田区皇岗口岸租车中心",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "智能电动,科技体验",
-    image_url: "https://images.unsplash.com/photo-1560958089-b8a1929cea89",
+    image_url: "/images/cars/car_01.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 107
@@ -339,7 +339,7 @@ cars_data = [
     pickup_location: "首都国际机场T3航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.4T",
     tags: "机场特惠,热门车型",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 201
@@ -360,7 +360,7 @@ cars_data = [
     pickup_location: "首都国际机场T2航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.3T",
     tags: "经济实惠,品质之选",
-    image_url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf",
+    image_url: "/images/cars/car_08.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 202
@@ -381,7 +381,7 @@ cars_data = [
     pickup_location: "大兴国际机场综合服务楼",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "运动时尚,年轻选择",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 203
@@ -402,7 +402,7 @@ cars_data = [
     pickup_location: "北京南站北广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "高铁直达,舒适商务",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 204
@@ -423,7 +423,7 @@ cars_data = [
     pickup_location: "北京西站南广场停车楼",
     features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
     tags: "商务豪华,尊贵出行",
-    image_url: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8",
+    image_url: "/images/cars/car_06.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 205
@@ -444,7 +444,7 @@ cars_data = [
     pickup_location: "朝阳区国贸CBD租车点",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务接待,多人出行",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 206
@@ -465,7 +465,7 @@ cars_data = [
     pickup_location: "三里屯太古里租车服务站",
     features: "新能源 | 5座5门 | 自动挡 | 纯电动",
     tags: "智能SUV,科技体验",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 207
@@ -488,7 +488,7 @@ cars_data = [
     pickup_location: "浦东国际机场T1航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "机场热销,经济之选",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 301
@@ -509,7 +509,7 @@ cars_data = [
     pickup_location: "浦东国际机场T2航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.2T",
     tags: "省油耐用,品质可靠",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 302
@@ -530,7 +530,7 @@ cars_data = [
     pickup_location: "虹桥国际机场T2航站楼",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "商务首选,舒适驾乘",
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588",
+    image_url: "/images/cars/car_02.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 303
@@ -551,7 +551,7 @@ cars_data = [
     pickup_location: "上海虹桥站西广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "高铁便捷,移动沙发",
-    image_url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6",
+    image_url: "/images/cars/car_10.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 304
@@ -572,7 +572,7 @@ cars_data = [
     pickup_location: "上海南站南广场停车场",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务专车,宽敞舒适",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 305
@@ -593,7 +593,7 @@ cars_data = [
     pickup_location: "陆家嘴金融区租车服务站",
     features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
     tags: "奢华体验,商务至尊",
-    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738",
+    image_url: "/images/cars/car_13.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 306
@@ -614,7 +614,7 @@ cars_data = [
     pickup_location: "徐家汇商圈租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "智能座舱,换电便捷",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 307
@@ -637,7 +637,7 @@ cars_data = [
     pickup_location: "白云国际机场T1航站楼",
     features: "经济轿车 | 5座5门 | 自动挡 | 1.5L",
     tags: "超跑GK5,空间魔术",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 401
@@ -658,7 +658,7 @@ cars_data = [
     pickup_location: "白云国际机场T2航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "省油王,家用首选",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 402
@@ -679,7 +679,7 @@ cars_data = [
     pickup_location: "广州南站东广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "高铁站直达,商务舒适",
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588",
+    image_url: "/images/cars/car_02.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 403
@@ -700,7 +700,7 @@ cars_data = [
     pickup_location: "广州东站南广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.6L",
     tags: "移动沙发,舒适代步",
-    image_url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6",
+    image_url: "/images/cars/car_10.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 404
@@ -721,7 +721,7 @@ cars_data = [
     pickup_location: "天河体育中心租车点",
     features: "SUV | 7座5门 | 自动挡 | 2.0T",
     tags: "七座SUV,家庭出游",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 405
@@ -742,7 +742,7 @@ cars_data = [
     pickup_location: "珠江新城CBD租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务专车,陆地公务舱",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 406
@@ -763,7 +763,7 @@ cars_data = [
     pickup_location: "琶洲会展中心租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "旗舰电动,科技豪华",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 407
@@ -786,7 +786,7 @@ cars_data = [
     pickup_location: "双流国际机场T2航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.4T",
     tags: "机场热销,德系品质",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 501
@@ -807,7 +807,7 @@ cars_data = [
     pickup_location: "双流国际机场T1航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.3T",
     tags: "经济实用,口碑之选",
-    image_url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf",
+    image_url: "/images/cars/car_08.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 502
@@ -828,7 +828,7 @@ cars_data = [
     pickup_location: "成都东站东广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "高铁专属,商务之选",
-    image_url: "https://images.unsplash.com/photo-1590362891991-f776e747a588",
+    image_url: "/images/cars/car_02.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 503
@@ -849,7 +849,7 @@ cars_data = [
     pickup_location: "成都南站南广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "高铁站点,品质保证",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 504
@@ -870,7 +870,7 @@ cars_data = [
     pickup_location: "春熙路太古里租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务接待,多人出行",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 505
@@ -891,7 +891,7 @@ cars_data = [
     pickup_location: "天府广场租车点",
     features: "SUV | 7座5门 | 自动挡 | 2.0T",
     tags: "大空间SUV,家庭首选",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 506
@@ -912,7 +912,7 @@ cars_data = [
     pickup_location: "高新区环球中心租车点",
     features: "新能源 | 6座5门 | 自动挡 | 增程式",
     tags: "智能座舱,奶爸首选",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 507
@@ -935,7 +935,7 @@ cars_data = [
     pickup_location: "萧山国际机场T3航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "机场特惠,经济热销",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 601
@@ -956,7 +956,7 @@ cars_data = [
     pickup_location: "杭州东站东广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "高铁直达,运动时尚",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 602
@@ -977,7 +977,7 @@ cars_data = [
     pickup_location: "杭州站南广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "火车站点,品质之选",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 603
@@ -998,7 +998,7 @@ cars_data = [
     pickup_location: "武林广场租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务专车,市中心取车",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 604
@@ -1019,7 +1019,7 @@ cars_data = [
     pickup_location: "西湖文化广场租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "本土品牌,智能电动",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 605
@@ -1040,7 +1040,7 @@ cars_data = [
     pickup_location: "钱江新城CBD租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "智能驾驶,科技体验",
-    image_url: "https://images.unsplash.com/photo-1560958089-b8a1929cea89",
+    image_url: "/images/cars/car_01.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 606
@@ -1063,7 +1063,7 @@ cars_data = [
     pickup_location: "咸阳国际机场T3航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.4T",
     tags: "机场直达,经济实惠",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 701
@@ -1084,7 +1084,7 @@ cars_data = [
     pickup_location: "西安北站北广场租车中心",
     features: "经济轿车 | 5座5门 | 自动挡 | 1.5L",
     tags: "高铁站点,小车首选",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 702
@@ -1105,7 +1105,7 @@ cars_data = [
     pickup_location: "西安站南广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "火车站直达,舒适可靠",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 703
@@ -1126,7 +1126,7 @@ cars_data = [
     pickup_location: "钟楼商圈租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务接待,市中心取车",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 704
@@ -1147,7 +1147,7 @@ cars_data = [
     pickup_location: "大雁塔北广场租车点",
     features: "新能源 | 5座4门 | 自动挡 | 插电混动",
     tags: "混动节能,低油耗",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 705
@@ -1170,7 +1170,7 @@ cars_data = [
     pickup_location: "江北国际机场T3航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "机场热销,经济之选",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 801
@@ -1191,7 +1191,7 @@ cars_data = [
     pickup_location: "重庆北站北广场租车中心",
     features: "经济轿车 | 5座5门 | 自动挡 | 1.5L",
     tags: "高铁站点,灵活小车",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 802
@@ -1212,7 +1212,7 @@ cars_data = [
     pickup_location: "重庆西站西广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "高铁便捷,商务舒适",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 803
@@ -1233,7 +1233,7 @@ cars_data = [
     pickup_location: "解放碑商圈租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务专车,CBD直达",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 804
@@ -1254,7 +1254,7 @@ cars_data = [
     pickup_location: "观音桥商圈租车点",
     features: "SUV | 5座5门 | 自动挡 | 2.0T",
     tags: "本土品牌,智能SUV",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 805
@@ -1277,7 +1277,7 @@ cars_data = [
     pickup_location: "禄口国际机场T2航站楼",
     features: "经济轿车 | 5座4门 | 自动挡 | 1.5L",
     tags: "机场专属,经济热销",
-    image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537",
+    image_url: "/images/cars/car_07.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 901
@@ -1298,7 +1298,7 @@ cars_data = [
     pickup_location: "南京南站南广场租车中心",
     features: "舒适轿车 | 5座4门 | 自动挡 | 1.5T",
     tags: "高铁站点,运动风格",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 902
@@ -1319,7 +1319,7 @@ cars_data = [
     pickup_location: "南京站北广场停车场",
     features: "舒适轿车 | 5座4门 | 自动挡 | 2.0L",
     tags: "火车站直达,可靠品质",
-    image_url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb",
+    image_url: "/images/cars/car_04.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 903
@@ -1340,7 +1340,7 @@ cars_data = [
     pickup_location: "新街口商圈租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "商务接待,市中心取车",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 904
@@ -1363,7 +1363,7 @@ cars_data = [
     pickup_location: "凤凰国际机场航站楼",
     features: "经济轿车 | 5座5门 | 自动挡 | 1.5L",
     tags: "海岛自驾,小巧灵活",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d",
+    image_url: "/images/cars/car_09.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 1001
@@ -1384,7 +1384,7 @@ cars_data = [
     pickup_location: "三亚站东广场租车中心",
     features: "SUV | 5座5门 | 自动挡 | 2.0T",
     tags: "高铁便捷,海岛SUV",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 1002
@@ -1405,7 +1405,7 @@ cars_data = [
     pickup_location: "大东海广场租车点",
     features: "SUV | 7座5门 | 自动挡 | 3.5L",
     tags: "豪华越野,海岛探险",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 1003
@@ -1426,7 +1426,7 @@ cars_data = [
     pickup_location: "三亚湾度假区租车服务站",
     features: "商务车 | 7座5门 | 自动挡 | 2.0T",
     tags: "家庭度假,多人出行",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 1004
@@ -1447,7 +1447,7 @@ cars_data = [
     pickup_location: "海棠湾免税店租车点",
     features: "SUV | 5座4门 | 自动挡 | 2.0T",
     tags: "越野传奇,海岛自由",
-    image_url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf",
+    image_url: "/images/cars/car_08.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 1005
@@ -1471,7 +1471,7 @@ cars_data = [
     pickup_location: "南山科技园租车点",
     features: "新能源 | 5座5门 | 自动挡 | 纯电动",
     tags: "新能源,免押金,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 104
@@ -1492,7 +1492,7 @@ cars_data = [
     pickup_location: "罗湖口岸租车服务站",
     features: "新能源 | 5座5门 | 自动挡 | 纯电动",
     tags: "新能源,智能科技,免费取消",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 105
@@ -1513,7 +1513,7 @@ cars_data = [
     pickup_location: "福田中心区会展中心租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "新能源,长续航,特惠优惠",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 106
@@ -1536,7 +1536,7 @@ cars_data = [
     pickup_location: "三里屯商圈租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "新能源,智能座舱,免押金",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 208
@@ -1557,7 +1557,7 @@ cars_data = [
     pickup_location: "中关村科技园租车服务站",
     features: "新能源 | 6座5门 | 自动挡 | 增程式",
     tags: "新能源,家庭旗舰,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 209
@@ -1578,7 +1578,7 @@ cars_data = [
     pickup_location: "朝阳门CBD租车点",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "新能源,豪华电动,免费取消",
-    image_url: "https://images.unsplash.com/photo-1560958089-b8a1929cea89",
+    image_url: "/images/cars/car_01.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 210
@@ -1601,7 +1601,7 @@ cars_data = [
     pickup_location: "静安寺商圈租车点",
     features: "新能源 | 5座5门 | 自动挡 | 纯电动",
     tags: "新能源,免押金,特惠优惠",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 308
@@ -1622,7 +1622,7 @@ cars_data = [
     pickup_location: "人民广场租车服务站",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "新能源,智能驾驶,免费取消",
-    image_url: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7",
+    image_url: "/images/cars/car_11.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 309
@@ -1645,7 +1645,7 @@ cars_data = [
     pickup_location: "成都东站东广场租车中心",
     features: "新能源 | 5座4门 | 自动挡 | 纯电动",
     tags: "新能源,经济实用,免押金",
-    image_url: "https://images.unsplash.com/photo-1617788138017-80ad40651399",
+    image_url: "/images/cars/car_12.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 508
@@ -1669,7 +1669,7 @@ cars_data = [
     pickup_location: "福田中心区会展中心租车点",
     features: "豪华车 | 5座4门 | 自动挡 | 2.0T",
     tags: "豪华车,商务尊享,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
+    image_url: "/images/cars/car_14.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 107
@@ -1690,7 +1690,7 @@ cars_data = [
     pickup_location: "南山科技园租车点",
     features: "豪华车 | 5座4门 | 自动挡 | 2.0T",
     tags: "豪华车,尊贵体验,免费取消",
-    image_url: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8",
+    image_url: "/images/cars/car_06.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 108
@@ -1711,7 +1711,7 @@ cars_data = [
     pickup_location: "宝安机场T3航站楼租车中心",
     features: "豪华车 | 5座4门 | 自动挡 | 2.5L",
     tags: "豪华车,舒适静谧,特惠优惠",
-    image_url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6",
+    image_url: "/images/cars/car_10.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 109
@@ -1734,7 +1734,7 @@ cars_data = [
     pickup_location: "国贸CBD租车服务站",
     features: "豪华车 | 5座4门 | 自动挡 | 3.0T",
     tags: "豪华车,旗舰尊享,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
+    image_url: "/images/cars/car_14.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 211
@@ -1755,7 +1755,7 @@ cars_data = [
     pickup_location: "朝阳门CBD租车点",
     features: "豪华车 | 5座4门 | 自动挡 | 3.0T",
     tags: "豪华车,商务旗舰,免费取消",
-    image_url: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8",
+    image_url: "/images/cars/car_06.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 212
@@ -1778,7 +1778,7 @@ cars_data = [
     pickup_location: "陆家嘴金融区租车点",
     features: "豪华车 | 5座4门 | 自动挡 | 2.9T",
     tags: "豪华车,跑车体验,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738",
+    image_url: "/images/cars/car_13.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 310
@@ -1799,7 +1799,7 @@ cars_data = [
     pickup_location: "浦东机场T2航站楼",
     features: "豪华车 | 5座4门 | 自动挡 | 2.0T",
     tags: "豪华车,商务首选,免押金",
-    image_url: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8",
+    image_url: "/images/cars/car_06.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 311
@@ -1823,7 +1823,7 @@ cars_data = [
     pickup_location: "深圳北站西广场租车中心",
     features: "SUV | 5座5门 | 自动挡 | 1.5T",
     tags: "SUV,家用首选,免费取消",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 110
@@ -1844,7 +1844,7 @@ cars_data = [
     pickup_location: "宝安机场GTC地面交通中心",
     features: "SUV | 5座5门 | 自动挡 | 2.0T",
     tags: "SUV,空间大,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 111
@@ -1865,7 +1865,7 @@ cars_data = [
     pickup_location: "罗湖口岸租车服务站",
     features: "SUV | 5座5门 | 自动挡 | 2.0L",
     tags: "SUV,越野基因,免押金",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 112
@@ -1888,7 +1888,7 @@ cars_data = [
     pickup_location: "首都机场T3航站楼",
     features: "SUV | 5座5门 | 自动挡 | 2.0T",
     tags: "SUV,豪华SUV,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6",
+    image_url: "/images/cars/car_10.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 213
@@ -1909,7 +1909,7 @@ cars_data = [
     pickup_location: "朝阳门CBD租车点",
     features: "SUV | 5座5门 | 自动挡 | 2.0T",
     tags: "SUV,豪华运动,免费取消",
-    image_url: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
+    image_url: "/images/cars/car_14.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 214
@@ -1932,7 +1932,7 @@ cars_data = [
     pickup_location: "上海虹桥站南广场租车中心",
     features: "SUV | 5座5门 | 自动挡 | 1.5T",
     tags: "SUV,空间魔术,免押金",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 312
@@ -1953,7 +1953,7 @@ cars_data = [
     pickup_location: "浦东机场T2航站楼",
     features: "SUV | 7座5门 | 自动挡 | 2.0T",
     tags: "SUV,7座大空间,特惠优惠",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 313
@@ -1977,7 +1977,7 @@ cars_data = [
     pickup_location: "宝安机场T3航站楼租车中心",
     features: "MPV | 8座5门 | 自动挡 | 2.5L",
     tags: "MPV,家庭出游,免费取消",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 113
@@ -1998,7 +1998,7 @@ cars_data = [
     pickup_location: "深圳北站西广场租车中心",
     features: "MPV | 8座5门 | 自动挡 | 2.5L",
     tags: "MPV,大空间,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 114
@@ -2021,7 +2021,7 @@ cars_data = [
     pickup_location: "首都机场T3航站楼",
     features: "MPV | 7座5门 | 自动挡 | 2.0T",
     tags: "MPV,商务接待,免押金",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 215
@@ -2042,7 +2042,7 @@ cars_data = [
     pickup_location: "国贸CBD租车服务站",
     features: "MPV | 7座5门 | 自动挡 | 2.4L",
     tags: "MPV,舒适商务,特惠优惠",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: false,
     is_available: true,
     sales_rank: 216
@@ -2065,7 +2065,7 @@ cars_data = [
     pickup_location: "陆家嘴金融区租车点",
     features: "MPV | 7座5门 | 自动挡 | 2.0T",
     tags: "MPV,豪华商务,小伤免赔",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 314
@@ -2086,7 +2086,7 @@ cars_data = [
     pickup_location: "浦东机场T2航站楼",
     features: "MPV | 7座5门 | 自动挡 | 混合动力",
     tags: "MPV,顶级商务,免费取消",
-    image_url: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b",
+    image_url: "/images/cars/car_05.jpg",
     is_featured: true,
     is_available: true,
     sales_rank: 315

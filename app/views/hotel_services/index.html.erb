@@ -136,8 +136,8 @@
             <div class="flex p-3 gap-3">
               <!-- Hotel Image -->
               <div class="relative w-32 h-40 flex-shrink-0 rounded-lg overflow-hidden">
-                <% if hotel.image.attached? %>
-                  <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+                <% if hotel.image_url.present? %>
+                  <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
                 <% elsif hotel.image_url.present? %>
                   <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
                 <% else %>

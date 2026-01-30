@@ -18,8 +18,8 @@
       <div class="relative w-28 h-36 flex-shrink-0">
         <!-- 图片占位符 -->
         <div class="w-full h-full bg-blue-100 rounded-lg overflow-hidden relative">
-          <% if room.respond_to?(:image) && room.image.attached? %>
-            <%= image_tag room.image, class: "w-full h-full object-cover", alt: room.room_type %>
+          <% if room.respond_to?(:image) && room.image_url.present? %>
+            <%= image_tag room.image_url, class: "w-full h-full object-cover", alt: room.room_type %>
           <% else %>
             <% 
               # 使用真实的Unsplash酒店房间图片

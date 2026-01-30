@@ -1114,7 +1114,7 @@ day_tour_products.each do |tour_info|
     sales_count: rand(50..300),
     badge: "一日游",
     departure_label: "每日发团",
-    image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+    image_url: "/images/tours/tour_daytrip_default.jpg",
     is_featured: true,
     display_order: rand(1..50),
     data_version: 0,

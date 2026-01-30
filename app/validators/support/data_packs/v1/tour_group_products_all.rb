@@ -1,6 +1,10 @@
 # 统一的旅游产品数据包 - 合并所有目的地和类型
 # 使用 insert_all 批量插入提升性能
 
+
+# 加载图片辅助工具
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "🧹 清理旧数据..."
 TourItineraryDay.destroy_all
 TourPackage.destroy_all
@@ -188,7 +192,7 @@ destinations_config.each do |dest_config|
           departure_label: "#{departure_city}出发",
           is_featured: rand < 0.15,  # 15%概率精选
           display_order: all_products_data.count,
-          image_url: "https://images.unsplash.com/photo-#{rand(1500000000000..1700000000000)}-#{SecureRandom.hex(8)}?w=400&h=600",
+          image_url: ImageSeedHelper.random_image_from_category(:tours),
           travel_agency_id: agency_id,
           created_at: timestamp,
           updated_at: timestamp

@@ -2,7 +2,8 @@ class TourReview < ApplicationRecord
   include DataVersionable
   belongs_to :tour_group_product
   belongs_to :user
-  has_many_attached :images
+  # 图片字段: image_urls (JSON 数组)
+  serialize :image_urls, coder: JSON
 
   validates :rating, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 5 }
   validates :comment, presence: true

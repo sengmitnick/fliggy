@@ -26,9 +26,7 @@
     <!-- Product Image Slider -->
     <div class="relative bg-surface-elevated">
       <div class="aspect-square">
-        <% if @product.image.attached? %>
-          <%= image_tag @product.image.variant(resize_to_limit: [800, 800]), class: "w-full h-full object-cover", alt: @product.name %>
-        <% elsif @product.image_url.present? %>
+        <% if @product.image_url.present? && (@product.image_url.start_with?('http://') || @product.image_url.start_with?('https://') || @product.image_url.start_with?('/')) %>
           <%= image_tag @product.image_url, class: "w-full h-full object-cover", alt: @product.name %>
         <% else %>
           <div class="w-full h-full flex items-center justify-center bg-surface-elevated">

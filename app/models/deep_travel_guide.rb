@@ -1,8 +1,8 @@
 class DeepTravelGuide < ApplicationRecord
   include DataVersionable
-  # ActiveStorage attachments
-  has_one_attached :avatar
-  has_one_attached :video
+  # 图片/视频字段 (使用本地路径或外部 URL)
+  # avatar_url: 导游头像
+  # video_url: 介绍视频
   
   # Associations
   has_many :deep_travel_products, dependent: :destroy
@@ -21,13 +21,4 @@ class DeepTravelGuide < ApplicationRecord
   # Scopes
   scope :featured, -> { where(featured: true) }
   scope :by_rank, -> { order(rank: :asc) }
-  
-  # Helper methods
-  def avatar_url
-    attachment_url(avatar)
-  end
-  
-  def video_url
-    attachment_url(video)
-  end
 end

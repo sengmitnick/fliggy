@@ -187,8 +187,8 @@
             <%= link_to "#", class: "block" do %>
               <div class="card overflow-hidden">
                 <div class="relative">
-                  <% if package.brand_logo.attached? %>
-                    <%= image_tag package.brand_logo, alt: package.brand_name, class: "w-full h-40 object-cover" %>
+                  <% if package.brand_logo_url.present? %>
+                    <%= image_tag package.brand_logo_url, alt: package.brand_name, class: "w-full h-40 object-cover" %>
                   <% else %>
                     <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400" alt="<%= package.brand_name %>" class="w-full h-40 object-cover">
                   <% end %>

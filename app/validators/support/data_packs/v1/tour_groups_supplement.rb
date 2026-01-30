@@ -56,7 +56,7 @@ products_data = []
       departure_label: "#{departure_city}出发",
       is_featured: i == 0,
       display_order: 0,
-      image_url: "https://images.unsplash.com/photo-#{rand(1500000000000..1700000000000)}-#{SecureRandom.hex(8)}?w=400&h=600",
+      image_url: "/images/tours/#{rand(1500000000000..1700000000000)}-#{SecureRandom.hex(8)}.jpg",
       travel_agency_id: agency.id,
       data_version: 0,
       created_at: timestamp,

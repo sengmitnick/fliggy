@@ -43,8 +43,8 @@
 
   <!-- 视频/图片轮播区域 -->
   <div class="relative h-64">
-    <% if @hotel.image.attached? %>
-      <%= image_tag @hotel.image, class: "w-full h-full object-cover" %>
+    <% if @hotel.image_url.present? %>
+      <%= image_tag hotel.image_url, class: "w-full h-full object-cover" %>
     <% elsif @hotel.image_url.present? %>
       <%= image_tag @hotel.image_url, class: "w-full h-full object-cover" %>
     <% else %>

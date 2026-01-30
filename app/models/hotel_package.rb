@@ -3,7 +3,7 @@ class HotelPackage < ApplicationRecord
   extend FriendlyId
   friendly_id :title, use: :slugged
   
-  has_one_attached :brand_logo
+  # 图片字段: brand_logo_url (使用本地路径或外部 URL)
   has_many :hotel_package_orders, dependent: :destroy
   has_many :package_options, dependent: :destroy
   belongs_to :hotel, optional: true

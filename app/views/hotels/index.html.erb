@@ -298,8 +298,8 @@
               <div class="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 flex">
                 <!-- Hotel Image -->
                 <div class="relative w-32 h-32 flex-shrink-0">
-                  <% if hotel.image.attached? %>
-                    <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+                  <% if hotel.image_url.present? %>
+                    <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
                   <% elsif hotel.image_url.present? %>
                     <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'" %>
                   <% else %>
@@ -392,8 +392,8 @@
             <div class="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100">
               <!-- Hotel Image -->
               <div class="relative aspect-[4/3]">
-                <% if hotel.image.attached? %>
-                  <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+                <% if hotel.image_url.present? %>
+                  <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
                 <% elsif hotel.image_url.present? %>
                   <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'" %>
                 <% else %>

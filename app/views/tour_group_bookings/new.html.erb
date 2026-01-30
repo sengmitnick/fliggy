@@ -27,8 +27,8 @@
     <!-- 行程信息 -->
     <div class="bg-white px-4 py-4">
       <div class="flex items-start gap-3">
-        <% if @product.main_image.attached? %>
-          <%= image_tag @product.main_image, class: "w-20 h-20 rounded-lg object-cover" %>
+        <% if @product.main_image_url.present? %>
+          <%= image_tag @product.main_image_url, class: "w-20 h-20 rounded-lg object-cover" %>
         <% end %>
         <div class="flex-1">
           <h2 class="text-base font-semibold text-foreground mb-1"><%= @product.title %></h2>

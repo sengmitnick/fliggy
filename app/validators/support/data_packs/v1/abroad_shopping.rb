@@ -117,7 +117,7 @@ shops_data = [
     city: "成田",
     address: "千叶县成田市成田国际机场 第1航站楼南翼出国出境审查区",
     description: "位于成田机场第 1 航站楼南翼出出国境审查区出口后的左手边的第二家商店。",
-    image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_1.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -127,7 +127,7 @@ shops_data = [
     city: "成田",
     address: "千叶县成田市成田国际机场 第1航站楼第4卫星厅",
     description: "位于成田机场第 1 航站楼第4卫星厅的免税店。",
-    image_url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_2.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -138,7 +138,7 @@ shops_data = [
     city: "大阪",
     address: "大阪市中央区道顿堀",
     description: "位于大阪道顿堀商圈的药妆店。",
-    image_url: "https://images.unsplash.com/photo-1590559899731-a363ad00a649?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_3.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -148,7 +148,7 @@ shops_data = [
     city: "东京",
     address: "东京都新宿区歌舞伎町一丁目",
     description: "位于东京新宿歌舞伎町的药妆店。",
-    image_url: "https://images.unsplash.com/photo-1578469645742-46cae010e5d4?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_4.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -158,7 +158,7 @@ shops_data = [
     city: "大阪",
     address: "大阪市中央区心斋桥",
     description: "位于大阪心斋桥商圈的药妆店。",
-    image_url: "https://images.unsplash.com/photo-1623861214041-39655848e109?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_5.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -168,7 +168,7 @@ shops_data = [
     city: "福岡",
     address: "福冈县福冈市中央区天神",
     description: "位于福冈天神大丸百货的药妆店。",
-    image_url: "https://images.unsplash.com/photo-1533050487297-09b450131914?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_6.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -179,7 +179,7 @@ shops_data = [
     city: "大阪",
     address: "大阪市中央区",
     description: "位于大阪市中心的药妆店。",
-    image_url: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_7.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -190,7 +190,7 @@ shops_data = [
     city: "东京",
     address: "东京都新宿区西新宿",
     description: "位于新宿的京王百货店。",
-    image_url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_2.jpg",
     created_at: timestamp,
     updated_at: timestamp
   },
@@ -201,7 +201,7 @@ shops_data = [
     city: "东京",
     address: "东京都新宿区西新宿",
     description: "位于新宿的小田急百货店。",
-    image_url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&h=300&fit=crop",
+    image_url: "/images/shops/shop_2.jpg",
     created_at: timestamp,
     updated_at: timestamp
   }

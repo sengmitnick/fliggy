@@ -20,8 +20,8 @@
 
   <!-- 1. 主图区域 -->
   <div class="relative h-[400px] bg-gray-100">
-    <% if @package.brand_logo.attached? %>
-      <%= image_tag @package.brand_logo, class: "w-full h-full object-cover" %>
+    <% if @package.brand_logo_url.present? %>
+      <%= image_tag @package.brand_logo_url, class: "w-full h-full object-cover" %>
     <% else %>
       <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" alt="<%= @package.brand_name %>" class="w-full h-full object-cover">
     <% end %>
@@ -242,8 +242,8 @@
     </div>
     <!-- 背景装饰图 -->
     <div class="mt-8 relative h-64 bg-gray-200/20 rounded-t-xl">
-      <% if @package.brand_logo.attached? %>
-        <%= image_tag @package.brand_logo, class: "w-full h-full object-cover rounded-t-xl opacity-30" %>
+      <% if @package.brand_logo_url.present? %>
+        <%= image_tag @package.brand_logo_url, class: "w-full h-full object-cover rounded-t-xl opacity-30" %>
       <% else %>
         <div class="absolute inset-0 flex items-center justify-center text-white/20">
           <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -301,8 +301,8 @@
       <% HotelPackage.where.not(id: @package.id).limit(2).each do |package| %>
         <%= link_to hotel_package_path(package), class: "bg-white rounded-lg overflow-hidden shadow-sm" do %>
           <div class="h-40 bg-gray-200 relative">
-            <% if package.brand_logo.attached? %>
-              <%= image_tag package.brand_logo, class: "w-full h-full object-cover" %>
+            <% if package.brand_logo_url.present? %>
+              <%= image_tag package.brand_logo_url, class: "w-full h-full object-cover" %>
             <% else %>
               <div class="absolute inset-0 flex items-center justify-center text-gray-400">
                 <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>

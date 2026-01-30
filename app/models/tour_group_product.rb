@@ -6,11 +6,13 @@ class TourGroupProduct < ApplicationRecord
   has_many :tour_packages, dependent: :destroy
   has_many :tour_itinerary_days, -> { order(day_number: :asc) }, dependent: :destroy
   has_many :tour_reviews, dependent: :destroy
-  has_one_attached :main_image
-  has_many_attached :gallery_images
-
+  
+  # 图片字段 (使用本地路径或外部 URL)
+  # main_image_url: 主图
+  # gallery_image_urls: 相册图片 (JSON 数组)
   serialize :highlights, coder: JSON
   serialize :tags, coder: JSON
+  serialize :gallery_image_urls, coder: JSON
 
   validates :title, presence: true
   validates :tour_category, inclusion: { in: %w[comprehensive group_tour private_group free_travel outbound_essentials ticket] }

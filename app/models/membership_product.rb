@@ -4,7 +4,7 @@ class MembershipProduct < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
   
-  has_one_attached :image
+  # 图片字段: image_url (使用本地路径或外部 URL)
   has_many :membership_orders, dependent: :restrict_with_error
   
   # Category constants

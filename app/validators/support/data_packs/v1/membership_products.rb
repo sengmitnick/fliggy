@@ -11,6 +11,10 @@
 # 加载方式：
 # rake validator:reset_baseline
 
+
+# 加载图片辅助工具
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "正在加载 membership_products_v1 数据包..."
 
 # 清空现有数据
@@ -32,7 +36,7 @@ products_data = [
     stock: 9999,
     rating: 4.8,
     description: '瑞幸咖啡电子券，全国门店通用',
-    image_url: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -47,7 +51,7 @@ products_data = [
     stock: 9999,
     rating: 4.7,
     description: '蜜雪冰城门店通用代金券',
-    image_url: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -62,7 +66,7 @@ products_data = [
     stock: 5000,
     rating: 4.9,
     description: 'KFC早餐套餐兑换券',
-    image_url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -77,7 +81,7 @@ products_data = [
     stock: 3000,
     rating: 4.8,
     description: '喜茶门店通用代金券',
-    image_url: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -92,7 +96,7 @@ products_data = [
     stock: 2000,
     rating: 4.9,
     description: '星巴克电子礼品卡，全国门店通用',
-    image_url: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -108,7 +112,7 @@ products_data = [
     stock: 1000,
     rating: 4.9,
     description: '京东商城购物卡，全场通用',
-    image_url: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -123,7 +127,7 @@ products_data = [
     stock: 800,
     rating: 4.8,
     description: '天猫超市购物卡，日用百货通用',
-    image_url: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -140,7 +144,7 @@ products_data = [
     stock: 500,
     rating: 4.7,
     description: '坚果零食组合装，过年送礼佳品',
-    image_url: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -155,7 +159,7 @@ products_data = [
     stock: 400,
     rating: 4.7,
     description: '经典口味粽子礼盒，传统美味',
-    image_url: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -170,7 +174,7 @@ products_data = [
     stock: 300,
     rating: 4.8,
     description: '老字号糕点，传统年味',
-    image_url: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -185,7 +189,7 @@ products_data = [
     stock: 200,
     rating: 4.8,
     description: '东阿阿胶，养生佳品',
-    image_url: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -200,7 +204,7 @@ products_data = [
     stock: 50,
     rating: 5.0,
     description: '国酒茅台，送礼佳品',
-    image_url: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -217,7 +221,7 @@ products_data = [
     stock: 1000,
     rating: 4.6,
     description: '防水防潮，轻便易携带',
-    image_url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -232,7 +236,7 @@ products_data = [
     stock: 800,
     rating: 4.7,
     description: '304不锈钢，24小时保温',
-    image_url: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -247,7 +251,7 @@ products_data = [
     stock: 500,
     rating: 4.6,
     description: '野外烹饪必备，安全可靠',
-    image_url: 'https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -262,7 +266,7 @@ products_data = [
     stock: 300,
     rating: 4.7,
     description: '铝合金材质，轻便耐用',
-    image_url: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -277,7 +281,7 @@ products_data = [
     stock: 200,
     rating: 5.0,
     description: '轻量便携，耐用环保',
-    image_url: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -292,7 +296,7 @@ products_data = [
     stock: 150,
     rating: 4.9,
     description: '防雨透气，搭建简便',
-    image_url: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: true
   },
@@ -309,7 +313,7 @@ products_data = [
     stock: 2000,
     rating: 4.6,
     description: 'Tritan材质，便携防漏',
-    image_url: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -324,7 +328,7 @@ products_data = [
     stock: 3000,
     rating: 4.5,
     description: '超细纤维，吸水速干',
-    image_url: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -339,7 +343,7 @@ products_data = [
     stock: 800,
     rating: 4.7,
     description: 'LED强光，续航持久',
-    image_url: 'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'domestic',
     featured: false
   },
@@ -354,7 +358,7 @@ products_data = [
     stock: 400,
     rating: 4.7,
     description: '碳纤维材质，超轻便携',
-    image_url: 'https://images.unsplash.com/photo-1526976668912-1a811878dd37?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
     featured: false
   },
@@ -369,7 +373,7 @@ products_data = [
     stock: 300,
     rating: 4.8,
     description: '抓地力强，耐磨防滑',
-    image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
     featured: true
   },
@@ -384,7 +388,7 @@ products_data = [
     stock: 200,
     rating: 4.9,
     description: '大容量背负系统，舒适透气',
-    image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
     featured: true
   },
@@ -399,7 +403,7 @@ products_data = [
     stock: 150,
     rating: 4.9,
     description: 'GPS导航，气压高度计',
-    image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
     featured: true
   },
@@ -414,7 +418,7 @@ products_data = [
     stock: 100,
     rating: 5.0,
     description: 'GORE-TEX面料，专业防护',
-    image_url: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400',
+    image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
     featured: true
   }

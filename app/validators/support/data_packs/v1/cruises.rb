@@ -56,7 +56,7 @@ cruise_ships_data = [
     cruise_line_id: royal_caribbean.id,
     name: '海洋光谱号',
     name_en: 'Spectrum of the Seas',
-    image_url: 'https://images.unsplash.com/photo-1568481572796-cac3501604fc?w=800&h=600&fit=crop',
+    image_url: '/images/cruises/1568481572796-cac3501604fc.jpg',
     tonnage: 168666,
     passenger_capacity: 4246,
     features: ['超量子系列首艘邮轮', '甲板跳伞', '正宗川菜料理', '套房专享皇家府邸'],
@@ -67,7 +67,7 @@ cruise_ships_data = [
     cruise_line_id: msc_cruises.id,
     name: '地中海辉煌号',
     name_en: 'MSC Bellissima',
-    image_url: 'https://images.unsplash.com/photo-1599640842225-85d111c60e6b?w=800&h=600&fit=crop',
+    image_url: '/images/cruises/1599640842225-85d111c60e6b.jpg',
     tonnage: 171598,
     passenger_capacity: 4500,
     features: ['米其林星级餐厅', '豪华购物长廊', '海上水上乐园'],
@@ -78,7 +78,7 @@ cruise_ships_data = [
     cruise_line_id: aida_cruises.id,
     name: '爱达新星号',
     name_en: 'AIDA Nova',
-    image_url: 'https://images.unsplash.com/photo-1605408499391-6368c628ef42?w=800&h=600&fit=crop',
+    image_url: '/images/cruises/1605408499391-6368c628ef42.jpg',
     tonnage: 183900,
     passenger_capacity: 5200,
     features: ['环保LNG动力', '全景观景台', '海上啤酒花园'],
@@ -216,7 +216,7 @@ cabin_types_data = [
     has_window: true,
     max_occupancy: 3,
     description: '超大观海窗户',
-    image_urls: ['https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&h=400&fit=crop'],
+    image_urls: ['/images/cruises/room_1.jpg'],
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -230,7 +230,7 @@ cabin_types_data = [
     has_window: false,
     max_occupancy: 2,
     description: '性价比之选',
-    image_urls: ['https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&h=400&fit=crop'],
+    image_urls: ['/images/cruises/room_2.jpg'],
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -262,7 +262,7 @@ cabin_types_data = [
     has_window: true,
     max_occupancy: 4,
     description: '地中海风格装饰，享受海风拂面',
-    image_urls: ['https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=600&h=400&fit=crop'],
+    image_urls: ['/images/cruises/room_3.jpg'],
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -276,7 +276,7 @@ cabin_types_data = [
     has_window: false,
     max_occupancy: 2,
     description: '经济实惠之选',
-    image_urls: ['https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&h=400&fit=crop'],
+    image_urls: ['/images/cruises/room_2.jpg'],
     created_at: Time.current,
     updated_at: Time.current
   }

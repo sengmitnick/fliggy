@@ -62,8 +62,8 @@
           <%= link_to membership_product_path(product), class: "block bg-surface rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" do %>
             <!-- Product Image -->
             <div class="relative aspect-square bg-surface-elevated">
-              <% if product.image.attached? %>
-                <%= image_tag product.image.variant(resize_to_fill: [300, 300]), class: "w-full h-full object-cover", alt: product.name %>
+              <% if product.image_url.present? %>
+                <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
               <% elsif product.image_url.present? %>
                 <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
               <% else %>

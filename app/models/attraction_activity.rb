@@ -2,7 +2,7 @@ class AttractionActivity < ApplicationRecord
   include DataVersionable
   belongs_to :attraction
   has_many :activity_orders, dependent: :destroy
-  has_one_attached :image
+  # 图片字段: image_url (使用本地路径或外部 URL)
   
   validates :name, presence: true
   validates :current_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
