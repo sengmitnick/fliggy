@@ -3,15 +3,13 @@ require 'rails_helper'
 RSpec.describe "Tour group bookings", type: :request do
 
   let(:user) { create(:user) }
-  let(:product) { TourGroupProduct.includes(:tour_packages).first }
-  let(:package) { product.tour_packages.first }
+  let(:product) { create(:tour_group_product) }
+  let(:package) { create(:tour_package, tour_group_product: product) }
   
   before { sign_in_as(user) }
 
   describe "GET /tour_group_bookings/new" do
     it "returns http success" do
-      skip "Run seeds first" unless product && package
-      
       get new_tour_group_booking_path, params: {
         product_id: product.id,
         package_id: package.id,

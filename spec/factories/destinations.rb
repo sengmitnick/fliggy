@@ -1,13 +1,9 @@
 FactoryBot.define do
   factory :destination do
-    # Note: This project uses data packs for all data
-    # Factories should not be used to create test data
-    # Data is loaded from app/validators/support/data_packs/v1/
-    
-    sequence(:name) { |n| "City#{n}" }
+    sequence(:name) { |n| "深圳#{n}" }
     region { "广东" }
-    description { "A beautiful destination" }
-    image_url { nil }
+    description { "创新之都，现代化滨海城市" }
+    image_url { "https://images.unsplash.com/photo-1548919973-5cef591cdbc9?w=800" }
     is_hot { true }
   end
 end
