@@ -1,10 +1,12 @@
 require 'rails_helper'
+require_relative '../support/stimulus_cache_manager'
 
 RSpec.describe 'Stimulus Validation', type: :system do
   include StimulusValidationHelpers
 
-  # Initialize pipeline once for all tests
-  let(:pipeline) { StimulusValidationPipeline.new }
+  # Initialize pipeline once for all tests with cache manager
+  let(:cache_manager) { StimulusCacheManager.new('stimulus_validation') }
+  let(:pipeline) { StimulusValidationPipeline.new(cache_manager: cache_manager) }
   let(:controller_data) { pipeline.controller_data }
   let(:view_files) { pipeline.view_files }
   let(:partial_parent_map) { pipeline.partial_parent_map }

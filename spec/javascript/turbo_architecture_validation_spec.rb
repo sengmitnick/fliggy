@@ -1,10 +1,12 @@
 require 'rails_helper'
+require_relative '../support/stimulus_cache_manager'
 
 RSpec.describe 'Turbo Architecture Validation', type: :system do
   include StimulusValidationHelpers
 
-  # Initialize pipeline once for all tests
-  let(:pipeline) { StimulusValidationPipeline.new }
+  # Initialize pipeline once for all tests with cache manager
+  let(:cache_manager) { StimulusCacheManager.new('turbo_architecture_validation') }
+  let(:pipeline) { StimulusValidationPipeline.new(cache_manager: cache_manager) }
   let(:controller_data) { pipeline.controller_data }
   let(:view_files) { pipeline.view_files }
 
