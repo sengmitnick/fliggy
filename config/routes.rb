@@ -393,6 +393,9 @@ Rails.application.routes.draw do
       get 'health', to: 'health#show'
     end
     
+    # Cruise sailings API
+    resources :cruise_sailings, only: [:show]
+    
     # 验证系统 API
     get 'tasks', to: 'verify#index'                         # 获取所有任务列表
     post 'tasks/:id/start', to: 'verify#start_task'         # 创建训练会话

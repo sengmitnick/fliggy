@@ -21,6 +21,9 @@
 !/tmp/pids/
 !/tmp/pids/.keep
 
+# Ignore test cache files
+/tmp/test_cache/
+
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/

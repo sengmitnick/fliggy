@@ -5,14 +5,30 @@
 class StimulusValidationPipeline
   attr_reader :controller_data, :view_files, :partial_parent_map
 
-  def initialize
+  def initialize(cache_manager: nil)
     @controllers_dir = Rails.root.join('app/javascript/controllers')
     @views_dir = Rails.root.join('app/views')
+    @cache_manager = cache_manager
 
-    # Scan and cache all data upfront
-    @controller_data = scan_controllers
-    @view_files = scan_view_files
-    @partial_parent_map = build_partial_parent_map
+    if @cache_manager
+      # Use incremental scanning with cache
+      controller_files = Dir.glob(@controllers_dir.join('*_controller.ts'))
+      view_files_list = get_all_view_files
+      all_files = controller_files + view_files_list
+
+      result = @cache_manager.fetch_incremental(files_to_track: all_files) do |changed_files, cached_data|
+        scan_with_cache(changed_files, cached_data, controller_files, view_files_list)
+      end
+
+      @controller_data = result[:data][:controller_data]
+      @view_files = result[:data][:view_files]
+      @partial_parent_map = result[:data][:partial_parent_map]
+    else
+      # Original full scan
+      @controller_data = scan_controllers
+      @view_files = scan_view_files
+      @partial_parent_map = build_partial_parent_map
+    end
   end
 
   # Get controllers from parent files (recursive)
@@ -225,39 +241,99 @@ class StimulusValidationPipeline
 
   private
 
+  # Get all view files with filtering
+  def get_all_view_files
+    all_files = Dir.glob(@views_dir.join('**/*.html.erb'))
+
+    if ENV['FULL_VIEW_DEBUG']
+      all_files.reject { |file| file.include?('shared/demo.html.erb') }
+    else
+      all_files.reject do |file|
+        file.include?('shared/demo.html.erb') ||
+        file.include?('/admin/') ||
+        file.include?('/kaminari/') ||
+        file.include?('/shared/admin/') ||
+        file.end_with?('/bookings/new.html.erb') ||
+        file.end_with?('/train_bookings/new.html.erb') ||
+        file.include?('shared/friendly_error.html.erb') ||
+        file.include?('shared/missing_template_fallback.html.erb')
+      end
+    end
+  end
+
+  # Scan with cache: only rescan changed files and merge with cached data
+  def scan_with_cache(changed_files, cached_data, controller_files, view_files_list)
+    # Initialize from cache or empty
+    controller_data = cached_data&.dig(:controller_data) || {}
+    view_files = cached_data&.dig(:view_files) || []
+    partial_parent_map = cached_data&.dig(:partial_parent_map) || {}
+
+    # Determine which files changed
+    changed_controller_files = changed_files & controller_files
+    changed_view_files = changed_files & view_files_list
+
+    # Rescan changed controllers
+    unless changed_controller_files.empty?
+      changed_controller_files.each do |file|
+        controller_name = File.basename(file, '.ts').gsub('_controller', '').gsub('_', '-')
+        controller_data[controller_name] = scan_single_controller(file)
+      end
+    end
+
+    # Update view files list
+    view_files = view_files_list
+
+    # Rebuild partial parent map if any view files changed
+    unless changed_view_files.empty?
+      partial_parent_map = build_partial_parent_map_from_files(view_files)
+    end
+
+    {
+      controller_data: controller_data,
+      view_files: view_files,
+      partial_parent_map: partial_parent_map
+    }
+  end
+
+  # Scan a single controller file
+  def scan_single_controller(file)
+    controller_name = File.basename(file, '.ts').gsub('_controller', '').gsub('_', '-')
+
+    # Use TypeScript AST parser to extract controller metadata
+    parser_script = Rails.root.join('bin/parse_ts_controller.js')
+    result_json = `node #{parser_script} #{file}`
+
+    if $?.success?
+      parsed_data = JSON.parse(result_json)
+
+      {
+        targets: parsed_data['targets'] || [],
+        optional_targets: parsed_data['optionalTargets'] || [],
+        outlets: parsed_data['outlets'] || [],
+        values: parsed_data['values'] || [],
+        values_with_defaults: parsed_data['valuesWithDefaults'] || [],
+        values_with_dynamic_defaults: parsed_data['valuesWithDynamicDefaults'] || [],
+        optional_values: parsed_data['optionalValues'] || [],
+        methods: parsed_data['methods'] || [],
+        querySelectors: parsed_data['querySelectors'] || [],
+        anti_patterns: parsed_data['antiPatterns'] || [],
+        targets_with_skip: parsed_data['targetsWithSkip'] || [],
+        values_with_skip: parsed_data['valuesWithSkip'] || [],
+        is_system_controller: parsed_data['isSystemController'] || false,
+        file: file
+      }
+    else
+      raise 'Parse ts controller failed'
+    end
+  end
+
   # Scan all TypeScript controllers and parse their metadata
   def scan_controllers
     data = {}
 
     Dir.glob(@controllers_dir.join('*_controller.ts')).each do |file|
       controller_name = File.basename(file, '.ts').gsub('_controller', '').gsub('_', '-')
-
-      # Use TypeScript AST parser to extract controller metadata
-      parser_script = Rails.root.join('bin/parse_ts_controller.js')
-      result_json = `node #{parser_script} #{file}`
-
-      if $?.success?
-        parsed_data = JSON.parse(result_json)
-
-        data[controller_name] = {
-          targets: parsed_data['targets'] || [],
-          optional_targets: parsed_data['optionalTargets'] || [],
-          outlets: parsed_data['outlets'] || [],
-          values: parsed_data['values'] || [],
-          values_with_defaults: parsed_data['valuesWithDefaults'] || [],
-          values_with_dynamic_defaults: parsed_data['valuesWithDynamicDefaults'] || [],
-          optional_values: parsed_data['optionalValues'] || [],
-          methods: parsed_data['methods'] || [],
-          querySelectors: parsed_data['querySelectors'] || [],
-          anti_patterns: parsed_data['antiPatterns'] || [],
-          targets_with_skip: parsed_data['targetsWithSkip'] || [],
-          values_with_skip: parsed_data['valuesWithSkip'] || [],
-          is_system_controller: parsed_data['isSystemController'] || false,
-          file: file
-        }
-      else
-        raise 'Parse ts controller failed'
-      end
+      data[controller_name] = scan_single_controller(file)
     end
 
     data
@@ -285,9 +361,14 @@ class StimulusValidationPipeline
 
   # Build a map of partial files to their parent files
   def build_partial_parent_map
+    build_partial_parent_map_from_files(@view_files)
+  end
+
+  # Build partial parent map from a given list of view files
+  def build_partial_parent_map_from_files(view_files)
     map = {}
 
-    @view_files.each do |view_file|
+    view_files.each do |view_file|
       content = File.read(view_file)
       relative_path = view_file.sub(Rails.root.to_s + '/', '')
 

@@ -99,10 +99,10 @@
           <span class="text-[11px] text-gray-800">邮轮游</span>
         <% end %>
         <!-- 定制游 -->
-        <button class="bg-white rounded-sm p-2 flex flex-col items-center justify-center" onclick="window.showToast('精彩即将上线，敬请期待')">
+        <%= link_to chartered_tours_path, class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center" do %>
           <%= image_tag "出境游/定制游.png", class: "w-6 h-6 mb-1", alt: "定制游" %>
           <span class="text-[11px] text-gray-800">定制游</span>
-        </button>
+        <% end %>
         <!-- 自由行 -->
         <%= link_to free_travels_path, class: "bg-white rounded-sm p-2 flex flex-col items-center justify-center" do %>
           <%= image_tag "出境游/自由行.png", class: "w-6 h-6 mb-1", alt: "自由行" %>

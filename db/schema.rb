@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_30_081021) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -572,6 +572,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_081021) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.string "boarding_address"
+    t.string "boarding_deadline"
     t.index ["cruise_route_id"], name: "index_cruise_sailings_on_cruise_route_id"
     t.index ["cruise_ship_id"], name: "index_cruise_sailings_on_cruise_ship_id"
     t.index ["data_version"], name: "index_cruise_sailings_on_data_version"

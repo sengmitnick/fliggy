@@ -73,10 +73,10 @@
               <%= image_tag 'tourism/一日游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">一日游</span>
             <% end %>
-            <div class="flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" onclick="window.showToast('精彩即将上线，敬请期待')">
+            <%= link_to chartered_tours_path, class: "flex-1 flex flex-col items-center justify-center border-r border-[#fdf2cc] px-1" do %>
               <%= image_tag 'tourism/定制游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">定制游</span>
-            </div>
+            <% end %>
             <%= link_to cruises_path, class: "flex-1 flex flex-col items-center justify-center px-1" do %>
               <%= image_tag 'tourism/邮轮游.png', class: 'w-6 h-6 mb-1' %>
               <span class="text-[10px] text-gray-700 whitespace-nowrap">邮轮游</span>

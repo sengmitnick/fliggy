@@ -3,8 +3,8 @@
 require_relative 'base_validator'
 
 # 验证用例91: 预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）
-class V091BookChongliSkiingPrivateLessonValidator < BaseValidator
-  self.validator_id = 'v091_book_chongli_skiing_private_lesson_validator'
+class V091BookXianTerracottaWarriorsTourValidator < BaseValidator
+  self.validator_id = 'v091_book_xian_terracotta_warriors_tour_validator'
   self.task_id = '5bc15e2f-a604-469a-99a1-ccce0e9eabed'
   self.title = '预订西安秦始皇帝陵博物院讲解（服务人数最多的金牌导游）'
   self.description = '预订下周末西安秦始皇帝陵博物院讲解，选择服务人数最多的金牌导游'

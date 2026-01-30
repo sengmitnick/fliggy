@@ -2,25 +2,9 @@ class CharteredToursController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    # 获取当前选中的城市（默认武汉）
-    @selected_city = City.find_by(name: params[:city] || '武汉')
-    
-    # 获取热门城市
-    @hot_cities = City.where(name: ['东京', '大阪', '京都', '冲绳', '北海道', '清迈', '普吉岛', '曼谷'])
-    
-    # 获取武汉的精选路线（首页展示3个）
-    @featured_routes = CharterRoute.includes(:city, :attractions)
-                                   .where(city: @selected_city, category: 'featured')
-                                   .order(created_at: :desc)
-                                   .limit(3)
-    
-    # 获取热门景点（首页展示3个）
-    @popular_attractions = Attraction.where(city: @selected_city)
-                                     .order(created_at: :desc)
-                                     .limit(3)
-    
-    # 设置默认出发日期为明天
-    @default_departure_date = (Time.zone.today + 1.day).strftime('%m月%d日')
+    # 定制旅游首页 - 展示个人定制和公司团建两个tab
+    # 目前默认显示个人定制tab
+    @active_tab = params[:tab] || 'personal'
   end
 
   def vehicles

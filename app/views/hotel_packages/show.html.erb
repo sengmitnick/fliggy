@@ -153,7 +153,7 @@
             <span class="text-xs text-blue-600">查看可约酒店及日期 ></span>
             <div class="flex space-x-2">
               <span class="text-orange-600 font-bold text-xl mr-2">¥<%= option.price.to_i %></span>
-              <button class="px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm" onclick="window.showToast('精彩即将上线，敬请期待')">预约</button>
+              <%= link_to "预约", new_hotel_package_order_path(package_option_id: option.id, booking_type: 'instant'), class: "px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm" %>
               <%= link_to "囤货", new_hotel_package_order_path(package_option_id: option.id), class: "px-4 py-1 bg-orange-500 text-white rounded-full text-sm" %>
             </div>
           </div>
