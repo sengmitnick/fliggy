@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../../../../../app/helpers/image_seed_helper'
 
 timestamp = Time.current
 
@@ -9,50 +10,50 @@ timestamp = Time.current
 
 countries_data = [
   # 东南亚国家
-  { name: "泰国", code: "TH", region: "东南亚", visa_free: false, image_url: "/images/visas/1552465011-b4e21bf6e79a.jpg", description: "东南亚热门旅游目的地", created_at: timestamp, updated_at: timestamp },
-  { name: "越南", code: "VN", region: "东南亚", visa_free: false, image_url: "/images/visas/1583417319070-4a69db38a482.jpg", description: "东南亚文化古国", created_at: timestamp, updated_at: timestamp },
-  { name: "新加坡", code: "SG", region: "东南亚", visa_free: false, image_url: "/images/visas/1525625293386-3f8f99389edd.jpg", description: "东南亚金融中心", created_at: timestamp, updated_at: timestamp },
-  { name: "马来西亚", code: "MY", region: "东南亚", visa_free: false, image_url: "/images/visas/1596422846543-75c6fc197f07.jpg", description: "多元文化国家", created_at: timestamp, updated_at: timestamp },
-  { name: "菲律宾", code: "PH", region: "东南亚", visa_free: false, image_url: "/images/visas/1551244072-5d12893278ab.jpg", description: "千岛之国", created_at: timestamp, updated_at: timestamp },
-  { name: "印度尼西亚", code: "ID", region: "东南亚", visa_free: false, image_url: "/images/visas/1555409290-7896f99c76b2.jpg", description: "万岛之国", created_at: timestamp, updated_at: timestamp },
+  { name: "泰国", code: "TH", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "东南亚热门旅游目的地", created_at: timestamp, updated_at: timestamp },
+  { name: "越南", code: "VN", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "东南亚文化古国", created_at: timestamp, updated_at: timestamp },
+  { name: "新加坡", code: "SG", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "东南亚金融中心", created_at: timestamp, updated_at: timestamp },
+  { name: "马来西亚", code: "MY", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "多元文化国家", created_at: timestamp, updated_at: timestamp },
+  { name: "菲律宾", code: "PH", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "千岛之国", created_at: timestamp, updated_at: timestamp },
+  { name: "印度尼西亚", code: "ID", region: "东南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "万岛之国", created_at: timestamp, updated_at: timestamp },
   
   # 东亚国家
-  { name: "日本", code: "JP", region: "东亚", visa_free: false, image_url: "/images/visas/1493976040374-85c8e12f0c0e.jpg", description: "樱花之国", created_at: timestamp, updated_at: timestamp },
-  { name: "韩国", code: "KR", region: "东亚", visa_free: false, image_url: "/images/visas/1517154421773-0529f29ea451.jpg", description: "韩流文化发源地", created_at: timestamp, updated_at: timestamp },
+  { name: "日本", code: "JP", region: "东亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "樱花之国", created_at: timestamp, updated_at: timestamp },
+  { name: "韩国", code: "KR", region: "东亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "韩流文化发源地", created_at: timestamp, updated_at: timestamp },
   
   # 欧洲国家
-  { name: "英国", code: "GB", region: "欧洲", visa_free: false, image_url: "/images/visas/1513635269975-59663e0ac1ad.jpg", description: "大不列颠及北爱尔兰联合王国", created_at: timestamp, updated_at: timestamp },
-  { name: "法国", code: "FR", region: "欧洲", visa_free: false, image_url: "/images/visas/1502602898657-3e91760cbb34.jpg", description: "浪漫之都", created_at: timestamp, updated_at: timestamp },
-  { name: "德国", code: "DE", region: "欧洲", visa_free: false, image_url: "/images/visas/1467269204594-9661b134dd2b.jpg", description: "欧洲经济引擎", created_at: timestamp, updated_at: timestamp },
-  { name: "意大利", code: "IT", region: "欧洲", visa_free: false, image_url: "/images/visas/1523906834658-6e24ef2386f9.jpg", description: "文艺复兴发源地", created_at: timestamp, updated_at: timestamp },
-  { name: "西班牙", code: "ES", region: "欧洲", visa_free: false, image_url: "/images/visas/1543783207-ec64e4d95325.jpg", description: "激情国度", created_at: timestamp, updated_at: timestamp },
-  { name: "瑞士", code: "CH", region: "欧洲", visa_free: false, image_url: "/images/visas/1506905925346-21bda4d32df4.jpg", description: "永久中立国", created_at: timestamp, updated_at: timestamp },
-  { name: "希腊", code: "GR", region: "欧洲", visa_free: false, image_url: "/images/visas/1555993539-1732b0258235.jpg", description: "西方文明发源地", created_at: timestamp, updated_at: timestamp },
+  { name: "英国", code: "GB", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "大不列颠及北爱尔兰联合王国", created_at: timestamp, updated_at: timestamp },
+  { name: "法国", code: "FR", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "浪漫之都", created_at: timestamp, updated_at: timestamp },
+  { name: "德国", code: "DE", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "欧洲经济引擎", created_at: timestamp, updated_at: timestamp },
+  { name: "意大利", code: "IT", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "文艺复兴发源地", created_at: timestamp, updated_at: timestamp },
+  { name: "西班牙", code: "ES", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "激情国度", created_at: timestamp, updated_at: timestamp },
+  { name: "瑞士", code: "CH", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "永久中立国", created_at: timestamp, updated_at: timestamp },
+  { name: "希腊", code: "GR", region: "欧洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "西方文明发源地", created_at: timestamp, updated_at: timestamp },
   
   # 大洋洲国家
-  { name: "澳大利亚", code: "AU", region: "大洋洲", visa_free: false, image_url: "/images/visas/1523482580672-f109ba8cb9be.jpg", description: "南半球大陆", created_at: timestamp, updated_at: timestamp },
-  { name: "新西兰", code: "NZ", region: "大洋洲", visa_free: false, image_url: "/images/visas/1507699622108-4be3abd695ad.jpg", description: "长白云之乡", created_at: timestamp, updated_at: timestamp },
+  { name: "澳大利亚", code: "AU", region: "大洋洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "南半球大陆", created_at: timestamp, updated_at: timestamp },
+  { name: "新西兰", code: "NZ", region: "大洋洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "长白云之乡", created_at: timestamp, updated_at: timestamp },
   
   # 北美洲国家
-  { name: "美国", code: "US", region: "北美洲", visa_free: false, image_url: "/images/visas/1485738422979-f5c462d49f74.jpg", description: "超级大国", created_at: timestamp, updated_at: timestamp },
-  { name: "加拿大", code: "CA", region: "北美洲", visa_free: false, image_url: "/images/visas/1503614472-8c93d56e92ce.jpg", description: "枫叶之国", created_at: timestamp, updated_at: timestamp },
+  { name: "美国", code: "US", region: "北美洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "超级大国", created_at: timestamp, updated_at: timestamp },
+  { name: "加拿大", code: "CA", region: "北美洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "枫叶之国", created_at: timestamp, updated_at: timestamp },
   
   # 南美洲国家
-  { name: "巴西", code: "BR", region: "南美洲", visa_free: false, image_url: "/images/visas/1483729558449-99ef09a8c325.jpg", description: "足球王国", created_at: timestamp, updated_at: timestamp },
-  { name: "阿根廷", code: "AR", region: "南美洲", visa_free: false, image_url: "/images/visas/1589909202802-8f4aadce1849.jpg", description: "探戈之国", created_at: timestamp, updated_at: timestamp },
+  { name: "巴西", code: "BR", region: "南美洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "足球王国", created_at: timestamp, updated_at: timestamp },
+  { name: "阿根廷", code: "AR", region: "南美洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "探戈之国", created_at: timestamp, updated_at: timestamp },
   
   # 非洲国家
-  { name: "埃及", code: "EG", region: "非洲", visa_free: false, image_url: "/images/visas/1572252009286-268acec5ca0a.jpg", description: "古文明古国", created_at: timestamp, updated_at: timestamp },
-  { name: "南非", code: "ZA", region: "非洲", visa_free: false, image_url: "/images/visas/1484318571209-661cf29a69c3.jpg", description: "彩虹之国", created_at: timestamp, updated_at: timestamp },
-  { name: "肯尼亚", code: "KE", region: "非洲", visa_free: false, image_url: "/images/visas/1489392191049-fc10c97e64b6.jpg", description: "野生动物天堂", created_at: timestamp, updated_at: timestamp },
+  { name: "埃及", code: "EG", region: "非洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "古文明古国", created_at: timestamp, updated_at: timestamp },
+  { name: "南非", code: "ZA", region: "非洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "彩虹之国", created_at: timestamp, updated_at: timestamp },
+  { name: "肯尼亚", code: "KE", region: "非洲", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "野生动物天堂", created_at: timestamp, updated_at: timestamp },
   
   # 南亚国家
-  { name: "印度", code: "IN", region: "南亚", visa_free: false, image_url: "/images/visas/1524492412937-b28074a5d7da.jpg", description: "文明古国", created_at: timestamp, updated_at: timestamp },
-  { name: "斯里兰卡", code: "LK", region: "南亚", visa_free: false, image_url: "/images/visas/1566073771259-6a8506099945.jpg", description: "印度洋上的明珠", created_at: timestamp, updated_at: timestamp },
+  { name: "印度", code: "IN", region: "南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "文明古国", created_at: timestamp, updated_at: timestamp },
+  { name: "斯里兰卡", code: "LK", region: "南亚", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "印度洋上的明珠", created_at: timestamp, updated_at: timestamp },
   
   # 中东国家
-  { name: "阿联酋", code: "AE", region: "中东", visa_free: false, image_url: "/images/visas/1512453979798-5ea266f8880c.jpg", description: "沙漠中的明珠", created_at: timestamp, updated_at: timestamp },
-  { name: "土耳其", code: "TR", region: "中东", visa_free: false, image_url: "/images/visas/1524231757912-21f4fe3a7200.jpg", description: "横跨欧亚大陆", created_at: timestamp, updated_at: timestamp }
+  { name: "阿联酋", code: "AE", region: "中东", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "沙漠中的明珠", created_at: timestamp, updated_at: timestamp },
+  { name: "土耳其", code: "TR", region: "中东", visa_free: false, image_url: ImageSeedHelper.random_image_from_category(:visas), description: "横跨欧亚大陆", created_at: timestamp, updated_at: timestamp }
 ]
 
 Country.insert_all(countries_data)

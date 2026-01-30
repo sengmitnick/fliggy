@@ -225,7 +225,7 @@ namespace :validator do
     puts "🔍 Step 1: Checking weight sums..."
     weight_errors = []
     
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_files.each do |file|
       next if file.end_with?('base_validator.rb')
       
@@ -272,7 +272,7 @@ namespace :validator do
     puts "-" * 70
     
     # 加载所有 Validator
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validators = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
       File.basename(file, '.rb').camelize.constantize
@@ -385,7 +385,7 @@ namespace :validator do
       puts "❌ Usage: rake validator:simulate_single[validator_id]"
       puts "\nAvailable validators:"
       
-      Dir[Rails.root.join('app/validators/*_validator.rb')].each do |file|
+      Dir[Rails.root.join('app/validators/**/*_validator.rb')].each do |file|
         next if file.end_with?('base_validator.rb')
         klass = File.basename(file, '.rb').camelize.constantize
         puts "  - #{klass.validator_id} (#{klass.title})"
@@ -395,7 +395,7 @@ namespace :validator do
     end
     
     # 查找 Validator
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_class = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
       klass = File.basename(file, '.rb').camelize.constantize

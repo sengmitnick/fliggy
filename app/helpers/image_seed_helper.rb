@@ -44,12 +44,43 @@ module ImageSeedHelper
     products: [
       '1555881400-74d7acaacd8b', '1533929736458-ca588d08c8be',
       '1503454537195-1dcabb73ffb9'
+    ],
+    cruises: [
+      '1568481572796-cac3501604fc', '1599640842225-85d111c60e6b',
+      '1605408499391-6368c628ef42', '1583417319070-4a69db38a482',
+      '1571896349842-33c89424de2d', '1540541338287-41700207dee6'
+    ],
+    flights: [
+      '1436491865332-7a61a109cc05', '1464037866556-6812c9d1c72e',
+      '1469854523086-cc02fe5d8800', '1476514525535-07fb3b4ae5f1'
+    ],
+    insurances: [
+      '1436491865332-7a61a109cc05', '1464037866556-6812c9d1c72e',
+      '1469854523086-cc02fe5d8800', '1476514525535-07fb3b4ae5f1',
+      '1488646953014-85cb44e25828', '1506929562872-bb421503ef21'
+    ],
+    visas: [
+      '1467269204594-9661b134dd2b', '1493976040374-85c8e12f0c0e',
+      '1502602898657-3e91760cbb34', '1513635269975-59663e0ac1ad',
+      '1517154421773-0529f29ea451', '1523906834658-6e24ef2386f9',
+      '1525625293386-3f8f99389edd', '1551244072-5d12893278ab',
+      '1552465011-b4e21bf6e79a', '1555409290-7896f99c76b2',
+      '1583417319070-4a69db38a482', '1596422846543-75c6fc197f07'
+    ],
+    cars: [
+      '1449965023817-8219c0a8cdaf', '1552519507-da3f49e1f26e',
+      '1503376780353-7e6692767b70', '1494905998402-395d579af36f',
+      '1542362567-b07e54358753', '1583267746965-ac1f34a4654f'
+    ],
+    shops: [
+      '1555881400-74d7acaacd8b', '1488085061387-422e29b40080',
+      '1540959733332-eab4deabeeaf', '1533929736458-ca588d08c8be'
     ]
   }.freeze
 
   # 确保图片目录存在
   def self.ensure_image_directories
-    categories = %w[attractions hotels tickets activities tours packages guides products]
+    categories = %w[attractions hotels tickets activities tours packages guides products cruises flights insurances visas cars shops]
     categories.each do |category|
       dir = Rails.root.join('public', 'images', category)
       FileUtils.mkdir_p(dir) unless Dir.exist?(dir)

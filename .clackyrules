@@ -143,6 +143,55 @@ puts "✓ 数据包加载完成"
 - ❌ NEVER use `find_or_create_by!` for data packs (use `insert_all` instead)
 - ❌ NEVER mix production seed data with test data
 
+**Image Management in Data Packs (CRITICAL)**:
+
+**ALWAYS use ImageSeedHelper for image URLs in data packs:**
+
+```ruby
+# At the top of data pack file
+require_relative '../../../../../app/helpers/image_seed_helper'
+
+# When creating records with images
+hotels_data << {
+  name: "上海希尔顿酒店",
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),  # ✅ Correct
+  # ...
+}
+```
+
+**Supported image categories:**
+- `:attractions` - 景点风景图 (Attraction)
+- `:hotels` - 酒店建筑/房间图 (Hotel, HotelPackage)
+- `:tours` - 旅游产品图 (TourGroupProduct, TourPackage)
+- `:tickets` - 门票/活动图 (Ticket, Activity)
+- `:activities` - 体验活动图 (AttractionActivity)
+- `:packages` - 套餐产品图 (HotelPackage)
+- `:guides` - 导游/服务人员图 (Guide)
+- `:products` - 通用产品图 (其他产品模型)
+- `:cruises` - 游轮/邮轮图 (CruiseSailing, CruiseShip)
+- `:flights` - 航班/机场图 (Flight, FlightOffer)
+- `:insurances` - 保险产品图 (InsuranceProduct)
+- `:visas` - 签证/国家图 (VisaProduct, Country)
+- `:cars` - 租车/车辆图 (Car, CarOrder)
+- `:shops` - 商家/商店图 (AbroadShop)
+
+**❌ DO NOT hardcode Unsplash URLs:**
+```ruby
+# ❌ BAD - Hardcoded URL
+image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
+
+# ✅ GOOD - Use ImageSeedHelper
+image_url: ImageSeedHelper.random_image_from_category(:hotels)
+```
+
+**Benefits:**
+- ✅ Centralized image management
+- ✅ Automatic random selection (no duplicates)
+- ✅ Easy to maintain and extend
+- ✅ Supports local caching for offline use
+
+**For detailed documentation, see:** `docs/IMAGE_SEED_HELPER.md`
+
 ## Validator verify Method Best Practices
 
 **⚠️ CRITICAL: Query Rules in First Assertion**

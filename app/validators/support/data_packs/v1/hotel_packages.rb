@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 # hotel_packages_v1 数据包
 # 酒店套餐验证数据
 #
@@ -15,12 +17,12 @@ puts "正在加载 hotel_packages_v1 数据包..."
 
 # 品牌数据
 brands = [
-  { name: "华住", logo: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80&fm=jpg&fit=crop&auto=format" },
-  { name: "万豪", logo: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80&fm=jpg&fit=crop&auto=format" },
-  { name: "希尔顿", logo: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&q=80&fm=jpg&fit=crop&auto=format" },
-  { name: "洲际", logo: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&q=80&fm=jpg&fit=crop&auto=format" },
-  { name: "凯悦", logo: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80&fm=jpg&fit=crop&auto=format" },
-  { name: "香格里拉", logo: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80&fm=jpg&fit=crop&auto=format" }
+  { name: "华住", logo: ImageSeedHelper.random_image_from_category(:hotels) },
+  { name: "万豪", logo: ImageSeedHelper.random_image_from_category(:hotels) },
+  { name: "希尔顿", logo: ImageSeedHelper.random_image_from_category(:hotels) },
+  { name: "洲际", logo: ImageSeedHelper.random_image_from_category(:hotels) },
+  { name: "凯悦", logo: ImageSeedHelper.random_image_from_category(:hotels) },
+  { name: "香格里拉", logo: ImageSeedHelper.random_image_from_category(:hotels) }
 ]
 
 regions = ["全国通用", "华东地区", "华南地区", "华北地区", "西南地区", "华中地区"]
