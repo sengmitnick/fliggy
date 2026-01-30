@@ -100,15 +100,46 @@ class StimulusCacheManager
       # Don't symbolize keys for file paths - they should remain strings
       data = JSON.parse(@cache_file.read)
       # Convert top-level keys to symbols manually
+      # Also convert data hash keys to symbols for consistent access
       {
         version: data['version'],
         cached_at: data['cached_at'],
         file_mtimes: data['file_mtimes'], # Keep file paths as strings
-        data: data['data'] # This can be anything
+        data: data['data'] ? {
+          controller_data: symbolize_controller_data(data['data']['controller_data']),
+          view_files: data['data']['view_files'],
+          partial_parent_map: data['data']['partial_parent_map']
+        } : nil
       }
     rescue JSON::ParserError, Errno::ENOENT
       nil
     end
+  end
+
+  # Convert controller_data nested hash keys to symbols
+  def symbolize_controller_data(controller_data)
+    return nil if controller_data.nil?
+    
+    result = {}
+    controller_data.each do |controller_name, controller_info|
+      result[controller_name] = {
+        targets: controller_info['targets'],
+        optional_targets: controller_info['optional_targets'],
+        outlets: controller_info['outlets'],
+        values: controller_info['values'],
+        values_with_defaults: controller_info['values_with_defaults'],
+        values_with_dynamic_defaults: controller_info['values_with_dynamic_defaults'],
+        optional_values: controller_info['optional_values'],
+        methods: controller_info['methods'],
+        querySelectors: controller_info['querySelectors'],
+        anti_patterns: controller_info['anti_patterns'],
+        targets_with_skip: controller_info['targets_with_skip'],
+        values_with_skip: controller_info['values_with_skip'],
+        is_system_controller: controller_info['is_system_controller'],
+        file: controller_info['file']
+      }
+    end
+    result
   end
 
   def save_cache(data, files_to_track)
