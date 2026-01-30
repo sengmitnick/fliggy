@@ -175,6 +175,52 @@ namespace :validator do
     puts "🧪 Validator Simulation Tests"
     puts "="*70 + "\n"
     
+    # Step 0: 检查必需的 API 端点
+    puts "🔌 Step 0: Checking required API endpoints..."
+    api_errors = []
+    
+    required_apis = [
+      { method: 'GET', path: '/api/tasks', description: '获取任务列表' },
+      { method: 'POST', path: '/api/tasks/:id/start', description: '创建训练会话' },
+      { method: 'POST', path: '/api/verify/run', description: '验证接口' }
+    ]
+    
+    required_apis.each do |api|
+      begin
+        # 检查路由是否存在
+        path_for_check = api[:path].gsub(':id', 'test_id')
+        
+        # 使用 Rails.application.routes 检查路由
+        route_found = Rails.application.routes.routes.any? do |route|
+          # 匹配 HTTP 方法和路径模式
+          route.verb.match?(api[:method]) && 
+          route.path.spec.to_s.gsub('(.:format)', '').match?(api[:path].gsub(':id', '[^/]+'))
+        end
+        
+        if route_found
+          puts "  ✓ #{api[:method].ljust(6)} #{api[:path].ljust(30)} - #{api[:description]}"
+        else
+          api_errors << "#{api[:method]} #{api[:path]} - 路由不存在"
+          puts "  ✗ #{api[:method].ljust(6)} #{api[:path].ljust(30)} - 路由不存在"
+        end
+      rescue StandardError => e
+        api_errors << "#{api[:method]} #{api[:path]} - 检查失败: #{e.message}"
+        puts "  ⚠ #{api[:method].ljust(6)} #{api[:path].ljust(30)} - 检查失败"
+      end
+    end
+    
+    if api_errors.any?
+      puts "\n❌ API Endpoint Errors Found:"
+      puts "-" * 70
+      api_errors.each { |error| puts "  → #{error}" }
+      puts "-" * 70
+      puts "\n❌ #{api_errors.size} required API endpoint(s) are missing"
+      puts "Please ensure all required APIs are properly configured in routes.rb\n"
+      exit 1
+    else
+      puts "✅ All required API endpoints are available\n"
+    end
+    
     # Step 1: 检查权重总和
     puts "🔍 Step 1: Checking weight sums..."
     weight_errors = []

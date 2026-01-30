@@ -92,6 +92,12 @@ When developing features that require User or Order models, **DO NOT create them
 
 3. **LLM Integration:**: Use `rails generate llm` to generate LLM service infrastructure. Always prefer streaming via ActionCable - use `LlmStreamJob.perform_later(channel_name:, prompt:, system:)` for real-time streaming responses. Auto-configures LLM_BASE_URL, LLM_API_KEY, LLM_MODEL in application.yml. When storing LLM messages, include `LlmMessageValidationConcern` - don't validate role & content yourself.
 
+4. **Validator Generator**: Use `rails generate validator NAME "标题" "描述"` to create new validators
+   - **UUID auto-generated**: task_id field automatically generated, no manual addition needed
+   - **Syntax**: `rails generate validator book_hotel "预订酒店" "用户需要预订经济型酒店"`
+   - **Auto-creates**: Validator file with complete boilerplate, UUID, auto-incremented validator number
+   - **Documentation**: See `docs/VALIDATOR_GENERATOR.md` for complete guide
+
 Do not recreate administrator functionality in User model. Administrator system already exists. Adding admin page low priority.
 
 
@@ -480,6 +486,15 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 2. **Unit/Request Tests**: Run `rake test` to verify backend logic
 
 `rake test` is configured to only show 5 failed test cases at a time, so you should repeatedly run rake test if these have errors (no more than 10 rounds) until all tests pass
+
+**Validator Testing**:
+- **CRITICAL**: `rake validator:simulate` automatically checks 3 required API endpoints before running tests:
+  - `GET /api/tasks` - 获取任务列表
+  - `POST /api/tasks/:id/start` - 创建训练会话
+  - `POST /api/verify/run` - 验证接口
+- If any API endpoint is missing, the task will fail with error before running validator simulations
+- Ensure these routes are properly configured in `config/routes.rb` before running `rake validator:simulate`
+- Run `rake validator:simulate` after creating/modifying validators to ensure all tests pass
 
 For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
 ```bash
