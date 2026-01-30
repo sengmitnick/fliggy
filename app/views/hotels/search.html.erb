@@ -385,8 +385,8 @@
       <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, room_category: @room_category), class: "flex bg-white p-3 border-b border-gray-200" do %>
         <!-- 左侧图片 -->
         <div class="relative w-[110px] h-[140px] bg-gray-200 rounded-lg overflow-hidden shrink-0">
-          <% if hotel.image.attached? %>
-            <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+          <% if hotel.image_url.present? %>
+            <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
           <% elsif hotel.image_url.present? %>
             <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'" %>
           <% else %>

@@ -27,8 +27,8 @@
   <div class="px-4 mb-4">
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
       <div class="flex items-center p-4 border-b">
-        <% if @guide.avatar.attached? %>
-          <%= image_tag @guide.avatar, class: "w-16 h-16 rounded-full object-cover" %>
+        <% if @guide.avatar_url.present? %>
+          <%= image_tag @guide.avatar_url, class: "w-16 h-16 rounded-full object-cover" %>
         <% else %>
           <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
             <span class="text-2xl text-gray-400">👤</span>

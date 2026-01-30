@@ -53,7 +53,7 @@ insurance_products_data = []
     active: true,
     available_for_embedding: false,
     sort_order: 100 - i * 5,
-    image_url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800'
+    image_url: '/images/insurances/1469854523086-cc02fe5d8800.jpg'
   }
   
   # 额外生成3个变种产品
@@ -78,7 +78,7 @@ insurance_products_data = []
       active: true,
       available_for_embedding: false,
       sort_order: 65 - i * 5,
-      image_url: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800'
+      image_url: '/images/insurances/1506929562872-bb421503ef21.jpg'
     }
   end
 end
@@ -116,7 +116,7 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 60 - i * 5,
-    image_url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800'
+    image_url: '/images/insurances/1476514525535-07fb3b4ae5f1.jpg'
   }
   
   # 额外生成4个变种产品
@@ -141,7 +141,7 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 40 - i * 5,
-      image_url: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800'
+      image_url: '/images/insurances/1488646953014-85cb44e25828.jpg'
     }
   end
 end
@@ -173,7 +173,7 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 40 - i * 5,
-    image_url: 'https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=800'
+    image_url: '/images/insurances/1464037866556-6812c9d1c72e.jpg'
   }
   
   # 额外生成变种
@@ -198,7 +198,7 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 30 - i * 5,
-      image_url: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800'
+      image_url: '/images/insurances/1436491865332-7a61a109cc05.jpg'
     }
   end
 end

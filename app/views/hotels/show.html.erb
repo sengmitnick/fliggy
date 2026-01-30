@@ -43,8 +43,8 @@
 
   <!-- 视频/图片轮播区域 -->
   <div class="relative h-64">
-    <% if @hotel.image.attached? %>
-      <%= image_tag @hotel.image, class: "w-full h-full object-cover" %>
+    <% if @hotel.image_url.present? && (@hotel.image_url.start_with?('http://') || @hotel.image_url.start_with?('https://') || @hotel.image_url.start_with?('/')) %>
+      <%= image_tag @hotel.image_url, class: "w-full h-full object-cover" %>
     <% else %>
       <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
         <div class="text-white text-center">

@@ -1,6 +1,7 @@
 class Hotel < ApplicationRecord
   include DataVersionable
-  has_one_attached :image
+  # 图片字段 (使用本地路径或外部 URL)
+  # image_url: 酒店主图
   has_many :hotel_rooms, dependent: :destroy
   has_many :rooms, dependent: :destroy
   has_one :hotel_policy, dependent: :destroy

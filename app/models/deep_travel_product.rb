@@ -3,8 +3,8 @@ class DeepTravelProduct < ApplicationRecord
   # Associations
   belongs_to :deep_travel_guide
   
-  # ActiveStorage attachments for multiple images
-  has_many_attached :images
+  # 图片字段: image_urls (JSON 数组)
+  serialize :image_urls, coder: JSON
   
   # Validations
   validates :title, presence: true
@@ -16,9 +16,4 @@ class DeepTravelProduct < ApplicationRecord
   scope :featured, -> { where(featured: true) }
   scope :by_location, ->(location) { where(location: location) }
   scope :recent, -> { order(created_at: :desc) }
-  
-  # Helper methods
-  def image_urls
-    images.map { |image| Rails.application.routes.url_helpers.rails_blob_url(image) } if images.attached?
-  end
 end

@@ -265,8 +265,8 @@
         <%= link_to hotel_path(hotel, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "block" do %>
           <div class="bg-white rounded-xl overflow-hidden shadow-sm h-48">
             <div class="h-3/4 bg-gray-200 relative">
-              <% if hotel.image.attached? %>
-                <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+              <% if hotel.image_url.present? %>
+                <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
               <% elsif hotel.image_url.present? %>
                 <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop'" %>
               <% else %>

@@ -12,17 +12,17 @@ class DeepTravelsController < ApplicationController
     
     # Get products based on location filter
     @products = if @location == '境内精选'
-                  DeepTravelProduct.includes(:deep_travel_guide, :images_attachments)
+                  DeepTravelProduct.includes(:deep_travel_guide)
                                   .where(location: ['北京', '华东', '华中', '陕西'])
                                   .recent
                                   .limit(20)
                 elsif @location == '境外精选'
-                  DeepTravelProduct.includes(:deep_travel_guide, :images_attachments)
+                  DeepTravelProduct.includes(:deep_travel_guide)
                                   .where.not(location: ['北京', '华东', '华中', '陕西'])
                                   .recent
                                   .limit(20)
                 else
-                  DeepTravelProduct.includes(:deep_travel_guide, :images_attachments)
+                  DeepTravelProduct.includes(:deep_travel_guide)
                                   .by_location(@location)
                                   .recent
                                   .limit(20)
@@ -73,7 +73,7 @@ class DeepTravelsController < ApplicationController
 
   def show
     @full_render = true
-    @guide = DeepTravelGuide.includes(:deep_travel_products, :deep_travel_reviews, :avatar_attachment, :video_attachment)
+    @guide = DeepTravelGuide.includes(:deep_travel_products, :deep_travel_reviews)
                            .find(params[:id])
     @products = @guide.deep_travel_products.order(sales_count: :desc)
     @selected_product = @products.first

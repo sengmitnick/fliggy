@@ -61,8 +61,8 @@
         <div class="flex gap-3 mb-4">
           <div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-elevated flex-shrink-0">
             <% product = @order.membership_product %>
-            <% if product.image.attached? %>
-              <%= image_tag product.image.variant(resize_to_fill: [160, 160]), class: "w-full h-full object-cover", alt: product.name %>
+            <% if product.image_url.present? %>
+              <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
             <% elsif product.image_url.present? %>
               <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
             <% else %>

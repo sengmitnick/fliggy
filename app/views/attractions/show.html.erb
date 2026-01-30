@@ -22,17 +22,17 @@
 
   <!-- Image Gallery -->
   <div class="relative bg-surface">
-    <% if @attraction.cover_image.attached? %>
-      <%= image_tag @attraction.cover_image, class: "w-full h-80 object-cover" %>
+    <% if @attraction.cover_image_url.present? %>
+      <%= image_tag @attraction.cover_image_url_url, class: "w-full h-80 object-cover" %>
     <% else %>
       <div class="w-full h-80 bg-gray-200 flex items-center justify-center">
         <span class="text-6xl">🎫</span>
       </div>
     <% end %>
     
-    <% if @attraction.gallery_images.attached? && @attraction.gallery_images.count > 0 %>
+    <% if @attraction.gallery_image_urls.present? && @attraction.gallery_image_urls.any? %>
       <div class="absolute bottom-4 right-4 px-3 py-1 bg-surface-dark/80 backdrop-blur-sm rounded-full text-sm text-white">
-        1/<%= @attraction.gallery_images.count + 1 %>
+        1/<%= @attraction.gallery_image_urls.size + 1 %>
       </div>
     <% end %>
   </div>

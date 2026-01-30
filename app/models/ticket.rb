@@ -5,7 +5,7 @@ class Ticket < ApplicationRecord
   has_many :ticket_suppliers, dependent: :destroy
   has_many :suppliers, through: :ticket_suppliers
   has_many :ticket_orders, dependent: :destroy
-  has_one_attached :image
+  # 图片字段: image_url (使用本地路径或外部 URL)
   
   validates :name, presence: true
   validates :current_price, presence: true, numericality: { greater_than_or_equal_to: 0 }

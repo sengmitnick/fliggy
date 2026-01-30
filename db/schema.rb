@@ -99,34 +99,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.index ["data_version"], name: "index_abroad_tickets_on_data_version"
   end
 
-  create_table "active_storage_attachments", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "record_type", null: false
-    t.bigint "record_id", null: false
-    t.bigint "blob_id", null: false
-    t.datetime "created_at", null: false
-    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
-    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
-  end
-
-  create_table "active_storage_blobs", force: :cascade do |t|
-    t.string "key", null: false
-    t.string "filename", null: false
-    t.string "content_type"
-    t.text "metadata"
-    t.string "service_name", null: false
-    t.bigint "byte_size", null: false
-    t.string "checksum"
-    t.datetime "created_at", null: false
-    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
-  end
-
-  create_table "active_storage_variant_records", force: :cascade do |t|
-    t.bigint "blob_id", null: false
-    t.string "variation_digest", null: false
-    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
-  end
-
   create_table "activity_orders", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "attraction_activity_id"
@@ -206,6 +178,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
     t.integer "stock"
+    t.string "image_url"
     t.index ["attraction_id"], name: "index_attraction_activities_on_attraction_id"
   end
 
@@ -241,6 +214,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
     t.boolean "is_free"
+    t.string "cover_image_url"
+    t.text "gallery_image_urls"
   end
 
   create_table "booking_options", force: :cascade do |t|
@@ -697,6 +672,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
     t.string "venue"
+    t.string "avatar_url"
+    t.string "video_url"
     t.index ["data_version"], name: "index_deep_travel_guides_on_data_version"
   end
 
@@ -713,6 +690,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.text "image_urls"
     t.index ["data_version"], name: "index_deep_travel_products_on_data_version"
     t.index ["deep_travel_guide_id"], name: "index_deep_travel_products_on_deep_travel_guide_id"
   end
@@ -1576,6 +1554,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.string "image_url"
     t.index ["attraction_id"], name: "index_tickets_on_attraction_id"
   end
 
@@ -1641,6 +1620,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.string "data_version", limit: 50, default: "0", null: false
     t.string "travel_type"
     t.bigint "attraction_id"
+    t.string "main_image_url"
+    t.text "gallery_image_urls"
     t.index ["attraction_id"], name: "index_tour_group_products_on_attraction_id"
     t.index ["data_version"], name: "index_tour_group_products_on_data_version"
     t.index ["travel_agency_id"], name: "index_tour_group_products_on_travel_agency_id"
@@ -1725,6 +1706,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.text "image_urls"
     t.index ["data_version"], name: "index_tour_reviews_on_data_version"
     t.index ["tour_group_product_id"], name: "index_tour_reviews_on_tour_group_product_id"
     t.index ["user_id"], name: "index_tour_reviews_on_user_id"
@@ -2008,8 +1990,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.index ["slug"], name: "index_visa_services_on_slug", unique: true
   end
 
-  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_oplogs", "administrators"
   add_foreign_key "brand_memberships", "users"
   add_foreign_key "bus_ticket_passengers", "bus_ticket_orders", on_delete: :cascade

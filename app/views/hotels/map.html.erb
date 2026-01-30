@@ -75,8 +75,8 @@
             <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
               <% if hotel.image_url.present? %>
                 <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
-              <% elsif hotel.image.attached? %>
-                <%= image_tag hotel.image, class: "w-full h-full object-cover", alt: hotel.name %>
+              <% elsif hotel.image_url.present? %>
+                <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
               <% else %>
                 <div class="w-full h-full flex items-center justify-center text-gray-400">
                   <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">

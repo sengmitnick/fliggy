@@ -120,15 +120,15 @@
             
             <!-- 右侧图片 -->
             <div class="w-[110px] h-[140px] bg-slate-200 rounded-lg overflow-hidden relative flex-shrink-0">
-              <% if primary_guide.avatar.attached? %>
-                <%= image_tag primary_guide.avatar, class: "w-full h-full object-cover" %>
+              <% if primary_guide.avatar_url.present? %>
+                <%= image_tag primary_guide.avatar_url, class: "w-full h-full object-cover" %>
               <% else %>
                 <div class="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white text-2xl font-bold">
                   <%= primary_guide.name[0] %>
                 </div>
               <% end %>
               
-              <% if primary_guide.video.attached? %>
+              <% if primary_guide.video_url.present? %>
                 <div class="absolute bottom-2 left-2 right-2 text-white text-[8px] leading-tight">
                   <%= primary_guide.description&.truncate(30) || "深度讲解专业服务" %>
                 </div>
@@ -152,8 +152,8 @@
                   data-guide-served-count="<%= guide.served_count %>"
                   data-action="click->guide-switcher#switchGuide"
                 >
-                  <% if guide.avatar.attached? %>
-                    <%= image_tag guide.avatar, class: "w-full h-full object-cover" %>
+                  <% if guide.avatar_url.present? %>
+                    <%= image_tag guide.avatar_url, class: "w-full h-full object-cover" %>
                   <% else %>
                     <div class="w-full h-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white text-xs font-bold">
                       <%= guide.name[0] %>

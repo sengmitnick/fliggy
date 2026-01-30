@@ -104,18 +104,18 @@
         <!-- Image -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>
-          <% if @attraction_activity.image.attached? %>
+          <% if @attraction_activity.image_url.present? %>
             <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
               <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
               </svg>
               <div>
-                <div class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= @attraction_activity.image.filename %></div>
-                <div class="text-xs text-gray-500"><%= number_to_human_size(@attraction_activity.image.byte_size) %></div>
+                <div class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= @attraction_activity.image_url %></div>
+                <div class="text-xs text-gray-500"><%= number_to_human_size(@attraction_activity) %></div>
               </div>
-              <% if @attraction_activity.image.content_type&.start_with?('image/') %>
+              <% if @attraction_activity&.start_with?('image/') %>
                 <div class="ml-auto">
-                  <%= image_tag @attraction_activity.image, class: "w-16 h-16 object-cover rounded" %>
+                  <%= image_tag attraction_activity.image_url, class: "w-16 h-16 object-cover rounded" %>
                 </div>
               <% end %>
             </div>

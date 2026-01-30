@@ -10,8 +10,11 @@ class Attraction < ApplicationRecord
   has_many :attraction_activities, dependent: :destroy
   has_many :tour_group_products, dependent: :nullify
   has_many :attraction_reviews, dependent: :destroy
-  has_one_attached :cover_image
-  has_many_attached :gallery_images
+  
+  # 图片字段 (使用本地路径或外部 URL)
+  # cover_image_url: 封面图片
+  # gallery_image_urls: 相册图片 (JSON 数组)
+  serialize :gallery_image_urls, coder: JSON
   
   # Validations
   validates :name, presence: true
