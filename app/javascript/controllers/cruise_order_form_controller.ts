@@ -1,7 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["modal", "nameInput", "phoneInput", "emailInput", "contactItem", "insuranceCard", "checkmark", "insurancePriceInput", "quantityInput", "totalPrice"]
+  static targets = [
+    "modal", "nameInput", "phoneInput", "emailInput", "contactItem",
+    "insuranceCard", "checkmark", "insurancePriceInput", "quantityInput",
+    "totalPrice", "submitBtn", "form"
+  ]
 
   declare readonly modalTarget: HTMLElement
   declare readonly nameInputTarget: HTMLInputElement
@@ -13,6 +17,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly insurancePriceInputTarget: HTMLInputElement
   declare readonly quantityInputTarget: HTMLInputElement
   declare readonly totalPriceTarget: HTMLElement
+  declare readonly submitBtnTarget: HTMLButtonElement
+  declare readonly formTarget: HTMLFormElement
   declare readonly hasModalTarget: boolean
   declare readonly hasContactItemTarget: boolean
   declare readonly hasInsuranceCardTarget: boolean
@@ -187,5 +193,75 @@ export default class extends Controller<HTMLElement> {
     const totalPrice = pricePerPerson * quantity
     
     this.totalPriceTarget.textContent = totalPrice.toString()
+    
+    // Sync amount to payment-confirmation controller
+    this.element.dispatchEvent(new CustomEvent('payment-confirmation:amount-changed', {
+      bubbles: true,
+      detail: { amount: totalPrice }
+    }))
+  }
+
+  handleOrderCreated(event: CustomEvent): void {
+    const [data, status, xhr] = event.detail
+    
+    if (data.success) {
+      console.log('Order created successfully:', data)
+      
+      // Get payment-confirmation controller from the element
+      const paymentController = this.application.getControllerForElementAndIdentifier(
+        this.element,
+        'payment-confirmation'
+      ) as any
+      
+      if (paymentController) {
+        // Set payment data
+        paymentController.amountValue = data.amount.toString()
+        paymentController.paymentUrlValue = data.payment_url
+        paymentController.successUrlValue = data.success_url
+        
+        // Show payment modal
+        paymentController.showPasswordModal()
+      } else {
+        console.error('Payment confirmation controller not found')
+        alert('创建订单成功，但无法打开支付窗口')
+      }
+    } else {
+      const errorMessage = data.errors ? data.errors.join(', ') : '未知错误'
+      alert(`创建订单失败：${errorMessage}`)
+      this.resetSubmitButton()
+    }
+  }
+
+  handleOrderError(event: CustomEvent): void {
+    const [data, status, xhr] = event.detail
+    console.error('Order creation failed:', event.detail)
+    
+    // 尝试解析 JSON 错误响应
+    if (data && data.errors) {
+      const errorMessage = data.errors.join('\n')
+      alert(`创建订单失败：\n\n${errorMessage}`)
+    } else if (xhr && xhr.responseText) {
+      try {
+        const errorData = JSON.parse(xhr.responseText)
+        if (errorData.errors) {
+          alert(`创建订单失败：\n\n${errorData.errors.join('\n')}`)
+        } else {
+          alert('创建订单失败，请检查表单信息')
+        }
+      } catch {
+        alert('创建订单失败，请检查表单信息')
+      }
+    } else {
+      alert('创建订单失败，请检查表单信息')
+    }
+    
+    this.resetSubmitButton()
+  }
+
+  private resetSubmitButton(): void {
+    if (this.submitBtnTarget) {
+      this.submitBtnTarget.disabled = false
+      this.submitBtnTarget.textContent = '立即支付'
+    }
   }
 }

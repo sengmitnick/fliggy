@@ -32,13 +32,27 @@ class CruiseOrdersController < ApplicationController
     @cruise_order.cruise_product = @product
     
     if @cruise_order.save
-      # 转到确认页
-      redirect_to confirm_cruise_order_path(@cruise_order)
+      # 检测 AJAX 请求（Rails UJS 带有 X-Requested-With header）
+      if request.xhr?
+        render json: { 
+          success: true, 
+          order_id: @cruise_order.id,
+          amount: @cruise_order.total_price.to_f,
+          payment_url: pay_cruise_order_path(@cruise_order),
+          success_url: payment_success_cruise_order_path(@cruise_order)
+        }
+      else
+        redirect_to confirm_cruise_order_path(@cruise_order)
+      end
     else
-      # 返回表单页，显示错误
-      @cabin_type = @product.cabin_type
-      @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
-      render :new, status: :unprocessable_entity
+      # 验证失败，也需要区分 AJAX 和普通请求
+      if request.xhr?
+        render json: { success: false, errors: @cruise_order.errors.full_messages }, status: :unprocessable_entity
+      else
+        @cabin_type = @product.cabin_type
+        @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 
