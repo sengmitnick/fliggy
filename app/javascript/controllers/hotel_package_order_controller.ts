@@ -118,6 +118,21 @@ export default class extends Controller<HTMLElement> {
         this.contactPhoneInputTarget.value = this.manualPhoneInputTarget!.value
       })
     }
+    
+    // Auto-open booking modal if booking_type=instant in URL AND no dates selected yet
+    const urlParams = new URLSearchParams(window.location.search)
+    const bookingType = urlParams.get('booking_type')
+    const hasCheckInDate = urlParams.get('check_in_date')
+    const hasCheckOutDate = urlParams.get('check_out_date')
+    
+    // Only auto-open modal if it's instant booking mode WITHOUT dates
+    // (dates present means user just confirmed date selection, don't reopen modal)
+    if (bookingType === 'instant' && !hasCheckInDate && !hasCheckOutDate && this.hasBookingModalTarget) {
+      // Use setTimeout to ensure DOM is fully rendered before opening modal
+      setTimeout(() => {
+        this.bookingModalTarget!.classList.remove('hidden')
+      }, 100)
+    }
   }
 
   increaseQuantity(event: Event): void {

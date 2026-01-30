@@ -235,10 +235,6 @@
       奢享套房
     <% end %>
     
-    <span class="px-3 py-1.5 rounded-full text-sm bg-surface-elevated text-text-secondary whitespace-nowrap border border-border">
-      大牌酒店
-    </span>
-    
     <%= link_to search_hotel_packages_path(city: @city, q: @query, tags: ['instant_booking']),
         class: "px-3 py-1.5 rounded-full text-sm whitespace-nowrap border #{@filter_tags.include?('instant_booking') ? 'bg-primary text-text-primary border-primary' : 'bg-surface-elevated text-text-secondary border-border'}" do %>
       即买即约
