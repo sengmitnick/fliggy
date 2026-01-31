@@ -2,9 +2,15 @@ require_relative "boot"
 require "rails/all"
 
 Bundler.require(*Rails.groups)
+
+# ⚠️ CRITICAL: Load middleware files BEFORE Rails initialization
+# These files are in directories ignored by autoload_lib, so must be required manually
 require_relative '../lib/middleware/clacky_health_check'
 require_relative '../lib/env_checker'
 require_relative '../app/middleware/validator_session_binder'
+
+# Verify middleware class is loaded
+raise "ValidatorSessionBinder middleware not loaded!" unless defined?(ValidatorSessionBinder)
 
 require 'open-uri'
 

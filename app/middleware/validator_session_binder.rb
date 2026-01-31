@@ -47,9 +47,12 @@ class ValidatorSessionBinder
     request = ActionDispatch::Request.new(env)
     response = nil
     
-    # Extract session_id from URL parameters
-    if request.params['session_id'].present?
-      session_id = request.params['session_id']
+    # Extract session_id directly from query string
+    # ⚠️ CRITICAL: Don't use request.params as it may not be parsed at middleware level
+    query_params = Rack::Utils.parse_query(request.query_string)
+    session_id = query_params['session_id']
+    
+    if session_id.present?
       old_cookie_value = request.cookies[COOKIE_NAME]
       
       Rails.logger.info "[ValidatorSessionBinder] Detected session_id=#{session_id} from URL param"
