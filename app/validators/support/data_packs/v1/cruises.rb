@@ -9,7 +9,9 @@
 # - 商家产品数据
 #
 # 加载方式：
-# rails runner "load Rails.root.join('app/validators/support/data_packs/v1/cruises.rb')"
+# rake validator:reset_baseline
+
+require_relative '../../../../../app/helpers/image_seed_helper'
 
 puts "正在加载 cruises_v1 数据包..."
 
@@ -75,6 +77,39 @@ cruise_ships_data = [
     updated_at: Time.current
   },
   {
+    cruise_line_id: msc_cruises.id,
+    name: '地中海荣耀号',
+    name_en: 'MSC Grandiosa',
+    image_url: ImageSeedHelper.random_image_from_category(:cruises),
+    tonnage: 181000,
+    passenger_capacity: 6334,
+    features: ['欧洲最大邮轮之一', '室内娱乐长廊', '卡拉拉大理石装饰', 'MSC游艇俱乐部'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_line_id: msc_cruises.id,
+    name: '地中海传奇号',
+    name_en: 'MSC Fantasia',
+    image_url: ImageSeedHelper.random_image_from_category(:cruises),
+    tonnage: 137936,
+    passenger_capacity: 3959,
+    features: ['施华洛世奇水晶楼梯', '四维影院', '一级方程式赛车模拟器'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_line_id: royal_caribbean.id,
+    name: '海洋和悦号',
+    name_en: 'Harmony of the Seas',
+    image_url: ImageSeedHelper.random_image_from_category(:cruises),
+    tonnage: 226963,
+    passenger_capacity: 6780,
+    features: ['世界最大邮轮之一', '中央公园', '百老汇歌剧院', '终极深渊滑梯'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
     cruise_line_id: aida_cruises.id,
     name: '爱达新星号',
     name_en: 'AIDA Nova',
@@ -113,10 +148,14 @@ CruiseRoute.insert_all(cruise_routes_data)
 # 获取船只和航线ID
 spectrum = CruiseShip.find_by(name: '海洋光谱号')
 bellissima = CruiseShip.find_by(name: '地中海辉煌号')
+grandiosa = CruiseShip.find_by(name: '地中海荣耀号')
+fantasia = CruiseShip.find_by(name: '地中海传奇号')
+harmony = CruiseShip.find_by(name: '海洋和悦号')
 aida_nova = CruiseShip.find_by(name: '爱达新星号')
 japan_korea_route = CruiseRoute.find_by(region: 'japan_korea')
 mediterranean_route = CruiseRoute.find_by(region: 'mediterranean')
 southeast_asia_route = CruiseRoute.find_by(region: 'southeast_asia')
+caribbean_route = CruiseRoute.find_by(region: 'caribbean')
 
 cruise_sailings_data = [
   # 海洋光谱号 - 日韩航线
@@ -537,6 +576,134 @@ cruise_sailings_data = [
     ],
     created_at: Time.current,
     updated_at: Time.current
+  },
+  # 地中海辉煌号 - 地中海航线
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: mediterranean_route.id,
+    departure_date: Date.parse('2026-04-10'),
+    return_date: Date.parse('2026-04-16'),
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '巴塞罗那登船',
+    arrival_port: '巴塞罗那离船',
+    status: 'on_sale',
+    boarding_address: '巴塞罗那港口码头 Port de Barcelona',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '巴塞罗那', title: '登船', description: '巴塞罗那港口码头登船，探索高迪建筑之都' },
+      { day: 2, port: '马赛', title: '岸上观光', description: '法国马赛，普罗旺斯风情' },
+      { day: 3, port: '热那亚', title: '岸上观光', description: '意大利热那亚，哥伦布故乡' },
+      { day: 4, port: '罗马（奇维塔韦基亚）', title: '岸上观光', description: '永恒之城罗马，梵蒂冈朝圣' },
+      { day: 5, port: '那不勒斯', title: '岸上观光', description: '那不勒斯湾，庞贝古城遗址' },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: '享受船上设施，地中海风情' },
+      { day: 7, port: '巴塞罗那', title: '离船', description: '返回巴塞罗那，结束地中海之旅' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海荣耀号 - 地中海航线
+  {
+    cruise_ship_id: grandiosa.id,
+    cruise_route_id: mediterranean_route.id,
+    departure_date: Date.parse('2026-04-25'),
+    return_date: Date.parse('2026-05-01'),
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '巴塞罗那登船',
+    arrival_port: '巴塞罗那离船',
+    status: 'on_sale',
+    boarding_address: 'Port de Barcelona Terminal MSC',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '巴塞罗那', title: '登船', description: '欧洲最大邮轮之旅开启' },
+      { day: 2, port: '马赛', title: '岸上观光', description: '普罗旺斯门户马赛' },
+      { day: 3, port: '热那亚', title: '岸上观光', description: '利古里亚海岸风情' },
+      { day: 4, port: '那不勒斯', title: '岸上观光', description: '比萨之乡，庞贝古城' },
+      { day: 5, port: '罗马（奇维塔韦基亚）', title: '岸上观光', description: '永恒之城罗马' },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: 'MSC游艇俱乐部体验' },
+      { day: 7, port: '巴塞罗那', title: '离船', description: '返回巴塞罗那' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 地中海航线
+  {
+    cruise_ship_id: fantasia.id,
+    cruise_route_id: mediterranean_route.id,
+    departure_date: Date.parse('2026-05-05'),
+    return_date: Date.parse('2026-05-11'),
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '巴塞罗那登船',
+    arrival_port: '巴塞罗那离船',
+    status: 'on_sale',
+    boarding_address: 'Port de Barcelona',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '巴塞罗那', title: '登船', description: '施华洛世奇水晶邮轮' },
+      { day: 2, port: '戛纳', title: '岸上观光', description: '法国电影节之城' },
+      { day: 3, port: '热那亚', title: '岸上观光', description: '哥伦布故乡' },
+      { day: 4, port: '那不勒斯', title: '岸上观光', description: '阿马尔菲海岸' },
+      { day: 5, port: '罗马（奇维塔韦基亚）', title: '岸上观光', description: '古罗马遗迹' },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: 'F1模拟器体验' },
+      { day: 7, port: '巴塞罗那', title: '离船', description: '返回巴塞罗那' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋和悦号 - 地中海航线
+  {
+    cruise_ship_id: harmony.id,
+    cruise_route_id: mediterranean_route.id,
+    departure_date: Date.parse('2026-06-15'),
+    return_date: Date.parse('2026-06-21'),
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '巴塞罗那登船',
+    arrival_port: '巴塞罗那离船',
+    status: 'on_sale',
+    boarding_address: 'Port de Barcelona Royal Caribbean Terminal',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '巴塞罗那', title: '登船', description: '世界最大邮轮之旅' },
+      { day: 2, port: '帕尔马', title: '岸上观光', description: '马略卡岛度假' },
+      { day: 3, port: '马赛', title: '岸上观光', description: '蔚蓝海岸风情' },
+      { day: 4, port: '佛罗伦萨（里窝那）', title: '岸上观光', description: '文艺复兴之都' },
+      { day: 5, port: '罗马（奇维塔韦基亚）', title: '岸上观光', description: '永恒之城' },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: '中央公园漫步' },
+      { day: 7, port: '巴塞罗那', title: '离船', description: '返回巴塞罗那' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋光谱号 - 加勒比航线
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: caribbean_route&.id,
+    departure_date: Date.parse('2026-05-01'),
+    return_date: Date.parse('2026-05-10'),
+    duration_days: 10,
+    duration_nights: 9,
+    departure_port: '迈阿密登船',
+    arrival_port: '迈阿密离船',
+    status: 'on_sale',
+    boarding_address: 'PortMiami, Miami, FL 33132',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '迈阿密', title: '登船', description: '迈阿密港登船，阳光之城启航' },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '享受船上设施，加勒比海巡航' },
+      { day: 3, port: '大开曼岛', title: '岸上观光', description: '七英里海滩，浮潜天堂' },
+      { day: 4, port: '牙买加（蒙特哥贝）', title: '岸上观光', description: '雷鬼音乐发源地，热带雨林探险' },
+      { day: 5, port: '海地（拉巴第）', title: '岸上观光', description: '私人海滩，加勒比风情' },
+      { day: 6, port: '圣托马斯', title: '岸上观光', description: '免税购物天堂，美属维尔京群岛' },
+      { day: 7, port: '巴哈马（拿骚）', title: '岸上观光', description: '天堂岛，亚特兰蒂斯度假村' },
+      { day: 8, port: '海上巡航', title: '海上巡航', description: '甲板派对，加勒比落日' },
+      { day: 9, port: '海上巡航', title: '海上巡航', description: '船长晚宴，告别之夜' },
+      { day: 10, port: '迈阿密', title: '离船', description: '返回迈阿密，结束加勒比之旅' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
   }
 ]
 
@@ -697,6 +864,135 @@ cabin_types_data = [
       'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&h=400&fit=crop',
       'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=600&h=400&fit=crop'
     ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海荣耀号 - 舱房类型
+  {
+    cruise_ship_id: grandiosa.id,
+    name: '阳台房',
+    category: 'balcony',
+    floor_range: '8-14层',
+    area: 21,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 4,
+    description: '地中海风格，宽敞阳台',
+    image_urls: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=400&fit=crop'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: grandiosa.id,
+    name: '内舱房',
+    category: 'interior',
+    floor_range: '5-10层',
+    area: 16,
+    has_balcony: false,
+    has_window: false,
+    max_occupancy: 2,
+    description: '经济实惠之选',
+    image_urls: ['/images/cruises/room_2.jpg'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: grandiosa.id,
+    name: '游艇俱乐部套房',
+    category: 'suite',
+    floor_range: '15-18层',
+    area: 45,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 4,
+    description: '尊享俱乐部服务，专属餐厅和泳池',
+    image_urls: ['https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&h=400&fit=crop'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 舱房类型
+  {
+    cruise_ship_id: fantasia.id,
+    name: '阳台房',
+    category: 'balcony',
+    floor_range: '7-12层',
+    area: 19,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 4,
+    description: '私密阳台，海景房',
+    image_urls: ['https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: fantasia.id,
+    name: '内舱房',
+    category: 'interior',
+    floor_range: '4-9层',
+    area: 14,
+    has_balcony: false,
+    has_window: false,
+    max_occupancy: 2,
+    description: '经济型选择',
+    image_urls: ['/images/cruises/room_2.jpg'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋和悦号 - 舱房类型
+  {
+    cruise_ship_id: harmony.id,
+    name: '阳台房',
+    category: 'balcony',
+    floor_range: '8-15层',
+    area: 20,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 4,
+    description: '中央公园景观阳台房',
+    image_urls: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&h=400&fit=crop'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: harmony.id,
+    name: '海景房',
+    category: 'ocean_view',
+    floor_range: '7-12层',
+    area: 17,
+    has_balcony: false,
+    has_window: true,
+    max_occupancy: 3,
+    description: '大型观景窗',
+    image_urls: ['https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&h=400&fit=crop'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: harmony.id,
+    name: '内舱房',
+    category: 'interior',
+    floor_range: '4-10层',
+    area: 15,
+    has_balcony: false,
+    has_window: false,
+    max_occupancy: 2,
+    description: '性价比之选',
+    image_urls: ['/images/cruises/room_2.jpg'],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: harmony.id,
+    name: '皇家套房',
+    category: 'suite',
+    floor_range: '16-18层',
+    area: 50,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 6,
+    description: '皇家尊享，专属管家服务',
+    image_urls: ['https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&h=400&fit=crop'],
     created_at: Time.current,
     updated_at: Time.current
   }
