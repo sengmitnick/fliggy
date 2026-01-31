@@ -311,6 +311,44 @@ attractions_data = [
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
+  },
+  {
+    name: "北京欢乐谷",
+    slug: "beijing-happy-valley",
+    province: "北京市",
+    city: "北京",
+    district: "朝阳区",
+    address: "北京市朝阳区东四环小武基北路",
+    latitude: 39.867,
+    longitude: 116.485,
+    description: "大型现代主题公园，拥有多个主题区域和大型游乐设施。包括过山车、激流勇进等热门项目，适合家庭和年轻人游玩。",
+    opening_hours: "10:00-18:00（周末延长至20:00）",
+    phone: "010-67389898",
+    rating: 4.6,
+    review_count: 12560,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "广州长隆野生动物世界",
+    slug: "guangzhou-chimelong-safari-park",
+    province: "广东省",
+    city: "广州",
+    district: "番禺区",
+    address: "广州市番禺区大石东路长隆旅游度假区内",
+    latitude: 23.003,
+    longitude: 113.294,
+    description: "大型野生动物园，以大规模野生动物种群放养和自驾车观赏为特色。拥有世界珍稀动物种群，是亚洲最大的野生动物公园。",
+    opening_hours: "09:30-18:00",
+    phone: "020-84783333",
+    rating: 4.8,
+    review_count: 25680,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
   }
 ]
 
@@ -521,6 +559,85 @@ tickets_data << {
   updated_at: timestamp
 }
 
+# 北京欢乐谷门票
+attraction = attractions["北京欢乐谷"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "北京欢乐谷成人票",
+  ticket_type: "adult",
+  current_price: 260,
+  original_price: 299,
+  requirements: "含园区所有游乐项目，不含收费项目和餐饮。",
+  sales_count: 15680,
+  validity_days: 90,
+  booking_notice: "游玩当天15:00前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "北京欢乐谷儿童票",
+  ticket_type: "child",
+  current_price: 130,
+  original_price: 149,
+  requirements: "适用于1.2米-1.5米儿童。含园区所有适龄游乐项目。",
+  sales_count: 8560,
+  validity_days: 90,
+  booking_notice: "游玩当天15:00前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 广州长隆野生动物世界门票
+attraction = attractions["广州长隆野生动物世界"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "广州长隆野生动物世界成人票",
+  ticket_type: "adult",
+  current_price: 300,
+  original_price: 350,
+  requirements: "含园区所有展馆、动物表演和乘车游览，不含餐饮。",
+  sales_count: 22560,
+  validity_days: 90,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "广州长隆野生动物世界儿童票",
+  ticket_type: "child",
+  current_price: 210,
+  original_price: 245,
+  requirements: "适用于1.0米-1.5米儿童。含园区所有展馆、动物表演和乘车游览。",
+  sales_count: 11280,
+  validity_days: 90,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "广州长隆野生动物世界学生票",
+  ticket_type: "student",
+  current_price: 240,
+  original_price: 280,
+  requirements: "适用于全日制大学本科及以下学历学生（凭学生证）。含园区所有项目。",
+  sales_count: 6280,
+  validity_days: 90,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
 # 上海迪士尼乐园门票
 attraction = attractions["上海迪士尼乐园"]
 tickets_data << {
@@ -563,6 +680,36 @@ tickets_data << {
   sales_count: 12560,
   validity_days: 180,
   booking_notice: "需提前3天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "上海迪士尼乐园1日票（平日）儿童票",
+  ticket_type: "child",
+  current_price: 325,
+  original_price: 356,
+  requirements: "适用于1.0米-1.4米儿童。平日通用，含园区所有游乐设施和娱乐演出，不含餐饮。",
+  sales_count: 15280,
+  validity_days: 180,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "上海迪士尼乐园1日票（周末）儿童票",
+  ticket_type: "child",
+  current_price: 431,
+  original_price: 464,
+  requirements: "适用于1.0米-1.4米儿童。周末通用，含园区所有游乐设施和娱乐演出，不含餐饮。",
+  sales_count: 9280,
+  validity_days: 180,
+  booking_notice: "需提前1天预订",
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -733,6 +880,671 @@ Ticket.insert_all(tickets_data)
 
 puts "✓ 创建了 #{tickets_data.size} 张门票"
 
+# ==================== 供应商数据 ====================
+
+suppliers_data = [
+  {
+    name: "携程旅行",
+    supplier_type: "platform",
+    rating: 4.8,
+    sales_count: 158000,
+    description: "国内领先的在线旅游平台，提供门票、酒店、机票等服务",
+    contact_phone: "10106666",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "飞猪旅行",
+    supplier_type: "platform",
+    rating: 4.7,
+    sales_count: 126000,
+    description: "阿里巴巴旗下综合性旅游出行服务平台",
+    contact_phone: "10101688",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "美团门票",
+    supplier_type: "platform",
+    rating: 4.6,
+    sales_count: 98000,
+    description: "美团旗下景区门票预订平台，覆盖全国景点",
+    contact_phone: "10109777",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    name: "景区官方",
+    supplier_type: "official",
+    rating: 4.9,
+    sales_count: 85000,
+    description: "景区官方直销渠道",
+    contact_phone: "400-000-0000",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+Supplier.insert_all(suppliers_data)
+
+puts "✓ 创建了 #{suppliers_data.size} 个供应商"
+
+# 重新加载供应商以获取 ID
+suppliers = {}
+Supplier.where(data_version: 0).each do |supplier|
+  suppliers[supplier.name] = supplier
+end
+
+# 重新加载门票以获取 ID
+tickets = {}
+Ticket.where(data_version: 0).includes(:attraction).each do |ticket|
+  key = "#{ticket.attraction.name}_#{ticket.name}"
+  tickets[key] = ticket
+end
+
+# ==================== 门票供应商关联数据 ====================
+
+ticket_suppliers_data = []
+
+# 深圳欢乐港湾成人票 - 4个供应商
+ticket = tickets["深圳欢乐港湾_深圳欢乐港湾成人票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 85,
+  original_price: 120,
+  stock: 500,
+  discount_info: "早鸟优惠",
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 88,
+  original_price: 120,
+  stock: 300,
+  discount_info: "限时特惠",
+  sales_count: 1850,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 90,
+  original_price: 120,
+  stock: 400,
+  discount_info: "满减优惠",
+  sales_count: 1560,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 95,
+  original_price: 120,
+  stock: -1,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 深圳欢乐港湾儿童票 - 4个供应商
+ticket = tickets["深圳欢乐港湾_深圳欢乐港湾儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 42,
+  original_price: 60,
+  stock: 500,
+  discount_info: "儿童特惠",
+  sales_count: 1520,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 45,
+  original_price: 60,
+  stock: 300,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 43,
+  original_price: 60,
+  stock: 400,
+  discount_info: nil,
+  sales_count: 850,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 48,
+  original_price: 60,
+  stock: -1,
+  discount_info: nil,
+  sales_count: 560,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 上海迪士尼乐园1日票（平日）- 3个供应商
+ticket = tickets["上海迪士尼乐园_上海迪士尼乐园1日票（平日）"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 435,
+  original_price: 475,
+  stock: 1000,
+  discount_info: "官方授权",
+  sales_count: 15600,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 438,
+  original_price: 475,
+  stock: 800,
+  discount_info: nil,
+  sales_count: 8960,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 445,
+  original_price: 475,
+  stock: -1,
+  discount_info: nil,
+  sales_count: 4000,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 上海迪士尼乐园1日票（周末）- 3个供应商
+ticket = tickets["上海迪士尼乐园_上海迪士尼乐园1日票（周末）"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 570,
+  original_price: 619,
+  stock: 800,
+  discount_info: nil,
+  sales_count: 10200,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 575,
+  original_price: 619,
+  stock: 600,
+  discount_info: nil,
+  sales_count: 5680,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 585,
+  original_price: 619,
+  stock: -1,
+  discount_info: nil,
+  sales_count: 2680,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 上海迪士尼乐园儿童票（平日）- 3个供应商
+ticket = tickets["上海迪士尼乐园_上海迪士尼乐园1日票（平日）儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 315,
+  original_price: 356,
+  stock: 300,
+  discount_info: "儿童票优惠",
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 325,
+  original_price: 356,
+  stock: 200,
+  discount_info: nil,
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 356,
+  original_price: 356,
+  stock: 400,
+  discount_info: nil,
+  sales_count: 3280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 上海迪士尼乐园儿童票（周末）- 3个供应商
+ticket = tickets["上海迪士尼乐园_上海迪士尼乐园1日票（周末）儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 420,
+  original_price: 464,
+  stock: 200,
+  discount_info: "周末儿童票",
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 431,
+  original_price: 464,
+  stock: 150,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 464,
+  original_price: 464,
+  stock: 300,
+  discount_info: nil,
+  sales_count: 2280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 深圳欢乐谷成人票 - 4个供应商
+ticket = tickets["深圳欢乐谷_深圳欢乐谷成人票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 185,
+  original_price: 230,
+  stock: 500,
+  discount_info: "早鸟优惠",
+  sales_count: 3580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 190,
+  original_price: 230,
+  stock: 400,
+  discount_info: nil,
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 195,
+  original_price: 230,
+  stock: 350,
+  discount_info: nil,
+  sales_count: 1980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 200,
+  original_price: 230,
+  stock: 600,
+  discount_info: nil,
+  sales_count: 4280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 深圳欢乐谷儿童票 - 4个供应商
+ticket = tickets["深圳欢乐谷_深圳欢乐谷儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 92,
+  original_price: 115,
+  stock: 300,
+  discount_info: "儿童票优惠",
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 95,
+  original_price: 115,
+  stock: 250,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 98,
+  original_price: 115,
+  stock: 200,
+  discount_info: nil,
+  sales_count: 780,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 100,
+  original_price: 115,
+  stock: 400,
+  discount_info: nil,
+  sales_count: 2280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 北京欢乐谷成人票 - 4个供应商
+ticket = tickets["北京欢乐谷_北京欢乐谷成人票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 245,
+  original_price: 299,
+  stock: 600,
+  discount_info: "早鸟优惠",
+  sales_count: 4580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 250,
+  original_price: 299,
+  stock: 500,
+  discount_info: nil,
+  sales_count: 3580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 255,
+  original_price: 299,
+  stock: 450,
+  discount_info: nil,
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 260,
+  original_price: 299,
+  stock: 700,
+  discount_info: nil,
+  sales_count: 5280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 北京欢乐谷儿童票 - 4个供应商
+ticket = tickets["北京欢乐谷_北京欢乐谷儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 120,
+  original_price: 149,
+  stock: 400,
+  discount_info: "儿童票优惠",
+  sales_count: 2280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 125,
+  original_price: 149,
+  stock: 350,
+  discount_info: nil,
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 128,
+  original_price: 149,
+  stock: 300,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 130,
+  original_price: 149,
+  stock: 500,
+  discount_info: nil,
+  sales_count: 3280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 广州长隆野生动物世界成人票 - 4个供应商
+ticket = tickets["广州长隆野生动物世界_广州长隆野生动物世界成人票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 285,
+  original_price: 350,
+  stock: 800,
+  discount_info: "早鸟优惠",
+  sales_count: 6580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 290,
+  original_price: 350,
+  stock: 700,
+  discount_info: nil,
+  sales_count: 5580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 295,
+  original_price: 350,
+  stock: 650,
+  discount_info: nil,
+  sales_count: 4580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 300,
+  original_price: 350,
+  stock: 900,
+  discount_info: nil,
+  sales_count: 5880,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 广州长隆野生动物世界儿童票 - 3个供应商
+ticket = tickets["广州长隆野生动物世界_广州长隆野生动物世界儿童票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 200,
+  original_price: 245,
+  stock: 500,
+  discount_info: "儿童票优惠",
+  sales_count: 3280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 205,
+  original_price: 245,
+  stock: 450,
+  discount_info: nil,
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 210,
+  original_price: 245,
+  stock: 600,
+  discount_info: nil,
+  sales_count: 4280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 广州长隆野生动物世界学生票 - 3个供应商
+ticket = tickets["广州长隆野生动物世界_广州长隆野生动物世界学生票"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 230,
+  original_price: 280,
+  stock: 400,
+  discount_info: "学生特惠",
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 235,
+  original_price: 280,
+  stock: 350,
+  discount_info: nil,
+  sales_count: 980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 240,
+  original_price: 280,
+  stock: 500,
+  discount_info: nil,
+  sales_count: 2280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+TicketSupplier.insert_all(ticket_suppliers_data) if ticket_suppliers_data.any?
+
+puts "✓ 创建了 #{ticket_suppliers_data.size} 个门票供应商关联"
+
 # ==================== 景点内项目数据 ====================
 # 注意：AttractionActivity 模型没有 image_url 字段，无需迁移图片
 
@@ -743,11 +1555,10 @@ attraction = attractions["深圳东部华侨城"]
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "云中部落观光缆车",
-  category: "交通工具",
+  activity_type: "交通工具",
   current_price: 35,
-  requirements: "索道全长约1600米，从大侠谷至云中部落，欣赏沿途美景。",
+  description: "索道全长约1600米，从大侠谷至云中部落，欣赏沿途美景。",
   duration: "15分钟单程",
-  booking_required: false,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -756,11 +1567,10 @@ attraction_activities_data << {
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "云海谷高尔夫球场",
-  category: "运动体验",
+  activity_type: "运动体验",
   current_price: 580,
-  requirements: "27洞山地高尔夫球场，含球杆租赁和教练指导。",
+  description: "27洞山地高尔夫球场，含球杆租赁和教练指导。",
   duration: "4-5小时",
-  booking_required: true,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -771,11 +1581,10 @@ attraction = attractions["上海海昌海洋公园"]
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "VR深海奇妙夜",
-  category: "互动体验",
+  activity_type: "互动体验",
   current_price: 80,
-  requirements: "佩戴VR设备，沉浸式体验深海世界，与海洋生物互动。",
+  description: "佩戴VR设备，沉浸式体验深海世界，与海洋生物互动。",
   duration: "20分钟",
-  booking_required: false,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -784,11 +1593,10 @@ attraction_activities_data << {
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "海豚互动体验",
-  category: "动物互动",
+  activity_type: "动物互动",
   current_price: 380,
-  requirements: "在专业驯养师指导下，近距离接触海豚，喂食、抚摸、合影。限4-12岁儿童。",
+  description: "在专业驯养师指导下，近距离接触海豚，喂食、抚摸、合影。限4-12岁儿童。",
   duration: "30分钟",
-  booking_required: true,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -799,11 +1607,10 @@ attraction = attractions["上海迪士尼乐园"]
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "米奇童话专列巡游",
-  category: "娱乐演出",
+  activity_type: "娱乐演出",
   current_price: 0,  # 免费，含在门票内
-  requirements: "迪士尼经典花车巡游，米奇、米妮、唐老鸭等经典角色登场。",
+  description: "迪士尼经典花车巡游，米奇、米妮、唐老鸭等经典角色登场。",
   duration: "30分钟",
-  booking_required: false,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -812,11 +1619,10 @@ attraction_activities_data << {
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "点亮奇梦：夜光幻影秀",
-  category: "娱乐演出",
+  activity_type: "娱乐演出",
   current_price: 0,  # 免费，含在门票内
-  requirements: "奇幻城堡投影秀，配合烟花和音乐，讲述迪士尼经典故事。",
+  description: "奇幻城堡投影秀，配合烟花和音乐，讲述迪士尼经典故事。",
   duration: "30分钟",
-  booking_required: false,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
@@ -827,11 +1633,10 @@ attraction = attractions["上海东方明珠广播电视塔"]
 attraction_activities_data << {
   attraction_id: attraction.id,
   name: "旋转餐厅用餐",
-  category: "餐饮服务",
+  activity_type: "餐饮服务",
   current_price: 398,
-  requirements: "267米空中旋转餐厅，360度观景，中西式自助餐。",
+  description: "267米空中旋转餐厅，360度观景，中西式自助餐。",
   duration: "2小时",
-  booking_required: true,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
