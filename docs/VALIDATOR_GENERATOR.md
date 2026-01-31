@@ -5,6 +5,8 @@
 The validator generator automates the creation of new validator files with:
 - **Auto-generated UUID** for `task_id` field
 - **Auto-incremented validator number** (e.g., v098, v099, v100)
+- **Automatic namespace module wrapper** (V001V050, V051V100, V101V150, etc.)
+- **Correct require_relative path** to base_validator
 - **Complete boilerplate code** with best practices
 - **Comprehensive inline documentation** and examples
 
@@ -20,7 +22,28 @@ rails generate validator VALIDATOR_NAME "中文标题" "中文描述"
 rails generate validator book_premium_hotel "预订高档酒店" "用户需要预订五星级酒店，价格不限"
 ```
 
-This creates `app/validators/v098_book_premium_hotel_validator.rb` with:
+## Automatic Directory & Namespace Selection
+
+The generator **automatically determines** the target directory and namespace based on the validator number:
+
+- **v001-v050** → `app/validators/v001_v050/` → `module V001V050`
+- **v051-v100** → `app/validators/v051_v100/` → `module V051V100`
+- **v101-v150** → `app/validators/v101_v150/` → `module V101V150`
+- **v151-v200** → `app/validators/v151_v200/` → `module V151V200`
+- **v201+** → Dynamically calculated (e.g., v201_v250 → V201V250)
+
+### Example Output
+
+When you run the generator for v114, you'll see:
+
+```
+✅ Created validator: app/validators/v101_v150/v114_book_premium_hotel_validator.rb
+   - Validator ID: v114_book_premium_hotel_validator
+   - Task ID (UUID): da60cf35-e1ae-4363-8610-29381b68e14e
+   - Class Name: V101V150::V114BookPremiumHotelValidator
+```
+
+This creates `app/validators/v101_v150/v114_book_premium_hotel_validator.rb` with:
 - `validator_id`: `v098_book_premium_hotel_validator`
 - `task_id`: `8cf22f3f-c196-4f35-b70c-03327c21b808` (auto-generated UUID)
 - `title`: `预订高档酒店`
@@ -31,42 +54,44 @@ This creates `app/validators/v098_book_premium_hotel_validator.rb` with:
 ```ruby
 # frozen_string_literal: true
 
-require_relative 'base_validator'
+require_relative '../base_validator'
 
-# 验证用例098: 预订高档酒店
+# 验证用例114: 预订高档酒店
 #
 # 任务描述:
 #   用户需要预订五星级酒店，价格不限
 #
 # 评分标准:
 #   - TODO: 定义评分标准
-class V098BookPremiumHotelValidator < BaseValidator
-  self.validator_id = 'v098_book_premium_hotel_validator'
-  self.task_id = '8cf22f3f-c196-4f35-b70c-03327c21b808'  # ✅ Auto-generated UUID
-  self.title = '预订高档酒店'
-  self.description = '用户需要预订五星级酒店，价格不限'
-  self.timeout_seconds = 300
-  
-  def prepare
-    # TODO: Implement task parameters
-  end
-  
-  def verify
-    # TODO: Add assertions
-  end
-  
-  def simulate
-    # TODO: Implement AI agent logic
-  end
-  
-  private
-  
-  def execution_state_data
-    # TODO: Save state
-  end
-  
-  def restore_from_state(data)
-    # TODO: Restore state
+module V101V150
+  class V114BookPremiumHotelValidator < BaseValidator
+    self.validator_id = 'v114_book_premium_hotel_validator'
+    self.task_id = 'da60cf35-e1ae-4363-8610-29381b68e14e'  # ✅ Auto-generated UUID
+    self.title = '预订高档酒店'
+    self.description = '用户需要预订五星级酒店，价格不限'
+    self.timeout_seconds = 300
+    
+    def prepare
+      # TODO: Implement task parameters
+    end
+    
+    def verify
+      # TODO: Add assertions
+    end
+    
+    def simulate
+      # TODO: Implement AI agent logic
+    end
+    
+    private
+    
+    def execution_state_data
+      # TODO: Save state
+    end
+    
+    def restore_from_state(data)
+      # TODO: Restore state
+    end
   end
 end
 ```

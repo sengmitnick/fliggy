@@ -280,7 +280,18 @@ namespace :validator do
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validators = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
-      File.basename(file, '.rb').camelize.constantize
+      
+      # Derive full class name with namespace from file path
+      relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+      class_path = relative_path.gsub('.rb', '').split('/')
+      class_name = class_path.map(&:camelize).join('::')
+      
+      begin
+        class_name.constantize
+      rescue NameError => e
+        Rails.logger.warn "[Validator] Failed to load validator: #{file} (#{class_name})"
+        nil
+      end
     end.compact.select { |klass| klass < BaseValidator }
     
     if validators.empty?
@@ -392,8 +403,17 @@ namespace :validator do
       
       Dir[Rails.root.join('app/validators/**/*_validator.rb')].each do |file|
         next if file.end_with?('base_validator.rb')
-        klass = File.basename(file, '.rb').camelize.constantize
-        puts "  - #{klass.validator_id} (#{klass.title})"
+        
+        relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+        class_path = relative_path.gsub('.rb', '').split('/')
+        class_name = class_path.map(&:camelize).join('::')
+        
+        begin
+          klass = class_name.constantize
+          puts "  - #{klass.validator_id} (#{klass.title})"
+        rescue NameError
+          # Skip invalid validators
+        end
       end
       
       exit 1
@@ -403,8 +423,17 @@ namespace :validator do
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_class = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
-      klass = File.basename(file, '.rb').camelize.constantize
-      klass if klass.validator_id == validator_id
+      
+      relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+      class_path = relative_path.gsub('.rb', '').split('/')
+      class_name = class_path.map(&:camelize).join('::')
+      
+      begin
+        klass = class_name.constantize
+        klass if klass.validator_id == validator_id
+      rescue NameError
+        nil
+      end
     end.compact.first
     
     unless validator_class

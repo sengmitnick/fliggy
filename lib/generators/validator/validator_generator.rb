@@ -32,6 +32,9 @@ class ValidatorGenerator < Rails::Generators::Base
     # Determine target directory based on validator number
     target_dir = determine_target_directory(validator_number.to_i)
     
+    # Extract namespace module from target directory (e.g., v001_v050 → V001V050)
+    @namespace_module = extract_namespace_from_directory(target_dir)
+    
     # Generate UUID for task_id
     task_id = SecureRandom.uuid
     
@@ -51,6 +54,7 @@ class ValidatorGenerator < Rails::Generators::Base
     
     # Replace ERB tags
     content = template_content.gsub('<%= @validator_number %>', validator_number)
+                              .gsub('<%= @namespace_module %>', @namespace_module)
                               .gsub('<%= @class_name %>', @class_name)
                               .gsub('<%= @validator_id %>', @validator_id)
                               .gsub('<%= @task_id %>', @task_id)
@@ -63,7 +67,7 @@ class ValidatorGenerator < Rails::Generators::Base
     say "✅ Created validator: #{output_file}", :green
     say "   - Validator ID: #{@validator_id}", :green
     say "   - Task ID (UUID): #{@task_id}", :green
-    say "   - Class Name: #{@class_name}", :green
+    say "   - Class Name: #{@namespace_module}::#{@class_name}", :green
     say ""
     say "📝 Next steps:", :yellow
     say "   1. Implement the prepare method (define task parameters)", :yellow
@@ -95,6 +99,17 @@ class ValidatorGenerator < Rails::Generators::Base
       end_range = start_range + 49
       "app/validators/v#{start_range.to_s.rjust(3, '0')}_v#{end_range.to_s.rjust(3, '0')}"
     end
+  end
+  
+  # Extract namespace module from directory path
+  # app/validators/v001_v050 → V001V050
+  # app/validators/v051_v100 → V051V100
+  # app/validators/v151_v200 → V151V200
+  def extract_namespace_from_directory(dir_path)
+    # Extract the last directory component (e.g., v001_v050)
+    dir_name = File.basename(dir_path)
+    # Convert to camelized module name (v001_v050 → V001V050)
+    dir_name.camelize
   end
   
   def next_validator_number
