@@ -384,6 +384,9 @@ Rails.application.routes.draw do
     collection do
       get :search
     end
+    member do
+      get :hotels
+    end
   end
   # End routes for hotel_packages
 

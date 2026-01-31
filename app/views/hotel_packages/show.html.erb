@@ -150,7 +150,7 @@
             <span><%= option.night_count %>晚 多房型可选，以实际预约为准</span>
           </div>
           <div class="flex justify-between items-end">
-            <span class="text-xs text-blue-600">查看可约酒店及日期 ></span>
+            <%= link_to "查看可约酒店及日期 >", hotels_hotel_package_path(@package), class: "text-xs text-blue-600" %>
             <div class="flex space-x-2">
               <span class="text-orange-600 font-bold text-xl mr-2">¥<%= option.price.to_i %></span>
               <%= link_to "预约", new_hotel_package_order_path(package_option_id: option.id, booking_type: 'instant'), class: "px-4 py-1 border border-orange-500 text-orange-500 rounded-full text-sm" %>

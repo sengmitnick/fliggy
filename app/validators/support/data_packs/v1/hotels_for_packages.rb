@@ -40,8 +40,12 @@ brand_city_configs = [
   # 武汉地区 - 华中地区
   { brand: "华住", city: "武汉", region: "华中地区", star: 4, suffix: "酒店", base_price: 350 },
   { brand: "万豪", city: "武汉", region: "华中地区", star: 5, suffix: "大酒店", base_price: 800 },
+  { brand: "希尔顿", city: "武汉", region: "华中地区", star: 5, suffix: "酒店", base_price: 750 },
   { brand: "洲际", city: "武汉", region: "华中地区", star: 5, suffix: "酒店", base_price: 750 },
   { brand: "凯悦", city: "武汉", region: "华中地区", star: 5, suffix: "酒店", base_price: 700 },
+  { brand: "如家", city: "武汉", region: "华中地区", star: 3, suffix: "酒店", base_price: 200 },
+  { brand: "汉庭", city: "武汉", region: "华中地区", star: 3, suffix: "酒店", base_price: 180 },
+  { brand: "7天", city: "武汉", region: "华中地区", star: 3, suffix: "酒店", base_price: 150 },
   
   # 上海地区 - 华东地区
   { brand: "华住", city: "上海", region: "华东地区", star: 4, suffix: "酒店", base_price: 450 },
@@ -61,10 +65,12 @@ brand_city_configs = [
   { brand: "华住", city: "深圳", region: "华南地区", star: 4, suffix: "酒店", base_price: 500 },
   { brand: "洲际", city: "深圳", region: "华南地区", star: 5, suffix: "酒店", base_price: 1000 },
   { brand: "香格里拉", city: "深圳", region: "华南地区", star: 5, suffix: "大酒店", base_price: 1200 },
+  { brand: "希尔顿", city: "深圳", region: "华南地区", star: 5, suffix: "酒店", base_price: 1050 },
   
   # 广州地区 - 华南地区
   { brand: "华住", city: "广州", region: "华南地区", star: 4, suffix: "酒店", base_price: 450 },
   { brand: "万豪", city: "广州", region: "华南地区", star: 5, suffix: "大酒店", base_price: 1000 },
+  { brand: "希尔顿", city: "广州", region: "华南地区", star: 5, suffix: "酒店", base_price: 980 },
   { brand: "洲际", city: "广州", region: "华南地区", star: 5, suffix: "酒店", base_price: 950 },
   { brand: "香格里拉", city: "广州", region: "华南地区", star: 5, suffix: "大酒店", base_price: 1100 },
   
