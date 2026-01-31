@@ -205,6 +205,90 @@ end
 puts "\n💾 批量插入 #{all_products_data.count} 个旅游产品..."
 TourGroupProduct.insert_all(all_products_data)
 
+# 杭州4天4晚独立成团产品（支持 v101/v113 验证器）
+puts "\n🎯 添加特定杭州4天私家团产品..."
+
+hangzhou_private_group_products = [
+  {
+    title: "【多日游】杭州西湖+千岛湖+乌镇 4天3晚 舒适酒店·全程用餐·包含门票·独立成团",
+    subtitle: "西湖·舒适酒店·独立成团",
+    destination: "杭州",
+    departure_city: "杭州",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 4,
+    badge: '多日游·独立成团',
+    price: 2288,
+    original_price: 2888,
+    rating: 4.9,
+    rating_desc: "180条评价",
+    sales_count: 156,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    tags: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    departure_label: "杭州出发",
+    is_featured: true,
+    display_order: all_products_data.count,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['杭州携程国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】杭州西湖风景区+千岛湖深度游 4天3晚 专属导游·独立成团",
+    subtitle: "千岛湖·专属导游·独立成团",
+    destination: "杭州",
+    departure_city: "上海",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 4,
+    badge: '多日游·独立成团',
+    price: 2588,
+    original_price: 3088,
+    rating: 4.8,
+    rating_desc: "205条评价",
+    sales_count: 198,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团'],
+    tags: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '专属导游'],
+    departure_label: "上海出发",
+    is_featured: false,
+    display_order: all_products_data.count + 1,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['上海春秋旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】杭州西湖+乌镇+西塘湿地 4天3晚 纯玩无购物·独立成团",
+    subtitle: "西湖·纯玩无购物·独立成团",
+    destination: "杭州",
+    departure_city: "宁波",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 4,
+    badge: '多日游·独立成团',
+    price: 2188,
+    original_price: 2688,
+    rating: 4.7,
+    rating_desc: "125条评价",
+    sales_count: 89,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '纯玩无购物'],
+    tags: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    departure_label: "宁波出发",
+    is_featured: false,
+    display_order: all_products_data.count + 2,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['杭州西湖国旅'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+TourGroupProduct.insert_all(hangzhou_private_group_products)
+puts "✓ 添加了 #{hangzhou_private_group_products.count} 个杭州4天私家团产品"
+
 # ==================== 批量生成套餐数据 ====================
 puts "\n🎟️ 批量生成套餐数据..."
 

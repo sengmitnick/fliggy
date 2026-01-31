@@ -74,15 +74,18 @@
     <!-- Cruise Line Selector (Horizontal Scroll) -->
     <section class="bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 py-4">
-        <div class="flex gap-3 overflow-x-auto pb-2" data-cruise-search-target="cruiseLineContainer">
+        <div class="flex gap-3 overflow-x-auto pb-2">
           <% 
-            # 获取该航线下的所有邮轮公司
-            cruise_lines = @sailings.map { |s| s.cruise_ship.cruise_line }.uniq
-            cruise_lines.each_with_index do |line, index|
+            # 获取该航线下的所有邮轮公司（基于当前筛选条件前的班次）
+            base_sailings = CruiseSailing.where(status: 'on_sale')
+            base_sailings = base_sailings.where(cruise_route_id: @selected_route.id) if @selected_route.present?
+            all_cruise_lines = base_sailings.includes(:cruise_ship).map { |s| s.cruise_ship.cruise_line }.uniq
+            
+            all_cruise_lines.each do |line|
+              is_selected = params[:cruise_line_id].to_i == line.id
           %>
-            <button class="flex-none flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition <%= index == 0 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-gray-300' %>"
-                    data-action="click->cruise-search#selectCruiseLine"
-                    data-cruise-line-id="<%= line.id %>">
+            <%= link_to search_cruises_path(route: params[:route], cruise_line_id: line.id), 
+                        class: "flex-none flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition #{is_selected ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-gray-300'}" do %>
               <% if line.logo_url.present? %>
                 <%= image_tag line.logo_url, alt: line.name, class: "w-16 h-16 object-contain" %>
               <% else %>
@@ -91,49 +94,55 @@
                 </div>
               <% end %>
               <span class="text-xs text-gray-700 text-center whitespace-nowrap"><%= line.name %></span>
-            </button>
+            <% end %>
           <% end %>
         </div>
       </div>
     </section>
 
-    <!-- Cruise Ship Card -->
-    <section class="bg-white">
-      <div class="max-w-7xl mx-auto">
-        <!-- Ship Image with Background -->
-        <div class="relative h-56 bg-gradient-to-br from-blue-400 to-blue-600">
-          <%= image_tag cruise_ship.image_url, alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80" %>
-          
-          <!-- Ship Info Overlay -->
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-            <div class="flex items-end justify-between">
-              <div>
-                <h2 class="text-2xl font-bold text-white mb-1"><%= cruise_ship.name %></h2>
-                <p class="text-white/90 text-sm"><%= cruise_ship.name_en %></p>
-              </div>
-              <% if cruise_line.logo_url.present? %>
-                <div class="bg-white rounded-lg p-2">
-                  <%= image_tag cruise_line.logo_url, alt: cruise_line.name, class: "h-8 object-contain" %>
+    <!-- Cruise Ship Card (Dynamic for each sailing) -->
+    <% @sailings.order(departure_date: :asc).each_with_index do |sailing, sailing_index| %>
+      <% cruise_ship = sailing.cruise_ship %>
+      <% cruise_line = cruise_ship.cruise_line %>
+      <section class="bg-white <%= sailing_index == 0 ? '' : 'hidden' %>" 
+               data-cruise-search-target="shipCard"
+               data-sailing-id="<%= sailing.id %>">
+        <div class="max-w-7xl mx-auto">
+          <!-- Ship Image with Background -->
+          <div class="relative h-56 bg-gradient-to-br from-blue-400 to-blue-600">
+            <%= image_tag cruise_ship.image_url, alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80" %>
+            
+            <!-- Ship Info Overlay -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+              <div class="flex items-end justify-between">
+                <div>
+                  <h2 class="text-2xl font-bold text-white mb-1"><%= cruise_ship.name %></h2>
+                  <p class="text-white/90 text-sm"><%= cruise_ship.name_en %></p>
                 </div>
+                <% if cruise_line.logo_url.present? %>
+                  <div class="bg-white rounded-lg p-2">
+                    <%= image_tag cruise_line.logo_url, alt: cruise_line.name, class: "h-8 object-contain" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ship Features Tags -->
+          <div class="px-4 py-3 border-b border-gray-100">
+            <div class="flex items-center gap-2 overflow-x-auto">
+              <% if cruise_ship.features.present? %>
+                <% cruise_ship.feature_list.take(6).each do |feature| %>
+                  <span class="flex-none inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 text-gray-700 text-xs rounded-full border border-gray-200">
+                    <%= feature %>
+                  </span>
+                <% end %>
               <% end %>
             </div>
           </div>
         </div>
-
-        <!-- Ship Features Tags -->
-        <div class="px-4 py-3 border-b border-gray-100">
-          <div class="flex items-center gap-2 overflow-x-auto">
-            <% if cruise_ship.features.present? %>
-              <% cruise_ship.feature_list.take(6).each do |feature| %>
-                <span class="flex-none inline-flex items-center gap-1 px-3 py-1.5 bg-gray-50 text-gray-700 text-xs rounded-full border border-gray-200">
-                  <%= feature %>
-                </span>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    <% end %>
 
     <!-- Tabs: Overview, Entertainment, Dining, Facilities, Cabins -->
     <section class="bg-white border-b border-gray-100 sticky top-[57px] z-10">
@@ -187,10 +196,10 @@
             <div class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-20"
                  data-cruise-search-target="cityDropdown">
               <div class="p-3 max-h-64 overflow-y-auto">
-                <%= link_to '全部城市', search_cruises_path(route: params[:route]), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
+                <%= link_to '全部城市', search_cruises_path(route: params[:route], cruise_line_id: params[:cruise_line_id]), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 
                 <% @all_departure_cities.each do |city| %>
-                  <%= link_to city, search_cruises_path(route: params[:route], city: city), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
+                  <%= link_to city, search_cruises_path(route: params[:route], cruise_line_id: params[:cruise_line_id], city: city), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 <% end %>
               </div>
             </div>
@@ -229,11 +238,11 @@
                   departure_months = @sailings.pluck(:departure_date).compact.map { |d| d.strftime('%Y-%m') }.uniq.sort
                 %>
                 
-                <%= link_to '全部月份', search_cruises_path(route: params[:route], city: params[:city]), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
+                <%= link_to '全部月份', search_cruises_path(route: params[:route], cruise_line_id: params[:cruise_line_id], city: params[:city]), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 
                 <% departure_months.each do |month| %>
                   <% month_date = Date.parse("#{month}-01") %>
-                  <%= link_to month_date.strftime('%Y年%m月'), search_cruises_path(route: params[:route], city: params[:city], month: month), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
+                  <%= link_to month_date.strftime('%Y年%m月'), search_cruises_path(route: params[:route], cruise_line_id: params[:cruise_line_id], city: params[:city], month: month), class: 'block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 rounded transition' %>
                 <% end %>
               </div>
             </div>

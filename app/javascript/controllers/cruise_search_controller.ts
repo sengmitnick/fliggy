@@ -4,7 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = [
     "routeDropdown",
     "tab",
-    "cruiseLineContainer",
+    "shipCard",
     "cityDropdown",
     "monthDropdown",
     "itineraryModal",
@@ -17,7 +17,7 @@ export default class extends Controller<HTMLElement> {
 
   declare readonly routeDropdownTarget: HTMLElement
   declare readonly tabTargets: HTMLElement[]
-  declare readonly hasCruiseLineContainerTarget: boolean
+  declare readonly shipCardTargets: HTMLElement[]
   declare readonly cityDropdownTarget: HTMLElement
   declare readonly hasCityDropdownTarget: boolean
   declare readonly monthDropdownTarget: HTMLElement
@@ -45,7 +45,7 @@ export default class extends Controller<HTMLElement> {
     this.routeDropdownTarget.classList.toggle('hidden')
   }
 
-  // Select date and show corresponding cabins and rooms
+  // Select date and show corresponding ship card, cabins and rooms
   selectDate(event: Event): void {
     event.preventDefault()
     const card = event.currentTarget as HTMLElement
@@ -61,6 +61,16 @@ export default class extends Controller<HTMLElement> {
       } else {
         dateCard.classList.remove('bg-yellow-50', 'border-yellow-400')
         dateCard.classList.add('bg-white', 'border-gray-200')
+      }
+    })
+    
+    // Show/hide corresponding ship cards
+    this.shipCardTargets.forEach(shipCard => {
+      const cardSailingId = shipCard.dataset.sailingId
+      if (cardSailingId === sailingId) {
+        shipCard.classList.remove('hidden')
+      } else {
+        shipCard.classList.add('hidden')
       }
     })
     
@@ -149,25 +159,6 @@ export default class extends Controller<HTMLElement> {
         roomList.classList.add('hidden')
       }
     })
-  }
-
-  // Select cruise line (visual effect only, actual filtering requires backend)
-  selectCruiseLine(event: Event): void {
-    event.preventDefault()
-    const button = event.currentTarget as HTMLElement
-    
-    // Remove selection from all cruise line buttons
-    if (this.hasCruiseLineContainerTarget) {
-      const allButtons = this.element.querySelectorAll('[data-action="click->cruise-search#selectCruiseLine"]')
-      allButtons.forEach(btn => {
-        btn.classList.remove('border-yellow-400', 'bg-yellow-50')
-        btn.classList.add('border-gray-200')
-      })
-    }
-    
-    // Add selection to clicked button
-    button.classList.remove('border-gray-200')
-    button.classList.add('border-yellow-400', 'bg-yellow-50')
   }
 
   // Switch tabs (visual effect only)

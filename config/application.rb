@@ -40,6 +40,13 @@ module Myapp
     # Ignore data_packs directory in validators (seed data files, not autoloadable classes)
     Rails.autoloaders.main.ignore("#{Rails.root}/app/validators/support/data_packs")
 
+    # Add validator subdirectories to autoload paths
+    config.autoload_paths += %W[
+      #{config.root}/app/validators/v001_v050
+      #{config.root}/app/validators/v051_v100
+      #{config.root}/app/validators/v101_v150
+    ]
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

@@ -27,13 +27,14 @@ class Admin::ValidationTasksController < Admin::BaseController
 
   # 加载所有验证器类
   def load_all_validators
-    # 自动加载 app/validators/*_validator.rb
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    # 自动加载 app/validators/**/*_validator.rb（支持子文件夹）
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     
     validator_files.map do |file|
       # 跳过 base_validator.rb
       next if file.end_with?('base_validator.rb')
       
+      # 优先使用文件名加载（因为验证器类没有使用命名空间模块）
       class_name = File.basename(file, '.rb').camelize
       begin
         klass = class_name.constantize

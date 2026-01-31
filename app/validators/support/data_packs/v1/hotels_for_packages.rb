@@ -11,23 +11,14 @@
 # 加载方式：
 # rake validator:reset_baseline
 
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "正在加载 hotels_for_packages_v1 数据包..."
 
 timestamp = Time.current
 
 # ==================== 图片URL配置 ====================
-hotel_images = [
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
-  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-  "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800",
-  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-  "https://images.unsplash.com/photo-1549294413-26f195200c16?w=800",
-  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-  "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800",
-  "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=800",
-  "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800"
-]
+hotel_images = ImageSeedHelper.random_images_from_category('hotel_rooms', count: 10)
 
 # ==================== 设施配置 ====================
 features_pool = [

@@ -106,7 +106,7 @@
         <div class="text-xs text-gray-500">宝贝返钱 ¥ 80</div>
       </div>
     </div>
-    <button class="px-4 py-1.5 bg-gradient-to-r from-red-400 to-red-500 text-white text-xs rounded-full font-semibold">
+    <button class="px-4 py-1.5 bg-gradient-to-r from-red-400 to-red-500 text-white text-xs rounded-full font-semibold" onclick="window.showToast('精彩即将上线，敬请期待')">
       立即邀请
     </button>
   </div>
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Promotion Banner -->
-  <div class="mx-4 mb-3">
+  <div class="mx-4 mb-3" onclick="window.showToast('精彩即将上线，敬请期待')">
     <div class="relative bg-gradient-to-r from-red-400 to-pink-400 rounded-xl overflow-hidden">
       <img src="https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=200&fit=crop" 
            alt="飞西澳促销" 
@@ -150,7 +150,7 @@
   <!-- Section Header -->
   <div class="px-4 py-3 flex items-center justify-between">
     <h3 class="text-base font-bold text-gray-900">联到<span class="text-red-500">买优惠</span></h3>
-    <a href="#" class="text-xs text-gray-500 flex items-center gap-1">
+    <a href="#" class="text-xs text-gray-500 flex items-center gap-1" onclick="window.showToast('精彩即将上线，敬请期待')">
       地图领红包
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -162,64 +162,36 @@
   <div class="px-4 mb-3">
     <div class="text-sm">
       <span class="text-gray-900"><%= @booking.check_in_date.strftime('%m月%d日') %></span>
-      <span class="text-red-500 font-semibold ml-2">武汉·订交通</span>
+      <span class="text-red-500 font-semibold ml-2"><%= @hotel.city %>·订交通</span>
     </div>
   </div>
 
   <!-- Transportation Options -->
   <div class="px-4 grid grid-cols-3 gap-3 mb-4">
-    <button class="bg-yellow-100 rounded-lg py-4 flex flex-col items-center justify-center">
+    <%= link_to cars_path, class: "bg-yellow-100 rounded-lg py-4 flex flex-col items-center justify-center" do %>
       <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
       </svg>
       <span class="text-sm text-gray-900">租车</span>
-    </button>
+    <% end %>
     
-    <button class="bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center">
+    <%= link_to transfers_path(service: 'from_airport', type: 'airport_pickup'), class: "bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center" do %>
       <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
       </svg>
       <span class="text-sm text-gray-900">接机</span>
-    </button>
+    <% end %>
     
-    <button class="bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center">
+    <%= link_to transfers_path(service: 'to_airport', type: 'airport_pickup'), class: "bg-white border border-gray-200 rounded-lg py-4 flex flex-col items-center justify-center" do %>
       <svg class="w-8 h-8 text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
       </svg>
       <span class="text-sm text-gray-900">送机/站</span>
-    </button>
+    <% end %>
   </div>
 
   <!-- Route Info -->
   <div class="px-4 mb-4">
-    <div class="bg-white rounded-lg border border-gray-200 p-3">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex-1">
-          <div class="text-xs text-gray-500 mb-1">出发地/目的地</div>
-          <div class="text-sm font-semibold text-gray-900">维也纳国际...</div>
-        </div>
-        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-        </svg>
-        <div class="flex-1 text-right">
-          <div class="text-xs text-gray-500 mb-1">武汉大学国际软件</div>
-          <button class="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded">优惠区车</button>
-        </div>
-      </div>
-      
-      <div class="flex items-center justify-between text-xs text-gray-500">
-        <div>
-          <span class="text-gray-900">周六</span>
-          <span class="ml-2"><%= @booking.check_in_date.strftime('%m月%d日 %H:%M') %></span>
-        </div>
-        <div>
-          <span class="text-gray-900">2次</span>
-        </div>
-        <div>
-          <span class="text-gray-900">周一</span>
-          <span class="ml-2"><%= @booking.check_out_date.strftime('%m月%d日 %H:%M') %></span>
-        </div>
-      </div>
-    </div>
+    
   </div>
 </div>

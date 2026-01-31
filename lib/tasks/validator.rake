@@ -88,6 +88,11 @@ namespace :validator do
     # Step 2: 重新加载数据包
     puts "\n📦 Step 2: 重新加载数据包..."
 
+    # 设置固定随机种子，确保数据包生成的随机数据可重现
+    # 使用日期作为种子：20250131
+    srand(20250131)
+    puts "  → 设置固定随机种子: srand(20250131) - 确保数据包随机性可重现"
+
     # 设置 PostgreSQL 会话变量 app.data_version='0'
     ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
     
@@ -225,7 +230,7 @@ namespace :validator do
     puts "🔍 Step 1: Checking weight sums..."
     weight_errors = []
     
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_files.each do |file|
       next if file.end_with?('base_validator.rb')
       
@@ -272,7 +277,7 @@ namespace :validator do
     puts "-" * 70
     
     # 加载所有 Validator
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validators = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
       File.basename(file, '.rb').camelize.constantize
@@ -385,7 +390,7 @@ namespace :validator do
       puts "❌ Usage: rake validator:simulate_single[validator_id]"
       puts "\nAvailable validators:"
       
-      Dir[Rails.root.join('app/validators/*_validator.rb')].each do |file|
+      Dir[Rails.root.join('app/validators/**/*_validator.rb')].each do |file|
         next if file.end_with?('base_validator.rb')
         klass = File.basename(file, '.rb').camelize.constantize
         puts "  - #{klass.validator_id} (#{klass.title})"
@@ -395,7 +400,7 @@ namespace :validator do
     end
     
     # 查找 Validator
-    validator_files = Dir[Rails.root.join('app/validators/*_validator.rb')]
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_class = validator_files.map do |file|
       next if file.end_with?('base_validator.rb')
       klass = File.basename(file, '.rb').camelize.constantize
