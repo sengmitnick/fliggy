@@ -20,95 +20,97 @@ require_relative '../base_validator'
 #   - 目的地正确（天津） (25分)
 #   - 发车日期正确（明天） (20分)
 #
-class V044BookBusBeijingTianjinValidator < BaseValidator
-  self.validator_id = 'v044_book_bus_beijing_tianjin_validator'
-  self.task_id = '68156569-46f4-4a08-99a1-e25e9c4d498f'
-  self.title = '预订明天北京到天津最早汽车票'
-  self.description = '搜索北京到天津的汽车票，找到发车时间最早的班次'
-  self.timeout_seconds = 240
+module V001V050
+  class V044BookBusBeijingTianjinValidator < BaseValidator
+    self.validator_id = 'v044_book_bus_beijing_tianjin_validator'
+    self.task_id = '68156569-46f4-4a08-99a1-e25e9c4d498f'
+    self.title = '预订明天北京到天津最早汽车票'
+    self.description = '搜索北京到天津的汽车票，找到发车时间最早的班次'
+    self.timeout_seconds = 240
   
-  def prepare
-    @origin = '北京'
-    @destination = '天津'
-    @target_date = Date.current + 1.day
+    def prepare
+      @origin = '北京'
+      @destination = '天津'
+      @target_date = Date.current + 1.day
     
-    available_tickets = BusTicket.where(
-      origin: @origin,
-      destination: @destination,
-      departure_date: @target_date,
-      data_version: 0
-    )
+      available_tickets = BusTicket.where(
+        origin: @origin,
+        destination: @destination,
+        departure_date: @target_date,
+        data_version: 0
+      )
     
-    @earliest_time = available_tickets.minimum(:departure_time)
+      @earliest_time = available_tickets.minimum(:departure_time)
     
-    {
-      task: "请预订明天从#{@origin}到#{@destination}的最早汽车票",
-      origin: @origin,
-      destination: @destination,
-      date: @target_date.to_s,
-      date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
-      hint: "系统中有多个班次，请选择发车时间最早的",
-      available_tickets_count: available_tickets.count,
-      earliest_time: @earliest_time
-    }
-  end
-  
-  def verify
-    add_assertion "订单已创建", weight: 30 do
-      @order = BusTicketOrder.order(created_at: :desc).first
-      expect(@order).not_to be_nil, "未找到任何汽车票订单记录"
+      {
+        task: "请预订明天从#{@origin}到#{@destination}的最早汽车票",
+        origin: @origin,
+        destination: @destination,
+        date: @target_date.to_s,
+        date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
+        hint: "系统中有多个班次，请选择发车时间最早的",
+        available_tickets_count: available_tickets.count,
+        earliest_time: @earliest_time
+      }
     end
+  
+    def verify
+      add_assertion "订单已创建", weight: 30 do
+        @order = BusTicketOrder.order(created_at: :desc).first
+        expect(@order).not_to be_nil, "未找到任何汽车票订单记录"
+      end
     
-    return unless @order
+      return unless @order
     
-    add_assertion "出发地正确（#{@origin}）", weight: 25 do
-      expect(@order.bus_ticket.origin).to eq(@origin)
+      add_assertion "出发地正确（#{@origin}）", weight: 25 do
+        expect(@order.bus_ticket.origin).to eq(@origin)
+      end
+    
+      add_assertion "目的地正确（#{@destination}）", weight: 25 do
+        expect(@order.bus_ticket.destination).to eq(@destination)
+      end
+    
+      add_assertion "发车日期正确（明天）", weight: 20 do
+        expect(@order.bus_ticket.departure_date).to eq(@target_date)
+      end
     end
-    
-    add_assertion "目的地正确（#{@destination}）", weight: 25 do
-      expect(@order.bus_ticket.destination).to eq(@destination)
+  
+    private
+  
+    def execution_state_data
+      { origin: @origin, destination: @destination, target_date: @target_date.to_s }
     end
-    
-    add_assertion "发车日期正确（明天）", weight: 20 do
-      expect(@order.bus_ticket.departure_date).to eq(@target_date)
+  
+    def restore_from_state(data)
+      @origin = data['origin']
+      @destination = data['destination']
+      @target_date = Date.parse(data['target_date'])
     end
-  end
   
-  private
-  
-  def execution_state_data
-    { origin: @origin, destination: @destination, target_date: @target_date.to_s }
-  end
-  
-  def restore_from_state(data)
-    @origin = data['origin']
-    @destination = data['destination']
-    @target_date = Date.parse(data['target_date'])
-  end
-  
-  def simulate
-    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    target_ticket = BusTicket.where(
-      origin: @origin,
-      destination: @destination,
-      departure_date: @target_date,
-      data_version: 0
-    ).order(:departure_time).first
+      target_ticket = BusTicket.where(
+        origin: @origin,
+        destination: @destination,
+        departure_date: @target_date,
+        data_version: 0
+      ).order(:departure_time).first
     
-    order = BusTicketOrder.create!(
-      bus_ticket_id: target_ticket.id,
-      user_id: user.id,
-      passenger_count: 1,
-      total_price: target_ticket.price,
-      status: 'pending'
-    )
+      order = BusTicketOrder.create!(
+        bus_ticket_id: target_ticket.id,
+        user_id: user.id,
+        passenger_count: 1,
+        total_price: target_ticket.price,
+        status: 'pending'
+      )
     
-    order.passengers.create!(
-      passenger_name: '张三',
-      passenger_id_number: '110101199001011234'
-    )
+      order.passengers.create!(
+        passenger_name: '张三',
+        passenger_id_number: '110101199001011234'
+      )
     
-    { action: 'create_bus_order', departure_time: target_ticket.departure_time }
-  end
+      { action: 'create_bus_order', departure_time: target_ticket.departure_time }
+    end
+    end
 end

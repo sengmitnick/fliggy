@@ -20,102 +20,104 @@ require_relative '../base_validator'
 #   - 出发日期正确（后天） (20分)
 #   - 座位类型正确（一等座） (30分)
 #
-class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
-  self.validator_id = 'v023_book_first_class_train_shanghai_shenzhen_validator'
-  self.task_id = 'a09b2f8a-8e9f-44bc-b9e4-ddf833016e09'
-  self.title = '预订后天上海到深圳的一等座'
-  self.description = '搜索后天上海到深圳的高铁，选择一等座并完成预订'
-  self.timeout_seconds = 240
+module V001V050
+  class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
+    self.validator_id = 'v023_book_first_class_train_shanghai_shenzhen_validator'
+    self.task_id = 'a09b2f8a-8e9f-44bc-b9e4-ddf833016e09'
+    self.title = '预订后天上海到深圳的一等座'
+    self.description = '搜索后天上海到深圳的高铁，选择一等座并完成预订'
+    self.timeout_seconds = 240
   
-  def prepare
-    @origin = '上海'
-    @destination = '深圳'
-    @target_date = Date.current + 2.days
-    @seat_type = 'first_class'
+    def prepare
+      @origin = '上海'
+      @destination = '深圳'
+      @target_date = Date.current + 2.days
+      @seat_type = 'first_class'
     
-    available_trains = Train.where(
-      departure_city: @origin,
-      arrival_city: @destination,
-      data_version: 0
-    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
+      available_trains = Train.where(
+        departure_city: @origin,
+        arrival_city: @destination,
+        data_version: 0
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
-    {
-      task: "请预订一张后天从#{@origin}到#{@destination}的高铁票（一等座）",
-      departure_city: @origin,
-      destination_city: @destination,
-      date: @target_date.to_s,
-      date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
-      seat_requirement: "一等座",
-      hint: "系统中有多个车次可选，请选择一等座",
-      available_trains_count: available_trains.count
-    }
-  end
-  
-  def verify
-    add_assertion "订单已创建", weight: 20 do
-      @booking = TrainBooking.order(created_at: :desc).first
-      expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+      {
+        task: "请预订一张后天从#{@origin}到#{@destination}的高铁票（一等座）",
+        departure_city: @origin,
+        destination_city: @destination,
+        date: @target_date.to_s,
+        date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
+        seat_requirement: "一等座",
+        hint: "系统中有多个车次可选，请选择一等座",
+        available_trains_count: available_trains.count
+      }
     end
-    
-    return unless @booking
-    
-    add_assertion "出发城市正确", weight: 15 do
-      expect(@booking.train.departure_city).to eq(@origin)
-    end
-    
-    add_assertion "到达城市正确", weight: 15 do
-      expect(@booking.train.arrival_city).to eq(@destination)
-    end
-    
-    add_assertion "出发日期正确", weight: 20 do
-      booking_date = @booking.train.departure_time.to_date
-      expect(booking_date).to eq(@target_date),
-        "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
-    end
-    
-    add_assertion "座位类型正确（一等座）", weight: 30 do
-      expect(@booking.seat_type).to eq(@seat_type),
-        "应选择一等座，实际选择: #{@booking.seat_type_label}"
-    end
-  end
   
-  private
+    def verify
+      add_assertion "订单已创建", weight: 20 do
+        @booking = TrainBooking.order(created_at: :desc).first
+        expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+      end
+    
+      return unless @booking
+    
+      add_assertion "出发城市正确", weight: 15 do
+        expect(@booking.train.departure_city).to eq(@origin)
+      end
+    
+      add_assertion "到达城市正确", weight: 15 do
+        expect(@booking.train.arrival_city).to eq(@destination)
+      end
+    
+      add_assertion "出发日期正确", weight: 20 do
+        booking_date = @booking.train.departure_time.to_date
+        expect(booking_date).to eq(@target_date),
+          "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
+      end
+    
+      add_assertion "座位类型正确（一等座）", weight: 30 do
+        expect(@booking.seat_type).to eq(@seat_type),
+          "应选择一等座，实际选择: #{@booking.seat_type_label}"
+      end
+    end
   
-  def execution_state_data
-    { origin: @origin, destination: @destination, target_date: @target_date.to_s, seat_type: @seat_type }
-  end
+    private
   
-  def restore_from_state(data)
-    @origin = data['origin']
-    @destination = data['destination']
-    @target_date = Date.parse(data['target_date'])
-    @seat_type = data['seat_type']
-  end
+    def execution_state_data
+      { origin: @origin, destination: @destination, target_date: @target_date.to_s, seat_type: @seat_type }
+    end
   
-  def simulate
-    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-    passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)
+    def restore_from_state(data)
+      @origin = data['origin']
+      @destination = data['destination']
+      @target_date = Date.parse(data['target_date'])
+      @seat_type = data['seat_type']
+    end
+  
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)
     
-    target_train = Train.where(
-      departure_city: @origin,
-      arrival_city: @destination,
-      data_version: 0
-    ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date).sample
+      target_train = Train.where(
+        departure_city: @origin,
+        arrival_city: @destination,
+        data_version: 0
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date).sample
     
-    seat = target_train.train_seats.find_by(seat_type: @seat_type)
+      seat = target_train.train_seats.find_by(seat_type: @seat_type)
     
-    TrainBooking.create!(
-      train_id: target_train.id,
-      user_id: user.id,
-      passenger_name: passenger.name,
-      passenger_id_number: passenger.id_number,
-      contact_phone: passenger.phone,
-      seat_type: @seat_type,
-      accept_terms: true,
-      total_price: seat.price,
-      status: 'pending'
-    )
+      TrainBooking.create!(
+        train_id: target_train.id,
+        user_id: user.id,
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
+        seat_type: @seat_type,
+        accept_terms: true,
+        total_price: seat.price,
+        status: 'pending'
+      )
     
-    { action: 'create_train_booking', train_number: target_train.train_number }
-  end
+      { action: 'create_train_booking', train_number: target_train.train_number }
+    end
+    end
 end

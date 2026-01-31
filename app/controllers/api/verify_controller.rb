@@ -212,16 +212,19 @@ module Api
     
     # 加载所有验证器类
     def load_all_validators
-      # 自动加载 app/validators/**/*_validator.rb（支持子文件夹）
+      # 自动加载 app/validators/**/*_validator.rb（支持子文件夹和命名空间）
       validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
       
       validator_files.map do |file|
         # 跳过 base_validator.rb
         next if file.end_with?('base_validator.rb')
         
-        # 优先使用文件名加载（因为验证器类没有使用命名空间模块）
-        # 例如: v001_v050/v001_book_budget_hotel_validator.rb -> V001BookBudgetHotelValidator
-        class_name = File.basename(file, '.rb').camelize
+        # 从文件路径推导出完整的类名（包含命名空间）
+        # 例如: app/validators/v001_v050/v001_book_budget_hotel_validator.rb
+        # => V001V050::V001BookBudgetHotelValidator
+        relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+        class_path = relative_path.gsub('.rb', '').split('/')
+        class_name = class_path.map(&:camelize).join('::')
         
         begin
           class_name.constantize

@@ -21,103 +21,105 @@ require_relative '../base_validator'
 #   - 车型正确（SUV） (30分)
 #   - 租赁天数正确（2天） (30分)
 #
-class V033RentSuvBeijingValidator < BaseValidator
-  self.validator_id = 'v033_rent_suv_beijing_validator'
-  self.task_id = '6eb27ac0-25d9-4fd8-bb9b-3834d06e4ffa'
-  self.title = '租赁后天北京SUV（2天）'
-  self.description = '搜索北京的租车服务，找到SUV车型并租赁2天'
-  self.timeout_seconds = 240
+module V001V050
+  class V033RentSuvBeijingValidator < BaseValidator
+    self.validator_id = 'v033_rent_suv_beijing_validator'
+    self.task_id = '6eb27ac0-25d9-4fd8-bb9b-3834d06e4ffa'
+    self.title = '租赁后天北京SUV（2天）'
+    self.description = '搜索北京的租车服务，找到SUV车型并租赁2天'
+    self.timeout_seconds = 240
   
-  def prepare
-    @location = '北京'
-    @category = 'SUV'
-    @rental_days = 2
-    @pickup_date = Date.current + 2.days
+    def prepare
+      @location = '北京'
+      @category = 'SUV'
+      @rental_days = 2
+      @pickup_date = Date.current + 2.days
     
-    suitable_cars = Car.where(
-      location: @location,
-      category: @category,
-      data_version: 0
-    )
+      suitable_cars = Car.where(
+        location: @location,
+        category: @category,
+        data_version: 0
+      )
     
-    {
-      task: "请租赁一辆后天在#{@location}取车的#{@category}（租期2天）",
-      location: @location,
-      category: @category,
-      rental_days: @rental_days,
-      pickup_date: @pickup_date.to_s,
-      pickup_date_description: "后天（#{@pickup_date.strftime('%Y年%m月%d日')}）",
-      hint: "系统中有多辆SUV可选，选择车型正确即可",
-      suitable_cars_count: suitable_cars.count
-    }
-  end
+      {
+        task: "请租赁一辆后天在#{@location}取车的#{@category}（租期2天）",
+        location: @location,
+        category: @category,
+        rental_days: @rental_days,
+        pickup_date: @pickup_date.to_s,
+        pickup_date_description: "后天（#{@pickup_date.strftime('%Y年%m月%d日')}）",
+        hint: "系统中有多辆SUV可选，选择车型正确即可",
+        suitable_cars_count: suitable_cars.count
+      }
+    end
   
-  def verify
-    add_assertion "订单已创建", weight: 20 do
-      @order = CarOrder.order(created_at: :desc).first
-      expect(@order).not_to be_nil, "未找到任何租车订单记录"
-    end
+    def verify
+      add_assertion "订单已创建", weight: 20 do
+        @order = CarOrder.order(created_at: :desc).first
+        expect(@order).not_to be_nil, "未找到任何租车订单记录"
+      end
     
-    return unless @order
+      return unless @order
     
-    add_assertion "城市正确（北京）", weight: 20 do
-      expect(@order.car.location).to eq(@location)
-    end
+      add_assertion "城市正确（北京）", weight: 20 do
+        expect(@order.car.location).to eq(@location)
+      end
     
-    add_assertion "车型正确（SUV）", weight: 30 do
-      expect(@order.car.category).to eq(@category),
-        "车型不正确。期望: #{@category}, 实际: #{@order.car.category}"
-    end
+      add_assertion "车型正确（SUV）", weight: 30 do
+        expect(@order.car.category).to eq(@category),
+          "车型不正确。期望: #{@category}, 实际: #{@order.car.category}"
+      end
     
-    add_assertion "租赁天数正确（2天）", weight: 30 do
-      return_date = @order.return_datetime.to_date
-      pickup_date = @order.pickup_datetime.to_date
-      actual_days = (return_date - pickup_date).to_i + 1
+      add_assertion "租赁天数正确（2天）", weight: 30 do
+        return_date = @order.return_datetime.to_date
+        pickup_date = @order.pickup_datetime.to_date
+        actual_days = (return_date - pickup_date).to_i + 1
       
-      expect(actual_days).to eq(@rental_days),
-        "租赁天数不正确。期望: #{@rental_days}天, 实际: #{actual_days}天"
+        expect(actual_days).to eq(@rental_days),
+          "租赁天数不正确。期望: #{@rental_days}天, 实际: #{actual_days}天"
+      end
     end
-  end
   
-  private
+    private
   
-  def execution_state_data
-    { location: @location, category: @category, rental_days: @rental_days, pickup_date: @pickup_date.to_s }
-  end
+    def execution_state_data
+      { location: @location, category: @category, rental_days: @rental_days, pickup_date: @pickup_date.to_s }
+    end
   
-  def restore_from_state(data)
-    @location = data['location']
-    @category = data['category']
-    @rental_days = data['rental_days']
-    @pickup_date = Date.parse(data['pickup_date'])
-  end
+    def restore_from_state(data)
+      @location = data['location']
+      @category = data['category']
+      @rental_days = data['rental_days']
+      @pickup_date = Date.parse(data['pickup_date'])
+    end
   
-  def simulate
-    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-    target_car = Car.where(
-      location: @location,
-      category: @category,
-      data_version: 0
-    ).sample
+      target_car = Car.where(
+        location: @location,
+        category: @category,
+        data_version: 0
+      ).sample
     
-    total_price = target_car.price_per_day * @rental_days
-    pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
-    return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
+      total_price = target_car.price_per_day * @rental_days
+      pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
+      return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
     
-    CarOrder.create!(
-      car_id: target_car.id,
-      user_id: user.id,
-      driver_name: '张三',
-      driver_id_number: '110101199001011234',
-      contact_phone: '13800138000',
-      pickup_datetime: pickup_datetime,
-      return_datetime: return_datetime,
-      pickup_location: target_car.pickup_location,
-      status: 'pending',
-      total_price: total_price
-    )
+      CarOrder.create!(
+        car_id: target_car.id,
+        user_id: user.id,
+        driver_name: '张三',
+        driver_id_number: '110101199001011234',
+        contact_phone: '13800138000',
+        pickup_datetime: pickup_datetime,
+        return_datetime: return_datetime,
+        pickup_location: target_car.pickup_location,
+        status: 'pending',
+        total_price: total_price
+      )
     
-    { action: 'create_car_order', car_model: "#{target_car.brand} #{target_car.car_model}" }
-  end
+      { action: 'create_car_order', car_model: "#{target_car.brand} #{target_car.car_model}" }
+    end
+    end
 end
