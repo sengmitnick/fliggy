@@ -110,7 +110,7 @@ class V108LongTermHomestayValidator < BaseValidator
       available_rooms = HotelRoom
         .joins(:hotel)
         .where(
-          hotels: { hotel_type: 'homestay', data_version: @data_version },
+          hotels: { hotel_type: 'homestay', data_version: 0 },
           room_category: 'monthly'
         )
         .where("hotels.city = ? OR hotels.city LIKE ?", @city, "#{@city}%")
@@ -120,8 +120,8 @@ class V108LongTermHomestayValidator < BaseValidator
       
       expect(@booking.hotel_room_id).to eq(cheapest_room.id),
         "未选择价格最低的月租房。" \
-        "应选: #{cheapest_room.hotel.name} - #{cheapest_room.name}（#{cheapest_room.price}元/月），" \
-        "实际选择: #{@booking.hotel.name} - #{@booking.hotel_room.name}（#{@booking.hotel_room.price}元/月）"
+        "应选: #{cheapest_room.hotel.name} - #{cheapest_room.room_type}（#{cheapest_room.price}元/月），" \
+        "实际选择: #{@booking.hotel.name} - #{@booking.hotel_room.room_type}（#{@booking.hotel_room.price}元/月）"
     end
   end
   
@@ -155,7 +155,7 @@ class V108LongTermHomestayValidator < BaseValidator
       adults_count: 1,
       children_count: 0,
       total_price: target_room.price,  # 月租按月计费
-      payment_method: '微信支付',
+      payment_method: '花呗',
       status: 'pending',
       guest_name: '李明',
       guest_phone: '13800138012',

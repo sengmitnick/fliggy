@@ -45,10 +45,26 @@ module ImageSeedHelper
       '1555881400-74d7acaacd8b', '1533929736458-ca588d08c8be',
       '1503454537195-1dcabb73ffb9'
     ],
-    cruises: [
-      '1568481572796-cac3501604fc', '1599640842225-85d111c60e6b',
+    cruise_ships: [
+      '1578894381163-e72c17f2d45f', '1599640842225-85d111c60e6b',
       '1605408499391-6368c628ef42', '1583417319070-4a69db38a482',
       '1571896349842-33c89424de2d', '1540541338287-41700207dee6'
+    ],
+    cruise_cabins: [
+      '1566073771259-6a8506099945', '1582719478250-c89cae4dc85b',
+      '1551882547-ff40c63fe5fa', '1571003123894-1f0594d2b5d9',
+      '1520250497591-112f2f40a3f4', '1584132967334-10e028bd69f7'
+    ],
+    cruise_logos: [
+      '1548574505-5e239809ee19', '1563298723-dcfebaa392e3',
+      '1520250497591-112f2f40a3f4'
+    ],
+    cruise_destinations: [
+      '1583417319070-4a69db38a482', '1506905925346-21bda4d32df4',
+      '1540541338287-41700207dee6', '1464822759023-fed622ff2c3b',
+      '1528360983277-13d401cdc186', '1590559899731-a382839e5549',
+      '1571896349842-33c89424de2d', '1578894381163-e72c17f2d45f',
+      '1519681393784-d120267933ba', '1564501049412-61c2a3083791'
     ],
     flights: [
       '1436491865332-7a61a109cc05', '1464037866556-6812c9d1c72e',
@@ -75,12 +91,23 @@ module ImageSeedHelper
     shops: [
       '1555881400-74d7acaacd8b', '1488085061387-422e29b40080',
       '1540959733332-eab4deabeeaf', '1533929736458-ca588d08c8be'
+    ],
+    shop_logos: [
+      '1550009158-9ebf69173e03', '1436491865332-7a61a109cc05',
+      '1555529669-e69e7aa0ba9a', '1596755389378-c31d21fd1273'
+    ],
+    hotel_rooms: [
+      '1566073771259-6a8506099945', '1542314831-068cd1dbfeeb',
+      '1551882547-ff40c63fe5fa', '1571003123894-1f0594d2b5d9',
+      '1582719478250-c89cae4dc85b', '1549294413-26f195200c16',
+      '1520250497591-112f2f40a3f4', '1584132967334-10e028bd69f7',
+      '1517840901100-8179e982acb7', '1564501049412-61c2a3083791'
     ]
   }.freeze
 
   # 确保图片目录存在
   def self.ensure_image_directories
-    categories = %w[attractions hotels tickets activities tours packages guides products cruises flights insurances visas cars shops]
+    categories = %w[attractions hotels tickets activities tours packages guides products cruise_ships cruise_cabins cruise_logos cruise_destinations flights insurances visas cars shops shop_logos hotel_rooms]
     categories.each do |category|
       dir = Rails.root.join('public', 'images', category)
       FileUtils.mkdir_p(dir) unless Dir.exist?(dir)

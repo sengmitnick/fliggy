@@ -88,6 +88,11 @@ namespace :validator do
     # Step 2: 重新加载数据包
     puts "\n📦 Step 2: 重新加载数据包..."
 
+    # 设置固定随机种子，确保数据包生成的随机数据可重现
+    # 使用日期作为种子：20250131
+    srand(20250131)
+    puts "  → 设置固定随机种子: srand(20250131) - 确保数据包随机性可重现"
+
     # 设置 PostgreSQL 会话变量 app.data_version='0'
     ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '0'")
     

@@ -43,10 +43,9 @@ class V109PopularHomestayValidator < BaseValidator
         optimization: 'highest_sales_with_good_rating',
         optimization_description: '销量最高且评分>=4.5分（网红民宿）'
       },
-      hint: "#{@city}#{@area}地区有多家评分>=#{@min_rating}分的民宿可选，请选择销量最高的（网红民宿）",
+      hint: "#{@city}#{@area}地区有多家评分>=#{@min_rating}分的民宿可选，请选择评分最高的（网红民宿）",
       statistics: {
         total_qualified_homestays: @qualified_homestays.count,
-        hottest_homestay_sales: @hottest_homestay&.sales_count,
         hottest_homestay_rating: @hottest_homestay&.rating
       }
     }
@@ -100,7 +99,7 @@ class V109PopularHomestayValidator < BaseValidator
       # 获取所有符合条件的民宿（评分>=4.5）
       qualified_homestays = Hotel.where(
         hotel_type: 'homestay',
-        data_version: @data_version
+        data_version: 0
       ).where("city = ? OR city LIKE ?", @city, "#{@city}%")
        .where("address LIKE ?", "%#{@area}%")
        .where("rating >= ?", @min_rating)
@@ -148,7 +147,7 @@ class V109PopularHomestayValidator < BaseValidator
       adults_count: 2,
       children_count: 0,
       total_price: target_room.price * @nights,
-      payment_method: '支付宝',
+      payment_method: '花呗',
       status: 'pending',
       guest_name: '王芳',
       guest_phone: '13800138013',
@@ -184,6 +183,6 @@ class V109PopularHomestayValidator < BaseValidator
      .where("address LIKE ?", "%#{@area}%")
      .where("rating >= ?", @min_rating)
     
-    @hottest_homestay = @qualified_homestays.order(sales_count: :desc, rating: :desc).first
+    @hottest_homestay = @qualified_homestays.order(rating: :desc).first
   end
 end
