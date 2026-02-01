@@ -4,7 +4,7 @@ export default class extends Controller<HTMLElement> {
   static targets = [
     "modal", "nameInput", "phoneInput", "emailInput", "contactItem",
     "insuranceCard", "checkmark", "insurancePriceInput", "quantityInput",
-    "totalPrice", "submitBtn", "form"
+    "totalPrice", "submitBtn", "form", "acceptTermsCheckbox", "termsSection", "termsError"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -19,6 +19,9 @@ export default class extends Controller<HTMLElement> {
   declare readonly totalPriceTarget: HTMLElement
   declare readonly submitBtnTarget: HTMLButtonElement
   declare readonly formTarget: HTMLFormElement
+  declare readonly acceptTermsCheckboxTarget: HTMLInputElement
+  declare readonly termsSectionTarget: HTMLElement
+  declare readonly termsErrorTarget: HTMLElement
   declare readonly hasModalTarget: boolean
   declare readonly hasContactItemTarget: boolean
   declare readonly hasInsuranceCardTarget: boolean
@@ -35,6 +38,40 @@ export default class extends Controller<HTMLElement> {
     
     // Initialize with "none" insurance selected by default
     this.selectDefaultInsurance()
+    
+    // Add form submit event listener for validation
+    this.formTarget.addEventListener('submit', this.validateForm.bind(this))
+  }
+
+  validateForm(event: Event): boolean {
+    // Check if accept_terms checkbox is checked
+    if (!this.acceptTermsCheckboxTarget.checked) {
+      event.preventDefault()
+      
+      // Show error message
+      this.termsErrorTarget.classList.remove('hidden')
+      
+      // Add red border to terms section
+      this.termsSectionTarget.classList.add('border-2', 'border-red-300', 'shadow-lg')
+      
+      // Scroll to terms section
+      this.termsSectionTarget.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      
+      // Shake animation
+      this.termsSectionTarget.style.animation = 'shake 0.5s'
+      setTimeout(() => {
+        this.termsSectionTarget.style.animation = ''
+      }, 500)
+      
+      return false
+    }
+    return true
+  }
+  
+  clearTermsError(): void {
+    // Hide error message when checkbox is checked
+    this.termsErrorTarget.classList.add('hidden')
+    this.termsSectionTarget.classList.remove('border-2', 'border-red-300', 'shadow-lg')
   }
 
   openContactSelector(): void {

@@ -3,7 +3,14 @@
   <div class="sticky top-0 z-20 bg-surface/95 backdrop-blur-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
-        <%= link_to cruise_sailing_path(@sailing, cabin_type_id: @cabin_type.id), class: "text-gray-700" do %>
+        <%= link_to cruise_sailing_path(
+          @sailing, 
+          cabin_type_id: @cabin_type.id,
+          route: params[:route],
+          cruise_line_id: params[:cruise_line_id],
+          city: params[:city],
+          month: params[:month]
+        ), class: "text-gray-700" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -260,9 +267,14 @@
     </section>
 
     <!-- Terms -->
-    <section class="bg-white rounded-lg p-4 shadow-sm">
+    <section class="bg-white rounded-lg p-4 shadow-sm transition-all" data-cruise-order-form-target="termsSection">
       <label class="flex items-start gap-3">
-        <%= f.check_box :accept_terms, class: "mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" %>
+        <%= f.check_box :accept_terms, 
+                        class: "mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary",
+                        data: { 
+                          cruise_order_form_target: "acceptTermsCheckbox",
+                          action: "change->cruise-order-form#clearTermsError"
+                        } %>
         <span class="text-sm text-gray-700 flex-1">
           我已阅读并同意
           <a href="#" class="text-primary hover:underline">《游轮预订服务条款》</a>
@@ -270,6 +282,16 @@
           <a href="#" class="text-primary hover:underline">《退改规则》</a>
         </span>
       </label>
+      
+      <!-- Error message (hidden by default) -->
+      <div class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg" data-cruise-order-form-target="termsError">
+        <div class="flex items-center gap-2 text-red-600">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="text-sm font-medium">请先阅读并同意服务条款和退改规则</span>
+        </div>
+      </div>
     </section>
 
     <!-- Price Summary & Submit -->
