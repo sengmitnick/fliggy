@@ -28,6 +28,7 @@ locations_data = [
   { city: '北京', name: '北京南站北广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '北京', name: '北京西站南广场停车楼', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '北京', name: '朝阳门CBD接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '北京', name: '国贸CBD', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '北京', name: '中关村科技园接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '北京', name: '三里屯太古里接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
@@ -37,8 +38,11 @@ locations_data = [
   { city: '上海', name: '浦东国际机场T2航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海虹桥站西广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海虹桥站南广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: '上海虹桥站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海南站南广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '陆家嘴金融区接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: '陆家嘴金融区', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: '外滩', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '徐家汇商圈接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '人民广场接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
@@ -62,15 +66,19 @@ locations_data = [
   { city: '成都', name: '双流国际机场T1航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '成都', name: '双流国际机场T2航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '成都', name: '成都东站东广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
+  { city: '成都', name: '成都东站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '成都', name: '成都南站南广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '成都', name: '春熙路太古里接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '成都', name: '春熙路商圈', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '成都', name: '高新区环球中心接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
   # 杭州
   { city: '杭州', name: '萧山国际机场T3航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
+  { city: '杭州', name: '萧山国际机场', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '杭州', name: '杭州东站东广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '杭州', name: '杭州站南广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '杭州', name: '武林广场接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '杭州', name: '西湖风景区', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '杭州', name: '钱江新城CBD接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
   # 重庆
@@ -84,13 +92,17 @@ locations_data = [
   { city: '西安', name: '咸阳国际机场T3航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '西安', name: '西安北站北广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '西安', name: '西安站南广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
+  { city: '西安', name: '西安站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '西安', name: '钟楼商圈接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '西安', name: '钟楼商圈', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
   # 南京
   { city: '南京', name: '禄口国际机场T2航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '南京', name: '南京南站南广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
+  { city: '南京', name: '南京南站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '南京', name: '南京站北广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '南京', name: '新街口商圈接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '南京', name: '新街口商圈', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
   # 武汉
   { city: '武汉', name: '天河国际机场T3', location_type: 'airport', created_at: timestamp, updated_at: timestamp },

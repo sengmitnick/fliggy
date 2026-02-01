@@ -286,6 +286,52 @@ if cities.include?("上海")
   end
 end
 
+# 火车站附近酒店（支持 V131/V134 等验证器）
+["上海", "天津"].each do |city|
+  next unless cities.include?(city)
+  
+  # 每个城市添加3家火车站附近酒店
+  3.times do |idx|
+    hotel_index += 1
+    brand = domestic_brands.sample
+    star_level = brand[:star]
+    
+    base_price = case star_level
+    when 4 then rand(300..500)
+    else rand(200..350)
+    end
+    
+    # 确保酒店名字或地址包含"站"
+    hotel_name = if idx == 0
+      "#{brand[:name]}酒店·#{city}火车站店"  # 名字包含"火车站"
+    else
+      "#{brand[:name]}酒店·#{city}店"
+    end
+    
+    hotels_data << {
+      name: hotel_name,
+      brand: brand[:name],
+      city: city,
+      address: "#{city}火车站#{rand(1..999)}号",  # 地址包含"火车站"
+      rating: (4.0 + rand * 0.8).round(1),
+      price: base_price,
+      original_price: (base_price * rand(1.1..1.25)).round(0),
+      distance: "#{rand(1..3)}.#{rand(0..9)}km",  # 离火车站更近
+      features: features_pool.sample,
+      star_level: star_level,
+      is_featured: false,
+      display_order: hotel_index,
+      hotel_type: 'hotel',
+      is_domestic: true,
+      region: '国内',
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
 puts "💾 批量插入 #{hotels_data.count} 家酒店..."
 Hotel.insert_all(hotels_data)
 

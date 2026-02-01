@@ -8,7 +8,8 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 #
 # 数据说明：
 # - 深圳到北京：每天4个航班，最低价550元
-# - 上海到深圳：每天2个航班，考虑折扣后最低价450元
+# - 上海到深圳：每天3个航班（含18:30晚班），考虑折扣后最低价450元
+# - 北京往返深圳：每天各2个航班
 # - 北京往返上海：每天各3个航班
 # - 广州往返成都：每天各2个航班
 # - 杭州往返三亚：每天各2个航班
@@ -16,6 +17,9 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 # - 北京往返杭州：每天各2个航班
 # - 北京往返广州：每天各2个航班
 # - 上海往返成都：每天各2个航班
+# - 北京到上海浦东T1：每天1个航班（V114专用）
+# - 成都到杭州：每天2个航班（V116专用）
+# - 国际航班到上海浦东T2深夜：每天1个航班（V117专用）
 # - 生成未来7天的航班数据
 # - 不使用显式 ID，让数据库自动生成
 
@@ -161,6 +165,24 @@ all_flights = []
       flight_date: date,
       created_at: timestamp,
       updated_at: timestamp
+    },
+    {
+      departure_city: "上海",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 18, min: 30),
+      arrival_time: base_datetime.change(hour: 21, min: 15),
+      departure_airport: "虹桥T2",
+      arrival_airport: "宝安T3",
+      airline: "东方航空",
+      flight_number: "MU#{5567 + day_suffix}",
+      aircraft_type: "空客321(中)",
+      price: 580.0,
+      discount_price: 30.0,
+      seat_class: "economy",
+      available_seats: 95,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
     }
   ]
   
@@ -168,6 +190,59 @@ all_flights = []
 end
 
 # 批量插入上海->深圳航班
+Flight.insert_all(all_flights)
+
+# ==================== 北京 <-> 深圳 往返航班 ====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  # 北京 -> 深圳
+  flights_bj_to_sz = [
+    {
+      departure_city: "北京",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 8, min: 30),
+      arrival_time: base_datetime.change(hour: 11, min: 45),
+      departure_airport: "首都T3",
+      arrival_airport: "宝安T3",
+      airline: "中国国航",
+      flight_number: "CA#{1301 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 780.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "北京",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 14, min: 0),
+      arrival_time: base_datetime.change(hour: 17, min: 15),
+      departure_airport: "大兴",
+      arrival_airport: "宝安T3",
+      airline: "南方航空",
+      flight_number: "CZ#{3801 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 690.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 80,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_bj_to_sz)
+end
+
+# 批量插入北京->深圳航班
 Flight.insert_all(all_flights)
 
 # ==================== 北京 <-> 上海 往返航班 ====================
@@ -857,9 +932,289 @@ end
 
 Flight.insert_all(all_flights)
 
+# ==================== 北京 -> 上海浦东T1（V114专用）====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flights_bj_to_sh_t1 = [
+    {
+      departure_city: "北京",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 12, min: 0),
+      arrival_time: base_datetime.change(hour: 14, min: 30),
+      departure_airport: "首都T3",
+      arrival_airport: "浦东国际机场T1航站楼",
+      airline: "东方航空",
+      flight_number: "MU#{5301 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 750.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_bj_to_sh_t1)
+end
+
+Flight.insert_all(all_flights)
+
+# ==================== 成都 -> 杭州萧山机场（V116专用）====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flights_cd_to_hz = [
+    {
+      departure_city: "成都",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 9, min: 20),
+      arrival_time: base_datetime.change(hour: 11, min: 50),
+      departure_airport: "双流T2",
+      arrival_airport: "萧山国际机场",
+      airline: "四川航空",
+      flight_number: "3U#{8501 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 880.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "成都",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 15, min: 30),
+      arrival_time: base_datetime.change(hour: 18, min: 0),
+      departure_airport: "双流T1",
+      arrival_airport: "萧山国际机场",
+      airline: "东方航空",
+      flight_number: "MU#{5601 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 920.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 95,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_cd_to_hz)
+end
+
+Flight.insert_all(all_flights)
+
+# ==================== 国际航班 -> 上海浦东T2深夜（V117专用）====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flights_international_to_sh = [
+    {
+      departure_city: "东京",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 19, min: 30),
+      arrival_time: base_datetime.change(hour: 22, min: 0),
+      departure_airport: "成田T1",
+      arrival_airport: "浦东国际机场T2航站楼",
+      airline: "全日空",
+      flight_number: "NH#{921 + day_suffix}",
+      aircraft_type: "波音787(大)",
+      price: 1580.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 180,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "首尔",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 20, min: 0),
+      arrival_time: base_datetime.change(hour: 22, min: 15),
+      departure_airport: "仁川T1",
+      arrival_airport: "浦东国际机场T2航站楼",
+      airline: "大韩航空",
+      flight_number: "KE#{891 + day_suffix}",
+      aircraft_type: "空客330(大)",
+      price: 1280.0,
+      discount_price: 100.0,
+      seat_class: "economy",
+      available_seats: 150,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_international_to_sh)
+end
+
+Flight.insert_all(all_flights)
+
+# ==================== 上海 <-> 杭州 往返航班（用于V168验证） ====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  # 上海 -> 杭州
+  flights_sh_to_hz = [
+    {
+      departure_city: "上海",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 8, min: 0),
+      arrival_time: base_datetime.change(hour: 9, min: 0),
+      departure_airport: "虹桥T2",
+      arrival_airport: "萧山",
+      airline: "东方航空",
+      flight_number: "MU#{5331 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 280.0,
+      discount_price: 20.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "上海",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 14, min: 30),
+      arrival_time: base_datetime.change(hour: 15, min: 30),
+      departure_airport: "浦东T2",
+      arrival_airport: "萧山",
+      airline: "吉祥航空",
+      flight_number: "HO#{1188 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 320.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 90,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  # 杭州 -> 上海
+  flights_hz_to_sh = [
+    {
+      departure_city: "杭州",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 10, min: 30),
+      arrival_time: base_datetime.change(hour: 11, min: 30),
+      departure_airport: "萧山",
+      arrival_airport: "虹桥T2",
+      airline: "东方航空",
+      flight_number: "MU#{5332 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 290.0,
+      discount_price: 20.0,
+      seat_class: "economy",
+      available_seats: 110,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "杭州",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 16, min: 0),
+      arrival_time: base_datetime.change(hour: 17, min: 0),
+      departure_airport: "萧山",
+      arrival_airport: "浦东T2",
+      airline: "吉祥航空",
+      flight_number: "HO#{1189 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 310.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 95,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_sh_to_hz)
+  all_flights.concat(flights_hz_to_sh)
+end
+
+Flight.insert_all(all_flights)
+
+# ==================== 上海 -> 广州 航班（用于V169验证） ====================
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  # 上海 -> 广州
+  flights_sh_to_gz = [
+    {
+      departure_city: "上海",
+      destination_city: "广州",
+      departure_time: base_datetime.change(hour: 8, min: 30),
+      arrival_time: base_datetime.change(hour: 11, min: 15),
+      departure_airport: "虹桥T2",
+      arrival_airport: "白云T2",
+      airline: "南方航空",
+      flight_number: "CZ#{3501 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 680.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "上海",
+      destination_city: "广州",
+      departure_time: base_datetime.change(hour: 14, min: 0),
+      arrival_time: base_datetime.change(hour: 16, min: 45),
+      departure_airport: "浦东T2",
+      arrival_airport: "白云T2",
+      airline: "东方航空",
+      flight_number: "MU#{5171 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 720.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_sh_to_gz)
+end
+
+Flight.insert_all(all_flights)
+
 # 批量生成优惠信息（为所有航班生成）
-# 原有6个航班 + 北京上海6个 + 广州成都4个 + 杭州三亚4个 + 西安南京4个 + 北京杭州4个 + 北京广州4个 + 上海成都4个 = 每天36个航班
-total_flights = (start_date..end_date).count * 36
+# 原有36个航班 + 北京上海浦东T1(1) + 成都杭州(2) + 国际航班(2) + 上海杭州(4) + 上海广州(2) = 每天47个航班
+total_flights = (start_date..end_date).count * 47
 Flight.where(data_version: 0).find_each(&:generate_offers)
 
 puts "  - 深圳到北京: 每天4个航班，最低价 550元（共 #{(start_date..end_date).count * 4} 个）"
@@ -871,3 +1226,8 @@ puts "  - 西安往返南京: 每天各2个航班（共 #{(start_date..end_date)
 puts "  - 北京往返杭州: 每天各2个航班（共 #{(start_date..end_date).count * 4} 个）"
 puts "  - 北京往返广州: 每天各2个航班（共 #{(start_date..end_date).count * 4} 个）"
 puts "  - 上海往返成都: 每天各2个航班（共 #{(start_date..end_date).count * 4} 个）"
+puts "  - 北京到上海浦东T1: 每天1个航班（共 #{(start_date..end_date).count * 1} 个）"
+puts "  - 成都到杭州: 每天2个航班（共 #{(start_date..end_date).count * 2} 个）"
+puts "  - 国际航班到上海浦东T2深夜: 每天2个航班（共 #{(start_date..end_date).count * 2} 个）"
+puts "  - 上海往返杭州: 每天各2个航班（共 #{(start_date..end_date).count * 4} 个）"
+puts "  - 上海到广州: 每天2个航班（共 #{(start_date..end_date).count * 2} 个）"

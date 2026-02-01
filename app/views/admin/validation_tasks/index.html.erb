@@ -5,7 +5,28 @@
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50">验证任务管理</h1>
     <div class="text-sm text-gray-500 dark:text-gray-400">
-      共 <%= @tasks.size %> 个任务
+      共 <%= @tasks.total_count %> 个任务
+    </div>
+  </div>
+
+  <!-- Directory Filter -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">目录筛选：</span>
+      
+      <!-- All Tasks Button -->
+      <%= link_to admin_validation_tasks_path, 
+          class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory.nil? ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
+        全部 (<%= @tasks.total_count %>)
+      <% end %>
+      
+      <!-- Directory Buttons -->
+      <% @directories.each do |directory| %>
+        <%= link_to admin_validation_tasks_path(directory: directory), 
+            class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory == directory ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
+          <%= directory %>
+        <% end %>
+      <% end %>
     </div>
   </div>
 
@@ -46,6 +67,14 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <%= paginate @tasks, theme: 'custom', 
+              params: { directory: @selected_directory }.compact,
+              outer_window: 2, 
+              window: 3 %>
+        </div>
       <% else %>
         <div class="text-center py-12">
           <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -53,8 +82,20 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
           </div>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-50 mb-2">暂无验证任务</h3>
-          <p class="text-gray-500 dark:text-gray-400">请在 app/validators/ 目录下创建验证器。</p>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-50 mb-2">
+            <% if @selected_directory.present? %>
+              该目录下暂无验证任务
+            <% else %>
+              暂无验证任务
+            <% end %>
+          </h3>
+          <p class="text-gray-500 dark:text-gray-400">
+            <% if @selected_directory.present? %>
+              尝试选择其他目录或查看全部任务
+            <% else %>
+              请在 app/validators/ 目录下创建验证器。
+            <% end %>
+          </p>
         </div>
       <% end %>
     </div>

@@ -3,7 +3,21 @@
 class Admin::ValidationTasksController < Admin::BaseController
   # GET /admin/validation_tasks
   def index
-    @tasks = load_all_validators
+    all_tasks = load_all_validators
+    
+    # 获取所有目录用于筛选
+    @directories = all_tasks.map { |t| extract_directory(t[:validator_id]) }.uniq.sort
+    
+    # 按目录筛选
+    @selected_directory = params[:directory]
+    filtered_tasks = if @selected_directory.present?
+      all_tasks.select { |t| extract_directory(t[:validator_id]) == @selected_directory }
+    else
+      all_tasks
+    end
+    
+    # 分页（使用 Kaminari.paginate_array）
+    @tasks = Kaminari.paginate_array(filtered_tasks).page(params[:page]).per(50)
   end
 
   # GET /admin/validation_tasks/:id
@@ -57,5 +71,15 @@ class Admin::ValidationTasksController < Admin::BaseController
   # 根据ID查找验证器（支持 validator_id 或 task_id）
   def find_validator_by_id(id)
     load_all_validators.find { |task| task[:validator_id] == id || task[:task_id] == id }
+  end
+
+  # 从 validator_id 中提取目录名
+  def extract_directory(validator_id)
+    # 匹配格式如 v001_v050::v001_xxx
+    if validator_id =~ /^([a-z0-9_]+)::/i
+      Regexp.last_match(1)
+    else
+      '其他'
+    end
   end
 end
