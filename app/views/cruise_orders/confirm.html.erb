@@ -90,7 +90,7 @@
         <% if @cruise_order.insurance_price.present? && @cruise_order.insurance_price > 0 %>
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">保险费用</span>
-            <span class="font-medium text-gray-900">¥<%= @cruise_order.insurance_price %></span>
+            <span class="font-medium text-gray-900">¥<%= @cruise_order.insurance_price * @cruise_order.quantity %></span>
           </div>
         <% end %>
         

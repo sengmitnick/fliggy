@@ -91,8 +91,8 @@
         </div>
         <% if @cruise_order.insurance_price.to_i > 0 %>
         <div class="flex justify-between text-sm">
-          <span class="text-gray-600">保险费用</span>
-          <span class="text-gray-900">¥<%= @cruise_order.insurance_price.to_i %></span>
+          <span class="text-gray-600">保险费用（<%= @cruise_order.quantity %>人）</span>
+          <span class="text-gray-900">¥<%= (@cruise_order.insurance_price * @cruise_order.quantity).to_i %></span>
         </div>
         <% end %>
         <div class="border-t border-gray-100 pt-3">
