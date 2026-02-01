@@ -7,6 +7,32 @@ class CharteredToursController < ApplicationController
     @active_tab = params[:tab] || 'personal'
   end
 
+  def search
+    # 包车游城市搜索页面 - 展示城市选择、日期选择、精挑路线
+    @selected_city = params[:city].present? ? City.find_by(name: params[:city]) : City.find_by(name: '武汉')
+    @departure_date = params[:date].present? ? Date.parse(params[:date]) : (Date.current + 1.day)
+    @active_tab = params[:tab] || 'recommend' # recommend, classic, hot
+    
+    # 获取该城市的包车路线
+    if @selected_city
+      @routes = CharterRoute.where(city: @selected_city)
+      @routes = case @active_tab
+                when 'classic'
+                  @routes.classic
+                when 'hot'
+                  @routes.hot
+                else
+                  @routes.featured
+                end
+      @routes = @routes.includes(:city, :attractions).order(:name)
+    else
+      @routes = CharterRoute.none
+    end
+    
+    # 获取热门城市列表（用于城市选择器）
+    @hot_cities = City.where(name: ['武汉', '上海', '北京', '广州', '深圳', '杭州', '成都', '西安'])
+  end
+
   def vehicles
     # 车型选择页面 - 显示不同时长和车型的价格
     @route = CharterRoute.friendly.find(params[:route_id])

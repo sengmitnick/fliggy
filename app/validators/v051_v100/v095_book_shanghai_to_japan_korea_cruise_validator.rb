@@ -2,13 +2,14 @@
 
 require_relative '../base_validator'
 
-# 验证用例95: 预订香港出发日韩邮轮（海洋光谱号，6天5晚）
+# 验证用例95: 预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）
+# 测试内容：邮轮筛选、出发港过滤、行程天数匹配、舱房类型选择、出发月份筛选、日期优化选择、预订数量验证
 module V051V100
   class V095BookShanghaiToJapanKoreaCruiseValidator < BaseValidator
     self.validator_id = 'v095_book_shanghai_to_japan_korea_cruise_validator'
     self.task_id = '25e31a26-07fd-4515-91c9-91e037c21aa4'
-    self.title = '预订香港出发日韩邮轮（海洋光谱号，6天5晚最近班次）'
-    self.description = '预订香港出发的日韩邮轮，选择海洋光谱号最近一班6天5晚行程，预订内舱房（性价比之选）'
+    self.title = '预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
+    self.description = '预订香港出发的日韩邮轮，选择海洋光谱号1月份最近一班6天5晚行程，预订内舱房（性价比之选），为2位成人'
     self.timeout_seconds = 240
   
     def prepare
@@ -18,44 +19,57 @@ module V051V100
       @duration_nights = 5
       @cabin_category = 'interior'
       @adult_count = 2
+      @expected_month = 1  # 1月出发（冬季日韩航线）
     
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     
       {
-        task: "请预订香港出发的日韩邮轮，要求#{@ship_keyword}，行程#{@duration_days}天#{@duration_nights}晚，选择最近的一个班次，预订内舱房（性价比之选），为#{@adult_count}位成人",
+        task: "请预订香港出发的日韩邮轮，要求#{@ship_keyword}，行程#{@duration_days}天#{@duration_nights}晚，选择1月份最近的一个班次，预订内舱房（性价比之选），为#{@adult_count}位成人",
         ship_keyword: @ship_keyword,
         departure_port_keyword: @departure_port_keyword,
         duration: "#{@duration_days}天#{@duration_nights}晚",
         cabin_category: '内舱房（interior）',
         adult_count: @adult_count,
-        hint: "筛选船只名包含'海洋光谱号'、出发港包含'香港'、duration_days=6且duration_nights=5的班次，选择最近日期的班次，预订内舱房（category='interior'）",
+        departure_month: '1月（冬季日韩航线）',
+        hint: "筛选船只名包含'海洋光谱号'、出发港包含'香港'、duration_days=6且duration_nights=5的班次，选择1月份最近日期的班次，预订内舱房（category='interior'），预订数量为2位成人",
         available_ships_count: @available_ships.count
       }
     end
   
     def verify
+      # 断言1: 订单已创建（20%）
       add_assertion "订单已创建", weight: 20 do
-        @order = CruiseOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何邮轮订单"
+        all_orders = CruiseOrder
+          .joins(cruise_product: { cruise_sailing: :cruise_ship })
+          .where(cruise_ships: { name: @ship_keyword })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+    
+        expect(all_orders).not_to be_empty, "未找到任何邮轮订单"
+        @order = all_orders.first
       end
     
       return unless @order
     
-      add_assertion "船只正确（海洋光谱号）", weight: 20 do
+      # 断言2: 船只正确（15%）
+      add_assertion "船只正确（#{@ship_keyword}）", weight: 15 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
         expect(ship.name).to include(@ship_keyword),
           "船只不符合要求。期望包含: #{@ship_keyword}, 实际: #{ship.name}"
       end
     
-      add_assertion "出发港正确（香港）", weight: 15 do
+      # 断言3: 出发港正确（10%）
+      add_assertion "出发港正确（#{@departure_port_keyword}）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
         expect(sailing.departure_port).to include(@departure_port_keyword),
           "出发港不符合要求。期望包含: #{@departure_port_keyword}, 实际: #{sailing.departure_port}"
       end
     
-      add_assertion "行程天数正确（6天5晚）", weight: 15 do
+      # 断言4: 行程天数正确（10%）
+      add_assertion "行程天数正确（#{@duration_days}天#{@duration_nights}晚）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
         expect(sailing.duration_days).to eq(@duration_days),
@@ -64,6 +78,15 @@ module V051V100
           "行程晚数错误。期望: #{@duration_nights}晚, 实际: #{sailing.duration_nights}晚"
       end
     
+      # 断言5: 出发月份正确（10%）- 验证选择了1月份出发的班次
+      add_assertion "出发月份正确（1月份）", weight: 10 do
+        sailing = @order.cruise_product.cruise_sailing
+        actual_month = sailing.departure_date.month
+        expect(actual_month).to eq(@expected_month),
+          "出发月份错误。期望: #{@expected_month}月, 实际: #{actual_month}月（#{sailing.departure_date}）"
+      end
+    
+      # 断言6: 舱房类型正确（15%）
       add_assertion "舱房类型正确（内舱房）", weight: 15 do
         product = @order.cruise_product
         cabin = product.cabin_type
@@ -71,25 +94,43 @@ module V051V100
           "舱房类型错误。期望: #{@cabin_category}（内舱房），实际: #{cabin.category}（#{cabin.name}）"
       end
     
-      add_assertion "选择了最近日期的班次", weight: 15 do
+      # 断言7: 预订数量正确（10%）- 验证为2位成人预订
+      add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 10 do
+        expect(@order.quantity).to eq(@adult_count),
+          "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
+      end
+    
+      # 断言8: 选择了1月份最近日期的班次（10%）- 在所有符合条件的1月班次中选择最早的
+      add_assertion "选择了1月份最近日期的班次", weight: 10 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
+        
+        # 筛选符合条件的班次：正确的出发港、行程天数、出发月份
         available_sailings = CruiseSailing.where(
           data_version: 0,
           cruise_ship_id: ship.id,
           duration_days: @duration_days,
           duration_nights: @duration_nights
-        )
+        ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+         .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
       
         nearest = available_sailings.order(departure_date: :asc).first
         actual_sailing = @order.cruise_product.cruise_sailing
+        
         expect(actual_sailing.id).to eq(nearest.id),
-          "未选择最近日期的班次。应选: #{nearest.departure_date}, 实际: #{actual_sailing.departure_date}"
+          "未选择1月份最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
       end
     end
   
     def execution_state_data
-      { ship_keyword: @ship_keyword, departure_port_keyword: @departure_port_keyword, duration_days: @duration_days,
-        duration_nights: @duration_nights, cabin_category: @cabin_category, adult_count: @adult_count }
+      { 
+        ship_keyword: @ship_keyword, 
+        departure_port_keyword: @departure_port_keyword, 
+        duration_days: @duration_days,
+        duration_nights: @duration_nights, 
+        cabin_category: @cabin_category, 
+        adult_count: @adult_count,
+        expected_month: @expected_month
+      }
     end
   
     def restore_from_state(data)
@@ -99,29 +140,36 @@ module V051V100
       @duration_nights = data['duration_nights']
       @cabin_category = data['cabin_category']
       @adult_count = data['adult_count']
+      @expected_month = data['expected_month']
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     end
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
+      # 查找船只
       ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
       raise "未找到符合条件的船只" unless ship
     
+      # 查找符合条件的班次：船只、行程天数、出发港、出发月份
       available_sailings = CruiseSailing.where(
         data_version: 0,
         cruise_ship_id: ship.id,
         duration_days: @duration_days,
         duration_nights: @duration_nights
-      )
+      ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+       .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+       
       raise "未找到符合条件的班次" if available_sailings.empty?
     
+      # 选择1月份最近日期的班次
       nearest_sailing = available_sailings.order(departure_date: :asc).first
     
+      # 查找内舱房
       cabin_type = CabinType.where(data_version: 0, cruise_ship_id: ship.id, category: @cabin_category).first
       raise "未找到符合条件的舱房类型" unless cabin_type
     
-      # Find or create CruiseProduct
+      # 查找或创建邮轮产品
       cruise_product = CruiseProduct.find_or_create_by!(
         cruise_sailing_id: nearest_sailing.id,
         cabin_type_id: cabin_type.id,
@@ -139,6 +187,7 @@ module V051V100
     
       total_price = cruise_product.price_per_person * @adult_count
     
+      # 创建订单（2位成人）
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: cruise_product.id,
@@ -147,7 +196,8 @@ module V051V100
         contact_phone: '13800138006',
         total_price: total_price,
         accept_terms: true,
-        status: 'pending'
+        status: 'pending',
+        data_version: 0
       )
     end
     end

@@ -42,6 +42,7 @@ Rails.application.routes.draw do
   resources :chartered_tours, only: [:index] do
     collection do
       get :vehicles
+      get :search
     end
   end
   # End routes for chartered_tours

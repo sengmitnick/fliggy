@@ -129,6 +129,7 @@ import CarSearchEditorController from "./car_search_editor_controller"
 import InsuranceSearchController from "./insurance_search_controller"
 import InsuranceSearchFormController from "./insurance_search_form_controller"
 import FlightCitySelectorController from "./flight_city_selector_controller"
+import CharterSearchController from "./charter_search_controller"
 
 const application = Application.start()
 
@@ -261,5 +262,6 @@ application.register("car-search-editor", CarSearchEditorController)
 application.register("insurance-search", InsuranceSearchController)
 application.register("insurance-search-form", InsuranceSearchFormController)
 application.register("flight-city-selector", FlightCitySelectorController)
+application.register("charter-search", CharterSearchController)
 
 window.Stimulus = application
