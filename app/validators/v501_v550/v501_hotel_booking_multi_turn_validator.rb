@@ -117,62 +117,63 @@ module V501V550
       end
     end
     
-    # 处理用户消息并返回 Agent 响应
-    # 在多轮对话中，这个方法会被调用来获取 Agent 的回复
-    def process_user_message(message)
-      # 在实际实现中，这里应该调用真实的 Agent API
-      # 目前返回模拟响应用于测试框架
+    # 模拟用户操作：直接创建符合条件的酒店订单
+    # 注意：此方法用于 rake validator:simulate 测试
+    # 在生产环境中，实际订单通过多轮对话 API 创建
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 简单的规则引擎模拟 Agent 行为
-      if @current_turn == 1
-        # 第一轮：询问详细需求
-        "好的，我来帮您预订酒店。请问您的入住日期和离店日期是什么时候？"
-      elsif message.include?('入住') || message.include?('日期')
-        # 第二轮：确认预算和偏好
-        "明白了，入住日期是#{@check_in_date}，离店日期是#{@check_out_date}。您提到预算#{@budget}元，对酒店位置或设施有特殊要求吗？"
-      elsif message.include?('位置') || message.include?('性价比')
-        # 第三轮：推荐酒店
-        hotel = Hotel.where(data_version: 0)
-                     .by_city(@city)
-                     .where('price <= ?', @budget)
-                     .order(rating: :desc)
-                     .first
+      # 根据任务条件查找符合要求的酒店和房间
+      # 注意：需要同时考虑酒店和房间的价格
+      hotels = Hotel.where(city: @city, data_version: 0)
+      
+      target_hotel = nil
+      target_hotel_room = nil
+      
+      # 遍历酒店，找到第一个有符合预算房间的酒店
+      hotels.shuffle.each do |hotel|
+        room = HotelRoom.where(hotel_id: hotel.id)
+                        .where(room_category: 'overnight')
+                        .where('price <= ?', @budget)
+                        .order(:price)
+                        .first
         
-        if hotel
-          "我为您找到了#{hotel.name}，每晚#{hotel.price}元，#{hotel.star_level}星级，评分#{hotel.rating}。是否需要我帮您预订？"
-        else
-          "抱歉，暂时没有找到符合条件的酒店。要不要调整一下预算或城市？"
+        if room
+          target_hotel = hotel
+          target_hotel_room = room
+          break
         end
-      elsif message.include?('预订') || message.include?('确认')
-        # 第四轮：执行预订
-        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-        hotel = Hotel.where(data_version: 0)
-                     .by_city(@city)
-                     .where('price <= ?', @budget)
-                     .order(rating: :desc)
-                     .first
-        
-        if hotel
-          hotel_room = hotel.hotel_rooms.first
-          
-          booking = HotelBooking.create!(
-            user_id: user.id,
-            hotel_id: hotel.id,
-            hotel_room_id: hotel_room&.id,
-            check_in_date: @check_in_date,
-            check_out_date: @check_out_date,
-            total_price: hotel.price,
-            data_version: @data_version
-          )
-          
-          "预订成功！您的订单号是#{booking.id}，#{hotel.name}，入住日期#{@check_in_date}，离店日期#{@check_out_date}，总价#{hotel.price}元。"
-        else
-          "抱歉，预订失败，未找到合适的酒店。"
-        end
-      else
-        # 其他情况：提示用户
-        "我需要了解您的入住日期和预算，才能帮您找到合适的酒店。"
       end
+      
+      raise "未找到符合条件的酒店房间（城市: #{@city}, 预算: ≤#{@budget}元）" unless target_hotel && target_hotel_room
+      
+      # 创建酒店订单
+      hotel_booking = HotelBooking.create!(
+        hotel_id: target_hotel.id,
+        hotel_room_id: target_hotel_room.id,
+        user_id: user.id,
+        check_in_date: @check_in_date,
+        check_out_date: @check_out_date,
+        rooms_count: 1,
+        adults_count: 1,
+        children_count: 0,
+        total_price: target_hotel_room.price,
+        payment_method: '花呗',
+        status: 'pending',
+        guest_name: user.email.split('@').first,
+        guest_phone: '13800138000',
+        data_version: @data_version
+      )
+      
+      {
+        action: 'create_hotel_booking',
+        booking_id: hotel_booking.id,
+        hotel_name: target_hotel.name,
+        room_price: target_hotel_room.price,
+        check_in_date: @check_in_date.to_s,
+        check_out_date: @check_out_date.to_s,
+        user_email: user.email
+      }
     end
     
     private
