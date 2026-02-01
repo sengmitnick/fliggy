@@ -59,16 +59,39 @@
       <h2 class="text-base font-semibold text-gray-900 mb-3">乘客人数</h2>
       
       <div class="form-group">
-        <%= f.label :quantity, "入住人数", class: "form-label" %>
-        <%= f.number_field :quantity, 
-                          min: @product.occupancy_requirement, 
-                          value: @product.occupancy_requirement,
-                          class: "form-input",
+        <div class="flex items-center justify-between">
+          <%= f.label :quantity, "入住人数", class: "form-label mb-0 flex-shrink-0" %>
+          
+          <div class="flex items-center gap-3">
+            <button type="button" 
+                    class="w-9 h-9 rounded-lg border-2 border-gray-300 text-gray-600 hover:border-primary hover:text-primary transition flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+                    data-action="click->cruise-order-form#decrementQuantity"
+                    data-cruise-order-form-target="decrementBtn">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+              </svg>
+            </button>
+            
+            <div class="w-16 text-center flex-shrink-0">
+              <div class="text-2xl font-bold text-primary" data-cruise-order-form-target="quantityDisplay"><%= @product.occupancy_requirement %></div>
+              <div class="text-[10px] text-gray-400 leading-none">人</div>
+            </div>
+            
+            <button type="button" 
+                    class="w-9 h-9 rounded-lg border-2 border-gray-300 text-gray-600 hover:border-primary hover:text-primary transition flex items-center justify-center flex-shrink-0"
+                    data-action="click->cruise-order-form#incrementQuantity">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <%= f.hidden_field :quantity, 
                           data: { 
                             cruise_order_form_target: "quantityInput",
-                            action: "input->cruise-order-form#updateTotalPrice"
+                            occupancy_requirement: @product.occupancy_requirement
                           } %>
-        <p class="form-help">此舱房要求至少 <%= @product.occupancy_requirement %> 人入住</p>
+        <p class="form-help">此舱房要求至少 <%= @product.occupancy_requirement %> 人入住，每次增减 <%= @product.occupancy_requirement %> 人</p>
       </div>
     </section>
 
@@ -249,8 +272,9 @@
         </div>
       </div>
 
-      <!-- Hidden form field for insurance price -->
-      <%= f.hidden_field :insurance_price, value: 0, data: { cruise_order_form_target: "insurancePriceInput" } %>
+      <!-- Hidden form fields for insurance -->
+      <%= f.hidden_field :insurance_price, data: { cruise_order_form_target: "insurancePriceInput" } %>
+      <%= f.hidden_field :insurance_type, data: { cruise_order_form_target: "insuranceTypeInput" } %>
     </div>
 
     <!-- Remark -->

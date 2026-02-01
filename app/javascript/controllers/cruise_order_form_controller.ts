@@ -3,8 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = [
     "modal", "nameInput", "phoneInput", "emailInput", "contactItem",
-    "insuranceCard", "checkmark", "insurancePriceInput", "quantityInput",
-    "totalPrice", "submitBtn", "form", "acceptTermsCheckbox", "termsSection", "termsError"
+    "insuranceCard", "checkmark", "insurancePriceInput", "insuranceTypeInput", "quantityInput",
+    "totalPrice", "submitBtn", "form", "acceptTermsCheckbox", "termsSection", "termsError",
+    "quantityDisplay", "decrementBtn"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -15,6 +16,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly insuranceCardTargets: HTMLElement[]
   declare readonly checkmarkTargets: HTMLElement[]
   declare readonly insurancePriceInputTarget: HTMLInputElement
+  declare readonly insuranceTypeInputTarget: HTMLInputElement
   declare readonly quantityInputTarget: HTMLInputElement
   declare readonly totalPriceTarget: HTMLElement
   declare readonly submitBtnTarget: HTMLButtonElement
@@ -22,6 +24,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly acceptTermsCheckboxTarget: HTMLInputElement
   declare readonly termsSectionTarget: HTMLElement
   declare readonly termsErrorTarget: HTMLElement
+  declare readonly quantityDisplayTarget: HTMLElement
+  declare readonly decrementBtnTarget: HTMLButtonElement
   declare readonly hasModalTarget: boolean
   declare readonly hasContactItemTarget: boolean
   declare readonly hasInsuranceCardTarget: boolean
@@ -29,6 +33,7 @@ export default class extends Controller<HTMLElement> {
   private selectedInsuranceType: string = 'none'
   private selectedInsurancePrice: number = 0
   private basePrice: number = 0
+  private occupancyRequirement: number = 1
 
   connect(): void {
     console.log("CruiseOrderForm connected")
@@ -36,8 +41,30 @@ export default class extends Controller<HTMLElement> {
     // Get base price from totalPrice element
     this.basePrice = parseFloat(this.totalPriceTarget.dataset.basePrice || '0')
     
-    // Initialize with "none" insurance selected by default
-    this.selectDefaultInsurance()
+    // Get occupancy requirement from quantity input
+    this.occupancyRequirement = parseInt(this.quantityInputTarget.dataset.occupancyRequirement || '1')
+    
+    // Restore insurance selection from form values (may come from URL params)
+    const insuranceType = this.insuranceTypeInputTarget.value
+    const insurancePrice = parseInt(this.insurancePriceInputTarget.value || '0')
+    
+    if (insuranceType && insuranceType !== 'none') {
+      // Restore from URL params (coming back from confirm page)
+      this.selectedInsuranceType = insuranceType
+      this.selectedInsurancePrice = insurancePrice
+    } else {
+      // Default to "none" insurance
+      this.selectDefaultInsurance()
+    }
+    
+    // Update quantity display from hidden field value
+    const quantity = parseInt(this.quantityInputTarget.value) || this.occupancyRequirement
+    this.quantityDisplayTarget.textContent = quantity.toString()
+    
+    // Update UI states
+    this.updateInsuranceCardsUI()
+    this.updateDecrementButtonState()
+    this.updateTotalPrice()
     
     // Add form submit event listener for validation
     this.formTarget.addEventListener('submit', this.validateForm.bind(this))
@@ -156,8 +183,9 @@ export default class extends Controller<HTMLElement> {
     this.selectedInsuranceType = target.dataset.insuranceType || 'none'
     this.selectedInsurancePrice = parseInt(target.dataset.insurancePrice || '0')
     
-    // Update hidden form field
+    // Update hidden form fields
     this.insurancePriceInputTarget.value = this.selectedInsurancePrice.toString()
+    this.insuranceTypeInputTarget.value = this.selectedInsuranceType
     
     // Update visual state of all insurance cards
     this.updateInsuranceCardsUI()
@@ -171,6 +199,7 @@ export default class extends Controller<HTMLElement> {
     this.selectedInsuranceType = 'none'
     this.selectedInsurancePrice = 0
     this.insurancePriceInputTarget.value = '0'
+    this.insuranceTypeInputTarget.value = 'none'
     this.updateInsuranceCardsUI()
   }
 
@@ -236,6 +265,42 @@ export default class extends Controller<HTMLElement> {
       bubbles: true,
       detail: { amount: totalPrice }
     }))
+  }
+
+  incrementQuantity(): void {
+    const currentQuantity = parseInt(this.quantityInputTarget.value) || this.occupancyRequirement
+    const newQuantity = currentQuantity + this.occupancyRequirement
+    
+    this.quantityInputTarget.value = newQuantity.toString()
+    this.quantityDisplayTarget.textContent = newQuantity.toString()
+    
+    this.updateDecrementButtonState()
+    this.updateTotalPrice()
+  }
+
+  decrementQuantity(): void {
+    const currentQuantity = parseInt(this.quantityInputTarget.value) || this.occupancyRequirement
+    const newQuantity = currentQuantity - this.occupancyRequirement
+    
+    // Don't allow going below the minimum occupancy requirement
+    if (newQuantity >= this.occupancyRequirement) {
+      this.quantityInputTarget.value = newQuantity.toString()
+      this.quantityDisplayTarget.textContent = newQuantity.toString()
+      
+      this.updateDecrementButtonState()
+      this.updateTotalPrice()
+    }
+  }
+
+  private updateDecrementButtonState(): void {
+    const currentQuantity = parseInt(this.quantityInputTarget.value) || this.occupancyRequirement
+    
+    // Disable decrement button if we're at the minimum
+    if (currentQuantity <= this.occupancyRequirement) {
+      this.decrementBtnTarget.disabled = true
+    } else {
+      this.decrementBtnTarget.disabled = false
+    }
   }
 
   handleOrderCreated(event: CustomEvent): void {

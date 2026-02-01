@@ -12,14 +12,18 @@ class CruiseOrdersController < ApplicationController
     @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc).limit(10)
     
     # 初始化订单对象，默认使用默认联系人信息，如果没有则使用当前用户信息
+    # 如果 URL 包含参数（从确认页返回），则使用 URL 参数恢复表单状态
     default_contact = current_user.contacts.find_by(is_default: true)
     
     @cruise_order = current_user.cruise_orders.build(
       cruise_product: @product,
-      quantity: @product.occupancy_requirement, # 默认人数
-      contact_name: default_contact&.name || current_user.name,
-      contact_phone: default_contact&.phone || current_user.phone,
-      contact_email: default_contact&.email || current_user.email
+      quantity: params[:quantity] || @product.occupancy_requirement,
+      contact_name: params[:contact_name] || default_contact&.name || current_user.name,
+      contact_phone: params[:contact_phone] || default_contact&.phone || current_user.phone,
+      contact_email: params[:contact_email] || default_contact&.email || current_user.email,
+      insurance_type: params[:insurance_type] || 'none',
+      insurance_price: params[:insurance_price] || 0,
+      remark: params[:remark]
     )
   end
 
@@ -106,6 +110,7 @@ class CruiseOrdersController < ApplicationController
       :contact_phone,
       :contact_email,
       :insurance_price,
+      :insurance_type,
       :remark,
       :accept_terms,
       passenger_info: {}
