@@ -31,6 +31,9 @@ class Admin::ValidationTasksController < Admin::BaseController
       return
     end
     
+    # 检查是否为多轮对话验证器
+    @is_multi_turn = check_multi_turn_validator(@task[:validator_id])
+    
     # 查找上一个和下一个任务
     current_index = @tasks.index { |t| t[:validator_id] == @task[:validator_id] }
     @prev_task = @tasks[current_index - 1] if current_index && current_index > 0
@@ -81,5 +84,33 @@ class Admin::ValidationTasksController < Admin::BaseController
     else
       '其他'
     end
+  end
+  
+  # 检查验证器是否为多轮对话类型
+  def check_multi_turn_validator(validator_id)
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb') || file.end_with?('multi_turn_base_validator.rb')
+      
+      relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+      class_path = relative_path.gsub('.rb', '').split('/')
+      class_name = class_path.map(&:camelize).join('::')
+      
+      begin
+        klass = class_name.constantize
+        next unless klass < BaseValidator
+        
+        # 匹配 validator_id
+        if klass.validator_id == validator_id
+          # 检查是否继承自 MultiTurnBaseValidator
+          return klass < MultiTurnBaseValidator
+        end
+      rescue StandardError => e
+        next
+      end
+    end
+    
+    false
   end
 end

@@ -3,7 +3,14 @@
   <div class="sticky top-0 z-20 bg-surface/95 backdrop-blur-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 py-3">
       <div class="flex items-center gap-3">
-        <%= link_to search_cruises_path(route: @sailing.cruise_route_id), class: "text-gray-700" do %>
+        <%= link_to search_cruises_path(
+          route: params[:route], 
+          cruise_line_id: params[:cruise_line_id],
+          city: params[:city],
+          month: params[:month],
+          sailing_id: @sailing.id,
+          cabin_type_id: params[:cabin_type_id]
+        ), class: "text-gray-700" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -67,7 +74,13 @@
 
       <div class="space-y-3">
         <% @products.each_with_index do |product, index| %>
-          <%= link_to new_cruise_order_path(product_id: product.id), 
+          <%= link_to new_cruise_order_path(
+            product_id: product.id,
+            route: params[:route],
+            cruise_line_id: params[:cruise_line_id],
+            city: params[:city],
+            month: params[:month]
+          ), 
                       class: "block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition" do %>
             <!-- Merchant Header -->
             <div class="flex items-start justify-between mb-3">

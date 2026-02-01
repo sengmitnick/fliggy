@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller<HTMLElement> {
   static targets = [
     "routeDropdown",
-    "tab",
     "shipCard",
     "cityDropdown",
     "monthDropdown",
@@ -12,11 +11,11 @@ export default class extends Controller<HTMLElement> {
     "dateCard",
     "cabinContainer",
     "cabinCard",
-    "roomList"
+    "roomList",
+    "itinerarySection"
   ]
 
   declare readonly routeDropdownTarget: HTMLElement
-  declare readonly tabTargets: HTMLElement[]
   declare readonly shipCardTargets: HTMLElement[]
   declare readonly cityDropdownTarget: HTMLElement
   declare readonly hasCityDropdownTarget: boolean
@@ -30,6 +29,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly cabinContainerTargets: HTMLElement[]
   declare readonly cabinCardTargets: HTMLElement[]
   declare readonly roomListTargets: HTMLElement[]
+  declare readonly itinerarySectionTargets: HTMLElement[]
 
   connect(): void {
     console.log("CruiseSearch connected")
@@ -81,6 +81,16 @@ export default class extends Controller<HTMLElement> {
         container.classList.remove('hidden')
       } else {
         container.classList.add('hidden')
+      }
+    })
+    
+    // Show/hide corresponding itinerary sections
+    this.itinerarySectionTargets.forEach(section => {
+      const sectionSailingId = section.dataset.sailingId
+      if (sectionSailingId === sailingId) {
+        section.classList.remove('hidden')
+      } else {
+        section.classList.add('hidden')
       }
     })
     
@@ -159,27 +169,6 @@ export default class extends Controller<HTMLElement> {
         roomList.classList.add('hidden')
       }
     })
-  }
-
-  // Switch tabs (visual effect only)
-  switchTab(event: Event): void {
-    event.preventDefault()
-    const clickedTab = event.currentTarget as HTMLElement
-    const tabName = clickedTab.dataset.tab
-    
-    // Update tab styles
-    this.tabTargets.forEach(tab => {
-      if (tab === clickedTab) {
-        tab.classList.remove('border-transparent', 'text-gray-500')
-        tab.classList.add('border-yellow-400', 'text-gray-900')
-      } else {
-        tab.classList.remove('border-yellow-400', 'text-gray-900')
-        tab.classList.add('border-transparent', 'text-gray-500')
-      }
-    })
-    
-    // In a real implementation, you would load content for each tab
-    console.log(`Switched to tab: ${tabName}`)
   }
 
   // Toggle city dropdown menu

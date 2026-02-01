@@ -129,16 +129,16 @@ CruiseShip.find_each(&:save)
 # ==================== 航线数据 ====================
 
 cruise_routes_data = [
-  { name: '日韩', region: 'japan_korea', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '三峡', region: 'yangtze_river', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '南北极', region: 'north_pole', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '东南亚', region: 'southeast_asia', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '地中海', region: 'mediterranean', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '阿拉斯加', region: 'alaska', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '欧洲河轮', region: 'europe_river', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '加勒比', region: 'caribbean', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '中东', region: 'middle_east', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current },
-  { name: '西沙群岛', region: 'xisha_islands', icon_url: 'tourism/邮轮游.png', created_at: Time.current, updated_at: Time.current }
+  { name: '日韩', region: 'japan_korea', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '三峡', region: 'yangtze_river', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '南北极', region: 'north_pole', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '东南亚', region: 'southeast_asia', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '地中海', region: 'mediterranean', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '阿拉斯加', region: 'alaska', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '欧洲河轮', region: 'europe_river', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '加勒比', region: 'caribbean', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '中东', region: 'middle_east', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current },
+  { name: '西沙群岛', region: 'xisha_islands', icon_url: ImageSeedHelper.random_image_from_category(:cruises), created_at: Time.current, updated_at: Time.current }
 ]
 
 CruiseRoute.insert_all(cruise_routes_data)
@@ -156,6 +156,12 @@ japan_korea_route = CruiseRoute.find_by(region: 'japan_korea')
 mediterranean_route = CruiseRoute.find_by(region: 'mediterranean')
 southeast_asia_route = CruiseRoute.find_by(region: 'southeast_asia')
 caribbean_route = CruiseRoute.find_by(region: 'caribbean')
+yangtze_river_route = CruiseRoute.find_by(region: 'yangtze_river')
+north_pole_route = CruiseRoute.find_by(region: 'north_pole')
+alaska_route = CruiseRoute.find_by(region: 'alaska')
+europe_river_route = CruiseRoute.find_by(region: 'europe_river')
+middle_east_route = CruiseRoute.find_by(region: 'middle_east')
+xisha_islands_route = CruiseRoute.find_by(region: 'xisha_islands')
 
 cruise_sailings_data = [
   # 海洋光谱号 - 日韩航线
@@ -701,6 +707,488 @@ cruise_sailings_data = [
       { day: 8, port: '海上巡航', title: '海上巡航', description: '甲板派对，加勒比落日' },
       { day: 9, port: '海上巡航', title: '海上巡航', description: '船长晚宴，告别之夜' },
       { day: 10, port: '迈阿密', title: '离船', description: '返回迈阿密，结束加勒比之旅' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+
+  # 地中海辉煌号 - 三峡航线（第1个航班）
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-03-15'),
+    return_date: Date.parse('2026-03-19'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆朝天门码头登船，晚上启航，欣赏山城夜景。三峡邮轮为内河邮轮，航行平稳舒适', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城道教文化景区，下午途经忠县石宝寨古建筑', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '参观白帝城，换乘小船游览小三峡自然风光。晚上穿行瞿塘峡、巫峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '参观三峡大坝水利工程，体验过五级船闸，航行西陵峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '早晨抵达宜昌码头，结束长江三峡之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海辉煌号 - 三峡航线（第2个航班）
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-04-10'),
+    return_date: Date.parse('2026-04-14'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆朝天门码头登船，晚上启航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城，下午途经石宝寨', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '参观白帝城，游览小三峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '参观三峡大坝，体验过船闸', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '抵达宜昌，结束三峡之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海荣耀号 - 三峡航线
+  {
+    cruise_ship_id: grandiosa.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-03-25'),
+    return_date: Date.parse('2026-03-29'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆登船，晚上启航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '白帝城和小三峡游览', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '三峡大坝参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '抵达宜昌', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 三峡航线
+  {
+    cruise_ship_id: fantasia.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-05-05'),
+    return_date: Date.parse('2026-05-09'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆登船，晚上启航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '白帝城和小三峡游览', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '三峡大坝参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '抵达宜昌', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 爱达新星号 - 三峡航线（第1个航班）
+  {
+    cruise_ship_id: aida_nova.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-04-20'),
+    return_date: Date.parse('2026-04-24'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆登船，晚上启航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '白帝城和小三峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '三峡大坝参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '抵达宜昌', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 爱达新星号 - 三峡航线（第2个航班）
+  {
+    cruise_ship_id: aida_nova.id,
+    cruise_route_id: yangtze_river_route&.id,
+    departure_date: Date.parse('2026-05-15'),
+    return_date: Date.parse('2026-05-19'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '重庆登船',
+    arrival_port: '宜昌离船',
+    status: 'on_sale',
+    boarding_address: '重庆朝天门邮轮码头',
+    boarding_deadline: '18:00',
+    itinerary: [
+      { day: 1, port: '重庆', title: '登船', description: '重庆登船，晚上启航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '丰都鬼城', title: '岸上观光', description: '游览丰都鬼城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '白帝城/小三峡', title: '岸上观光', description: '白帝城和小三峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '三峡大坝/西陵峡', title: '岸上观光', description: '三峡大坝参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '宜昌', title: '离船', description: '抵达宜昌', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋和悦号 - 阿拉斯加航线（第1个航班）
+  {
+    cruise_ship_id: harmony.id,
+    cruise_route_id: alaska_route&.id,
+    departure_date: Date.parse('2026-05-10'),
+    return_date: Date.parse('2026-05-17'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '西雅图登船',
+    arrival_port: '西雅图离船',
+    status: 'on_sale',
+    boarding_address: '西雅图港口邮轮码头',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '西雅图', title: '登船', description: '西雅图登船，开启阿拉斯加冰川探险之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '沿内湾航道北上，欣赏太平洋西北地区美景', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '朱诺', title: '岸上观光', description: '阿拉斯加首府，参观门登霍尔冰川、淘金历史博物馆', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '史凯威', title: '岸上观光', description: '淘金小镇，乘坐白色山口铁路，体验克朗代克淘金热历史', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '冰河湾国家公园', title: '岸上观光', description: '近距离观赏壮观的潮汐冰川，观看冰川崩解奇观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '凯奇坎', title: '岸上观光', description: '阿拉斯加的三文鱼之都，参观图腾遗址公园', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '海上巡航', title: '海上巡航', description: '返航途中尽享游轮设施', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '西雅图', title: '离船', description: '抵达西雅图，结束冰川之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋和悦号 - 阿拉斯加航线（第2个航班）
+  {
+    cruise_ship_id: harmony.id,
+    cruise_route_id: alaska_route&.id,
+    departure_date: Date.parse('2026-06-05'),
+    return_date: Date.parse('2026-06-12'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '温哥华登船',
+    arrival_port: '温哥华离船',
+    status: 'on_sale',
+    boarding_address: '温哥华加拿大广场邮轮码头',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '温哥华', title: '登船', description: '温哥华登船，开启阿拉斯加冰川探险之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '沿内湾航道北上，欣赏加拿大BC省海岸风光', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '凯奇坎', title: '岸上观光', description: '阿拉斯加的三文鱼之都，参观图腾遗址公园', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '朱诺', title: '岸上观光', description: '阿拉斯加首府，参观门登霍尔冰川、淘金历史博物馆', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '史凯威', title: '岸上观光', description: '淘金小镇，乘坐白色山口铁路，体验克朗代克淘金热历史', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '维多利亚', title: '岸上观光', description: '英属哥伦比亚省省会，参观布查特花园、省议会大厦', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '海上巡航', title: '海上巡航', description: '返航途中尽享游轮设施', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '温哥华', title: '离船', description: '抵达温哥华，结束冰川之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋和悦号 - 阿拉斯加航线（第3个航班）
+  {
+    cruise_ship_id: harmony.id,
+    cruise_route_id: alaska_route&.id,
+    departure_date: Date.parse('2026-07-01'),
+    return_date: Date.parse('2026-07-08'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '西雅图登船',
+    arrival_port: '西雅图离船',
+    status: 'on_sale',
+    boarding_address: '西雅图港口邮轮码头',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '西雅图', title: '登船', description: '西雅图登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '沿内湾航道北上', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '朱诺', title: '岸上观光', description: '阿拉斯加首府观光', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '史凯威', title: '岸上观光', description: '淘金小镇体验', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '冰河湾国家公园', title: '岸上观光', description: '冰川崩解奇观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '凯奇坎', title: '岸上观光', description: '三文鱼之都观光', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '海上巡航', title: '海上巡航', description: '返航途中尽享游轮设施', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '西雅图', title: '离船', description: '抵达西雅图', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海荣耀号 - 南北极航线（第1个航班）
+  {
+    cruise_ship_id: grandiosa.id,
+    cruise_route_id: north_pole_route&.id,
+    departure_date: Date.parse('2026-12-15'),
+    return_date: Date.parse('2026-12-29'),
+    duration_days: 15,
+    duration_nights: 14,
+    departure_port: '布宜诺斯艾利斯登船',
+    arrival_port: '布宜诺斯艾利斯离船',
+    status: 'on_sale',
+    boarding_address: '布宜诺斯艾利斯邮轮港',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '布宜诺斯艾利斯', title: '登船', description: '阿根廷首都登船，开启南极探险之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '向南航行，准备穿越德雷克海峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '乌斯怀亚', title: '岸上观光', description: '世界最南端城市，采购极地装备', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '德雷克海峡', title: '海上巡航', description: '穿越德雷克海峡，南极环保讲座', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '南设得兰群岛', title: '岸上观光', description: '登陆南极半岛，观赏企鹅栖息地', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '天堂湾', title: '岸上观光', description: '南极最美海湾，冰川近距离接触', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '勒梅尔海峡', title: '岸上观光', description: '南极明信片景点，巡航观赏', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '库佛维尔岛', title: '岸上观光', description: '巴布亚企鹅繁殖地，野生动物摄影', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 9, port: '南极半岛', title: '岸上观光', description: '科考站参观，极地科学讲座', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 10, port: '德雷克海峡', title: '海上巡航', description: '返程穿越德雷克海峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 11, port: '海上巡航', title: '海上巡航', description: '继续北上返航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 12, port: '乌斯怀亚', title: '岸上观光', description: '再访世界尽头，自由活动', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 13, port: '海上巡航', title: '海上巡航', description: '返航途中回顾旅程', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 14, port: '海上巡航', title: '海上巡航', description: '继续北上', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 15, port: '布宜诺斯艾利斯', title: '离船', description: '抵达布宜诺斯艾利斯，结束南极之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海荣耀号 - 南北极航线（第2个航班）
+  {
+    cruise_ship_id: grandiosa.id,
+    cruise_route_id: north_pole_route&.id,
+    departure_date: Date.parse('2027-01-10'),
+    return_date: Date.parse('2027-01-24'),
+    duration_days: 15,
+    duration_nights: 14,
+    departure_port: '布宜诺斯艾利斯登船',
+    arrival_port: '布宜诺斯艾利斯离船',
+    status: 'on_sale',
+    boarding_address: '布宜诺斯艾利斯邮轮港',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '布宜诺斯艾利斯', title: '登船', description: '阿根廷首都登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '向南航行', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '乌斯怀亚', title: '岸上观光', description: '世界最南端城市', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '德雷克海峡', title: '海上巡航', description: '穿越德雷克海峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '南设得兰群岛', title: '岸上观光', description: '登陆南极半岛', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '天堂湾', title: '岸上观光', description: '南极最美海湾', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '勒梅尔海峡', title: '岸上观光', description: '南极明信片景点', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '库佛维尔岛', title: '岸上观光', description: '企鹅繁殖地', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 9, port: '南极半岛', title: '岸上观光', description: '科考站参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 10, port: '德雷克海峡', title: '海上巡航', description: '返程穿越德雷克海峡', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 11, port: '海上巡航', title: '海上巡航', description: '继续北上返航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 12, port: '乌斯怀亚', title: '岸上观光', description: '再访世界尽头', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 13, port: '海上巡航', title: '海上巡航', description: '返航途中', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 14, port: '海上巡航', title: '海上巡航', description: '继续北上', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 15, port: '布宜诺斯艾利斯', title: '离船', description: '抵达布宜诺斯艾利斯', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 欧洲河轮航线（第1个航班）
+  {
+    cruise_ship_id: fantasia.id,
+    cruise_route_id: europe_river_route&.id,
+    departure_date: Date.parse('2026-04-15'),
+    return_date: Date.parse('2026-04-22'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '阿姆斯特丹登船',
+    arrival_port: '布达佩斯离船',
+    status: 'on_sale',
+    boarding_address: '阿姆斯特丹中央车站码头',
+    boarding_deadline: '16:00',
+    itinerary: [
+      { day: 1, port: '阿姆斯特丹', title: '登船', description: '荷兰首都登船，运河之城游览', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '科隆', title: '岸上观光', description: '参观科隆大教堂，莱茵河畔古城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '科布伦茨', title: '岸上观光', description: '莱茵河与摩泽尔河交汇处，德意志之角', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '吕德斯海姆', title: '岸上观光', description: '莱茵河谷葡萄酒小镇，酒窖品酒', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '维尔茨堡', title: '岸上观光', description: '巴洛克风格主教宫，世界文化遗产', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '纽伦堡', title: '岸上观光', description: '中世纪古城，纽伦堡审判地', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '维也纳', title: '岸上观光', description: '奥地利首都，音乐之都巡礼', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '布达佩斯', title: '离船', description: '匈牙利首都，多瑙河明珠', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 欧洲河轮航线（第2个航班）
+  {
+    cruise_ship_id: fantasia.id,
+    cruise_route_id: europe_river_route&.id,
+    departure_date: Date.parse('2026-05-20'),
+    return_date: Date.parse('2026-05-27'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '布达佩斯登船',
+    arrival_port: '阿姆斯特丹离船',
+    status: 'on_sale',
+    boarding_address: '布达佩斯多瑙河码头',
+    boarding_deadline: '16:00',
+    itinerary: [
+      { day: 1, port: '布达佩斯', title: '登船', description: '匈牙利首都登船，多瑙河明珠', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '维也纳', title: '岸上观光', description: '奥地利首都，音乐之都巡礼', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '梅尔克', title: '岸上观光', description: '梅尔克修道院，瓦豪河谷葡萄酒产区', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '帕绍', title: '岸上观光', description: '三河城，多瑙河、因河、伊尔茨河交汇', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '雷根斯堡', title: '岸上观光', description: '巴伐利亚古城，世界文化遗产', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '班贝格', title: '岸上观光', description: '小威尼斯，中世纪建筑群', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '法兰克福', title: '岸上观光', description: '德国金融中心，老城罗马广场', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '阿姆斯特丹', title: '离船', description: '抵达阿姆斯特丹，结束河轮之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海传奇号 - 欧洲河轮航线（第3个航班）
+  {
+    cruise_ship_id: fantasia.id,
+    cruise_route_id: europe_river_route&.id,
+    departure_date: Date.parse('2026-06-15'),
+    return_date: Date.parse('2026-06-22'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '阿姆斯特丹登船',
+    arrival_port: '布达佩斯离船',
+    status: 'on_sale',
+    boarding_address: '阿姆斯特丹中央车站码头',
+    boarding_deadline: '16:00',
+    itinerary: [
+      { day: 1, port: '阿姆斯特丹', title: '登船', description: '荷兰首都登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '科隆', title: '岸上观光', description: '科隆大教堂', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '科布伦茨', title: '岸上观光', description: '德意志之角', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '吕德斯海姆', title: '岸上观光', description: '葡萄酒小镇', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '维尔茨堡', title: '岸上观光', description: '主教宫参观', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '纽伦堡', title: '岸上观光', description: '中世纪古城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '维也纳', title: '岸上观光', description: '音乐之都', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '布达佩斯', title: '离船', description: '抵达布达佩斯', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海辉煌号 - 中东航线（第1个航班）
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: middle_east_route&.id,
+    departure_date: Date.parse('2026-03-10'),
+    return_date: Date.parse('2026-03-17'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '迪拜登船',
+    arrival_port: '迪拜离船',
+    status: 'on_sale',
+    boarding_address: '迪拜拉希德港邮轮码头',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '迪拜', title: '登船', description: '迪拜登船，现代奇迹之城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '阿布扎比', title: '岸上观光', description: '阿联酋首都，参观谢赫扎耶德大清真寺、卢浮宫阿布扎比', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '多哈', title: '岸上观光', description: '卡塔尔首都，瓦其夫老市场、伊斯兰艺术博物馆', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '巴林', title: '岸上观光', description: '巴林王国，巴林堡、珍珠博物馆', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '科威特', title: '岸上观光', description: '科威特城，科威特塔、大清真寺', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: '波斯湾巡航，享受游轮设施', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '富查伊拉', title: '岸上观光', description: '阿联酋东海岸，富查伊拉古堡、潜水胜地', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '迪拜', title: '离船', description: '返回迪拜，结束中东之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 地中海辉煌号 - 中东航线（第2个航班）
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: middle_east_route&.id,
+    departure_date: Date.parse('2026-04-05'),
+    return_date: Date.parse('2026-04-12'),
+    duration_days: 8,
+    duration_nights: 7,
+    departure_port: '迪拜登船',
+    arrival_port: '迪拜离船',
+    status: 'on_sale',
+    boarding_address: '迪拜拉希德港邮轮码头',
+    boarding_deadline: '15:00',
+    itinerary: [
+      { day: 1, port: '迪拜', title: '登船', description: '迪拜登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '阿布扎比', title: '岸上观光', description: '阿联酋首都观光', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '多哈', title: '岸上观光', description: '卡塔尔首都', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '巴林', title: '岸上观光', description: '巴林王国', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '科威特', title: '岸上观光', description: '科威特城', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 6, port: '海上巡航', title: '海上巡航', description: '波斯湾巡航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 7, port: '富查伊拉', title: '岸上观光', description: '阿联酋东海岸', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 8, port: '迪拜', title: '离船', description: '返回迪拜', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋光谱号 - 西沙群岛航线（第1个航班）
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: xisha_islands_route&.id,
+    departure_date: Date.parse('2026-03-08'),
+    return_date: Date.parse('2026-03-12'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '三亚凤凰岛登船',
+    arrival_port: '三亚凤凰岛离船',
+    status: 'on_sale',
+    boarding_address: '三亚凤凰岛国际邮轮码头',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '三亚', title: '登船', description: '三亚凤凰岛登船，开启西沙群岛探秘之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '南海巡航，西沙群岛海洋文化讲座', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '全富岛', title: '岸上观光', description: '登陆全富岛，珊瑚白沙滩，浮潜观赏海底世界', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '鸭公岛', title: '岸上观光', description: '渔民小岛体验，海鲜市场，渔家乐', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '三亚', title: '离船', description: '返回三亚凤凰岛，结束西沙之旅', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋光谱号 - 西沙群岛航线（第2个航班）
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: xisha_islands_route&.id,
+    departure_date: Date.parse('2026-04-10'),
+    return_date: Date.parse('2026-04-14'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '三亚凤凰岛登船',
+    arrival_port: '三亚凤凰岛离船',
+    status: 'on_sale',
+    boarding_address: '三亚凤凰岛国际邮轮码头',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '三亚', title: '登船', description: '三亚凤凰岛登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '南海巡航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '全富岛', title: '岸上观光', description: '登陆全富岛', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '鸭公岛', title: '岸上观光', description: '渔民小岛体验', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '三亚', title: '离船', description: '返回三亚凤凰岛', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋光谱号 - 西沙群岛航线（第3个航班）
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: xisha_islands_route&.id,
+    departure_date: Date.parse('2026-05-05'),
+    return_date: Date.parse('2026-05-09'),
+    duration_days: 5,
+    duration_nights: 4,
+    departure_port: '三亚凤凰岛登船',
+    arrival_port: '三亚凤凰岛离船',
+    status: 'on_sale',
+    boarding_address: '三亚凤凰岛国际邮轮码头',
+    boarding_deadline: '14:00',
+    itinerary: [
+      { day: 1, port: '三亚', title: '登船', description: '三亚凤凰岛登船', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '南海巡航', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 3, port: '全富岛', title: '岸上观光', description: '登陆全富岛', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 4, port: '鸭公岛', title: '岸上观光', description: '渔民小岛体验', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] },
+      { day: 5, port: '三亚', title: '离船', description: '返回三亚凤凰岛', images: [ImageSeedHelper.random_image_from_category('cruise_destinations')] }
     ],
     created_at: Time.current,
     updated_at: Time.current
