@@ -289,6 +289,90 @@ hangzhou_private_group_products = [
 TourGroupProduct.insert_all(hangzhou_private_group_products)
 puts "✓ 添加了 #{hangzhou_private_group_products.count} 个杭州4天私家团产品"
 
+# 成都3日跟团游产品（支持 v156 验证器）
+puts "\n🎯 添加特定成都3日跟团游产品..."
+
+chengdu_3day_tour_products = [
+  {
+    title: "【精品小团】成都大熊猫基地+都江堰+青城山 3天2晚 6人团 含酒店·含餐食·含门票·纯玩团",
+    subtitle: "大熊猫基地·含酒店·纯玩团",
+    destination: "成都",
+    departure_city: "成都",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 3,
+    badge: '多日游·6人团',
+    price: 1488,
+    original_price: 1888,
+    rating: 4.9,
+    rating_desc: "280条评价",
+    sales_count: 356,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    tags: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    departure_label: "成都出发",
+    is_featured: true,
+    display_order: all_products_data.count,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['成都青旅国际'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】成都九寨沟+黄龙 3天2晚 8人团 含酒店·含餐食·含门票",
+    subtitle: "九寨沟·含酒店·8人团",
+    destination: "成都",
+    departure_city: "成都",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 3,
+    badge: '多日游·8人团',
+    price: 1688,
+    original_price: 2088,
+    rating: 4.8,
+    rating_desc: "195条评价",
+    sales_count: 228,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团'],
+    tags: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    departure_label: "成都出发",
+    is_featured: false,
+    display_order: all_products_data.count + 1,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['四川省中国旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】成都峨眉山+乐山大佛 3天2晚 10人团 含酒店·含餐食·纯玩无购物",
+    subtitle: "峨眉山·乐山大佛·10人团",
+    destination: "成都",
+    departure_city: "重庆",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 3,
+    badge: '多日游·10人团',
+    price: 1388,
+    original_price: 1688,
+    rating: 4.7,
+    rating_desc: "145条评价",
+    sales_count: 167,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    tags: ['含酒店', '含餐食', '含门票', '纯玩团', '深度游览'],
+    departure_label: "重庆出发",
+    is_featured: false,
+    display_order: all_products_data.count + 2,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['成都青旅国际'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+TourGroupProduct.insert_all(chengdu_3day_tour_products)
+puts "✓ 添加了 #{chengdu_3day_tour_products.count} 个成都3日跟团游产品"
+
 # ==================== 批量生成套餐数据 ====================
 puts "\n🎟️ 批量生成套餐数据..."
 
