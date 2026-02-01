@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例118: 订购火车票后预订接站服务（高铁）
+# 验证用例175: 订购火车票后预订接站服务（高铁）
 #
 # 任务描述:
 #   用户订了北京到南京的高铁，到达南京南站，需要接站到新街口商圈。
@@ -27,15 +27,15 @@ require_relative '../base_validator'
 #
 # 使用方法:
 #   # 准备阶段
-#   POST /api/tasks/v118_book_train_and_station_pickup_validator/start
+#   POST /api/tasks/v175_book_train_and_station_pickup_validator/start
 #   
 #   # Agent 通过界面操作完成任务...
 #   
 #   # 验证结果
 #   POST /api/verify/:execution_id/result
-module V101V150
-  class V118BookTrainAndStationPickupValidator < BaseValidator
-    self.validator_id = 'v118_book_train_and_station_pickup_validator'
+module V151V200
+  class V175BookTrainAndStationPickupValidator < BaseValidator
+    self.validator_id = 'v175_book_train_and_station_pickup_validator'
     self.task_id = '77ad42cd-6c18-4752-b8e4-f7ec1532fee0'
     self.title = '订购火车票后预订接站服务（高铁）'
     self.description = '订购北京到南京的高铁，到达南京南站后预订接站到新街口商圈'
