@@ -266,6 +266,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.integer "return_offer_id"
     t.jsonb "multi_city_flights"
     t.string "data_version", limit: 50, default: "0", null: false
+    t.bigint "flight_offer_id"
     t.index ["data_version"], name: "index_bookings_on_data_version"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
@@ -1836,6 +1837,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.datetime "updated_at", null: false
     t.integer "transfer_package_id"
     t.string "data_version", limit: 50, default: "0", null: false
+    t.integer "passenger_count"
+    t.integer "luggage_count"
     t.index ["data_version"], name: "index_transfers_on_data_version"
     t.index ["transfer_package_id"], name: "index_transfers_on_transfer_package_id"
     t.index ["user_id"], name: "index_transfers_on_user_id"

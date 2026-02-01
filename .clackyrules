@@ -192,6 +192,43 @@ image_url: ImageSeedHelper.random_image_from_category(:hotels)
 
 **For detailed documentation, see:** `docs/IMAGE_SEED_HELPER.md`
 
+## Validator Development Best Practices
+
+**⚠️ CRITICAL: Verify Model Fields Before Writing Validators**
+
+Before creating ANY validator that queries models, you MUST verify the actual field names:
+
+**MANDATORY Pre-Development Checks:**
+```bash
+# Check model column names
+rails runner "puts ModelName.column_names.join(', ')"
+
+# Check model associations and validations
+rails runner "puts ModelName.reflect_on_all_associations.map(&:name).join(', ')"
+```
+
+**Common Field Naming Mistakes:**
+- ❌ `from_station`, `to_station` → ✅ `departure_city`, `arrival_city` (Train model)
+- ❌ `departure_date` → ✅ `departure_time.to_date` + `.by_date()` scope (Train model)
+- ❌ `price` → ✅ `price_second_class` (Train model)
+- ❌ `duration_text` → ✅ `duration` integer (TourGroupProduct model)
+- ❌ `city` → ✅ `destination` (TourGroupProduct model)
+
+**Common Model Naming Mistakes:**
+- ❌ `TrainTicket` → ✅ `TrainBooking`
+- ❌ `HotelOrder` → ✅ `HotelBooking` (for room bookings)
+- ❌ `TourOrder` → ✅ `TourGroupBooking`
+
+**When in doubt:**
+1. Search codebase for existing validators using the same model (e.g., check V131 for Train usage)
+2. Run `rails runner` to inspect actual database schema
+3. Check `app/models/` for model definitions and associations
+
+**Why this matters:**
+- Prevents `PG::UndefinedColumn` errors
+- Prevents `uninitialized constant` errors
+- Saves debugging time by catching issues before writing validator code
+
 ## Validator verify Method Best Practices
 
 **⚠️ CRITICAL: Query Rules in First Assertion**

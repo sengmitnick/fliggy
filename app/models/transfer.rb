@@ -3,7 +3,7 @@ class Transfer < ApplicationRecord
   belongs_to :user
   belongs_to :transfer_package, optional: true
 
-  validates :transfer_type, presence: true, inclusion: { in: %w[airport_pickup train_pickup] }
+  validates :transfer_type, presence: true, inclusion: { in: %w[airport_pickup airport_dropoff train_pickup train_dropoff] }
   validates :service_type, presence: true, inclusion: { in: %w[to_airport from_airport to_station from_station] }
   validates :location_from, :location_to, :pickup_datetime, presence: true
   validates :passenger_name, :passenger_phone, presence: true
