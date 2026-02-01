@@ -142,6 +142,73 @@
     </div>
   </div>
 
+  <% if @is_multi_turn %>
+  <!-- Multi-Turn Dialogue Panel -->
+  <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="card-body p-6">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">多轮对话测试</h2>
+      
+      <!-- Session Selection -->
+      <div class="mb-4">
+        <label for="dialog-session-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          选择会话进行对话测试：
+        </label>
+        <select 
+          id="dialog-session-select" 
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <option value="">-- 请先创建会话 --</option>
+        </select>
+      </div>
+
+      <!-- Dialogue History -->
+      <div 
+        id="dialog-history" 
+        class="mb-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg h-96 overflow-y-auto">
+        <p class="text-gray-500 dark:text-gray-400 text-center py-8">选择会话后开始对话...</p>
+      </div>
+
+      <!-- Input Box -->
+      <div class="flex items-start space-x-3">
+        <textarea 
+          id="dialog-input" 
+          rows="3" 
+          placeholder="输入您的消息（作为 Agent）..."
+          disabled
+          class="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"></textarea>
+        <button 
+          type="button"
+          id="send-message-btn"
+          disabled
+          class="btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+          </svg>
+          <span>发送</span>
+        </button>
+      </div>
+
+      <!-- Tips -->
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+        <div class="flex">
+          <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="text-sm text-blue-800 dark:text-blue-200">
+            <p class="font-medium mb-1">使用说明：</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li>先点击"启动新会话"按钮创建会话</li>
+              <li>在下拉框中选择要测试的会话</li>
+              <li>在输入框中模拟 Agent 向用户发送消息</li>
+              <li>AI Simul User 会自动回复，模拟真实用户行为</li>
+              <li>对话完成后，点击"验证"按钮查看得分</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
   <!-- Result Panel -->
   <div id="result-panel" class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hidden">
     <div class="card-body p-6">
@@ -223,11 +290,17 @@
     if (sessions.length === 0) {
       sessionsContainer.classList.add('hidden');
       clearAllBtn.classList.add('hidden');
+      <% if @is_multi_turn %>
+      updateDialogSessionSelect();
+      <% end %>
       return;
     }
     
     sessionsContainer.classList.remove('hidden');
     clearAllBtn.classList.remove('hidden');
+    <% if @is_multi_turn %>
+    updateDialogSessionSelect();
+    <% end %>
     
     sessionsList.innerHTML = sessions.map((session, index) => `
       <div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm" data-session-id="${session.id}">
@@ -423,6 +496,181 @@
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
+
+  <% if @is_multi_turn %>
+  // ==================== 多轮对话功能 ====================
+  const dialogSessionSelect = document.getElementById('dialog-session-select');
+  const dialogHistory = document.getElementById('dialog-history');
+  const dialogInput = document.getElementById('dialog-input');
+  const sendMessageBtn = document.getElementById('send-message-btn');
+  let currentDialogSessionId = null;
+  let dialogTurns = [];  // 存储当前会话的对话历史
+
+  // 更新对话会话下拉框
+  function updateDialogSessionSelect() {
+    if (sessions.length === 0) {
+      dialogSessionSelect.innerHTML = '<option value="">-- 请先创建会话 --</option>';
+      dialogInput.disabled = true;
+      sendMessageBtn.disabled = true;
+      return;
+    }
+
+    dialogSessionSelect.innerHTML = '<option value="">-- 选择会话 --</option>' + 
+      sessions.map((session, index) => 
+        `<option value="${session.id}">会话 #${index + 1} (${session.createdAt})</option>`
+      ).join('');
+  }
+
+  // 监听会话选择变化
+  dialogSessionSelect.addEventListener('change', async (e) => {
+    currentDialogSessionId = e.target.value;
+    
+    if (currentDialogSessionId) {
+      dialogInput.disabled = false;
+      sendMessageBtn.disabled = false;
+      dialogTurns = [];
+      
+      // 加载该会话的对话历史
+      try {
+        const response = await fetch(`/api/dialog/history?session_id=${currentDialogSessionId}`);
+        if (response.ok) {
+          const data = await response.json();
+          dialogTurns = data.turns.map(turn => ({
+            role: turn.role,
+            message: turn.message,
+            metadata: { turn_number: turn.turn_number }
+          }));
+        }
+      } catch (error) {
+        console.error('加载对话历史失败:', error);
+      }
+      
+      renderDialogHistory();
+    } else {
+      dialogInput.disabled = true;
+      sendMessageBtn.disabled = true;
+      dialogHistory.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">选择会话后开始对话...</p>';
+    }
+  });
+
+  // 渲染对话历史
+  function renderDialogHistory() {
+    if (dialogTurns.length === 0) {
+      dialogHistory.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">开始与 AI Simul User 对话...</p>';
+      return;
+    }
+
+    dialogHistory.innerHTML = dialogTurns.map(turn => {
+      const isAgent = turn.role === 'agent';
+      return `
+        <div class="mb-4 flex ${isAgent ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[80%]">
+            <div class="flex items-center mb-1 ${isAgent ? 'justify-end' : 'justify-start'}">
+              <span class="text-xs font-medium ${isAgent ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'}">
+                ${isAgent ? 'Agent (您)' : 'Simul User (AI)'}
+              </span>
+            </div>
+            <div class="${isAgent ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'} px-4 py-3 rounded-lg">
+              <p class="text-sm whitespace-pre-wrap">${escapeHtml(turn.message)}</p>
+            </div>
+            ${turn.metadata ? `
+              <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 ${isAgent ? 'text-right' : 'text-left'}">
+                轮次 ${turn.metadata.turn_number || ''}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    // 滚动到底部
+    dialogHistory.scrollTop = dialogHistory.scrollHeight;
+  }
+
+  // HTML 转义函数
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // 发送消息
+  async function sendDialogMessage() {
+    const message = dialogInput.value.trim();
+    if (!message || !currentDialogSessionId) return;
+
+    // 禁用输入和按钮
+    dialogInput.disabled = true;
+    sendMessageBtn.disabled = true;
+    const originalBtnHtml = sendMessageBtn.innerHTML;
+    sendMessageBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>发送中...';
+
+    try {
+      // 添加 Agent 消息到历史
+      dialogTurns.push({
+        role: 'agent',
+        message: message
+      });
+      renderDialogHistory();
+      dialogInput.value = '';
+
+      // 调用 API
+      const response = await fetch('/api/dialog/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session_id: currentDialogSessionId,
+          agent_message: message
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.simul_user_message) {
+        // 添加 Simul User 回复到历史
+        dialogTurns.push({
+          role: 'simul_user',
+          message: data.simul_user_message,
+          metadata: data.metadata
+        });
+        renderDialogHistory();
+
+        // 检查是否应该结束对话
+        if (!data.should_continue) {
+          showToast('对话已结束，可以进行验证了', 'info');
+        }
+      } else {
+        throw new Error(data.error || '发送消息失败');
+      }
+    } catch (error) {
+      console.error('发送消息失败:', error);
+      showToast(`发送失败: ${error.message}`, 'error');
+      // 移除最后一条 Agent 消息（因为失败了）
+      dialogTurns.pop();
+      renderDialogHistory();
+    } finally {
+      // 恢复输入和按钮
+      sendMessageBtn.innerHTML = originalBtnHtml;
+      dialogInput.disabled = false;
+      sendMessageBtn.disabled = false;
+      dialogInput.focus();
+    }
+  }
+
+  // 绑定发送按钮事件
+  sendMessageBtn.addEventListener('click', sendDialogMessage);
+
+  // 绑定 Enter 键发送（Shift+Enter 换行）
+  dialogInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendDialogMessage();
+    }
+  });
+  <% end %>
+  // ==================== 多轮对话功能结束 ====================
 
   // 添加动画样式
   // 添加动画样式（如果不存在）

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -721,6 +721,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_01_30_085106) do
     t.string "data_version", limit: 50, default: "0", null: false
     t.index ["data_version"], name: "index_destinations_on_data_version"
     t.index ["slug"], name: "index_destinations_on_slug", unique: true
+  end
+
+  create_table "dialog_turns", force: :cascade do |t|
+    t.bigint "validator_execution_id"
+    t.integer "turn_number"
+    t.string "role"
+    t.text "message"
+    t.jsonb "metadata"
+    t.string "data_version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["validator_execution_id"], name: "index_dialog_turns_on_validator_execution_id"
   end
 
   create_table "family_benefits", force: :cascade do |t|
