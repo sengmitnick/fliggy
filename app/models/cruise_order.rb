@@ -51,7 +51,7 @@ class CruiseOrder < ApplicationRecord
     return unless cruise_product.present? && quantity.present?
     
     base_price = cruise_product.price_per_person * quantity
-    insurance = insurance_price || 0
+    insurance = (insurance_price || 0) * quantity
     self.total_price = base_price + insurance
   end
 end

@@ -5,11 +5,41 @@ class CruisesController < ApplicationController
     # 获取所有航线分类
     @cruise_routes = CruiseRoute.order(:id)
     
-    # 获取热门游轮班次（推荐列表，不做筛选）
+    # 获取热门游轮班次
     @popular_sailings = CruiseSailing.where(status: 'on_sale')
-                                      .includes(:cruise_ship, :cruise_route, :cruise_products)
-                                      .order('cruise_sailings.created_at DESC')
-                                      .limit(20)
+                                      .includes(cruise_ship: :cruise_line, cruise_route: {}, cruise_products: {})
+    
+    # 按关键词搜索（目的地、邮轮公司名称、航线名称）
+    if params[:query].present?
+      query = "%#{params[:query]}%"
+      @popular_sailings = @popular_sailings
+        .left_joins(cruise_ship: :cruise_line)
+        .left_joins(:cruise_route)
+        .where(
+          "cruise_sailings.departure_port ILIKE :query OR 
+           cruise_sailings.arrival_port ILIKE :query OR 
+           cruise_lines.name ILIKE :query OR 
+           cruise_lines.name_en ILIKE :query OR 
+           cruise_routes.name ILIKE :query",
+          query: query
+        )
+    end
+    
+    # 按航线筛选
+    if params[:route_id].present?
+      @selected_route = CruiseRoute.find_by(id: params[:route_id])
+      @popular_sailings = @popular_sailings.where(cruise_route_id: @selected_route.id) if @selected_route
+    end
+    
+    # 按邮轮公司筛选
+    if params[:cruise_line_id].present?
+      @selected_cruise_line = CruiseLine.find_by(id: params[:cruise_line_id])
+      if @selected_cruise_line
+        @popular_sailings = @popular_sailings.joins(:cruise_ship).where(cruise_ships: { cruise_line_id: @selected_cruise_line.id })
+      end
+    end
+    
+    @popular_sailings = @popular_sailings.order('cruise_sailings.created_at DESC').limit(20)
   end
 
   def search
@@ -26,16 +56,29 @@ class CruisesController < ApplicationController
       @sailings = @sailings.where(cruise_route_id: @selected_route.id)
     end
     
-    # 按邮轮公司筛选
-    if params[:cruise_line_id].present?
-      @sailings = @sailings.joins(:cruise_ship).where(cruise_ships: { cruise_line_id: params[:cruise_line_id] })
+    # 获取该航线下的所有邮轮公司（用于默认选择）
+    base_sailings_for_lines = @sailings
+    all_cruise_lines_for_default = base_sailings_for_lines.includes(:cruise_ship).map { |s| s.cruise_ship.cruise_line }.uniq
+    default_cruise_line_id = all_cruise_lines_for_default.first&.id
+    
+    # 按邮轮公司筛选（如果没有指定，默认选中第一个）
+    selected_cruise_line_id = params[:cruise_line_id].present? ? params[:cruise_line_id].to_i : default_cruise_line_id
+    if selected_cruise_line_id.present?
+      @sailings = @sailings.joins(:cruise_ship).where(cruise_ships: { cruise_line_id: selected_cruise_line_id })
     end
     
     # 获取所有可用城市（不受当前筛选影响）
     base_sailings = CruiseSailing.where(status: 'on_sale')
     base_sailings = base_sailings.where(cruise_route_id: @selected_route.id) if @selected_route.present?
-    base_sailings = base_sailings.joins(:cruise_ship).where(cruise_ships: { cruise_line_id: params[:cruise_line_id] }) if params[:cruise_line_id].present?
+    base_sailings = base_sailings.joins(:cruise_ship).where(cruise_ships: { cruise_line_id: selected_cruise_line_id }) if selected_cruise_line_id.present?
     @all_departure_cities = base_sailings.pluck(:departure_port).uniq.compact.sort
+    
+    # 保存所有可用月份（在筛选前）
+    all_sailings_for_months = @sailings
+    if params[:city].present?
+      all_sailings_for_months = all_sailings_for_months.where(departure_port: params[:city])
+    end
+    @all_departure_months = all_sailings_for_months.pluck(:departure_date).compact.map { |d| d.strftime('%Y-%m') }.uniq.sort
     
     # 按城市筛选
     if params[:city].present?
@@ -55,7 +98,7 @@ class CruisesController < ApplicationController
     end
     
     @sailings = @sailings
-                 .includes(:cruise_ship, :cruise_route, :cruise_products)
+                 .includes(cruise_ship: :cruise_line, cruise_route: {}, cruise_products: {})
                  .order(:departure_date)
     
     # 为舱房选择区域准备数据

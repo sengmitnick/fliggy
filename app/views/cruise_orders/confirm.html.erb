@@ -7,7 +7,16 @@
   <!-- Header -->
   <div class="sticky top-0 z-20 bg-surface/95 backdrop-blur-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 py-3 relative">
-      <%= link_to new_cruise_order_path(product_id: @cruise_order.cruise_product_id), class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-900" do %>
+      <%= link_to new_cruise_order_path(
+        product_id: @cruise_order.cruise_product_id,
+        quantity: @cruise_order.quantity,
+        insurance_type: @cruise_order.insurance_type || 'none',
+        insurance_price: @cruise_order.insurance_price || 0,
+        contact_name: @cruise_order.contact_name,
+        contact_phone: @cruise_order.contact_phone,
+        contact_email: @cruise_order.contact_email,
+        remark: @cruise_order.remark
+      ), class: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-900" do %>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -90,7 +99,7 @@
         <% if @cruise_order.insurance_price.present? && @cruise_order.insurance_price > 0 %>
           <div class="flex justify-between text-sm">
             <span class="text-gray-600">保险费用</span>
-            <span class="font-medium text-gray-900">¥<%= @cruise_order.insurance_price %></span>
+            <span class="font-medium text-gray-900">¥<%= @cruise_order.insurance_price * @cruise_order.quantity %></span>
           </div>
         <% end %>
         
