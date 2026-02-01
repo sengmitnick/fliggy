@@ -177,10 +177,10 @@
       <div data-service-grid-target="page" class="hidden">
         <!-- Row 1 -->
         <div class="grid grid-cols-5 mb-2 h-[80px]">
-          <button class="flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" onclick="window.showToast('精彩即将上线，敬请期待')">
+          <%= link_to hotels_path(city: '香港', location_type: 'international'), class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/国际酒店.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "国际酒店" %>
             <span class="text-[12px] text-secondary">国际酒店</span>
-          </button>
+          <% end %>
 
           <%= link_to visas_path(ref: 'home'), class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/签证.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "签证" %>
@@ -215,7 +215,7 @@
             <span class="text-[12px] text-secondary">深度游+</span>
           <% end %>
 
-          <%= link_to chartered_tours_path, class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
+          <%= link_to search_charter_routes_path, class: "flex flex-col items-center justify-end h-full hover:opacity-75 transition-opacity duration-200" do %>
             <%= image_tag "home/包车游.png", class: "max-w-[40%] mb-1 h-auto object-contain", alt: "包车" %>
             <span class="text-[12px] text-secondary">包车</span>
           <% end %>

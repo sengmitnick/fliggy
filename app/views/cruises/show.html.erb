@@ -56,7 +56,7 @@
         <h3 class="text-base font-semibold text-gray-900 mb-3">选择日期</h3>
         <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4" data-cruise-detail-target="dateContainer">
           <% @sailings.each_with_index do |sailing, index| %>
-            <%= link_to cruise_path(@cruise_ship.slug, sailing_id: sailing.id), 
+            <%= link_to cruise_path(@cruise_ship.slug || @cruise_ship.id, sailing_id: sailing.id), 
                         class: "flex-none w-32 px-4 py-3 rounded-lg border-2 transition #{sailing == @selected_sailing ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}",
                         data: { 
                           cruise_detail_target: "dateTab",

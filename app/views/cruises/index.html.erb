@@ -108,7 +108,7 @@
       <div class="space-y-3">
         <% @popular_sailings.each do |sailing| %>
           <% next if sailing.cruise_ship.nil? || sailing.cruise_route.nil? %>
-          <%= link_to cruise_path(sailing.cruise_ship.slug), class: "block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition" do %>
+          <%= link_to cruise_path(sailing.cruise_ship.slug || sailing.cruise_ship.id), class: "block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition" do %>
             <!-- Cruise Image -->
             <div class="relative h-48">
               <% if sailing.cruise_ship.image_url.present? %>

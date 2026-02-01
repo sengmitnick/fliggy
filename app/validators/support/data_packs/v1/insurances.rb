@@ -11,6 +11,8 @@
 # 加载方式：
 # rake validator:reset_baseline
 
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "正在加载 insurances_v1 数据包..."
 
 # ==================== 保险产品数据 ====================
@@ -53,7 +55,7 @@ insurance_products_data = []
     active: true,
     available_for_embedding: false,
     sort_order: 100 - i * 5,
-    image_url: '/images/insurances/1469854523086-cc02fe5d8800.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:insurances)
   }
   
   # 额外生成3个变种产品
@@ -78,7 +80,7 @@ insurance_products_data = []
       active: true,
       available_for_embedding: false,
       sort_order: 65 - i * 5,
-      image_url: '/images/insurances/1506929562872-bb421503ef21.jpg'
+      image_url: ImageSeedHelper.random_image_from_category(:insurances)
     }
   end
 end
@@ -116,7 +118,7 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 60 - i * 5,
-    image_url: '/images/insurances/1476514525535-07fb3b4ae5f1.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:insurances)
   }
   
   # 额外生成4个变种产品
@@ -141,7 +143,7 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 40 - i * 5,
-      image_url: '/images/insurances/1488646953014-85cb44e25828.jpg'
+      image_url: ImageSeedHelper.random_image_from_category(:insurances)
     }
   end
 end
@@ -173,7 +175,7 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 40 - i * 5,
-    image_url: '/images/insurances/1464037866556-6812c9d1c72e.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:insurances)
   }
   
   # 额外生成变种
@@ -198,7 +200,7 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 30 - i * 5,
-      image_url: '/images/insurances/1436491865332-7a61a109cc05.jpg'
+      image_url: ImageSeedHelper.random_image_from_category(:insurances)
     }
   end
 end
