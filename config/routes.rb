@@ -402,6 +402,8 @@ Rails.application.routes.draw do
     # 验证系统 API
     get 'tasks', to: 'verify#index'                         # 获取所有任务列表
     post 'tasks/:id/start', to: 'verify#start_task'         # 创建训练会话
+    get 'dialog/history', to: 'verify#dialog_history'       # 获取对话历史
+    post 'dialog/message', to: 'verify#dialog_message'      # 多轮对话（Agent 发送消息获取 Simul User 回复）
     post 'verify/run', to: 'verify#run_verification'        # 验证接口
     
     # 向下兼容旧接口

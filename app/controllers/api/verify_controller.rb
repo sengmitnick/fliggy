@@ -6,6 +6,7 @@ module Api
   # 提供接口：
   # - GET /api/tasks - 列出所有可用验证器
   # - POST /api/tasks/:id/start - 创建训练会话
+  # - POST /api/dialog/message - 多轮对话（Agent 发送消息获取 Simul User 回复）
   # - POST /api/verify/run - 验证接口
   # 
   # 向下兼容接口：
@@ -118,6 +119,29 @@ module Api
           execution.activate!
           
           Rails.logger.info "[Validator] Started validation session #{session_id} for user #{user.id}"
+          
+          # 如果是多轮对话验证器，创建初始 Simul User 消息
+          if instance.is_a?(MultiTurnBaseValidator)
+            begin
+              # 初始消息直接使用任务目标（用户的需求描述）
+              # Simul User 的第一句话就是用户提出的需求，不需要 LLM 生成
+              initial_message = instance.initial_task_goal
+              
+              # 保存到数据库
+              DialogTurn.create!(
+                validator_execution_id: execution.id,
+                turn_number: 1,
+                role: 'simul_user',
+                message: initial_message,
+                data_version: execution.data_version
+              )
+              
+              Rails.logger.info "[Multi-Turn Dialog] Created initial Simul User message for session #{session_id}: #{initial_message[0..50]}..."
+            rescue StandardError => e
+              Rails.logger.error "[Multi-Turn Dialog] Failed to create initial message: #{e.message}"
+              # 不阻塞会话创建，继续返回结果
+            end
+          end
         end
         
         # 按照甲方格式返回
@@ -129,6 +153,167 @@ module Api
       end
     rescue StandardError => e
       render json: { error: e.message, backtrace: e.backtrace.first(3) }, status: :unprocessable_entity
+    end
+    
+    # GET /api/dialog/history
+    # 获取会话的对话历史
+    # 参数：{ session_id: "xxx" }
+    # 返回：{ turns: [{ role: "simul_user", message: "...", turn_number: 1 }, ...] }
+    def dialog_history
+      session_id = params[:session_id]
+      
+      unless session_id
+        return render json: {
+          error: "缺少 session_id 参数"
+        }, status: :bad_request
+      end
+      
+      # 查找会话
+      execution = ValidatorExecution.find_by(execution_id: session_id)
+      
+      unless execution
+        return render json: {
+          error: "验证会话不存在或已过期: #{session_id}"
+        }, status: :not_found
+      end
+      
+      # 获取该会话的所有对话记录
+      turns = DialogTurn.where(
+        validator_execution_id: execution.id,
+        data_version: execution.data_version
+      ).order(turn_number: :asc)
+      
+      render json: {
+        turns: turns.map do |turn|
+          {
+            role: turn.role,
+            message: turn.message,
+            turn_number: turn.turn_number
+          }
+        end
+      }
+    end
+    
+    # POST /api/dialog/message
+    # 多轮对话接口：Agent 发送消息并获取 Simul User 回复
+    # 参数：{ session_id: "xxx", agent_message: "请问您的入住日期是？" }
+    # 返回：{ simul_user_message: "3天后入住", should_continue: true, turn_number: 2 }
+    def dialog_message
+      session_id = params[:session_id]
+      agent_message = params[:agent_message]
+      
+      unless session_id
+        return render json: {
+          error: "缺少 session_id 参数"
+        }, status: :bad_request
+      end
+      
+      unless agent_message
+        return render json: {
+          error: "缺少 agent_message 参数"
+        }, status: :bad_request
+      end
+      
+      # 查找会话
+      execution = ValidatorExecution.find_by(execution_id: session_id)
+      
+      unless execution
+        return render json: {
+          error: "验证会话不存在或已过期: #{session_id}"
+        }, status: :not_found
+      end
+      
+      begin
+        # 获取验证器实例
+        state_data = execution.state_data
+        validator_class = state_data['validator_class'].constantize
+        instance = validator_class.new(session_id)
+        
+        # ⚠️ CRITICAL: 在使用 instance 之前，必须恢复其 state（包括 @city, @budget 等）
+        # 否则 user_context 会是空的
+        if state_data['data']
+          instance.instance_variable_set(:@data_version, state_data['data']['data_version'])
+          instance.send(:restore_from_state, state_data['data'])
+        end
+        
+        # 检查是否是多轮对话验证器
+        unless instance.is_a?(MultiTurnBaseValidator)
+          return render json: {
+            error: "此验证器不支持多轮对话功能"
+          }, status: :unprocessable_entity
+        end
+        
+        # 记录 Agent 消息
+        current_turn = DialogTurn.where(
+          validator_execution_id: execution.id,
+          data_version: execution.data_version
+        ).maximum(:turn_number) || 0
+        
+        DialogTurn.create!(
+          validator_execution_id: execution.id,
+          turn_number: current_turn + 1,
+          role: 'agent',
+          message: agent_message,
+          data_version: execution.data_version
+        )
+        
+        # 初始化 Simul User 服务（如果尚未初始化）
+        unless instance.instance_variable_get(:@simul_user_service)
+          instance.send(:initialize_simul_user)
+        end
+        
+        simul_user_service = instance.instance_variable_get(:@simul_user_service)
+        
+        # 加载对话历史（包括刚记录的 Agent 消息）
+        dialog_history = DialogTurn.where(
+          validator_execution_id: execution.id,
+          data_version: execution.data_version
+        ).order(:turn_number)
+        
+        # 清空并重新加载 conversation_history
+        simul_user_service.instance_variable_set(:@conversation_history, [])
+        dialog_history.each do |turn|
+          simul_user_service.send(:add_to_history, turn.role, turn.message)
+        end
+        
+        # 生成 Simul User 回复（传入 agent_response 但不再添加到历史，因为已经从数据库加载）
+        simul_user_message = simul_user_service.generate_message(agent_response: nil)
+        
+        # 记录 Simul User 消息
+        DialogTurn.create!(
+          validator_execution_id: execution.id,
+          turn_number: current_turn + 2,
+          role: 'simul_user',
+          message: simul_user_message,
+          data_version: execution.data_version
+        )
+        
+        # 检查是否应该结束对话
+        should_continue = !simul_user_service.should_end_conversation?
+        
+        # 检查是否达到最大轮数
+        max_turns = validator_class.max_turns || 10
+        if current_turn + 2 >= max_turns * 2  # 每轮包含 agent + simul_user 两条消息
+          should_continue = false
+        end
+        
+        render json: {
+          simul_user_message: simul_user_message,
+          should_continue: should_continue,
+          turn_number: (current_turn + 2) / 2,  # 实际对话轮数
+          metadata: {
+            total_messages: current_turn + 2,
+            max_turns: max_turns
+          }
+        }
+        
+      rescue StandardError => e
+        Rails.logger.error "[Dialog Message] Error: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+        render json: {
+          error: "生成回复失败: #{e.message}",
+          error_type: e.class.name
+        }, status: :internal_server_error
+      end
     end
     
     # POST /api/verify/run
