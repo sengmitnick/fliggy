@@ -75,6 +75,23 @@ class HotelPackagesController < ApplicationController
     @package = HotelPackage.friendly.find(params[:id])
   end
 
+  def hotels
+    @package = HotelPackage.friendly.find(params[:id])
+    
+    # Get hotels for this package
+    # Primary: Use the associated hotel_id if present
+    # Secondary: Find hotels matching brand and city
+    if @package.hotel_id.present?
+      @hotels = Hotel.where(id: @package.hotel_id)
+    elsif @package.brand_name.present? && @package.city.present?
+      @hotels = Hotel.where(brand: @package.brand_name, city: @package.city)
+    else
+      @hotels = Hotel.none
+    end
+    
+    @hotels = @hotels.ordered
+  end
+
   private
   # Write your private methods here
 end

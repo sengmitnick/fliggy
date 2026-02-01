@@ -5,10 +5,11 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 # hotel_packages_v1 数据包
 # 酒店套餐验证数据
 #
-# 用途：
+# 用途:
 # - 提供丰富的酒店套餐数据用于验证
 # - 包含不同城市、不同晚数、不同品牌的套餐
 # - 支持1晚、2晚、1-2晚组合套餐
+# - 自动关联到hotels_for_packages创建的酒店
 #
 # 加载方式：
 # rake validator:reset_baseline
@@ -34,11 +35,6 @@ HotelPackage.where(data_version: 0).destroy_all
 hotel_packages = []
 current_time = Time.current
 
-# Helper: 根据品牌和城市查找酒店ID
-def find_hotel_id(brand_name, city)
-  Hotel.find_by(brand: brand_name, city: city)&.id
-end
-
 # ============================================================
 # 武汉地区套餐（用于 v048 验证器）
 # ============================================================
@@ -48,7 +44,7 @@ brand_name = "华住"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 4,
   title: "【官方直营】华住美仑品牌全国140+店客房2晚连住通兑 全程不加价",
   description: "含早餐，可叠加会员权益，全国140+门店通用，客房2晚连住",
@@ -76,7 +72,7 @@ brand_name = "万豪"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "万豪酒店客房2晚连住通兑套餐 高端商务之选",
   description: "包含双早，行政酒廊权益，全国万豪旗下酒店通用，客房2晚连住",
@@ -104,7 +100,7 @@ brand_name = "希尔顿"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "希尔顿酒店套餐 家庭亲子首选 客房2晚连住",
   description: "含双早+双晚餐，儿童免费，全国希尔顿品牌通用，客房2晚连住",
@@ -132,7 +128,7 @@ brand_name = "洲际"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "洲际酒店商务快捷1晚套餐 武汉门店通用",
   description: "商务出行首选，含双人早餐，免费停车",
@@ -160,7 +156,7 @@ brand_name = "凯悦"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "凯悦酒店灵活组合套餐 1晚起订 武汉通用",
   description: "可选1晚住宿或2晚连住，含早餐，免费健身房",
@@ -188,7 +184,7 @@ brand_name = "如家"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 3,
   title: "如家酒店经济舒适1晚套餐 武汉门店通用",
   description: "经济实惠，干净卫生，含早餐，交通便利",
@@ -216,7 +212,7 @@ brand_name = "汉庭"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 3,
   title: "汉庭酒店超值2晚连住套餐 武汉门店通用",
   description: "商务出行首选，含双早，WiFi免费，客房2晚连住",
@@ -244,7 +240,7 @@ brand_name = "7天"
 city = "武汉"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 3,
   title: "7天酒店快捷1晚套餐 武汉多店通用",
   description: "性价比之选，基础设施齐全，近地铁站",
@@ -276,7 +272,7 @@ brand_name = "洲际"
 city = "上海"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "洲际酒店奢华体验套餐 客房2晚连住",
   description: "豪华房型升级，SPA体验，米其林餐厅体验，客房2晚连住",
@@ -304,7 +300,7 @@ brand_name = "香格里拉"
 city = "上海"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "香格里拉酒店商务1晚套餐 上海门店",
   description: "行政楼层，含早餐+欢迎礼遇",
@@ -332,7 +328,7 @@ brand_name = "凯悦"
 city = "北京"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "凯悦酒店度假套餐 限时特惠 客房2晚连住",
   description: "含三餐自助，免费延迟退房，景区门票折扣，客房2晚连住",
@@ -360,7 +356,7 @@ brand_name = "万豪"
 city = "北京"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "万豪酒店商旅快捷1晚套餐 北京通用",
   description: "商务房型，含早餐，行政酒廊",
@@ -388,7 +384,7 @@ brand_name = "香格里拉"
 city = "深圳"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "香格里拉酒店尊享套餐 客房2晚连住",
   description: "行政套房，管家服务，机场接送，专属礼遇，客房2晚连住",
@@ -416,7 +412,7 @@ brand_name = "华住"
 city = "深圳"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 4,
   title: "华住精选商旅1晚套餐 深圳门店通用",
   description: "经济实惠，含早餐，交通便利",
@@ -444,7 +440,7 @@ brand_name = "希尔顿"
 city = "广州"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "希尔顿商务精选灵活套餐 1晚起订 广州通用",
   description: "可选1晚住宿或2晚连住，工作日专用，含早餐，免费会议室使用",
@@ -472,7 +468,7 @@ brand_name = "洲际"
 city = "成都"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "洲际周末度假套餐 客房2晚连住",
   description: "周末专用，含双人早餐+欢迎水果，客房2晚连住",
@@ -500,7 +496,7 @@ brand_name = "凯悦"
 city = "成都"
 hotel_packages << {
   brand_name: brand_name,
-  hotel_id: find_hotel_id(brand_name, city),
+  hotel_id: nil,  # Will be updated after insertion
   star_level: 5,
   title: "凯悦酒店商务1晚套餐 成都通用",
   description: "商务楼层，含早餐，免费健身房和泳池",
@@ -531,6 +527,9 @@ puts "   - 武汉地区: #{hotel_packages.count { |p| p[:city] == '武汉' }} �
 puts "   - 其他城市: #{hotel_packages.count { |p| p[:city] != '武汉' }} 个"
 puts "   - 1晚套餐: #{hotel_packages.count { |p| p[:night_count] == 1 }} 个"
 puts "   - 2晚套餐: #{hotel_packages.count { |p| p[:night_count] == 2 }} 个"
+
+# 注意：酒店关联将在 z_hotel_packages_associations.rb 中处理
+# 该文件在所有酒店数据包加载完成后执行
 
 # 为每个套餐生成选项（标准、含早、豪华）
 puts "\n正在生成套餐选项..."
