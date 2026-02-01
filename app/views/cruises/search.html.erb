@@ -110,7 +110,7 @@
         <div class="max-w-7xl mx-auto">
           <!-- Ship Image with Background -->
           <div class="relative h-56 bg-gradient-to-br from-blue-400 to-blue-600">
-            <%= image_tag cruise_ship.image_url, alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80" %>
+            <%= image_tag cruise_ship.image_url || 'https://images.unsplash.com/photo-1567630281845-3753819c6f0b?w=800', alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80" %>
             
             <!-- Ship Info Overlay -->
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
