@@ -14,18 +14,59 @@
   </div>
 
   <div class="max-w-7xl mx-auto px-4 pb-20">
-    <!-- Search Bar -->
+    <!-- Search Form -->
     <div class="py-4">
-      <div class="relative">
-        <input 
-          type="search" 
-          placeholder="搜索目的地、邮轮公司" 
-          class="w-full h-12 pl-11 pr-4 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-primary text-base"
-        >
-        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
+      <%= form_with url: cruises_path, method: :get, class: "space-y-3" do |f| %>
+        <!-- Search Input -->
+        <div class="relative">
+          <%= f.text_field :query, 
+                placeholder: "搜索目的地、邮轮公司", 
+                value: params[:query],
+                class: "w-full h-12 pl-11 pr-4 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-primary text-base" %>
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+
+        <!-- Filter Chips -->
+        <% if params[:query].present? || params[:route_id].present? || params[:cruise_line_id].present? %>
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-sm text-gray-600">筛选：</span>
+            
+            <% if params[:query].present? %>
+              <%= link_to cruises_path(request.query_parameters.except('query')), 
+                    class: "inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary/20" do %>
+                <%= params[:query] %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              <% end %>
+            <% end %>
+            
+            <% if params[:route_id].present? && @selected_route %>
+              <%= link_to cruises_path(request.query_parameters.except('route_id')), 
+                    class: "inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary/20" do %>
+                <%= @selected_route.name %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              <% end %>
+            <% end %>
+            
+            <% if params[:cruise_line_id].present? && @selected_cruise_line %>
+              <%= link_to cruises_path(request.query_parameters.except('cruise_line_id')), 
+                    class: "inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm rounded-full hover:bg-primary/20" do %>
+                <%= @selected_cruise_line.name %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              <% end %>
+            <% end %>
+            
+            <%= link_to "清除全部", cruises_path, class: "text-sm text-gray-500 hover:text-gray-700 underline" %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
 
     <!-- Route Categories Grid -->
@@ -35,7 +76,7 @@
         <% @cruise_routes.each do |route| %>
           <%= link_to search_cruises_path(route: route.id), class: "flex flex-col items-center gap-2 p-3 rounded-lg transition hover:bg-gray-50" do %>
             <% if route.icon_url.present? %>
-              <%= image_tag route.icon_url, alt: route.name, class: "w-12 h-12 object-contain" %>
+              <%= image_tag route.icon_url, alt: route.name, class: "w-12 h-12 object-cover rounded-full" %>
             <% else %>
               <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,8 +92,17 @@
 
     <!-- Popular Cruises List -->
     <section>
-      <div class="mb-3">
-        <h2 class="text-base font-semibold text-gray-900">热门游轮</h2>
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-base font-semibold text-gray-900">
+          <% if params[:query].present? || params[:route_id].present? || params[:cruise_line_id].present? %>
+            搜索结果
+          <% else %>
+            热门游轮
+          <% end %>
+        </h2>
+        <% if @popular_sailings.any? %>
+          <span class="text-sm text-gray-500">共 <%= @popular_sailings.size %> 个结果</span>
+        <% end %>
       </div>
 
       <div class="space-y-3">
