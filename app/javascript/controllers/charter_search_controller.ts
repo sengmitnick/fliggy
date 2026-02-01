@@ -3,18 +3,26 @@ import { Controller } from "@hotwired/stimulus"
 // 包车游搜索页面控制器
 // 处理城市选择、日期选择、立即包车等交互
 export default class extends Controller {
-  static targets = ["cityName", "dateDisplay", "cityModal", "dateModal"]
+  static targets = ["cityName", "dateDisplay", "cityModal", "dateModal", "searchInput", "citiesList"]
 
   declare readonly cityNameTarget: HTMLElement
   declare readonly dateDisplayTarget: HTMLElement
   declare readonly cityModalTarget: HTMLElement
   declare readonly dateModalTarget: HTMLElement
+  declare readonly searchInputTarget: HTMLInputElement
+  declare readonly citiesListTarget: HTMLElement
 
   // 打开城市选择器
   openCitySelector(event: Event): void {
     event.preventDefault()
     this.cityModalTarget.classList.remove("hidden")
     document.body.style.overflow = "hidden"
+    
+    // 清空搜索框并显示所有城市
+    if (this.searchInputTarget) {
+      this.searchInputTarget.value = ""
+      this.showAllCities()
+    }
   }
 
   // 关闭城市选择器
@@ -56,6 +64,57 @@ export default class extends Controller {
       const currentTab = this.getCurrentTab()
       window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&tab=${currentTab}`
     }
+  }
+
+  // 过滤城市列表（实时搜索）
+  filterCities(event: Event): void {
+    const searchTerm = (event.target as HTMLInputElement).value.toLowerCase().trim()
+    
+    if (!searchTerm) {
+      this.showAllCities()
+      return
+    }
+    
+    // 获取所有城市组和城市按钮
+    const cityGroups = this.citiesListTarget.querySelectorAll('.city-group')
+    
+    cityGroups.forEach((group: Element) => {
+      const groupElement = group as HTMLElement
+      const cityButtons = groupElement.querySelectorAll('.city-item')
+      let hasVisibleCity = false
+      
+      cityButtons.forEach((button: Element) => {
+        const btnElement = button as HTMLButtonElement
+        const cityName = (btnElement.dataset.cityDisplay || '').toLowerCase()
+        const cityPinyin = (btnElement.dataset.cityPinyin || '').toLowerCase()
+        
+        // 匹配中文名或拼音
+        const matches = cityName.includes(searchTerm) || cityPinyin.includes(searchTerm)
+        
+        if (matches) {
+          btnElement.style.display = ''
+          hasVisibleCity = true
+        } else {
+          btnElement.style.display = 'none'
+        }
+      })
+      
+      // 如果该地区没有匹配的城市，隐藏整个地区组
+      groupElement.style.display = hasVisibleCity ? '' : 'none'
+    })
+  }
+
+  // 显示所有城市
+  private showAllCities(): void {
+    const cityGroups = this.citiesListTarget.querySelectorAll('.city-group')
+    const cityButtons = this.citiesListTarget.querySelectorAll('.city-item')
+    
+    cityGroups.forEach((group: Element) => {
+      (group as HTMLElement).style.display = ''
+    })
+    cityButtons.forEach((button: Element) => {
+      (button as HTMLElement).style.display = ''
+    })
   }
 
   // 打开日期选择器
