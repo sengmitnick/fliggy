@@ -10,6 +10,8 @@
 # 加载方式：
 # rails runner "load Rails.root.join('app/validators/support/data_packs/v1/chartered_tours.rb')"
 
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 
 # 确保武汉城市存在
 wuhan = City.find_or_create_by!(name: '武汉') do |city|
@@ -164,7 +166,7 @@ vehicle_types_data = [
     hourly_price_6h: 308.0,
     hourly_price_8h: 388.0,
     included_mileage: 100,
-    image_url: '/images/tours/1549317661-bd32c8ce0db2.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   },
   {
     name: '舒适5座',
@@ -175,7 +177,7 @@ vehicle_types_data = [
     hourly_price_6h: 378.0,
     hourly_price_8h: 478.0,
     included_mileage: 100,
-    image_url: '/images/tours/1563720360172-67b8f3dce741.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   },
   {
     name: '豪华5座',
@@ -186,7 +188,7 @@ vehicle_types_data = [
     hourly_price_6h: 588.0,
     hourly_price_8h: 688.0,
     included_mileage: 100,
-    image_url: '/images/tours/1617814076367-b759c7d7e738.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   },
   {
     name: '经济7座',
@@ -197,7 +199,7 @@ vehicle_types_data = [
     hourly_price_6h: 428.0,
     hourly_price_8h: 528.0,
     included_mileage: 100,
-    image_url: '/images/tours/1519641471654-76ce0107ad1b.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   },
   {
     name: '舒适7座',
@@ -208,7 +210,7 @@ vehicle_types_data = [
     hourly_price_6h: 528.0,
     hourly_price_8h: 628.0,
     included_mileage: 100,
-    image_url: '/images/tours/1503736334956-4c8f8e92946d.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   },
   {
     name: '商务巴士',
@@ -219,7 +221,7 @@ vehicle_types_data = [
     hourly_price_6h: 888.0,
     hourly_price_8h: 1088.0,
     included_mileage: 100,
-    image_url: '/images/tours/1544620347-c4fd4a3d5957.jpg'
+    image_url: ImageSeedHelper.random_image_from_category(:cars)
   }
 ]
 
@@ -239,7 +241,7 @@ routes_data = [
     description: '游览武汉最著名的景点，包括黄鹤楼、武汉大学、湖北省博物馆、东湖听涛景区，深度体验武汉历史文化。',
     price_from: 450.0,
     highlights: ['黄鹤楼登高望远', '武大赏樱花', '编钟演奏', '东湖泛舟', '品尝美食'].to_json,
-    cover_image_url: '/images/tours/1580836572436-7f8e60ec0d99.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   },
   {
     name: '武汉精华四景',
@@ -251,7 +253,7 @@ routes_data = [
     description: '精选武汉四大必游景点，轻松舒适的行程安排，适合第一次来武汉的游客。',
     price_from: 400.0,
     highlights: ['黄鹤楼', '武汉大学', '省博物馆', '东湖听涛'].to_json,
-    cover_image_url: '/images/tours/1562774053-701939374585.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   },
   {
     name: '武汉文化深度游',
@@ -263,7 +265,7 @@ routes_data = [
     description: '深度探索武汉历史文化，游览黄鹤楼、古德寺、晴川阁等文化景点，感受武汉深厚的历史底蕴。',
     price_from: 480.0,
     highlights: ['黄鹤楼', '古德寺独特建筑', '晴川阁', '省博物馆', '东湖'].to_json,
-    cover_image_url: '/images/tours/1566127992631-137a642a90f4.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   },
   {
     name: '武汉美食文化游',
@@ -275,7 +277,7 @@ routes_data = [
     description: '游览武汉经典景点的同时，深入户部巷品尝地道武汉美食，热干面、豆皮、面窝一网打尽。',
     price_from: 380.0,
     highlights: ['黄鹤楼', '户部巷美食', '长江游船', '品尝热干面'].to_json,
-    cover_image_url: '/images/tours/1555939594-58d7cb561ad1.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   },
   {
     name: '武汉夜游江城',
@@ -287,7 +289,7 @@ routes_data = [
     description: '体验武汉夜晚的魅力，乘坐长江游船欣赏两岸灯光秀，感受江城夜色之美。',
     price_from: 420.0,
     highlights: ['长江夜游', '两岸灯光秀', '江滩夜景', '夜市美食'].to_json,
-    cover_image_url: '/images/tours/1514565131-fce0801e5785.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   },
   {
     name: '武汉周边木兰天池',
@@ -299,7 +301,7 @@ routes_data = [
     description: '前往黄陂区木兰天池国家森林公园，享受大自然的清新空气，爬山玩水，远离城市喧嚣。',
     price_from: 550.0,
     highlights: ['木兰天池', '森林氧吧', '瀑布景观', '山水风光'].to_json,
-    cover_image_url: '/images/tours/1506905925346-21bda4d32df4.jpg'
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours)
   }
 ]
 

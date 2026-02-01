@@ -16,7 +16,7 @@
   <div class="max-w-7xl mx-auto">
     <!-- Ship Image -->
     <div class="relative h-64">
-      <%= image_tag @cruise_ship.image_url, alt: @cruise_ship.name, class: "w-full h-full object-cover" %>
+      <%= image_tag @cruise_ship.image_url || 'https://images.unsplash.com/photo-1567630281845-3753819c6f0b?w=800', alt: @cruise_ship.name, class: "w-full h-full object-cover" %>
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
       <div class="absolute bottom-4 left-4 right-4">
         <h2 class="text-2xl font-bold text-white mb-1"><%= @cruise_ship.name %></h2>
@@ -46,7 +46,7 @@
         <h3 class="text-base font-semibold text-gray-900 mb-3">选择日期</h3>
         <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4" data-cruise-detail-target="dateContainer">
           <% @sailings.each_with_index do |sailing, index| %>
-            <%= link_to cruise_path(@cruise_ship.slug, sailing_id: sailing.id), 
+            <%= link_to cruise_path(@cruise_ship.slug || @cruise_ship.id, sailing_id: sailing.id), 
                         class: "flex-none w-32 px-4 py-3 rounded-lg border-2 transition #{sailing == @selected_sailing ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}",
                         data: { 
                           cruise_detail_target: "dateTab",

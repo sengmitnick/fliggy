@@ -9,6 +9,8 @@
 # 加载方式：
 # rake validator:reset_baseline
 
+require_relative '../../../../../app/helpers/image_seed_helper'
+
 puts "正在加载 chartered_tours_supplement_v1 数据包（上海包车路线）..."
 
 # 确保上海城市存在
@@ -112,7 +114,7 @@ shanghai_routes_data = [
     description: '游览上海最著名的景点：外滩、东方明珠、豫园、南京路步行街，深度体验海派文化。',
     price_from: 380.0,
     highlights: ['外滩万国建筑', '东方明珠登塔', '豫园古典园林', '南京路购物', '品尝本帮菜'].to_json,
-    cover_image_url: '/images/tours/shanghai-classic.jpg',
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours),
     data_version: 0
   },
   {
@@ -124,7 +126,7 @@ shanghai_routes_data = [
     description: '精选上海四大核心景点，适合时间有限的游客快速打卡。',
     price_from: 350.0,
     highlights: ['外滩夜景', '东方明珠', '田子坊', '豫园'].to_json,
-    cover_image_url: '/images/tours/shanghai-hot.jpg',
+    cover_image_url: ImageSeedHelper.random_image_from_category(:tours),
     data_version: 0
   }
 ]
