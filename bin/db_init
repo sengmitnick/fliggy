@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+# path to your application root.
+APP_ROOT = File.expand_path("..", __dir__)
+
+def system!(*args)
+  system(*args, exception: true)
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "== Initializing database for new branch =="
+  
+  # Try to drop existing database (skip if in use)
+  puts "\n== Dropping database (if possible) =="
+  system "bin/rails db:drop 2>/dev/null || echo 'Database in use, will reset instead'"
+  
+  # Create database if not exists
+  puts "\n== Creating database =="
+  system "bin/rails db:create 2>/dev/null || echo 'Database already exists'"
+  
+  # Reset database schema
+  puts "\n== Resetting database schema =="
+  system! "bin/rails db:schema:load"
+  
+  # Load seed data
+  puts "\n== Loading seed data =="
+  system! "bin/rails db:seed"
+  
+  puts "\n== Database initialization completed =="
+end
