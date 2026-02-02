@@ -303,6 +303,7 @@ def generate_attractions_for_city(city_name, city_info)
       province: city_info[:province],
       district: district,
       address: "#{district}#{attr_name}",
+      cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
       latitude: 30.0 + rand * 20,
       longitude: 100.0 + rand * 30,
       rating: (4.0 + rand * 1.0).round(1),

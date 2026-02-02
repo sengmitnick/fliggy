@@ -44,7 +44,7 @@
   <!-- 视频/图片轮播区域 -->
   <div class="relative h-64">
     <% if @hotel.image_url.present? %>
-      <%= image_tag @hotel.image_url, class: "w-full h-full object-cover" %>
+      <%= safe_image_tag(@hotel.image_url, class: "w-full h-full object-cover" %>
     <% else %>
       <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
         <div class="text-white text-center">

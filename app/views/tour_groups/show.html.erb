@@ -28,9 +28,9 @@
   <!-- Image Gallery -->
   <div class="relative bg-surface" data-controller="carousel">
     <% if @product.main_image_url.present? %>
-      <%= image_tag @product.main_image_url, class: "w-full h-80 object-cover" %>
+      <%= safe_image_tag(@product.main_image_url, class: "w-full h-80 object-cover") %>
     <% elsif @product.image_url.present? %>
-      <%= image_tag @product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'" %>
+      <%= safe_image_tag(@product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'" %>
     <% end %>
     
     <% if @product.gallery_image_urls.present? && @product.gallery_image_urls.size > 0 %>
@@ -900,7 +900,7 @@
           <div class="grid grid-cols-2 gap-3">
             <% @related_products.each do |product| %>
               <%= link_to tour_group_path(product), class: "bg-background rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow" do %>
-                <%= image_tag product.image_url, class: "w-full h-32 object-cover" %>
+                <%= safe_image_tag(product.image_url, class: "w-full h-32 object-cover" %>
                 <div class="p-2">
                   <h4 class="text-sm font-medium text-foreground line-clamp-2 mb-1"><%= product.title %></h4>
                   <div class="flex items-center justify-between">

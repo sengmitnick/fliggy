@@ -137,7 +137,7 @@
               <!-- Hotel Image -->
               <div class="relative w-32 h-40 flex-shrink-0 rounded-lg overflow-hidden">
                 <% if hotel.image_url.present? %>
-                  <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
+                  <%= safe_image_tag(hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
                 <% else %>
                   <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                     <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">

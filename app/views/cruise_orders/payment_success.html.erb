@@ -14,7 +14,7 @@
     <!-- Order Info Card -->
     <div class="bg-white rounded-xl p-6 shadow-sm space-y-4">
       <div class="flex gap-4">
-        <%= image_tag @cruise_ship.image_url, alt: @cruise_ship.name, class: "w-20 h-20 rounded-lg object-cover flex-shrink-0" %>
+        <%= safe_image_tag(@cruise_ship.image_url, alt: @cruise_ship.name, class: "w-20 h-20 rounded-lg object-cover flex-shrink-0" %>
         <div class="flex-1 min-w-0">
           <h2 class="font-semibold text-gray-900 mb-1 truncate"><%= @cruise_ship.name %></h2>
           <p class="text-sm text-gray-600 mb-1">

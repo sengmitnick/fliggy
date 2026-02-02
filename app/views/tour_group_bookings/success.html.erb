@@ -39,7 +39,7 @@
     <div class="bg-white rounded-lg shadow p-4">
       <div class="flex items-start gap-3 mb-4">
         <% if @product.main_image_url.present? %>
-          <%= image_tag @product.main_image_url, class: "w-20 h-20 rounded-lg object-cover" %>
+          <%= safe_image_tag(@product.main_image_url, class: "w-20 h-20 rounded-lg object-cover") %>
         <% end %>
         <div class="flex-1">
           <h3 class="text-base font-semibold text-foreground mb-2"><%= @product.title %></h3>

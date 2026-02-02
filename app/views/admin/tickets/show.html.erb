@@ -129,7 +129,7 @@
               </div>
               <% if @ticket&.start_with?('image/') %>
                 <div class="ml-auto">
-                  <%= image_tag ticket.image_url, class: "w-16 h-16 object-cover rounded" %>
+                  <%= safe_image_tag(ticket.image_url, class: "w-16 h-16 object-cover rounded" %>
                 </div>
               <% end %>
             </div>

@@ -266,9 +266,9 @@
           <div class="bg-white rounded-xl overflow-hidden shadow-sm h-48">
             <div class="h-3/4 bg-gray-200 relative">
               <% if hotel.image_url.present? %>
-                <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
+                <%= safe_image_tag(hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
               <% elsif hotel.image_url.present? %>
-                <%= image_tag hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop'" %>
+                <%= safe_image_tag(hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name, onerror: "this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop'" %>
               <% else %>
                 <%= image_tag "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400&auto=format&fit=crop", class: "w-full h-full object-cover", alt: hotel.name %>
               <% end %>
