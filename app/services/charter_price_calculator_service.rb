@@ -15,9 +15,45 @@ class CharterPriceCalculatorService < ApplicationService
   private
 
   def calculate_price
-    base_price = vehicle_type.price_for_duration(duration_hours)
-    final_price = base_price * holiday_markup * peak_season_markup
+    # 基础价格：使用路线的 price_from（已包含城市、距离、景点等因素）
+    base_price = route.price_from
+    
+    # 车型系数：根据车型档次调整价格
+    vehicle_markup = calculate_vehicle_markup
+    
+    # 时长系数：8小时比6小时贵
+    duration_markup = calculate_duration_markup
+    
+    # 最终价格 = 基础价格 × 车型系数 × 时长系数 × 节假日系数 × 旺季系数
+    final_price = base_price * vehicle_markup * duration_markup * holiday_markup * peak_season_markup
     final_price.round(2)
+  end
+
+  def calculate_vehicle_markup
+    # 根据车型档次调整价格
+    # 经济型作为基准(1.0倍)，其他车型按档次递增
+    case vehicle_type.level
+    when '经济'
+      1.0
+    when '舒适'
+      1.25
+    when '豪华'
+      1.8
+    else
+      1.0
+    end
+  end
+
+  def calculate_duration_markup
+    # 时长系数
+    case duration_hours
+    when 6
+      1.0  # 6小时作为基准
+    when 8
+      1.3  # 8小时比6小时贵30%
+    else
+      duration_hours / 6.0  # 其他时长按比例计算
+    end
   end
 
   def holiday_markup

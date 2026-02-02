@@ -177,6 +177,18 @@ export default class extends Controller<HTMLElement> {
       const url = new URL(window.location.href)
       url.searchParams.set('date', dateStr)
       window.location.href = url.toString()
+    } else if (window.location.pathname.includes('/chartered_tours/search')) {
+      // Chartered tours search page mode - reload with new date
+      console.log('Date picker: Chartered tours search mode, reloading with new date')
+      const url = new URL(window.location.href)
+      url.searchParams.set('date', dateStr)
+      window.location.href = url.toString()
+    } else if (window.location.pathname.includes('/charter_routes/search')) {
+      // Charter routes search page mode - reload with new date
+      console.log('Date picker: Charter routes search mode, reloading with new date')
+      const url = new URL(window.location.href)
+      url.searchParams.set('date', dateStr)
+      window.location.href = url.toString()
     } else {
       console.log('Date picker: Regular mode')
       // Regular single/round trip selection

@@ -12,7 +12,7 @@
         <button 
           data-action="click->date-picker#switchToExactDate"
           data-date-picker-target="exactTab"
-          class="text-base font-bold border-b-2 border-black pb-1">精确日期</button>
+          class="text-base font-bold border-b-2 border-black pb-1">精确日期<span class="text-xs text-gray-500 font-normal">（以当地时间为准）</span></button>
         <button 
           data-action="click->date-picker#switchToFuzzyDate"
           data-date-picker-target="fuzzyTab"
@@ -168,11 +168,6 @@
                 <!-- Date number -->
                 <div class="text-2xl font-bold mt-3 <%= is_selected ? 'text-gray-900' : 'text-gray-800' %>">
                   <%= date.day %>
-                </div>
-                
-                <!-- Price -->
-                <div class="text-xs <%= is_selected ? 'text-red-600 font-bold' : price_class %> mt-1">
-                  ¥<%= price %>
                 </div>
                 
                 <!-- Special day label -->

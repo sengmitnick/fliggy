@@ -1,6 +1,6 @@
 class CharterBookingsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_charter_booking, only: [:show, :confirm, :pay, :success]
+  before_action :set_charter_booking, only: [:show, :edit, :update, :confirm, :pay, :success]
 
   def new
     # 订单填写页面
@@ -68,6 +68,49 @@ class CharterBookingsController < ApplicationController
 
   def show
     # 订单详情页
+  end
+
+  def edit
+    # 编辑订单信息页面 - 类似 new 页面，但加载已存在的订单数据
+    @route = @charter_booking.charter_route
+    @vehicle_type = @charter_booking.vehicle_type
+    @departure_date = @charter_booking.departure_date
+    @duration_hours = @charter_booking.duration_hours
+    @passengers_count = @charter_booking.passengers_count
+    @total_price = @charter_booking.total_price
+    
+    # 获取用户的常用联系人（如果有）
+    @contacts = current_user.contacts.limit(3)
+    
+    # 使用 new 页面的视图
+    render :new
+  end
+
+  def update
+    # 更新订单信息
+    if @charter_booking.update(charter_booking_params)
+      # 重新计算价格（防止前端篡改）
+      @charter_booking.update(
+        total_price: CharterPriceCalculatorService.call(
+          route: @charter_booking.charter_route,
+          vehicle_type: @charter_booking.vehicle_type,
+          duration_hours: @charter_booking.duration_hours,
+          departure_date: @charter_booking.departure_date
+        )
+      )
+      
+      redirect_to confirm_charter_booking_path(@charter_booking)
+    else
+      # Set all required instance variables for the form re-render
+      @route = @charter_booking.charter_route
+      @vehicle_type = @charter_booking.vehicle_type
+      @departure_date = @charter_booking.departure_date
+      @duration_hours = @charter_booking.duration_hours
+      @passengers_count = @charter_booking.passengers_count
+      @total_price = @charter_booking.total_price
+      @contacts = current_user.contacts.limit(3)
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def confirm

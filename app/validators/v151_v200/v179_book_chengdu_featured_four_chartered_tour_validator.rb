@@ -2,29 +2,29 @@
 
 require_relative '../base_validator'
 
-# 验证用例96: 预订武汉经典一日包车游（经济7座，家庭出行，3天后出发）
+# 验证用例179: 预订成都精华四景游（舒适7座，朋友出行，10天后出发）
 #
 # 核心验证点:
-# 1. 路线选择: 武汉经典一日游
-# 2. 车型选择: 经济7座（座位数≥5人）
-# 3. 包车时长: 8小时（一日游标准时长）
-# 4. 出发日期: 3天后（Date.today + 3.days）
+# 1. 路线选择: 成都精华四景
+# 2. 车型选择: 舒适7座（座位数≥6人）
+# 3. 包车时长: 6小时（半日游标准时长）
+# 4. 出发日期: 10天后（Date.today + 10.days）
 # 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
-module V051V100
-  class V096BookWuhanClassicOneDayCharteredTourValidator < BaseValidator
-    self.validator_id = 'v096_book_wuhan_classic_one_day_chartered_tour_validator'
-    self.task_id = 'eba7a78e-2541-4232-b0cf-427687f70264'
-    self.title = '预订武汉经典一日包车游（经济7座，家庭5人）- 验证出发日期、包车时长8小时、订单完整性'
-    self.description = '预订武汉经典一日游包车路线，家庭5人出行，选择经济7座车型，8小时服务。验证出发日期（3天后）、包车时长（8小时）、车型座位数、订单信息完整性。'
+module V151V200
+  class V179BookChengduFeaturedFourCharteredTourValidator < BaseValidator
+    self.validator_id = 'v179_book_chengdu_featured_four_chartered_tour_validator'
+    self.task_id = 'e82f3b3f-68f5-4d9e-9f0f-e454fd93ad36'
+    self.title = '预订成都精华四景游（舒适7座，朋友6人）- 验证出发日期、包车时长6小时、订单完整性'
+    self.description = '预订成都精华四景包车路线，朋友6人出行，选择舒适7座车型，6小时服务。验证出发日期（10天后）、包车时长（6小时）、车型座位数、订单信息完整性。'
     self.timeout_seconds = 240
   
     def prepare
-      @city_name = '武汉'
-      @route_keyword = '经典一日游'
-      @vehicle_type_name = '经济7座'
-      @duration_hours = 8
-      @passenger_count = 5
-      @travel_date = Date.today + 3.days
+      @city_name = '成都'
+      @route_keyword = '精华四景'
+      @vehicle_type_name = '舒适7座'
+      @duration_hours = 6
+      @passenger_count = 6
+      @travel_date = Date.today + 10.days
     
       # 查询可用路线
       @available_routes = CharterRoute.where(data_version: @data_version)
@@ -36,14 +36,14 @@ module V051V100
       @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: @data_version)
     
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，家庭#{@passenger_count}人出行，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务",
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，朋友#{@passenger_count}人出行，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务（半日游）",
         city: @city_name,
         route_keyword: @route_keyword,
         vehicle_type: @vehicle_type_name,
         duration_hours: @duration_hours,
         passenger_count: @passenger_count,
         travel_date: @travel_date.strftime('%Y-%m-%d'),
-        hint: "1. 在包车游搜索页选择武汉城市\n2. 浏览并选择包含'经典一日游'的路线\n3. 在车型选择页选择8小时服务时长\n4. 选择'经济7座'车型（适合5人家庭出行）\n5. 填写联系人信息并提交订单",
+        hint: "1. 在包车游搜索页选择成都城市\n2. 浏览并选择包含'精华四景'的路线\n3. 在车型选择页选择6小时服务时长\n4. 选择'舒适7座'车型（适合6人朋友出行）\n5. 填写联系人信息并提交订单",
         available_routes_count: @available_routes.count,
         vehicle_available: @available_vehicle.present?
       }
@@ -73,7 +73,7 @@ module V051V100
       return if @charter_bookings.nil? || @charter_bookings.empty?
       
       # 断言2: 路线正确（权重15%）
-      add_assertion "路线正确（武汉经典一日游）", weight: 15 do
+      add_assertion "路线正确（成都精华四景）", weight: 15 do
         @charter_bookings.each do |booking|
           route_name = booking.charter_route.name
           city_name = booking.charter_route.city.name
@@ -87,7 +87,7 @@ module V051V100
       end
       
       # 断言3: 车型正确（权重20%）
-      add_assertion "车型正确（经济7座）", weight: 20 do
+      add_assertion "车型正确（舒适7座）", weight: 20 do
         @charter_bookings.each do |booking|
           vehicle_name = booking.vehicle_type.name
           vehicle_seats = booking.vehicle_type.seats
@@ -95,29 +95,29 @@ module V051V100
           expect(vehicle_name).to eq(@vehicle_type_name),
             "车型错误。期望: #{@vehicle_type_name}, 实际: #{vehicle_name}"
           
-          # 验证座位数能容纳5人
+          # 验证座位数能容纳6人
           expect(vehicle_seats).to be >= @passenger_count,
             "车辆座位数不足。需要容纳#{@passenger_count}人，实际座位数: #{vehicle_seats}"
         end
       end
       
       # 断言4: 服务时长正确（权重15%）
-      # 验证包车时长为8小时（一日游标准服务时长）
-      add_assertion "服务时长正确（8小时）", weight: 15 do
+      # 验证包车时长为6小时（半日游标准服务时长）
+      add_assertion "服务时长正确（6小时）", weight: 15 do
         @charter_bookings.each do |booking|
           duration = booking.duration_hours
           
           expect(duration).to eq(@duration_hours),
             "服务时长错误。期望: #{@duration_hours}小时, 实际: #{duration}小时"
           
-          # 验证包车时长是8小时（一日游标准时长）
-          expect(duration).to eq(8),
-            "包车时长应为8小时（一日游标准），实际: #{duration}小时"
+          # 验证包车时长是6小时（半日游标准时长）
+          expect(duration).to eq(6),
+            "包车时长应为6小时（半日游标准），实际: #{duration}小时"
         end
       end
       
       # 断言5: 订单信息完整（权重15%）
-      # 验证联系人信息、出发日期（3天后）、出发时间格式、乘客数量、预订模式
+      # 验证联系人信息、出发日期（10天后）、出发时间格式、乘客数量、预订模式
       add_assertion "订单信息完整（联系人、电话、出发日期）", weight: 15 do
         @charter_bookings.each do |booking|
           # 联系人姓名
@@ -139,7 +139,7 @@ module V051V100
             "缺少出发日期"
           
           expect(booking.departure_date).to eq(@travel_date),
-            "出发日期错误。期望: #{@travel_date}（3天后），实际: #{booking.departure_date}"
+            "出发日期错误。期望: #{@travel_date}（10天后），实际: #{booking.departure_date}"
           
           expect(booking.departure_date).to be >= Date.today,
             "出发日期不能早于今天。实际: #{booking.departure_date}"
@@ -153,7 +153,7 @@ module V051V100
           
           # 乘客数量
           expect(booking.passengers_count).to eq(@passenger_count),
-            "乘客数量错误。期望: #{@passenger_count}人（家庭出行），实际: #{booking.passengers_count}人"
+            "乘客数量错误。期望: #{@passenger_count}人（朋友出行），实际: #{booking.passengers_count}人"
           
           # 预订模式
           expect(booking.booking_mode).to eq('by_route'),
@@ -238,12 +238,12 @@ module V051V100
         charter_route_id: route.id,
         vehicle_type_id: vehicle_type.id,
         departure_date: @travel_date,
-        departure_time: '09:00',
+        departure_time: '07:30',
         duration_hours: @duration_hours,
         booking_mode: 'by_route',
         passengers_count: @passenger_count,
-        contact_name: '吴九',
-        contact_phone: '13800138007',
+        contact_name: '孙七',
+        contact_phone: '13800138005',
         total_price: price,
         status: 'pending',
         data_version: @data_version

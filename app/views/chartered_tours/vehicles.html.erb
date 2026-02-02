@@ -22,8 +22,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <%= @departure_date.strftime('%Y年%m月%d日') %> 出发
-        <span class="mx-2">·</span>
-        <span><%= @passenger_count %>人</span>
       </div>
     </div>
   </div>
@@ -110,7 +108,7 @@
                   <!-- 价格 -->
                   <div class="flex items-center justify-between mt-2">
                     <div>
-                      <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id] %></span>
+                      <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id].round(1) %></span>
                       <span class="text-xs text-gray-500">/<%= @duration_hours %>小时</span>
                     </div>
                     <div class="text-yellow-500 text-sm font-medium">选择 →</div>
@@ -165,7 +163,7 @@
                     
                     <div class="flex items-center justify-between mt-2">
                       <div>
-                        <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id] %></span>
+                        <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id].round(1) %></span>
                         <span class="text-xs text-gray-500">/<%= @duration_hours %>小时</span>
                       </div>
                       <div class="text-yellow-500 text-sm font-medium">选择 →</div>
@@ -221,7 +219,7 @@
                     
                     <div class="flex items-center justify-between mt-2">
                       <div>
-                        <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id] %></span>
+                        <span class="text-xl font-bold text-orange-500">¥<%= @vehicle_prices[vehicle.id].round(1) %></span>
                         <span class="text-xs text-gray-500">/<%= @duration_hours %>小时</span>
                       </div>
                       <div class="text-yellow-500 text-sm font-medium">选择 →</div>

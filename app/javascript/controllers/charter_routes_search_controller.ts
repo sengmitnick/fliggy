@@ -1,50 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
-// 包车游搜索页面控制器
-// 处理城市选择、日期选择、选项卡切换、立即包车等交互
+// 包车路线搜索页面控制器
+// 处理城市选择和日期选择
 export default class extends Controller {
-  static targets = ["cityName", "dateDisplay", "cityModal", "searchInput", "citiesList", "tabButtons", "tabContent"]
+  static targets = ["cityName", "dateDisplay", "cityModal", "searchInput", "citiesList"]
 
   declare readonly cityNameTarget: HTMLElement
   declare readonly dateDisplayTarget: HTMLElement
   declare readonly cityModalTarget: HTMLElement
   declare readonly searchInputTarget: HTMLInputElement
   declare readonly citiesListTarget: HTMLElement
-  declare readonly tabButtonsTarget: HTMLElement
-  declare readonly tabContentTargets: HTMLElement[]
-
-  // 切换选项卡
-  switchTab(event: Event): void {
-    event.preventDefault()
-    const button = event.currentTarget as HTMLButtonElement
-    const tabName = button.dataset.tab
-
-    if (!tabName) return
-
-    // 更新所有按钮样式
-    const allButtons = this.tabButtonsTarget.querySelectorAll('button')
-    allButtons.forEach((btn) => {
-      const btnElement = btn as HTMLButtonElement
-      if (btnElement.dataset.tab === tabName) {
-        // 激活状态
-        btnElement.classList.remove('text-text-secondary')
-        btnElement.classList.add('text-primary', 'border-b-2', 'border-primary')
-      } else {
-        // 非激活状态
-        btnElement.classList.remove('text-primary', 'border-b-2', 'border-primary')
-        btnElement.classList.add('text-text-secondary')
-      }
-    })
-
-    // 切换内容显示
-    this.tabContentTargets.forEach((content) => {
-      if (content.dataset.tab === tabName) {
-        content.classList.remove('hidden')
-      } else {
-        content.classList.add('hidden')
-      }
-    })
-  }
 
   // 打开城市选择器
   openCitySelector(event: Event): void {
@@ -81,22 +46,8 @@ export default class extends Controller {
       
       // 重新加载页面，传递新的城市参数
       const currentDate = this.getCurrentDate()
-      const currentTab = this.getCurrentTab()
-      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&tab=${currentTab}`
-    }
-  }
-
-  // 选择热门城市
-  selectHotCity(event: Event): void {
-    event.preventDefault()
-    const button = event.currentTarget as HTMLButtonElement
-    const cityName = button.dataset.cityName
-
-    if (cityName) {
-      // 直接导航到新城市页面
-      const currentDate = this.getCurrentDate()
-      const currentTab = this.getCurrentTab()
-      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&tab=${currentTab}`
+      const currentCategory = this.getCurrentCategory()
+      window.location.href = `/charter_routes/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&category=${currentCategory}`
     }
   }
 
@@ -151,24 +102,12 @@ export default class extends Controller {
     })
   }
 
-  // 立即包车 - 跳转到路线列表或直接预订
-  startBooking(event: Event): void {
-    event.preventDefault()
-    
-    // 获取当前选择的城市和日期
-    const city = this.getCurrentCity()
-    const date = this.getCurrentDate()
-    
-    // 跳转到charter_routes搜索页面
-    window.location.href = `/charter_routes/search?city=${encodeURIComponent(city)}&date=${date}`
-  }
-
   // 获取当前选择的城市
   private getCurrentCity(): string {
     return this.cityNameTarget.textContent?.trim() || '武汉'
   }
 
-  // 获取当前选择的日期（从URL参数或dateDisplay目标）
+  // 获取当前选择的日期（从URL参数）
   private getCurrentDate(): string {
     const urlParams = new URLSearchParams(window.location.search)
     const dateParam = urlParams.get('date')
@@ -183,10 +122,10 @@ export default class extends Controller {
     return tomorrow.toISOString().split('T')[0]
   }
 
-  // 获取当前激活的Tab
-  private getCurrentTab(): string {
+  // 获取当前选择的类别
+  private getCurrentCategory(): string {
     const urlParams = new URLSearchParams(window.location.search)
-    return urlParams.get('tab') || 'recommend'
+    return urlParams.get('category') || 'all'
   }
 
   // 点击模态框背景关闭
@@ -195,7 +134,6 @@ export default class extends Controller {
     if (target === this.cityModalTarget) {
       this.closeCitySelector(event)
     }
-    // Note: dateModal is handled by date-picker controller
   }
 
   // 组件断开连接时清理
