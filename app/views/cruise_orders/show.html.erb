@@ -58,7 +58,7 @@
     <div class="bg-white rounded-xl p-6 shadow-sm">
       <h3 class="font-bold text-base mb-4">游轮信息</h3>
       <div class="flex gap-4">
-        <%= safe_image_tag(@cruise_ship.image_url, alt: @cruise_ship.name, class: "w-24 h-24 rounded-lg object-cover flex-shrink-0" %>
+        <%= safe_image_tag(@cruise_ship.image_url, alt: @cruise_ship.name, class: "w-24 h-24 rounded-lg object-cover flex-shrink-0") %>
         <div class="flex-1 min-w-0">
           <h4 class="font-semibold text-gray-900 mb-2"><%= @cruise_ship.name %></h4>
           <div class="space-y-1 text-sm text-gray-600">

@@ -131,7 +131,7 @@
               </div>
               <% if @hotel&.start_with?('image/') %>
                 <div class="ml-auto">
-                  <%= safe_image_tag(hotel.image_url, class: "w-16 h-16 object-cover rounded" %>
+                  <%= safe_image_tag(hotel.image_url, class: "w-16 h-16 object-cover rounded") %>
                 </div>
               <% end %>
             </div>

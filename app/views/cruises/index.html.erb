@@ -112,7 +112,7 @@
             <!-- Cruise Image -->
             <div class="relative h-48">
               <% if sailing.cruise_ship.image_url.present? %>
-                <%= safe_image_tag(sailing.cruise_ship.image_url, alt: sailing.cruise_ship.name, class: "w-full h-full object-cover" %>
+                <%= safe_image_tag(sailing.cruise_ship.image_url, alt: sailing.cruise_ship.name, class: "w-full h-full object-cover") %>
               <% else %>
                 <div class="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                   <svg class="w-20 h-20 text-blue-300" fill="currentColor" viewBox="0 0 20 20">

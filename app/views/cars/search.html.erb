@@ -186,7 +186,7 @@
             <div class="flex items-start">
               <div class="w-32 h-20 bg-gray-50 rounded overflow-hidden relative">
                 <% if car.image_url.present? %>
-                  <%= safe_image_tag(car.image_url, alt: "#{car.brand} #{car.car_model}", class: "w-full h-full object-cover" %>
+                  <%= safe_image_tag(car.image_url, alt: "#{car.brand} #{car.car_model}", class: "w-full h-full object-cover") %>
                 <% else %>
                   <!-- 汽车占位图 -->
                   <div class="flex items-center justify-center h-full text-gray-300">
