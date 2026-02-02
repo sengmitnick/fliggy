@@ -5,7 +5,7 @@
 #
 # Usage:
 #   class HotelBookingMultiTurnValidator < MultiTurnBaseValidator
-#     self.validator_id = 'v501'
+#     self.validator_id = 'v201'
 #     self.task_id = 'uuid-here'
 #     self.title = '酒店预订多轮对话'
 #     self.max_turns = 10

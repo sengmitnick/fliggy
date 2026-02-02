@@ -8,6 +8,7 @@ module V101V150
     self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e1f'
     self.title = '预订普通列车+酒店1晚'
     self.description = '预订明天北京到天津的普通列车（C字头或Z字头，二等座），并预订天津酒店1晚'
+    self.timeout_seconds = 300
 
     def task_description
       "预订明天北京到天津的普通列车（C字头或Z字头，二等座），并预订天津酒店1晚"

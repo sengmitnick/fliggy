@@ -149,3 +149,41 @@ if all_tickets_data.any?
 else
   puts "⚠️  没有数据需要创建"
 end
+
+# ==================== 专门为验证器添加晚班大巴（18:00后） ====================
+night_buses_data = []
+
+# 为未来7天生成北京→天津晚班大巴
+(0..6).each do |day_offset|
+  date = Date.today + day_offset.days
+  
+  night_times = [
+    { dep: "18:00", arr: "20:00" },
+    { dep: "18:30", arr: "20:30" },
+    { dep: "19:00", arr: "21:00" },
+    { dep: "19:30", arr: "21:30" },
+    { dep: "20:00", arr: "22:00" },
+    { dep: "20:30", arr: "22:30" },
+    { dep: "21:00", arr: "23:00" }
+  ]
+  
+  night_times.each do |time_pair|
+    night_buses_data << {
+      origin: "北京",
+      destination: "天津",
+      departure_date: date,
+      departure_time: time_pair[:dep],
+      arrival_time: time_pair[:arr],
+      price: 65,
+      status: "available",
+      seat_type: "普通座",
+      departure_station: "北京六里桥长途汽车站",
+      arrival_station: "天津客运西站",
+      route_description: "晚班直达",
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+BusTicket.insert_all(night_buses_data) if night_buses_data.any?

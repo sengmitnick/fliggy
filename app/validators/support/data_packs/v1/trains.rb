@@ -153,6 +153,22 @@ end
 # 批量插入上海→杭州火车票
 Train.insert_all(all_trains)
 
+# ==================== 专门为验证器添加北京→上海夜间火车（20:00后） ====================
+all_trains = []
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  night_trains_bj_to_sh = [
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 0, min: 30), train_number: "G#{109 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 0), train_number: "G#{111 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 30), train_number: "G#{113 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 0), train_number: "D#{301 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 22, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 30), train_number: "D#{303 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
+  ]
+  all_trains.concat(night_trains_bj_to_sh)
+end
+Train.insert_all(all_trains)
+
 # 路线1B: 杭州→上海（返程路线，用于往返行程验证）
 # 与上海→杭州对应的返程路线，车次和时刻对称
 all_trains = []

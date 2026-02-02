@@ -226,8 +226,73 @@ namespace :validator do
       puts "✅ All required API endpoints are available\n"
     end
     
-    # Step 1: 检查权重总和
-    puts "🔍 Step 1: Checking weight sums..."
+    # Step 1: 检查validator类属性完整性
+    puts "🔍 Step 1: Checking validator class attributes..."
+    attribute_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      
+      # 加载validator类
+      relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+      class_path = relative_path.gsub('.rb', '').split('/')
+      class_name = class_path.map(&:camelize).join('::')
+      
+      begin
+        klass = class_name.constantize
+        
+        # 检查必需的类属性
+        missing_attrs = []
+        missing_attrs << 'self.validator_id' if klass.validator_id.nil?
+        missing_attrs << 'self.task_id' if klass.task_id.nil?
+        missing_attrs << 'self.title' if klass.title.nil?
+        missing_attrs << 'self.description' if klass.description.nil?
+        missing_attrs << 'self.timeout_seconds' if klass.timeout_seconds.nil?
+        
+        if missing_attrs.any?
+          attribute_errors << {
+            validator: validator_name,
+            class_name: class_name,
+            file: file,
+            missing: missing_attrs
+          }
+        end
+      rescue NameError => e
+        attribute_errors << {
+          validator: validator_name,
+          class_name: class_name,
+          file: file,
+          error: "无法加载类: #{e.message}"
+        }
+      end
+    end
+    
+    if attribute_errors.any?
+      puts "\n❌ Validator Attribute Errors Found:"
+      puts "-" * 70
+      attribute_errors.each do |error|
+        puts "\n#{error[:validator]} (#{error[:class_name]})"
+        puts "  File: #{error[:file]}"
+        if error[:error]
+          puts "  Error: #{error[:error]}"
+        elsif error[:missing]
+          puts "  Missing attributes: #{error[:missing].join(', ')}"
+          puts "  → 请使用新风格类属性定义（例如：self.validator_id = '...'）"
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ #{attribute_errors.size} validator(s) have missing or invalid class attributes"
+      puts "Please fix these validators before running simulations\n"
+      exit 1
+    else
+      puts "✅ All validators have required class attributes\n"
+    end
+    
+    # Step 2: 检查权重总和
+    puts "🔍 Step 2: Checking weight sums..."
     weight_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -272,8 +337,8 @@ namespace :validator do
       puts "✅ All validators have correct weight sums (total = 100)\n"
     end
     
-    # Step 2: 运行模拟测试
-    puts "🧪 Step 2: Running simulations..."
+    # Step 3: 运行模拟测试
+    puts "🧪 Step 3: Running simulations..."
     puts "-" * 70
     
     # 加载所有 Validator

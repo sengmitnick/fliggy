@@ -8,6 +8,8 @@ module V101V150
     self.task_id = 'a0b1c2d3-4e5f-6a7b-8c9d-0e1f2a3b4c5d'
     self.title = '预订豪华轿车+送机服务'
     self.description = '预订明天北京豪华轿车1天，并预订送机服务'
+    self.timeout_seconds = 300
+    
 
     def task_description
       "预订明天北京豪华轿车1天，并预订送机服务"

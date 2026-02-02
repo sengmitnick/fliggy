@@ -9,6 +9,7 @@ module V101V150
   self.task_id = 'c5d6e7f8-9a0b-1c2d-3e4f-5a6b7c8d9e0f'
   self.title = '预订3天后上海→深圳航班+深圳宝安机场附近酒店'
   self.description = '预订3天后从上海到深圳的航班，并预订深圳宝安国际机场附近的酒店（当天入住2晚）'
+  self.timeout_seconds = 300
 
   def prepare
     @departure_city = '上海'

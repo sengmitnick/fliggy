@@ -19,13 +19,11 @@
 | 号段 | 数量 | 状态 | 说明 |
 |------|------|------|------|
 | V176-V200 | 25个 | ✅ 可用 | v151_v200目录 |
-| V201-V205 | 5个 | ✅ 可用 | 需创建v201_v250目录 |
 | V114-V118 | 5个 | ❌ 不可用 | 另一分支已有新版本，避免冲突 |
 | **总计** | **30个** | - | 达到200个验证器总量 ✅ |
 
 **实施方案**: 
-- 使用V176-V200 (25个) + 创建V201-V205 (5个)
-- 需创建新目录 `app/validators/v201_v250/`
+- 使用V176-V200 (25个) +
 - 总计达到200个验证器 ✅
 
 ---
@@ -96,22 +94,6 @@
 - 地理位置关键词识别（CBD、市中心、景区等）
 - 距离便利性评估
 - 位置与服务的匹配度
-
----
-
-### 第4批: 服务增强组合验证器 (V201-V205, 5个)
-
-利用现有服务模块创建增强组合验证器（需创建v201_v250目录）：
-
-| 编号 | 验证器名称 | 核心场景 | 数据支持 |
-|------|------------|----------|----------|
-| **V201** | `book_insurance_included_flight_hotel` | 预订航班+酒店+旅行保险组合 | ✅ flights.rb + hotels_all.rb + insurance_products.rb |
-| **V202** | `book_visa_service_and_international_flight` | 预订签证服务+国际航班组合 | ✅ visa_products.rb + flights.rb |
-| **V203** | `book_abroad_ticket_and_hotel` | 预订境外景点门票+境外酒店 | ✅ abroad_tickets.rb + hotels_all.rb |
-| **V204** | `book_internet_service_and_international_trip` | 预订境外上网服务+国际行程组合 | ✅ internet_sim_cards.rb + flights.rb |
-| **V205** | `book_deep_travel_and_accommodation` | 预订深度旅行产品+配套住宿 | ✅ deep_travel_products.rb + hotels_all.rb |
-
-**注意**: 第4批需要创建新目录 `app/validators/v201_v250/`。
 
 ---
 

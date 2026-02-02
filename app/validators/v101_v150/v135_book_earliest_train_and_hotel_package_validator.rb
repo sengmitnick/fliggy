@@ -8,6 +8,7 @@ module V101V150
     self.task_id = 'b5c6d7e8-9f0a-1b2c-3d4e-5f6a7b8c9d0e'
     self.title = '预订最早高铁+酒店套餐（含早餐）'
     self.description = '预订明天上海到杭州的最早高铁（二等座），并预订上海酒店套餐1晚（含早餐）'
+    self.timeout_seconds = 300
 
     def task_description
       "预订明天上海到杭州的最早高铁（二等座），并预订上海酒店套餐1晚（含早餐）"
