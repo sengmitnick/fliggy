@@ -335,7 +335,7 @@
             <!-- Hotel Image -->
             <div class="relative w-32 h-40 flex-shrink-0">
               <% if hotel.image_url.present? %>
-                <%= safe_image_tag(hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name %>
+                <%= safe_image_tag(hotel.image_url, class: "w-full h-full object-cover", alt: hotel.name) %>
               <% else %>
                 <%= image_tag "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80", class: "w-full h-full object-cover", alt: hotel.name %>
               <% end %>

@@ -510,6 +510,15 @@ Do not write any business logic in the admin backend that should only be for web
 
 **Image Processing**: Prefer native ActiveStorage variants. If custom processing needed, use `ImageProcessing::Vips` only. Forbidden: MiniMagick, direct Vips::Image.
 
+**⚠️ CRITICAL: Batch Replacement of image_tag → safe_image_tag**:
+- When performing batch replacements on ERB templates, ALWAYS verify syntax after replacement
+- Common issue: Missing closing parentheses `)` before `%>` in multi-line method calls
+- **Pattern to watch**: `<%= safe_image_tag(model.image_url, class: "...", alt: model.name %>` (WRONG - missing `)`)
+- **Correct pattern**: `<%= safe_image_tag(model.image_url, class: "...", alt: model.name) %>`
+- **Prevention**: After batch replacement, ALWAYS run `bin/validate_erb_html` to catch syntax errors
+- **Testing**: Run `rake test` after any view changes to ensure no rendering errors
+- **Why this matters**: Missing parentheses cause "syntax error, unexpected `else', expecting ')'" that breaks entire pages
+
 When installing any new gem or npm packages, always specify a version you are most familiar with and suitable for the project. Do not use the latest version directly.
 
 **ALWAYS prefer `rails generate models` for batch model generation:**

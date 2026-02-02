@@ -30,7 +30,7 @@
     <% if @product.main_image_url.present? %>
       <%= safe_image_tag(@product.main_image_url, class: "w-full h-80 object-cover") %>
     <% elsif @product.image_url.present? %>
-      <%= safe_image_tag(@product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'" %>
+      <%= safe_image_tag(@product.image_url, class: "w-full h-80 object-cover", onerror: "this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'") %>
     <% end %>
     
     <% if @product.gallery_image_urls.present? && @product.gallery_image_urls.size > 0 %>

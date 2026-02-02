@@ -27,7 +27,7 @@
     <div class="relative bg-surface-elevated">
       <div class="aspect-square">
         <% if @product.image_url.present? && (@product.image_url.start_with?('http://') || @product.image_url.start_with?('https://') || @product.image_url.start_with?('/')) %>
-          <%= safe_image_tag(@product.image_url, class: "w-full h-full object-cover", alt: @product.name %>
+          <%= safe_image_tag(@product.image_url, class: "w-full h-full object-cover", alt: @product.name) %>
         <% else %>
           <div class="w-full h-full flex items-center justify-center bg-surface-elevated">
             <span class="text-muted">暂无图片</span>

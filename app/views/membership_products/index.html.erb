@@ -63,9 +63,9 @@
             <!-- Product Image -->
             <div class="relative aspect-square bg-surface-elevated">
               <% if product.image_url.present? %>
-                <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+                <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name) %>
               <% elsif product.image_url.present? %>
-                <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+                <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name) %>
               <% else %>
                 <div class="w-full h-full flex items-center justify-center">
                   <span class="text-muted text-xs">暂无图片</span>
