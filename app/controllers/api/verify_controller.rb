@@ -148,7 +148,8 @@ module Api
         render json: {
           task: prepare_info,            # 任务信息（instruction 等）
           session_id: session_id,        # 会话 ID
-          task_id: task_id               # 任务 ID（回显）
+          task_id: task_id,              # 任务 ID（回显）
+          is_multi_turn: instance.is_a?(MultiTurnBaseValidator)  # 是否为多轮对话验证器
         }
       end
     rescue StandardError => e

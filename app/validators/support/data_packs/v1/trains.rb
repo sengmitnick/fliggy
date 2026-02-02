@@ -13,7 +13,7 @@ puts "正在加载 trains_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
 # 生成未来7天的火车票数据（从明天开始）
-start_date = Date.current + 1.day
+start_date = Date.today + 1.day
 end_date = start_date + 6.days
 
 puts "  火车票日期范围: #{start_date} 至 #{end_date} (共7天)"
@@ -26,7 +26,7 @@ timestamp = Time.current
 # 这条路线主要测试"最早"概念（时间排序）
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i  # 用于生成唯一车次号
+  day_suffix = (date - Date.today).to_i  # 用于生成唯一车次号
   
   # 生成8个车次，覆盖早中晚时段
   trains_sh_to_hz = [
@@ -158,7 +158,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 生成8个返程车次，对应去程时刻
   trains_hz_to_sh = [
@@ -299,7 +299,7 @@ all_trains = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 生成6个车次，价格差异明显
   trains_bj_to_tj = [
@@ -403,7 +403,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_tj_to_sh = [
     { departure_city: "天津", arrival_city: "上海", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{201 + day_suffix}", duration: 270, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "天津", arrival_city: "上海", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 25), train_number: "G#{203 + day_suffix}", duration: 265, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -417,7 +417,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_bj_to_sh = [
     { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 30), train_number: "G#{101 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 28), train_number: "G#{103 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -431,7 +431,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_sh_to_bj = [
     { departure_city: "上海", arrival_city: "北京", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{102 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "上海", arrival_city: "北京", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 28), train_number: "G#{104 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -445,7 +445,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_sh_to_sz = [
     { departure_city: "上海", arrival_city: "深圳", departure_time: base_datetime.change(hour: 8, min: 0), arrival_time: base_datetime.change(hour: 16, min: 30), train_number: "G#{1301 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "上海", arrival_city: "深圳", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{1303 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -459,7 +459,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_hz_to_bj = [
     { departure_city: "杭州", arrival_city: "北京", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 55), train_number: "G#{19 + day_suffix}", duration: 295, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "杭州", arrival_city: "北京", departure_time: base_datetime.change(hour: 12, min: 0), arrival_time: base_datetime.change(hour: 17, min: 5), train_number: "G#{23 + day_suffix}", duration: 305, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -473,7 +473,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_bj_to_hz = [
     { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 18), train_number: "G#{31 + day_suffix}", duration: 288, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 52), train_number: "G#{33 + day_suffix}", duration: 292, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -490,7 +490,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_sz_to_gz = [
     { departure_city: "深圳", arrival_city: "广州", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 7, min: 35), train_number: "G#{6001 + day_suffix}", duration: 35, price_second_class: 75.0, price_first_class: 120.0, price_business_class: 225.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "深圳", arrival_city: "广州", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 10, min: 45), train_number: "D#{2001 + day_suffix}", duration: 45, price_second_class: 60.0, price_first_class: 96.0, price_business_class: 180.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -504,7 +504,7 @@ Train.insert_all(all_trains)
 all_trains = []
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   trains_gz_to_sh = [
     { departure_city: "广州", arrival_city: "上海", departure_time: base_datetime.change(hour: 12, min: 30), arrival_time: base_datetime.change(hour: 20, min: 5), train_number: "D#{901 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "广州", arrival_city: "上海", departure_time: base_datetime.change(hour: 16, min: 0), arrival_time: base_datetime.change(hour: 23, min: 35), train_number: "D#{903 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
@@ -627,7 +627,7 @@ all_trains = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   trains_bj_to_nj = [
     # 早班高铁
@@ -704,7 +704,7 @@ all_trains = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   trains_wh_to_xa = [
     # 早班普通列车
@@ -766,7 +766,7 @@ all_trains = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   trains_cq_to_cd = [
     # 早班高铁
