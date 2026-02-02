@@ -62,9 +62,9 @@
           <div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-elevated flex-shrink-0">
             <% product = @order.membership_product %>
             <% if product.image_url.present? %>
-              <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+              <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name) %>
             <% elsif product.image_url.present? %>
-              <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.name %>
+              <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.name) %>
             <% else %>
               <div class="w-full h-full flex items-center justify-center">
                 <span class="text-muted text-xs">暂无图片</span>

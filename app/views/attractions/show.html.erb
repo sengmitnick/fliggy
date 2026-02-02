@@ -23,7 +23,7 @@
   <!-- Image Gallery -->
   <div class="relative bg-surface">
     <% if @attraction.cover_image_url.present? %>
-      <%= image_tag @attraction.cover_image_url_url, class: "w-full h-80 object-cover" %>
+      <%= safe_image_tag(@attraction.cover_image_url, class: "w-full h-80 object-cover") %>
     <% else %>
       <div class="w-full h-80 bg-gray-200 flex items-center justify-center">
         <span class="text-6xl">🎫</span>
@@ -240,7 +240,7 @@
             <%= link_to hotel_path(hotel), class: "block border border-border rounded-lg p-4 hover:border-primary transition-colors" do %>
               <div class="flex gap-3">
                 <% if hotel.image_url.present? %>
-                  <%= image_tag hotel.image_url, class: "w-20 h-20 object-cover rounded" %>
+                  <%= safe_image_tag(hotel.image_url, class: "w-20 h-20 object-cover rounded") %>
                 <% else %>
                   <div class="w-20 h-20 bg-gray-200 rounded flex items-center justify-center">
                     <span class="text-2xl">🏨</span>

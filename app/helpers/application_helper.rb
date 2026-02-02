@@ -110,6 +110,28 @@ module ApplicationHelper
     end
   end
 
+  # Safe image tag that handles nil/empty image URLs gracefully
+  # Returns placeholder image or nothing when image_url is nil/blank
+  def safe_image_tag(image_url, options = {})
+    # If image_url is nil or blank, use a placeholder or return empty
+    if image_url.blank?
+      placeholder = options.delete(:placeholder)
+      return placeholder ? image_tag(placeholder, options) : ''
+    end
+    
+    # Check if it's a local path or external URL
+    if image_url.start_with?('/', 'http')
+      image_tag(image_url, options)
+    else
+      # Treat as local path if no protocol
+      image_tag("/#{image_url}", options)
+    end
+  rescue => e
+    Rails.logger.error("Image tag error for URL '#{image_url}': #{e.message}")
+    placeholder = options[:placeholder]
+    placeholder ? image_tag(placeholder, options) : ''
+  end
+
   # Notification helpers for messages page
   def category_icon(category)
     icons = {

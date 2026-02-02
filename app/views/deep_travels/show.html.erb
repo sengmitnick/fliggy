@@ -226,9 +226,9 @@
           <div class="shrink-0 w-64 bg-gray-50 rounded-lg overflow-hidden flex border border-gray-100">
             <div class="w-24 h-24 bg-gray-300 shrink-0 relative">
               <% if rec_product.image_urls.present? && rec_product.image_urls.first %>
-                <%= image_tag rec_product.image_urls.first,
+                <%= safe_image_tag(rec_product.image_urls.first,
                              class: "w-full h-full object-cover",
-                             alt: rec_product.title %>
+                             alt: rec_product.title) %>
               <% else %>
                 <svg class="w-full h-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                   <rect width="24" height="24" fill="#ddd"/>

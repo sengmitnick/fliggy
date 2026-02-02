@@ -61,7 +61,7 @@
           <%= link_to product_link, class: "live-product-card" do %>
             <div class="live-product-image">
               <% if product.is_a?(TourGroupProduct) %>
-                <%= image_tag product.image_url, class: "w-full h-full object-cover", alt: product.title %>
+                <%= safe_image_tag(product.image_url, class: "w-full h-full object-cover", alt: product.title) %>
               <% elsif product.is_a?(HotelPackage) %>
                 <%= image_tag product.brand_logo_url, class: "w-full h-full object-cover", alt: product.title %>
               <% end %>

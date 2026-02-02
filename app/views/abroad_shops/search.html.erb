@@ -58,7 +58,7 @@
               <%= shop.abroad_brand.name[0..8] %>
             </div>
             <% if shop.image_url.present? %>
-              <%= image_tag shop.image_url, class: "w-full h-full object-cover", alt: shop.name %>
+              <%= safe_image_tag(shop.image_url, class: "w-full h-full object-cover", alt: shop.name %>
             <% else %>
               <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                 <span class="text-gray-500 text-xs">店铺图片</span>

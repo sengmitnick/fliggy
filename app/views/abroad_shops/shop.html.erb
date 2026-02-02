@@ -20,7 +20,7 @@
   <!-- 门店图片 -->
   <div class="relative w-full h-56 bg-gray-200 overflow-hidden">
     <% if @shop.image_url.present? %>
-      <%= image_tag @shop.image_url, class: "w-full h-full object-cover", alt: @shop.name %>
+      <%= safe_image_tag(@shop.image_url, class: "w-full h-full object-cover", alt: @shop.name %>
     <% else %>
       <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
         <span class="text-white text-4xl font-bold"><%= @brand.name[0] %></span>

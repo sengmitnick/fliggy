@@ -16,7 +16,7 @@ brands_data = [
     country: "日本",
     category: "duty_free",
     description: "EDION是日本知名的电器连锁店，提供高达7%的立减优惠和免税服务。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: true,
     created_at: timestamp,
     updated_at: timestamp
@@ -26,7 +26,7 @@ brands_data = [
     country: "日本",
     category: "duty_free",
     description: "【ANA DUTY FREE SHOP 全日空免税】位于成田机场第 1 航站楼南翼出国出境审查区商店。除了 THE GINZA、Clé de Peau Beauté 、SUQQU 等广受欢迎的日本化妆品外，还有许多国际品牌，如 YSL等。此外，还有在海外越来越受欢迎的日本清酒和日本威士忌，以及中国的高级白酒茅台酒等，酒类种类丰富。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: true,
     created_at: timestamp,
     updated_at: timestamp
@@ -36,7 +36,7 @@ brands_data = [
     country: "日本",
     category: "department_store",
     description: "近铁百货，源自日本的零售巨擘，诞生于铁路发展的繁荣之中，与近铁集团紧密相连。自创立以来，它不仅是一个购物中心，更是日本现代零售文化的象征。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: true,
     created_at: timestamp,
     updated_at: timestamp
@@ -46,7 +46,7 @@ brands_data = [
     country: "日本",
     category: "department_store",
     description: "大丸松坂屋百货是日本历史悠久的高端百货商店，提供减5%优惠和餐饮代金券。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: true,
     created_at: timestamp,
     updated_at: timestamp
@@ -56,7 +56,7 @@ brands_data = [
     country: "日本",
     category: "duty_free",
     description: "Bic Camera是日本知名的电器连锁店，提供95折优惠。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: false,
     created_at: timestamp,
     updated_at: timestamp
@@ -66,7 +66,7 @@ brands_data = [
     country: "日本",
     category: "cosmeceuticals",
     description: "科摩思药妆是日本知名的药妆连锁店，提供满额立减7%和免税服务。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: false,
     created_at: timestamp,
     updated_at: timestamp
@@ -76,7 +76,7 @@ brands_data = [
     country: "日本",
     category: "cosmeceuticals",
     description: "赤壁药妆是日本知名的药妆连锁店，提供92折+免税服务。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: false,
     created_at: timestamp,
     updated_at: timestamp
@@ -86,7 +86,7 @@ brands_data = [
     country: "日本",
     category: "department_store",
     description: "京王百货新宿店提供95折和10%免税优惠。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: false,
     created_at: timestamp,
     updated_at: timestamp
@@ -96,7 +96,7 @@ brands_data = [
     country: "日本",
     category: "department_store",
     description: "小田急百货新宿店提供94折和10%免税优惠。",
-    logo_url: ImageSeedHelper.random_image_from_category('shop_logos'),
+    logo_url: ImageSeedHelper.random_image_from_category(:shop_logos),
     featured: false,
     created_at: timestamp,
     updated_at: timestamp

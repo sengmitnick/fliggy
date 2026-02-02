@@ -97,7 +97,7 @@
                 <!-- Attraction Image -->
                 <div class="w-32 h-32 flex-shrink-0">
                   <% if attraction.cover_image_url.present? %>
-                    <%= image_tag @attraction.cover_image_url_url, class: "w-full h-full object-cover" %>
+                    <%= safe_image_tag(@attraction.cover_image_url, class: "w-full h-full object-cover") %>
                   <% else %>
                     <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                       <span class="text-4xl">🎫</span>

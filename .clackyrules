@@ -179,43 +179,63 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 # When creating records with images
 hotels_data << {
   name: "上海希尔顿酒店",
-  image_url: ImageSeedHelper.random_image_from_category(:hotels),  # ✅ Correct
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),  # ✅ Correct - symbol
   # ...
 }
 ```
 
+**MANDATORY RULES**:
+- ✅ MUST use **symbol** parameter: `:category` (NOT string `'category'`)
+- ✅ MUST use **correct category name** (see mapping below)
+- ❌ NEVER use string parameter: `'category'` (returns nil or causes issues)
+- ❌ NEVER use wrong category name (returns nil)
+- ❌ NEVER hardcode Unsplash URLs or leave image_url as nil
+
 **Supported image categories:**
 - `:attractions` - 景点风景图 (Attraction)
 - `:hotels` - 酒店建筑/房间图 (Hotel, HotelPackage)
+- `:hotel_rooms` - 酒店房间图 (HotelRoom)
 - `:tours` - 旅游产品图 (TourGroupProduct, TourPackage)
 - `:tickets` - 门票/活动图 (Ticket, Activity)
 - `:activities` - 体验活动图 (AttractionActivity)
 - `:packages` - 套餐产品图 (HotelPackage)
 - `:guides` - 导游/服务人员图 (Guide)
 - `:products` - 通用产品图 (其他产品模型)
-- `:cruises` - 游轮/邮轮图 (CruiseSailing, CruiseShip)
+- `:cruise_ships` - 游轮船只图 (CruiseShip) ⚠️ NOT `:cruises`
+- `:cruise_logos` - 游轮公司logo (CruiseLine.logo_url)
+- `:cruise_destinations` - 游轮目的地图 (CruiseRoute.icon_url, itinerary images)
+- `:cruise_cabins` - 游轮舱房图 (CabinType)
 - `:flights` - 航班/机场图 (Flight, FlightOffer)
 - `:insurances` - 保险产品图 (InsuranceProduct)
 - `:visas` - 签证/国家图 (VisaProduct, Country)
 - `:cars` - 租车/车辆图 (Car, CarOrder)
 - `:shops` - 商家/商店图 (AbroadShop)
+- `:shop_logos` - 商家logo图 (AbroadShop.logo_url, AbroadBrand.logo_url)
 
-**❌ DO NOT hardcode Unsplash URLs:**
+**Common mistakes:**
 ```ruby
-# ❌ BAD - Hardcoded URL
+# ❌ WRONG - String parameter (not recommended, inconsistent)
+image_url: ImageSeedHelper.random_image_from_category('hotels')
+
+# ❌ WRONG - Wrong category name (returns nil)
+image_url: ImageSeedHelper.random_image_from_category(:cruises)  # Should be :cruise_ships
+
+# ❌ WRONG - Hardcoded URL
 image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
 
-# ✅ GOOD - Use ImageSeedHelper
-image_url: ImageSeedHelper.random_image_from_category(:hotels)
+# ❌ WRONG - Leaving as nil
+image_url: nil
+
+# ✅ CORRECT - Symbol + correct category
+image_url: ImageSeedHelper.random_image_from_category(:cruise_ships)
+logo_url: ImageSeedHelper.random_image_from_category(:cruise_logos)
+icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations)
 ```
 
-**Benefits:**
-- ✅ Centralized image management
-- ✅ Automatic random selection (no duplicates)
-- ✅ Easy to maintain and extend
-- ✅ Supports local caching for offline use
-
-**For detailed documentation, see:** `docs/IMAGE_SEED_HELPER.md`
+**If you encounter nil image_url errors:**
+1. ❌ DO NOT fix database records directly
+2. ✅ Fix the data pack file source (use correct category + symbol)
+3. ✅ Run `rake validator:reset_baseline` to reload data
 
 ## Validator Development Best Practices
 
@@ -489,6 +509,15 @@ Do not generate any fake data that should originally be in the database for user
 Do not write any business logic in the admin backend that should only be for website management and maintenance.
 
 **Image Processing**: Prefer native ActiveStorage variants. If custom processing needed, use `ImageProcessing::Vips` only. Forbidden: MiniMagick, direct Vips::Image.
+
+**⚠️ CRITICAL: Batch Replacement of image_tag → safe_image_tag**:
+- When performing batch replacements on ERB templates, ALWAYS verify syntax after replacement
+- Common issue: Missing closing parentheses `)` before `%>` in multi-line method calls
+- **Pattern to watch**: `<%= safe_image_tag(model.image_url, class: "...", alt: model.name %>` (WRONG - missing `)`)
+- **Correct pattern**: `<%= safe_image_tag(model.image_url, class: "...", alt: model.name) %>`
+- **Prevention**: After batch replacement, ALWAYS run `bin/validate_erb_html` to catch syntax errors
+- **Testing**: Run `rake test` after any view changes to ensure no rendering errors
+- **Why this matters**: Missing parentheses cause "syntax error, unexpected `else', expecting ')'" that breaks entire pages
 
 When installing any new gem or npm packages, always specify a version you are most familiar with and suitable for the project. Do not use the latest version directly.
 

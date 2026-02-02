@@ -32,7 +32,7 @@
       
       <div class="space-y-3">
         <div class="flex gap-4">
-          <%= image_tag @cruise_ship.image_url, alt: @cruise_ship.name, class: "w-24 h-24 rounded-lg object-cover" %>
+          <%= safe_image_tag(@cruise_ship.image_url, alt: @cruise_ship.name, class: "w-24 h-24 rounded-lg object-cover") %>
           <div class="flex-1">
             <h3 class="font-medium text-gray-900 mb-1"><%= @cruise_ship.name %></h3>
             <p class="text-sm text-gray-600"><%= @sailing.cruise_route.name %>航线</p>
