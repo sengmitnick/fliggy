@@ -62,15 +62,28 @@ curl http://localhost:3000/api/tasks
 响应：
 ```json
 {
-  "tasks": [
+  "validators": [
     {
       "id": "v501_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
-      "title": "酒店预订多轮对话"
+      "title": "酒店预订多轮对话",
+      "is_multi_turn": true
+    },
+    {
+      "id": "v001_flight_booking_validator",
+      "task_id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+      "title": "单程机票预订",
+      "is_multi_turn": false
     }
-  ]
+  ],
+  "count": 2
 }
 ```
+
+**如何识别多轮对话验证器？**
+查看 `is_multi_turn` 字段：
+- `true` → 多轮对话验证器，需要使用 `POST /api/dialog/message` 接口
+- `false` → 传统验证器，直接调用业务 API 完成任务
 
 ### 步骤 2: 启动训练会话
 
@@ -87,11 +100,15 @@ curl -X POST http://localhost:3000/api/tasks/v501_hotel_booking_multi_turn_valid
 ```json
 {
   "session_id": "sess_abc123",
-  "data_version": "dv_xyz789",
-  "initial_message": "帮我订一个上海的酒店，预算500元左右",
-  "context": {
-    "user_id": 123,
-    "session_token": "token_xxx"
+  "task_id": "v501_hotel_booking_multi_turn_validator",
+  "is_multi_turn": true,
+  "task": {
+    "data_version": "dv_xyz789",
+    "title": "今天是2025年2月2日。帮我订一个上海的酒店，预算500元左右",
+    "context": {
+      "user_id": 123,
+      "session_token": "token_xxx"
+    }
   }
 }
 ```

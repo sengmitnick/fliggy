@@ -91,16 +91,30 @@ GET /api/tasks
 **响应示例：**
 ```json
 {
-  "tasks": [
+  "validators": [
     {
       "id": "v501_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
       "title": "酒店预订多轮对话",
-      "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店"
+      "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店",
+      "is_multi_turn": true
+    },
+    {
+      "id": "v001_flight_booking_validator",
+      "task_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "title": "单程机票预订",
+      "description": "验证 Agent 是否能正确预订单程机票",
+      "is_multi_turn": false
     }
-  ]
+  ],
+  "count": 2
 }
 ```
+
+**字段说明：**
+- `is_multi_turn`: 布尔值，标识是否为多轮对话验证器
+  - `true`: 支持多轮对话，需要使用 `POST /api/dialog/message` 接口
+  - `false`: 传统验证器，直接调用业务 API 完成任务后验证
 
 ### 2. 启动训练会话
 
@@ -118,6 +132,8 @@ Content-Type: application/json
 ```json
 {
   "session_id": "sess_abc123",
+  "task_id": "v501_hotel_booking_multi_turn_validator",
+  "is_multi_turn": true,
   "task": {
     "task": "帮我订一个上海的酒店，预算500元左右",
     "data_version": "dv_xyz789",
@@ -131,6 +147,7 @@ Content-Type: application/json
 
 **重要参数说明：**
 - `session_id`: 本次会话的唯一标识，用于后续所有 API 调用
+- `is_multi_turn`: 是否为多轮对话验证器（`true` 需要使用 `POST /api/dialog/message`）
 - `task.data_version`: RLS 数据隔离版本号，Agent 创建的所有数据必须带上此字段
 - `task.task`: 模拟用户的初始请求
 - `task.context`: 包含 user_id、session_token 等用于 Agent 调用业务 API

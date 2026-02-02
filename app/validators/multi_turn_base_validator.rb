@@ -29,6 +29,11 @@
 class MultiTurnBaseValidator < BaseValidator
   class << self
     attr_accessor :max_turns
+
+    # Override metadata to mark multi-turn validators
+    def metadata
+      super.merge(is_multi_turn: true)
+    end
   end
 
   # Default max conversation turns

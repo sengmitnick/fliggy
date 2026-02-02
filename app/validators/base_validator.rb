@@ -216,7 +216,8 @@ class BaseValidator
         task_id: task_id,              # 新字段（UUID）
         title: title,
         description: description,
-        timeout: timeout_seconds
+        timeout: timeout_seconds,
+        is_multi_turn: false           # 默认不支持多轮对话
       }
     end
   end

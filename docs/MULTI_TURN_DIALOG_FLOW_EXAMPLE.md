@@ -24,7 +24,8 @@ curl http://localhost:3000/api/tasks
       "id": "v501_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
       "title": "酒店预订多轮对话",
-      "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店"
+      "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店",
+      "is_multi_turn": true
     }
   ],
   "count": 1
