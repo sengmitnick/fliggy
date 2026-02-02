@@ -170,6 +170,10 @@
                   <%= date.day %>
                 </div>
                 
+                <!-- Price -->
+                <div class="text-xs <%= is_selected ? 'text-red-600 font-bold' : price_class %> mt-1">
+                  ¥<%= price %>
+                </div>
                 
                 <!-- Special day label -->
                 <% if special_label %>
