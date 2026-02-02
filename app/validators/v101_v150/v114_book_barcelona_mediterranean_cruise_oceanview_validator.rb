@@ -15,6 +15,8 @@
 # 用户需求：
 # "我想4月份坐地中海辉煌号游地中海，7天6晚的行程，订2间海景房"
 class V114BookBarcelonaMediterraneanCruiseOceanviewValidator < BaseValidator
+  self.validator_id = 'v114_book_barcelona_mediterranean_cruise_oceanview_validator'
+  
   def initialize
     super
     @task_id = '3d116df7-1187-4679-bc00-816578f10a7b'

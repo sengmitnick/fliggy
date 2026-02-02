@@ -15,6 +15,8 @@
 # 用户需求：
 # "我想2月份坐爱达新星号游东南亚，8天7晚的行程，订1间海景房"
 class V116BookShanghaiSoutheastAsiaNovaCruiseOceanviewValidator < BaseValidator
+  self.validator_id = 'v116_book_shanghai_southeast_asia_nova_cruise_oceanview_validator'
+  
   def initialize
     super
     @task_id = '70a9737c-8db3-4c11-b179-2522c8f58af2'

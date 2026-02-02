@@ -15,6 +15,8 @@
 # 用户需求：
 # "我想4月份坐地中海荣耀号游地中海，7天6晚的行程，订4间游艇俱乐部套房"
 class V118BookBarcelonaMediterraneanGrandiosaCruiseSuiteValidator < BaseValidator
+  self.validator_id = 'v118_book_barcelona_mediterranean_grandiosa_cruise_suite_validator'
+  
   def initialize
     super
     @task_id = '6382841f-d24d-4564-ad55-8414ccc4741c'

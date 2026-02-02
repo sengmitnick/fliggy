@@ -15,6 +15,8 @@
 # 用户需求：
 # "我想2月份坐地中海辉煌号游日韩，7天6晚的行程，订2间内舱房"
 class V117BookHongkongJapanKoreaBellissimaCruiseInteriorValidator < BaseValidator
+  self.validator_id = 'v117_book_hongkong_japan_korea_bellissima_cruise_interior_validator'
+  
   def initialize
     super
     @task_id = 'eb47869c-0c0f-4f08-b97a-49fa29721261'

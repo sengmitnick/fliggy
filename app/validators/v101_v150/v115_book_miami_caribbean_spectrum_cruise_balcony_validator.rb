@@ -15,6 +15,8 @@
 # 用户需求：
 # "我想5月份坐海洋光谱号游加勒比，10天9晚的行程，订3间阳台房"
 class V115BookMiamiCaribbeanSpectrumCruiseBalconyValidator < BaseValidator
+  self.validator_id = 'v115_book_miami_caribbean_spectrum_cruise_balcony_validator'
+  
   def initialize
     super
     @task_id = 'b4a00a86-51cd-40b8-800a-67287efdfdd6'
