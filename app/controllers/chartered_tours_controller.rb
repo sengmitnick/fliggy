@@ -15,18 +15,43 @@ class CharteredToursController < ApplicationController
     
     # 获取该城市的包车路线
     if @selected_city
-      @routes = CharterRoute.where(city: @selected_city)
+      # 获取所有类别的路线（用于价格计算）
+      all_routes = CharterRoute.where(city: @selected_city).includes(:city, :attractions).order(:name)
+      
+      # 根据当前 tab 筛选显示的路线
       @routes = case @active_tab
                 when 'classic'
-                  @routes.classic
+                  all_routes.classic
                 when 'hot'
-                  @routes.hot
+                  all_routes.hot
                 else
-                  @routes.featured
+                  all_routes.featured
                 end
-      @routes = @routes.includes(:city, :attractions).order(:name)
+      
+      # 计算所有路线的实际最低价（6小时，所有车型中的最低价）
+      # 注意：计算所有路线而不仅是当前 tab，因为用户可能切换 tab
+      @route_prices = {}
+      @vehicle_types = VehicleType.all
+      all_routes.each do |route|
+        min_price = @vehicle_types.map do |vehicle|
+          CharterPriceCalculatorService.call(
+            route: route,
+            vehicle_type: vehicle,
+            duration_hours: 6,
+            departure_date: @departure_date
+          )
+        end.min
+        @route_prices[route.id] = min_price
+      end
+      
+      # 获取该城市的热门景点（用于展示在"精挑路线"部分）
+      @city_attractions = Attraction.by_city(@selected_city.name)
+                                    .featured
+                                    .limit(5)
     else
       @routes = CharterRoute.none
+      @city_attractions = Attraction.none
+      @route_prices = {}
     end
     
     # 获取热门城市列表（用于城市选择器）

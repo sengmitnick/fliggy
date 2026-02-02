@@ -1,5 +1,5 @@
 <!-- 包车游主页 - 城市选择、日期选择、路线展示 -->
-<div class="min-h-screen bg-background" data-controller="charter-search">
+<div class="min-h-screen bg-background" data-controller="charter-search date-picker">
   <!-- Header Banner -->
   <div class="bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-50 border-b border-yellow-200">
     <div class="max-w-md mx-auto px-4 py-4">
@@ -72,7 +72,7 @@
           </div>
           <button 
             type="button"
-            data-action="click->charter-search#openDatePicker"
+            data-action="click->date-picker#openModal"
             class="flex items-center text-text-primary font-medium">
             <span data-charter-search-target="dateDisplay"><%= @departure_date.strftime('%m月%d日') %> 出发</span>
             <svg class="w-5 h-5 ml-1 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,11 @@
       <h2 class="text-base font-bold text-text-primary mb-1">
         <span class="text-primary"><%= @selected_city&.name || '武汉' %></span>精挑路线
       </h2>
-      <p class="text-xs text-text-secondary">含黄鹤楼/湖北省博物馆/武汉大学等</p>
+      <% if @city_attractions.any? %>
+        <p class="text-xs text-text-secondary">含<%= @city_attractions.take(3).map(&:name).join('/') %>等</p>
+      <% else %>
+        <p class="text-xs text-text-secondary">探索当地精选景点</p>
+      <% end %>
     </div>
 
     <!-- Routes Grid -->
@@ -131,80 +135,173 @@
     </div>
 
     <!-- Attractions Section -->
-    <div class="bg-white mt-2 pb-4">
-      <div class="px-4 py-4 flex items-center justify-between">
-        <h3 class="text-sm font-semibold text-text-primary">黄鹤楼</h3>
-        <span class="text-xs text-text-tertiary">江南三大名楼,仙鹤...</span>
+    <% if @city_attractions.any? %>
+      <div class="bg-white mt-2 pb-4">
+        <% @city_attractions.take(5).each_with_index do |attraction, index| %>
+          <div class="px-4 py-4 flex items-center justify-between <%= 'border-t border-divider' if index > 0 %>">
+            <h3 class="text-sm font-semibold text-text-primary"><%= attraction.name %></h3>
+            <% if attraction.description.present? %>
+              <span class="text-xs text-text-tertiary"><%= attraction.description.truncate(20) %></span>
+            <% end %>
+          </div>
+        <% end %>
       </div>
-      <div class="px-4 py-4 flex items-center justify-between border-t border-divider">
-        <h3 class="text-sm font-semibold text-text-primary">湖北省博物馆</h3>
-        <span class="text-xs text-text-tertiary">编钟表演,浓郁楚...</span>
-      </div>
-      <div class="px-4 py-4 flex items-center justify-between border-t border-divider">
-        <h3 class="text-sm font-semibold text-text-primary">武汉大学</h3>
-        <span class="text-xs text-text-tertiary">特色老建筑群,赏...</span>
-      </div>
-    </div>
+    <% end %>
 
     <!-- Tabs Section -->
     <div class="bg-white mt-2">
-      <div class="flex border-b border-divider">
-        <%= link_to search_chartered_tours_path(city: @selected_city&.name, date: @departure_date, tab: 'recommend'),
-            class: "flex-1 py-3 text-center text-sm font-medium transition-colors #{@active_tab == 'recommend' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary'}" do %>
+      <div class="flex border-b border-divider" data-charter-search-target="tabButtons">
+        <% recommend_cls = @active_tab == 'recommend' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary' %>
+        <% classic_cls = @active_tab == 'classic' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary' %>
+        <% hot_cls = @active_tab == 'hot' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary' %>
+        
+        <button type="button" data-action="click->charter-search#switchTab" data-tab="recommend" class="flex-1 py-3 text-center text-sm font-medium transition-colors <%= recommend_cls %>">
           猜你喜欢
-        <% end %>
-        <%= link_to search_chartered_tours_path(city: @selected_city&.name, date: @departure_date, tab: 'classic'),
-            class: "flex-1 py-3 text-center text-sm font-medium transition-colors #{@active_tab == 'classic' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary'}" do %>
+        </button>
+        <button type="button" data-action="click->charter-search#switchTab" data-tab="classic" class="flex-1 py-3 text-center text-sm font-medium transition-colors <%= classic_cls %>">
           经典路线
-        <% end %>
-        <%= link_to search_chartered_tours_path(city: @selected_city&.name, date: @departure_date, tab: 'hot'),
-            class: "flex-1 py-3 text-center text-sm font-medium transition-colors #{@active_tab == 'hot' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary'}" do %>
+        </button>
+        <button type="button" data-action="click->charter-search#switchTab" data-tab="hot" class="flex-1 py-3 text-center text-sm font-medium transition-colors <%= hot_cls %>">
           热门路线
-        <% end %>
+        </button>
       </div>
 
       <!-- Tab Content - Route Cards -->
       <div class="p-4">
-        <% if @routes.any? %>
-          <div class="space-y-3">
-            <% @routes.each do |route| %>
-              <%= link_to charter_route_path(route, departure_date: @departure_date), 
-                  class: "block" do %>
-                <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <div class="w-32 h-32 flex-shrink-0">
-                    <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
-                         alt="<%= route.name %>" 
-                         class="w-full h-full object-cover">
-                  </div>
-                  <div class="flex-1 p-3 flex flex-col justify-between">
-                    <div>
-                      <h4 class="text-sm font-semibold text-text-primary mb-1 line-clamp-2"><%= route.name %></h4>
-                      <div class="text-xs text-text-secondary mb-2">
-                        <% if route.attractions.any? %>
-                          <%= route.attractions.pluck(:name).take(3).join(' · ') %>
-                        <% end %>
-                      </div>
+        <!-- Recommend Tab Content -->
+        <div data-charter-search-target="tabContent" data-tab="recommend" class="<%= @active_tab == 'recommend' ? '':  'hidden' %>">
+          <% recommend_routes = @selected_city ? CharterRoute.where(city: @selected_city).featured.includes(:city, :attractions).order(:name) : CharterRoute.none %>
+          <% if recommend_routes.any? %>
+            <div class="space-y-3">
+              <% recommend_routes.each do |route| %>
+                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                    class: "block" do %>
+                  <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-32 h-32 flex-shrink-0">
+                      <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
+                           alt="<%= route.name %>" 
+                           class="w-full h-full object-cover">
                     </div>
-                    <div class="flex items-end justify-between">
+                    <div class="flex-1 p-3 flex flex-col justify-between">
                       <div>
-                        <span class="text-xs text-text-secondary">起</span>
-                        <span class="text-lg font-bold text-primary">¥<%= route.price_from %></span>
-                        <span class="text-xs text-text-secondary">/6h</span>
+                        <h4 class="text-sm font-semibold text-text-primary mb-1 line-clamp-2"><%= route.name %></h4>
+                        <div class="text-xs text-text-secondary mb-2">
+                          <% if route.attractions.any? %>
+                            <%= route.attractions.pluck(:name).take(3).join(' · ') %>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="flex items-end justify-between">
+                        <div>
+                          <span class="text-xs text-text-secondary">起</span>
+                          <span class="text-lg font-bold text-primary">¥<%= @route_prices[route.id]&.round(2) || route.price_from %></span>
+                          <span class="text-xs text-text-secondary">/6h</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                <% end %>
               <% end %>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="text-center py-8">
-            <svg class="w-16 h-16 text-text-disabled mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-            <p class="text-text-secondary">暂无路线，换个城市看看吧～</p>
-          </div>
-        <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="w-16 h-16 text-text-disabled mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <p class="text-text-secondary">暂无路线，换个城市看看吧～</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Classic Tab Content -->
+        <div data-charter-search-target="tabContent" data-tab="classic" class="<%= @active_tab != 'classic' ? 'hidden' : '' %>">
+          <% classic_routes = @selected_city ? CharterRoute.where(city: @selected_city).classic.includes(:city, :attractions).order(:name) : CharterRoute.none %>
+          <% if classic_routes.any? %>
+            <div class="space-y-3">
+              <% classic_routes.each do |route| %>
+                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                    class: "block" do %>
+                  <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-32 h-32 flex-shrink-0">
+                      <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
+                           alt="<%= route.name %>" 
+                           class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 p-3 flex flex-col justify-between">
+                      <div>
+                        <h4 class="text-sm font-semibold text-text-primary mb-1 line-clamp-2"><%= route.name %></h4>
+                        <div class="text-xs text-text-secondary mb-2">
+                          <% if route.attractions.any? %>
+                            <%= route.attractions.pluck(:name).take(3).join(' · ') %>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="flex items-end justify-between">
+                        <div>
+                          <span class="text-xs text-text-secondary">起</span>
+                          <span class="text-lg font-bold text-primary">¥<%= @route_prices[route.id]&.round(2) || route.price_from %></span>
+                          <span class="text-xs text-text-secondary">/6h</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="w-16 h-16 text-text-disabled mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <p class="text-text-secondary">暂无路线，换个城市看看吧～</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Hot Tab Content -->
+        <div data-charter-search-target="tabContent" data-tab="hot" class="<%= @active_tab != 'hot' ? 'hidden' : '' %>">
+          <% hot_routes = @selected_city ? CharterRoute.where(city: @selected_city).hot.includes(:city, :attractions).order(:name) : CharterRoute.none %>
+          <% if hot_routes.any? %>
+            <div class="space-y-3">
+              <% hot_routes.each do |route| %>
+                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                    class: "block" do %>
+                  <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-32 h-32 flex-shrink-0">
+                      <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
+                           alt="<%= route.name %>" 
+                           class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 p-3 flex flex-col justify-between">
+                      <div>
+                        <h4 class="text-sm font-semibold text-text-primary mb-1 line-clamp-2"><%= route.name %></h4>
+                        <div class="text-xs text-text-secondary mb-2">
+                          <% if route.attractions.any? %>
+                            <%= route.attractions.pluck(:name).take(3).join(' · ') %>
+                          <% end %>
+                        </div>
+                      </div>
+                      <div class="flex items-end justify-between">
+                        <div>
+                          <span class="text-xs text-text-secondary">起</span>
+                          <span class="text-lg font-bold text-primary">¥<%= @route_prices[route.id]&.round(2) || route.price_from %></span>
+                          <span class="text-xs text-text-secondary">/6h</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="w-16 h-16 text-text-disabled mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <p class="text-text-secondary">暂无路线，换个城市看看吧～</p>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
@@ -263,32 +360,5 @@
     </div>
   </div>
 
-  <!-- Date Picker Modal (Hidden by default) -->
-  <div data-charter-search-target="dateModal" class="hidden fixed inset-0 bg-black/50 z-50">
-    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl">
-      <div class="sticky top-0 bg-white border-b border-divider px-4 py-3 flex items-center justify-between">
-        <h3 class="text-base font-bold text-text-primary">选择出发日期</h3>
-        <button type="button" data-action="click->charter-search#closeDatePicker" class="p-1">
-          <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="p-4">
-        <div class="grid grid-cols-7 gap-2 mb-4">
-          <% 14.times do |i| %>
-            <% date = Date.current + i.days %>
-            <button 
-              type="button"
-              data-action="click->charter-search#selectDate"
-              data-date="<%= date.strftime('%Y-%m-%d') %>"
-              class="py-3 text-center text-xs flex flex-col items-center rounded-lg <%= date == @departure_date ? 'bg-primary text-text-inverse' : 'bg-surface-elevated text-text-primary hover:bg-surface-hover' %> transition-colors">
-              <span class="font-medium"><%= date.strftime('%d') %></span>
-              <span class="text-xs opacity-75"><%= date.strftime('%a') %></span>
-            </button>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </div>
+  <%= render 'shared/date_picker_modal' %>
 </div>
