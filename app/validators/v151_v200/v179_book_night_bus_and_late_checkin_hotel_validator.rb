@@ -33,8 +33,17 @@ module V151V200
       
       # 查找晚上18点后出发的大巴
       @available_buses = BusTicket
-        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
-        .select { |b| b.departure_time.hour >= 18 && b.departure_date == @bus_date }
+        .where(origin: @departure_city, destination: @arrival_city, data_version: 0)
+        .select do |b|
+          next false unless b.departure_date == @bus_date
+          # departure_time 是字符串，需要解析
+          begin
+            dep_time = Time.parse(b.departure_time)
+            dep_time.hour >= 18
+          rescue
+            false
+          end
+        end
       
       expect(@available_buses).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}晚班大巴（18:00后）"
       
@@ -49,7 +58,15 @@ module V151V200
       
       # 计算到达日期（可能是当天或次日）
       sample_bus = @available_buses.first
-      @hotel_checkin_date = sample_bus.arrival_date
+      # departure_time 和 arrival_time 是字符串，需要解析
+      dep_hour = Time.parse(sample_bus.departure_time).hour
+      arr_hour = Time.parse(sample_bus.arrival_time).hour
+      # 如果到达时间晚于出发时间，则当天到达；否则次日到达
+      @hotel_checkin_date = if arr_hour >= dep_hour
+        @bus_date
+      else
+        @bus_date + 1.day
+      end
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
@@ -79,10 +96,8 @@ module V151V200
       BusTicketOrder.create!(
         user: user,
         bus_ticket: bus,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
-        quantity: 1,
+        passenger_count: 1,
+        base_price: bus.price,
         total_price: bus.price,
         data_version: @data_version
       )
@@ -114,7 +129,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )
@@ -126,7 +141,7 @@ module V151V200
         all_orders = BusTicketOrder
           .joins(:bus_ticket)
           .includes(:bus_ticket)
-          .where(bus_tickets: { departure_city: @departure_city, arrival_city: @arrival_city })
+          .where(bus_tickets: { origin: @departure_city, destination: @arrival_city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
@@ -139,9 +154,10 @@ module V151V200
       
       # 断言2: 大巴出发时间正确（18:00后） (20%)
       add_assertion "大巴出发时间正确（18:00后）", weight: 20 do
-        departure_hour = @bus_order.bus_ticket.departure_time.hour
+        dep_time = Time.parse(@bus_order.bus_ticket.departure_time)
+        departure_hour = dep_time.hour
         expect(departure_hour).to be >= 18, 
-          "出发时间过早。期望: 18:00后, 实际: #{@bus_order.bus_ticket.departure_time.strftime('%H:%M')}"
+          "出发时间过早。期望: 18:00后, 实际: #{@bus_order.bus_ticket.departure_time}"
       end
       
       # 断言3: 创建了酒店订单 (20%)
@@ -168,7 +184,16 @@ module V151V200
       
       # 断言5: 酒店入住日期为大巴到达当天 (20%)
       add_assertion "酒店入住日期正确（大巴到达当天）", weight: 20 do
-        arrival_date = @bus_order.bus_ticket.arrival_date
+        bus = @bus_order.bus_ticket
+        # departure_time 和 arrival_time 是字符串，需要解析
+        dep_hour = Time.parse(bus.departure_time).hour
+        arr_hour = Time.parse(bus.arrival_time).hour
+        # 计算到达日期：如果到达时间晚于出发时间，则当天；否则次日
+        arrival_date = if arr_hour >= dep_hour
+          bus.departure_date
+        else
+          bus.departure_date + 1.day
+        end
         expect(@hotel_booking.check_in_date).to eq(arrival_date),
           "入住日期错误。期望: #{arrival_date}（大巴到达当天）, 实际: #{@hotel_booking.check_in_date}"
       end

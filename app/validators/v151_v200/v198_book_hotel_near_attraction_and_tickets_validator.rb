@@ -8,16 +8,11 @@ require_relative '../base_validator'
 #   预订景区附近酒店+景区门票
 #
 # 评分标准:
-#   - TODO: 定义评分标准
-#
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v504_book_hotel_near_attraction_and_tickets_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+#   - 创建了酒店订单 (30%)
+#   - 创建了门票订单 (30%)
+#   - 酒店在景区所在城市 (15%)
+#   - 游玩日期合理 (15%)
+#   - 景点正确 (10%)
 module V151V200
   class V198BookHotelNearAttractionAndTicketsValidator < BaseValidator
     self.validator_id = 'v198_book_hotel_near_attraction_and_tickets_validator'
@@ -26,121 +21,154 @@ module V151V200
     self.description = '预订景区附近酒店+景区门票'
     self.timeout_seconds = 300
     
-    # 准备阶段：设置任务参数
-    #
-    # 返回任务信息给 Agent（必须包含 task 字段）
-    #
-    # Example:
-    #   def prepare
-    #     @city = '深圳'
-    #     @budget = 500
-    #     
-    #     {
-    #       task: "请预订#{@city}的酒店，预算≤#{@budget}元",
-    #       city: @city,
-    #       budget: @budget,
-    #       hint: "系统中有多家酒店可选，请选择性价比最高的"
-    #     }
-    #   end
     def prepare
-      # TODO: 设置任务参数（使用实例变量存储，用于后续 verify）
+      @attraction_name = '北京欢乐谷'
+      @city = '北京'
+      @visit_date = Date.tomorrow + 2.days
       
-      # 返回任务信息
+      # 查找景点
+      @attraction = Attraction.find_by(name: @attraction_name, data_version: 0)
+      expect(@attraction).not_to be_nil, "数据包缺少景点：#{@attraction_name}"
+      
+      # 查找景点门票
+      @available_tickets = Ticket
+        .where(attraction_id: @attraction.id, data_version: 0)
+        .to_a
+      
+      expect(@available_tickets).not_to be_empty,
+        "数据包缺少#{@attraction_name}的门票"
+      
+      # 查找景区附近酒店
+      @available_hotels = Hotel.where(city: @city, data_version: 0).to_a
+      expect(@available_hotels).not_to be_empty, "数据包缺少#{@city}的酒店"
+      
       {
-        task: '预订景区附近酒店+景区门票',
-        # TODO: 添加更多任务参数和提示
+        task: "请预订#{@visit_date.strftime('%m月%d日')}#{@attraction_name}的门票，并预订#{@city}的酒店",
+        attraction: @attraction_name,
+        city: @city,
+        visit_date: @visit_date.strftime('%Y-%m-%d'),
+        hint: "预订景区门票和附近酒店"
       }
     end
     
-    # 验证阶段：检查任务是否完成
-    #
-    # 使用 add_assertion 添加断言（必须指定 weight 权重，总和为 100）
     def verify
-      # TODO: 添加断言验证任务完成情况
-      
-      # 第一个断言：验证核心操作是否完成
-      add_assertion "TODO: 断言描述", weight: 20 do
-        # Query with data_version filter
-        # @record = Model.where(data_version: @data_version).order(created_at: :desc).first
-        # expect(@record).not_to be_nil, "未找到记录"
+      # 断言1: 创建了酒店订单 (30%)
+      add_assertion "创建了酒店订单", weight: 30 do
+        @hotel_booking = HotelBooking
+          .joins(:hotel)
+          .includes(:hotel)
+          .where(hotels: { city: @city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@hotel_booking).not_to be_nil, "未找到酒店订单（#{@city}）"
       end
       
-      # Guard clause: 如果核心操作未完成，后续断言无法继续
-      # return unless @record
-      
-      # 后续断言：验证具体属性
-      add_assertion "TODO: 属性验证2", weight: 20 do
+      # 断言2: 创建了门票订单 (30%)
+      add_assertion "创建了门票订单", weight: 30 do
+        @ticket_orders = TicketOrder
+          .joins(ticket: :attraction)
+          .includes(ticket: :attraction)
+          .where(tickets: { attractions: { name: @attraction_name } })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(@ticket_orders).not_to be_empty, "未找到门票订单（#{@attraction_name}）"
       end
       
-      add_assertion "TODO: 属性验证3", weight: 20 do
+      return if @hotel_booking.nil? || @ticket_orders.empty?
+      
+      # 断言3: 酒店在景区所在城市 (15%)
+      add_assertion "酒店在景区所在城市（#{@city}）", weight: 15 do
+        hotel = @hotel_booking.hotel
+        expect(hotel.city).to eq(@city)
       end
       
-      add_assertion "TODO: 属性验证4", weight: 20 do
+      # 断言4: 游玩日期合理 (15%)
+      add_assertion "游玩日期合理", weight: 15 do
+        ticket_order = @ticket_orders.first
+        visit_date = ticket_order.visit_date
+        checkin_date = @hotel_booking.check_in_date
+        
+        # 入住日期应为游玩前一天或当天
+        expect([visit_date - 1.day, visit_date]).to include(checkin_date),
+          "入住日期不合理。游玩日期: #{visit_date}, 入住日期: #{checkin_date}（应为游玩前一天或当天）"
       end
       
-      add_assertion "TODO: 属性验证5", weight: 20 do
+      # 断言5: 景点正确 (10%)
+      add_assertion "景点正确（#{@attraction_name}）", weight: 10 do
+        ticket_order = @ticket_orders.first
+        attraction = ticket_order.ticket.attraction
+        expect(attraction.name).to eq(@attraction_name)
       end
     end
     
-    # 模拟 AI Agent 操作
-    #
-    # 此方法模拟 AI Agent 如何完成任务（用于自动化测试）
-    #
-    # Example:
-    #   def simulate
-    #     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-    #     
-    #     hotel = Hotel.where(city: @city, data_version: 0)
-    #                  .where('price <= ?', @budget)
-    #                  .order(rating: :desc)
-    #                  .first
-    #     
-    #     HotelBooking.create!(
-    #       user_id: user.id,
-    #       hotel_id: hotel.id,
-    #       check_in_date: @check_in_date,
-    #       total_price: hotel.price
-    #     )
-    #   end
     def simulate
-      # TODO: 实现 AI Agent 自动化逻辑
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 查找测试用户（数据包中已创建，data_version: 0）
-      # user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      # 创建门票订单
+      ticket = @available_tickets.first
+      TicketOrder.create!(
+        user: user,
+        ticket: ticket,
+        contact_phone: '13800138000',
+        visit_date: @visit_date,
+        quantity: 1,
+        total_price: ticket.current_price,
+        status: 'paid',
+        data_version: @data_version
+      )
       
-      # 2. 根据任务要求查找数据（注意过滤 data_version: 0）
-      # target = Model.where(data_version: 0).where(...).first
+      # 创建酒店订单
+      hotel = @available_hotels.min_by(&:price)
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      unless room
+        room = HotelRoom.create!(
+          hotel_id: hotel.id,
+          room_type: '标准双人间',
+          bed_type: 'double',
+          price: hotel.price,
+          original_price: hotel.original_price,
+          area: 25.0,
+          max_guests: 2,
+          has_window: true,
+          available_rooms: 10,
+          room_category: 'standard',
+          data_version: 0
+        )
+      end
       
-      # 3. 创建订单/记录（使用 data_version: @data_version）
-      # Record.create!(
-      #   user_id: user.id,
-      #   # ... other fields
-      #   data_version: @data_version  # 关键：使用当前 execution 的 data_version
-      # )
-      
-      raise NotImplementedError, "TODO: 实现 simulate 方法"
+      # 入住前一天
+      HotelBooking.create!(
+        user: user,
+        hotel_id: hotel.id,
+        hotel_room_id: room.id,
+        check_in_date: @visit_date - 1.day,
+        check_out_date: @visit_date + 1.day,
+        guest_name: user.name,
+        guest_phone: '13800138000',
+        payment_method: '花呗',
+        total_price: room.price * 2,
+        data_version: @data_version
+      )
     end
     
     private
     
-    # 保存执行状态数据（用于跨请求恢复状态）
-    #
-    # 返回需要持久化的实例变量数据
     def execution_state_data
       {
-        # TODO: 添加需要保存的状态数据
-        # city: @city,
-        # budget: @budget
+        attraction_name: @attraction_name,
+        city: @city,
+        visit_date: @visit_date&.to_s
       }
     end
     
-    # 从状态恢复实例变量（用于跨请求恢复状态）
-    #
-    # 从持久化数据恢复实例变量
     def restore_from_state(data)
-      # TODO: 从 data 恢复实例变量
-      # @city = data['city']
-      # @budget = data['budget']
+      @attraction_name = data['attraction_name']
+      @city = data['city']
+      @visit_date = Date.parse(data['visit_date']) if data['visit_date']
     end
   end
 end

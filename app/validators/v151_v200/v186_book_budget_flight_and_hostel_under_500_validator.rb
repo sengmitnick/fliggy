@@ -102,14 +102,14 @@ module V151V200
       unless room
         room = HotelRoom.create!(
           hotel_id: hotel.id,
-          name: '经济单人间',
-          size: 12.0,
+          room_type: '经济单人间',
           bed_type: 'single',
+          area: 12.0,
+          max_guests: 1,
           price: 80.0,
           original_price: 120.0,
-          amenities: ['免费WiFi', '空调'].to_json,
-          breakfast_included: false,
-          cancellation_policy: '不可取消',
+          has_window: true,
+          available_rooms: 10,
           data_version: 0
         )
       end
@@ -122,7 +122,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )

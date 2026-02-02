@@ -9,6 +9,7 @@ module V101V150
   self.task_id = 'h0i1j2k3-4a5b-6c7d-8e9f-0a1b2c3d4e5f'
   self.title = '预订最便宜的航班+酒店组合（总价最低）'
   self.description = '预订后天从上海到深圳的航班和深圳酒店（1晚），要求航班+酒店总价最低'
+  self.timeout_seconds = 300
 
   def prepare
     @departure_city = '上海'

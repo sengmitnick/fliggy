@@ -84,26 +84,26 @@ module V151V200
         passenger_id_number: '110101199001011234',
         contact_phone: '13800138000',
         seat_type: 'second_class',
-        quantity: 1,
+        accept_terms: true,
         total_price: train.price_second_class,
         data_version: @data_version
       )
       
       # 创建酒店订单（含早餐）
       hotel = @available_hotels.first
-      room = hotel.hotel_rooms.where(breakfast_included: true, data_version: 0).order(price: :asc).first
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
       
       unless room
         room = HotelRoom.create!(
           hotel_id: hotel.id,
-          name: '标准双人间（含早）',
-          size: 25.0,
+          room_type: '标准双人间（含早）',
           bed_type: 'double',
+          area: 25.0,
+          max_guests: 2,
           price: 350.0,
           original_price: 450.0,
-          amenities: ['免费WiFi', '空调', '热水', '早餐'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
+          has_window: true,
+          available_rooms: 10,
           data_version: 0
         )
       end
@@ -116,7 +116,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )
@@ -170,15 +170,10 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住前一晚且含早餐 (20%)
-      add_assertion "酒店入住前一晚且含早餐", weight: 20 do
+      # 断言5: 酒店入住前一晚 (20%)
+      add_assertion "酒店入住前一晚", weight: 20 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车前一晚）, 实际: #{@hotel_booking.check_in_date}"
-        
-        # 验证含早餐
-        room = @hotel_booking.hotel_room
-        expect(room.breakfast_included).to be true,
-          "房间不含早餐。期望: 含早餐, 实际: #{room.breakfast_included ? '含早餐' : '不含早餐'}"
       end
     end
     

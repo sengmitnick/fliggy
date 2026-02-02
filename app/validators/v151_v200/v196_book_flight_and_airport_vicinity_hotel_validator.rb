@@ -8,16 +8,11 @@ require_relative '../base_validator'
 #   预订航班+机场3公里内酒店（便于转机）
 #
 # 评分标准:
-#   - TODO: 定义评分标准
-#
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v502_book_flight_and_airport_vicinity_hotel_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+#   - 创建了航班订单 (25%)
+#   - 创建了酒店订单 (25%)
+#   - 酒店在机场附近（≤3公里） (30%)
+#   - 出发/到达城市正确 (10%)
+#   - 日期合理 (10%)
 module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
@@ -26,121 +21,183 @@ module V151V200
     self.description = '预订航班+机场3公里内酒店（便于转机）'
     self.timeout_seconds = 300
     
-    # 准备阶段：设置任务参数
-    #
-    # 返回任务信息给 Agent（必须包含 task 字段）
-    #
-    # Example:
-    #   def prepare
-    #     @city = '深圳'
-    #     @budget = 500
-    #     
-    #     {
-    #       task: "请预订#{@city}的酒店，预算≤#{@budget}元",
-    #       city: @city,
-    #       budget: @budget,
-    #       hint: "系统中有多家酒店可选，请选择性价比最高的"
-    #     }
-    #   end
     def prepare
-      # TODO: 设置任务参数（使用实例变量存储，用于后续 verify）
+      @departure_city = '北京'
+      @arrival_city = '上海'
+      @travel_date = Date.tomorrow + 2.days
+      @max_distance = 3.0  # 公里
       
-      # 返回任务信息
+      # 查找航班
+      @available_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @arrival_city, data_version: 0)
+        .select { |f| f.departure_time.to_date == @travel_date }
+        .to_a
+      
+      expect(@available_flights).not_to be_empty,
+        "数据包缺少#{@departure_city}→#{@arrival_city}的航班（#{@travel_date}）"
+      
+      # 查找机场附近酒店（通过features或hotel_type判断）
+      @airport_hotels = Hotel
+        .where(city: @arrival_city, data_version: 0)
+        .select { |h| is_near_airport?(h) }
+        .to_a
+      
+      if @airport_hotels.empty?
+        # 如果没有明确标记的机场酒店，选择距离最近的
+        @airport_hotels = Hotel
+          .where(city: @arrival_city, data_version: 0)
+          .select { |h| h.distance && h.distance <= @max_distance }
+          .to_a
+      end
+      
+      expect(@airport_hotels).not_to be_empty, 
+        "数据包缺少#{@arrival_city}机场附近（≤#{@max_distance}公里）的酒店"
+      
       {
-        task: '预订航班+机场3公里内酒店（便于转机）',
-        # TODO: 添加更多任务参数和提示
+        task: "请预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班，并预订机场#{@max_distance}公里内的酒店（便于转机）",
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        travel_date: @travel_date.strftime('%Y-%m-%d'),
+        max_distance: @max_distance,
+        hint: "选择机场附近的酒店，方便转机或早班飞机"
       }
     end
     
-    # 验证阶段：检查任务是否完成
-    #
-    # 使用 add_assertion 添加断言（必须指定 weight 权重，总和为 100）
     def verify
-      # TODO: 添加断言验证任务完成情况
-      
-      # 第一个断言：验证核心操作是否完成
-      add_assertion "TODO: 断言描述", weight: 20 do
-        # Query with data_version filter
-        # @record = Model.where(data_version: @data_version).order(created_at: :desc).first
-        # expect(@record).not_to be_nil, "未找到记录"
+      # 断言1: 创建了航班订单 (25%)
+      add_assertion "创建了航班订单", weight: 25 do
+        @flight_booking = Booking
+          .joins(:flight)
+          .includes(:flight)
+          .where(flights: { departure_city: @departure_city, destination_city: @arrival_city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@flight_booking).not_to be_nil, "未找到航班订单"
       end
       
-      # Guard clause: 如果核心操作未完成，后续断言无法继续
-      # return unless @record
+      return if @flight_booking.nil?
       
-      # 后续断言：验证具体属性
-      add_assertion "TODO: 属性验证2", weight: 20 do
+      # 断言2: 创建了酒店订单 (25%)
+      add_assertion "创建了酒店订单", weight: 25 do
+        @hotel_booking = HotelBooking
+          .joins(:hotel)
+          .includes(:hotel)
+          .where(hotels: { city: @arrival_city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@hotel_booking).not_to be_nil, "未找到酒店订单"
       end
       
-      add_assertion "TODO: 属性验证3", weight: 20 do
+      return if @hotel_booking.nil?
+      
+      # 断言3: 酒店在机场附近（≤3公里） (30%)
+      add_assertion "酒店在机场附近（≤#{@max_distance}公里）", weight: 30 do
+        hotel = @hotel_booking.hotel
+        is_airport_hotel = is_near_airport?(hotel) || 
+                          (hotel.distance && hotel.distance <= @max_distance)
+        
+        expect(is_airport_hotel).to be(true),
+          "酒店不在机场附近。酒店: #{hotel.name}（距离#{hotel.distance}公里），要求: ≤#{@max_distance}公里"
       end
       
-      add_assertion "TODO: 属性验证4", weight: 20 do
+      # 断言4: 出发/到达城市正确 (10%)
+      add_assertion "出发/到达城市正确", weight: 10 do
+        flight = @flight_booking.flight
+        hotel = @hotel_booking.hotel
+        expect(flight.departure_city).to eq(@departure_city)
+        expect(flight.destination_city).to eq(@arrival_city)
+        expect(hotel.city).to eq(@arrival_city)
       end
       
-      add_assertion "TODO: 属性验证5", weight: 20 do
+      # 断言5: 日期合理 (10%)
+      add_assertion "日期合理", weight: 10 do
+        arrival_date = @flight_booking.flight.arrival_time.to_date
+        checkin_date = @hotel_booking.check_in_date
+        expect([arrival_date, arrival_date + 1.day]).to include(checkin_date)
       end
     end
     
-    # 模拟 AI Agent 操作
-    #
-    # 此方法模拟 AI Agent 如何完成任务（用于自动化测试）
-    #
-    # Example:
-    #   def simulate
-    #     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-    #     
-    #     hotel = Hotel.where(city: @city, data_version: 0)
-    #                  .where('price <= ?', @budget)
-    #                  .order(rating: :desc)
-    #                  .first
-    #     
-    #     HotelBooking.create!(
-    #       user_id: user.id,
-    #       hotel_id: hotel.id,
-    #       check_in_date: @check_in_date,
-    #       total_price: hotel.price
-    #     )
-    #   end
     def simulate
-      # TODO: 实现 AI Agent 自动化逻辑
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 查找测试用户（数据包中已创建，data_version: 0）
-      # user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      # 选择航班
+      flight = @available_flights.min_by(&:price)
       
-      # 2. 根据任务要求查找数据（注意过滤 data_version: 0）
-      # target = Model.where(data_version: 0).where(...).first
+      # 创建航班订单
+      Booking.create!(
+        user: user,
+        flight_id: flight.id,
+        passenger_name: user.name,
+        passenger_id_number: '110101199001011234',
+        contact_phone: '13800138000',
+        total_price: flight.price,
+        accept_terms: true,
+        status: 'paid',
+        data_version: @data_version
+      )
       
-      # 3. 创建订单/记录（使用 data_version: @data_version）
-      # Record.create!(
-      #   user_id: user.id,
-      #   # ... other fields
-      #   data_version: @data_version  # 关键：使用当前 execution 的 data_version
-      # )
+      # 选择机场酒店
+      airport_hotel = @airport_hotels.min_by(&:price)
+      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      unless room
+        room = HotelRoom.create!(
+          hotel_id: airport_hotel.id,
+          room_type: '标准双人间',
+          bed_type: 'double',
+          price: airport_hotel.price,
+          original_price: airport_hotel.original_price,
+          area: 25.0,
+          max_guests: 2,
+          has_window: true,
+          available_rooms: 10,
+          room_category: 'standard',
+          data_version: 0
+        )
+      end
       
-      raise NotImplementedError, "TODO: 实现 simulate 方法"
+      arrival_date = flight.arrival_time.to_date
+      HotelBooking.create!(
+        user: user,
+        hotel_id: airport_hotel.id,
+        hotel_room_id: room.id,
+        check_in_date: arrival_date,
+        check_out_date: arrival_date + 1.day,
+        guest_name: user.name,
+        guest_phone: '13800138000',
+        payment_method: '花呗',
+        total_price: room.price,
+        data_version: @data_version
+      )
     end
     
     private
     
-    # 保存执行状态数据（用于跨请求恢复状态）
-    #
-    # 返回需要持久化的实例变量数据
+    def is_near_airport?(hotel)
+      return true if hotel.hotel_type&.include?('机场')
+      return true if hotel.name&.include?('机场')
+      return true if hotel.address&.include?('机场')
+      return true if hotel.features&.include?('机场')
+      false
+    end
+    
     def execution_state_data
       {
-        # TODO: 添加需要保存的状态数据
-        # city: @city,
-        # budget: @budget
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        travel_date: @travel_date&.to_s,
+        max_distance: @max_distance
       }
     end
     
-    # 从状态恢复实例变量（用于跨请求恢复状态）
-    #
-    # 从持久化数据恢复实例变量
     def restore_from_state(data)
-      # TODO: 从 data 恢复实例变量
-      # @city = data['city']
-      # @budget = data['budget']
+      @departure_city = data['departure_city']
+      @arrival_city = data['arrival_city']
+      @travel_date = Date.parse(data['travel_date']) if data['travel_date']
+      @max_distance = data['max_distance']
     end
   end
 end

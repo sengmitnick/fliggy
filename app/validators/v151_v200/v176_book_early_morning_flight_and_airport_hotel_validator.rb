@@ -134,7 +134,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )

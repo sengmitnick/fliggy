@@ -3,7 +3,7 @@
 require_relative '../base_validator'
 require_relative '../multi_turn_base_validator'
 
-# 验证用例501: 酒店预订多轮对话 (AI Simul User)
+# 验证用例201: 酒店预订多轮对话 (AI Simul User)
 #
 # 任务描述:
 #   用户模糊描述需求，AI助手通过反问获取信息后完成酒店预订
@@ -23,11 +23,11 @@ require_relative '../multi_turn_base_validator'
 #   
 #   # 验证结果
 #   POST /api/verify/run
-module V501V550
-  class V501HotelBookingMultiTurnValidator < MultiTurnBaseValidator
-    self.validator_id = 'v501_hotel_booking_multi_turn_validator'
+module V201V250
+  class V201HotelBookingMultiTurnValidator < MultiTurnBaseValidator
+    self.validator_id = 'v201_hotel_booking_multi_turn_validator'
     self.task_id = '0b2d6f73-3d61-4dab-84da-4de740b906a3'
-    self.title = '酒店预订多轮对话'
+    self.title = '我想订个酒店'
     self.description = '用户模糊描述需求，AI助手通过反问获取信息后完成酒店预订'
     self.timeout_seconds = 300
     self.max_turns = 10

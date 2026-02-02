@@ -82,7 +82,7 @@ module V151V200
         passenger_id_number: '110101199001011234',
         contact_phone: '13800138000',
         seat_type: 'second_class',
-        quantity: 1,
+        accept_terms: true,
         total_price: train.price_second_class,
         data_version: @data_version
       )
@@ -114,7 +114,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )

@@ -57,7 +57,7 @@ module V151V200
         .limit(20)
         .to_a
       
-      expect(@available_packages.any? || @available_hotels.any?, "数据包缺少#{@arrival_city}的酒店或套餐")
+      expect(@available_packages.any? || @available_hotels.any?).to be_truthy, "数据包缺少#{@arrival_city}的酒店或套餐"
       
       @hotel_checkin_date = @friday_date  # 周五入住
       @hotel_checkout_date = @friday_date + 2.days  # 周日退房
@@ -123,14 +123,14 @@ module V151V200
         unless room
           room = HotelRoom.create!(
             hotel_id: hotel.id,
-            name: '豪华海景房',
-            size: 45.0,
+            room_type: '豪华海景房',
             bed_type: 'king',
+            area: 45.0,
+            max_guests: 2,
             price: 800.0,
             original_price: 1200.0,
-            amenities: ['免费WiFi', '空调', '海景', '阳台', '游泳池'].to_json,
-            breakfast_included: true,
-            cancellation_policy: '免费取消',
+            has_window: true,
+            available_rooms: 10,
             data_version: 0
           )
         end
@@ -143,7 +143,7 @@ module V151V200
           check_out_date: @hotel_checkout_date,
           guest_name: user.name,
           guest_phone: '13800138000',
-          payment_method: '微信支付',
+          payment_method: '花呗',
           total_price: room.price * 2,  # 2晚
           data_version: @data_version
         )
@@ -172,10 +172,12 @@ module V151V200
         flight_date = @flight_booking.flight.flight_date
         departure_hour = @flight_booking.flight.departure_time.hour
         
-        expect(flight_date.friday?).to be true,
-          "不是周五。期望: 周五, 实际: #{flight_date.strftime('%A')}"
-        expect(departure_hour).to be >= 18,
-          "出发时间过早。期望: 18:00后, 实际: #{@flight_booking.flight.departure_time.strftime('%H:%M')}"
+        is_friday = flight_date.friday?
+        expect(is_friday).to be(true)
+        unless is_friday
+          raise RSpec::Expectations::ExpectationNotMetError, "不是周五。期望: 周五, 实际: #{flight_date.strftime('%A')}"
+        end
+        expect(departure_hour).to be >= 18
       end
       
       # 断言3: 创建了酒店套餐或酒店订单 (20%)

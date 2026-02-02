@@ -8,16 +8,12 @@ require_relative '../base_validator'
 #   预订7天行程（往返+住宿），总预算≤3000元
 #
 # 评分标准:
-#   - TODO: 定义评分标准
-#
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v508_book_week_trip_budget_3000_optimize_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+#   - 创建了去程交通订单 (15%)
+#   - 创建了返程交通订单 (15%)
+#   - 创建了酒店订单（7晚） (20%)
+#   - 出发/到达城市正确 (10%)
+#   - 总预算在3000元以内 (30%)
+#   - 日期合理 (10%)
 module V151V200
   class V192BookWeekTripBudget3000OptimizeValidator < BaseValidator
     self.validator_id = 'v192_book_week_trip_budget_3000_optimize_validator'
@@ -26,121 +22,207 @@ module V151V200
     self.description = '预订7天行程（往返+住宿），总预算≤3000元'
     self.timeout_seconds = 300
     
-    # 准备阶段：设置任务参数
-    #
-    # 返回任务信息给 Agent（必须包含 task 字段）
-    #
-    # Example:
-    #   def prepare
-    #     @city = '深圳'
-    #     @budget = 500
-    #     
-    #     {
-    #       task: "请预订#{@city}的酒店，预算≤#{@budget}元",
-    #       city: @city,
-    #       budget: @budget,
-    #       hint: "系统中有多家酒店可选，请选择性价比最高的"
-    #     }
-    #   end
     def prepare
-      # TODO: 设置任务参数（使用实例变量存储，用于后续 verify）
+      @departure_city = '北京'
+      @arrival_city = '上海'
+      @go_date = Date.tomorrow + 3.days
+      @return_date = @go_date + 7.days
+      @max_budget = 3000
+      @stay_nights = 7
       
-      # 返回任务信息
+      # 查找去程火车
+      @available_go_trains = Train
+        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
+        .select { |t| t.departure_time.to_date == @go_date }
+        .to_a
+      
+      expect(@available_go_trains).not_to be_empty,
+        "数据包缺少#{@departure_city}→#{@arrival_city}的火车（#{@go_date}）"
+      
+      # 查找返程火车
+      @available_return_trains = Train
+        .where(departure_city: @arrival_city, arrival_city: @departure_city, data_version: 0)
+        .select { |t| t.departure_time.to_date == @return_date }
+        .to_a
+      
+      expect(@available_return_trains).not_to be_empty,
+        "数据包缺少#{@arrival_city}→#{@departure_city}的返程火车（#{@return_date}）"
+      
+      # 查找经济型酒店
+      @available_hotels = Hotel.where(city: @arrival_city, data_version: 0).order(price: :asc).limit(20).to_a
+      expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
+      
       {
-        task: '预订7天行程（往返+住宿），总预算≤3000元',
-        # TODO: 添加更多任务参数和提示
+        task: "请预订#{@go_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的7天行程（往返交通+住宿7晚），总预算≤#{@max_budget}元",
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        go_date: @go_date.strftime('%Y-%m-%d'),
+        return_date: @return_date.strftime('%Y-%m-%d'),
+        stay_nights: @stay_nights,
+        max_budget: @max_budget,
+        hint: "需要预订去程、返程交通和7晚酒店，总价不超过#{@max_budget}元"
       }
     end
     
-    # 验证阶段：检查任务是否完成
-    #
-    # 使用 add_assertion 添加断言（必须指定 weight 权重，总和为 100）
     def verify
-      # TODO: 添加断言验证任务完成情况
-      
-      # 第一个断言：验证核心操作是否完成
-      add_assertion "TODO: 断言描述", weight: 20 do
-        # Query with data_version filter
-        # @record = Model.where(data_version: @data_version).order(created_at: :desc).first
-        # expect(@record).not_to be_nil, "未找到记录"
+      # 断言1: 创建了去程交通订单 (15%)
+      add_assertion "创建了去程交通订单（#{@departure_city}→#{@arrival_city}）", weight: 15 do
+        @go_booking = TrainBooking
+          .joins(:train)
+          .includes(:train)
+          .where(trains: { departure_city: @departure_city, arrival_city: @arrival_city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@go_booking).not_to be_nil, "未找到去程交通订单"
       end
       
-      # Guard clause: 如果核心操作未完成，后续断言无法继续
-      # return unless @record
+      return if @go_booking.nil?
       
-      # 后续断言：验证具体属性
-      add_assertion "TODO: 属性验证2", weight: 20 do
+      # 断言2: 创建了返程交通订单 (15%)
+      add_assertion "创建了返程交通订单（#{@arrival_city}→#{@departure_city}）", weight: 15 do
+        @return_booking = TrainBooking
+          .joins(:train)
+          .includes(:train)
+          .where(trains: { departure_city: @arrival_city, arrival_city: @departure_city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@return_booking).not_to be_nil, "未找到返程交通订单"
       end
       
-      add_assertion "TODO: 属性验证3", weight: 20 do
+      # 断言3: 创建了酒店订单（7晚） (20%)
+      add_assertion "创建了酒店订单（7晚）", weight: 20 do
+        @hotel_booking = HotelBooking
+          .joins(:hotel)
+          .includes(:hotel)
+          .where(hotels: { city: @arrival_city })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@hotel_booking).not_to be_nil, "未找到酒店订单"
+        
+        nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
+        expect(nights).to eq(@stay_nights),
+          "住宿天数错误。期望: #{@stay_nights}晚, 实际: #{nights}晚"
       end
       
-      add_assertion "TODO: 属性验证4", weight: 20 do
+      return if @hotel_booking.nil?
+      
+      # 断言4: 出发/到达城市正确 (10%)
+      add_assertion "出发/到达城市正确", weight: 10 do
+        go_train = @go_booking.train
+        expect(go_train.departure_city).to eq(@departure_city)
+        expect(go_train.arrival_city).to eq(@arrival_city)
       end
       
-      add_assertion "TODO: 属性验证5", weight: 20 do
+      # 断言5: 总预算在3000元以内 (30%)
+      add_assertion "总预算在#{@max_budget}元以内", weight: 30 do
+        go_price = @go_booking.total_price
+        return_price = @return_booking ? @return_booking.total_price : 0
+        hotel_price = @hotel_booking.total_price
+        actual_total = go_price + return_price + hotel_price
+        
+        expect(actual_total).to be <= @max_budget,
+          "总价超预算。期望: ≤#{@max_budget}元, 实际: #{actual_total}元（去程#{go_price}+返程#{return_price}+酒店#{hotel_price}）"
+      end
+      
+      # 断言6: 日期合理 (10%)
+      add_assertion "日期合理", weight: 10 do
+        arrival_date = @go_booking.train.arrival_time.to_date
+        checkin_date = @hotel_booking.check_in_date
+        expect([arrival_date, arrival_date + 1.day]).to include(checkin_date)
       end
     end
     
-    # 模拟 AI Agent 操作
-    #
-    # 此方法模拟 AI Agent 如何完成任务（用于自动化测试）
-    #
-    # Example:
-    #   def simulate
-    #     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-    #     
-    #     hotel = Hotel.where(city: @city, data_version: 0)
-    #                  .where('price <= ?', @budget)
-    #                  .order(rating: :desc)
-    #                  .first
-    #     
-    #     HotelBooking.create!(
-    #       user_id: user.id,
-    #       hotel_id: hotel.id,
-    #       check_in_date: @check_in_date,
-    #       total_price: hotel.price
-    #     )
-    #   end
     def simulate
-      # TODO: 实现 AI Agent 自动化逻辑
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 查找测试用户（数据包中已创建，data_version: 0）
-      # user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      # 选择最便宜的去程火车
+      go_train = @available_go_trains.min_by(&:price_second_class)
+      TrainBooking.create!(
+        user: user,
+        train: go_train,
+        passenger_name: user.name,
+        passenger_id_number: '110101199001011234',
+        seat_type: 'second_class',
+        contact_phone: '13800138000',
+        total_price: go_train.price_second_class,
+        accept_terms: true,
+        data_version: @data_version
+      )
       
-      # 2. 根据任务要求查找数据（注意过滤 data_version: 0）
-      # target = Model.where(data_version: 0).where(...).first
+      # 选择最便宜的返程火车
+      return_train = @available_return_trains.min_by(&:price_second_class)
+      TrainBooking.create!(
+        user: user,
+        train: return_train,
+        passenger_name: user.name,
+        passenger_id_number: '110101199001011234',
+        seat_type: 'second_class',
+        contact_phone: '13800138000',
+        total_price: return_train.price_second_class,
+        accept_terms: true,
+        data_version: @data_version
+      )
       
-      # 3. 创建订单/记录（使用 data_version: @data_version）
-      # Record.create!(
-      #   user_id: user.id,
-      #   # ... other fields
-      #   data_version: @data_version  # 关键：使用当前 execution 的 data_version
-      # )
+      # 找到最便宜的酒店
+      cheapest_hotel = @available_hotels.first
+      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      unless room
+        room = HotelRoom.create!(
+          hotel_id: cheapest_hotel.id,
+          room_type: '标准双人间',
+          bed_type: 'double',
+          price: cheapest_hotel.price,
+          original_price: cheapest_hotel.original_price,
+          area: 25.0,
+          max_guests: 2,
+          has_window: true,
+          available_rooms: 10,
+          room_category: 'standard',
+          data_version: 0
+        )
+      end
       
-      raise NotImplementedError, "TODO: 实现 simulate 方法"
+      arrival_date = go_train.arrival_time.to_date
+      HotelBooking.create!(
+        user: user,
+        hotel_id: cheapest_hotel.id,
+        hotel_room_id: room.id,
+        check_in_date: arrival_date,
+        check_out_date: arrival_date + @stay_nights.days,
+        guest_name: user.name,
+        guest_phone: '13800138000',
+        payment_method: '花呗',
+        total_price: room.price * @stay_nights,
+        data_version: @data_version
+      )
     end
     
     private
     
-    # 保存执行状态数据（用于跨请求恢复状态）
-    #
-    # 返回需要持久化的实例变量数据
     def execution_state_data
       {
-        # TODO: 添加需要保存的状态数据
-        # city: @city,
-        # budget: @budget
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        go_date: @go_date&.to_s,
+        return_date: @return_date&.to_s,
+        max_budget: @max_budget,
+        stay_nights: @stay_nights
       }
     end
     
-    # 从状态恢复实例变量（用于跨请求恢复状态）
-    #
-    # 从持久化数据恢复实例变量
     def restore_from_state(data)
-      # TODO: 从 data 恢复实例变量
-      # @city = data['city']
-      # @budget = data['budget']
+      @departure_city = data['departure_city']
+      @arrival_city = data['arrival_city']
+      @go_date = Date.parse(data['go_date']) if data['go_date']
+      @return_date = Date.parse(data['return_date']) if data['return_date']
+      @max_budget = data['max_budget']
+      @stay_nights = data['stay_nights']
     end
   end
 end

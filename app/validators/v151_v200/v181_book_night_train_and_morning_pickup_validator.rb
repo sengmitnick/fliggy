@@ -40,8 +40,7 @@ module V151V200
       expect(@available_trains).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}夜间火车（20:00后）"
       
       # 查找上海的接站服务
-      @available_transfers = Transfer
-        .where("pickup_location LIKE ? OR city LIKE ?", "%#{@arrival_city}%", "%#{@arrival_city}%")
+      @available_transfers = TransferPackage
         .where(data_version: 0)
         .limit(20)
         .to_a
@@ -82,23 +81,28 @@ module V151V200
         passenger_name: user.name,
         passenger_id_number: '110101199001011234',
         contact_phone: '13800138000',
-        seat_type: 'sleeper',
-        quantity: 1,
-        total_price: train.price_sleeper || train.price_first_class,
+        seat_type: 'business_class',
+        accept_terms: true,
+        total_price: train.price_business_class,
         data_version: @data_version
       )
       
       # 创建接站订单
-      transfer = @available_transfers.first
-      TransferOrder.create!(
+      transfer_package = @available_transfers.first
+      Transfer.create!(
         user: user,
-        transfer: transfer,
+        transfer_package: transfer_package,
+        transfer_type: 'train_pickup',
+        service_type: 'from_station',
+        location_from: "#{@arrival_city}火车站",
+        location_to: "#{@arrival_city}市区",
+        pickup_datetime: train.arrival_time,
         passenger_name: user.name,
-        contact_phone: '13800138000',
-        pickup_date: train.arrival_time.to_date,
-        pickup_time: train.arrival_time,
+        passenger_phone: '13800138000',
         passenger_count: 1,
-        total_price: transfer.price,
+        total_price: transfer_package.price,
+        status: 'paid',
+        driver_status: 'pending',
         data_version: @data_version
       )
     end
@@ -129,10 +133,8 @@ module V151V200
       
       # 断言3: 创建了接站订单 (20%)
       add_assertion "创建了接站订单", weight: 20 do
-        @transfer_order = TransferOrder
-          .joins(:transfer)
-          .includes(:transfer)
-          .where("transfers.pickup_location LIKE ? OR transfers.city LIKE ?", "%#{@arrival_city}%", "%#{@arrival_city}%")
+        @transfer_order = Transfer
+          .where("location_from LIKE ? OR location_to LIKE ?", "%#{@arrival_city}%", "%#{@arrival_city}%")
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
@@ -144,18 +146,17 @@ module V151V200
       
       # 断言4: 接站地点正确（到达城市） (20%)
       add_assertion "接站地点正确（#{@arrival_city}）", weight: 20 do
-        transfer = @transfer_order.transfer
-        location_correct = transfer.pickup_location&.include?(@arrival_city) || 
-                          transfer.city&.include?(@arrival_city)
+        location_correct = @transfer_order.location_from&.include?(@arrival_city) || 
+                          @transfer_order.location_to&.include?(@arrival_city)
         
-        expect(location_correct).to be true,
-          "接站地点错误。期望: #{@arrival_city}, 实际: #{transfer.pickup_location || transfer.city}"
+        expect(location_correct).to be(true),
+          "接站地点错误。期望: #{@arrival_city}, 实际: #{@transfer_order.location_from} → #{@transfer_order.location_to}"
       end
       
       # 断言5: 接站时间与火车到达时间匹配 (20%)
       add_assertion "接站时间与火车到达时间匹配", weight: 20 do
         train_arrival = @train_booking.train.arrival_time
-        pickup_datetime = @transfer_order.pickup_time
+        pickup_datetime = @transfer_order.pickup_datetime
         
         # 接站时间应该在火车到达后的合理时间内（0-2小时）
         time_diff = (pickup_datetime - train_arrival) / 3600.0  # 小时

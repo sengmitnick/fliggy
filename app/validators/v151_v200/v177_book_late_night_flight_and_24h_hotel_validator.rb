@@ -120,7 +120,7 @@ module V151V200
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
         guest_phone: '13800138000',
-        payment_method: '微信支付',
+        payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
       )
@@ -147,7 +147,7 @@ module V151V200
       add_assertion "航班起飞时间正确（23:00-02:00）", weight: 20 do
         departure_hour = @flight_booking.flight.departure_time.hour
         is_red_eye = departure_hour >= 23 || departure_hour < 2
-        expect(is_red_eye).to be true, 
+        expect(is_red_eye).to be(true), 
           "不是红眼航班。期望: 23:00-02:00, 实际: #{@flight_booking.flight.departure_time.strftime('%H:%M')}"
       end
       

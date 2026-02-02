@@ -8,6 +8,7 @@ module V101V150
     self.task_id = 'f9a0b1c2-3d4e-5f6a-7b8c-9d0e1f2a3b4c'
     self.title = '预订SUV租车（含GPS，异地还车）'
     self.description = '预订后天上海SUV租车5天（含GPS导航），异地还车到杭州'
+    self.timeout_seconds = 300
 
     def task_description
       "预订后天上海SUV租车5天（含GPS导航），异地还车到杭州"
