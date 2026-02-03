@@ -9,6 +9,7 @@ module V101V150
   self.task_id = 'g9h0i1j2-3a4b-5c6d-7e8f-9a0b1c2d3e4f'
   self.title = '预订周五航班+周末度假酒店（2晚）'
   self.description = '预订本周五从北京到深圳的航班，并预订深圳市区酒店（周五入住2晚，周日退房）'
+  self.timeout_seconds = 300
 
   def prepare
     @departure_city = '北京'

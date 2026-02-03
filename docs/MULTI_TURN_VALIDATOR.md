@@ -34,7 +34,7 @@ test:
 
 **测试单个验证器（推荐用于开发调试）：**
 ```bash
-rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
+rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]
 ```
 
 **测试所有验证器：**
@@ -44,7 +44,7 @@ rake validator:simulate
 
 **查看详细日志：**
 ```bash
-VERBOSE=1 rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
+VERBOSE=1 rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]
 ```
 
 ### 3. 测试结果解读
@@ -53,7 +53,7 @@ VERBOSE=1 rake validator:simulate_single[v501_hotel_booking_multi_turn_validator
 
 ```
 ========================================
-验证器: v501_hotel_booking_multi_turn_validator
+验证器: v201_hotel_booking_multi_turn_validator
 标题: 酒店预订多轮对话
 ========================================
 
@@ -93,7 +93,7 @@ GET /api/tasks
 {
   "validators": [
     {
-      "id": "v501_hotel_booking_multi_turn_validator",
+      "id": "v201_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
       "title": "酒店预订多轮对话",
       "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店",
@@ -132,7 +132,7 @@ Content-Type: application/json
 ```json
 {
   "session_id": "sess_abc123",
-  "task_id": "v501_hotel_booking_multi_turn_validator",
+  "task_id": "v201_hotel_booking_multi_turn_validator",
   "is_multi_turn": true,
   "task": {
     "task": "帮我订一个上海的酒店，预算500元左右",
@@ -290,7 +290,7 @@ HotelBooking.create!(
 
 ## 已实现验证器列表
 
-### v501: 酒店预订多轮对话
+### v201: 酒店预订多轮对话
 
 **任务描述：** 用户提供模糊的酒店预订请求，Agent 需通过提问获取完整信息并完成预订
 
@@ -468,7 +468,7 @@ A: Simul User 使用 LLM 根据对话历史、任务目标和用户上下文动�
 A: 使用 `VERBOSE=1` 环境变量查看详细日志：
 
 ```bash
-VERBOSE=1 rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
+VERBOSE=1 rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]
 ```
 
 或查询数据库中的对话记录：

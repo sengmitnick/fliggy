@@ -8,6 +8,7 @@ module V101V150
     self.task_id = 'd7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f2a'
     self.title = '预订火车票+酒店+返程送站服务'
     self.description = '预订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
+    self.timeout_seconds = 300
 
     def task_description
       "预订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务"

@@ -115,7 +115,7 @@
               </div>
               <% if @attraction_activity&.start_with?('image/') %>
                 <div class="ml-auto">
-                  <%= image_tag attraction_activity.image_url, class: "w-16 h-16 object-cover rounded" %>
+                  <%= safe_image_tag(attraction_activity.image_url, class: "w-16 h-16 object-cover rounded") %>
                 </div>
               <% end %>
             </div>

@@ -18,7 +18,7 @@ puts "正在加载 hotels_for_packages_v1 数据包..."
 timestamp = Time.current
 
 # ==================== 图片URL配置 ====================
-hotel_images = ImageSeedHelper.random_images_from_category('hotel_rooms', count: 10)
+hotel_images = ImageSeedHelper.random_images_from_category(:hotel_rooms, count: 10)
 
 # ==================== 设施配置 ====================
 features_pool = [

@@ -1,154 +1,167 @@
-# 阶段2编号调整方案
+# 阶段2编号调整说明
 
-## 🔍 问题分析
+## 📋 调整概述
 
-### 当前情况
-- **主分支**: V001-V170 已存在
-  - V114-V118 可能**不存在**或**版本较旧**
-- **另一个分支**: V114-V118 已完成（新版本）
-  - V114: `book_flight_and_airport_pickup_economy`
-  - V115: `book_flight_and_airport_pickup_comfort`
-  - V116: `book_flight_and_airport_pickup_economy7`
-  - V117: `book_international_flight_and_pickup`
-  - V118: `book_train_and_station_pickup`
-
-### 潜在冲突
-合并时，V114-V118 会产生文件冲突或功能重复。
+**原计划**: V171-V220 (+50个验证器)  
+**调整后**: V202-V250 (+49个验证器)  
+**调整原因**: 阶段1超额完成 + V201已被多轮对话验证器占用
 
 ---
 
-## ✅ 解决方案
+## 🔄 编号调整详情
 
-### 方案A: 保持阶段2原编号（推荐）⭐
+### 阶段1超额完成
 
-**理由**:
-- ✅ 阶段2从 **V171** 开始，与 V114-V118 **没有冲突**
-- ✅ 另一个分支的 V114-V118 可以直接合并到主分支
-- ✅ 文档无需修改，按原计划执行
+**原计划**:
+- 阶段1目标: 122→170 (+48个)
+- 阶段1区间: V123-V170
 
-**操作步骤**:
-```bash
-# 1. 先合并另一个分支的 V114-V118
-git merge feature/v114-v118
+**实际完成**:
+- 阶段1实际: 122→200 (+78个)
+- 阶段1区间: V123-V200
+- **超额完成**: +30个验证器 (原计划48个，实际完成78个)
 
-# 2. 然后在主分支上继续开发阶段2（V171-V220）
-# 无冲突，直接按文档执行
-```
+### V201特殊情况
 
-**结论**: **无需调整编号**，阶段2仍然是 V171-V220
+**V201**: 多轮对话验证器
+- 文件: `app/validators/v201_v250/v201_hotel_booking_multi_turn_validator.rb`
+- 类型: Multi-Turn Dialog Validator
+- 状态: ✅ 已完成
+- 说明: V201作为多轮对话验证器的标志性编号，具有特殊意义
 
----
+### 编号调整映射
 
-### 方案B: 如果V114-V118占用了V171-V175
+| 原编号区间 | 调整后区间 | 偏移量 | 说明 |
+|-----------|-----------|-------|------|
+| V171-V185 | V202-V216 | +31 | 时间约束验证器 (15个) |
+| V186-V200 | V217-V231 | +31 | 价格约束验证器 (15个) |
+| V201-V220 | V232-V250 | +31 | 多维度约束验证器 (19个，原20个) |
 
-如果另一个分支**错误地使用了 V171-V175** 编号（不太可能），才需要调整。
-
-**调整方案**:
-
-#### 原编号 (V171-V220)
-- V171-V185: 时间约束验证器 (15个)
-- V186-V200: 价格约束验证器 (15个)
-- V201-V220: 多维度组合约束 (20个)
-
-#### 调整后 (V176-V225)
-- V176-V190: 时间约束验证器 (15个)
-- V191-V205: 价格约束验证器 (15个)
-- V206-V225: 多维度组合约束 (20个)
-
-**但这不太可能**，因为：
-- 你说的是 V114-V118（在 V101-V150 区间）
-- 不会影响 V171+ 的编号
+**总数变化**: 50个 → 49个 (V201已占用)
 
 ---
 
-## 🎯 推荐操作流程
+## 📊 完整编号映射表
 
-### Step 1: 确认冲突情况
+### 第1批: 时间约束验证器
 
-```bash
-# 查看主分支当前最大编号
-find app/validators -name 'v*_validator.rb' | grep -oE 'v[0-9]+' | sort -V | tail -1
-
-# 查看另一个分支有哪些验证器
-git checkout feature/other-branch
-find app/validators -name 'v*_validator.rb' | grep -E 'v1[1-2][0-9]'
-```
-
-### Step 2: 根据情况选择方案
-
-**情况1**: 另一个分支只有 V114-V118
-```bash
-# 选择方案A，无需调整
-# 阶段2保持 V171-V220
-```
-
-**情况2**: 另一个分支有 V171+（不太可能）
-```bash
-# 选择方案B，调整编号
-# 阶段2改为 V176-V225 或更靠后
-```
-
-### Step 3: 合并分支
-
-```bash
-# 回到主分支
-git checkout main
-
-# 合并另一个分支
-git merge feature/other-branch
-
-# 解决冲突（如果有）
-# 然后继续开发阶段2
-```
+| 原编号 | 新编号 | 验证器名称 |
+|-------|-------|------------|
+| V171 | V202 | `book_morning_flight_time_window` |
+| V172 | V203 | `book_afternoon_train_time_window` |
+| V173 | V204 | `book_evening_bus_time_window` |
+| V174 | V205 | `book_midnight_flight_red_eye` |
+| V175 | V206 | `book_sunrise_train_early_bird` |
+| V176 | V207 | `book_short_haul_flight_under_2h` |
+| V177 | V208 | `book_fastest_train_shortest_duration` |
+| V178 | V209 | `book_overnight_train_sleeper` |
+| V179 | V210 | `book_quick_connection_transfer` |
+| V180 | V211 | `book_long_layover_city_tour` |
+| V181 | V212 | `book_hotel_check_in_after_midnight` |
+| V182 | V213 | `book_early_check_in_hotel_before_noon` |
+| V183 | V214 | `book_late_check_out_hotel_after_2pm` |
+| V184 | V215 | `book_split_stay_two_hotels` |
+| V185 | V216 | `book_consecutive_trips_multi_destination` |
 
 ---
 
-## 📝 需要修改的文档（如果选择方案B）
+### 第2批: 价格约束验证器
 
-如果需要调整编号，需要修改以下文档：
-
-1. **`docs/STAGE2_IMPLEMENTATION_PLAN.md`**
-   - 全局替换 `V171` → `V176`
-   - 全局替换 `V185` → `V190`
-   - 全局替换 `V186` → `V191`
-   - 全局替换 `V200` → `V205`
-   - 全局替换 `V201` → `V206`
-   - 全局替换 `V220` → `V225`
-
-2. **`docs/VALIDATOR_300_ROADMAP.md`**
-   - 阶段2区间: `V171-V220` → `V176-V225`
-
-3. **`docs/VALIDATOR_EXPANSION_QUICK_GUIDE.md`**
-   - 阶段2区间: `V171-V220` → `V176-V225`
-
-4. **`docs/STAGE1_COMPLETION_ANALYSIS.md`**
-   - 提到阶段2的地方: `V171-V220` → `V176-V225`
-
----
-
-## ✅ 我的建议
-
-根据你的描述 "v114 - v118 在另一个分支已经有了"：
-
-**结论**: 这不会影响阶段2的编号！
-
-- ✅ **阶段2保持 V171-V220**（无需修改）
-- ✅ V114-V118 在 V101-V150 区间，与 V171+ 不冲突
-- ✅ 直接合并另一个分支，然后按原计划开发阶段2
-
-**无需任何调整！** 🎉
+| 原编号 | 新编号 | 验证器名称 |
+|-------|-------|------------|
+| V186 | V217 | `book_flight_and_hotel_budget_1500` |
+| V187 | V218 | `book_train_and_hotel_budget_800` |
+| V188 | V219 | `book_round_trip_budget_2000` |
+| V189 | V220 | `book_family_trip_budget_5000` |
+| V190 | V221 | `book_week_trip_budget_3000` |
+| V191 | V222 | `book_mid_range_hotel_500_800` |
+| V192 | V223 | `book_premium_flight_business_class` |
+| V193 | V224 | `book_budget_combo_under_500` |
+| V194 | V225 | `book_luxury_package_over_3000` |
+| V195 | V226 | `book_student_budget_under_300` |
+| V196 | V227 | `book_best_value_flight_hotel_combo` |
+| V197 | V228 | `book_cheapest_total_price_optimize` |
+| V198 | V229 | `book_balanced_price_quality_ratio` |
+| V199 | V230 | `book_premium_within_budget_max` |
+| V200 | V231 | `book_incremental_upgrade_100_more` |
 
 ---
 
-## 🤔 如果我理解错了
+### 第3批: 多维度约束验证器
 
-如果你的意思是：
-- "另一个分支的某个验证器**功能**与阶段2规划的 V171 重复"
-- 或者"需要把阶段2的 V171 改成其他编号"
+| 原编号 | 新编号 | 验证器名称 | 说明 |
+|-------|-------|------------|------|
+| **V201** | **V201** | `v201_hotel_booking_multi_turn` | ✅ 已完成 (多轮对话) |
+| V202 | V232 | `book_hotel_near_landmark_west_lake` | |
+| V203 | V233 | `book_hotel_near_transport_hub_station` | |
+| V204 | V234 | `book_hotel_cbd_business_district` | |
+| V205 | V235 | `book_airport_hotel_within_5km` | |
+| V206 | V236 | `book_scenic_area_hotel_mountain_view` | |
+| V207 | V237 | `book_hotel_with_breakfast_included` | |
+| V208 | V238 | `book_hotel_with_parking_free` | |
+| V209 | V239 | `book_hotel_with_gym_pool_facilities` | |
+| V210 | V240 | `book_car_with_gps_child_seat` | |
+| V211 | V241 | `book_flight_with_lounge_access` | |
+| V212 | V242 | `book_high_rated_hotel_above_4_5` | |
+| V213 | V243 | `book_well_reviewed_hotel_100_plus` | |
+| V214 | V244 | `book_top_rated_in_city_best_hotel` | |
+| V215 | V245 | `book_new_hotel_recent_opening_2024` | |
+| V216 | V246 | `book_consistent_rating_stable_service` | |
+| V217 | V247 | `book_flexible_ticket_free_cancellation` | |
+| V218 | V248 | `book_refundable_hotel_full_refund` | |
+| V219 | V249 | `book_changeable_train_reschedule_free` | |
+| V220 | V250 | `book_pay_at_hotel_no_prepayment` | |
 
-请告诉我具体情况，我可以：
-1. 调整 V171-V220 的编号
-2. 更新所有相关文档
-3. 生成新的编号映射表
+---
 
-请确认是哪种情况，我来帮你处理！😊
+## 🎯 调整后的路线图
+
+### 300验证器总目标
+
+| 阶段 | 验证器区间 | 新增数量 | 累计 | 状态 |
+|------|-----------|---------|------|------|
+| **阶段1** | V123-V200 | +78个 | 200 | ✅ 已完成 |
+| **阶段2** | V202-V250 | +49个 | 250 | 🎯 当前任务 |
+| **阶段3** | V251-V280 | +30个 | 280 | 📋 已规划 |
+| **阶段4** | V281-V300 | +20个 | 300 | 📋 已规划 |
+
+**总计**: V001-V300 (300个验证器) ✅
+
+---
+
+## 💡 调整影响
+
+### ✅ 积极影响
+
+1. **目标超额完成**: 阶段1原计划170个，实际完成200个 (+30个)
+2. **多轮对话独立**: V201作为多轮对话验证器的标志性编号，易于识别
+3. **编号连续性**: 阶段2从V202开始，保持整体编号连续性
+4. **文档清晰**: 明确区分不同阶段和类型的验证器
+
+### ⚠️ 需要注意
+
+1. **文档更新**: 所有相关文档需要同步更新编号
+2. **代码引用**: 确保没有硬编码引用旧编号
+3. **测试覆盖**: 验证器编号调整后需要重新运行测试
+
+---
+
+## 📝 文档更新清单
+
+以下文档已同步更新:
+
+- ✅ `docs/VALIDATOR_300_ROADMAP.md`
+- ✅ `docs/STAGE2_IMPLEMENTATION_PLAN.md`
+- ✅ `docs/STAGE1_EXPANSION_TO_200.md`
+- ✅ `docs/STAGE1_COMPLETION_ANALYSIS.md`
+- ✅ `docs/STAGE2_NUMBERING_ADJUSTMENT.md` (本文档)
+
+---
+
+## 🚀 下一步行动
+
+1. ✅ 文档更新完成
+2. 🎯 开始阶段2实施: V202-V250 (+49个验证器)
+3. 📋 验证器生成: 使用 `rails generate validator` 批量生成骨架
+4. 💻 验证器实现: 按批次实现 prepare、simulate、verify 方法
+5. ✅ 测试验证: 运行 `rake validator:simulate` 确保全部通过

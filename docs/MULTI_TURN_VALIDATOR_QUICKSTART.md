@@ -20,7 +20,7 @@ development:
 bin/dev
 
 # 新开终端，运行测试
-rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
+rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]
 ```
 
 ### 3. 查看测试结果
@@ -29,7 +29,7 @@ rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
 
 ```
 ========================================
-验证器: v501_hotel_booking_multi_turn_validator
+验证器: v201_hotel_booking_multi_turn_validator
 标题: 酒店预订多轮对话
 ========================================
 
@@ -64,7 +64,7 @@ curl http://localhost:3000/api/tasks
 {
   "validators": [
     {
-      "id": "v501_hotel_booking_multi_turn_validator",
+      "id": "v201_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
       "title": "酒店预订多轮对话",
       "is_multi_turn": true
@@ -88,7 +88,7 @@ curl http://localhost:3000/api/tasks
 ### 步骤 2: 启动训练会话
 
 ```bash
-curl -X POST http://localhost:3000/api/tasks/v501_hotel_booking_multi_turn_validator/start \
+curl -X POST http://localhost:3000/api/tasks/v201_hotel_booking_multi_turn_validator/start \
   -H "Content-Type: application/json" \
   -d '{
     "agent_name": "MyAIAgent",
@@ -100,7 +100,7 @@ curl -X POST http://localhost:3000/api/tasks/v501_hotel_booking_multi_turn_valid
 ```json
 {
   "session_id": "sess_abc123",
-  "task_id": "v501_hotel_booking_multi_turn_validator",
+  "task_id": "v201_hotel_booking_multi_turn_validator",
   "is_multi_turn": true,
   "task": {
     "data_version": "dv_xyz789",
@@ -196,7 +196,7 @@ HotelBooking.create!(
 
 查看详细日志：
 ```bash
-VERBOSE=1 rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]
+VERBOSE=1 rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]
 ```
 
 查看对话历史：
@@ -212,7 +212,7 @@ rails runner "
 
 - 阅读完整文档：`docs/MULTI_TURN_VALIDATOR.md`
 - 开发新验证器：`rails generate validator your_name "标题" "描述"`
-- 查看示例代码：`app/validators/v501_v550/v501_hotel_booking_multi_turn_validator.rb`
+- 查看示例代码：`app/validators/v201_v250/v201_hotel_booking_multi_turn_validator.rb`
 
 ## 常见问题
 

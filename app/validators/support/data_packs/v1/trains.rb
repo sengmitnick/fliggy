@@ -153,6 +153,22 @@ end
 # 批量插入上海→杭州火车票
 Train.insert_all(all_trains)
 
+# ==================== 专门为验证器添加北京→上海夜间火车（20:00后） ====================
+all_trains = []
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  night_trains_bj_to_sh = [
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 0, min: 30), train_number: "G#{109 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 0), train_number: "G#{111 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 30), train_number: "G#{113 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 0), train_number: "D#{301 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 22, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 30), train_number: "D#{303 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
+  ]
+  all_trains.concat(night_trains_bj_to_sh)
+end
+Train.insert_all(all_trains)
+
 # 路线1B: 杭州→上海（返程路线，用于往返行程验证）
 # 与上海→杭州对应的返程路线，车次和时刻对称
 all_trains = []
@@ -852,6 +868,93 @@ end
 # 批量插入重庆→成都东火车票
 Train.insert_all(all_trains)
 
+# ==================== 广州 <-> 成都 往返高铁（V221-V232专用，经济型预算组合） ====================
+all_trains = []
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  
+  # 广州 -> 成都（高铁二等座约500元）
+  trains_gz_to_cd = [
+    {
+      departure_city: "广州",
+      arrival_city: "成都",
+      departure_time: base_datetime.change(hour: 8, min: 0),
+      arrival_time: base_datetime.change(hour: 16, min: 0),
+      train_number: "G#{1234 + day_suffix}",
+      duration: 480,
+      price_second_class: 490.0,
+      price_first_class: 780.0,
+      price_business_class: 1500.0,
+      available_seats: 200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "广州",
+      arrival_city: "成都",
+      departure_time: base_datetime.change(hour: 14, min: 30),
+      arrival_time: base_datetime.change(hour: 22, min: 30),
+      train_number: "G#{1236 + day_suffix}",
+      duration: 480,
+      price_second_class: 510.0,
+      price_first_class: 800.0,
+      price_business_class: 1550.0,
+      available_seats: 180,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_trains.concat(trains_gz_to_cd)
+end
+
+# 成都 -> 广州（返程，日期+7天）
+return_date_range = (start_date + 7.days)..(end_date + 7.days)
+return_date_range.each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  
+  trains_cd_to_gz = [
+    {
+      departure_city: "成都",
+      arrival_city: "广州",
+      departure_time: base_datetime.change(hour: 9, min: 0),
+      arrival_time: base_datetime.change(hour: 17, min: 0),
+      train_number: "G#{1235 + day_suffix}",
+      duration: 480,
+      price_second_class: 490.0,
+      price_first_class: 780.0,
+      price_business_class: 1500.0,
+      available_seats: 200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "成都",
+      arrival_city: "广州",
+      departure_time: base_datetime.change(hour: 15, min: 0),
+      arrival_time: base_datetime.change(hour: 23, min: 0),
+      train_number: "G#{1237 + day_suffix}",
+      duration: 480,
+      price_second_class: 510.0,
+      price_first_class: 800.0,
+      price_business_class: 1550.0,
+      available_seats: 180,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_trains.concat(trains_cd_to_gz)
+end
+
+Train.insert_all(all_trains)
+
 # 统计信息（更新）
 bj_to_nj_count = Train.where(data_version: 0, departure_city: "北京", arrival_city: "南京").count
 wh_to_xa_count = Train.where(data_version: 0, departure_city: "武汉", arrival_city: "西安").count
@@ -860,3 +963,8 @@ cq_to_cd_count = Train.where(data_version: 0, departure_city: "重庆", arrival_
 puts "  - 北京→南京南: 每天4个车次，价格区间 443.5-1383.5元（共 #{bj_to_nj_count} 个）"
 puts "  - 武汉→西安: 每天3个车次，价格区间 152.5-427.5元（共 #{wh_to_xa_count} 个）"
 puts "  - 重庆→成都东: 每天5个车次，价格区间 97.0-466.5元（共 #{cq_to_cd_count} 个）"
+
+gz_to_cd_count = Train.where(data_version: 0, departure_city: "广州", arrival_city: "成都").count
+cd_to_gz_count = Train.where(data_version: 0, departure_city: "成都", arrival_city: "广州").count
+puts "  - 广州→成都: 每天2个车次，价格区间 490-510元（共 #{gz_to_cd_count} 个）"
+puts "  - 成都→广州: 每天2个车次，价格区间 490-510元（共 #{cd_to_gz_count} 个）"

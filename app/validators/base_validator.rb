@@ -439,20 +439,15 @@ class BaseValidator
   def rollback_to_baseline
     return unless @data_version
     
-    puts "\nℹ️  回滚到基线状态（删除 data_version=#{@data_version} 的数据）..."
-    
     # 使用 DataVersionable.models 获取所有注册的模型
     # 这样无需维护硬编码的模型列表
     DataVersionable.models.each do |model|
       begin
-        deleted_count = model.where(data_version: @data_version).delete_all
-        puts "  → #{model.name}: 删除 #{deleted_count} 条记录" if deleted_count > 0
+        model.where(data_version: @data_version).delete_all
       rescue StandardError => e
         puts "  ⚠️  删除 #{model.name} 失败: #{e.message}"
       end
     end
-    
-    puts "✓ 已回滚到基线状态（保留 data_version=0 的基线数据）"
   end
   
   # 保存执行状态到数据库

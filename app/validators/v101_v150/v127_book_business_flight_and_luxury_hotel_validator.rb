@@ -9,6 +9,7 @@ module V101V150
   self.task_id = 'f8g9h0i1-2a3b-4c5d-6e7f-8a9b0c1d2e3f'
   self.title = '预订商务舱航班+高档酒店（3晚）'
   self.description = '预订3天后从北京到上海的商务舱航班，并预订上海市区高档酒店（4星级以上，当天入住3晚）'
+  self.timeout_seconds = 300
 
   def prepare
     @departure_city = '北京'

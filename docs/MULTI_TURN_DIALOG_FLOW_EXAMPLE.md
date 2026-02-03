@@ -6,7 +6,7 @@
 
 **任务：** 预订上海酒店，预算 500 元左右
 
-**验证器：** v501_hotel_booking_multi_turn_validator
+**验证器：** v201_hotel_booking_multi_turn_validator
 
 ## 完整对话流程
 
@@ -21,7 +21,7 @@ curl http://localhost:3000/api/tasks
 {
   "validators": [
     {
-      "id": "v501_hotel_booking_multi_turn_validator",
+      "id": "v201_hotel_booking_multi_turn_validator",
       "task_id": "0b2d6f73-3d61-4dab-84da-4de740b906a3",
       "title": "酒店预订多轮对话",
       "description": "验证 Agent 是否能通过多轮对话获取完整信息并成功预订酒店",
@@ -35,7 +35,7 @@ curl http://localhost:3000/api/tasks
 ### 第 2 步：启动训练会话
 
 ```bash
-curl -X POST http://localhost:3000/api/tasks/v501_hotel_booking_multi_turn_validator/start \
+curl -X POST http://localhost:3000/api/tasks/v201_hotel_booking_multi_turn_validator/start \
   -H "Content-Type: application/json" \
   -d '{
     "agent_name": "MyAIAgent",
@@ -55,7 +55,7 @@ curl -X POST http://localhost:3000/api/tasks/v501_hotel_booking_multi_turn_valid
     }
   },
   "session_id": "sess_abc123def456",
-  "task_id": "v501_hotel_booking_multi_turn_validator"
+  "task_id": "v201_hotel_booking_multi_turn_validator"
 }
 ```
 
@@ -159,7 +159,7 @@ curl -X POST http://localhost:3000/api/verify/run \
   -H "Content-Type: application/json" \
   -d '{
     "session_id": "sess_abc123def456",
-    "task_id": "v501_hotel_booking_multi_turn_validator"
+    "task_id": "v201_hotel_booking_multi_turn_validator"
   }'
 ```
 
@@ -170,7 +170,7 @@ curl -X POST http://localhost:3000/api/verify/run \
   "reason": "所有验证通过",
   "execution_status": "success",
   "metadata": {
-    "validator_id": "v501_hotel_booking_multi_turn_validator",
+    "validator_id": "v201_hotel_booking_multi_turn_validator",
     "total_score": 100,
     "max_score": 100,
     "assertions": [
@@ -390,4 +390,4 @@ Agent: [继续调用 /api/dialog/message]
 
 - 查看完整 API 文档：`docs/MULTI_TURN_VALIDATOR.md`
 - 开发新验证器：`rails generate validator your_name "标题" "描述"`
-- 运行测试：`rake validator:simulate_single[v501_hotel_booking_multi_turn_validator]`
+- 运行测试：`rake validator:simulate_single[v201_hotel_booking_multi_turn_validator]`

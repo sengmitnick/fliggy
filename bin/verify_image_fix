@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Quick verification script for image URL fix
+# Run: rails runner bin/verify_image_fix
+
+puts "\n" + "=" * 70
+puts "IMAGE URL FIX VERIFICATION"
+puts "=" * 70
+
+# 1. Check safe_image_tag helper exists
+print "\n1. Checking safe_image_tag helper... "
+if ApplicationHelper.instance_methods.include?(:safe_image_tag)
+  puts "✓ OK"
+else
+  puts "✗ MISSING!"
+  exit 1
+end
+
+# 2. Check view files
+print "2. Checking view files for unsafe image_tag... "
+unsafe_count = `grep -r "image_tag.*\\.image_url" app/views --include="*.erb" | grep -v safe_image_tag | wc -l`.to_i
+if unsafe_count == 0
+  puts "✓ OK (all using safe_image_tag)"
+else
+  puts "✗ FOUND #{unsafe_count} unsafe usages!"
+  exit 1
+end
+
+# 3. Check database for nil image URLs
+puts "3. Checking database for nil/blank image URLs..."
+
+models = [
+  { name: 'CruiseShip', field: :image_url, model: CruiseShip },
+  { name: 'Hotel', field: :image_url, model: Hotel },
+  { name: 'Car', field: :image_url, model: Car },
+  { name: 'TourGroupProduct', field: :main_image_url, model: TourGroupProduct },
+  { name: 'Attraction', field: :cover_image_url, model: Attraction },
+  { name: 'AbroadShop', field: :image_url, model: AbroadShop },
+  { name: 'MembershipProduct', field: :image_url, model: MembershipProduct }
+]
+
+all_good = true
+models.each do |m|
+  total = m[:model].count
+  nil_count = m[:model].where(m[:field] => nil).count
+  blank_count = m[:model].where(m[:field] => '').count
+  
+  if nil_count == 0 && blank_count == 0
+    puts "   ✓ #{m[:name].ljust(20)} - OK (#{total} records)"
+  else
+    puts "   ✗ #{m[:name].ljust(20)} - #{nil_count} nil, #{blank_count} blank (#{total} total)"
+    all_good = false
+  end
+end
+
+# 4. Final result
+puts "\n" + "=" * 70
+if all_good
+  puts "✓ ALL CHECKS PASSED - Image URL fix is working correctly!"
+  puts "=" * 70
+  exit 0
+else
+  puts "✗ SOME CHECKS FAILED - Please review the errors above"
+  puts "=" * 70
+  exit 1
+end

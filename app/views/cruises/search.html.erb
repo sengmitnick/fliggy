@@ -115,7 +115,7 @@
           <!-- Ship Image with Background -->
           <div class="relative h-56 bg-gradient-to-br from-blue-400 to-blue-600">
             <% if cruise_ship.image_url.present? %>
-              <%= image_tag cruise_ship.image_url, alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80" %>
+              <%= safe_image_tag(cruise_ship.image_url, alt: cruise_ship.name, class: "w-full h-full object-cover mix-blend-overlay opacity-80") %>
             <% else %>
               <div class="w-full h-full flex items-center justify-center">
                 <svg class="w-20 h-20 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -300,7 +300,7 @@
                 <div class="bg-white rounded-lg overflow-hidden border-2 hover:shadow-md transition <%= is_cabin_selected ? 'border-yellow-400' : 'border-gray-200' %>">
                   <!-- Cabin Image -->
                   <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
-                    <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-24 object-cover" %>
+                    <%= safe_image_tag(cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-24 object-cover") %>
                   <% else %>
                     <div class="w-full h-24 bg-gray-100 flex items-center justify-center">
                       <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,7 +358,7 @@
                     <!-- Room Image -->
                     <% if cabin_type.image_urls.present? && cabin_type.image_urls.first %>
                       <div class="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
-                        <%= image_tag cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-full object-cover" %>
+                        <%= safe_image_tag(cabin_type.image_urls.first, alt: cabin_type.name, class: "w-full h-full object-cover") %>
                       </div>
                     <% end %>
                     

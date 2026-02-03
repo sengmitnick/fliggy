@@ -48,7 +48,7 @@
           <div class="flex items-start gap-3">
             <div class="flex-shrink-0 w-12 h-12 rounded bg-gray-100 overflow-hidden">
               <% if @cabin_type.image_urls.present? && @cabin_type.image_urls.first %>
-                <%= image_tag @cabin_type.image_urls.first, alt: @cabin_type.name, class: "w-full h-full object-cover" %>
+                <%= safe_image_tag(@cabin_type.image_urls.first, alt: @cabin_type.name, class: "w-full h-full object-cover") %>
               <% end %>
             </div>
             <div>
