@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# V205: 预订红眼航班（跨日）
+# V256: 预订红眼航班（跨日）
 #
 # 任务描述:
 #   用户需要预订后天23:00-次日02:00北京→上海红眼航班
@@ -13,9 +13,9 @@ require_relative '../base_validator'
 #   - 出发日期正确（后天） (15%)
 #   - 起飞时间在23:00-次日02:00红眼时段 (30%)
 #   - 订单状态有效 (20%)
-module V201V250
-  class V205BookRedEyeFlightCrossDayValidator < BaseValidator
-    self.validator_id = 'v205_book_red_eye_flight_cross_day_validator'
+module V251V300
+  class V256BookRedEyeFlightCrossDayValidator < BaseValidator
+    self.validator_id = 'v256_book_red_eye_flight_cross_day_validator'
     self.task_id = '4d5576f9-5f5f-4e9b-bf8f-9f1a2b3c4d5f'
     self.title = '预订红眼航班（跨日）'
     self.description = '用户需要预订后天23:00-次日02:00北京→上海红眼航班'

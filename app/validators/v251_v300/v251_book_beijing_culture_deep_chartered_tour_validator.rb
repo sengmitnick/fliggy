@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例176: 预订北京文化深度游（豪华5座，情侣出行，5天后出发）
+# 验证用例251: 预订北京文化深度游（豪华5座，情侣出行，5天后出发）
 #
 # 核心验证点:
 # 1. 路线选择: 北京文化深度游
@@ -10,9 +10,9 @@ require_relative '../base_validator'
 # 3. 包车时长: 6小时（半日游标准时长）
 # 4. 出发日期: 5天后（Date.today + 5.days）
 # 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
-module V151V200
-  class V176BookBeijingCultureDeepCharteredTourValidator < BaseValidator
-    self.validator_id = 'v176_book_beijing_culture_deep_chartered_tour_validator'
+module V251V300
+  class V251BookBeijingCultureDeepCharteredTourValidator < BaseValidator
+    self.validator_id = 'v251_book_beijing_culture_deep_chartered_tour_validator'
     self.task_id = '61645ce7-e573-42d2-b80e-c5bfe1d863db'
     self.title = '预订北京文化深度游（豪华5座，情侣2人）- 验证出发日期、包车时长6小时、订单完整性'
     self.description = '预订北京文化深度游包车路线，情侣2人出行，选择豪华5座车型，6小时服务。验证出发日期（5天后）、包车时长（6小时）、车型档次、订单信息完整性。'
