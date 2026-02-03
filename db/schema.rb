@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_02_122318) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -267,6 +267,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.jsonb "multi_city_flights"
     t.string "data_version", limit: 50, default: "0", null: false
     t.bigint "flight_offer_id"
+    t.string "seat_preference"
+    t.string "seat_number"
+    t.string "frequent_flyer_number"
     t.index ["data_version"], name: "index_bookings_on_data_version"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"
@@ -821,6 +824,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.string "baggage_allowance"
+    t.string "refund_policy"
+    t.string "meal_service"
+    t.string "mileage_accrual"
+    t.boolean "is_direct", default: true
+    t.integer "stops", default: 0
     t.index ["data_version"], name: "index_flights_on_data_version"
   end
 
@@ -962,6 +971,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.decimal "insurance_price"
     t.datetime "locked_until"
     t.string "data_version", limit: 50, default: "0", null: false
+    t.integer "room_count", default: 1
     t.index ["data_version"], name: "index_hotel_bookings_on_data_version"
     t.index ["hotel_id"], name: "index_hotel_bookings_on_hotel_id"
     t.index ["hotel_room_id"], name: "index_hotel_bookings_on_hotel_room_id"
@@ -1114,6 +1124,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.string "brand"
     t.decimal "latitude", precision: 10, scale: 6
     t.decimal "longitude", precision: 10, scale: 6
+    t.text "facilities"
+    t.string "cancellation_policy"
+    t.decimal "price_per_night"
     t.index ["data_version"], name: "index_hotels_on_data_version"
     t.index ["hotel_type"], name: "index_hotels_on_hotel_type"
     t.index ["is_domestic"], name: "index_hotels_on_is_domestic"
@@ -1743,6 +1756,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_01_080136) do
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
     t.bigint "booking_option_id"
+    t.integer "ticket_count", default: 1
     t.index ["booking_option_id"], name: "index_train_bookings_on_booking_option_id"
     t.index ["data_version"], name: "index_train_bookings_on_data_version"
     t.index ["train_id"], name: "index_train_bookings_on_train_id"

@@ -1289,6 +1289,34 @@ cabin_types_data = [
     created_at: Time.current,
     updated_at: Time.current
   },
+  {
+    cruise_ship_id: bellissima.id,
+    name: '海景房',
+    category: 'ocean_view',
+    floor_range: '6-10层',
+    area: 17,
+    has_balcony: false,
+    has_window: true,
+    max_occupancy: 3,
+    description: '大型观景窗，明亮通透',
+    image_urls: [cabin_images[2]].compact,
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: bellissima.id,
+    name: 'MSC游艘俱乐部套房',
+    category: 'suite',
+    floor_range: '14-16层',
+    area: 48,
+    has_balcony: true,
+    has_window: true,
+    max_occupancy: 4,
+    description: '尊享俱乐部服务，专属餐厅',
+    image_urls: [cabin_images[4], cabin_images[5]].compact,
+    created_at: Time.current,
+    updated_at: Time.current
+  },
   # 爱达新星号 - 舱房类型
   {
     cruise_ship_id: aida_nova.id,

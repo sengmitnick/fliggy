@@ -1,11 +1,18 @@
-# 阶段2实施方案：条件变体验证器 (V171-V220, +50个)
+# 阶段2实施方案：条件变体验证器 (V202-V250, +49个)
 
 ## 📋 总体规划
 
-**目标**: 170→220 (+50个验证器)  
+**目标**: 200→250 (+49个验证器)  
+**区间**: V202-V250 (V201为多轮对话验证器)  
 **策略**: 条件变体验证器（复杂约束条件，无需新增数据包）  
-**时间**: 1天  
+**时间**: 2天  
 **数据支持**: ✅ 利用现有数据包，通过不同维度筛选生成变体
+
+### V201特殊说明
+- **V201**: 多轮对话验证器 (v201_hotel_booking_multi_turn_validator)
+- **类型**: Multi-Turn Dialog Validator
+- **状态**: ✅ 已完成
+- **说明**: V201作为多轮对话验证器的标志性编号，阶段2从V202开始
 
 ---
 
@@ -17,7 +24,7 @@
 
 **示例对比**:
 
-| 类型 | V001 (简单) | V171 (复杂) |
+| 类型 | V001 (简单) | V202 (复杂) |
 |------|-------------|-------------|
 | **任务** | 预订后天深圳到北京的低价机票 | 预订后天深圳到北京的机票，要求：<br>1. 起飞时间9:00-12:00<br>2. 价格≤800元<br>3. 直飞（非中转）<br>4. 经济舱有座 |
 | **筛选维度** | 1个（价格） | 4个（时间+价格+航线+座位） |
@@ -28,17 +35,17 @@
 
 ## 📦 验证器分类体系
 
-### 第1批: 时间约束验证器 (V171-V185, 15个)
+### 第1批: 时间约束验证器 (V202-V216, 15个)
 
 #### 1.1 精确时间窗口 (5个)
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V171** | `book_morning_flight_time_window` | 预订明天**9:00-12:00**深圳→北京航班（商务出行） |
-| **V172** | `book_afternoon_train_time_window` | 预订后天**14:00-17:00**上海→杭州高铁（下午茶时段出发） |
-| **V173** | `book_evening_bus_time_window` | 预订明天**18:00-20:00**广州→深圳大巴（下班后出行） |
-| **V174** | `book_midnight_flight_red_eye` | 预订后天**23:00-02:00**红眼航班+机场休息室 |
-| **V175** | `book_sunrise_train_early_bird` | 预订明天**05:00-07:00**最早班次火车+早餐 |
+| **V202** | `book_morning_flight_time_window` | 预订明天**9:00-12:00**深圳→北京航班（商务出行） |
+| **V203** | `book_afternoon_train_time_window` | 预订后天**14:00-17:00**上海→杭州高铁（下午茶时段出发） |
+| **V204** | `book_evening_bus_time_window` | 预订明天**18:00-20:00**广州→深圳大巴（下班后出行） |
+| **V205** | `book_midnight_flight_red_eye` | 预订后天**23:00-02:00**红眼航班+机场休息室 |
+| **V206** | `book_sunrise_train_early_bird` | 预订明天**05:00-07:00**最早班次火车+早餐 |
 
 **验证点**:
 - 起飞/出发时间在指定窗口内
@@ -53,11 +60,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V176** | `book_short_haul_flight_under_2h` | 预订后天深圳→上海航班，**飞行时长≤2小时** |
-| **V177** | `book_fastest_train_shortest_duration` | 预订明天上海→杭州，**行程时间最短**的高铁 |
-| **V178** | `book_overnight_train_sleeper` | 预订后天北京→西安，**夜间卧铺**（22:00-次日8:00） |
-| **V179** | `book_quick_connection_transfer` | 预订明天航班转火车，**中转时间≤3小时** |
-| **V180** | `book_long_layover_city_tour` | 预订后天航班，**中转时间5-8小时**可市内游览 |
+| **V207** | `book_short_haul_flight_under_2h` | 预订后天深圳→上海航班，**飞行时长≤2小时** |
+| **V208** | `book_fastest_train_shortest_duration` | 预订明天上海→杭州，**行程时间最短**的高铁 |
+| **V209** | `book_overnight_train_sleeper` | 预订后天北京→西安，**夜间卧铺**（22:00-次日8:00） |
+| **V210** | `book_quick_connection_transfer` | 预订明天航班转火车，**中转时间≤3小时** |
+| **V211** | `book_long_layover_city_tour` | 预订后天航班，**中转时间5-8小时**可市内游览 |
 
 **验证点**:
 - 计算并验证实际飞行/行驶时长
@@ -72,11 +79,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V181** | `book_hotel_check_in_after_midnight` | 预订深夜航班+**凌晨后入住酒店**（24小时前台） |
-| **V182** | `book_early_check_in_hotel_before_noon` | 预订航班+酒店，**12:00前提前入住** |
-| **V183** | `book_late_check_out_hotel_after_2pm` | 预订酒店，**14:00后延迟退房**（适合晚班航班） |
-| **V184** | `book_split_stay_two_hotels` | 预订5天行程，**分住2家酒店**（前2晚A酒店+后3晚B酒店） |
-| **V185** | `book_consecutive_trips_multi_destination` | 预订**连续多段行程**（北京→上海→杭州→深圳，4天） |
+| **V212** | `book_hotel_check_in_after_midnight` | 预订深夜航班+**凌晨后入住酒店**（24小时前台） |
+| **V213** | `book_early_check_in_hotel_before_noon` | 预订航班+酒店，**12:00前提前入住** |
+| **V214** | `book_late_check_out_hotel_after_2pm` | 预订酒店，**14:00后延迟退房**（适合晚班航班） |
+| **V215** | `book_split_stay_two_hotels` | 预订5天行程，**分住2家酒店**（前2晚A酒店+后3晚B酒店） |
+| **V216** | `book_consecutive_trips_multi_destination` | 预订**连续多段行程**（北京→上海→杭州→深圳，4天） |
 
 **验证点**:
 - 入住/退房时间符合特殊要求
@@ -87,17 +94,17 @@
 
 ---
 
-### 第2批: 价格约束验证器 (V186-V200, 15个)
+### 第2批: 价格约束验证器 (V217-V231, 15个)
 
 #### 2.1 预算上限约束 (5个)
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V186** | `book_flight_and_hotel_budget_1500` | 预订航班+酒店，**总预算≤1500元** |
-| **V187** | `book_train_and_hotel_budget_800` | 预订火车票+酒店，**总预算≤800元** |
-| **V188** | `book_round_trip_budget_2000` | 预订往返航班+酒店3晚，**总预算≤2000元** |
-| **V189** | `book_family_trip_budget_5000` | 预订2大1小出行套餐，**总预算≤5000元** |
-| **V190** | `book_week_trip_budget_3000` | 预订7天自由行（往返交通+酒店），**总预算≤3000元** |
+| **V217** | `book_flight_and_hotel_budget_1500` | 预订航班+酒店，**总预算≤1500元** |
+| **V218** | `book_train_and_hotel_budget_800` | 预订火车票+酒店，**总预算≤800元** |
+| **V219** | `book_round_trip_budget_2000` | 预订往返航班+酒店3晚，**总预算≤2000元** |
+| **V220** | `book_family_trip_budget_5000` | 预订2大1小出行套餐，**总预算≤5000元** |
+| **V221** | `book_week_trip_budget_3000` | 预订7天自由行（往返交通+酒店），**总预算≤3000元** |
 
 **验证点**:
 - 所有订单总价≤预算上限
@@ -112,11 +119,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V191** | `book_mid_range_hotel_500_800` | 预订酒店，**价格区间500-800元/晚**（中档舒适） |
-| **V192** | `book_premium_flight_business_class` | 预订商务舱航班，**价格≥2000元**（高端出行） |
-| **V193** | `book_budget_combo_under_500` | 预订火车票+经济型酒店，**单项≤300元** |
-| **V194** | `book_luxury_package_over_3000` | 预订豪华套餐（头等舱+五星酒店），**总价≥3000元** |
-| **V195** | `book_student_budget_under_300` | 预订学生出行（青年票+青旅），**总预算≤300元** |
+| **V222** | `book_mid_range_hotel_500_800` | 预订酒店，**价格区间500-800元/晚**（中档舒适） |
+| **V223** | `book_premium_flight_business_class` | 预订商务舱航班，**价格≥2000元**（高端出行） |
+| **V224** | `book_budget_combo_under_500` | 预订火车票+经济型酒店，**单项≤300元** |
+| **V225** | `book_luxury_package_over_3000` | 预订豪华套餐（头等舱+五星酒店），**总价≥3000元** |
+| **V226** | `book_student_budget_under_300` | 预订学生出行（青年票+青旅），**总预算≤300元** |
 
 **验证点**:
 - 价格在指定区间内
@@ -131,11 +138,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V196** | `book_best_value_flight_hotel_combo` | 预订航班+酒店，**综合性价比最高**（价格×评分） |
-| **V197** | `book_cheapest_total_price_optimize` | 预订往返交通+酒店，**总价最低组合** |
-| **V198** | `book_balanced_price_quality_ratio` | 预订火车票+酒店，**价格/质量平衡最佳** |
-| **V199** | `book_premium_within_budget_max` | 预订≤2000元预算内，**服务最高档的组合** |
-| **V200** | `book_incremental_upgrade_100_more` | 预订经济舱+标准房，**加100元升级商务舱或高级房** |
+| **V227** | `book_best_value_flight_hotel_combo` | 预订航班+酒店，**综合性价比最高**（价格×评分） |
+| **V228** | `book_cheapest_total_price_optimize` | 预订往返交通+酒店，**总价最低组合** |
+| **V229** | `book_balanced_price_quality_ratio` | 预订火车票+酒店，**价格/质量平衡最佳** |
+| **V230** | `book_premium_within_budget_max` | 预订≤2000元预算内，**服务最高档的组合** |
+| **V231** | `book_incremental_upgrade_100_more` | 预订经济舱+标准房，**加100元升级商务舱或高级房** |
 
 **验证点**:
 - 需要计算综合指标（价格×评分×便利性）
@@ -146,17 +153,19 @@
 
 ---
 
-### 第3批: 多维度组合约束 (V201-V220, 20个)
+### 第3批: 多维度组合约束 (V232-V250, 19个)
+
+**说明**: V201已被多轮对话验证器占用，此批次从V232开始
 
 #### 3.1 地理位置约束 (5个)
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V201** | `book_hotel_near_landmark_west_lake` | 预订杭州酒店，**距离西湖≤2公里** |
-| **V202** | `book_hotel_near_transport_hub_station` | 预订北京酒店，**距离火车站≤1公里** |
-| **V203** | `book_hotel_cbd_business_district` | 预订深圳酒店，**位于CBD商务区**（福田/南山） |
-| **V204** | `book_airport_hotel_within_5km` | 预订上海酒店，**距离浦东机场≤5公里** |
-| **V205** | `book_scenic_area_hotel_mountain_view` | 预订黄山酒店，**山景房+景区内** |
+| **V232** | `book_hotel_near_landmark_west_lake` | 预订杭州酒店，**距离西湖≤2公里** |
+| **V233** | `book_hotel_near_transport_hub_station` | 预订北京酒店，**距离火车站≤1公里** |
+| **V234** | `book_hotel_cbd_business_district` | 预订深圳酒店，**位于CBD商务区**（福田/南山） |
+| **V235** | `book_airport_hotel_within_5km` | 预订上海酒店，**距离浦东机场≤5公里** |
+| **V236** | `book_scenic_area_hotel_mountain_view` | 预订黄山酒店，**山景房+景区内** |
 
 **验证点**:
 - 酒店地址包含关键词或区域名称
@@ -171,11 +180,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V206** | `book_hotel_with_breakfast_included` | 预订酒店，**含早餐** |
-| **V207** | `book_hotel_with_parking_free` | 预订酒店，**免费停车** |
-| **V208** | `book_hotel_with_gym_pool_facilities` | 预订酒店，**健身房+游泳池** |
-| **V209** | `book_car_with_gps_child_seat` | 预订租车，**GPS导航+儿童座椅** |
-| **V210** | `book_flight_with_lounge_access` | 预订航班，**含贵宾休息室** |
+| **V237** | `book_hotel_with_breakfast_included` | 预订酒店，**含早餐** |
+| **V238** | `book_hotel_with_parking_free` | 预订酒店，**免费停车** |
+| **V239** | `book_hotel_with_gym_pool_facilities` | 预订酒店，**健身房+游泳池** |
+| **V240** | `book_car_with_gps_child_seat` | 预订租车，**GPS导航+儿童座椅** |
+| **V241** | `book_flight_with_lounge_access` | 预订航班，**含贵宾休息室** |
 
 **验证点**:
 - 酒店/车辆/服务包含指定设施
@@ -192,11 +201,11 @@
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V211** | `book_high_rated_hotel_above_4_5` | 预订酒店，**评分≥4.5分** |
-| **V212** | `book_well_reviewed_hotel_100_plus` | 预订酒店，**评价数≥100条** |
-| **V213** | `book_top_rated_in_city_best_hotel` | 预订**该城市评分最高**的酒店 |
-| **V214** | `book_new_hotel_recent_opening_2024` | 预订**新开业酒店**（2024年后） |
-| **V215** | `book_consistent_rating_stable_service` | 预订**评分波动小**的酒店（稳定服务） |
+| **V242** | `book_high_rated_hotel_above_4_5` | 预订酒店，**评分≥4.5分** |
+| **V243** | `book_well_reviewed_hotel_100_plus` | 预订酒店，**评价数≥100条** |
+| **V244** | `book_top_rated_in_city_best_hotel` | 预订**该城市评分最高**的酒店 |
+| **V245** | `book_new_hotel_recent_opening_2024` | 预订**新开业酒店**（2024年后） |
+| **V246** | `book_consistent_rating_stable_service` | 预订**评分波动小**的酒店（稳定服务） |
 
 **验证点**:
 - 评分/评价数符合条件
@@ -207,15 +216,14 @@
 
 ---
 
-#### 3.4 灵活性/退改约束 (5个)
+#### 3.4 灵活性/退改约束 (4个)
 
 | 编号 | 验证器名称 | 核心约束 |
 |------|------------|----------|
-| **V216** | `book_flexible_ticket_free_cancellation` | 预订**可免费取消**的机票 |
-| **V217** | `book_refundable_hotel_full_refund` | 预订**全额退款**的酒店 |
-| **V218** | `book_changeable_train_reschedule_free` | 预订**可免费改签**的火车票 |
-| **V219** | `book_insurance_included_full_protection` | 预订**含保险**的出行套餐 |
-| **V220** | `book_pay_at_hotel_no_prepayment` | 预订**到店付款**的酒店（无需预付） |
+| **V247** | `book_flexible_ticket_free_cancellation` | 预订**可免费取消**的机票 |
+| **V248** | `book_refundable_hotel_full_refund` | 预订**全额退款**的酒店 |
+| **V249** | `book_changeable_train_reschedule_free` | 预订**可免费改签**的火车票 |
+| **V250** | `book_pay_at_hotel_no_prepayment` | 预订**到店付款**的酒店（无需预付） |
 
 **验证点**:
 - 退改政策符合要求

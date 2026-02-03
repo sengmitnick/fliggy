@@ -1540,3 +1540,40 @@ end
 Flight.insert_all(budget_flights_bj_to_sh)
 
 puts "  - 北京到上海低价航班(≤300元): 每天4个航班（共 #{budget_flights_bj_to_sh.count} 个）"
+
+# ==================== 上海 -> 杭州 中转航班（V211专用，18:00出发） ====================
+layover_flights_sh_to_hz = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flight = {
+    flight_number: "MU#{5588 + day_suffix}",
+    airline: "东方航空",
+    departure_city: "上海",
+    destination_city: "杭州",
+    departure_airport: "虹桥机场",
+    arrival_airport: "萧山机场",
+    flight_date: date,
+    departure_time: base_datetime.change(hour: 18, min: 0),
+    arrival_time: base_datetime.change(hour: 19, min: 0),
+    price: 480.0,
+    discount_price: 0.0,
+    available_seats: 50,
+    seat_class: "economy",
+    mileage_accrual: true,
+    baggage_allowance: "20kg",
+    meal_service: true,
+    aircraft_type: "A320",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  layover_flights_sh_to_hz << flight
+end
+
+Flight.insert_all(layover_flights_sh_to_hz)
+
+puts "  - 上海→杭州中转航班(18:00出发): 每天1个航班（共 #{layover_flights_sh_to_hz.count} 个）"

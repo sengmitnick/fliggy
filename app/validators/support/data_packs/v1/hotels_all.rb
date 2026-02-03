@@ -524,6 +524,35 @@ HotelRoom.insert_all(hotel_rooms_data) if hotel_rooms_data.any?
 HotelPolicy.insert_all(policies_data) if policies_data.any?
 HotelReview.insert_all(reviews_data) if reviews_data.any?
 
+# ==================== V240: 杭州无烟房（Phase 2专用） ====================
+puts "⚡️ 为杭州酒店添加无烟房..."
+hangzhou_hotels = Hotel.where(city: "杭州", data_version: 0).limit(5)
+non_smoking_rooms_data = []
+
+hangzhou_hotels.each do |hotel|
+  # 检查是否已有无烟房
+  next if HotelRoom.exists?(hotel_id: hotel.id, room_type: "无烟客房", data_version: 0)
+  
+  non_smoking_rooms_data << {
+    hotel_id: hotel.id,
+    room_type: "无烟客房",
+    bed_type: "双床",
+    area: 30.0,
+    room_category: "overnight",
+    price: hotel.price + 50,
+    available_rooms: 8,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+if non_smoking_rooms_data.any?
+  HotelRoom.insert_all(non_smoking_rooms_data)
+  puts "✅ 成功为杭州 #{non_smoking_rooms_data.size} 家酒店添加无烟房"
+else
+  puts "✅ 杭州酒店已有无烟房，跳过"
+end
+
 puts "✓ 已创建 #{HotelFacility.count} 个设施"
 puts "✓ 已创建 #{HotelRoom.count} 个房型"
 puts "✓ 已创建 #{HotelPolicy.count} 个政策"

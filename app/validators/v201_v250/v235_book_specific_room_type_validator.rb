@@ -1,0 +1,135 @@
+# frozen_string_literal: true
+
+require_relative '../base_validator'
+
+# V235: 预订特定房型（如大床房、套房）
+#
+# 任务描述:
+#   用户需要预订特定房型的酒店（如大床房、双床房、套房）
+#
+# 评分标准:
+#   - 创建了酒店订单 (30%)
+#   - 房型符合要求 (40%)
+#   - 入住日期和时长正确 (20%)
+#   - 订单状态有效 (10%)
+module V201V250
+  class V235BookSpecificRoomTypeValidator < BaseValidator
+    self.validator_id = 'v235_book_specific_room_type_validator'
+    self.task_id = '1ff1d2ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
+    self.title = '预订特定房型（如大床房）'
+    self.description = '用户需要预订特定房型的酒店（如大床房、双床房、套房）'
+    self.timeout_seconds = 300
+    
+    def prepare
+      @city = '成都'
+      @room_type = '大床房'
+      @check_in_date = Date.today + 2.days
+      @check_out_date = @check_in_date + 2.days
+      
+      # 查找有指定房型的酒店
+      @available_rooms = HotelRoom.joins(:hotel)
+        .where(hotels: { city: @city, data_version: 0 })
+        .where("hotel_rooms.room_type LIKE ?", "%#{@room_type}%")
+        .where(hotel_rooms: { data_version: 0 })
+        .includes(:hotel)
+        .to_a
+      
+      raise "未找到#{@room_type}的酒店" if @available_rooms.empty?
+      
+      {
+        task: "请预订#{@check_in_date.strftime('%Y年%m月%d日')}（后天）在#{@city}的#{@room_type}，住2晚。",
+        requirements: {
+          city: @city,
+          room_type: @room_type,
+          check_in_date: @check_in_date,
+          nights: 2,
+          purpose: '指定房型'
+        },
+        hint: "选择房型为'#{@room_type}'的房间。"
+      }
+    end
+    
+    def verify
+      add_assertion "创建了酒店订单", weight: 30 do
+        all_bookings = HotelBooking
+          .joins(:hotel)
+          .includes(:hotel_room)
+          .where(hotels: { city: @city })
+          .where(data_version: @data_version)
+          .to_a
+        
+        @hotel_booking = all_bookings.first
+        expect(@hotel_booking).not_to be_nil, "未找到#{@city}的酒店订单"
+      end
+      
+      return if @hotel_booking.nil?
+      
+      add_assertion "房型符合要求（#{@room_type}）", weight: 40 do
+        room = @hotel_booking.hotel_room
+        room_type_match = room.room_type.include?(@room_type)
+        
+        expect(room_type_match).to eq(true),
+          "房型不符合要求。要求: #{@room_type}, 实际: #{room.room_type}"
+      end
+      
+      add_assertion "入住日期和时长正确", weight: 20 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
+        expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
+      end
+    end
+    
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 选择第一个符合房型要求的房间
+      room = @available_rooms.first
+      hotel = room.hotel
+      
+      HotelBooking.create!(
+        user: user,
+        hotel: hotel,
+        hotel_room: room,
+        check_in_date: @check_in_date,
+        check_out_date: @check_out_date,
+        guest_name: user.name,
+        guest_phone: '13800138000',
+        room_count: 1,
+        total_price: room.price * 2,
+        status: 'paid',
+        payment_method: '花呗',
+        data_version: @data_version
+      )
+    end
+    
+    private
+    
+    def execution_state_data
+      {
+        city: @city,
+        room_type: @room_type,
+        check_in_date: @check_in_date.to_s,
+        check_out_date: @check_out_date.to_s
+      }
+    end
+    
+    def restore_from_state(data)
+      @city = data['city']
+      @room_type = data['room_type']
+      @check_in_date = Date.parse(data['check_in_date'])
+      @check_out_date = Date.parse(data['check_out_date'])
+      
+      @available_rooms = HotelRoom.joins(:hotel)
+        .where(hotels: { city: @city, data_version: 0 })
+        .where("hotel_rooms.room_type LIKE ?", "%#{@room_type}%")
+        .where(hotel_rooms: { data_version: 0 })
+        .includes(:hotel)
+        .to_a
+    end
+  end
+end
