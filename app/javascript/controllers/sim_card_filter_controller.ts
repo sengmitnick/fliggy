@@ -5,7 +5,8 @@ export default class extends Controller<HTMLElement> {
   static values = {
     delivery: String,
     days: Number,
-    data: String
+    data: String,
+    region: String
   }
 
   declare readonly priceTargets: HTMLElement[]
@@ -13,6 +14,7 @@ export default class extends Controller<HTMLElement> {
   declare deliveryValue: string
   declare daysValue: number
   declare dataValue: string
+  declare regionValue: string
 
   connect(): void {
     console.log("SimCardFilter connected")
