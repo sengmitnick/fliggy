@@ -1,7 +1,3 @@
-# 清理现有数据
-BusTicket.destroy_all
-
-
 # 热门路线数据
 routes = [
   # 深圳 -> 广州
@@ -187,3 +183,82 @@ night_buses_data = []
 end
 
 BusTicket.insert_all(night_buses_data) if night_buses_data.any?
+
+# ==================== 补充: 杭州→上海晚班车 (bus_tickets_supplement) ====================
+puts "\n[补充] 杭州→上海晚班车..."
+
+# 晚班车时间段（18:00之后）
+evening_time_slots = [
+  "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"
+]
+
+# 杭州→上海的车站配置
+stations_hz_sh = [
+  { dep: "杭州汽车客运中心站", arr: "上海汽车客运总站", desc: "高速直达" },
+  { dep: "杭州汽车南站", arr: "上海南站长途汽车站", desc: "快速班线" },
+  { dep: "杭州汽车西站", arr: "上海虹桥汽车站", desc: "商务班车" },
+  { dep: "杭州萧山国际机场", arr: "上海浦东机场", desc: "机场专线" }
+]
+
+# 价格范围
+evening_price_range = (55..90)
+
+# 座位类型
+evening_seat_types = ["普通座", "商务座", "豪华座"]
+
+# 批量准备晚班车数据
+evening_tickets_data = []
+
+# 为未来7天生成晚班车
+(0..6).each do |day_offset|
+  date = Date.today + day_offset.days
+  
+  stations_hz_sh.each do |station|
+    # 每个站点选择几个晚班时间段
+    selected_times = evening_time_slots.sample(rand(4..6))
+    
+    selected_times.each do |dep_time|
+      # 计算到达时间（随机2-3小时后）
+      dep = Time.parse(dep_time)
+      duration_hours = rand(2.0..3.0)
+      arr = dep + duration_hours.hours
+      arr_time = if arr.hour >= 24
+        (arr - 1.day).strftime("%H:%M")
+      else
+        arr.strftime("%H:%M")
+      end
+      
+      # 随机价格
+      base_price = rand(evening_price_range)
+      # 晚班车价格稍贵5-10%
+      base_price = (base_price * 1.08).round
+      
+      evening_tickets_data << {
+        origin: "杭州",
+        destination: "上海",
+        departure_date: date,
+        departure_time: dep_time,
+        arrival_time: arr_time,
+        price: base_price,
+        status: "available",
+        seat_type: evening_seat_types.sample,
+        departure_station: station[:dep],
+        arrival_station: station[:arr],
+        route_description: station[:desc],
+        data_version: 0,
+        created_at: timestamp,
+        updated_at: timestamp
+      }
+    end
+  end
+end
+
+# 批量插入所有数据
+if evening_tickets_data.any?
+  BusTicket.insert_all(evening_tickets_data)
+  puts "   ✓ 杭州→上海晚班车: #{evening_tickets_data.count} 个班次"
+else
+  puts "   ⚠️ 没有数据需要创建"
+end
+
+puts "\n✅ bus_tickets_v1 数据包加载完成！"

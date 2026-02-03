@@ -29,6 +29,8 @@
         <%= f.hidden_field :rooms, value: @rooms %>
         <%= f.hidden_field :adults, value: @adults %>
         <%= f.hidden_field :children, value: @children %>
+        <%= f.hidden_field :type, value: @type if @type.present? %>
+        <%= f.hidden_field :room_category, value: @category if @category.present? %>
         <!-- 清除按钮 -->
         <% if params[:q].present? %>
           <div class="bg-gray-200 rounded-full p-0.5 ml-1 cursor-pointer" onclick="this.closest('form').querySelector('[name=q]').value=''; this.closest('form').submit();">
@@ -72,7 +74,9 @@
        data-hotel-search-filter-district-value="<%= params[:district] || '' %>" 
        data-hotel-search-filter-price-range-value="<%= params[:price_range] || '' %>" 
        data-hotel-search-filter-stars-value="<%= params[:star_level] || '' %>"
-       data-hotel-search-filter-brand-value="<%= params[:brand] || '' %>">
+       data-hotel-search-filter-brand-value="<%= params[:brand] || '' %>"
+       data-hotel-search-filter-type-value="<%= @type || '' %>"
+       data-hotel-search-filter-room-category-value="<%= @category || '' %>">
     
     <!-- 排序按钮 -->
     <button type="button" 

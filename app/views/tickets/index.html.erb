@@ -60,27 +60,7 @@
 
   <!-- Tab导航 -->
   <div class="bg-gray-100 px-4">
-    <div class="flex space-x-6 text-sm overflow-x-auto hide-scrollbar">
-      <% 
-        tabs = [
-          { label: '全部景点', value: nil },
-          { label: '景酒套餐', value: 'hotel_package' },
-          { label: '当地体验', value: 'experience' },
-          { label: '一日游', value: 'day_tour' },
-          { label: '包车游', value: 'charter' }
-        ]
-      %>
-      <% tabs.each do |tab| %>
-        <% is_active = params[:tab] == tab[:value] || (params[:tab].nil? && tab[:value].nil?) %>
-        <%= link_to tickets_path(city: @city, tab: tab[:value], sort_by: @sort_by, tag: @selected_tag),
-            class: "relative pb-2 whitespace-nowrap #{is_active ? 'font-bold text-black' : 'text-gray-600'}" do %>
-          <span><%= tab[:label] %></span>
-          <% if is_active %>
-            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-black"></div>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
+    
   </div>
 
   <!-- 筛选栏 -->

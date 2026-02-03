@@ -25,9 +25,6 @@ tour_group_product ||= TourGroupProduct.where("destination LIKE '%深圳%'").fir
 hotel_package = HotelPackage.first
 
 if tour_group_product && hotel_package
-  # 清理旧的直播间商品数据
-  LiveProduct.where(live_room_name: "旅游环境01 直播间").destroy_all
-  
   # 创建直播间商品关联
   live_products_data = [
     {

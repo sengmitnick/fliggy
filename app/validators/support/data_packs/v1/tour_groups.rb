@@ -5,11 +5,7 @@
 # 加载图片辅助工具
 require_relative '../../../../../app/helpers/image_seed_helper'
 
-puts "🧹 清理旧数据..."
-TourItineraryDay.destroy_all
-TourPackage.destroy_all
-TourGroupProduct.destroy_all
-TravelAgency.destroy_all
+puts "🎫 正在加载旅游产品数据包..."
 
 timestamp = Time.current
 
@@ -529,3 +525,114 @@ puts "  总行程数: #{TourItineraryDay.count}"
 puts "  - 平均每产品: #{(TourItineraryDay.count.to_f / TourGroupProduct.count).round(1)}天行程"
 
 puts "\n✅ 旅游产品数据包加载完成！"
+
+# ==================== 补充：三亚6天5晚跟团游 (tour_groups_supplement) ====================
+puts "\n🏖️ 补充三亚6天5晚跟团游产品..."
+
+timestamp_supplement = Time.current
+
+# 查找或创建海南椰风假期旅行社（如果不存在）
+agency_hainan = TravelAgency.find_or_create_by(name: "海南椰风假期") do |a|
+  a.rating = 4.9
+  a.sales_count = 6500
+  a.is_verified = true
+  a.created_at = timestamp_supplement
+  a.updated_at = timestamp_supplement
+end
+
+# 补充三亚6天5晚跟团游产品
+sanya_6day_products_data = []
+
+['三亚', '海口', '广州', '深圳'].each do |departure_city|
+  3.times do |i|
+    base_price = rand(3288..5088)
+    original_price = (base_price * rand(1.15..1.35)).to_i
+    
+    attractions = ['蜈支洲岛', '亚龙湾', '天涯海角', '南山寺', '呀诺达雨林', '大小洞天'].sample(4)
+    
+    title = "【精品小团】三亚#{attractions.join('+')} 6天5晚 #{rand(6..10)}人团 含酒店·含餐食·含门票"
+    subtitle = [attractions.first, '纯玩团', '无购物'].join('·')
+    
+    sanya_6day_products_data << {
+      title: title,
+      subtitle: subtitle,
+      destination: "三亚",
+      departure_city: departure_city,
+      tour_category: 'group_tour',
+      travel_type: '跟团游',
+      duration: 6,
+      badge: "多日游·#{rand(6..10)}人团",
+      price: base_price,
+      original_price: original_price,
+      rating: [4.7, 4.8, 4.9, 5.0].sample,
+      rating_desc: "#{rand(50..500)}条评价",
+      sales_count: rand(100..1000),
+      highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'].sample(rand(2..3)),
+      tags: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物', '深度游览'].sample(rand(3..5)),
+      departure_label: "#{departure_city}出发",
+      is_featured: i == 0,
+      display_order: 0,
+      image_url: ImageSeedHelper.random_image_from_category(:tours),
+      travel_agency_id: agency_hainan.id,
+      data_version: 0,
+      created_at: timestamp_supplement,
+      updated_at: timestamp_supplement
+    }
+  end
+end
+
+TourGroupProduct.insert_all(sanya_6day_products_data) if sanya_6day_products_data.any?
+puts "✓ 添加了 #{sanya_6day_products_data.count} 个三亚6天5晚跟团游产品"
+
+# 为新产品创建套餐
+sanya_packages_data = []
+
+TourGroupProduct.where(destination: "三亚", duration: 6, data_version: 0)
+  .where("created_at >= ?", timestamp_supplement - 1.minute)
+  .find_each do |product|
+  # 每个产品生成2-3个套餐
+  packages_count = rand(2..3)
+  
+  packages_count.times do |i|
+    base_price = product.price
+    
+    package_price = case i
+    when 0 then base_price
+    when 1 then (base_price * rand(1.2..1.4)).to_i
+    when 2 then (base_price * rand(1.5..1.8)).to_i
+    end
+    
+    child_price = (package_price * rand(0.6..0.8)).to_i
+    
+    package_names = case i
+    when 0 then ['基础套餐', '经济套餐', '标准套餐']
+    when 1 then ['豪华套餐', '高级套餐', '优选套餐']
+    when 2 then ['至尊套餐', '尊享套餐', 'VIP套餐']
+    end
+    
+    description = case i
+    when 0
+      "✓ 三星级酒店住宿\n✓ 包含早餐\n✓ 景点首道门票\n✓ 旅游大巴接送\n✓ 专业导游服务"
+    when 1
+      "✓ 四星级酒店住宿\n✓ 包含早餐+午餐\n✓ 景点门票+特色体验\n✓ 豪华旅游大巴\n✓ 金牌导游服务\n✓ 赠送旅游意外险"
+    when 2
+      "✓ 五星级酒店住宿\n✓ 包含三餐(含特色餐)\n✓ 景点VIP通道+深度体验\n✓ 商务车接送\n✓ 资深导游一对一服务\n✓ 赠送旅游意外险+旅拍服务"
+    end
+    
+    sanya_packages_data << {
+      tour_group_product_id: product.id,
+      name: package_names.sample,
+      price: package_price,
+      child_price: child_price,
+      description: description,
+      is_featured: i == 0,
+      created_at: timestamp_supplement,
+      updated_at: timestamp_supplement
+    }
+  end
+end
+
+TourPackage.insert_all(sanya_packages_data) if sanya_packages_data.any?
+puts "✓ 为三亚产品添加了 #{sanya_packages_data.count} 个套餐"
+
+puts "\n✅ 三亚6天5晚补充数据加载完成！"

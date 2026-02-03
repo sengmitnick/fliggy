@@ -1577,3 +1577,199 @@ end
 Flight.insert_all(layover_flights_sh_to_hz)
 
 puts "  - 上海→杭州中转航班(18:00出发): 每天1个航班（共 #{layover_flights_sh_to_hz.count} 个）"
+
+# ==================== 补充路线: 深圳→杭州 (flights_supplement) ====================
+puts "\n[补充] 深圳→杭州 航班..."
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flights_sz_to_hz = [
+    {
+      departure_city: "深圳",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 8, min: 30),
+      arrival_time: base_datetime.change(hour: 10, min: 45),
+      departure_airport: "宝安T3",
+      arrival_airport: "萧山T3",
+      airline: "深圳航空",
+      flight_number: "ZH#{9201 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 850.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 150,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "深圳",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 13, min: 0),
+      arrival_time: base_datetime.change(hour: 15, min: 20),
+      departure_airport: "宝安T3",
+      arrival_airport: "萧山T3",
+      airline: "东方航空",
+      flight_number: "MU#{5701 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 920.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "深圳",
+      destination_city: "杭州",
+      departure_time: base_datetime.change(hour: 17, min: 30),
+      arrival_time: base_datetime.change(hour: 19, min: 50),
+      departure_airport: "宝安T3",
+      arrival_airport: "萧山T3",
+      airline: "厦门航空",
+      flight_number: "MF#{8301 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 880.0,
+      discount_price: 30.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_sz_to_hz)
+end
+
+Flight.insert_all(all_flights) if all_flights.any?
+puts "   ✓ 深圳→杭州: #{all_flights.count} 个航班"
+
+# ==================== 补充路线: 杭州→深圳 经济舱 (flights_supplement) ====================
+puts "\n[补充] 杭州→深圳 航班..."
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.current).to_i
+  
+  flights_hz_to_sz = [
+    {
+      departure_city: "杭州",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 7, min: 45),
+      arrival_time: base_datetime.change(hour: 10, min: 10),
+      departure_airport: "萧山T3",
+      arrival_airport: "宝安T3",
+      airline: "春秋航空",
+      flight_number: "9C#{8901 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 650.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 180,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "杭州",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 11, min: 30),
+      arrival_time: base_datetime.change(hour: 14, min: 0),
+      departure_airport: "萧山T3",
+      arrival_airport: "宝安T3",
+      airline: "吉祥航空",
+      flight_number: "HO#{1501 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 720.0,
+      discount_price: 20.0,
+      seat_class: "economy",
+      available_seats: 150,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "杭州",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 15, min: 0),
+      arrival_time: base_datetime.change(hour: 17, min: 30),
+      departure_airport: "萧山T3",
+      arrival_airport: "宝安T3",
+      airline: "南方航空",
+      flight_number: "CZ#{3601 + day_suffix}",
+      aircraft_type: "空客321(中)",
+      price: 800.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "杭州",
+      destination_city: "深圳",
+      departure_time: base_datetime.change(hour: 19, min: 15),
+      arrival_time: base_datetime.change(hour: 21, min: 45),
+      departure_airport: "萧山T3",
+      arrival_airport: "宝安T3",
+      airline: "东方航空",
+      flight_number: "MU#{5801 + day_suffix}",
+      aircraft_type: "波音737(中)",
+      price: 780.0,
+      discount_price: 30.0,
+      seat_class: "economy",
+      available_seats: 100,
+      flight_date: date,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_hz_to_sz)
+end
+
+Flight.insert_all(all_flights) if all_flights.any?
+puts "   ✓ 杭州→深圳: #{all_flights.count} 个航班"
+
+# ==================== Phase 2字段更新 (flights_phase2_fields_update) ====================
+puts "\n[Phase 2] 更新航班字段..."
+
+flights = Flight.where(data_version: 0).to_a
+puts "   找到 #{flights.count} 个航班需要更新"
+
+flights.each_slice(100) do |batch|
+  updates = batch.map do |flight|
+    is_major_airline = ['国航', '东航', '南航', '海航'].any? { |name| flight.airline&.include?(name) }
+    is_premium = flight.price.to_f >= 1500
+    
+    {
+      id: flight.id,
+      baggage_allowance: is_premium ? '托运行李2件(每件23kg)' : '托运行李1件(23kg)',
+      refund_policy: is_premium ? '可免费改签，退票收5%手续费' : '改签收50元，退票收10%手续费',
+      meal_service: is_premium ? '含飞机餐+饮料' : '含简餐',
+      mileage_accrual: is_major_airline ? '可累积里程' : '不可累积',
+      is_direct: flight.stops.nil? ? true : (flight.stops == 0),
+      stops: flight.stops || 0
+    }
+  end
+  
+  Flight.upsert_all(updates, unique_by: :id)
+end
+
+puts "   ✓ 已更新 #{flights.count} 个航班的Phase 2字段"
+
+puts "\n✅ flights_v1 数据包加载完成！"

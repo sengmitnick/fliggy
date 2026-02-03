@@ -28,9 +28,6 @@ brands = [
 
 regions = ["全国通用", "华东地区", "华南地区", "华北地区", "西南地区", "华中地区"]
 
-# 清理现有数据（仅限 data_version=0）
-HotelPackage.where(data_version: 0).destroy_all
-
 # 准备批量插入数据
 hotel_packages = []
 current_time = Time.current
