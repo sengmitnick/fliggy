@@ -1,0 +1,97 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+# Path to your application root.
+APP_ROOT = File.expand_path('..', __dir__)
+
+def system!(*args)
+  system(*args) || abort("\n== Command #{args} failed ==")
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "\n=========================================="
+  puts "🔄 线程环境初始化开始..."
+  puts "==========================================\n"
+
+  # Step 1: 确保拉取最新代码
+  puts "📥 [1/3] 拉取最新代码..."
+  
+  # 获取当前分支名
+  current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+  puts "   当前分支: #{current_branch}"
+  
+  # 获取主干分支名（优先级：main > master > develop）
+  main_branch = nil
+  ['main', 'master', 'develop'].each do |branch|
+    if system("git show-ref --verify --quiet refs/remotes/origin/#{branch}")
+      main_branch = branch
+      break
+    end
+  end
+  
+  if main_branch
+    puts "   主干分支: origin/#{main_branch}"
+    
+    # Fetch 最新代码
+    system! "git fetch origin #{main_branch}"
+    
+    # 检查是否需要合并
+    local_commit = `git rev-parse HEAD`.strip
+    remote_commit = `git rev-parse origin/#{main_branch}`.strip
+    
+    if local_commit != remote_commit
+      puts "   检测到主干有更新，开始合并..."
+      
+      # 尝试 merge（保留当前分支的提交历史）
+      if system("git merge origin/#{main_branch} --no-edit")
+        puts "   ✓ 成功合并主干最新代码"
+      else
+        puts "   ⚠️  合并失败，尝试 rebase..."
+        system("git merge --abort 2>/dev/null")
+        
+        if system("git rebase origin/#{main_branch}")
+          puts "   ✓ 成功 rebase 到主干最新代码"
+        else
+          puts "   ❌ 代码合并失败，请手动解决冲突"
+          system("git rebase --abort 2>/dev/null")
+          abort("\n== 请手动解决代码冲突后重试 ==")
+        end
+      end
+      
+      # 推送更新后的分支（如果有上游跟踪）
+      upstream = `git rev-parse --abbrev-ref @{u} 2>/dev/null`.strip
+      if !upstream.empty?
+        puts "   推送更新到远程..."
+        system("git push origin #{current_branch} 2>/dev/null || true")
+      end
+    else
+      puts "   ✓ 代码已是最新"
+    end
+  else
+    puts "   ⚠️  未找到主干分支（main/master/develop），跳过代码同步"
+  end
+
+  # Step 2: 安装依赖
+  puts "\n📦 [2/3] 安装依赖..."
+  puts "   Ruby gems..."
+  system! "bundle install"
+  puts "   NPM packages..."
+  system! "npm install"
+
+  # Step 3: 初始化数据库
+  puts "\n📊 [3/3] 初始化数据库..."
+  system! "bin/db_init"
+
+  puts "\n=========================================="
+  puts "✅ 线程环境初始化完成！"
+  puts "==========================================\n"
+  puts "📝 环境信息："
+  puts "   分支: #{current_branch}"
+  puts "   提交: #{`git rev-parse --short HEAD`.strip}"
+  puts "   主干: #{main_branch || '未知'}"
+  puts ""
+  puts "📝 后续操作："
+  puts "   启动服务: bin/dev"
+  puts "   运行测试: rake test"
+  puts ""
+end
