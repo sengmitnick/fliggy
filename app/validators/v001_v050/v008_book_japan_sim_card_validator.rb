@@ -2,18 +2,18 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 购买日本7天无限流量SIM卡（数量1张）
+# 验证用例: 购买日本7天无限量流量SIM卡（数量1张）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索日本地区的SIM卡，
-#   找到有效期为7天且流量无限的产品，购买数量1张并成功创建订单
+#   找到有效期为7天且流量为"无限量"的产品，购买数量1张并成功创建订单
 # 
 # 评分标准:
 #   - 订单已创建 (15分)
 #   - 订单类型正确（SIM卡） (15分)
 #   - 地区正确（日本） (15分)
 #   - 有效期正确（7天） (15分)
-#   - 流量正确（无限） (15分)
+#   - 流量正确（无限量） (15分)
 #   - 购买数量正确（1张） (25分)
 # 
 # 使用方法:
@@ -28,17 +28,17 @@ module V001V050
   class V008BookJapanSimCardValidator < BaseValidator
     self.validator_id = 'v008_book_japan_sim_card_validator'
     self.task_id = '7a5cf48f-838f-4e29-a0e1-4dd67250b0d9'
-    self.title = '购买日本7天无限流量SIM卡（数量1张）'
-    self.description = '搜索日本地区的SIM卡，找到7天有效期且流量无限的产品并购买1张'
+    self.title = '购买日本7天无限量流量SIM卡（数量1张）'
+    self.description = '搜索日本地区的SIM卡，找到7天有效期且流量为"无限量"的产品并购买1张'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
     def prepare
       # 数据已通过 load_all_data_packs 自动加载
-      # 注意：现有数据包只有香港地区数据，需要创建日本地区数据
+      # 注意：日本地区数据已在 internet_services.rb 数据包中创建
       @region = '日本'
       @validity_days = 7
-      @data_limit_keyword = '无限'
+      @data_limit_keyword = '无限量'  # 实际数据格式: "无限量"
       @quantity = 1
     
       # 查找符合条件的SIM卡（注意：查询基线数据 data_version=0）
@@ -52,10 +52,10 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请购买一张日本7天无限流量的SIM卡（数量1张）",
+        task: "请购买一张日本7天无限量流量的SIM卡（数量1张）",
         region: @region,
         validity_days: @validity_days,
-        data_requirement: "无限流量",
+        data_requirement: "无限量",
         quantity: @quantity,
         hint: "系统中有多款SIM卡可选，请找到符合要求的产品",
         matching_count: @matching_count
@@ -91,8 +91,8 @@ module V001V050
           "有效期不正确。预期: #{@validity_days}天, 实际: #{sim_card.validity_days}天"
       end
     
-      # 断言5: 流量正确（包含"无限"关键词）
-      add_assertion "流量正确（无限）", weight: 15 do
+      # 断言5: 流量正确（包含"无限量"关键词）
+      add_assertion "流量正确（无限量）", weight: 15 do
         sim_card = @order.orderable
         expect(sim_card.data_limit).to include(@data_limit_keyword),
           "流量不符合要求。预期包含: #{@data_limit_keyword}, 实际: #{sim_card.data_limit}"
@@ -127,7 +127,7 @@ module V001V050
       @matching_count = data['matching_count']
     end
   
-    # 模拟 AI Agent 操作：购买日本7天无限流量SIM卡
+    # 模拟 AI Agent 操作：购买日本7天无限量流量SIM卡
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

@@ -67,10 +67,13 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 必须有订单创建（使用data_version隔离会话）
       add_assertion "订单已创建", weight: 20 do
-        @internet_order = InternetOrder.order(created_at: :desc).first
-        expect(@internet_order).not_to be_nil, "未找到任何境外上网订单记录"
+        @internet_order = InternetOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        expect(@internet_order).not_to be_nil, "未找到任何境外上网订单记录（data_version: #{@data_version}）"
       end
     
       return unless @internet_order # 如果没有订单，后续断言无法继续
@@ -141,7 +144,8 @@ module V051V100
       hk_wifis = wifis.where(region: "中国香港")
       cheapest_wifi = hk_wifis.min_by(&:daily_price)
     
-      start_date = Date.current + 7.days
+      # 使用Date.today避免时区问题
+      start_date = Date.today + 7.days
       end_date = start_date + (@rental_days - 1).days
     
       # 创建测试用户（如果不存在）
@@ -172,7 +176,7 @@ module V051V100
           name: "张三",
           phone: "13800138000"
         },
-        data_version: 999
+        data_version: @data_version
       )
     end
     end

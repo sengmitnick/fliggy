@@ -169,29 +169,49 @@
           </label>
         </div>
 
-        <!-- Avatar -->
+        <!-- Venue -->
         <div class="mb-4">
-          <%= form.label :avatar, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
-            Avatar
+          <%= form.label :venue, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Venue
           <% end %>
-          <%= form.file_field :avatar, {
-            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          <%= form.text_field :venue, {
+            placeholder: "Enter venue...",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
           } %>
-          <% if @deep_travel_guide.errors[:avatar].any? %>
-            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:avatar].first %></p>
+          <% if @deep_travel_guide.errors[:venue].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:venue].first %></p>
           <% end %>
         </div>
 
-        <!-- Video -->
+        <!-- Avatar URL -->
+        <!-- Avatar URL -->
         <div class="mb-4">
-          <%= form.label :video, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
-            Video
+          <%= form.label :avatar_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Avatar URL
           <% end %>
-          <%= form.file_field :video, {
-            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          <%= form.text_field :avatar_url, {
+            placeholder: "https://example.com/avatar.jpg",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
           } %>
-          <% if @deep_travel_guide.errors[:video].any? %>
-            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:video].first %></p>
+          <p class="text-sm text-gray-500 mt-1">Enter the full URL to the avatar image</p>
+          <% if @deep_travel_guide.errors[:avatar_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:avatar_url].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Video URL -->
+        <!-- Video URL -->
+        <div class="mb-4">
+          <%= form.label :video_url, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" do %>
+            Video URL
+          <% end %>
+          <%= form.text_field :video_url, {
+            placeholder: "https://example.com/video.mp4",
+            class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-50"
+          } %>
+          <p class="text-sm text-gray-500 mt-1">Enter the full URL to the video file</p>
+          <% if @deep_travel_guide.errors[:video_url].any? %>
+            <p class="text-sm text-red-500 mt-1"><%= @deep_travel_guide.errors[:video_url].first %></p>
           <% end %>
         </div>
 

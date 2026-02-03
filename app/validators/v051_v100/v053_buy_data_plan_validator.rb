@@ -2,21 +2,31 @@
 
 require_relative '../base_validator'
 
-# 验证用例53: 购买日本天包流量中最便宜的流量包
+# 验证用例53: 购买日本天包漫游流量中最便宜的流量包
+# 
+# ⚠️ 重要说明:
+#   本验证器测试的是 InternetDataPlan（漫游流量包），NOT InternetSimCard（SIM卡）
+#   订单类型必须是 order_type='data_plan'，orderable_type='InternetDataPlan'
+#   
+#   InternetDataPlan = 运营商漫游流量包（如中国电信境外漫游包）
+#   InternetSimCard = 境外当地SIM卡（如日本SIM卡）
+#   两者是不同的产品类型！
 # 
 # 任务描述:
-#   搜索日本流量包 → 筛选天包类型 → 对比价格 → 选最便宜的 → 填写手机号 → 创建订单
+#   搜索日本漫游流量包 → 筛选天包类型 → 对比价格 → 选最便宜的 → 填写手机号 → 创建订单
 #   
-#   包含三种套餐类型:
+#   包含三种套餐类型（InternetDataPlan的plan_type字段）:
 #   - 天包: 按天计费，如日本1天(28元)、3天(68元)、7天(128元)
 #   - 月包: 按月计费，如香港30天(288元)、60天(528元)、90天(788元)
 #   - 语音包: 语音通话包，如香港语音包100分钟(68元)、日本语音包100分钟(88元)
 #   
-#   筛选条件: region='日本' AND plan_type='天包'
+#   筛选条件: region='日本' AND plan_type='天包' AND data_version=0（基线数据）
 #   最便宜: 日本1天漫游包，28元（天包类型）
 #   运营商: 中国电信 180 2712 8600
 #   流量: 0.5GB/天，4G/5G漫游
 #   手机号: 13800138000
+#   
+#   数据隔离: 使用data_version字段标记当前验证会话的订单，避免跨会话数据污染
 # 
 # 操作步骤:
 #   1. 浏览日本流量包: 筛选天包类型
@@ -26,10 +36,10 @@ require_relative '../base_validator'
 #   5. 计算总价: 28×1=28元
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
+#   - 订单已创建（使用data_version隔离会话） (20分)
 #   - 订单类型=data_plan (15分)
 #   - 选了具体流量包产品 (15分)
-#   - 选了日本天包中最便宜的28元日本1天漫游包 (30分)
+#   - 选了日本天包中最便宜的28元日本1天漫游包（基于data_version=0的基线数据） (30分)
 #   - 总价=28元 (20分)
 # 
 # 使用方法:
@@ -44,8 +54,8 @@ module V051V100
   class V053BuyDataPlanValidator < BaseValidator
     self.validator_id = 'v053_buy_data_plan_validator'
     self.task_id = '22f7ecf1-8018-4a3f-8c00-f6fce7bee108'
-    self.title = '购买日本天包流量中最便宜的流量包'
-    self.description = '需要搜索日本流量包产品，筛选天包类型，选择价格最低的套餐（28元）并成功创建订单'
+    self.title = '购买日本天包漫游流量中最便宜的流量包'
+    self.description = '需要搜索日本漫游流量包产品（InternetDataPlan），筛选天包类型，选择价格最低的套餐（28元）并成功创建订单。注意：这是漫游流量包，不是SIM卡！'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -64,35 +74,44 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "购买日本天包流量: 1份、选最便宜的、填手机号",
+        task: "购买日本天包漫游流量: 1份、选最便宜的、填手机号",
+        product_type: "InternetDataPlan（漫游流量包，NOT SIM卡）",
+        order_type_expected: "data_plan",
         region: @region,
         plan_type: @plan_type,
         quantity: @quantity,
-        hint: "从日本天包类型流量包中选择价格最低的套餐(28元，日本1天漫游包)。手机号: 13800138000",
+        hint: "从日本天包类型漫游流量包（InternetDataPlan）中选择价格最低的套餐(28元，日本1天漫游包)。这是运营商漫游包，不是境外SIM卡。手机号: 13800138000",
         available_data_plans_count: @available_data_plans.count
       }
     end
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 必须有订单创建（使用data_version隔离当前会话的订单）
       add_assertion "订单已创建", weight: 20 do
-        @internet_order = InternetOrder.order(created_at: :desc).first
-        expect(@internet_order).not_to be_nil, "未找到任何境外上网订单记录"
+        @internet_order = InternetOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        expect(@internet_order).not_to be_nil, "未找到任何境外上网订单记录（data_version: #{@data_version}）"
       end
     
       return unless @internet_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 订单类型正确
+      # 断言2: 订单类型正确（必须是data_plan，不是sim_card）
       add_assertion "订单类型正确（data_plan）", weight: 15 do
         actual_type = @internet_order.order_type
         expect(actual_type).to eq('data_plan'),
-          "订单类型错误。期望: data_plan, 实际: #{actual_type}"
+          "订单类型错误。期望: data_plan（漫游流量包），实际: #{actual_type}。" \
+          "注意：InternetDataPlan使用order_type='data_plan'，InternetSimCard使用'sim_card'"
       end
     
-      # 断言3: 选择了具体的流量包产品
+      # 断言3: 选择了具体的漫游流量包产品（InternetDataPlan）
       add_assertion "选择了具体的流量包产品", weight: 15 do
-        expect(@internet_order.orderable_type).to eq('InternetDataPlan'), "未选择流量包产品（orderable_type错误）"
+        expect(@internet_order.orderable_type).to eq('InternetDataPlan'), 
+          "未选择流量包产品（orderable_type错误）。" \
+          "期望: InternetDataPlan（漫游流量包），实际: #{@internet_order.orderable_type}。" \
+          "注意：不要选择InternetSimCard（SIM卡）"
         expect(@internet_order.orderable_id).not_to be_nil, "未选择具体的流量包产品（orderable_id为空）"
         expect(@internet_order.orderable).not_to be_nil, "流量包产品记录不存在"
       end
@@ -164,10 +183,10 @@ module V051V100
   
     # 模拟 AI Agent 操作：购买日本天包流量，选择最便宜的
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户（数据包中已创建，使用基线数据data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找日本天包流量包产品
+      # 2. 查找日本天包流量包产品（筛选基线数据data_version=0）
       available_data_plans = InternetDataPlan.where(
         region: @region,
         plan_type: @plan_type,
@@ -184,7 +203,7 @@ module V051V100
       # 4. 计算总价：单价 × 数量
       total_price = cheapest_data_plan.price * @quantity
     
-      # 5. 创建境外上网订单
+      # 5. 创建境外上网订单（使用data_version标记当前会话）
       internet_order = InternetOrder.create!(
         user_id: user.id,
         orderable_type: 'InternetDataPlan',
@@ -201,7 +220,8 @@ module V051V100
           validity_days: cheapest_data_plan.validity_days,
           unit_price: cheapest_data_plan.price.to_f
         }),
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

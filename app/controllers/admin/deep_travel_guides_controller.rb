@@ -45,6 +45,6 @@ class Admin::DeepTravelGuidesController < Admin::BaseController
   end
 
   def deep_travel_guide_params
-    params.require(:deep_travel_guide).permit(:name, :title, :description, :follower_count, :experience_years, :specialties, :price, :served_count, :rank, :rating, :featured, :avatar, :video)
+    params.require(:deep_travel_guide).permit(:name, :title, :description, :follower_count, :experience_years, :specialties, :price, :served_count, :rank, :rating, :featured, :avatar_url, :video_url, :venue)
   end
 end

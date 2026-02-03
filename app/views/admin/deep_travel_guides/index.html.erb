@@ -40,14 +40,14 @@
                     <%= deep_travel_guide.title %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    <%= if deep_travel_guide.featured
-         content_tag(:span, 'Yes', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800')
-       else
-         content_tag(:span, 'No', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800')
-       end %>
+                    <% if deep_travel_guide.featured %>
+                      <%= content_tag(:span, 'Yes', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800') %>
+                    <% else %>
+                      <%= content_tag(:span, 'No', class: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800') %>
+                    <% end %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    <%= deep_travel_guide.avatar.attached? ? deep_travel_guide.avatar.filename : 'No file' %>
+                    <%= deep_travel_guide.avatar_url.present? ? truncate(deep_travel_guide.avatar_url, length: 30) : 'No URL' %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <%= deep_travel_guide.created_at.strftime("%Y-%m-%d %H:%M") %>
