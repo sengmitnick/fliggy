@@ -127,9 +127,31 @@ module V201V250
       best_rating_upgrade = 0
       min_hotel_rating = @available_hotels.first.rating
       
+      # 尝试航班组合
+      @available_flights.first(10).each do |flight|
+        @available_hotels.each do |hotel|
+          room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+          next unless room
+          
+          total = flight.price + room.price
+          price_increase = total - @base_price
+          
+          # 检查是否在升级预算范围内（±50元）
+          next unless price_increase >= (@upgrade_budget - 50) && price_increase <= (@upgrade_budget + 50)
+          
+          rating_upgrade = hotel.rating - min_hotel_rating
+          next unless rating_upgrade >= 0.1
+          
+          if rating_upgrade > best_rating_upgrade
+            best_rating_upgrade = rating_upgrade
+            best_combo = { type: :flight, transport: flight, hotel: hotel, room: room }
+          end
+        end
+      end
+      
       # 尝试火车组合
-      @available_trains.first(10).each do |train|
-        @available_hotels.first(10).each do |hotel|
+      @available_trains.each do |train|
+        @available_hotels.each do |hotel|
           room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
           next unless room
           
