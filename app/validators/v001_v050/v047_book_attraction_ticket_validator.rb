@@ -14,6 +14,7 @@ require_relative '../base_validator'
 #   3. 需要对比多个供应商的价格（4个供应商）
 #   4. 需要选择价格最低的供应商
 #   5. 需要填写游玩日期（明天）和数量（1张）
+#   6. 需要区分平日票和周末票（根据游玩日期）
 #   ❌ 不能一次性提供：需要先搜索景点→选择票种→对比供应商→预订
 # 
 # 评分标准:
@@ -59,12 +60,21 @@ module V001V050
         data_version: 0
       )
     
-      # 查找成人票中最便宜的供应商（通过 ticket_suppliers 关联）
-      # 获取所有成人票的供应商，找到价格最低的
+      # 判断是否为周末（周六=6, 周日=0）
+      @is_weekend = [0, 6].include?(@visit_date.wday)
+      @date_type_keyword = @is_weekend ? '周末' : '平日'
+    
+      # 过滤出对应的票种（平日或周末）
+      @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
+    
+      # 如果没有区分平日/周末的票，则使用所有成人票
+      @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
+    
+      # 查找适用票种中最便宜的供应商（通过 ticket_suppliers 关联）
       cheapest_supplier = nil
       min_price = Float::INFINITY
     
-      @adult_tickets.each do |ticket|
+      @applicable_tickets.each do |ticket|
         ticket.ticket_suppliers.where(data_version: 0).each do |ts|
           if ts.current_price < min_price
             min_price = ts.current_price
@@ -77,15 +87,16 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订明天（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的成人票1张，选择最便宜的供应商",
+        task: "请预订明天（#{@visit_date.strftime('%Y年%m月%d日')}#{@is_weekend ? '，周末' : ''}）#{@attraction_name}的成人票1张，选择最便宜的供应商",
         attraction_name: @attraction_name,
         ticket_type: "成人票",
         visit_date: @visit_date.to_s,
         date_description: "明天（#{@visit_date.strftime('%Y年%m月%d日')}）",
+        date_type: @date_type_keyword,
         quantity: @quantity,
-        hint: "系统中有多个供应商提供该景点门票，请对比价格后选择最便宜的",
+        hint: "系统中有多个供应商提供该景点门票，请对比价格后选择最便宜的#{@date_type_keyword}票",
         available_attractions_count: Attraction.where(data_version: 0).count,
-        ticket_types_count: @adult_tickets.count
+        ticket_types_count: @applicable_tickets.count
       }
     end
   
@@ -124,9 +135,18 @@ module V001V050
     
       # 断言5: 选择了最便宜的供应商（核心评分项）
       add_assertion "选择了最便宜的供应商", weight: 25 do
-        # 获取所有成人票的供应商价格
+        # 判断游玩日期是否为周末
+        is_weekend = [0, 6].include?(@visit_date.wday)
+        date_type_keyword = is_weekend ? '周末' : '平日'
+      
+        # 过滤出适用的票种（平日或周末）
+        applicable_tickets = @adult_tickets.select { |t| t.name.include?(date_type_keyword) }
+        # 如果没有区分平日/周末的票，则使用所有成人票
+        applicable_tickets = @adult_tickets if applicable_tickets.empty?
+      
+        # 获取适用票种的所有供应商价格
         all_prices = []
-        @adult_tickets.each do |ticket|
+        applicable_tickets.each do |ticket|
           ticket.ticket_suppliers.where(data_version: 0).each do |ts|
             all_prices << { 
               ticket_id: ticket.id,
@@ -155,7 +175,7 @@ module V001V050
                        @ticket_order.supplier_id == cheapest[:supplier_id])
       
         expect(is_cheapest).to be_truthy,
-          "未选择最便宜的供应商。" \
+          "未选择最便宜的供应商（#{date_type_keyword}票中）。" \
           "应选: #{cheapest[:supplier_name]}（#{cheapest[:ticket_name]}，#{cheapest[:price]}元），" \
           "实际选择: #{actual_supplier}（#{@ticket_order.ticket.name}，#{actual_price}元）"
       end
@@ -171,7 +191,9 @@ module V001V050
         visit_date: @visit_date.to_s,
         quantity: @quantity,
         attraction_id: @attraction&.id,
-        best_ticket_supplier_id: @best_ticket_supplier&.id
+        best_ticket_supplier_id: @best_ticket_supplier&.id,
+        is_weekend: @is_weekend,
+        date_type_keyword: @date_type_keyword
       }
     end
   
@@ -183,6 +205,8 @@ module V001V050
       @quantity = data['quantity']
       @attraction = Attraction.find_by(id: data['attraction_id']) if data['attraction_id']
       @best_ticket_supplier = TicketSupplier.find_by(id: data['best_ticket_supplier_id']) if data['best_ticket_supplier_id']
+      @is_weekend = data['is_weekend']
+      @date_type_keyword = data['date_type_keyword']
     
       # 重新加载成人票列表
       if @attraction
@@ -191,6 +215,9 @@ module V001V050
           ticket_type: @ticket_type,
           data_version: 0
         )
+        # 重新过滤适用票种
+        @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
+        @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
       end
     end
   
@@ -209,11 +236,17 @@ module V001V050
         data_version: 0
       )
     
-      # 4. 找到价格最低的供应商
+      # 4. 判断是否为周末，过滤适用票种
+      is_weekend = [0, 6].include?(@visit_date.wday)
+      date_type_keyword = is_weekend ? '周末' : '平日'
+      applicable_tickets = adult_tickets.select { |t| t.name.include?(date_type_keyword) }
+      applicable_tickets = adult_tickets if applicable_tickets.empty?
+    
+      # 5. 找到价格最低的供应商
       cheapest_supplier = nil
       min_price = Float::INFINITY
     
-      adult_tickets.each do |ticket|
+      applicable_tickets.each do |ticket|
         ticket.ticket_suppliers.where(data_version: 0).each do |ts|
           if ts.current_price < min_price
             min_price = ts.current_price
@@ -224,7 +257,7 @@ module V001V050
     
       raise "未找到可用的门票供应商" unless cheapest_supplier
     
-      # 5. 创建门票订单
+      # 6. 创建门票订单
       ticket_order = TicketOrder.create!(
         ticket_id: cheapest_supplier.ticket_id,
         supplier_id: cheapest_supplier.supplier_id,
@@ -248,9 +281,8 @@ module V001V050
         price: cheapest_supplier.current_price,
         visit_date: @visit_date.to_s,
         quantity: @quantity,
-        total_price: ticket_order.total_price,
-        user_email: user.email
+        total_price: ticket_order.total_price
       }
     end
-    end
+  end
 end

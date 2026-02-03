@@ -69,13 +69,15 @@ class InternetOrdersController < ApplicationController
       :quantity, :total_price, :delivery_method,
       delivery_info: [:address_id, :name, :phone, :full_address],
       contact_info: [:name, :phone, :passenger_id],
-      rental_info: [:pickup_date, :return_date, :pickup_location, :days]
+      rental_info: [:pickup_date, :return_date, :pickup_location, :days, :rental_days]
     )
   end
 
   def load_orderable
-    if params[:orderable_type] && params[:orderable_id]
+    if params[:orderable_type].present? && params[:orderable_id].present?
       @orderable = params[:orderable_type].constantize.find(params[:orderable_id])
     end
+  rescue ActiveRecord::RecordNotFound
+    redirect_to internet_services_path, alert: '产品不存在'
   end
 end

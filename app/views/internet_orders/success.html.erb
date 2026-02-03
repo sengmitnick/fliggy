@@ -25,7 +25,7 @@
 
     <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
       <span class="text-gray-600">目的地</span>
-      <span class="font-medium text-gray-900"><%= @order.region %></span>
+      <span class="font-medium text-gray-900"><%= @order.orderable.region %></span>
     </div>
 
     <div class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200">
@@ -74,9 +74,9 @@
       <h3 class="font-bold text-yellow-900 mb-2">📅 租用信息</h3>
       <% rental = @order.rental_info.is_a?(String) ? JSON.parse(@order.rental_info) : @order.rental_info %>
       <p class="text-yellow-800 text-sm">
-        取件日期: <%= rental['pickup_date'] %><br>
-        归还日期: <%= rental['return_date'] %><br>
-        租用天数: <%= rental['days'] %>天
+        取件日期: <%= Date.parse(rental['pickup_date']).strftime('%Y-%m-%d') %><br>
+        归还日期: <%= Date.parse(rental['return_date']).strftime('%Y-%m-%d') %><br>
+        租用天数: <%= rental['rental_days'] || rental['days'] %>天
       </p>
     </div>
   <% end %>

@@ -105,8 +105,8 @@ module V051V100
         wifi = @order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
       
-        rental_info = JSON.parse(@order.rental_info) rescue {}
-        actual_days = rental_info['rental_days']
+        rental_info = @order.rental_info.is_a?(String) ? (JSON.parse(@order.rental_info) rescue {}) : (@order.rental_info || {})
+        actual_days = (rental_info['rental_days'] || rental_info['days']).to_i
       
         expect(@order.quantity).to eq(@quantity),
           "租赁数量不正确。预期: #{@quantity}台, 实际: #{@order.quantity}台"

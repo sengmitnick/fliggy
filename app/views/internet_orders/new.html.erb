@@ -4,7 +4,7 @@
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value=""
      data-payment-confirmation-success-url-value=""
-     data-internet-order-form-deposit-value="<%= @orderable.is_a?(InternetWifi) ? (@orderable.deposit || 0) : 0 %>">
+     data-internet-order-form-deposit-value="<%= @orderable&.is_a?(InternetWifi) ? (@orderable.deposit || 0) : 0 %>">
   
   <!-- 顶部导航 -->
   <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center">
@@ -56,7 +56,7 @@
       when 'InternetDataPlan' then 'data_plan'
       else params[:orderable_type]&.underscore&.split('_')&.last(2)&.join('_')
     end %>
-    <%= f.hidden_field :region, value: params[:region] || '中国香港' %>
+    <%= f.hidden_field :region, value: @orderable&.region || params[:region] || '中国香港' %>
     <%= f.hidden_field :quantity, value: 1, data: { internet_order_form_target: "quantityField" } %>
     <%= f.hidden_field :total_price, value: @orderable&.try(:price) || @orderable&.try(:daily_price) || 0, 
         data: { internet_order_form_target: "totalPriceField" } %>
@@ -119,6 +119,14 @@
                 <% else %>
                   <p class="font-medium text-gray-900">租用天数: <span data-internet-order-form-target="rentalDaysDisplay">7</span> 天</p>
                 <% end %>
+                
+                <!-- 取件日期和归还日期 -->
+                <div class="mt-3 space-y-1">
+                  <% pickup_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
+                  <% return_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + (params[:days]&.to_i || 7).days) %>
+                  <p>取件日期: <span class="font-medium text-gray-900"><%= pickup_date_value.strftime('%Y-%m-%d') %></span></p>
+                  <p>归还日期: <span class="font-medium text-gray-900"><%= return_date_value.strftime('%Y-%m-%d') %></span></p>
+                </div>
               <% end %>
             </div>
           </div>
@@ -312,9 +320,11 @@
         </div>
         <%= f.fields_for :rental_info, data: { internet_order_form_target: "rentalInfoField" } do |rental| %>
           <% rental_days = (params[:days].presence || '7').to_i %>
-          <%= rental.hidden_field :pickup_date, value: Time.zone.today.to_s %>
-          <%= rental.hidden_field :return_date, value: (Time.zone.today + rental_days).to_s %>
-          <%= rental.hidden_field :days, value: rental_days, data: { internet_order_form_target: "rentalDaysField" } %>
+          <% pickup_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
+          <% return_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + rental_days.days) %>
+          <%= rental.hidden_field :rental_days, value: rental_days, data: { internet_order_form_target: "rentalDaysField" } %>
+          <%= rental.hidden_field :pickup_date, value: pickup_date_value.to_s %>
+          <%= rental.hidden_field :return_date, value: return_date_value.to_s %>
         <% end %>
       </div>
     <% end %>
