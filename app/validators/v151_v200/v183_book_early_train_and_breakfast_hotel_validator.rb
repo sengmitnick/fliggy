@@ -18,7 +18,8 @@ require_relative '../base_validator'
 #   - 火车出发时间正确（6-8点） (20分)
 #   - 创建了酒店订单 (20分)
 #   - 酒店在出发城市 (20分)
-#   - 酒店入住前一晚且含早餐 (20分)
+#   - 酒店入住前一晚 (15分)
+#   - 酒店含早餐 (5分)
 module V151V200
   class V183BookEarlyTrainAndBreakfastHotelValidator < BaseValidator
     self.validator_id = 'v183_book_early_train_and_breakfast_hotel_validator'
@@ -170,10 +171,17 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住前一晚 (20%)
-      add_assertion "酒店入住前一晚", weight: 20 do
+      # 断言5: 酒店入住前一晚 (15%)
+      add_assertion "酒店入住前一晚", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车前一晚）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店含早餐 (5%)
+      add_assertion "酒店含早餐", weight: 5 do
+        room = @hotel_booking.hotel_room
+        expect(room.room_type).to match(/早/),
+          "房型未包含早餐。期望: 含早餐房型, 实际: #{room.room_type}"
       end
     end
     
