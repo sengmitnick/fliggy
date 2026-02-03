@@ -32,10 +32,20 @@ module V051V100
     
       @adult_tickets = Ticket.where(attraction_id: @attraction.id, ticket_type: @ticket_type, data_version: 0)
     
+      # 判断是否为周末（周六=6, 周日=0）
+      @is_weekend = [0, 6].include?(@visit_date.wday)
+      @date_type_keyword = @is_weekend ? '周末' : '平日'
+    
+      # 过滤出对应的票种（平日或周末）
+      @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
+    
+      # 如果没有区分平日/周末的票，则使用所有成人票
+      @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
+    
       cheapest_supplier = nil
       min_price = Float::INFINITY
     
-      @adult_tickets.each do |ticket|
+      @applicable_tickets.each do |ticket|
         ticket.ticket_suppliers.where(data_version: 0).each do |ts|
           if ts.current_price < min_price
             min_price = ts.current_price
@@ -53,9 +63,10 @@ module V051V100
         ticket_type: "成人票",
         visit_date: @visit_date.to_s,
         date_description: "本周末（#{@visit_date.strftime('%Y年%m月%d日')}，周#{['日','一','二','三','四','五','六'][@visit_date.wday]}）",
+        date_type: @date_type_keyword,
         quantity: @quantity,
-        hint: "系统中有多个供应商提供成人票。请对比价格后选择最便宜的",
-        available_adult_tickets_count: @adult_tickets.count,
+        hint: "系统中有多个供应商提供成人票。请对比价格后选择最便宜的#{@date_type_keyword}票",
+        available_adult_tickets_count: @applicable_tickets.count,
         weekend_note: "本周末为周六（#{@visit_date}）"
       }
     end
@@ -99,8 +110,17 @@ module V051V100
       end
     
       add_assertion "选择了最便宜的供应商", weight: 20 do
+        # 判断游玩日期是否为周末
+        is_weekend = [0, 6].include?(@visit_date.wday)
+        date_type_keyword = is_weekend ? '周末' : '平日'
+      
+        # 过滤出适用的票种（平日或周末）
+        applicable_tickets = @adult_tickets.select { |t| t.name.include?(date_type_keyword) }
+        # 如果没有区分平日/周末的票，则使用所有成人票
+        applicable_tickets = @adult_tickets if applicable_tickets.empty?
+      
         all_prices = []
-        @adult_tickets.each do |ticket|
+        applicable_tickets.each do |ticket|
           ticket.ticket_suppliers.where(data_version: 0).each do |ts|
             all_prices << { 
               ticket_id: ticket.id,
@@ -126,7 +146,7 @@ module V051V100
                        @ticket_order.supplier_id == cheapest[:supplier_id])
       
         expect(is_cheapest).to be_truthy,
-          "未选择最便宜的供应商。" \
+          "未选择最便宜的供应商（#{date_type_keyword}票中）。" \
           "应选: #{cheapest[:supplier_name]}（#{cheapest[:ticket_name]}，#{cheapest[:price]}元），" \
           "实际选择: #{actual_supplier}（#{@ticket_order.ticket.name}，#{actual_price}元）"
       end
@@ -141,7 +161,9 @@ module V051V100
         visit_date: @visit_date.to_s,
         quantity: @quantity,
         attraction_id: @attraction&.id,
-        best_price: @best_price
+        best_price: @best_price,
+        is_weekend: @is_weekend,
+        date_type_keyword: @date_type_keyword
       }
     end
   
@@ -151,6 +173,8 @@ module V051V100
       @visit_date = Date.parse(data['visit_date'])
       @quantity = data['quantity']
       @best_price = data['best_price']
+      @is_weekend = data['is_weekend']
+      @date_type_keyword = data['date_type_keyword']
       @attraction = Attraction.find_by(id: data['attraction_id']) if data['attraction_id']
     
       if @attraction
@@ -159,6 +183,9 @@ module V051V100
           ticket_type: @ticket_type,
           data_version: 0
         )
+        # 重新过滤适用票种
+        @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
+        @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
       end
     end
   
@@ -172,10 +199,16 @@ module V051V100
         data_version: 0
       )
     
+      # 判断是否为周末，过滤适用票种
+      is_weekend = [0, 6].include?(@visit_date.wday)
+      date_type_keyword = is_weekend ? '周末' : '平日'
+      applicable_tickets = adult_tickets.select { |t| t.name.include?(date_type_keyword) }
+      applicable_tickets = adult_tickets if applicable_tickets.empty?
+    
       cheapest_supplier = nil
       min_price = Float::INFINITY
     
-      adult_tickets.each do |ticket|
+      applicable_tickets.each do |ticket|
         ticket.ticket_suppliers.where(data_version: 0).each do |ts|
           if ts.current_price < min_price
             min_price = ts.current_price

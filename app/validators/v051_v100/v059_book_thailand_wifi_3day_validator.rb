@@ -70,7 +70,10 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @order = InternetOrder.order(created_at: :desc).first
+        @order = InternetOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
         expect(@order).not_to be_nil, "未找到任何境外上网订单记录"
       end
     
@@ -102,8 +105,8 @@ module V051V100
         wifi = @order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
       
-        rental_info = JSON.parse(@order.rental_info) rescue {}
-        actual_days = rental_info['rental_days']
+        rental_info = @order.rental_info.is_a?(String) ? (JSON.parse(@order.rental_info) rescue {}) : (@order.rental_info || {})
+        actual_days = (rental_info['rental_days'] || rental_info['days']).to_i
       
         expect(actual_days).to eq(@rental_days),
           "租赁天数不正确。预期: #{@rental_days}天, 实际: #{actual_days}天"
@@ -149,8 +152,8 @@ module V051V100
       # 随机选择一个
       target_wifi = matching_wifis.sample
     
-      # 3. 计算日期
-      start_date = Date.current + 7.days
+      # 3. 计算日期（使用Date.today避免时区问题）
+      start_date = Date.today + 7.days
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 创建订单
@@ -173,7 +176,8 @@ module V051V100
           method: "mail"
         }.to_json,
         contact_info: { name: '李四', phone: '13900139000', address: '上海市浦东新区世纪大道1000号' }.to_json,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

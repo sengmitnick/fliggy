@@ -18,7 +18,8 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("SimCardFilter connected")
-    // Mail delivery is the only option (no need to set initial selection)
+    // Apply initial filtering based on current values
+    this.filterProductCards()
   }
 
   // Delivery method selection removed - mail is the only option
@@ -47,10 +48,10 @@ export default class extends Controller<HTMLElement> {
     `
     button.insertAdjacentHTML('beforeend', checkmarkHTML)
     
-    // Update value and recalculate prices
+    // Update value and filter products
     if (days) {
       this.daysValue = parseInt(days)
-      this.updateAllPrices()
+      this.filterProductCards()
     }
   }
 
@@ -78,45 +79,113 @@ export default class extends Controller<HTMLElement> {
     `
     button.insertAdjacentHTML('beforeend', checkmarkHTML)
     
-    // Update value and recalculate prices
+    // Update value and filter products
     if (data) {
       this.dataValue = data
-      this.updateAllPrices()
+      this.filterProductCards()
     }
   }
 
-  private updateAllPrices(): void {
-    this.productCardTargets.forEach((card, index) => {
-      const basePrice = parseFloat(card.dataset.basePrice || '0')
-      const newPrice = this.calculatePrice(basePrice)
+  private filterProductCards(): void {
+    const matchingCards: HTMLElement[] = []
+    
+    // Filter product cards based on current filter values
+    this.productCardTargets.forEach(card => {
+      const cardDays = parseInt(card.dataset.validityDays || '0')
+      const cardData = card.dataset.dataLimit || ''
       
-      const priceElement = this.priceTargets[index]
-      if (priceElement) {
-        priceElement.textContent = newPrice.toFixed(1)
+      const matchesDays = cardDays === this.daysValue
+      const matchesData = cardData === this.dataValue
+      
+      if (matchesDays && matchesData) {
+        card.classList.remove('hidden')
+        matchingCards.push(card)
+      } else {
+        card.classList.add('hidden')
+        // Remove selection from hidden cards
+        this.unselectCard(card)
       }
     })
-
-    // Update total price if a card is selected
-    this.updateTotalPriceForSelectedCard()
     
-    // Trigger quantity-based total price update
-    this.triggerQuantityUpdate()
+    // If we have matching cards, select the first one
+    if (matchingCards.length > 0) {
+      this.selectFirstMatchingCard(matchingCards[0])
+    } else {
+      // No matching cards - show all cards as fallback
+      console.warn(`No products found for ${this.daysValue} days and ${this.dataValue} data`)
+      this.productCardTargets.forEach(card => card.classList.remove('hidden'))
+      if (this.productCardTargets.length > 0) {
+        this.selectFirstMatchingCard(this.productCardTargets[0])
+      }
+    }
   }
 
-  private updateTotalPriceForSelectedCard(): void {
-    // Find the selected card (with yellow border)
-    const selectedCard = this.productCardTargets.find(card => 
-      card.classList.contains('border-[#FFCC00]')
-    )
+  private selectFirstMatchingCard(card: HTMLElement): void {
+    // Unselect all cards first
+    this.productCardTargets.forEach(c => this.unselectCard(c))
+    
+    // Select the card
+    card.classList.add('border-[#FFCC00]', 'bg-[#FFFEF8]')
+    card.classList.remove('border-gray-100', 'bg-white')
+    
+    // Update the radio button visual (remove empty circle, add checkmark)
+    const emptyCircle = card.querySelector('.w-5.h-5.rounded-full.border.border-gray-300')
+    if (emptyCircle) {
+      emptyCircle.innerHTML = `
+        <svg class="w-5 h-5 text-[#FFCC00] fill-current" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      `
+    }
+    
+    // Update total price with the selected card's price
+    this.updateTotalPriceForCard(card)
+    
+    // Trigger the product-card controller to update the selection
+    const productId = card.dataset.productId
+    const productType = card.dataset.productType
+    if (productId && productType) {
+      card.dispatchEvent(new CustomEvent('product-selected', {
+        bubbles: true,
+        detail: { productId, productType }
+      }))
+    }
+  }
 
-    if (selectedCard) {
-      const priceElement = selectedCard.querySelector('[data-sim-card-filter-target="price"]')
-      const totalPriceElement = document.querySelector('[data-sim-card-booking-target="totalPrice"]')
+  private unselectCard(card: HTMLElement): void {
+    card.classList.remove('border-[#FFCC00]', 'bg-[#FFFEF8]')
+    card.classList.add('border-gray-100', 'bg-white')
+    
+    // Find the container with the radio button (either svg or div)
+    const radioContainer = card.querySelector('.flex.items-center.mt-4')
+    if (radioContainer) {
+      // Find either the svg checkmark or the empty circle div
+      const checkmark = radioContainer.querySelector('svg.w-5.h-5')
+      const emptyCircle = radioContainer.querySelector('div.w-5.h-5.rounded-full')
       
-      if (priceElement && totalPriceElement) {
-        const price = priceElement.textContent || '9.9'
-        totalPriceElement.textContent = price
+      if (checkmark) {
+        // Replace checkmark with empty circle
+        checkmark.outerHTML = '<div class="w-5 h-5 rounded-full border border-gray-300" data-action="click->product-card#select"></div>'
+      } else if (!emptyCircle) {
+        // No radio button found, create one
+        const priceSpan = radioContainer.querySelector('span[data-sim-card-filter-target="price"]')
+        if (priceSpan) {
+          priceSpan.insertAdjacentHTML('afterend', '<div class="w-5 h-5 rounded-full border border-gray-300 ml-2" data-action="click->product-card#select"></div>')
+        }
       }
+    }
+  }
+
+  private updateTotalPriceForCard(card: HTMLElement): void {
+    const priceElement = card.querySelector('[data-sim-card-filter-target="price"]') as HTMLElement
+    const totalPriceElement = document.querySelector('[data-sim-card-booking-target="totalPrice"]') as HTMLElement
+    const quantityElement = document.querySelector('[data-sim-card-booking-target="quantity"]') as HTMLElement
+    
+    if (priceElement && totalPriceElement) {
+      const price = parseFloat(priceElement.textContent || '0')
+      const quantity = quantityElement ? parseInt(quantityElement.textContent || '1') : 1
+      const totalPrice = (price * quantity).toFixed(1)
+      totalPriceElement.textContent = totalPrice
     }
   }
 
@@ -128,36 +197,5 @@ export default class extends Controller<HTMLElement> {
       const event = new CustomEvent('price-changed')
       bookingController.dispatchEvent(event)
     }
-  }
-
-  private calculatePrice(basePrice: number): number {
-    let price = basePrice
-    
-    // Days multiplier
-    const daysMultiplier: {[key: number]: number} = {
-      1: 1,
-      3: 2.5,
-      4: 3.2,
-      5: 3.8,
-      7: 5,
-      10: 6.5,
-      15: 9,
-      30: 15
-    }
-    
-    const multiplier = daysMultiplier[this.daysValue] || 1
-    price = basePrice * multiplier
-    
-    // Data plan adjustment
-    const dataAdjustment: {[key: string]: number} = {
-      '共3GB': 0,
-      '共5GB': 10,
-      '共10GB': 20,
-      '无限量': 30
-    }
-    
-    price += (dataAdjustment[this.dataValue] || 0)
-    
-    return Math.max(price, 0.1) // Minimum price 0.1
   }
 }

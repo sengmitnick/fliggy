@@ -112,48 +112,32 @@
         </div>
 
         <!-- Avatar -->
+        <!-- Avatar URL -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Avatar</label>
-          <% if @deep_travel_guide.avatar.attached? %>
-            <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
-              <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-              </svg>
-              <div>
-                <div class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= @deep_travel_guide.avatar.filename %></div>
-                <div class="text-xs text-gray-500"><%= number_to_human_size(@deep_travel_guide.avatar.byte_size) %></div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Avatar URL</label>
+          <% if @deep_travel_guide.avatar_url.present? %>
+            <div class="flex items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div class="flex-1">
+                <div class="text-sm font-medium text-gray-900 dark:text-gray-100 break-all"><%= @deep_travel_guide.avatar_url %></div>
               </div>
-              <% if @deep_travel_guide.avatar.content_type&.start_with?('image/') %>
-                <div class="ml-auto">
-                  <%= image_tag @deep_travel_guide.avatar, class: "w-16 h-16 object-cover rounded" %>
-                </div>
-              <% end %>
+              <div class="ml-4 flex-shrink-0">
+                <%= image_tag @deep_travel_guide.avatar_url, class: "w-16 h-16 object-cover rounded", alt: "Avatar" rescue content_tag(:span, 'Image Error', class: 'text-xs text-red-500') %>
+              </div>
             </div>
           <% else %>
-            <div class="text-gray-500 dark:text-gray-400">No file attached</div>
+            <div class="text-gray-500 dark:text-gray-400">No URL provided</div>
           <% end %>
         </div>
 
-        <!-- Video -->
+        <!-- Video URL -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video</label>
-          <% if @deep_travel_guide.video.attached? %>
-            <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
-              <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-              </svg>
-              <div>
-                <div class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= @deep_travel_guide.video.filename %></div>
-                <div class="text-xs text-gray-500"><%= number_to_human_size(@deep_travel_guide.video.byte_size) %></div>
-              </div>
-              <% if @deep_travel_guide.video.content_type&.start_with?('image/') %>
-                <div class="ml-auto">
-                  <%= image_tag @deep_travel_guide.video, class: "w-16 h-16 object-cover rounded" %>
-                </div>
-              <% end %>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video URL</label>
+          <% if @deep_travel_guide.video_url.present? %>
+            <div class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100 break-all"><%= @deep_travel_guide.video_url %></div>
             </div>
           <% else %>
-            <div class="text-gray-500 dark:text-gray-400">No file attached</div>
+            <div class="text-gray-500 dark:text-gray-400">No URL provided</div>
           <% end %>
         </div>
 

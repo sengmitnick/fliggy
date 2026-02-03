@@ -73,10 +73,13 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 必须有订单创建（使用data_version隔离会话）
       add_assertion "订单已创建", weight: 20 do
-        @order = InternetOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何境外上网订单记录"
+        @order = InternetOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        expect(@order).not_to be_nil, "未找到任何境外上网订单记录（data_version: #{@data_version}）"
       end
     
       return unless @order # 如果没有订单，后续断言无法继续
@@ -163,7 +166,8 @@ module V051V100
         }.to_json,
         total_price: target_data_plan.price * @quantity,
         contact_info: { phone: '13800138001' }.to_json,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息
