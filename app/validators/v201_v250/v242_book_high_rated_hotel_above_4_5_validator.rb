@@ -90,7 +90,6 @@ module V201V250
         payment_method: '花呗',
         total_price: room.price,
         status: 'paid',
-        payment_method: '花呗',
         data_version: @data_version
       )
     end
