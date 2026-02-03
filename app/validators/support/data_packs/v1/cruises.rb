@@ -1277,6 +1277,20 @@ cabin_types_data = [
   },
   {
     cruise_ship_id: bellissima.id,
+    name: '海景房',
+    category: 'oceanview',
+    floor_range: '5-10层',
+    area: 18,
+    has_balcony: false,
+    has_window: true,
+    max_occupancy: 3,
+    description: '观景之选，全景落地窗',
+    image_urls: [cabin_images[2]].compact,
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: bellissima.id,
     name: '内舱房',
     category: 'interior',
     floor_range: '4-9层',

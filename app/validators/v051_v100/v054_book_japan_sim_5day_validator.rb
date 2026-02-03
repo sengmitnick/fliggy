@@ -62,10 +62,19 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 必须有订单创建（按地区和订单类型筛选）
       add_assertion "订单已创建", weight: 15 do
-        @order = InternetOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何境外上网订单记录"
+        # 先按地区和订单类型筛选，避免选到其他地区的订单
+        all_orders = InternetOrder
+          .where(order_type: 'sim_card', region: @region)
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_orders).not_to be_empty,
+          "未找到任何#{@region}SIM卡订单记录"
+        
+        @order = all_orders.first
       end
     
       return unless @order # 如果没有订单，后续断言无法继续
@@ -151,7 +160,8 @@ module V051V100
         total_price: target_sim_card.price,
         delivery_method: 'mail',
         contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

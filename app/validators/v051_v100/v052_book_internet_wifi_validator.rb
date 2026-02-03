@@ -90,19 +90,19 @@ module V051V100
       end
     
       # 断言4: 选择了最便宜的WiFi（核心评分项）
-      add_assertion "选择了最便宜的WiFi", weight: 30 do
-        # 获取所有可用WiFi
-        all_wifis = InternetWifi.where(data_version: 0)
+      add_assertion "选择了最便宜的WiFi（中国香港地区）", weight: 30 do
+        # 先筛选中国香港地区的WiFi
+        hk_wifis = InternetWifi.where(data_version: 0, region: "中国香港")
       
-        # 找到日租金最低的
-        cheapest_wifi = all_wifis.min_by(&:daily_price)
+        # 找到香港地区日租金最低的
+        cheapest_wifi = hk_wifis.min_by(&:daily_price)
         actual_price = @internet_order.orderable.daily_price
         cheapest_price = cheapest_wifi.daily_price
       
         expect(@internet_order.orderable_id).to eq(cheapest_wifi.id),
-          "未选择最便宜的WiFi。" \
-          "应选: #{cheapest_wifi.name}（#{cheapest_price}元/天），" \
-          "实际选择: #{@internet_order.orderable.name}（#{actual_price}元/天）"
+          "未选择中国香港地区最便宜的WiFi。" \
+          "应选: #{cheapest_wifi.name}（#{cheapest_price}元/天，中国香港），" \
+          "实际选择: #{@internet_order.orderable.name}（#{actual_price}元/天，#{@internet_order.orderable.region}）"
       end
     
       # 断言5: 订单价格正确
@@ -142,11 +142,15 @@ module V051V100
       wifis = InternetWifi.where(data_version: 0)
       puts "   找到 #{wifis.count} 个WiFi产品"
     
-      puts "2. 对比价格..."
-      cheapest_wifi = wifis.min_by(&:daily_price)
-      puts "   最便宜: #{cheapest_wifi.name}（#{cheapest_wifi.daily_price}元/天）"
+      puts "2. 筛选中国香港地区的WiFi..."
+      hk_wifis = wifis.where(region: "中国香港")
+      puts "   找到 #{hk_wifis.count} 个香港WiFi产品"
+      
+      puts "3. 对比价格..."
+      cheapest_wifi = hk_wifis.min_by(&:daily_price)
+      puts "   香港地区最便宜: #{cheapest_wifi.name}（#{cheapest_wifi.daily_price}元/天）"
     
-      puts "3. 创建订单..."
+      puts "4. 创建订单..."
       start_date = Date.current + 7.days
       end_date = start_date + (@rental_days - 1).days
     
