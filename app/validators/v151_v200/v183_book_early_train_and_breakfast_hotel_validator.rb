@@ -92,7 +92,8 @@ module V151V200
       
       # 创建酒店订单（含早餐）
       hotel = @available_hotels.first
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      # 优先查找含早餐的房型
+      room = hotel.hotel_rooms.where(data_version: 0).where("room_type LIKE ?", "%早%").order(price: :asc).first
       
       unless room
         room = HotelRoom.create!(
