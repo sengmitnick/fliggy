@@ -194,7 +194,6 @@ module V201V250
           total_price: best_combo[:transport].price,
           accept_terms: true,
           status: 'paid',
-        accept_terms: true,
           data_version: @data_version
         )
       else
@@ -208,7 +207,7 @@ module V201V250
           ticket_count: 1,
           total_price: best_combo[:transport].price_second_class,
           status: 'paid',
-        accept_terms: true,
+          accept_terms: true,
           data_version: @data_version
         )
       end

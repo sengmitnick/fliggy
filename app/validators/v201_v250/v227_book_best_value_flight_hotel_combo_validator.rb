@@ -156,7 +156,6 @@ module V201V250
         total_price: best_flight.price,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
       

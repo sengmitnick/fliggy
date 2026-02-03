@@ -99,7 +99,6 @@ module V201V250
         seat_number: '12C',  # C通常是过道座
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
     end
