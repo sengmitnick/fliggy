@@ -65,11 +65,14 @@ export default class extends Controller<HTMLElement> {
     const filterElement = document.querySelector('[data-controller~="sim-card-filter"]') as HTMLElement
     let days = '1'
     let data = '共3GB'
+    let region = ''
     
     if (filterElement) {
       // Read from data-sim-card-filter-days-value and data-sim-card-filter-data-value
       days = filterElement.dataset.simCardFilterDaysValue || '1'
       data = filterElement.dataset.simCardFilterDataValue || '共3GB'
+      // Extract region from data attribute
+      region = filterElement.dataset.simCardFilterRegionValue || ''
     }
 
     // Get unit price from selected card
@@ -83,12 +86,13 @@ export default class extends Controller<HTMLElement> {
     const addressIdInput = document.querySelector('[data-address-id-input]') as HTMLInputElement
     const addressId = addressIdInput?.value || ''
 
-    // Navigate to order page with params including filter values, price, quantity, total, and address_id
+    // Navigate to order page with params including filter values, price, quantity, total, address_id, and region
     const baseUrl = '/internet_orders/new'
     const params = `orderable_type=${orderableType}&orderable_id=${orderableId}&quantity=${quantity}`
     const filterParams = `days=${days}&data=${encodeURIComponent(data)}&price=${unitPrice}&total=${totalPrice}`
     const addressParam = addressId ? `&address_id=${addressId}` : ''
-    const url = `${baseUrl}?${params}&${filterParams}${addressParam}`
+    const regionParam = region ? `&region=${encodeURIComponent(region)}` : ''
+    const url = `${baseUrl}?${params}&${filterParams}${addressParam}${regionParam}`
     window.location.href = url
   }
 
