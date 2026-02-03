@@ -4,6 +4,7 @@ class FreeTravelsController < ApplicationController
     @destination = params[:destination].presence || '上海'
     @duration = params[:duration].presence
     @group_size = params[:group_size].presence
+    @package_type = params[:package_type].presence # flight_hotel or attraction_hotel
     
     # Hot destinations - 从数据库获取（筛选自由出行类型）
     @hot_destinations = TourGroupProduct.where(travel_type: '自由出行')

@@ -144,13 +144,13 @@
 
   <!-- 筛选栏 -->
   <div class="bg-white px-4 py-2 border-b" data-controller="filter-dropdown">
-    <div class="flex justify-between text-xs">
+    <div class="flex flex-wrap justify-between text-xs gap-2">
       <!-- 智能排序 -->
       <div class="relative">
         <button type="button" 
                 data-action="filter-dropdown#toggle" 
                 data-dropdown-id="sort"
-                class="flex items-center <%= @sort_by != 'smart' ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+                class="flex items-center whitespace-nowrap <%= @sort_by != 'smart' ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
           <span><%= @sort_by == 'smart' ? '智能排序' : @sort_by == 'sales' ? '销量优先' : '好评优先' %></span>
           <% if @sort_by != 'smart' %>
             <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
@@ -183,7 +183,7 @@
         <button type="button" 
                 data-action="filter-dropdown#toggle" 
                 data-dropdown-id="travel-type"
-                class="flex items-center <%= @travel_type.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+                class="flex items-center whitespace-nowrap <%= @travel_type.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
           <span><%= @travel_type.present? ? @travel_type : '旅游类型' %></span>
           <% if @travel_type.present? %>
             <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
@@ -215,12 +215,48 @@
         </div>
       </div>
       
+      <% if @travel_type == '自由出行' %>
+        <!-- 机酒/景酒筛选 -->
+        <div class="relative">
+          <button type="button" 
+                  data-action="filter-dropdown#toggle" 
+                  data-dropdown-id="package-type"
+                  class="flex items-center whitespace-nowrap <%= @package_type.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+            <span><%= @package_type == 'flight_hotel' ? '机酒套餐' : @package_type == 'attraction_hotel' ? '景酒套餐' : '机酒/景酒' %></span>
+            <% if @package_type.present? %>
+              <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
+            <% end %>
+            <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+            </svg>
+          </button>
+          
+          <!-- 机酒/景酒下拉菜单 -->
+          <div data-filter-dropdown-target="dropdown" 
+               data-dropdown-id="package-type"
+               class="hidden absolute top-full left-1/2 -translate-x-1/2 mt-2 w-32 bg-white rounded-lg shadow-lg border z-50">
+            <div class="py-2">
+              <div class="px-3 py-2 text-gray-500 text-xs font-bold">套餐类型</div>
+              <%= link_to '全部', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type), 
+                  class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@package_type.blank? ? 'text-primary font-bold' : 'text-gray-700'}",
+                  data: { action: 'filter-dropdown#selectOption' } %>
+              <%= link_to '机酒套餐', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type, package_type: 'flight_hotel'), 
+                  class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@package_type == 'flight_hotel' ? 'text-primary font-bold' : 'text-gray-700'}",
+                  data: { action: 'filter-dropdown#selectOption' } %>
+              <%= link_to '景酒套餐', search_tour_groups_path(destination: @destination, tour_category: @tour_category, sort_by: @sort_by, tag: @selected_tag, duration: @duration, departure_city: @departure_city, travel_type: @travel_type, package_type: 'attraction_hotel'), 
+                  class: "block px-4 py-2 hover:bg-gray-50 transition-colors #{@package_type == 'attraction_hotel' ? 'text-primary font-bold' : 'text-gray-700'}",
+                  data: { action: 'filter-dropdown#selectOption' } %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
       <!-- 出发地 -->
       <div class="relative">
         <button type="button" 
                 data-action="filter-dropdown#toggle" 
                 data-dropdown-id="departure"
-                class="flex items-center <%= @departure_city.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+                class="flex items-center whitespace-nowrap <%= @departure_city.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
           <span><%= @departure_city.present? ? @departure_city : '出发地' %></span>
           <% if @departure_city.present? %>
             <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
@@ -283,7 +319,7 @@
         <button type="button" 
                 data-action="filter-dropdown#toggle" 
                 data-dropdown-id="duration"
-                class="flex items-center <%= @duration.present? && @duration > 0 ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+                class="flex items-center whitespace-nowrap <%= @duration.present? && @duration > 0 ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
           <span><%= @duration.present? && @duration > 0 ? "#{@duration}日" : '天数/日期' %></span>
           <% if @duration.present? && @duration > 0 %>
             <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>
@@ -320,7 +356,7 @@
         <button type="button" 
                 data-action="filter-dropdown#toggle" 
                 data-dropdown-id="filter"
-                class="flex items-center <%= @selected_tag.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
+                class="flex items-center whitespace-nowrap <%= @selected_tag.present? ? 'text-[#FF7043]' : 'text-gray-700' %> hover:text-[#FF5722] transition-colors relative">
           <span><%= @selected_tag.present? ? @selected_tag : '套餐类型' %></span>
           <% if @selected_tag.present? %>
             <span class="absolute -top-1 -right-1 bg-[#FF5722] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">1</span>

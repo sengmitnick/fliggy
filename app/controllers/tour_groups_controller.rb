@@ -74,6 +74,7 @@ class TourGroupsController < ApplicationController
     @departure_city = params[:departure_city].presence # 出发地
     @duration = params[:duration].to_i if params[:duration].present?
     @travel_type = params[:travel_type].presence # 旅游类型：跟团游/独立成团/自由出行
+    @package_type = params[:package_type].presence # 套餐类型：flight_hotel/attraction_hotel
     
     # 处理顶部tab参数，将tab ID映射到travel_type
     @active_tab = params[:tab].presence || 'comprehensive'
@@ -115,6 +116,18 @@ class TourGroupsController < ApplicationController
     # 根据天数筛选
     if @duration.present? && @duration > 0
       products = products.where(duration: @duration)
+    end
+    
+    # 根据套餐类型筛选
+    if @package_type.present?
+      case @package_type
+      when 'flight_hotel'
+        # 机酒套餐：包含机票和酒店，通过tags筛选
+        products = products.where("tags LIKE ? OR tags LIKE ?", "%机票%", "%航班%")
+      when 'attraction_hotel'
+        # 景酒套餐：包含景点门票和酒店，通过tags筛选
+        products = products.where("tags LIKE ? OR tags LIKE ?", "%门票%", "%景点%")
+      end
     end
     
     # 根据标签筛选（在SQL层面过滤，更高效）
