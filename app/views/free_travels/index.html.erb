@@ -37,7 +37,8 @@
          data-controller="tour-group-filter"
          data-tour-group-filter-destination-value="<%= @destination %>"
          data-tour-group-filter-duration-value=""
-         data-tour-group-filter-group-size-value="<%= @group_size %>">
+         data-tour-group-filter-group-size-value="<%= @group_size %>"
+         data-tour-group-filter-package-type-value="<%= @package_type %>">
       
       <!-- Destination Section -->
       <div class="mb-4">
@@ -71,6 +72,45 @@
               <span class="<%= city == @destination ? 'font-bold' : 'font-medium' %>"><%= city %></span>
             </button>
           <% end %>
+        </div>
+      </div>
+
+      <!-- Package Type Selection (机酒套餐 / 景酒套餐) -->
+      <div class="mb-4">
+        <div class="flex gap-4">
+          <!-- 机酒套餐 Option -->
+          <label class="flex-1 cursor-pointer">
+            <input 
+              type="radio" 
+              name="package_type" 
+              value="flight_hotel"
+              data-tour-group-filter-target="packageTypeRadio"
+              data-action="change->tour-group-filter#selectPackageType"
+              class="sr-only">
+            <div data-tour-group-filter-target="packageTypeContainer" data-value="flight_hotel" class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-200 bg-white transition-all">
+              <div data-tour-group-filter-target="packageTypeCircle" data-value="flight_hotel" class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-white opacity-0"></div>
+              </div>
+              <span data-tour-group-filter-target="packageTypeText" data-value="flight_hotel" class="text-sm font-medium text-gray-700">机酒套餐</span>
+            </div>
+          </label>
+          
+          <!-- 景酒套餐 Option -->
+          <label class="flex-1 cursor-pointer">
+            <input 
+              type="radio" 
+              name="package_type" 
+              value="attraction_hotel"
+              data-tour-group-filter-target="packageTypeRadio"
+              data-action="change->tour-group-filter#selectPackageType"
+              class="sr-only">
+            <div data-tour-group-filter-target="packageTypeContainer" data-value="attraction_hotel" class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-gray-200 bg-white transition-all">
+              <div data-tour-group-filter-target="packageTypeCircle" data-value="attraction_hotel" class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                <div class="w-2.5 h-2.5 rounded-full bg-white opacity-0"></div>
+              </div>
+              <span data-tour-group-filter-target="packageTypeText" data-value="attraction_hotel" class="text-sm font-medium text-gray-700">景酒套餐</span>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -144,6 +184,7 @@
           <%= f.hidden_field :destination, value: @destination, data: { tour_group_filter_target: 'destinationInput', city_selector_target: 'departureCityInput' } %>
           <%= f.hidden_field :duration, data: { tour_group_filter_target: 'durationInput' } %>
           <%= f.hidden_field :group_size, data: { tour_group_filter_target: 'groupSizeInput' } %>
+          <%= f.hidden_field :package_type, data: { tour_group_filter_target: 'packageTypeInput' } %>
           <%= f.hidden_field :travel_type, value: '自由出行' %>
           <!-- Hidden destination target (required by city-selector controller but not used) -->
           <span class="hidden" data-city-selector-target="destination"></span>
