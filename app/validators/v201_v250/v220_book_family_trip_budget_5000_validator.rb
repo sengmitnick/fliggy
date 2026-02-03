@@ -126,7 +126,7 @@ module V201V250
       raise "未找到符合预算的组合" if best_combo.nil?
       
       # 创建航班订单（为2大1小各创建一个订单）
-      [@adults, @children].flatten.each_with_index do |_, idx|
+      3.times do |idx|
         Booking.create!(
           user: user,
           flight: best_combo[:flight],

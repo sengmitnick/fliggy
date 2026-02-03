@@ -159,22 +159,22 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 航班价格合理（≤300元） (20%)
-      add_assertion "航班价格合理（≤#{@max_flight_price.to_i}元）", weight: 20 do
+      # 断言3: 航班价格合理（≤300元） (15%)
+      add_assertion "航班价格合理（≤#{@max_flight_price.to_i}元）", weight: 15 do
         flight_price = @flight_booking.total_price
         expect(flight_price).to be <= @max_flight_price,
           "航班价格过高。期望: ≤#{@max_flight_price.to_i}元, 实际: #{flight_price}元"
       end
       
-      # 断言4: 酒店价格合理（≤200元） (20%)
-      add_assertion "酒店价格合理（≤#{@max_hotel_price.to_i}元）", weight: 20 do
+      # 断言4: 酒店价格合理（≤200元） (15%)
+      add_assertion "酒店价格合理（≤#{@max_hotel_price.to_i}元）", weight: 15 do
         hotel_price = @hotel_booking.total_price
         expect(hotel_price).to be <= @max_hotel_price,
           "酒店价格过高。期望: ≤#{@max_hotel_price.to_i}元, 实际: #{hotel_price}元"
       end
       
-      # 断言5: 总价≤500元 (20%)
-      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 20 do
+      # 断言5: 总价≤500元 (30%)
+      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 30 do
         total_price = @flight_booking.total_price + @hotel_booking.total_price
         expect(total_price).to be <= @max_total_budget,
           "总价超出预算。期望: ≤#{@max_total_budget.to_i}元, 实际: #{total_price}元（航班#{@flight_booking.total_price}+酒店#{@hotel_booking.total_price}）"

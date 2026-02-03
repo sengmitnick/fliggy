@@ -69,7 +69,7 @@ module V151V200
 
     def verify
       # 断言1: 创建了跟团游订单
-      add_assertion "创建了跟团游订单", weight: 30 do
+      add_assertion "创建了跟团游订单", weight: 25 do
         all_bookings = TourGroupBooking
           .joins(:tour_group_product)
           .includes(:tour_group_product)
@@ -91,13 +91,13 @@ module V151V200
       end
       
       # 断言3: 出发日期正确
-      add_assertion "出发日期正确（#{@tour_date}）", weight: 15 do
+      add_assertion "出发日期正确（#{@tour_date}）", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@tour_date),
           "出发日期错误。期望: #{@tour_date}（明天）, 实际: #{@tour_booking.travel_date}"
       end
       
       # 断言4: 创建了火车站送站服务
-      add_assertion "创建了火车站送站服务", weight: 30 do
+      add_assertion "创建了火车站送站服务", weight: 25 do
         @transfer = Transfer
           .where(transfer_type: 'train_dropoff', data_version: @data_version)
           .order(created_at: :desc)
@@ -108,11 +108,20 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言5: 送站地点在深圳
-      add_assertion "送站地点在深圳", weight: 10 do
-        in_city = @transfer.location_from.include?(@city) || @transfer.location_to.include?(@city)
-        expect(in_city).to be(true),
-          "送站地点错误。期望包含: #{@city}, 实际: #{@transfer.location_from} -> #{@transfer.location_to}"
+      # 断言5: 送站时间在最后一天（第2天）
+      add_assertion "送站时间在最后一天（第#{@duration_days}天）", weight: 15 do
+        expected_dropoff_date = @tour_date + (@duration_days - 1).days
+        transfer_date = @transfer.pickup_datetime.to_date
+        expect(transfer_date).to eq(expected_dropoff_date),
+          "送站时间错误。期望: #{expected_dropoff_date}（第#{@duration_days}天）, 实际: #{transfer_date}"
+      end
+      
+      # 断言6: 送站地点正确（市区→火车站）
+      add_assertion "送站地点正确（市区→火车站）", weight: 10 do
+        expect(@transfer.location_from).to include("#{@city}市区"),
+          "送站出发地错误。期望: #{@city}市区, 实际: #{@transfer.location_from}"
+        expect(@transfer.location_to).to include(@city),
+          "送站目的地错误。期望包含: #{@city}, 实际: #{@transfer.location_to}"
       end
     end
   end

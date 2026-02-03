@@ -109,16 +109,12 @@ module V251V300
           
           expect(duration).to eq(@duration_hours),
             "服务时长错误。期望: #{@duration_hours}小时, 实际: #{duration}小时"
-          
-          # 验证包车时长是8小时（一日游标准时长）
-          expect(duration).to eq(8),
-            "包车时长应为8小时（一日游标准），实际: #{duration}小时"
         end
       end
       
       # 断言5: 订单信息完整（权重15%）
       # 验证联系人信息、出发日期（7天后）、出发时间格式、乘客数量、预订模式
-      add_assertion "订单信息完整（联系人、电话、出发日期）", weight: 15 do
+      add_assertion "订单信息完整", weight: 15 do
         @charter_bookings.each do |booking|
           # 联系人姓名
           expect(booking.contact_name).to be_present,

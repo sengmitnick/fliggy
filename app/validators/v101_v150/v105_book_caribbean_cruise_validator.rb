@@ -8,7 +8,7 @@ module V101V150
     self.validator_id = 'v105_book_caribbean_cruise_validator'
     self.task_id = 'f5e2d8c1-4a9b-3d76-8e1f-6c3a5b4d9e72'
     self.title = '预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）'
-    self.description = '预订加勒比航线邮轮，选择海洋光谱号10天9晚行程，迈阿密出发，预订豪华套房'
+    self.description = '预订加勒比航线邮轮，选择海洋光谱号10天9晚行程，迈阿密出发，选择最近可用的班次，预订豪华套房'
     self.timeout_seconds = 240
   
     def prepare
