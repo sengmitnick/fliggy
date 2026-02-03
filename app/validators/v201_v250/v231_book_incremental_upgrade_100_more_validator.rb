@@ -127,28 +127,6 @@ module V201V250
       best_rating_upgrade = 0
       min_hotel_rating = @available_hotels.first.rating
       
-      # 尝试航班组合
-      @available_flights.first(10).each do |flight|
-        @available_hotels.each do |hotel|
-          room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-          next unless room
-          
-          total = flight.price + room.price
-          price_increase = total - @base_price
-          
-          # 检查是否在升级预算范围内（±50元）
-          next unless price_increase >= (@upgrade_budget - 50) && price_increase <= (@upgrade_budget + 50)
-          
-          rating_upgrade = hotel.rating - min_hotel_rating
-          next unless rating_upgrade >= 0.1
-          
-          if rating_upgrade > best_rating_upgrade
-            best_rating_upgrade = rating_upgrade
-            best_combo = { type: :flight, transport: flight, hotel: hotel, room: room }
-          end
-        end
-      end
-      
       # 尝试火车组合
       @available_trains.each do |train|
         @available_hotels.each do |hotel|
@@ -172,34 +150,20 @@ module V201V250
       
       raise "未找到符合升级要求的组合" if best_combo.nil?
       
-      # 创建交通订单
-      if best_combo[:type] == :flight
-        Booking.create!(
-          user: user,
-          flight: best_combo[:transport],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
-          total_price: best_combo[:transport].price,
-          accept_terms: true,
-          status: 'paid',
-          data_version: @data_version
-        )
-      else
-        TrainBooking.create!(
-          user: user,
-          train: best_combo[:transport],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
-          seat_type: 'second_class',
-          ticket_count: 1,
-          total_price: best_combo[:transport].price_second_class,
-          status: 'paid',
-          accept_terms: true,
-          data_version: @data_version
-        )
-      end
+      # 创建火车订单
+      TrainBooking.create!(
+        user: user,
+        train: best_combo[:train],
+        passenger_name: user.name,
+        passenger_id_number: '110101199001011234',
+        contact_phone: '13800138000',
+        seat_type: 'second_class',
+        ticket_count: 1,
+        total_price: best_combo[:train].price_second_class,
+        status: 'paid',
+        accept_terms: true,
+        data_version: @data_version
+      )
       
       # 创建酒店订单
       HotelBooking.create!(

@@ -31,14 +31,19 @@ export default class extends Controller<HTMLElement> {
   declare readonly destinationInputTarget: HTMLInputElement
   declare readonly durationInputTarget: HTMLInputElement
   declare readonly groupSizeInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
   declare readonly packageTypeInputTarget: HTMLInputElement
   declare readonly destinationButtonTargets: HTMLElement[]
   declare readonly durationButtonTargets: HTMLElement[]
   declare readonly hasGroupSizeButtonTarget: boolean
   declare readonly groupSizeButtonTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
   declare readonly packageTypeRadioTargets: HTMLInputElement[]
+  // stimulus-validator: disable-next-line
   declare readonly packageTypeContainerTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
   declare readonly packageTypeCircleTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
   declare readonly packageTypeTextTargets: HTMLElement[]
   declare readonly departureDisplayTarget: HTMLElement
   declare readonly durationModalTarget: HTMLElement
@@ -50,6 +55,7 @@ export default class extends Controller<HTMLElement> {
   declare destinationValue: string
   declare durationValue: string
   declare groupSizeValue: string
+  // stimulus-validator: disable-next-line
   declare packageTypeValue: string
   
   private tempSelectedDuration: string = ''

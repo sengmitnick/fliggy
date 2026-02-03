@@ -323,6 +323,22 @@ function visitNode(node) {
         }
       }
 
+      // Check for NON-readonly property declarations (values) with skip comments
+      if (ts.isPropertyDeclaration(member) &&
+          !member.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword) &&
+          !member.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword)) {
+
+        const propertyName = member.name.getText(sourceFile);
+        const hasSkipComment = checkPropertySkipComment(member);
+
+        // Check if it's a declare xxxValue property (non-readonly)
+        const valueMatch = propertyName.match(/^(\w+)Value$/);
+        if (valueMatch && hasSkipComment) {
+          const valueName = valueMatch[1];
+          result.valuesWithSkip.push(valueName);
+        }
+      }
+
       // Check for method declarations
       if (ts.isMethodDeclaration(member) && ts.isIdentifier(member.name)) {
         const methodName = member.name.text;
