@@ -29,13 +29,6 @@ module V201V250
       @check_out_date = @check_in_date + 1.day
       @upgrade_budget = 100
       
-      @available_flights = Flight.where(
-        departure_city: @departure_city,
-        destination_city: @destination_city,
-        flight_date: @travel_date,
-        data_version: 0
-      ).order(price: :asc).to_a
-      
       @available_trains = Train.by_route(@departure_city, @destination_city)
         .by_date(@travel_date)
         .where(data_version: 0)
@@ -46,13 +39,10 @@ module V201V250
         .order(price: :asc)
         .to_a
       
-      raise "未找到交通或酒店" if (@available_flights.empty? && @available_trains.empty?) || @available_hotels.empty?
+      raise "未找到交通或酒店" if @available_trains.empty? || @available_hotels.empty?
       
-      # 计算基础方案价格（最便宜的组合）
-      min_transport_price = [
-        @available_flights.first&.price || Float::INFINITY,
-        @available_trains.first&.price_second_class || Float::INFINITY
-      ].min
+      # 计算基础方案价格（最便宜的组合：火车+酒店）
+      min_transport_price = @available_trains.first.price_second_class
       
       min_hotel_room = @available_hotels.first.hotel_rooms.where(data_version: 0).order(price: :asc).first
       min_hotel_price = min_hotel_room ? min_hotel_room.price : Float::INFINITY
@@ -61,7 +51,7 @@ module V201V250
       @target_price = @base_price + @upgrade_budget
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@destination_city}的交通和酒店（住1晚）。基础方案约#{@base_price.round}元，请在此基础上加#{@upgrade_budget}元（预算#{@target_price.round}元）升级到更好的服务（如更高星级酒店或更快交通）。",
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@destination_city}的火车和酒店（住1晚）。基础方案约#{@base_price.round}元（最便宜的火车+酒店），请在此基础上加#{@upgrade_budget}元（预算#{@target_price.round}元）升级到更好的服务（如更高星级酒店或一等座）。",
         requirements: {
           departure_city: @departure_city,
           destination_city: @destination_city,
@@ -69,31 +59,24 @@ module V201V250
           base_price: "约#{@base_price.round}元",
           target_price: "约#{@target_price.round}元",
           upgrade_budget: "+#{@upgrade_budget}元",
-          purpose: '增量升级服务'
+          purpose: '增量升级服务（火车+酒店）'
         },
-        hint: "基础方案是最便宜的组合，加#{@upgrade_budget}元可以升级到更好的服务。"
+        hint: "基础方案是最便宜的二等座火车+最便宜的酒店房间，加#{@upgrade_budget}元可以升级到更好的服务（如一等座或更高星级酒店）。"
       }
     end
     
     def verify
-      add_assertion "创建了交通订单", weight: 20 do
-        @flight_booking = Booking
-          .joins(:flight)
-          .where(flights: { departure_city: @departure_city, destination_city: @destination_city })
-          .where(data_version: @data_version)
-          .first
-        
+      add_assertion "创建了火车订单", weight: 20 do
         @train_booking = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @departure_city, arrival_city: @destination_city })
           .where(data_version: @data_version)
           .first
         
-        @transport_booking = @flight_booking || @train_booking
-        expect(@transport_booking).not_to be_nil, "未找到交通订单"
+        expect(@train_booking).not_to be_nil, "未找到火车订单"
       end
       
-      return if @transport_booking.nil?
+      return if @train_booking.nil?
       
       add_assertion "创建了酒店订单", weight: 20 do
         @hotel_booking = HotelBooking
@@ -108,9 +91,9 @@ module V201V250
       return if @hotel_booking.nil?
       
       add_assertion "总价比基础方案多约#{@upgrade_budget}元（允许±50元）", weight: 30 do
-        transport_price = @transport_booking.total_price
+        train_price = @train_booking.total_price
         hotel_price = @hotel_booking.total_price
-        actual_total = transport_price + hotel_price
+        actual_total = train_price + hotel_price
         
         price_increase = actual_total - @base_price
         
@@ -131,7 +114,7 @@ module V201V250
       end
       
       add_assertion "订单状态有效", weight: 10 do
-        expect(@transport_booking.status).to be_in(['pending', 'paid', 'completed'])
+        expect(@train_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
     end
@@ -139,7 +122,7 @@ module V201V250
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 找到价格在目标范围内且档次提升的组合
+      # 找到价格在目标范围内且档次提升的组合（仅火车）
       best_combo = nil
       best_rating_upgrade = 0
       min_hotel_rating = @available_hotels.first.rating
@@ -182,7 +165,7 @@ module V201V250
           
           if rating_upgrade > best_rating_upgrade
             best_rating_upgrade = rating_upgrade
-            best_combo = { type: :train, transport: train, hotel: hotel, room: room }
+            best_combo = { train: train, hotel: hotel, room: room }
           end
         end
       end
@@ -259,13 +242,6 @@ module V201V250
       @base_price = data['base_price'].to_f
       @target_price = data['target_price'].to_f
       @upgrade_budget = data['upgrade_budget'].to_i
-      
-      @available_flights = Flight.where(
-        departure_city: @departure_city,
-        destination_city: @destination_city,
-        flight_date: @travel_date,
-        data_version: 0
-      ).order(price: :asc).to_a
       
       @available_trains = Train.by_route(@departure_city, @destination_city)
         .by_date(@travel_date)

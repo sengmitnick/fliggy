@@ -101,7 +101,7 @@ module V201V250
       
       # 选择最便宜的组合
       train = @available_trains.min_by(&:price_second_class)
-      hotel = @available_hotels.min_by(&:price_per_night)
+      hotel = @available_hotels.min_by(&:price)
       room = hotel.hotel_rooms.where(data_version: 0).first
       
       TrainBooking.create!(

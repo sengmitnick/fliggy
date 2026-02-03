@@ -8,7 +8,7 @@ module V101V150
     self.validator_id = 'v104_book_southeast_asia_cruise_validator'
     self.task_id = '8a7d1f3e-9c2b-4e85-a1f4-5d6c8e2b7a91'
     self.title = '预订东南亚邮轮（爱达新星号，7天6晚，香港出发）'
-    self.description = '预订东南亚航线邮轮，选择爱达新星号7天6晚行程，香港出发，预订海景房（性价比之选）'
+    self.description = '预订东南亚航线邮轮，选择爱达新星号7天6晚行程，香港出发，选择最近可用的班次，预订海景房（性价比之选）'
     self.timeout_seconds = 240
   
     def prepare

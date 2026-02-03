@@ -172,13 +172,20 @@ module V151V200
       return if @hotel_booking.nil?
       
       # 断言6: 酒店入住日期和时长正确
-      add_assertion "酒店入住日期和时长正确（3晚）", weight: 20 do
+      add_assertion "酒店入住日期和时长正确（3晚）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
         
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
         expect(actual_nights).to eq(@nights),
           "住宿天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
+      end
+      
+      # 断言7: 退房日期与返程航班关联正确
+      add_assertion "退房日期与返程航班关联正确", weight: 5 do
+        return_flight_date = @return_booking.flight.flight_date
+        expect(@hotel_booking.check_out_date).to be <= return_flight_date,
+          "退房日期与返程航班不匹配。退房: #{@hotel_booking.check_out_date}, 返程航班: #{return_flight_date}"
       end
     end
   end

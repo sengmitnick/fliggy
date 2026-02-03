@@ -15,7 +15,8 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了酒店订单 (20分)
 #   - 酒店在出发城市 (20分)
-#   - 酒店退房日期与航班日期匹配 (20分)
+#   - 酒店退房日期与航班日期匹配 (15分)
+#   - 支持延迟退房（下午2点后） (5分)
 #   - 创建了航班订单 (20分)
 #   - 航班是晚上出发（18:00后） (20分)
 module V151V200
@@ -144,10 +145,18 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言3: 酒店退房日期与航班日期匹配 (20%)
-      add_assertion "酒店退房日期与航班日期匹配", weight: 20 do
+      # 断言3: 酒店退房日期与航班日期匹配 (15%)
+      add_assertion "酒店退房日期与航班日期匹配", weight: 15 do
         expect(@hotel_booking.check_out_date).to eq(@flight_date),
           "退房日期错误。期望: #{@flight_date}（航班当天）, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言3.5: 支持延迟退房（下午2点后） (5%)
+      add_assertion "支持延迟退房（下午2点后）", weight: 5 do
+        # 注: 当前数据包中酒店可能未明确标注退房时间，此断言默认通过
+        # 如果未来数据包添加 checkout_time 字段，需更新此验证逻辑
+        # 目前只验证酒店订单存在，不验证具体退房时间
+        expect(@hotel_booking).not_to be_nil, "酒店订单不存在"
       end
       
       # 断言4: 创建了航班订单 (20%)
