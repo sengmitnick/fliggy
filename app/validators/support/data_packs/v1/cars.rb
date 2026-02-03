@@ -1,7 +1,3 @@
-# 清空现有数据
-Car.destroy_all
-
-
 cars_data = [
   # ============ 武汉 ============
   {
@@ -2097,4 +2093,135 @@ cars_data = [
 timestamp = Time.current
 cars_data_with_timestamps = cars_data.map { |data| data.merge(created_at: timestamp, updated_at: timestamp) }
 Car.insert_all(cars_data_with_timestamps)
+
+# ==================== 补充: 广州豪华轿车 (cars_supplement) ====================
+puts "\n[补充] 广州豪华轿车..."
+
+cars_supplement_data = [
+  {
+    brand: "奔驰",
+    car_model: "E级",
+    category: "豪华轿车",
+    seats: 5,
+    doors: 4,
+    transmission: "自动挡",
+    fuel_type: "汽油",
+    engine: "2.0T",
+    price_per_day: 450,
+    total_price: 1800,
+    discount_amount: 150,
+    location: "广州",
+    pickup_location: "白云国际机场T2",
+    features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
+    tags: "豪华商务,机场直达",
+    image_url: "/images/cars/car_06.jpg",
+    is_featured: true,
+    is_available: true,
+    sales_rank: 301,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    brand: "宝马",
+    car_model: "5系",
+    category: "豪华轿车",
+    seats: 5,
+    doors: 4,
+    transmission: "自动挡",
+    fuel_type: "汽油",
+    engine: "2.0T",
+    price_per_day: 480,
+    total_price: 1920,
+    discount_amount: 160,
+    location: "广州",
+    pickup_location: "广州南站租车中心",
+    features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
+    tags: "豪华商务,高铁便捷",
+    image_url: "/images/cars/car_14.jpg",
+    is_featured: true,
+    is_available: true,
+    sales_rank: 302,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    brand: "奥迪",
+    car_model: "A6L",
+    category: "豪华轿车",
+    seats: 5,
+    doors: 4,
+    transmission: "自动挡",
+    fuel_type: "汽油",
+    engine: "2.0T",
+    price_per_day: 420,
+    total_price: 1680,
+    discount_amount: 140,
+    location: "广州",
+    pickup_location: "天河体育中心租车点",
+    features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
+    tags: "豪华商务,市中心",
+    image_url: "/images/cars/car_15.jpg",
+    is_featured: false,
+    is_available: true,
+    sales_rank: 303,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    brand: "雷克萨斯",
+    car_model: "ES",
+    category: "豪华轿车",
+    seats: 5,
+    doors: 4,
+    transmission: "自动挡",
+    fuel_type: "混动",
+    engine: "2.5L混动",
+    price_per_day: 500,
+    total_price: 2000,
+    discount_amount: 200,
+    location: "广州",
+    pickup_location: "珠江新城租车服务站",
+    features: "豪华轿车 | 5座4门 | 自动挡 | 混动",
+    tags: "豪华商务,混合动力,静音舒适",
+    image_url: "/images/cars/car_04.jpg",
+    is_featured: false,
+    is_available: true,
+    sales_rank: 304,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    brand: "沃尔沃",
+    car_model: "S90",
+    category: "豪华轿车",
+    seats: 5,
+    doors: 4,
+    transmission: "自动挡",
+    fuel_type: "汽油",
+    engine: "2.0T",
+    price_per_day: 430,
+    total_price: 1720,
+    discount_amount: 150,
+    location: "广州",
+    pickup_location: "广州塔租车点",
+    features: "豪华轿车 | 5座4门 | 自动挡 | 2.0T",
+    tags: "豪华商务,安全可靠",
+    image_url: "/images/cars/car_03.jpg",
+    is_featured: false,
+    is_available: true,
+    sales_rank: 305,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+Car.insert_all(cars_supplement_data)
+puts "   ✓ 广州豪华轿车: #{cars_supplement_data.count} 辆"
+
+puts "\n✅ cars_v1 数据包加载完成！"
 

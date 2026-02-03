@@ -17,10 +17,6 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 
 puts "正在加载 membership_products_v1 数据包..."
 
-# 清空现有数据
-MembershipOrder.destroy_all
-MembershipProduct.destroy_all
-
 # 创建商品数据
 products_data = [
   # ========== 热门商品 ==========

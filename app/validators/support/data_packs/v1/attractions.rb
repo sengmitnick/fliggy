@@ -10,15 +10,6 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 
 puts "正在加载景点数据包..."
 
-# 清理现有数据
-AttractionReview.destroy_all
-ActivityOrder.destroy_all
-TicketOrder.destroy_all
-AttractionActivity.destroy_all
-TicketSupplier.destroy_all
-Ticket.destroy_all
-Attraction.destroy_all
-
 timestamp = Time.current
 
 # ==================== 景点数据 ====================
