@@ -222,7 +222,6 @@ module V201V250
           total_price: best_combo[:outbound][:item].price,
           accept_terms: true,
           status: 'paid',
-        accept_terms: true,
           data_version: @data_version
         )
       else
@@ -236,7 +235,7 @@ module V201V250
           ticket_count: 1,
           total_price: best_combo[:outbound][:item].price_second_class,
           status: 'paid',
-        accept_terms: true,
+          accept_terms: true,
           data_version: @data_version
         )
       end
@@ -252,7 +251,6 @@ module V201V250
           total_price: best_combo[:return][:item].price,
           accept_terms: true,
           status: 'paid',
-        accept_terms: true,
           data_version: @data_version
         )
       else
@@ -266,7 +264,7 @@ module V201V250
           ticket_count: 1,
           total_price: best_combo[:return][:item].price_second_class,
           status: 'paid',
-        accept_terms: true,
+          accept_terms: true,
           data_version: @data_version
         )
       end
@@ -283,7 +281,6 @@ module V201V250
         payment_method: '花呗',
         total_price: best_combo[:hotel][:room].price * 2,
         status: 'paid',
-        payment_method: '花呗',
         data_version: @data_version
       )
     end

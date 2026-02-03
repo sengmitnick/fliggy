@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例503: 预订火车+中档酒店，总预算800-1200元
+# 验证用例187: 预订火车+中档酒店，总预算800-1200元
 #
 # 任务描述:
 #   预订火车+中档酒店，总预算800-1200元
@@ -12,7 +12,7 @@ require_relative '../base_validator'
 #
 # 使用方法:
 #   # 准备阶段
-#   POST /api/tasks/v503_book_mid_range_train_and_hotel_800_1200_validator/start
+#   POST /api/tasks/v187_book_mid_range_train_and_hotel_800_1200_validator/start
 #   
 #   # Agent 通过界面操作完成任务...
 #   

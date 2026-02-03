@@ -163,7 +163,6 @@ module V201V250
         total_price: best_combo[:outbound].price,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
       
@@ -177,7 +176,6 @@ module V201V250
         total_price: best_combo[:return].price,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
       

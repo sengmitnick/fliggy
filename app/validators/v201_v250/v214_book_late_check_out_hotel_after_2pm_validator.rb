@@ -88,10 +88,10 @@ module V201V250
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 选择价格合理的酒店（过滤nil价格）
-      valid_hotels = @available_hotels.select { |h| h.price_per_night.present? }
+      valid_hotels = @available_hotels.select { |h| h.price.present? }
       raise "未找到有效价格的酒店" if valid_hotels.empty?
       
-      hotel = valid_hotels.min_by(&:price_per_night)
+      hotel = valid_hotels.min_by(&:price)
       room = hotel.hotel_rooms.where(data_version: 0).where.not(price: nil).order(price: :asc).first
       raise "未找到酒店房间" unless room
       

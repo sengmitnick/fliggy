@@ -85,7 +85,7 @@ module V151V200
 
     def verify
       # 断言1: 创建了跟团游订单
-      add_assertion "创建了跟团游订单", weight: 25 do
+      add_assertion "创建了跟团游订单", weight: 20 do
         all_bookings = TourGroupBooking
           .joins(:tour_group_product)
           .includes(:tour_group_product)
@@ -137,10 +137,18 @@ module V151V200
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
       # 断言6: 接机时间在第一天
-      add_assertion "接机时间在第一天", weight: 15 do
+      add_assertion "接机时间在第一天", weight: 10 do
         transfer_date = @pickup_transfer.pickup_datetime.to_date
         expect(transfer_date).to eq(@tour_date),
           "接机时间错误。期望: #{@tour_date}（第一天）, 实际: #{transfer_date}"
+      end
+      
+      # 断言7: 送机时间在最后一天（第3天）
+      add_assertion "送机时间在最后一天（第#{@duration_days}天）", weight: 10 do
+        expected_return_date = @tour_date + (@duration_days - 1).days
+        transfer_date = @dropoff_transfer.pickup_datetime.to_date
+        expect(transfer_date).to eq(expected_return_date),
+          "送机时间错误。期望: #{expected_return_date}（第#{@duration_days}天）, 实际: #{transfer_date}"
       end
     end
   end

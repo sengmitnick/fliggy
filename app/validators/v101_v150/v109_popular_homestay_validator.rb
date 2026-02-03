@@ -7,8 +7,8 @@ module V101V150
   class V109PopularHomestayValidator < BaseValidator
     self.validator_id = 'v109_popular_homestay_validator'
     self.task_id = 'c7f2e8d9-3a1b-4c6e-9d8f-7a2e5b4c1d93'
-    self.title = '预订网红民宿（成都宽窄巷子，高销量+高评分）'
-    self.description = '在成都宽窄巷子地区预订销量最高且评分>=4.5的网红民宿，入住3晚'
+    self.title = '预订网红民宿（成都宽窄巷子，高评分）'
+    self.description = '在成都宽窄巷子地区预订评分最高且>=4.5的网红民宿，入住3晚'
     self.timeout_seconds = 300
   
     def prepare
@@ -31,7 +31,7 @@ module V101V150
       @hottest_homestay = @qualified_homestays.order(rating: :desc).first
     
       {
-        task: "请在#{@city}#{@area}地区预订网红民宿（销量最高且评分>=#{@min_rating}分），入住#{@nights}晚（5天后入住，#{@check_in_date.strftime('%Y年%m月%d日')}到#{@check_out_date.strftime('%Y年%m月%d日')}）",
+        task: "请在#{@city}#{@area}地区预订网红民宿（评分最高且>=#{@min_rating}分），入住#{@nights}晚（5天后入住，#{@check_in_date.strftime('%Y年%m月%d日')}到#{@check_out_date.strftime('%Y年%m月%d日')}）",
         requirements: {
           city: @city,
           area: @area,
@@ -41,8 +41,8 @@ module V101V150
           check_out_date: @check_out_date.to_s,
           nights: @nights,
           min_rating: @min_rating,
-          optimization: 'highest_sales_with_good_rating',
-          optimization_description: '销量最高且评分>=4.5分（网红民宿）'
+          optimization: 'highest_rating',
+          optimization_description: '评分最高且>=4.5分（网红民宿）'
         },
         hint: "#{@city}#{@area}地区有多家评分>=#{@min_rating}分的民宿可选，请选择评分最高的（网红民宿）",
         statistics: {
@@ -96,7 +96,7 @@ module V101V150
           "评分不符合要求。期望>=#{@min_rating}分，实际: #{@booking.hotel.rating}分"
       end
     
-      add_assertion "选择了销量最高的网红民宿", weight: 30 do
+      add_assertion "选择了评分最高的网红民宿", weight: 30 do
         # 获取所有符合条件的民宿（评分>=4.5）
         qualified_homestays = Hotel.where(
           hotel_type: 'homestay',
