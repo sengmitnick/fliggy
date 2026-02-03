@@ -39,8 +39,8 @@ module V101V150
   class V102InstantBookChengduHotelThisWeekendValidator < BaseValidator
     self.validator_id = 'v102_instant_book_chengdu_hotel_this_weekend_validator'
     self.task_id = 'e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b'
-    self.title = '立即预约成都地区酒店套餐（本周六入住，2晚，豪华套餐）'
-    self.description = '需要搜索成都地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择豪华套餐（包含早餐+晚餐），并指定本周六开始入住2晚'
+    self.title = '立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）'
+    self.description = '需要搜索成都地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择豪华套餐（包含早餐+晚餐），并指定下周六开始入住2晚'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -50,11 +50,11 @@ module V101V150
       @night_count = 2
       @quantity = 1
     
-      # 计算本周六的日期
+      # 计算下周六的日期（提前预订更符合酒店预订场景）
       today = Date.today
       days_until_saturday = (6 - today.wday) % 7
       days_until_saturday = 7 if days_until_saturday == 0 # 如果今天是周六，则选择下周六
-      @check_in_date = today + days_until_saturday.days
+      @check_in_date = today + days_until_saturday.days + 7.days # 加7天确保是下周六
       @check_out_date = @check_in_date + @night_count.days
     
       # 查找成都地区的2晚套餐（注意：查询基线数据 data_version=0）
@@ -66,13 +66,13 @@ module V101V150
     
       # 返回给 Agent 的任务信息
       {
-        task: "请立即预约#{@city}地区的酒店套餐（#{@night_count}晚，1份），入住日期：本周六（#{@check_in_date.strftime('%Y年%m月%d日')}）开始，连住#{@night_count}晚，请选择豪华套餐选项（包含早餐和晚餐）",
+        task: "请立即预约#{@city}地区的酒店套餐（#{@night_count}晚，1份），入住日期：下周六（#{@check_in_date.strftime('%Y年%m月%d日')}）开始，连住#{@night_count}晚，请选择豪华套餐选项（包含早餐和晚餐）",
         city: @city,
         night_count: @night_count,
         quantity: @quantity,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        hint: "立即预约模式需要选择具体的酒店和入住日期。本周六是#{@check_in_date.strftime('%m月%d日')}。系统中的酒店套餐通常有多个选项，请选择豪华套餐选项（包含早餐+晚餐，服务最全面）。",
+        hint: "立即预约模式需要选择具体的酒店和入住日期。下周六是#{@check_in_date.strftime('%m月%d日')}。系统中的酒店套餐通常有多个选项，请选择豪华套餐选项（包含早餐+晚餐，服务最全面）。",
         available_packages_count: @available_packages.count
       }
     end
@@ -130,17 +130,17 @@ module V101V150
           "建议选择名称中包含'豪华'的套餐选项。"
       end
     
-      # 断言6: 入住日期正确（本周六）
-      add_assertion "入住日期正确（本周六开始，连住#{@night_count}晚）", weight: 15 do
+      # 断言6: 入住日期正确（下周六）
+      add_assertion "入住日期正确（下周六开始，连住#{@night_count}晚）", weight: 15 do
         actual_check_in = @package_order.check_in_date
         actual_check_out = @package_order.check_out_date
       
         expect(actual_check_in).not_to be_nil, "未设置入住日期（立即预约模式必须设置入住日期）"
         expect(actual_check_out).not_to be_nil, "未设置离店日期（立即预约模式必须设置离店日期）"
       
-        # 入住日期应该是本周六
+        # 入住日期应该是下周六
         expect(actual_check_in).to eq(@check_in_date),
-          "入住日期错误。期望: #{@check_in_date.strftime('%Y年%m月%d日')}（本周六）, 实际: #{actual_check_in&.strftime('%Y年%m月%d日')}"
+          "入住日期错误。期望: #{@check_in_date.strftime('%Y年%m月%d日')}（下周六）, 实际: #{actual_check_in&.strftime('%Y年%m月%d日')}"
       
         # 离店日期应该是入住日期 + night_count 天
         expect(actual_check_out).to eq(@check_out_date),
@@ -189,7 +189,7 @@ module V101V150
       )
     end
   
-    # 模拟 AI Agent 操作：立即预约成都地区豪华套餐（本周六入住）
+    # 模拟 AI Agent 操作：立即预约成都地区豪华套餐（下周六入住）
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
