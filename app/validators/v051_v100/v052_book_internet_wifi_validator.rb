@@ -137,16 +137,9 @@ module V051V100
   
     # 模拟 AI Agent 执行（用于开发测试）
     def simulate
-      puts "🤖 模拟预订流程："
-      puts "1. 查询所有WiFi..."
       wifis = InternetWifi.where(data_version: 0)
-      puts "   找到 #{wifis.count} 个WiFi产品"
-    
-      puts "2. 对比价格..."
       cheapest_wifi = wifis.min_by(&:daily_price)
-      puts "   最便宜: #{cheapest_wifi.name}（#{cheapest_wifi.daily_price}元/天）"
     
-      puts "3. 创建订单..."
       start_date = Date.current + 7.days
       end_date = start_date + (@rental_days - 1).days
     
@@ -180,8 +173,6 @@ module V051V100
         },
         data_version: 999
       )
-    
-      puts "✅ 订单创建成功！ID: #{order.id}, 总价: #{order.total_price}元"
     end
     end
 end
