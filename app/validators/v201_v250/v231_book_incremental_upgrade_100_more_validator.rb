@@ -145,9 +145,9 @@ module V201V250
       min_hotel_rating = @available_hotels.first.rating
       
       # 尝试航班组合
-      @available_flights.first(5).each do |flight|
-        @available_hotels.first(10).each do |hotel|
-          room = hotel.hotel_rooms.where(data_version: 0).first
+      @available_flights.first(10).each do |flight|
+        @available_hotels.each do |hotel|
+          room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
           next unless room
           
           total = flight.price + room.price
@@ -167,9 +167,9 @@ module V201V250
       end
       
       # 尝试火车组合
-      @available_trains.first(5).each do |train|
-        @available_hotels.first(10).each do |hotel|
-          room = hotel.hotel_rooms.where(data_version: 0).first
+      @available_trains.each do |train|
+        @available_hotels.each do |hotel|
+          room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
           next unless room
           
           total = train.price_second_class + room.price
