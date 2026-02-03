@@ -9,6 +9,8 @@ class Hotel < ApplicationRecord
   has_many :hotel_facilities, dependent: :destroy
   has_many :hotel_bookings, dependent: :destroy
   has_many :hotel_packages, dependent: :nullify
+  has_many :hotel_highlights, -> { order(:display_order) }, dependent: :destroy
+  has_many :hotel_nearby_places, -> { order(:display_order) }, dependent: :destroy
 
   serialize :features, coder: JSON
 

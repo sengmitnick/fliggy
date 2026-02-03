@@ -6,6 +6,8 @@
 require_relative '../../../../../app/helpers/image_seed_helper'
 
 puts "🧹 清理现有酒店数据..."
+HotelHighlight.destroy_all
+HotelNearbyPlace.destroy_all
 HotelFacility.destroy_all
 HotelReview.destroy_all
 HotelPolicy.destroy_all
@@ -577,6 +579,161 @@ else
   puts "✓ 所有酒店价格已一致，无需同步"
 end
 
+puts "\n🌟 创建酒店亮点数据..."
+highlights_data = []
+
+# 为前50家酒店添加亮点数据（示例数据）
+Hotel.limit(50).find_each.with_index do |hotel, index|
+  hotel_id = hotel.id
+  
+  # 榜单信息亮点
+  if hotel.star_level && hotel.star_level >= 4
+    highlights_data << {
+      hotel_id: hotel_id,
+      title: "《榜单》入选#{hotel.region}酒店品质榜",
+      description: "#{hotel.city}人文古迹景点榜·第#{rand(1..10)}名",
+      icon: "star",
+      display_order: 1,
+      data_version: '0',
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 健身中心亮点
+  if hotel.facilities&.include?("健身房") || hotel.features&.include?("健身房")
+    highlights_data << {
+      hotel_id: hotel_id,
+      title: "活力健身中心",
+      description: "配备先进器械的健身房，满足多元化锻炼需求，专业教练指导，助您塑造健康体魄，焕发无限活力。",
+      icon: "fitness",
+      display_order: 2,
+      data_version: '0',
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 亲子客房亮点（部分酒店）
+  if index.even? && hotel.star_level && hotel.star_level >= 3
+    highlights_data << {
+      hotel_id: hotel_id,
+      title: "亲子客房",
+      description: "动漫IP为主题，精选儿童用品，房内宽敞于乐设施齐全，可按需选择床型，打造家庭亲子温馨空间。",
+      icon: "family",
+      display_order: 3,
+      data_version: '0',
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+HotelHighlight.insert_all(highlights_data) if highlights_data.any?
+puts "  ✓ 创建了 #{highlights_data.size} 条酒店亮点数据"
+
+puts "\n📍 创建酒店周边信息数据..."
+nearby_places_data = []
+
+# 为前50家酒店添加周边信息
+Hotel.limit(50).find_each.with_index do |hotel, index|
+  hotel_id = hotel.id
+  
+  # 地铁站
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "地铁站",
+    name: "#{['南光', '科苑', '深大', '高新园', '车公庙', '市民中心'].sample}(地铁站)",
+    distance: "距酒店步行#{rand(200..800)}米",
+    description: "",
+    display_order: 1,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 火车站/汽车站
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "火车站",
+    name: "#{hotel.city}#{['西站', '站', '南站', '北站'].sample}",
+    distance: "距酒店驾车#{rand(2..10)}.#{rand(0..9)}公里",
+    description: "",
+    display_order: 2,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 机场
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "机场",
+    name: "#{hotel.city}#{['宝安', '浦东', '首都', '白云', '萧山'].sample}国际机场",
+    distance: "距酒店驾车#{rand(15..35)}.#{rand(0..9)}公里",
+    description: "",
+    display_order: 3,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 景点1
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "景点",
+    name: "#{['南头古城', '世界之窗', '欢乐谷', '东部华侨城', '大梅沙'].sample}",
+    distance: "距酒店直线#{rand(1..5)}.#{rand(0..9)}公里",
+    description: "#{hotel.city}#{['人文古迹', '主题乐园', '自然风光'].sample}景点榜·第#{rand(1..10)}名",
+    display_order: 4,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 景点2
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "景点",
+    name: "#{['蛇口', '海上世界', '莲花山公园', '深圳湾公园'].sample}",
+    distance: "距酒店直线#{rand(2..8)}.#{rand(0..9)}公里",
+    description: "",
+    display_order: 5,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 购物中心1
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "购物",
+    name: "#{['海岸城', '万象城', '益田假日广场', 'COCO Park'].sample}",
+    distance: "距酒店直线#{rand(1..3)}.#{rand(0..9)}公里",
+    description: "",
+    display_order: 6,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 购物中心2
+  nearby_places_data << {
+    hotel_id: hotel_id,
+    place_type: "购物",
+    name: "#{['前海周大福全球商品', '华润万家', '天虹商场'].sample}",
+    distance: "距酒店直线#{rand(1..4)}公里",
+    description: "",
+    display_order: 7,
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+HotelNearbyPlace.insert_all(nearby_places_data) if nearby_places_data.any?
+puts "  ✓ 创建了 #{nearby_places_data.size} 条酒店周边信息数据"
+
 puts "\n📊 统计信息："
 puts "  总酒店数: #{Hotel.count}"
 puts "  - 国内酒店: #{Hotel.where(hotel_type: 'hotel').count}"
@@ -584,5 +741,7 @@ puts "  - 民宿: #{Hotel.where(hotel_type: 'homestay').count}"
 puts "  - 5星级: #{Hotel.where(star_level: 5).count}"
 puts "  - 4星级: #{Hotel.where(star_level: 4).count}"
 puts "  - 3星级: #{Hotel.where(star_level: 3).count}"
+puts "  总亮点数: #{HotelHighlight.count}"
+puts "  总周边信息数: #{HotelNearbyPlace.count}"
 
 puts "\n✅ 酒店数据包加载完成！"

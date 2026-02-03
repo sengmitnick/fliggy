@@ -352,9 +352,9 @@ created_count = 0
 all_hotels.each do |hotel|
   # 为每个酒店创建3种房型（如果不存在）
   [
-    { type: 'standard', price: hotel.price, bed_type: '双床', max_guests: 2, area: 25 },
-    { type: 'deluxe', price: (hotel.price * 1.5).round, bed_type: '大床', max_guests: 2, area: 35 },
-    { type: 'suite', price: (hotel.price * 2).round, bed_type: '双床+沙发床', max_guests: 4, area: 50 }
+    { type: '标准双床房', price: hotel.price, bed_type: '双床', max_guests: 2, area: 25 },
+    { type: '豪华大床房', price: (hotel.price * 1.5).round, bed_type: '大床', max_guests: 2, area: 35 },
+    { type: '行政套房', price: (hotel.price * 2).round, bed_type: '双床+沙发床', max_guests: 4, area: 50 }
   ].each do |room_data|
     room = HotelRoom.find_or_initialize_by(
       hotel_id: hotel.id,

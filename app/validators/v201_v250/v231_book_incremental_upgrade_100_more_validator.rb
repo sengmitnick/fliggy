@@ -150,21 +150,34 @@ module V201V250
       
       raise "未找到符合升级要求的组合" if best_combo.nil?
       
-      # 创建火车订单
-      TrainBooking.create!(
-        user: user,
-        train: best_combo[:train],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
-        seat_type: 'second_class',
-        ticket_count: 1,
-        total_price: best_combo[:train].price_second_class,
-        status: 'paid',
-        accept_terms: true,
-        data_version: @data_version
-      )
-      
+      # 创建交通订单
+      if best_combo[:type] == :flight
+        Booking.create!(
+          user: user,
+          flight: best_combo[:transport],
+          passenger_name: user.name,
+          passenger_id_number: '110101199001011234',
+          contact_phone: '13800138000',
+          total_price: best_combo[:transport].price,
+          accept_terms: true,
+          status: 'paid',
+          data_version: @data_version
+        )
+      else
+        TrainBooking.create!(
+          user: user,
+          train: best_combo[:transport],
+          passenger_name: user.name,
+          passenger_id_number: '110101199001011234',
+          contact_phone: '13800138000',
+          seat_type: 'second_class',
+          ticket_count: 1,
+          total_price: best_combo[:transport].price_second_class,
+          status: 'paid',
+          accept_terms: true,
+          data_version: @data_version
+        )
+      end
       
       # 创建酒店订单
       HotelBooking.create!(

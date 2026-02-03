@@ -111,7 +111,6 @@ module V251V300
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
     end
