@@ -22,9 +22,7 @@ module V101V150
     self.description = '预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为3位成人'
     self.timeout_seconds = 300
     
-    def initialize
-      super
-      
+    def prepare
       # 核心参数
       @ship_keyword = '光谱'                # 船只关键词（海洋光谱号）
       @departure_port_keyword = '迈阿密'    # 出发港关键词（迈阿密）
@@ -33,6 +31,8 @@ module V101V150
       @expected_cabin_category = 'balcony'  # 预期舱房类型（阳台房）
       @expected_month = 5                   # 5月出发（初夏加勒比航线）
       @adult_count = 3                      # 成人数量
+      
+      {}
     end
 
     def verify
@@ -41,7 +41,7 @@ module V101V150
       add_assertion "订单已创建", weight: 20 do
         all_orders = CruiseOrder
           .joins(cruise_product: { cruise_sailing: :cruise_ship })
-          .where(cruise_ships: { name: @ship_keyword })
+          .where('cruise_ships.name LIKE ?', "%#{@ship_keyword}%")
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
@@ -53,7 +53,7 @@ module V101V150
         @order = all_orders.find do |o|
           sailing = o.cruise_product.cruise_sailing
           sailing.departure_port.include?(@departure_port_keyword) &&
-            o.cruise_product.cabin_category == @expected_cabin_category
+            o.cruise_product.cabin_type.category == @expected_cabin_category
         end
         
         expect(@order).not_to be_nil,
@@ -105,7 +105,7 @@ module V101V150
       # 断言6: 验证舱房类型正确（权重15%）
       # 确认预订的是阳台房（balcony）
       add_assertion "舱房类型正确（阳台房）", weight: 15 do
-        cabin_category = @order.cruise_product.cabin_category
+        cabin_category = @order.cruise_product.cabin_type.category
         expect(cabin_category).to eq(@expected_cabin_category),
           "舱房类型错误。期望: #{@expected_cabin_category}（阳台房），实际: #{cabin_category}"
       end
@@ -141,6 +141,67 @@ module V101V150
         expect(actual_sailing.departure_date).to eq(earliest_sailing.departure_date),
           "未选择最近日期。期望: #{earliest_sailing.departure_date}（最早），实际: #{actual_sailing.departure_date}"
       end
+    end
+
+    def simulate
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    
+      # 查找海洋光谱号
+      ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
+      raise "未找到符合条件的船只" unless ship
+    
+      # 查找加勒比航线
+      caribbean_route = CruiseRoute.where(data_version: 0).find_by(region: 'caribbean')
+      raise "未找到加勒比航线" unless caribbean_route
+    
+      # 查找符合条件的班次（5月份）
+      available_sailings = CruiseSailing.where(
+        data_version: 0,
+        cruise_ship_id: ship.id,
+        cruise_route_id: caribbean_route.id,
+        duration_days: @expected_days,
+        duration_nights: @expected_nights
+      ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+       .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+       .where('departure_date >= ?', Date.current)
+      raise "未找到符合条件的班次" if available_sailings.empty?
+    
+      # 选择最近的班次
+      nearest_sailing = available_sailings.order(departure_date: :asc).first
+    
+      # 查找阳台房类型
+      cabin_type = CabinType.where(data_version: 0, cruise_ship_id: ship.id, category: @expected_cabin_category).first
+      raise "未找到符合条件的舱房类型" unless cabin_type
+    
+      # 创建或查找邮轮产品
+      cruise_product = CruiseProduct.find_or_create_by!(
+        cruise_sailing_id: nearest_sailing.id,
+        cabin_type_id: cabin_type.id,
+        data_version: @data_version
+      ) do |product|
+        product.merchant_name = '皇家加勒比旗舰店'
+        product.price_per_person = 9800.0
+        product.occupancy_requirement = 2
+        product.stock = 10
+        product.sales_count = 0
+        product.is_refundable = true
+        product.requires_confirmation = false
+        product.status = 'on_sale'
+      end
+    
+      total_price = cruise_product.price_per_person * @adult_count
+    
+      CruiseOrder.create!(
+        user_id: user.id,
+        cruise_product_id: cruise_product.id,
+        quantity: @adult_count,
+        contact_name: '王五',
+        contact_phone: '13800138008',
+        total_price: total_price,
+        accept_terms: true,
+        status: 'pending',
+        data_version: @data_version
+      )
     end
   end
 end
