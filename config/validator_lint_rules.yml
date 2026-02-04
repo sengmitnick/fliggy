@@ -1,0 +1,175 @@
+# Validator Lint Rules Configuration
+# 验证器静态分析规则配置
+#
+# 用途：定义过时字段、常见关联、视图字段映射等规则
+# 更新时间：2026-02-04
+
+rules:
+  # 1. 过时字段检测规则
+  # 格式：
+  #   模型名:
+  #     - field: 字段名
+  #       reason: 废弃原因
+  #       alternative: 替代方案
+  #       severity: HIGH/MEDIUM/LOW
+  stale_fields:
+    Flight:
+      - field: discount_price
+        reason: "业务逻辑已迁移到 FlightOffer.cashback_amount，前端不再使用此字段"
+        alternative: "使用 FlightOffer.cashback_amount 计算返现后成本"
+        severity: HIGH
+        deprecated_at: "2025-12-01"
+        migration_guide: "docs/VALIDATOR_STALE_FIELD_DETECTION_PROBLEM.md"
+      
+      - field: final_price
+        reason: "方法依赖过时字段 discount_price，应使用 FlightOffer 计算"
+        alternative: "使用 offer.price - offer.cashback_amount"
+        severity: MEDIUM
+        deprecated_at: "2025-12-01"
+      
+      - field: discount_percent
+        reason: "方法依赖过时字段 discount_price"
+        alternative: "使用 FlightOffer 计算折扣百分比"
+        severity: MEDIUM
+        deprecated_at: "2025-12-01"
+    
+    # 预留其他模型（待调查）
+    Train: []
+    Hotel: []
+    HotelRoom: []
+    TourGroupProduct: []
+    
+  # 2. 常见关联检测规则（N+1 查询检测）
+  # 格式：模型名 => 常用关联列表
+  common_associations:
+    TicketOrder:
+      - ticket
+      - user
+    HotelBooking:
+      - hotel
+      - room
+      - user
+    TrainBooking:
+      - train
+      - user
+      - passengers
+    TourGroupBooking:
+      - tour_group_product
+      - travel_agency
+      - booking_travelers
+    Booking:
+      - flight
+      - passenger
+      - user
+    Flight:
+      - flight_offers
+    FlightOffer:
+      - flight
+    Ticket:
+      - attraction
+    Attraction:
+      - tickets
+      - attraction_activities
+    
+  # 3. 视图字段映射规则（验证器与视图对齐检查）
+  # 格式：
+  #   模型名:
+  #     validator_fields: 验证器中可能使用的字段
+  #     view_files: 相关视图文件路径
+  view_field_mappings:
+    Flight:
+      validator_fields:
+        - discount_price  # 过时字段，视图不应使用
+        - final_price     # 依赖过时字段
+      view_files:
+        - app/views/flights/search.html.erb
+        - app/views/flights/show.html.erb
+        - app/views/bookings/new.html.erb
+        - app/views/flights/multi_city_results.html.erb
+    
+    FlightOffer:
+      validator_fields:
+        - price
+        - cashback_amount
+        - provider_name
+      view_files:
+        - app/views/flights/search.html.erb
+        - app/views/flights/show.html.erb
+        - app/views/bookings/new.html.erb
+    
+    Ticket:
+      validator_fields:
+        - ticket_type
+        - price
+        - name
+      view_files:
+        - app/views/tickets/index.html.erb
+        - app/views/tickets/select.html.erb
+    
+    TicketOrder:
+      validator_fields:
+        - visit_date
+        - quantity
+        - total_price
+      view_files:
+        - app/views/ticket_orders/new.html.erb
+        - app/views/ticket_orders/show.html.erb
+    
+    HotelBooking:
+      validator_fields:
+        - check_in_date
+        - check_out_date
+        - total_price
+      view_files:
+        - app/views/hotel_bookings/new.html.erb
+        - app/views/hotel_bookings/show.html.erb
+    
+    Train:
+      validator_fields:
+        - departure_city
+        - arrival_city
+        - departure_time
+        - price_second_class
+        - price_first_class
+      view_files:
+        - app/views/trains/search.html.erb
+        - app/views/trains/show.html.erb
+    
+    TrainBooking:
+      validator_fields:
+        - seat_class
+        - departure_date
+        - total_price
+      view_files:
+        - app/views/train_bookings/new.html.erb
+        - app/views/train_bookings/show.html.erb
+
+# 4. 排除规则（白名单）
+# 某些验证器可能有合理理由使用过时字段（如测试历史兼容性）
+exclusions:
+  validators: []
+    # 示例：
+    # - v000_legacy_compatibility_validator
+  
+  fields: []
+    # 示例：
+    # - Flight.discount_price  # 在特定验证器中允许使用
+
+# 5. 严格模式配置
+strict_mode:
+  enabled: true
+  fail_on_high_severity: true      # HIGH 级别问题直接失败
+  fail_on_medium_severity: false   # MEDIUM 级别问题不失败（警告）
+  fail_on_low_severity: false      # LOW 级别问题不失败
+
+# 6. 报告配置
+reporting:
+  verbose: true                    # 详细输出
+  show_suggestions: true           # 显示修复建议
+  show_line_numbers: true          # 显示行号
+  group_by_severity: true          # 按严重程度分组
+  
+# 7. 性能配置
+performance:
+  max_file_size_kb: 500            # 跳过超大文件（避免性能问题）
+  cache_enabled: false             # 是否缓存分析结果
