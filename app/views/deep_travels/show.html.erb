@@ -219,7 +219,7 @@
       </h3>
       
       <div class="flex gap-3 overflow-x-auto no-scrollbar">
-        <% DeepTravelProduct.includes(:deep_travel_guide, images_attachments: :blob)
+        <% DeepTravelProduct.includes(:deep_travel_guide)
                             .where.not(deep_travel_guide_id: @guide.id)
                             .order(sales_count: :desc)
                             .limit(5).each do |rec_product| %>

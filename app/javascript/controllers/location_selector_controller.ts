@@ -5,6 +5,8 @@ export default class extends Controller<HTMLElement> {
     // stimulus-validator: disable-next-line
     "modal",
     // stimulus-validator: disable-next-line
+    "modalTitle",
+    // stimulus-validator: disable-next-line
     "searchInput",
     // stimulus-validator: disable-next-line
     "locationList",
@@ -14,6 +16,7 @@ export default class extends Controller<HTMLElement> {
 
   static values = {
     locationType: String, // "from" or "to"
+    // stimulus-validator: disable-next-line
     currentCity: String, // current selected city
     arrivalCity: String, // arrival city from flight (for transfers)
     apiEndpoint: { type: String, default: "/cars/locations" }, // API endpoint for locations
@@ -21,6 +24,10 @@ export default class extends Controller<HTMLElement> {
 
   // stimulus-validator: disable-next-line
   declare readonly modalTarget: HTMLElement
+  // stimulus-validator: disable-next-line
+  declare readonly hasModalTitleTarget: boolean
+  // stimulus-validator: disable-next-line
+  declare readonly modalTitleTarget: HTMLElement
   // stimulus-validator: disable-next-line
   declare readonly searchInputTarget: HTMLInputElement
   // stimulus-validator: disable-next-line
@@ -139,6 +146,11 @@ export default class extends Controller<HTMLElement> {
     
     console.log('[LocationSelector] currentCityValue after sync:', JSON.stringify(this.currentCityValue))
     console.log('[LocationSelector] currentCityValue bytes:', Array.from(this.currentCityValue || '').map(c => c.charCodeAt(0)))
+    
+    // Update modal title with current city
+    if (this.hasModalTitleTarget && this.currentCityValue) {
+      this.modalTitleTarget.textContent = `选择${this.currentCityValue}的地点`
+    }
     
     // Clear previous content immediately
     this.locationListTarget.innerHTML = '<div class="text-center py-8 text-text-muted">加载中...</div>'

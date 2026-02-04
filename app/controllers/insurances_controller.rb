@@ -1,5 +1,8 @@
 class InsurancesController < ApplicationController
+  include CitySelectorDataConcern
+  
   before_action :authenticate_user!
+  before_action :load_city_selector_data, only: [:index, :search, :show]
 
   def index
     # Homepage: featured and official select products

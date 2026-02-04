@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   before_action :set_current_request_details
   before_action :restore_validator_context
 
-  helper_method :current_user, :user_signed_in?, :unread_notifications_count
+  helper_method :current_user, :user_signed_in?, :unread_notifications_count, :current_validator_execution
   # Authentication public methods generated end
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
@@ -64,6 +64,10 @@ class ApplicationController < ActionController::Base
   # WHY COOKIE INSTEAD OF RAILS SESSION?
   # - Rails session is shared across all tabs → multi-tab validation fails
   # - Independent cookie allows each tab to maintain its own session_id
+  # 
+  # SIDE EFFECT:
+  # - Sets @current_validator_execution instance variable for use in controllers
+  # - Allows controllers to access validator state_data via current_validator_execution helper
   def restore_validator_context
     return unless user_signed_in?
     
@@ -96,6 +100,9 @@ class ApplicationController < ActionController::Base
       
       return unless execution
       
+      # Store execution for use in controllers (e.g., reading state_data)
+      @current_validator_execution = execution
+      
       # 获取 data_version
       data_version = execution.data_version
       return unless data_version
@@ -113,6 +120,12 @@ class ApplicationController < ActionController::Base
     rescue StandardError => e
       Rails.logger.error "[Validator Context] Failed to restore: #{e.message}"
     end
+  end
+
+  # Helper method: Get current validator execution (nil if not in validator context)
+  # Usage in controllers: current_validator_execution&.state_data
+  def current_validator_execution
+    @current_validator_execution
   end
 
   def auto_login_default_user

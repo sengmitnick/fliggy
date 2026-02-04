@@ -410,10 +410,18 @@ export default class extends Controller<HTMLElement> {
     const cityButtons = this.element.querySelectorAll('[data-city-name]')
     
     cityButtons.forEach((button) => {
-      const cityName = (button as HTMLElement).dataset.cityName?.toLowerCase() || ''
       const cityElement = button as HTMLElement
+      const cityName = cityElement.dataset.cityName?.toLowerCase() || ''
+      const cityPinyin = cityElement.dataset.cityPinyin?.toLowerCase() || ''
+      const cityEnglish = cityElement.dataset.cityEnglish?.toLowerCase() || ''
       
-      if (!query || cityName.includes(query)) {
+      // Search by Chinese name, pinyin, or English name
+      const matches = !query || 
+                     cityName.includes(query) || 
+                     cityPinyin.includes(query) || 
+                     cityEnglish.includes(query)
+      
+      if (matches) {
         cityElement.classList.remove('hidden')
       } else {
         cityElement.classList.add('hidden')
