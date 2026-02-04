@@ -22,9 +22,8 @@ class InsuranceOrdersController < ApplicationController
     @contacts = current_user.contacts.order(is_default: :desc, created_at: :desc)
     @default_contact = @contacts.find_by(is_default: true) || @contacts.first
     
-    # Load user passengers (出行人列表)
+    # Load user passengers (投保人列表)
     @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
-    @default_passenger = @passengers.find_by(is_self: true) || @passengers.first
     
     # Get dates and destination from params
     @start_date = params[:start_date]
@@ -69,16 +68,17 @@ class InsuranceOrdersController < ApplicationController
 
   def create
     @product = InsuranceProduct.find(params[:insurance_order][:insurance_product_id])
-    policyholder_id = params[:insurance_order][:policyholder_id]
     
-    # Get policyholder (passenger) information
+    # Get insured persons from form
+    insured_persons_params = params[:insurance_order][:insured_persons] || []
     insured_persons = []
-    if policyholder_id.present?
-      passenger = current_user.passengers.find_by(id: policyholder_id)
-      if passenger
+    
+    # Parse insured persons array
+    insured_persons_params.each do |_index, person_data|
+      if person_data[:name].present? && person_data[:id_number].present?
         insured_persons << {
-          name: passenger.name,
-          id_number: passenger.id_number
+          name: person_data[:name],
+          id_number: person_data[:id_number]
         }
       end
     end
@@ -89,6 +89,14 @@ class InsuranceOrdersController < ApplicationController
     @order.source = 'standalone'
     @order.quantity = insured_persons.size
     @order.status = 'pending'
+    
+    # CRITICAL: Recalculate unit_price with correct days and city_id
+    # The unit_price from form may be outdated if quantity changed
+    if @order.start_date && @order.end_date
+      days = (@order.end_date - @order.start_date).to_i + 1
+      city_id = params[:city_id]
+      @order.unit_price = @product.calculate_price(days, city_id: city_id)
+    end
 
     if @order.save
       redirect_to insurance_order_path(@order), notice: '保险订单创建成功，请完成支付'
@@ -159,7 +167,6 @@ class InsuranceOrdersController < ApplicationController
     
     # Load user passengers
     @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
-    @default_passenger = @passengers.find_by(is_self: true) || @passengers.first
     
     # Get dates and destination from params
     @start_date = params[:insurance_order][:start_date]
@@ -195,7 +202,8 @@ class InsuranceOrdersController < ApplicationController
       :destination,
       :destination_type,
       :unit_price,
-      :quantity
+      :quantity,
+      insured_persons: {}
     )
   end
 end

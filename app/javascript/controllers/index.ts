@@ -107,6 +107,8 @@ import CruiseSearchController from "./cruise_search_controller"
 import InsuranceFilterController from "./insurance_filter_controller"
 import ContactSelectorController from "./contact_selector_controller"
 import PolicyholderSelectorController from "./policyholder_selector_controller"
+import InsuredPersonCounterController from "./insured_person_counter_controller"
+import InsuredPersonSelectorController from "./insured_person_selector_controller"
 import InsuranceSearchValidationController from "./insurance_search_validation_controller"
 import BookingQuantityController from "./booking_quantity_controller"
 import TravelerToggleController from "./traveler_toggle_controller"
@@ -241,6 +243,8 @@ application.register("cruise-search", CruiseSearchController)
 application.register("insurance-filter", InsuranceFilterController)
 application.register("contact-selector", ContactSelectorController)
 application.register("policyholder-selector", PolicyholderSelectorController)
+application.register("insured-person-counter", InsuredPersonCounterController)
+application.register("insured-person-selector", InsuredPersonSelectorController)
 application.register("insurance-search-validation", InsuranceSearchValidationController)
 application.register("booking-quantity", BookingQuantityController)
 application.register("traveler-toggle", TravelerToggleController)
