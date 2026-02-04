@@ -13,8 +13,8 @@ class Train < ApplicationRecord
   scope :by_date, ->(date) { where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", date) }
   scope :available, -> { where('available_seats > ?', 0) }
   scope :high_speed, -> { where("train_number LIKE 'G%' OR train_number LIKE 'D%'") }
-  scope :ordered_by_time, -> { 
-    order(Arel.sql("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai')"))
+  scope :ordered_by_time, ->(direction = :asc) { 
+    order(Arel.sql("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') #{direction == :desc ? 'DESC' : 'ASC'}"))
   }
   scope :ordered_by_price, -> { order(:price_second_class) }
   scope :ordered_by_duration, -> { order(:duration) }
@@ -130,13 +130,14 @@ class Train < ApplicationRecord
     trains = trains.high_speed if options[:only_high_speed]
 
     # Apply sorting
+    sort_order = options[:sort_order] == 'desc' ? :desc : :asc
     case options[:sort_by]
     when 'price'
       trains = trains.ordered_by_price
     when 'duration'
       trains = trains.ordered_by_duration
     else
-      trains = trains.ordered_by_time
+      trains = trains.ordered_by_time(sort_order)
     end
 
     trains
