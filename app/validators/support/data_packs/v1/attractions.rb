@@ -19,7 +19,6 @@ attractions_data = [
   {
     name: "深圳欢乐港湾",
     slug: "shenzhen-happy-harbor",
-    province: "广东省",
     city: "深圳",
     district: "宝安区",
     address: "深圳市宝安区海天路与宝华路交汇处",
@@ -39,7 +38,6 @@ attractions_data = [
   {
     name: "深圳世界之窗",
     slug: "shenzhen-window-of-the-world",
-    province: "广东省",
     city: "深圳",
     district: "南山区",
     address: "深圳市南山区华侨城深南大道9037号",
@@ -59,7 +57,6 @@ attractions_data = [
   {
     name: "深圳欢乐谷",
     slug: "shenzhen-happy-valley",
-    province: "广东省",
     city: "深圳",
     district: "南山区",
     address: "深圳市南山区侨城西路18号",
@@ -79,7 +76,6 @@ attractions_data = [
   {
     name: "深圳东部华侨城",
     slug: "shenzhen-oct-east",
-    province: "广东省",
     city: "深圳",
     district: "盐田区",
     address: "深圳市盐田区大梅沙东部华侨城",
@@ -99,7 +95,6 @@ attractions_data = [
   {
     name: "深圳野生动物园",
     slug: "shenzhen-safari-park",
-    province: "广东省",
     city: "深圳",
     district: "南山区",
     address: "深圳市南山区西丽湖路4065号",
@@ -119,7 +114,6 @@ attractions_data = [
   {
     name: "深圳锦绣中华民俗村",
     slug: "shenzhen-splendid-china",
-    province: "广东省",
     city: "深圳",
     district: "南山区",
     address: "深圳市南山区深南大道9003号",
@@ -139,7 +133,6 @@ attractions_data = [
   {
     name: "深圳海上世界",
     slug: "shenzhen-sea-world",
-    province: "广东省",
     city: "深圳",
     district: "南山区",
     address: "深圳市南山区蛇口望海路1128号",
@@ -159,7 +152,6 @@ attractions_data = [
   {
     name: "深圳大梅沙海滨公园",
     slug: "shenzhen-dameisha-beach",
-    province: "广东省",
     city: "深圳",
     district: "盐田区",
     address: "深圳市盐田区大梅沙盐梅路9号",
@@ -181,7 +173,6 @@ attractions_data = [
   {
     name: "上海迪士尼乐园",
     slug: "shanghai-disney",
-    province: "上海市",
     city: "上海",
     district: "浦东新区",
     address: "上海市浦东新区川沙新镇上海迪士尼度假区",
@@ -201,7 +192,6 @@ attractions_data = [
   {
     name: "上海海昌海洋公园",
     slug: "shanghai-haichang-ocean-park",
-    province: "上海市",
     city: "上海",
     district: "浦东新区",
     address: "上海市浦东新区南汇新城银飞路166号",
@@ -221,7 +211,6 @@ attractions_data = [
   {
     name: "上海欢乐谷",
     slug: "shanghai-happy-valley",
-    province: "上海市",
     city: "上海",
     district: "松江区",
     address: "上海市松江区林湖路888号",
@@ -241,7 +230,6 @@ attractions_data = [
   {
     name: "上海野生动物园",
     slug: "shanghai-wild-animal-park",
-    province: "上海市",
     city: "上海",
     district: "浦东新区",
     address: "上海市浦东新区南六公路178号",
@@ -261,7 +249,6 @@ attractions_data = [
   {
     name: "上海东方明珠广播电视塔",
     slug: "shanghai-oriental-pearl-tower",
-    province: "上海市",
     city: "上海",
     district: "浦东新区",
     address: "上海市浦东新区世纪大道1号",
@@ -281,7 +268,6 @@ attractions_data = [
   {
     name: "上海科技馆",
     slug: "shanghai-science-and-technology-museum",
-    province: "上海市",
     city: "上海",
     district: "浦东新区",
     address: "上海市浦东新区世纪大道2000号",
@@ -301,7 +287,6 @@ attractions_data = [
   {
     name: "上海外滩",
     slug: "shanghai-the-bund",
-    province: "上海市",
     city: "上海",
     district: "黄浦区",
     address: "上海市黄浦区中山东一路",
@@ -321,7 +306,6 @@ attractions_data = [
   {
     name: "北京欢乐谷",
     slug: "beijing-happy-valley",
-    province: "北京市",
     city: "北京",
     district: "朝阳区",
     address: "北京市朝阳区东四环小武基北路",
@@ -341,7 +325,6 @@ attractions_data = [
   {
     name: "广州长隆野生动物世界",
     slug: "guangzhou-chimelong-safari-park",
-    province: "广东省",
     city: "广州",
     district: "番禺区",
     address: "广州市番禺区大石东路长隆旅游度假区内",
@@ -363,7 +346,6 @@ attractions_data = [
   {
     name: "张家界国家森林公园",
     slug: "zhangjiajie-national-forest-park",
-    province: "湖南省",
     city: "张家界",
     district: "武陵源区",
     address: "湖南省张家界市武陵源区金鞭路",
@@ -385,7 +367,6 @@ attractions_data = [
   {
     name: "三亚亚龙湾热带天堂森林公园",
     slug: "sanya-yalong-bay-tropical-paradise",
-    province: "海南省",
     city: "三亚",
     district: "吉阳区",
     address: "海南省三亚市亚龙湾国家旅游度假区",
@@ -407,7 +388,6 @@ attractions_data = [
   {
     name: "崇礼万龙滑雪场",
     slug: "chongli-wanlong-ski-resort",
-    province: "河北省",
     city: "张家口",
     district: "崇礼区",
     address: "河北省张家口市崇礼区红花梁",
@@ -429,7 +409,6 @@ attractions_data = [
   {
     name: "普罗旺斯风格薰衣草园",
     slug: "provence-style-lavender-garden",
-    province: "新疆维吾尔自治区",
     city: "伊犁",
     district: "霍城县",
     address: "新疆伊犁哈萨克自治州霍城县大西渠乡",
