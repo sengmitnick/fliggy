@@ -222,6 +222,60 @@
     20%, 40%, 60%, 80% { transform: translateX(8px); }
   }
 
+  /* Range slider styling for time filters */
+  .range-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: hsl(var(--color-primary));
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .range-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .range-slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    background: hsl(var(--color-primary-dark));
+  }
+
+  .range-slider::-moz-range-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: hsl(var(--color-primary));
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .range-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .range-slider::-moz-range-thumb:active {
+    transform: scale(1.1);
+    background: hsl(var(--color-primary-dark));
+  }
+
+  .range-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 4px;
+  }
+
+  .range-slider::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+  }
+
 } /* End of @layer components */
 
 @tailwind utilities;

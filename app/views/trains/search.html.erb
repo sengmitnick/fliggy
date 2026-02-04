@@ -97,37 +97,7 @@
   </div>
 
   <!-- Filter Tags -->
-  <div class="flex items-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
-    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap <%= @only_high_speed ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground' %>"
-            data-action="click->train-list#toggleFilter"
-            data-filter="only-tickets">
-      只看有票
-    </button>
-    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
-            data-action="click->train-list#toggleStation"
-            data-station="departure">
-      北京站
-    </button>
-    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
-            data-action="click->train-list#toggleStation"
-            data-station="arrival">
-      杭州站
-    </button>
-    <%= link_to search_trains_path(
-      departure_city: @departure_city,
-      arrival_city: @arrival_city,
-      date: @date,
-      sort_by: @sort_by,
-      only_high_speed: !@only_high_speed
-    ), class: "px-3 py-1 rounded-full text-sm whitespace-nowrap #{@only_high_speed ? 'bg-primary text-primary-foreground' : 'bg-surface-elevated text-foreground'}" do %>
-      高铁动车
-    <% end %>
-    <button class="px-3 py-1 rounded-full text-sm whitespace-nowrap bg-surface-elevated text-foreground"
-            data-action="click->train-list#toggleFilter"
-            data-filter="can-split">
-      可积分兑换
-    </button>
-  </div>
+  
 
   <!-- Train List -->
   <div class="px-4 pb-20">
@@ -258,12 +228,14 @@
   <!-- Bottom Filter Bar -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-border shadow-lg z-20">
     <div class="flex max-w-md mx-auto">
-      <button class="flex-1 flex flex-col items-center justify-center py-3 text-foreground hover:bg-surface-elevated transition-colors"
-              data-action="click->train-list#showAdvancedFilters">
+      <button class="flex-1 flex flex-col items-center justify-center py-3 text-foreground hover:bg-surface-elevated transition-all"
+              data-action="click->train-list#showAdvancedFilters"
+              data-train-list-target="advancedFilterButton">
         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
         </svg>
         <span class="text-xs">高级筛选</span>
+        <span class="hidden absolute top-1 right-1/4 w-2 h-2 bg-red-500 rounded-full" data-train-list-target="filterBadge"></span>
       </button>
       
       <%= link_to search_trains_path(
@@ -272,7 +244,7 @@
         date: @date,
         sort_by: 'price',
         only_high_speed: @only_high_speed
-      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'price' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'price' ? 'text-primary bg-primary/10 border-t-2 border-primary' : 'text-foreground'} hover:bg-surface-elevated transition-all" do %>
         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
@@ -285,7 +257,7 @@
         date: @date,
         sort_by: 'duration',
         only_high_speed: @only_high_speed
-      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'duration' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'duration' ? 'text-primary bg-primary/10 border-t-2 border-primary' : 'text-foreground'} hover:bg-surface-elevated transition-all" do %>
         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
@@ -297,13 +269,102 @@
         arrival_city: @arrival_city,
         date: @date,
         sort_by: 'departure_time',
+        sort_order: (@sort_by == 'departure_time' && @sort_order == 'asc') ? 'desc' : 'asc',
         only_high_speed: @only_high_speed
-      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'departure_time' ? 'text-primary' : 'text-foreground'} hover:bg-surface-elevated transition-colors" do %>
+      ), class: "flex-1 flex flex-col items-center justify-center py-3 #{@sort_by == 'departure_time' ? 'text-primary bg-primary/10 border-t-2 border-primary' : 'text-foreground'} hover:bg-surface-elevated transition-all" do %>
         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
         </svg>
-        <span class="text-xs">出发早-晚</span>
+        <span class="text-xs">
+          <% if @sort_by == 'departure_time' && @sort_order == 'desc' %>
+            出发晚-早
+          <% else %>
+            出发早-晚
+          <% end %>
+        </span>
       <% end %>
+    </div>
+  </div>
+
+  <!-- Advanced Filter Modal -->
+  <div id="advancedFilterModal" class="fixed inset-0 bg-black/50 z-50 hidden" data-train-list-target="modal">
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="sticky top-0 bg-white border-b border-border px-4 py-3 flex items-center justify-between">
+        <h3 class="text-lg font-medium">筛选</h3>
+        <button data-action="click->train-list#closeModal" class="p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Filter Content -->
+      <div class="p-4 space-y-6">
+        <!-- 车型选择 -->
+        <div>
+          <h4 class="text-sm font-medium text-foreground mb-3">车型选择</h4>
+          <div class="grid grid-cols-3 gap-2">
+            <button data-action="click->train-list#toggleTrainType" data-type="高铁(G)" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
+              高铁(G)
+            </button>
+            <button data-action="click->train-list#toggleTrainType" data-type="动车(D)" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
+              动车(D)
+            </button>
+            <button data-action="click->train-list#toggleTrainType" data-type="城际(C/S)" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
+              城际(C/S)
+            </button>
+            <button data-action="click->train-list#toggleTrainType" data-type="普通(Z/T/K)" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
+              普通(Z/T/K)
+            </button>
+            <button data-action="click->train-list#toggleTrainType" data-type="临时(L)/旅游(Y)" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
+              临时(L)/旅游(Y)
+            </button>
+          </div>
+        </div>
+
+        <!-- 出发时间 -->
+        <div>
+          <h4 class="text-sm font-medium text-foreground mb-3">出发时间</h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="text-primary font-medium" data-train-list-target="departureStartTime">00:00</span>
+              <span class="text-muted-foreground">-</span>
+              <span class="text-primary font-medium" data-train-list-target="departureEndTime">24:00</span>
+            </div>
+            <div class="relative space-y-8">
+              <input type="range" min="0" max="1440" value="0" step="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider" data-action="input->train-list#updateDepartureStartTime" data-train-list-target="departureTimeStart" style="position: relative; z-index: 2;">
+              <input type="range" min="0" max="1440" value="1440" step="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider" data-action="input->train-list#updateDepartureEndTime" data-train-list-target="departureTimeEnd" style="position: absolute; top: 0; left: 0; z-index: 1;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 到达时间 -->
+        <div>
+          <h4 class="text-sm font-medium text-foreground mb-3">到达时间</h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="text-primary font-medium" data-train-list-target="arrivalStartTime">00:00</span>
+              <span class="text-muted-foreground">-</span>
+              <span class="text-primary font-medium" data-train-list-target="arrivalEndTime">24:00</span>
+            </div>
+            <div class="relative space-y-8">
+              <input type="range" min="0" max="1440" value="0" step="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider" data-action="input->train-list#updateArrivalStartTime" data-train-list-target="arrivalTimeStart" style="position: relative; z-index: 2;">
+              <input type="range" min="0" max="1440" value="1440" step="15" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider" data-action="input->train-list#updateArrivalEndTime" data-train-list-target="arrivalTimeEnd" style="position: absolute; top: 0; left: 0; z-index: 1;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="sticky bottom-0 bg-white border-t border-border px-4 py-3 flex gap-3">
+        <button data-action="click->train-list#clearFilters" class="flex-1 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-surface-elevated transition-colors">
+          清空选择
+        </button>
+        <button data-action="click->train-list#applyFilters" class="flex-1 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors">
+          查看结果
+        </button>
+      </div>
     </div>
   </div>
 </div>
