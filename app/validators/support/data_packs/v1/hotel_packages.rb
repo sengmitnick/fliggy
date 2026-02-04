@@ -519,6 +519,10 @@ hotel_packages << {
 # 批量插入套餐数据
 HotelPackage.insert_all!(hotel_packages)
 
+# 为新插入的 HotelPackage 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为酒店套餐生成 slug..."
+HotelPackage.where(slug: [nil, '']).find_each(&:save)
+
 puts "✅ 已创建 #{hotel_packages.length} 个酒店套餐"
 puts "   - 武汉地区: #{hotel_packages.count { |p| p[:city] == '武汉' }} 个（1晚、2晚、1-2晚组合）"
 puts "   - 其他城市: #{hotel_packages.count { |p| p[:city] != '武汉' }} 个"

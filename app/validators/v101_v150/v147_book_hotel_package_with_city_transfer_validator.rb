@@ -84,6 +84,26 @@ module V101V150
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        checkin_date: @checkin_date.to_s,
+        nights: @nights,
+        city: @city,
+        pickup_location: @pickup_location,
+        dropoff_location: @dropoff_location
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @checkin_date = Date.parse(data['checkin_date']) if data['checkin_date']
+      @nights = data['nights']
+      @city = data['city']
+      @pickup_location = data['pickup_location']
+      @dropoff_location = data['dropoff_location']
+    end
+
     def verify
       # 断言1: 创建了酒店套餐订单
       add_assertion "创建了酒店套餐订单", weight: 30 do

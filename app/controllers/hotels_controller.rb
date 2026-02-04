@@ -6,8 +6,12 @@ class HotelsController < ApplicationController
     if params[:city].present?
       @city = params[:city]
     elsif session[:last_destination_slug].present?
-      destination = Destination.friendly.find(session[:last_destination_slug])
-      @city = destination.name
+      begin
+        destination = Destination.friendly.find(session[:last_destination_slug])
+        @city = destination.name
+      rescue ActiveRecord::RecordNotFound
+        @city = '深圳'
+      end
     else
       @city = '深圳'
     end

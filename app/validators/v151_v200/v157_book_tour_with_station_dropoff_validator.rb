@@ -67,6 +67,24 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        tour_date: @tour_date.to_s,
+        city: @city,
+        station_location: @station_location,
+        duration_days: @duration_days
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @tour_date = Date.parse(data['tour_date']) if data['tour_date']
+      @city = data['city']
+      @station_location = data['station_location']
+      @duration_days = data['duration_days']
+    end
+
     def verify
       # 断言1: 创建了跟团游订单
       add_assertion "创建了跟团游订单", weight: 25 do

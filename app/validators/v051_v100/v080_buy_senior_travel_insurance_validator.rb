@@ -52,16 +52,21 @@ module V051V100
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找境内旅游保险产品（注意：查询基线数据 data_version=0）
-      @available_products = InsuranceProduct.where(
+      # 只筛选官方精选产品（official_select: true，前端首页显示）
+      # 排除运动保险（有 sports_injury 保障的产品）
+      all_domestic_products = InsuranceProduct.where(
         product_type: @product_type,
+        official_select: true,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-    
-      # 找到医疗保额最高的产品
-      @highest_medical_product = @available_products.max_by do |p|
-        p.coverage_details['medical'] || 0
+      
+      @available_products = all_domestic_products.select do |p|
+        # 排除有运动伤害保障的产品（如滑雪运动保险）
+        !p.coverage_details.key?('sports_injury')
       end
-      @highest_medical = @highest_medical_product&.coverage_details&.[]('medical') || 0
+    
+      # 找到最高医疗保额值
+      @highest_medical = @available_products.map { |p| p.coverage_details['medical'] || 0 }.max
     
       # 返回给 Agent 的任务信息
       {
@@ -73,7 +78,7 @@ module V051V100
         age: @age,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
-        hint: "老年人旅游风险较高，建议选择医疗保额（coverage_details.medical）最高的保险产品。系统中有多款产品，请对比医疗保额后选择",
+        hint: "老年人旅游风险较高，建议选择医疗保额（coverage_details.medical）最高的保险产品。系统中官方精选有多款产品，请对比医疗保额后选择",
         available_products_count: @available_products.count,
         note: "老人旅游保险通常要求更高的医疗保障，部分产品可能有年龄限制"
       }
@@ -112,30 +117,47 @@ module V051V100
     
       # 断言5: 选择了医疗保额最高的产品（核心评分项）
       add_assertion "选择了医疗保额最高的产品", weight: 30 do
-        # 获取所有境内旅游保险产品
-        all_products = InsuranceProduct.where(
+        # 获取所有官方精选的境内旅游保险产品（排除运动保险）
+        all_domestic_products = InsuranceProduct.where(
           product_type: @product_type,
+          official_select: true,
           data_version: 0
         ).where('min_days <= ? AND max_days >= ?', @days, @days)
+        
+        all_products = all_domestic_products.select do |p|
+          # 排除有运动伤害保障的产品（如滑雪运动保险）
+          !p.coverage_details.key?('sports_injury')
+        end
       
-        # 找到医疗保额最高的
-        highest_product = all_products.max_by do |p|
-          p.coverage_details['medical'] || 0
+        # 找到最高医疗保额值
+        highest_medical = all_products.map { |p| p.coverage_details['medical'] || 0 }.max
+      
+        # 获取所有达到最高医疗保额的产品
+        highest_products = all_products.select do |p|
+          (p.coverage_details['medical'] || 0) == highest_medical
         end
       
         actual_medical = @insurance_order.insurance_product.coverage_details['medical'] || 0
-        highest_medical = highest_product.coverage_details['medical'] || 0
       
-        expect(@insurance_order.insurance_product_id).to eq(highest_product.id),
+        # 检查选择的产品是否达到最高医疗保额
+        expect(actual_medical).to eq(highest_medical),
           "未选择医疗保额最高的产品。" \
-          "应选: #{highest_product.name}（#{highest_product.company}，医疗保额#{highest_medical}元，每天#{highest_product.price_per_day}元），" \
+          "最高医疗保额: #{highest_medical}元（共#{highest_products.size}个产品达到此保额：#{highest_products.map(&:name).join('、')}），" \
           "实际选择: #{@insurance_order.insurance_product.name}（#{@insurance_order.insurance_product.company}，医疗保额#{actual_medical}元，每天#{@insurance_order.insurance_product.price_per_day}元）。" \
           "老年人旅游应选择医疗保额最高的产品"
       end
     
       # 断言6: 订单价格计算正确
       add_assertion "订单价格计算正确", weight: 15 do
-        expected_unit_price = @insurance_order.insurance_product.price_per_day * @insurance_order.days
+        # Get city_id from destination if available
+        city = City.find_by(name: @insurance_order.destination, data_version: 0)
+        city_id = city&.id
+        
+        # Use calculate_price to get correct price (considers city-specific pricing)
+        expected_unit_price = @insurance_order.insurance_product.calculate_price(
+          @insurance_order.days, 
+          city_id: city_id
+        )
         expected_total = expected_unit_price * @insurance_order.quantity
         actual_total = @insurance_order.total_price
       
@@ -171,14 +193,15 @@ module V051V100
       @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
       @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
     
-      # 重新加载可用产品列表
-      @available_products = InsuranceProduct.where(
+      # 重新加载可用产品列表（只筛选官方精选，排除运动保险）
+      all_domestic_products = InsuranceProduct.where(
         product_type: @product_type,
+        official_select: true,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-    
-      @highest_medical_product = @available_products.max_by do |p|
-        p.coverage_details['medical'] || 0
+      
+      @available_products = all_domestic_products.select do |p|
+        !p.coverage_details.key?('sports_injury')
       end
     end
   
@@ -187,24 +210,33 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找境内旅游保险产品
-      available_products = InsuranceProduct.where(
+      # 2. 查找官方精选的境内旅游保险产品（排除运动保险）
+      all_domestic_products = InsuranceProduct.where(
         product_type: @product_type,
+        official_select: true,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
+      
+      available_products = all_domestic_products.select do |p|
+        # 排除有运动伤害保障的产品（如滑雪运动保险）
+        !p.coverage_details.key?('sports_injury')
+      end
     
       raise "未找到境内旅游保险产品" if available_products.empty?
     
-      # 3. 选择医疗保额最高的
-      highest_medical_product = available_products.max_by do |p|
-        p.coverage_details['medical'] || 0
-      end
+      # 3. 选择医疗保额最高的产品（如果有多个，选择价格最低的）
+      highest_medical = available_products.map { |p| p.coverage_details['medical'] || 0 }.max
+      highest_products = available_products.select { |p| (p.coverage_details['medical'] || 0) == highest_medical }
+      highest_medical_product = highest_products.min_by(&:price_per_day)
     
       raise "未找到可用的保险产品" unless highest_medical_product
     
-      # 4. 创建保险订单
-      unit_price = highest_medical_product.price_per_day * @days
+      # 4. 计算价格（考虑城市差异化定价）
+      city = City.find_by(name: @destination, data_version: 0)
+      city_id = city&.id
+      unit_price = highest_medical_product.calculate_price(@days, city_id: city_id)
     
+      # 5. 创建保险订单
       insurance_order = InsuranceOrder.create!(
         user_id: user.id,
         insurance_product_id: highest_medical_product.id,

@@ -105,6 +105,10 @@ brands_data = [
 
 AbroadBrand.insert_all(brands_data)
 
+# 为新插入的 AbroadBrand 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为境外品牌生成 slug..."
+AbroadBrand.where(slug: [nil, '']).find_each(&:save)
+
 # 重新加载以获取ID映射
 brands_map = AbroadBrand.pluck(:name, :id).to_h
 

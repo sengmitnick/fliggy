@@ -57,7 +57,7 @@
     <div class="bg-white rounded-xl p-4 shadow-card">
       <div class="flex justify-between items-center mb-1">
         <span class="font-bold text-base">办签人数</span>
-        <span class="font-bold text-base">¥ <%= @unit_price.to_i %><span class="text-sm font-normal">/人</span></span>
+        <span class="font-bold text-base" data-unit-price="<%= @unit_price.to_f %>">¥ <%= @unit_price.to_i %><span class="text-sm font-normal">/人</span></span>
       </div>
       
       <div class="flex justify-between items-center mb-4">

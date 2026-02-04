@@ -68,6 +68,24 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        travel_date: @travel_date.to_s,
+        origin: @origin,
+        destination: @destination,
+        pickup_location: @pickup_location
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @travel_date = Date.parse(data['travel_date']) if data['travel_date']
+      @origin = data['origin']
+      @destination = data['destination']
+      @pickup_location = data['pickup_location']
+    end
+
     def verify
       # 断言1: 创建了长途汽车票订单
       add_assertion "创建了长途汽车票订单", weight: 30 do

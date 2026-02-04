@@ -408,13 +408,50 @@ export default class extends Controller {
   }
 
   decrease(event: Event): void {
-    // General decrease method that can be used for any count
+    event.preventDefault()
+    event.stopPropagation()
+    
+    // Simple +/- mode for visa orders (no modal)
+    if (this.hasCountTarget && !this.hasModalTarget) {
+      const currentCount = parseInt(this.countTarget.textContent || '1')
+      if (currentCount > 1) {
+        const newCount = currentCount - 1
+        this.countTarget.textContent = newCount.toString()
+        this.notifyPriceUpdate(newCount)
+      }
+      return
+    }
+    
+    // Flight booking mode: delegate to decrementAdults
     this.decrementAdults(event)
   }
 
   increase(event: Event): void {
-    // General increase method that can be used for any count
+    event.preventDefault()
+    event.stopPropagation()
+    
+    // Simple +/- mode for visa orders (no modal)
+    if (this.hasCountTarget && !this.hasModalTarget) {
+      const currentCount = parseInt(this.countTarget.textContent || '1')
+      if (currentCount < 9) {
+        const newCount = currentCount + 1
+        this.countTarget.textContent = newCount.toString()
+        this.notifyPriceUpdate(newCount)
+      }
+      return
+    }
+    
+    // Flight booking mode: delegate to incrementAdults
     this.incrementAdults(event)
+  }
+
+  private notifyPriceUpdate(count: number): void {
+    // Dispatch custom event to notify visa-order controller
+    const event = new CustomEvent('traveler-count-changed', {
+      detail: { count },
+      bubbles: true
+    })
+    this.element.dispatchEvent(event)
   }
 
   private updateCounters(): void {
