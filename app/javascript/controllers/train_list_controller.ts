@@ -42,33 +42,20 @@ export default class extends Controller<HTMLElement> {
   private restoreFiltersFromURL(): void {
     const url = new URL(window.location.href)
     
-    // Restore seat type filters
-    const seatTypes = url.searchParams.get('seat_types')
-    if (seatTypes) {
-      seatTypes.split(',').forEach(seat => {
-        this.selectedFilters.add(seat)
+    // Restore train type filters
+    const trainTypes = url.searchParams.get('train_types')
+    if (trainTypes) {
+      trainTypes.split(',').forEach(type => {
+        this.selectedFilters.add(type)
         // Find and activate the button
         const button = this.filterButtonTargets.find(btn => 
-          btn.dataset.seat === seat
+          btn.dataset.type === type
         )
         if (button) {
           button.classList.add('bg-primary', 'text-primary-foreground', 'border-primary')
           button.classList.remove('border-border')
         }
       })
-    }
-    
-    // Restore train type filters
-    const onlyHighSpeed = url.searchParams.get('only_high_speed')
-    if (onlyHighSpeed === 'true') {
-      this.selectedFilters.add('高铁/动车')
-      const button = this.filterButtonTargets.find(btn => 
-        btn.dataset.type === '高铁/动车'
-      )
-      if (button) {
-        button.classList.add('bg-primary', 'text-primary-foreground', 'border-primary')
-        button.classList.remove('border-border')
-      }
     }
     
     // Restore departure time range
@@ -123,18 +110,6 @@ export default class extends Controller<HTMLElement> {
     const button = event.currentTarget as HTMLButtonElement
     const type = button.dataset.type!
     this.toggleFilterButton(button, type)
-  }
-
-  toggleSeatType(event: Event): void {
-    const button = event.currentTarget as HTMLButtonElement
-    const seat = button.dataset.seat!
-    this.toggleFilterButton(button, seat)
-  }
-
-  toggleMoreFilter(event: Event): void {
-    const button = event.currentTarget as HTMLButtonElement
-    const filter = button.dataset.filter!
-    this.toggleFilterButton(button, filter)
   }
 
   private toggleFilterButton(button: HTMLButtonElement, value: string): void {
@@ -230,7 +205,7 @@ export default class extends Controller<HTMLElement> {
     
     // Reload page without filter params (keep core search params only)
     const url = new URL(window.location.href)
-    url.searchParams.delete('seat_types')
+    url.searchParams.delete('train_types')
     url.searchParams.delete('departure_time_start')
     url.searchParams.delete('departure_time_end')
     url.searchParams.delete('arrival_time_start')
@@ -248,14 +223,14 @@ export default class extends Controller<HTMLElement> {
     // Preserve core search params (departure_city, arrival_city, date)
     // These are already in the URL from the initial search
     
-    // Add seat type filters
-    const seatTypes = Array.from(this.selectedFilters).filter(f => 
-      ['商务座', '一等座', '二等座', '硬卧', '软卧', '硬座'].includes(f)
+    // Add train type filters
+    const trainTypes = Array.from(this.selectedFilters).filter(f => 
+      ['高铁(G)', '动车(D)', '城际(C/S)', '普通(Z/T/K)', '临时(L)/旅游(Y)'].includes(f)
     )
-    if (seatTypes.length > 0) {
-      url.searchParams.set('seat_types', seatTypes.join(','))
+    if (trainTypes.length > 0) {
+      url.searchParams.set('train_types', trainTypes.join(','))
     } else {
-      url.searchParams.delete('seat_types')
+      url.searchParams.delete('train_types')
     }
     
     // Add departure time range
@@ -280,15 +255,8 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.delete('arrival_time_end')
     }
     
-    // Add train type filters (from buttons)
-    const trainTypes = Array.from(this.selectedFilters).filter(f => 
-      ['高铁/动车', '普通列车'].includes(f)
-    )
-    if (trainTypes.includes('高铁/动车')) {
-      url.searchParams.set('only_high_speed', 'true')
-    } else {
-      url.searchParams.delete('only_high_speed')
-    }
+    // Remove legacy only_high_speed param (we now use train_types)
+    url.searchParams.delete('only_high_speed')
     
     // Close modal and refresh page with Turbo
     this.closeModal()

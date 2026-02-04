@@ -126,8 +126,31 @@ class Train < ApplicationRecord
              .by_date(date)
              .available
 
-    # Apply train type filter
+    # Apply train type filter (legacy support for only_high_speed)
     trains = trains.high_speed if options[:only_high_speed]
+    
+    # Apply specific train type filters (advanced filter)
+    if options[:train_types] && options[:train_types].any?
+      train_type_patterns = options[:train_types].map do |type|
+        case type
+        when '高铁(G)'
+          'G%'
+        when '动车(D)'
+          'D%'
+        when '城际(C/S)'
+          ['C%', 'S%']
+        when '普通(Z/T/K)'
+          ['Z%', 'T%', 'K%']
+        when '临时(L)/旅游(Y)'
+          ['L%', 'Y%']
+        end
+      end.flatten.compact
+      
+      if train_type_patterns.any?
+        conditions = train_type_patterns.map { "train_number LIKE ?" }.join(' OR ')
+        trains = trains.where(conditions, *train_type_patterns)
+      end
+    end
     
     # Apply time range filters
     if options[:departure_time_start] && options[:departure_time_end]
@@ -148,29 +171,6 @@ class Train < ApplicationRecord
         trains = trains.where(
           "EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') BETWEEN ? AND ?",
           arr_start, arr_end
-        )
-      end
-    end
-    
-    # Apply seat type filter (filter by available seats)
-    # Use subquery to avoid DISTINCT + ORDER BY conflicts
-    if options[:seat_types] && options[:seat_types].any?
-      seat_type_mapping = {
-        '商务座' => 'business_class',
-        '一等座' => 'first_class',
-        '二等座' => 'second_class',
-        '硬卧' => 'hard_sleeper',
-        '软卧' => 'soft_sleeper',
-        '硬座' => 'hard_seat'
-      }
-      
-      db_seat_types = options[:seat_types].map { |st| seat_type_mapping[st] }.compact
-      if db_seat_types.any?
-        # Use subquery with EXISTS to avoid DISTINCT
-        trains = trains.where(
-          "EXISTS (SELECT 1 FROM train_seats WHERE train_seats.train_id = trains.id " +
-          "AND train_seats.seat_type IN (?) AND train_seats.available_count > 0)",
-          db_seat_types
         )
       end
     end

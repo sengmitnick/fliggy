@@ -21,7 +21,7 @@ class TrainsController < ApplicationController
     @only_high_speed = params[:only_high_speed] == "true"
     
     # Advanced filter params
-    @seat_types = params[:seat_types]&.split(',') || []
+    @train_types = params[:train_types]&.split(',') || []
     @departure_time_start = params[:departure_time_start]&.to_i || 0
     @departure_time_end = params[:departure_time_end]&.to_i || 1440
     @arrival_time_start = params[:arrival_time_start]&.to_i || 0
@@ -38,7 +38,7 @@ class TrainsController < ApplicationController
       only_high_speed: @only_high_speed,
       sort_by: @sort_by,
       sort_order: @sort_order,
-      seat_types: @seat_types,
+      train_types: @train_types,
       departure_time_start: @departure_time_start,
       departure_time_end: @departure_time_end,
       arrival_time_start: @arrival_time_start,

@@ -354,54 +354,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 座席 -->
-        <div>
-          <h4 class="text-sm font-medium text-foreground mb-3">座席</h4>
-          <div class="grid grid-cols-3 gap-2">
-            <button data-action="click->train-list#toggleSeatType" data-seat="商务座" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              商务座
-            </button>
-            <button data-action="click->train-list#toggleSeatType" data-seat="一等座" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              一等座
-            </button>
-            <button data-action="click->train-list#toggleSeatType" data-seat="二等座" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              二等座
-            </button>
-            <button data-action="click->train-list#toggleSeatType" data-seat="硬卧" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              硬卧
-            </button>
-            <button data-action="click->train-list#toggleSeatType" data-seat="软卧" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              软卧
-            </button>
-            <button data-action="click->train-list#toggleSeatType" data-seat="硬座" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              硬座
-            </button>
-          </div>
-        </div>
-
-        <!-- 更多筛选选项 -->
-        <div>
-          <h4 class="text-sm font-medium text-foreground mb-3">更多筛选</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <button data-action="click->train-list#toggleMoreFilter" data-filter="只看有票" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              只看有票
-            </button>
-            <button data-action="click->train-list#toggleMoreFilter" data-filter="只看直达" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              只看直达
-            </button>
-            <button data-action="click->train-list#toggleMoreFilter" data-filter="可积分兑换" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              可积分兑换
-            </button>
-            <button data-action="click->train-list#toggleMoreFilter" data-filter="折扣票" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              折扣票
-              <span class="ml-1 text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded">新功能</span>
-            </button>
-            <button data-action="click->train-list#toggleMoreFilter" data-filter="卧铺过夜" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-              卧铺过夜
-            </button>
-          </div>
-        </div>
       </div>
 
       <!-- Modal Footer -->
