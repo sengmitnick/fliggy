@@ -10,29 +10,48 @@ export default class extends Controller<HTMLElement> {
   declare readonly payButtonTarget: HTMLButtonElement
 
   // Store base price from button's data attribute
-  private basePrice: number = 0
+  private unitPrice: number = 0
   private travelerCount: number = 1
 
   connect(): void {
     console.log("VisaOrder controller connected")
     
-    // Get base price and traveler count from pay button
+    // Get unit price from page data
+    const unitPriceElement = document.querySelector('[data-unit-price]')
+    if (unitPriceElement) {
+      this.unitPrice = parseFloat(unitPriceElement.getAttribute('data-unit-price') || '0')
+    }
+    
+    // Get traveler count from pay button
     const button = this.payButtonTarget
-    const totalPrice = parseFloat(button.dataset.totalPrice || '0')
-    const insurancePrice = parseFloat(button.dataset.insurancePrice || '0')
     this.travelerCount = parseInt(button.dataset.travelerCount || '1')
     
-    // Calculate base price (total - insurance)
-    this.basePrice = totalPrice - insurancePrice
+    // If unit price not found in data attribute, calculate from initial state
+    if (this.unitPrice === 0) {
+      const totalPrice = parseFloat(button.dataset.totalPrice || '0')
+      const insurancePrice = parseFloat(button.dataset.insurancePrice || '0')
+      this.unitPrice = (totalPrice - insurancePrice) / this.travelerCount
+    }
     
     // Listen to insurance radio changes
     this.setupInsuranceListeners()
+    
+    // Listen to traveler count changes
+    this.setupTravelerCountListener()
   }
 
   private setupInsuranceListeners(): void {
     const insuranceRadios = document.querySelectorAll<HTMLInputElement>('input[name="insurance"]')
     insuranceRadios.forEach(radio => {
       radio.addEventListener('change', () => this.updatePrice())
+    })
+  }
+
+  private setupTravelerCountListener(): void {
+    this.element.addEventListener('traveler-count-changed', (event) => {
+      const customEvent = event as CustomEvent
+      this.travelerCount = customEvent.detail.count
+      this.updatePrice()
     })
   }
 
@@ -55,18 +74,20 @@ export default class extends Controller<HTMLElement> {
         insurancePrice = 0
     }
 
-    // Calculate new total price
-    const newTotalPrice = this.basePrice + insurancePrice
+    // Calculate new total price: (unit_price × traveler_count) + insurance_price
+    const basePrice = this.unitPrice * this.travelerCount
+    const newTotalPrice = basePrice + insurancePrice
 
     // Update display
     this.totalPriceTarget.textContent = newTotalPrice.toFixed(0)
 
     // Update pay button data attributes
     this.payButtonTarget.dataset.totalPrice = newTotalPrice.toString()
+    this.payButtonTarget.dataset.travelerCount = this.travelerCount.toString()
     this.payButtonTarget.dataset.insuranceType = insuranceType
     this.payButtonTarget.dataset.insurancePrice = insurancePrice.toString()
 
-    console.log('Price updated:', { insuranceType, insurancePrice, newTotalPrice })
+    console.log('Price updated:', { travelerCount: this.travelerCount, unitPrice: this.unitPrice, basePrice, insuranceType, insurancePrice, newTotalPrice })
   }
 
   async submitOrder(event: Event): Promise<void> {
