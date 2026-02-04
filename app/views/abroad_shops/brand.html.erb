@@ -116,7 +116,7 @@
           <!-- 门店缩略图 -->
           <div class="w-[110px] h-[110px] flex-shrink-0 bg-gray-200 relative">
             <% if shop.image_url.present? %>
-              <%= safe_image_tag(shop.image_url, class: "w-full h-full object-cover", alt: shop.name %>
+              <%= safe_image_tag(shop.image_url, class: "w-full h-full object-cover", alt: shop.name) %>
             <% else %>
               <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
                 <span class="text-white text-xs font-bold"><%= @brand.name[0..3] %></span>

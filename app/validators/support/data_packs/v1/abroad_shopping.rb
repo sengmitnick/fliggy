@@ -216,21 +216,35 @@ shops_map = AbroadShop.pluck(:name, :id).to_h
 coupons_data = []
 
 # ANA 全日空免税店优惠券
-["【全日空免税 南翼店】", "【全日空免税 第4卫星厅店】"].each do |shop_name|
-  coupons_data << {
-    title: "购物金额的 5% 折扣",
-    abroad_brand_id: brands_map["ANA 【全日空免税店】"],
-    abroad_shop_id: shops_map[shop_name],
-    discount_type: "percentage",
-    discount_value: "5",
-    description: "1家ANA 【全日空免税店】 门店可用",
-    valid_from: Date.today,
-    valid_until: Date.today + 2.years,
-    active: true,
-    created_at: timestamp,
-    updated_at: timestamp
-  }
-end
+# 南翼店 - 8% 折扣（最高）
+coupons_data << {
+  title: "购物金额的 8% 折扣",
+  abroad_brand_id: brands_map["ANA 【全日空免税店】"],
+  abroad_shop_id: shops_map["【全日空免税 南翼店】"],
+  discount_type: "percentage",
+  discount_value: "8",
+  description: "1家ANA 【全日空免税店】 门店可用",
+  valid_from: Date.today,
+  valid_until: Date.today + 2.years,
+  active: true,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 第4卫星厅店 - 5% 折扣
+coupons_data << {
+  title: "购物金额的 5% 折扣",
+  abroad_brand_id: brands_map["ANA 【全日空免税店】"],
+  abroad_shop_id: shops_map["【全日空免税 第4卫星厅店】"],
+  discount_type: "percentage",
+  discount_value: "5",
+  description: "1家ANA 【全日空免税店】 门店可用",
+  valid_from: Date.today,
+  valid_until: Date.today + 2.years,
+  active: true,
+  created_at: timestamp,
+  updated_at: timestamp
+}
 
 # 科摩思COSMOS优惠券
 ["科摩思-道顿堀店", "科摩思-歌舞伎町一丁目店", "科摩思-心斋桥南店", "科摩思-天神大丸店"].each do |shop_name|
