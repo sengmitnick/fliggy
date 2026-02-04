@@ -36,6 +36,67 @@ export default class extends Controller<HTMLElement> {
 
   connect(): void {
     console.log("TrainList connected")
+    this.restoreFiltersFromURL()
+  }
+
+  private restoreFiltersFromURL(): void {
+    const url = new URL(window.location.href)
+    
+    // Restore seat type filters
+    const seatTypes = url.searchParams.get('seat_types')
+    if (seatTypes) {
+      seatTypes.split(',').forEach(seat => {
+        this.selectedFilters.add(seat)
+        // Find and activate the button
+        const button = this.filterButtonTargets.find(btn => 
+          btn.dataset.seat === seat
+        )
+        if (button) {
+          button.classList.add('bg-primary', 'text-primary-foreground', 'border-primary')
+          button.classList.remove('border-border')
+        }
+      })
+    }
+    
+    // Restore train type filters
+    const onlyHighSpeed = url.searchParams.get('only_high_speed')
+    if (onlyHighSpeed === 'true') {
+      this.selectedFilters.add('高铁/动车')
+      const button = this.filterButtonTargets.find(btn => 
+        btn.dataset.type === '高铁/动车'
+      )
+      if (button) {
+        button.classList.add('bg-primary', 'text-primary-foreground', 'border-primary')
+        button.classList.remove('border-border')
+      }
+    }
+    
+    // Restore departure time range
+    const depStart = url.searchParams.get('departure_time_start')
+    const depEnd = url.searchParams.get('departure_time_end')
+    if (depStart) {
+      this.departureTimeStartTarget.value = depStart
+      this.departureStartTimeTarget.textContent = this.formatMinutesToTime(parseInt(depStart))
+    }
+    if (depEnd) {
+      this.departureTimeEndTarget.value = depEnd
+      this.departureEndTimeTarget.textContent = this.formatMinutesToTime(parseInt(depEnd))
+    }
+    
+    // Restore arrival time range
+    const arrStart = url.searchParams.get('arrival_time_start')
+    const arrEnd = url.searchParams.get('arrival_time_end')
+    if (arrStart) {
+      this.arrivalTimeStartTarget.value = arrStart
+      this.arrivalStartTimeTarget.textContent = this.formatMinutesToTime(parseInt(arrStart))
+    }
+    if (arrEnd) {
+      this.arrivalTimeEndTarget.value = arrEnd
+      this.arrivalEndTimeTarget.textContent = this.formatMinutesToTime(parseInt(arrEnd))
+    }
+    
+    // Update indicator badge
+    this.updateAdvancedFilterIndicator()
   }
 
   disconnect(): void {
@@ -153,8 +214,31 @@ export default class extends Controller<HTMLElement> {
       button.classList.remove('bg-primary', 'text-primary-foreground', 'border-primary')
       button.classList.add('border-border')
     })
+    
+    // Reset time sliders to default values
+    this.departureTimeStartTarget.value = '0'
+    this.departureTimeEndTarget.value = '1440'
+    this.departureStartTimeTarget.textContent = '00:00'
+    this.departureEndTimeTarget.textContent = '24:00'
+    
+    this.arrivalTimeStartTarget.value = '0'
+    this.arrivalTimeEndTarget.value = '1440'
+    this.arrivalStartTimeTarget.textContent = '00:00'
+    this.arrivalEndTimeTarget.textContent = '24:00'
+    
     this.updateAdvancedFilterIndicator()
-    console.log('Filters cleared')
+    
+    // Reload page without filter params (keep core search params only)
+    const url = new URL(window.location.href)
+    url.searchParams.delete('seat_types')
+    url.searchParams.delete('departure_time_start')
+    url.searchParams.delete('departure_time_end')
+    url.searchParams.delete('arrival_time_start')
+    url.searchParams.delete('arrival_time_end')
+    url.searchParams.delete('only_high_speed')
+    
+    this.closeModal()
+    Turbo.visit(url.toString())
   }
 
   applyFilters(): void {
@@ -212,12 +296,25 @@ export default class extends Controller<HTMLElement> {
   }
 
   private updateAdvancedFilterIndicator(): void {
-    if (this.selectedFilters.size > 0) {
+    // Count active filters (buttons + time ranges)
+    let activeCount = this.selectedFilters.size
+    
+    // Check if time ranges are non-default
+    const depStart = parseInt(this.departureTimeStartTarget.value)
+    const depEnd = parseInt(this.departureTimeEndTarget.value)
+    const arrStart = parseInt(this.arrivalTimeStartTarget.value)
+    const arrEnd = parseInt(this.arrivalTimeEndTarget.value)
+    
+    if (depStart > 0 || depEnd < 1440) activeCount++
+    if (arrStart > 0 || arrEnd < 1440) activeCount++
+    
+    if (activeCount > 0) {
       // Add active state styling
       this.advancedFilterButtonTarget.classList.add('text-primary', 'bg-primary/10', 'border-t-2', 'border-primary')
       this.advancedFilterButtonTarget.classList.remove('text-foreground')
-      // Show badge
+      // Show badge with count
       this.filterBadgeTarget.classList.remove('hidden')
+      this.filterBadgeTarget.textContent = activeCount.toString()
     } else {
       // Remove active state styling
       this.advancedFilterButtonTarget.classList.remove('text-primary', 'bg-primary/10', 'border-t-2', 'border-primary')
