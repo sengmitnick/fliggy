@@ -58,6 +58,10 @@ countries_data = [
 
 Country.insert_all(countries_data)
 
+# 为新插入的 Country 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为国家生成 slug..."
+Country.where(slug: [nil, '']).find_each(&:save)
+
 # 重新加载国家数据以获取ID
 countries = Country.all.index_by(&:code)
 
@@ -501,7 +505,7 @@ end
 
 # 泰国签证产品（扩充到4个）
 [
-  { type: "落地签证", price: 58, days: 0, materials: 1, validity: "15天", stay: "15天" },
+  { type: "落地签证", price: 58, days: 1, materials: 1, validity: "15天", stay: "15天" },  # 落地签证虽然即时办理，但为满足 processing_days > 0 的验证，设为1
   { type: "商务签证", price: 488, days: 5, materials: 5, validity: "90天", stay: "90天" }
 ].each_with_index do |config, i|
   visa_products_data << {
@@ -670,6 +674,10 @@ end
 end
 
 VisaProduct.insert_all(visa_products_data)
+
+# 为新插入的 VisaProduct 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为签证产品生成 slug..."
+VisaProduct.where(slug: [nil, '']).find_each(&:save)
 
 # ============================================
 # 第三步：创建签证服务数据（原有数据）
@@ -912,6 +920,10 @@ visa_services_data.concat([
 
 # 批量插入所有签证服务
 VisaService.insert_all(visa_services_data)
+
+# 为新插入的 VisaService 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为签证服务生成 slug..."
+VisaService.where(slug: [nil, '']).find_each(&:save)
 
 puts "  - 韩国签证: 3 个商品"
 puts "  - 日本签证: 4 个商品"

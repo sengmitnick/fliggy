@@ -362,8 +362,10 @@ attractions_data = [
 
 # 批量插入景点数据
 Attraction.insert_all(attractions_data)
-# Regenerate slugs for FriendlyId (insert_all bypasses callbacks)
-Attraction.find_each(&:save)
+
+# 为新插入的 Attraction 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为景点生成 slug..."
+Attraction.where(data_version: '0', slug: [nil, '']).find_each(&:save)
 
 puts "✓ 创建了 #{attractions_data.size} 个景点"
 
