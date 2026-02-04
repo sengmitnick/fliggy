@@ -53,8 +53,7 @@ module V301V350
       # 创建温泉酒店
       @hotel = Hotel.find_by!(
         name: "哈尔滨温泉度假酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 

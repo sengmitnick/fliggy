@@ -44,8 +44,7 @@ module V301V350
       # 创建酒店
       @hotel = Hotel.find_by!(
         name: "张家界武陵源度假酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 

@@ -30,7 +30,7 @@ module V301V350
       @outbound_flight = Flight.find_by!(
         flight_number: "CA1357",
         departure_city: @departure_city,
-        arrival_city: @destination_city,
+        destination_city: @destination_city,
         departure_time: @departure_date.to_time + 8.hours,
         data_version: 0
       )
@@ -38,7 +38,7 @@ module V301V350
       @return_flight = Flight.find_by!(
         flight_number: "CA1358",
         departure_city: @destination_city,
-        arrival_city: @departure_city,
+        destination_city: @departure_city,
         departure_time: @return_date.to_time + 14.hours,
         data_version: 0
       )
@@ -46,8 +46,7 @@ module V301V350
       # 创建亲子酒店
       @hotel = Hotel.find_by!(
         name: "三亚亚龙湾亲子度假酒店",
-        city: city,
-        destination: destination,
+        city: @destination_city,
         data_version: 0
       )
 
@@ -131,7 +130,7 @@ module V301V350
           .includes(:flight, :return_flight)
           .where(flights: { 
             departure_city: @departure_city,
-            arrival_city: @destination_city
+            destination_city: @destination_city
           })
           .where(trip_type: 'round_trip')
           .where(data_version: @data_version)

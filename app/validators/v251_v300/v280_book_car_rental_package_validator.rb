@@ -28,8 +28,8 @@ module V251V300
       
       # 确保用户有足够余额
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      if user.account_balance < 2000
-        user.update!(account_balance: 3000)
+      if user.balance < 2000
+        user.update!(balance: 3000)
       end
       
       {

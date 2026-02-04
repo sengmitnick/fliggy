@@ -43,8 +43,7 @@ module V301V350
       # 创建海景酒店
       @hotel = Hotel.find_by!(
         name: "青岛金沙滩海景度假酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 

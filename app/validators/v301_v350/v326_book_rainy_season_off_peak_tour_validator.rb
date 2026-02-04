@@ -50,8 +50,7 @@ module V301V350
       # 创建淡季优惠酒店
       @hotel = Hotel.find_by!(
         name: "桂林漓江边经济型酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 

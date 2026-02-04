@@ -29,7 +29,7 @@ module V301V350
         departure_airport: "北京首都国际机场",
         arrival_airport: "东京成田国际机场",
         departure_city: "北京",
-        arrival_city: "东京",
+        destination_city: "东京",
         data_version: 0
       )
 
@@ -45,7 +45,7 @@ module V301V350
         departure_airport: "东京成田国际机场",
         arrival_airport: "纽约肯尼迪国际机场",
         departure_city: "东京",
-        arrival_city: "纽约",
+        destination_city: "纽约",
         data_version: 0
       )
 

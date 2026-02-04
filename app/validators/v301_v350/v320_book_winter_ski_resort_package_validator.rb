@@ -46,8 +46,7 @@ module V301V350
       # 创建滑雪场酒店
       @hotel = Hotel.find_by!(
         name: "崇礼万龙度假酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 

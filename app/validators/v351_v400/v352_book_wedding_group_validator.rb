@@ -17,10 +17,9 @@ module V351V400
 
       @hotel = Hotel.find_by!(
         name: '三亚亚龙湾瑞吉度假酒店',
-        destination: @destination.name,
+        city: @destination.name,
         address: '亚龙湾',
-        star_rating: '五星级',
-        description: '海滨婚礼酒店，浪漫氛围',
+        star_level: '五星级',
         price: 1680,
         data_version: 0
       )
@@ -34,7 +33,7 @@ module V351V400
 
       @photo_service = DeepTravelProduct.find_by!(
         name: '三亚海滩婚纱摄影套餐',
-        destination: @destination.name,
+        city: @destination.name,
         product_type: '婚纱摄影',
         price: 3800,
         includes_equipment: true,
@@ -111,8 +110,8 @@ module V351V400
       end
 
       add_assertion "酒店星级为五星级", weight: 10 do
-        expect(@hotel.star_rating).to eq('五星级'),
-          "酒店星级错误。期望: 五星级，实际: #{@hotel.star_rating}"
+        expect(@hotel.star_level).to eq('五星级'),
+          "酒店星级错误。期望: 五星级，实际: #{@hotel.star_level}"
       end
 
       add_assertion "住宿天数正确（3天2晚）", weight: 10 do

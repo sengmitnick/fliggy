@@ -18,11 +18,10 @@ module V351V400
       # 查找经济型酒店
       @hotel = Hotel.find_by!(
         name: '西安钟楼青年旅舍',
-        destination: @destination.name,
+        city: @destination.name,
         address: '钟楼附近',
-        star_rating: '经济型',
+        star_level: '经济型',
         price: 120,
-        description: '干净整洁，交通便利，适合学生',
         data_version: 0
       )
 
@@ -36,7 +35,7 @@ module V351V400
       # 跟团游产品
       @tour_product = TourGroupProduct.find_by!(
         name: '西安古都文化5日游（学生特惠）',
-        destination: @destination.name,
+        city: @destination.name,
         duration: 5,
         price: 1280,
         description: '含兵马俑、华清池、大雁塔等景点门票，学生价',

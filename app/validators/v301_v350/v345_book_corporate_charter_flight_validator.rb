@@ -29,7 +29,7 @@ module V301V350
         departure_airport: "北京首都国际机场",
         arrival_airport: "三亚凤凰国际机场",
         departure_city: "北京",
-        arrival_city: "三亚",
+        destination_city: "三亚",
         data_version: 0
       )
 

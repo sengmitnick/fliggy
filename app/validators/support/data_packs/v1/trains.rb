@@ -1196,4 +1196,56 @@ end
 Train.insert_all(all_trains)
 puts "   ✓ 已扩展 #{all_trains.size} 条火车票记录（未来8-15天）"
 
+# ==================== 春运热门线路：北京→成都 (V317需要：Z50春节返乡卧铺) ====================
+# 生成未来60天的北京→成都火车票（覆盖春节时段）
+all_trains = []
+beijing_chengdu_start_date = Date.today + 1.day
+beijing_chengdu_end_date = Date.today + 65.days
+
+(beijing_chengdu_start_date..beijing_chengdu_end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  
+  # Z50 直达特快（春运热门卧铺车次）
+  all_trains << {
+    departure_city: "北京",
+    arrival_city: "成都",
+    departure_station: "北京西站",
+    arrival_station: "成都站",
+    departure_time: base_datetime.change(hour: 19, min: 58),
+    arrival_time: (base_datetime + 1.day).change(hour: 19, min: 28),
+    train_number: "Z50",
+    duration: 1410,  # 23.5小时
+    price_second_class: 263.5,  # 硬座
+    price_first_class: 450.5,   # 硬卧
+    price_business_class: 690.5, # 软卧
+    available_seats: 200,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # K117 快速列车（经济实惠）
+  all_trains << {
+    departure_city: "北京",
+    arrival_city: "成都",
+    departure_station: "北京西站",
+    arrival_station: "成都站",
+    departure_time: base_datetime.change(hour: 12, min: 20),
+    arrival_time: (base_datetime + 1.day).change(hour: 18, min: 36),
+    train_number: "K#{117 + (day_suffix % 10)}",
+    duration: 1816,  # 30.3小时
+    price_second_class: 240.5,
+    price_first_class: 420.5,
+    price_business_class: 650.5,
+    available_seats: 180,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Train.insert_all(all_trains)
+puts "   ✓ 已添加 #{all_trains.size} 条北京→成都火车票记录（未来65天，含春节返乡Z50）"
+
 puts "\n✅ trains_v1 数据包加载完成！"

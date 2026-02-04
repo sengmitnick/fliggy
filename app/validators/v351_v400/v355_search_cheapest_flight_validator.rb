@@ -24,7 +24,7 @@ module V351V400
       @direct_flight = Flight.find_by!(
         flight_number: 'ZH9001',
         departure_city: @departure_city.name,
-        arrival_city: @arrival_city.name,
+        destination_city: @arrival_city.name,
         departure_time: (Date.today + 7.days).to_time + 10.hours,
         arrival_time: (Date.today + 7.days).to_time + 16.hours,
         data_version: 0
@@ -42,7 +42,7 @@ module V351V400
       @transit_flight1 = Flight.find_by!(
         flight_number: 'CZ3101',
         departure_city: @departure_city.name,
-        arrival_city: '北京',
+        destination_city: '北京',
         departure_time: (Date.today + 7.days).to_time + 8.hours,
         arrival_time: (Date.today + 7.days).to_time + 12.hours,
         data_version: 0
@@ -59,7 +59,7 @@ module V351V400
       @transit_flight2 = Flight.find_by!(
         flight_number: 'CA1301',
         departure_city: '北京',
-        arrival_city: @arrival_city.name,
+        destination_city: @arrival_city.name,
         departure_time: (Date.today + 7.days).to_time + 15.hours,
         arrival_time: (Date.today + 7.days).to_time + 19.hours,
         data_version: 0
@@ -77,7 +77,7 @@ module V351V400
       @redeye_flight = Flight.find_by!(
         flight_number: 'MU5201',
         departure_city: @departure_city.name,
-        arrival_city: @arrival_city.name,
+        destination_city: @arrival_city.name,
         departure_time: (Date.today + 7.days).to_time + 23.hours,
         arrival_time: (Date.today + 8.days).to_time + 5.hours,
         is_red_eye: true,
@@ -114,7 +114,7 @@ module V351V400
         all_orders = FlightBooking
           .joins(flight_offer: :flight)
           .includes(flight_offer: :flight)
-          .where(flights: { departure_city: @departure_city.name, arrival_city: @arrival_city.name })
+          .where(flights: { departure_city: @departure_city.name, destination_city: @arrival_city.name })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
@@ -166,7 +166,7 @@ module V351V400
       add_assertion "选择了中转或红眼航班（性价比优选）", weight: 10 do
         has_transit_or_redeye = @flight_bookings.any? do |booking|
           flight = booking.flight_offer.flight
-          flight.is_red_eye || flight.arrival_city != @arrival_city.name || @flight_bookings.size > 1
+          flight.is_red_eye || flight.destination_city != @arrival_city.name || @flight_bookings.size > 1
         end
 
         expect(has_transit_or_redeye).to be_truthy,

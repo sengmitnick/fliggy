@@ -44,8 +44,7 @@ module V301V350
 
       @hotel = Hotel.find_by!(
         name: "武汉大学周边精品酒店",
-        city: city,
-        destination: destination,
+        city: @city_name,
         data_version: 0
       )
 
