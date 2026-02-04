@@ -105,6 +105,18 @@ class TransfersController < ApplicationController
     @transfer_type = params[:transfer_type] || session.dig(:transfer_params, :transfer_type) || 'airport_pickup'
     @service_type = params[:service_type] || session.dig(:transfer_params, :service_type) || 'from_airport'
     
+    # 🎯 CRITICAL: 车型筛选参数优先级
+    # 1. Validator state_data (验证器自动筛选) - 优先级最高，不允许用户覆盖
+    # 2. URL params (用户手动筛选)
+    # 3. Session (保持用户之前的选择)
+    validator_vehicle_category = current_validator_execution&.state_data&.dig('data', 'vehicle_category')
+    @vehicle_category = validator_vehicle_category || 
+                       params[:vehicle_category] || 
+                       session.dig(:transfer_params, :vehicle_category)
+    
+    # 标记是否在验证器上下文中（用于视图判断是否禁用车型切换）
+    @in_validator_context = validator_vehicle_category.present?
+    
     # Redirect to search page if missing required params
     if @location_from.blank? || @location_to.blank?
       flash[:alert] = '请先选择出发地和目的地'
@@ -130,11 +142,19 @@ class TransfersController < ApplicationController
     # Get available packages ordered by priority and price
     @packages = TransferPackage.active.ordered
     
+    # 🎯 CRITICAL: 如果指定了vehicle_category（来自用户筛选或验证器要求），则只显示该车型的套餐
+    # 这样验证器在要求特定车型时，AI只会看到该车型的套餐，自然选择最便宜的
+    if @vehicle_category.present?
+      @packages = @packages.where(vehicle_category: @vehicle_category)
+      Rails.logger.info "[Transfer Packages] Filtering by vehicle_category=#{@vehicle_category}, found #{@packages.count} packages"
+    end
+    
     # Store params in session
     session[:transfer_params] = (session[:transfer_params] || {}).merge(
       location_from: @location_from,
       location_to: @location_to,
-      pickup_datetime: @pickup_datetime
+      pickup_datetime: @pickup_datetime,
+      vehicle_category: @vehicle_category  # 保存车型筛选条件
     ).compact
   end
 

@@ -50,13 +50,39 @@
       
       <!-- Left Sidebar -->
       <aside class="w-24 bg-[#F5F5F5] h-full overflow-y-auto no-scrollbar">
-        <% TransferPackage::VEHICLE_CATEGORIES.each_with_index do |(category, details), index| %>
-          <% packages_in_category = @packages.select { |p| p.vehicle_category == category } %>
-          <% min_price = packages_in_category.map(&:price).min || 0 %>
-          <div class="py-4 pl-3 pr-1 <%= index == 0 ? 'bg-surface border-l-[3px] border-[#FF5238]' : 'text-text-muted' %>">
-            <div class="<%= index == 0 ? 'font-bold text-text-primary' : '' %> text-sm"><%= details[:name] %></div>
-            <div class="text-xs <%= index == 0 ? 'text-text-primary font-bold' : '' %> mt-0.5">¥<%= min_price %>起</div>
-          </div>
+        <% if @in_validator_context %>
+          <%# 验证器上下文：只显示验证器要求的车型，禁用切换 %>
+          <% validator_category_details = TransferPackage::VEHICLE_CATEGORIES[@vehicle_category] %>
+          <% if validator_category_details %>
+            <% packages_in_category = @packages.select { |p| p.vehicle_category == @vehicle_category } %>
+            <% min_price = packages_in_category.map(&:price).min || 0 %>
+            <div class="py-4 pl-3 pr-1 bg-surface border-l-[3px] border-[#FF5238] opacity-60">
+              <div class="font-bold text-text-primary text-sm"><%= validator_category_details[:name] %></div>
+              <div class="text-xs text-text-primary font-bold mt-0.5">¥<%= min_price %>起</div>
+              <div class="text-[9px] text-gray-400 mt-1">系统推荐</div>
+            </div>
+          <% end %>
+        <% else %>
+          <%# 普通用户上下文：只显示有数据的车型，允许切换 %>
+          <% TransferPackage::VEHICLE_CATEGORIES.each_with_index do |(category, details), index| %>
+            <% packages_in_category = TransferPackage.active.where(vehicle_category: category) %>
+            <% next if packages_in_category.empty? %>
+            <% is_selected = @vehicle_category.present? ? (@vehicle_category == category) : (index == 0) %>
+            <% min_price = packages_in_category.minimum(:price) || 0 %>
+            <%= link_to transfers_packages_path(
+              vehicle_category: category,
+              transfer_type: @transfer_type,
+              service_type: @service_type,
+              location_from: @location_from,
+              location_to: @location_to,
+              pickup_datetime: @pickup_datetime,
+              flight_id: @flight_id,
+              train_id: @train_id
+            ), class: "block py-4 pl-3 pr-1 #{is_selected ? 'bg-surface border-l-[3px] border-[#FF5238]' : 'text-text-muted hover:bg-gray-100'} transition-colors" do %>
+              <div class="<%= is_selected ? 'font-bold text-text-primary' : '' %> text-sm"><%= details[:name] %></div>
+              <div class="text-xs <%= is_selected ? 'text-text-primary font-bold' : '' %> mt-0.5">¥<%= min_price %>起</div>
+            <% end %>
+          <% end %>
         <% end %>
       </aside>
 
@@ -169,7 +195,7 @@
       <div class="flex items-center justify-between mb-3">
         <div>
           <div class="text-xs text-text-muted">预计费用</div>
-          <div class="text-2xl font-bold text-[#FF4500]">¥<span id="selected-price">80</span></div>
+          <div class="text-2xl font-bold text-[#FF4500]">¥<span id="selected-price"><%= @packages.first&.price&.to_i || 0 %></span></div>
         </div>
         <button type="button" id="book-now-btn" class="bg-[#FF5238] text-white font-bold text-lg px-8 py-3 rounded-full shadow-md active:scale-95 transition-transform">
           立刻预约
@@ -195,6 +221,15 @@ document.addEventListener('turbo:load', function initPackageSelection() {
   console.log('packageCards count:', packageCards.length);
   console.log('Initial selectedPackageId:', selectedPackageId);
   console.log('Initial selectedCategory:', selectedCategory);
+  
+  // Initialize price display with first package's price
+  if (packageCards[0]) {
+    const firstPriceText = packageCards[0].querySelector('.text-\\[\\#FF4500\\].font-semibold')?.textContent;
+    if (firstPriceText) {
+      const firstPrice = firstPriceText.replace('¥', '');
+      selectedPriceEl.textContent = firstPrice;
+    }
+  }
 
   packageCards.forEach(card => {
     card.addEventListener('click', function() {

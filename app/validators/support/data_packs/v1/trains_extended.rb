@@ -29,6 +29,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "上海",
     arrival_city: "北京",
+    departure_station: "上海虹桥站",
+    arrival_station: "北京南站",
     departure_time: base_datetime.change(hour: 7, min: 0),
     arrival_time: base_datetime.change(hour: 11, min: 30),
     train_number: "G#{1 + day_suffix}",
@@ -45,6 +47,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "上海",
     arrival_city: "北京",
+    departure_station: "上海虹桥站",
+    arrival_station: "北京南站",
     departure_time: base_datetime.change(hour: 9, min: 0),
     arrival_time: base_datetime.change(hour: 13, min: 30),
     train_number: "G#{3 + day_suffix}",
@@ -61,6 +65,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "上海",
     arrival_city: "北京",
+    departure_station: "上海虹桥站",
+    arrival_station: "北京南站",
     departure_time: base_datetime.change(hour: 14, min: 0),
     arrival_time: base_datetime.change(hour: 18, min: 30),
     train_number: "G#{11 + day_suffix}",
@@ -78,6 +84,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "北京",
     arrival_city: "上海",
+    departure_station: "北京南站",
+    arrival_station: "上海虹桥站",
     departure_time: base_datetime.change(hour: 8, min: 0),
     arrival_time: base_datetime.change(hour: 12, min: 30),
     train_number: "G#{2 + day_suffix}",
@@ -94,6 +102,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "北京",
     arrival_city: "上海",
+    departure_station: "北京南站",
+    arrival_station: "上海虹桥站",
     departure_time: base_datetime.change(hour: 10, min: 0),
     arrival_time: base_datetime.change(hour: 14, min: 30),
     train_number: "G#{4 + day_suffix}",
@@ -110,6 +120,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "北京",
     arrival_city: "上海",
+    departure_station: "北京南站",
+    arrival_station: "上海虹桥站",
     departure_time: base_datetime.change(hour: 15, min: 0),
     arrival_time: base_datetime.change(hour: 19, min: 30),
     train_number: "G#{12 + day_suffix}",
@@ -127,6 +139,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "北京",
     arrival_city: "广州",
+    departure_station: "北京西站",
+    arrival_station: "广州南站",
     departure_time: base_datetime.change(hour: 8, min: 5),
     arrival_time: base_datetime.change(hour: 16, min: 24),
     train_number: "G#{65 + day_suffix}",
@@ -144,6 +158,8 @@ timestamp = Time.current
   all_trains << {
     departure_city: "广州",
     arrival_city: "北京",
+    departure_station: "广州南站",
+    arrival_station: "北京西站",
     departure_time: base_datetime.change(hour: 9, min: 0),
     arrival_time: base_datetime.change(hour: 17, min: 19),
     train_number: "G#{66 + day_suffix}",

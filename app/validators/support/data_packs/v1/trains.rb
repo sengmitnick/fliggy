@@ -34,6 +34,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 6, min: 15),
       arrival_time: base_datetime.change(hour: 7, min: 25),
       train_number: "G#{7301 + day_suffix}",
@@ -48,6 +50,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 7, min: 0),
       arrival_time: base_datetime.change(hour: 8, min: 8),
       train_number: "D#{3101 + day_suffix}",
@@ -62,6 +66,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 8, min: 30),
       arrival_time: base_datetime.change(hour: 9, min: 35),
       train_number: "G#{7303 + day_suffix}",
@@ -77,6 +83,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 10, min: 15),
       arrival_time: base_datetime.change(hour: 11, min: 22),
       train_number: "D#{3103 + day_suffix}",
@@ -91,6 +99,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 12, min: 0),
       arrival_time: base_datetime.change(hour: 13, min: 10),
       train_number: "G#{7305 + day_suffix}",
@@ -105,6 +115,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 14, min: 30),
       arrival_time: base_datetime.change(hour: 15, min: 38),
       train_number: "D#{3105 + day_suffix}",
@@ -120,6 +132,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 17, min: 0),
       arrival_time: base_datetime.change(hour: 18, min: 5),
       train_number: "G#{7307 + day_suffix}",
@@ -134,6 +148,8 @@ timestamp = Time.current
     {
       departure_city: "上海",
       arrival_city: "杭州",
+      departure_station: "上海虹桥站",
+      arrival_station: "杭州东站",
       departure_time: base_datetime.change(hour: 19, min: 30),
       arrival_time: base_datetime.change(hour: 20, min: 40),
       train_number: "D#{3107 + day_suffix}",
@@ -159,11 +175,11 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   night_trains_bj_to_sh = [
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 0, min: 30), train_number: "G#{109 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 20, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 0), train_number: "G#{111 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 30), train_number: "G#{113 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 21, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 0), train_number: "D#{301 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 22, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 30), train_number: "D#{303 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 20, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 0, min: 30), train_number: "G#{109 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 20, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 0), train_number: "G#{111 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 21, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 1, min: 30), train_number: "G#{113 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 21, min: 30), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 0), train_number: "D#{301 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 22, min: 0), arrival_time: (base_datetime + 1.day).change(hour: 2, min: 30), train_number: "D#{303 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(night_trains_bj_to_sh)
 end
@@ -182,6 +198,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 6, min: 30),
       arrival_time: base_datetime.change(hour: 7, min: 40),
       train_number: "G#{7302 + day_suffix}",
@@ -197,6 +215,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 7, min: 15),
       arrival_time: base_datetime.change(hour: 8, min: 23),
       train_number: "D#{3102 + day_suffix}",
@@ -212,6 +232,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 8, min: 45),
       arrival_time: base_datetime.change(hour: 9, min: 50),
       train_number: "G#{7304 + day_suffix}",
@@ -228,6 +250,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 10, min: 30),
       arrival_time: base_datetime.change(hour: 11, min: 37),
       train_number: "D#{3104 + day_suffix}",
@@ -243,6 +267,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 12, min: 15),
       arrival_time: base_datetime.change(hour: 13, min: 25),
       train_number: "G#{7306 + day_suffix}",
@@ -258,6 +284,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 14, min: 45),
       arrival_time: base_datetime.change(hour: 15, min: 53),
       train_number: "D#{3106 + day_suffix}",
@@ -274,6 +302,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 17, min: 15),
       arrival_time: base_datetime.change(hour: 18, min: 20),
       train_number: "G#{7308 + day_suffix}",
@@ -289,6 +319,8 @@ all_trains = []
     {
       departure_city: "杭州",
       arrival_city: "上海",
+      departure_station: "杭州东站",
+      arrival_station: "上海虹桥站",
       departure_time: base_datetime.change(hour: 19, min: 45),
       arrival_time: base_datetime.change(hour: 20, min: 55),
       train_number: "D#{3108 + day_suffix}",
@@ -323,6 +355,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 7, min: 0),
       arrival_time: base_datetime.change(hour: 7, min: 33),
       train_number: "C#{2001 + day_suffix}",
@@ -337,6 +371,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 8, min: 30),
       arrival_time: base_datetime.change(hour: 9, min: 5),
       train_number: "C#{2003 + day_suffix}",
@@ -352,6 +388,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 10, min: 0),
       arrival_time: base_datetime.change(hour: 10, min: 30),
       train_number: "G#{1 + day_suffix}",
@@ -366,6 +404,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 12, min: 30),
       arrival_time: base_datetime.change(hour: 13, min: 0),
       train_number: "G#{3 + day_suffix}",
@@ -381,6 +421,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 15, min: 0),
       arrival_time: base_datetime.change(hour: 15, min: 35),
       train_number: "C#{2005 + day_suffix}",
@@ -396,6 +438,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "天津",
+      departure_station: "北京南站",
+      arrival_station: "天津站",
       departure_time: base_datetime.change(hour: 18, min: 0),
       arrival_time: base_datetime.change(hour: 18, min: 32),
       train_number: "C#{2007 + day_suffix}",
@@ -421,9 +465,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_tj_to_sh = [
-    { departure_city: "天津", arrival_city: "上海", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{201 + day_suffix}", duration: 270, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "天津", arrival_city: "上海", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 25), train_number: "G#{203 + day_suffix}", duration: 265, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "天津", arrival_city: "上海", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 20, min: 0), train_number: "G#{207 + day_suffix}", duration: 270, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "天津", arrival_city: "上海", departure_station: "天津站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{201 + day_suffix}", duration: 270, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "天津", arrival_city: "上海", departure_station: "天津站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 25), train_number: "G#{203 + day_suffix}", duration: 265, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "天津", arrival_city: "上海", departure_station: "天津站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 20, min: 0), train_number: "G#{207 + day_suffix}", duration: 270, price_second_class: 488.0, price_first_class: 823.0, price_business_class: 1543.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_tj_to_sh)
 end
@@ -435,9 +479,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_bj_to_sh = [
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 30), train_number: "G#{101 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 28), train_number: "G#{103 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "上海", departure_time: base_datetime.change(hour: 14, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{107 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 30), train_number: "G#{101 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 28), train_number: "G#{103 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 14, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{107 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_bj_to_sh)
 end
@@ -449,9 +493,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_sh_to_bj = [
-    { departure_city: "上海", arrival_city: "北京", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{102 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "上海", arrival_city: "北京", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 28), train_number: "G#{104 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "上海", arrival_city: "北京", departure_time: base_datetime.change(hour: 15, min: 0), arrival_time: base_datetime.change(hour: 19, min: 30), train_number: "G#{108 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "上海", arrival_city: "北京", departure_station: "上海虹桥站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 0), train_number: "G#{102 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "上海", arrival_city: "北京", departure_station: "上海虹桥站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 28), train_number: "G#{104 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "上海", arrival_city: "北京", departure_station: "上海虹桥站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 15, min: 0), arrival_time: base_datetime.change(hour: 19, min: 30), train_number: "G#{108 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_sh_to_bj)
 end
@@ -463,9 +507,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_sh_to_sz = [
-    { departure_city: "上海", arrival_city: "深圳", departure_time: base_datetime.change(hour: 8, min: 0), arrival_time: base_datetime.change(hour: 16, min: 30), train_number: "G#{1301 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "上海", arrival_city: "深圳", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{1303 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "上海", arrival_city: "深圳", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 23, min: 59), train_number: "D#{701 + day_suffix}", duration: 509, price_second_class: 465.0, price_first_class: 743.0, price_business_class: 1395.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "上海", arrival_city: "深圳", departure_station: "上海虹桥站", arrival_station: "深圳北站", departure_time: base_datetime.change(hour: 8, min: 0), arrival_time: base_datetime.change(hour: 16, min: 30), train_number: "G#{1301 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "上海", arrival_city: "深圳", departure_station: "上海虹桥站", arrival_station: "深圳北站", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{1303 + day_suffix}", duration: 510, price_second_class: 595.0, price_first_class: 946.0, price_business_class: 1774.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "上海", arrival_city: "深圳", departure_station: "上海虹桥站", arrival_station: "深圳北站", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 23, min: 59), train_number: "D#{701 + day_suffix}", duration: 509, price_second_class: 465.0, price_first_class: 743.0, price_business_class: 1395.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_sh_to_sz)
 end
@@ -477,9 +521,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_hz_to_bj = [
-    { departure_city: "杭州", arrival_city: "北京", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 55), train_number: "G#{19 + day_suffix}", duration: 295, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "杭州", arrival_city: "北京", departure_time: base_datetime.change(hour: 12, min: 0), arrival_time: base_datetime.change(hour: 17, min: 5), train_number: "G#{23 + day_suffix}", duration: 305, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "杭州", arrival_city: "北京", departure_time: base_datetime.change(hour: 19, min: 30), arrival_time: base_datetime.change(hour: 23, min: 59), train_number: "G#{29 + day_suffix}", duration: 269, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "杭州", arrival_city: "北京", departure_station: "杭州东站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 55), train_number: "G#{19 + day_suffix}", duration: 295, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "杭州", arrival_city: "北京", departure_station: "杭州东站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 12, min: 0), arrival_time: base_datetime.change(hour: 17, min: 5), train_number: "G#{23 + day_suffix}", duration: 305, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "杭州", arrival_city: "北京", departure_station: "杭州东站", arrival_station: "北京南站", departure_time: base_datetime.change(hour: 19, min: 30), arrival_time: base_datetime.change(hour: 23, min: 59), train_number: "G#{29 + day_suffix}", duration: 269, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_hz_to_bj)
 end
@@ -491,12 +535,12 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_bj_to_hz = [
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 18), train_number: "G#{31 + day_suffix}", duration: 288, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 52), train_number: "G#{33 + day_suffix}", duration: 292, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 10, min: 30), arrival_time: base_datetime.change(hour: 15, min: 10), train_number: "D#{321 + day_suffix}", duration: 280, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 13, min: 0), arrival_time: base_datetime.change(hour: 17, min: 45), train_number: "G#{35 + day_suffix}", duration: 285, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 20, min: 15), train_number: "D#{323 + day_suffix}", duration: 285, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "北京", arrival_city: "杭州", departure_time: base_datetime.change(hour: 18, min: 0), arrival_time: base_datetime.change(hour: 22, min: 50), train_number: "G#{37 + day_suffix}", duration: 290, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 7, min: 30), arrival_time: base_datetime.change(hour: 12, min: 18), train_number: "G#{31 + day_suffix}", duration: 288, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 160, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 52), train_number: "G#{33 + day_suffix}", duration: 292, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 10, min: 30), arrival_time: base_datetime.change(hour: 15, min: 10), train_number: "D#{321 + day_suffix}", duration: 280, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 13, min: 0), arrival_time: base_datetime.change(hour: 17, min: 45), train_number: "G#{35 + day_suffix}", duration: 285, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 15, min: 30), arrival_time: base_datetime.change(hour: 20, min: 15), train_number: "D#{323 + day_suffix}", duration: 285, price_second_class: 428.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "杭州", departure_station: "北京南站", arrival_station: "杭州东站", departure_time: base_datetime.change(hour: 18, min: 0), arrival_time: base_datetime.change(hour: 22, min: 50), train_number: "G#{37 + day_suffix}", duration: 290, price_second_class: 538.0, price_first_class: 907.0, price_business_class: 1701.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_bj_to_hz)
 end
@@ -508,9 +552,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_sz_to_gz = [
-    { departure_city: "深圳", arrival_city: "广州", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 7, min: 35), train_number: "G#{6001 + day_suffix}", duration: 35, price_second_class: 75.0, price_first_class: 120.0, price_business_class: 225.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "深圳", arrival_city: "广州", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 10, min: 45), train_number: "D#{2001 + day_suffix}", duration: 45, price_second_class: 60.0, price_first_class: 96.0, price_business_class: 180.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "深圳", arrival_city: "广州", departure_time: base_datetime.change(hour: 14, min: 30), arrival_time: base_datetime.change(hour: 15, min: 12), train_number: "D#{2003 + day_suffix}", duration: 42, price_second_class: 60.0, price_first_class: 96.0, price_business_class: 180.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "深圳", arrival_city: "广州", departure_station: "深圳北站", arrival_station: "广州南站", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 7, min: 35), train_number: "G#{6001 + day_suffix}", duration: 35, price_second_class: 75.0, price_first_class: 120.0, price_business_class: 225.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "深圳", arrival_city: "广州", departure_station: "深圳北站", arrival_station: "广州南站", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 10, min: 45), train_number: "D#{2001 + day_suffix}", duration: 45, price_second_class: 60.0, price_first_class: 96.0, price_business_class: 180.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "深圳", arrival_city: "广州", departure_station: "深圳北站", arrival_station: "广州南站", departure_time: base_datetime.change(hour: 14, min: 30), arrival_time: base_datetime.change(hour: 15, min: 12), train_number: "D#{2003 + day_suffix}", duration: 42, price_second_class: 60.0, price_first_class: 96.0, price_business_class: 180.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_sz_to_gz)
 end
@@ -522,9 +566,9 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_gz_to_sh = [
-    { departure_city: "广州", arrival_city: "上海", departure_time: base_datetime.change(hour: 12, min: 30), arrival_time: base_datetime.change(hour: 20, min: 5), train_number: "D#{901 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "广州", arrival_city: "上海", departure_time: base_datetime.change(hour: 16, min: 0), arrival_time: base_datetime.change(hour: 23, min: 35), train_number: "D#{903 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
-    { departure_city: "广州", arrival_city: "上海", departure_time: base_datetime.change(hour: 18, min: 30), arrival_time: base_datetime.change(hour: 23, min: 50), train_number: "D#{905 + day_suffix}", duration: 320, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 210, data_version: 0, created_at: timestamp, updated_at: timestamp }
+    { departure_city: "广州", arrival_city: "上海", departure_station: "广州南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 12, min: 30), arrival_time: base_datetime.change(hour: 20, min: 5), train_number: "D#{901 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 200, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "广州", arrival_city: "上海", departure_station: "广州南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 16, min: 0), arrival_time: base_datetime.change(hour: 23, min: 35), train_number: "D#{903 + day_suffix}", duration: 455, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 190, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "广州", arrival_city: "上海", departure_station: "广州南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 18, min: 30), arrival_time: base_datetime.change(hour: 23, min: 50), train_number: "D#{905 + day_suffix}", duration: 320, price_second_class: 563.0, price_first_class: 898.0, price_business_class: 1685.0, available_seats: 210, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_gz_to_sh)
 end
@@ -650,6 +694,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "南京",
+      departure_station: "北京南站",
+      arrival_station: "南京南站",
       departure_time: base_datetime.change(hour: 7, min: 0),
       arrival_time: base_datetime.change(hour: 10, min: 30),
       train_number: "G#{101 + day_suffix}",
@@ -665,6 +711,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "南京",
+      departure_station: "北京南站",
+      arrival_station: "南京南站",
       departure_time: base_datetime.change(hour: 9, min: 30),
       arrival_time: base_datetime.change(hour: 13, min: 0),
       train_number: "G#{103 + day_suffix}",
@@ -680,6 +728,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "南京",
+      departure_station: "北京南站",
+      arrival_station: "南京南站",
       departure_time: base_datetime.change(hour: 14, min: 0),
       arrival_time: base_datetime.change(hour: 17, min: 30),
       train_number: "G#{105 + day_suffix}",
@@ -695,6 +745,8 @@ all_trains = []
     {
       departure_city: "北京",
       arrival_city: "南京",
+      departure_station: "北京南站",
+      arrival_station: "南京南站",
       departure_time: base_datetime.change(hour: 18, min: 0),
       arrival_time: base_datetime.change(hour: 21, min: 30),
       train_number: "G#{107 + day_suffix}",
@@ -727,6 +779,8 @@ all_trains = []
     {
       departure_city: "武汉",
       arrival_city: "西安",
+      departure_station: "武汉站",
+      arrival_station: "西安站",
       departure_time: base_datetime.change(hour: 8, min: 0),
       arrival_time: base_datetime.change(hour: 13, min: 30),
       train_number: "K#{201 + day_suffix}",
@@ -742,6 +796,8 @@ all_trains = []
     {
       departure_city: "武汉",
       arrival_city: "西安",
+      departure_station: "武汉站",
+      arrival_station: "西安站",
       departure_time: base_datetime.change(hour: 11, min: 0),
       arrival_time: base_datetime.change(hour: 15, min: 30),
       train_number: "D#{301 + day_suffix}",
@@ -757,6 +813,8 @@ all_trains = []
     {
       departure_city: "武汉",
       arrival_city: "西安",
+      departure_station: "武汉站",
+      arrival_station: "西安站",
       departure_time: base_datetime.change(hour: 15, min: 30),
       arrival_time: base_datetime.change(hour: 21, min: 0),
       train_number: "K#{203 + day_suffix}",
@@ -789,6 +847,8 @@ all_trains = []
     {
       departure_city: "重庆",
       arrival_city: "成都",
+      departure_station: "重庆北站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 7, min: 30),
       arrival_time: base_datetime.change(hour: 9, min: 0),
       train_number: "G#{8501 + day_suffix}",
@@ -804,6 +864,8 @@ all_trains = []
     {
       departure_city: "重庆",
       arrival_city: "成都",
+      departure_station: "重庆北站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 9, min: 30),
       arrival_time: base_datetime.change(hour: 11, min: 0),
       train_number: "G#{8503 + day_suffix}",
@@ -819,6 +881,8 @@ all_trains = []
     {
       departure_city: "重庆",
       arrival_city: "成都",
+      departure_station: "重庆北站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 12, min: 0),
       arrival_time: base_datetime.change(hour: 13, min: 40),
       train_number: "D#{5601 + day_suffix}",
@@ -834,6 +898,8 @@ all_trains = []
     {
       departure_city: "重庆",
       arrival_city: "成都",
+      departure_station: "重庆北站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 15, min: 30),
       arrival_time: base_datetime.change(hour: 17, min: 0),
       train_number: "G#{8505 + day_suffix}",
@@ -849,6 +915,8 @@ all_trains = []
     {
       departure_city: "重庆",
       arrival_city: "成都",
+      departure_station: "重庆北站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 18, min: 30),
       arrival_time: base_datetime.change(hour: 20, min: 0),
       train_number: "G#{8507 + day_suffix}",
@@ -879,6 +947,8 @@ all_trains = []
     {
       departure_city: "广州",
       arrival_city: "成都",
+      departure_station: "广州南站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 8, min: 0),
       arrival_time: base_datetime.change(hour: 16, min: 0),
       train_number: "G#{1234 + day_suffix}",
@@ -894,6 +964,8 @@ all_trains = []
     {
       departure_city: "广州",
       arrival_city: "成都",
+      departure_station: "广州南站",
+      arrival_station: "成都东站",
       departure_time: base_datetime.change(hour: 14, min: 30),
       arrival_time: base_datetime.change(hour: 22, min: 30),
       train_number: "G#{1236 + day_suffix}",
@@ -921,6 +993,8 @@ return_date_range.each do |date|
     {
       departure_city: "成都",
       arrival_city: "广州",
+      departure_station: "成都东站",
+      arrival_station: "广州南站",
       departure_time: base_datetime.change(hour: 9, min: 0),
       arrival_time: base_datetime.change(hour: 17, min: 0),
       train_number: "G#{1235 + day_suffix}",
@@ -936,6 +1010,8 @@ return_date_range.each do |date|
     {
       departure_city: "成都",
       arrival_city: "广州",
+      departure_station: "成都东站",
+      arrival_station: "广州南站",
       departure_time: base_datetime.change(hour: 15, min: 0),
       arrival_time: base_datetime.change(hour: 23, min: 0),
       train_number: "G#{1237 + day_suffix}",

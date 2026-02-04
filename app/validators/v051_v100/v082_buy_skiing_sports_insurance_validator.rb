@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# 验证用例82: 购买滑雪运动保险（长白山，3天，运动医疗保额最高）
+# 验证用例82: 购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）
 # 
 # 任务描述:
-#   Agent 需要为长白山滑雪之旅购买运动保险，
+#   Agent 需要为哈尔滨滑雪之旅购买运动保险，
 #   选择运动医疗保额最高的专业滑雪保险产品
 # 
 # 复杂度分析:
@@ -18,9 +18,10 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 保险类型正确（境内旅游）(15分)
-#   - 目的地正确（长白山）(10分)
-#   - 产品适合滑雪场景 (20分)
+#   - 保险类型正确（境内旅游）(10分)
+#   - 目的地正确（哈尔滨）(10分)
+#   - 出行开始时间正确（15天后）(10分)
+#   - 产品适合滑雪场景 (15分)
 #   - 选择了运动医疗保额最高的产品 (25分)
 #   - 保障天数正确（3天）(10分)
 # 
@@ -36,19 +37,19 @@ module V051V100
   class V082BuySkiingSportsInsuranceValidator < BaseValidator
     self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
     self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
-    self.title = '购买滑雪运动保险（长白山，3天，运动医疗保额最高）'
-    self.description = '为长白山滑雪之旅购买运动保险，选择运动医疗保额最高的专业滑雪保险'
+    self.title = '购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
+    self.description = '为哈尔滨滑雪之旅购买运动保险，选择运动医疗保额最高的专业滑雪保险'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
     def prepare
       # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
       @product_type = 'domestic'
-      @destination = '长白山'
+      @destination = '哈尔滨'
       @days = 3
       @quantity = 1
       @scene = '滑雪'
-      @start_date = Date.current + 10.days  # 10天后开始
+      @start_date = Date.today + 15.days  # 15天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找适合滑雪的境内旅游保险产品（注意：查询基线数据 data_version=0）
@@ -65,7 +66,7 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为长白山滑雪之旅购买运动保险（10天后出发，保障期#{@days}天），滑雪属于高风险运动，请选择适合滑雪且运动医疗保额最高的产品",
+        task: "请为哈尔滨滑雪之旅购买运动保险（15天后出发，保障期#{@days}天），滑雪属于高风险运动，请选择适合滑雪且运动医疗保额最高的产品",
         product_type: "境内旅游",
         destination: @destination,
         days: @days,
@@ -90,7 +91,7 @@ module V051V100
       return unless @insurance_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 保险类型正确
-      add_assertion "保险类型正确（境内旅游）", weight: 15 do
+      add_assertion "保险类型正确（境内旅游）", weight: 10 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}（境内旅游），实际: #{actual_type}"
@@ -103,8 +104,15 @@ module V051V100
           "目的地错误。期望包含: #{@destination}, 实际: #{actual_destination || '未填写'}"
       end
     
-      # 断言4: 产品适合滑雪场景
-      add_assertion "产品适合滑雪场景", weight: 20 do
+      # 断言4: 出行开始时间正确（15天后）
+      add_assertion "出行开始时间正确（15天后，#{@start_date}）", weight: 10 do
+        actual_start_date = @insurance_order.start_date
+        expect(actual_start_date).to eq(@start_date),
+          "出行开始时间错误。期望: #{@start_date}（15天后）, 实际: #{actual_start_date}"
+      end
+    
+      # 断言5: 产品适合滑雪场景
+      add_assertion "产品适合滑雪场景", weight: 15 do
         scenes = @insurance_order.insurance_product.scenes || []
         has_scene = scenes.include?(@scene)
       
@@ -113,7 +121,7 @@ module V051V100
           "滑雪属于高风险运动，需要专业的滑雪运动保险"
       end
     
-      # 断言5: 选择了运动医疗保额最高的产品（核心评分项）
+      # 断言6: 选择了运动医疗保额最高的产品（核心评分项）
       add_assertion "选择了运动医疗保额最高的产品", weight: 25 do
         # 获取所有适合滑雪的产品
         all_products = InsuranceProduct.where(
@@ -139,7 +147,7 @@ module V051V100
           "滑雪运动应选择运动医疗保额最高的产品"
       end
     
-      # 断言6: 保障天数正确
+      # 断言7: 保障天数正确
       add_assertion "保障天数正确（#{@days}天）", weight: 10 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),

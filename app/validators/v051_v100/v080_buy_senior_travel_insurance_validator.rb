@@ -18,11 +18,12 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 保险类型正确（境内旅游）(15分)
+#   - 保险类型正确（境内旅游）(10分)
 #   - 目的地正确（北京）(10分)
+#   - 出行开始时间正确（5天后）(10分)
 #   - 保障天数正确（5天）(10分)
 #   - 选择了医疗保额最高的产品 (30分)
-#   - 订单价格计算正确 (15分)
+#   - 订单价格计算正确 (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -48,7 +49,7 @@ module V051V100
       @days = 5
       @quantity = 1
       @age = 65
-      @start_date = Date.current + 5.days  # 5天后开始
+      @start_date = Date.today + 5.days  # 5天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找境内旅游保险产品（注意：查询基线数据 data_version=0）
@@ -95,7 +96,7 @@ module V051V100
       return unless @insurance_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 保险类型正确
-      add_assertion "保险类型正确（境内旅游）", weight: 15 do
+      add_assertion "保险类型正确（境内旅游）", weight: 10 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}（境内旅游），实际: #{actual_type}"
@@ -108,14 +109,21 @@ module V051V100
           "目的地错误。期望包含: #{@destination}, 实际: #{actual_destination || '未填写'}"
       end
     
-      # 断言4: 保障天数正确
+      # 断言4: 出行开始时间正确（5天后）
+      add_assertion "出行开始时间正确（5天后，#{@start_date}）", weight: 10 do
+        actual_start_date = @insurance_order.start_date
+        expect(actual_start_date).to eq(@start_date),
+          "出行开始时间错误。期望: #{@start_date}（5天后）, 实际: #{actual_start_date}"
+      end
+    
+      # 断言5: 保障天数正确
       add_assertion "保障天数正确（#{@days}天）", weight: 10 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
           "保障天数错误。期望: #{@days}天, 实际: #{actual_days}天"
       end
     
-      # 断言5: 选择了医疗保额最高的产品（核心评分项）
+      # 断言6: 选择了医疗保额最高的产品（核心评分项）
       add_assertion "选择了医疗保额最高的产品", weight: 30 do
         # 获取所有官方精选的境内旅游保险产品（排除运动保险）
         all_domestic_products = InsuranceProduct.where(
@@ -147,8 +155,8 @@ module V051V100
           "老年人旅游应选择医疗保额最高的产品"
       end
     
-      # 断言6: 订单价格计算正确
-      add_assertion "订单价格计算正确", weight: 15 do
+      # 断言7: 订单价格计算正确
+      add_assertion "订单价格计算正确", weight: 10 do
         # Get city_id from destination if available
         city = City.find_by(name: @insurance_order.destination, data_version: 0)
         city_id = city&.id
