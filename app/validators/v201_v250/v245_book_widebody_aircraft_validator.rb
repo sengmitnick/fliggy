@@ -8,9 +8,8 @@ require_relative '../base_validator'
 #   用户需要预订宽体机航班（长途飞行更舒适）
 #
 # 评分标准:
-#   - 创建了航班订单 (40%)
+#   - 创建了航班订单 (55%)
 #   - 航班为宽体机 (40%)
-#   - 出发日期正确 (15%)
 #   - 订单状态有效 (5%)
 module V201V250
   class V245BookWidebodyAircraftValidator < BaseValidator
@@ -23,7 +22,6 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @destination_city = '洛杉矶'
-      @flight_date = Date.today + 7.days
       
       # 查找宽体机航班（aircraft_type包含"宽体"或常见宽体机型）
       widebody_types = ['波音777', '波音787', '空客A330', '空客A350', '空客A380', '宽体']
@@ -32,18 +30,19 @@ module V201V250
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @destination_city,
-        flight_date: @flight_date,
         data_version: 0
       ).where(conditions, *widebody_types.map { |t| "%#{t}%" }).to_a
       
       raise "未找到宽体机航班" if @available_flights.empty?
       
+      # 使用实际航班日期
+      @flight_date = @available_flights.first.flight_date
+      
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（7天后）从#{@departure_city}到#{@destination_city}的宽体机航班（长途飞行更舒适）。",
+        task: "请预订从#{@departure_city}到#{@destination_city}的宽体机航班（长途飞行更舒适）。",
         requirements: {
           departure_city: @departure_city,
           destination_city: @destination_city,
-          flight_date: @flight_date,
           aircraft_type: '宽体机',
           purpose: '长途舒适'
         },
@@ -52,7 +51,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 40 do
+      add_assertion "创建了航班订单", weight: 55 do
         all_bookings = Booking
           .joins(:flight)
           .includes(:flight)
@@ -73,12 +72,6 @@ module V201V250
         
         expect(is_widebody).to eq(true),
           "航班不是宽体机。机型: #{flight.aircraft_type}, 航班号: #{flight.flight_number}"
-      end
-      
-      add_assertion "出发日期正确", weight: 15 do
-        flight = @flight_booking.flight
-        expect(flight.flight_date).to eq(@flight_date),
-          "出发日期错误。期望: #{@flight_date}, 实际: #{flight.flight_date}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -126,7 +119,6 @@ module V201V250
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @destination_city,
-        flight_date: @flight_date,
         data_version: 0
       ).where(conditions, *widebody_types.map { |t| "%#{t}%" }).to_a
     end

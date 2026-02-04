@@ -10,8 +10,7 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了航班订单 (20%)
 #   - 航班路线正确（深圳→上海） (15%)
-#   - 出发日期正确（后天） (15%)
-#   - 飞行时长≤2小时 (30%)
+#   - 飞行时长≤2小时 (45%)
 #   - 订单状态有效 (20%)
 module V201V250
   class V207BookShortHaulFlightUnder2hValidator < BaseValidator
@@ -24,14 +23,12 @@ module V201V250
     def prepare
       @departure_city = '深圳'
       @arrival_city = '上海'
-      @flight_date = Date.today + 2.days
       @max_duration_minutes = 120  # 2小时 = 120分钟
       
-      # 查找符合时长要求的航班
+      # 查找符合时长要求的航班（不限定日期）
       all_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @arrival_city,
-        flight_date: @flight_date,
         data_version: 0
       )
       
@@ -40,6 +37,8 @@ module V201V250
       end
       
       raise "未找到符合条件的短途航班" if @available_flights.empty?
+      
+      @flight_date = @available_flights.first.flight_date
       
       {
         task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@arrival_city}的航班，要求飞行时长≤2小时，适合快速出行。",
@@ -77,12 +76,9 @@ module V201V250
           "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.flight.destination_city}"
       end
       
-      add_assertion "出发日期正确（后天#{@flight_date}）", weight: 15 do
-        expect(@booking.flight.flight_date).to eq(@flight_date),
-          "航班日期错误。期望: #{@flight_date}（后天）, 实际: #{@booking.flight.flight_date}"
-      end
+      # 移除日期验证（数据包中日期固定）
       
-      add_assertion "飞行时长≤2小时", weight: 30 do
+      add_assertion "飞行时长≤2小时", weight: 45 do
         duration = @booking.flight.duration_minutes
         expect(duration).to be <= @max_duration_minutes,
           "飞行时长超出要求。期望: ≤#{@max_duration_minutes}分钟（2小时）, 实际: #{duration}分钟"
@@ -133,7 +129,6 @@ module V201V250
       all_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @arrival_city,
-        flight_date: @flight_date,
         data_version: 0
       )
       

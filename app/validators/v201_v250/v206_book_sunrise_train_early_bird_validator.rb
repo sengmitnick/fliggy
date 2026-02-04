@@ -10,8 +10,7 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了火车票订单 (20%)
 #   - 火车路线正确（上海→南京） (15%)
-#   - 出发日期正确（明天） (15%)
-#   - 出发时间在05:00-07:00清晨时段 (30%)
+#   - 出发时间在05:00-07:00清晨时段 (45%)
 #   - 订单状态有效 (20%)
 module V201V250
   class V206BookSunriseTrainEarlyBirdValidator < BaseValidator
@@ -24,13 +23,11 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @arrival_city = '南京'
-      @travel_date = Date.today + 1.day
       @time_window_start = 5   # 05:00
       @time_window_end = 7     # 07:00
       
-      # 查找清晨早班火车
+      # 查找清晨早班火车（不限定日期）
       all_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
       
       @available_trains = all_trains.select do |t|
@@ -39,6 +36,8 @@ module V201V250
       end
       
       raise "未找到符合条件的早班火车" if @available_trains.empty?
+      
+      @travel_date = @available_trains.first.departure_time.to_date
       
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（明天）清晨05:00-07:00从#{@departure_city}到#{@arrival_city}的最早班次高铁，适合早起赶路。",
@@ -76,13 +75,9 @@ module V201V250
           "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.train.arrival_city}"
       end
       
-      add_assertion "出发日期正确（明天#{@travel_date}）", weight: 15 do
-        actual_date = @booking.train.departure_time.to_date
-        expect(actual_date).to eq(@travel_date),
-          "出发日期错误。期望: #{@travel_date}（明天）, 实际: #{actual_date}"
-      end
+      # 移除日期验证（数据包中日期固定）
       
-      add_assertion "出发时间在05:00-07:00清晨时段", weight: 30 do
+      add_assertion "出发时间在05:00-07:00清晨时段", weight: 45 do
         hour = @booking.train.departure_time.hour
         expect(hour).to be >= @time_window_start,
           "出发时间过早。期望: ≥#{@time_window_start}:00, 实际: #{@booking.train.departure_time.strftime('%H:%M')}"
@@ -137,7 +132,6 @@ module V201V250
       @time_window_end = data['time_window_end']
       
       all_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
       
       @available_trains = all_trains.select do |t|

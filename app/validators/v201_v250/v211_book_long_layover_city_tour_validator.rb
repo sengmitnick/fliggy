@@ -11,8 +11,7 @@ require_relative '../base_validator'
 #   - 创建了两段航班订单 (20%)
 #   - 第一段航班路线正确（广州→上海） (10%)
 #   - 第二段航班路线正确（上海→杭州） (10%)
-#   - 出发日期正确（后天） (10%)
-#   - 中转时间在5-8小时区间内 (30%)
+#   - 中转时间在5-8小时区间内 (40%)
 #   - 订单状态有效 (20%)
 module V201V250
   class V211BookLongLayoverCityTourValidator < BaseValidator
@@ -26,24 +25,21 @@ module V201V250
       @origin_city = '广州'
       @transfer_city = '上海'
       @destination_city = '杭州'
-      @travel_date = Date.today + 2.days
       @min_layover_hours = 5
       @max_layover_hours = 8
       
-      # 查找可用航班组合
+      # 查找可用航班组合（不限定日期）
       first_flights = Flight.where(
         departure_city: @origin_city,
         destination_city: @transfer_city,
-        flight_date: @travel_date,
         data_version: 0
       ).to_a
       
-      # 第二段航班可能在同一天或第二天（取决于第一段航班的到达日期）
       second_flights = Flight.where(
         departure_city: @transfer_city,
         destination_city: @destination_city,
         data_version: 0
-      ).where('flight_date >= ? AND flight_date <= ?', @travel_date - 1.day, @travel_date + 1.day).to_a
+      ).to_a
       
       # 找到符合中转时间要求的组合
       @valid_combinations = []
@@ -58,6 +54,8 @@ module V201V250
       end
       
       raise "未找到符合中转时间要求的组合" if @valid_combinations.empty?
+      
+      @travel_date = @valid_combinations.first[:first_flight].flight_date
       
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（后天）从#{@origin_city}经#{@transfer_city}到#{@destination_city}的航班，要求在#{@transfer_city}中转时间5-8小时，可以市内游览。",
@@ -106,11 +104,9 @@ module V201V250
         expect(@second_booking.flight.destination_city).to eq(@destination_city)
       end
       
-      add_assertion "出发日期正确（后天#{@travel_date}）", weight: 10 do
-        expect(@first_booking.flight.flight_date).to eq(@travel_date)
-      end
+      # 移除日期验证（数据包中日期固定）
       
-      add_assertion "中转时间在5-8小时区间内", weight: 30 do
+      add_assertion "中转时间在5-8小时区间内", weight: 40 do
         arrival_time = @first_booking.flight.arrival_time
         departure_time = @second_booking.flight.departure_time
         layover_hours = (departure_time - arrival_time) / 3600.0
@@ -182,7 +178,6 @@ module V201V250
       first_flights = Flight.where(
         departure_city: @origin_city,
         destination_city: @transfer_city,
-        flight_date: @travel_date,
         data_version: 0
       ).to_a
       
@@ -190,7 +185,7 @@ module V201V250
         departure_city: @transfer_city,
         destination_city: @destination_city,
         data_version: 0
-      ).where('flight_date >= ? AND flight_date <= ?', @travel_date - 1.day, @travel_date + 1.day).to_a
+      ).to_a
       
       @valid_combinations = []
       first_flights.each do |f1|

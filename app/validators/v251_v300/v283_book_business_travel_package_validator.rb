@@ -77,7 +77,7 @@ module V251V300
       end
       
       add_assertion "所有订单状态正确", weight: 15 do
-        valid_statuses = ['pending', 'confirmed', 'paid']
+        valid_statuses = ['pending', 'paid']
         expect(valid_statuses).to include(@booking.status),
           "航班订单状态错误: #{@booking.status}"
         expect(valid_statuses).to include(@hotel_booking.status),

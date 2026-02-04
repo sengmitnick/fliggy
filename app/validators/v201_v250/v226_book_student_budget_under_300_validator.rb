@@ -23,13 +23,9 @@ module V201V250
     def prepare
       @departure_city = '广州'
       @arrival_city = '深圳'
-      @travel_date = Date.today + 1.day
-      @check_in_date = @travel_date
-      @check_out_date = @check_in_date + 1.day
       @max_budget = 300
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
       
@@ -37,6 +33,10 @@ module V201V250
         .order(price: :asc)
       
       raise "未找到火车或酒店" if @available_trains.empty? || @available_hotels.empty?
+      
+      @travel_date = @available_trains.first.departure_time.to_date
+      @check_in_date = @travel_date
+      @check_out_date = @check_in_date + 1.day
       
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的学生出行，包括火车票和经济型酒店1晚，总预算≤#{@max_budget}元。",
@@ -165,7 +165,6 @@ module V201V250
       @max_budget = data['max_budget']
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
       

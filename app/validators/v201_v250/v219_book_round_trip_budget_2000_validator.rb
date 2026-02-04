@@ -24,25 +24,19 @@ module V201V250
     def prepare
       @origin_city = '深圳'
       @destination_city = '上海'
-      @outbound_date = Date.today + 2.days
-      @return_date = @outbound_date + 3.days
-      @check_in_date = @outbound_date
-      @check_out_date = @return_date
       @nights = 3
       @max_budget = 2000
       
-      # 查找往返航班
+      # 查找往返航班（不限定日期）
       @outbound_flights = Flight.where(
         departure_city: @origin_city,
         destination_city: @destination_city,
-        flight_date: @outbound_date,
         data_version: 0
       ).order(price: :asc)
       
       @return_flights = Flight.where(
         departure_city: @destination_city,
         destination_city: @origin_city,
-        flight_date: @return_date,
         data_version: 0
       ).order(price: :asc)
       
@@ -53,6 +47,12 @@ module V201V250
       ).order(price: :asc)
       
       raise "未找到往返航班或酒店" if @outbound_flights.empty? || @return_flights.empty? || @available_hotels.empty?
+      
+      # 使用实际存在的航班日期
+      @outbound_date = @outbound_flights.first.flight_date
+      @return_date = (@return_flights.where('flight_date > ?', @outbound_date).first || @return_flights.first).flight_date
+      @check_in_date = @outbound_date
+      @check_out_date = @check_in_date + @nights.days
       
       {
         task: "请预订#{@outbound_date.strftime('%Y年%m月%d日')}（后天）从#{@origin_city}到#{@destination_city}的往返航班（#{@return_date.strftime('%m月%d日')}返回），并预订#{@destination_city}酒店#{@nights}晚。总预算不超过#{@max_budget}元。",
@@ -224,14 +224,12 @@ module V201V250
       @outbound_flights = Flight.where(
         departure_city: @origin_city,
         destination_city: @destination_city,
-        flight_date: @outbound_date,
         data_version: 0
       ).order(price: :asc)
       
       @return_flights = Flight.where(
         departure_city: @destination_city,
         destination_city: @origin_city,
-        flight_date: @return_date,
         data_version: 0
       ).order(price: :asc)
       

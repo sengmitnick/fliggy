@@ -353,8 +353,85 @@ namespace :validator do
       puts "✅ All validators with instance variables have state management\n"
     end
     
-    # Step 3: 检查权重总和
-    puts "🔍 Step 3: Checking weight sums..."
+    # Step 3: 检查 prepare 方法是否创建数据
+    puts "🔍 Step 3: Checking prepare methods for data creation violations..."
+    prepare_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      
+      # 提取 prepare 方法内容
+      prepare_method = content.match(/def\s+prepare.*?^\s*end/m)&.[](0)
+      
+      if prepare_method
+        violations = []
+        
+        # 检查 1: find_or_create_by (最严重的违规)
+        if prepare_method.match?(/\.find_or_create_by[!]?\(/)
+          violations << 'find_or_create_by! - 会创建不存在的记录'
+        end
+        
+        # 检查 2: create / create! (直接创建)
+        if prepare_method.match?(/\.(create|create!)\(/)
+          violations << 'create/create! - 直接创建新记录'
+        end
+        
+        # 检查 3: new + save (间接创建)
+        if prepare_method.match?(/\.new\([^)]*\)/) && prepare_method.match?(/\.save[!]?/)
+          violations << 'Model.new + save - 间接创建新记录'
+        end
+        
+        # 检查 4: update_all / delete_all (批量修改/删除)
+        if prepare_method.match?(/\.(update_all|delete_all|destroy_all)\(/)
+          violations << 'update_all/delete_all/destroy_all - 修改或删除数据'
+        end
+        
+        # 检查 5: insert / insert_all (SQL插入)
+        if prepare_method.match?(/\.(insert|insert_all)\(/)
+          violations << 'insert/insert_all - SQL插入数据'
+        end
+        
+        if violations.any?
+          prepare_errors << {
+            validator: validator_name,
+            file: file,
+            violations: violations
+          }
+        end
+      end
+    end
+    
+    if prepare_errors.any?
+      puts "\n❌ Prepare Method Violations Found:"
+      puts "-" * 70
+      prepare_errors.each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  File: #{error[:file]}"
+        puts "  违规操作:"
+        error[:violations].each { |v| puts "    → #{v}" }
+      end
+      puts "-" * 70
+      puts "\n❌ #{prepare_errors.size} validator(s) have prepare methods that create/modify data"
+      puts "\n💡 规则说明:"
+      puts "  - prepare 方法只能 QUERY 数据（使用 find_by!, where, find 等）"
+      puts "  - 所有测试数据必须来自数据包（app/validators/support/data_packs/v1/）"
+      puts "  - 如果缺少数据，应更新数据包文件，而不是在 prepare 中创建"
+      puts "  - 使用 find_by! 替代 find_or_create_by!"
+      puts "\n🔧 修复方法:"
+      puts "  1. 将所有 find_or_create_by! 改为 find_by!"
+      puts "  2. 删除 do |variable| ... end 代码块"
+      puts "  3. 如果数据不存在，在对应的数据包文件中添加（使用 insert_all）\n"
+      exit 1
+    else
+      puts "✅ All prepare methods only query data (no creation/modification)\n"
+    end
+    
+    # Step 4: 检查权重总和
+    puts "🔍 Step 4: Checking weight sums..."
     weight_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -399,8 +476,8 @@ namespace :validator do
       puts "✅ All validators have correct weight sums (total = 100)\n"
     end
     
-    # Step 4: 运行模拟测试
-    puts "🧪 Step 4: Running simulations..."
+    # Step 5: 运行模拟测试
+    puts "🧪 Step 5: Running simulations..."
     puts "-" * 70
     
     # 加载所有 Validator
@@ -429,14 +506,14 @@ namespace :validator do
     results = []
     
     validators.each do |validator_class|
-      validator_id = validator_class.validator_id
+      validator_id = validator_class.validator_id.to_s  # 确保是字符串
       title = validator_class.title
       
       # Workaround for V091: Rails constantize caching bug
       # Root cause: Rails constantize doesn't properly load simulate method in batch context
       # Solution: Access class metadata to force Rails to fully load the class definition
       # The metadata access below is MANDATORY - removing it causes V091 to fail in batch testing
-      if validator_id.include?('v091')
+      if validator_id.to_s.include?('v091') || validator_id == 91
         v091_file = Rails.root.join('app/validators/v051_v100/v091_book_xian_terracotta_warriors_tour_validator.rb')
         # Silent metadata access to trigger proper class loading
         _ = validator_class.instance_methods(false).include?(:simulate)
@@ -510,7 +587,7 @@ namespace :validator do
       
       # 按模块分组
       grouped_by_module = failed_results.group_by do |result|
-        validator_id = result[:validator_id] || result[:task_id]
+        validator_id = (result[:validator_id] || result[:task_id]).to_s
         # 提取模块前缀（v001, v051, v101等）
         if validator_id.match?(/^v(\d+)_/)
           range_start = ($1.to_i / 50) * 50 + 1
