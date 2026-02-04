@@ -1,11 +1,19 @@
 <div class="min-h-screen bg-[#F9F9F9]" data-controller="location-selector"
      data-location-selector-api-endpoint-value="/transfers/locations"
      data-location-selector-location-type-value=""
-     data-location-selector-current-city-value="<%= @transfer_params && @transfer_params[:flight_id].present? ? (Flight.find_by(id: @transfer_params[:flight_id])&.destination_city || '') : '' %>"
      <% if @transfer_params && @transfer_params[:flight_id].present? %>
        <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
        <% if flight %>
-         data-location-selector-arrival-city-value="<%= flight.destination_city %>"
+         <% correct_city = @service_type == 'to_airport' ? flight.departure_city : flight.destination_city %>
+         data-location-selector-current-city-value="<%= correct_city %>"
+         data-location-selector-arrival-city-value="<%= correct_city %>"
+       <% end %>
+     <% elsif @transfer_params && @transfer_params[:train_id].present? %>
+       <% train = Train.find_by(id: @transfer_params[:train_id]) %>
+       <% if train %>
+         <% correct_city = @service_type == 'to_station' ? train.departure_city : train.arrival_city %>
+         data-location-selector-current-city-value="<%= correct_city %>"
+         data-location-selector-arrival-city-value="<%= correct_city %>"
        <% end %>
      <% end %>>
   <!-- Top background gradient -->
@@ -115,10 +123,17 @@
                 <% if @transfer_params && @transfer_params[:flight_id].present? %>
                   <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
                   <% if flight %>
-                    <h2 class="text-xl font-bold text-text-primary"><%= flight.arrival_airport %></h2>
-                    <div class="text-xs text-text-secondary mt-1">
-                      <%= flight.flight_number %> 预计当地<%= flight.arrival_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][flight.arrival_time&.wday] %> <%= flight.arrival_time&.strftime('%H:%M') %>到达后用车
-                    </div>
+                    <% if @service_type == 'from_airport' %>
+                      <h2 class="text-xl font-bold text-text-primary"><%= flight.arrival_airport %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= flight.flight_number %> 预计当地<%= flight.arrival_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][flight.arrival_time&.wday] %> <%= flight.arrival_time&.strftime('%H:%M') %>到达后用车
+                      </div>
+                    <% else %>
+                      <h2 class="text-xl font-bold text-text-primary"><%= flight.departure_airport %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= flight.flight_number %> 预计当地<%= flight.departure_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][flight.departure_time&.wday] %> <%= flight.departure_time&.strftime('%H:%M') %>起飞前用车
+                      </div>
+                    <% end %>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
                   <% end %>
@@ -148,10 +163,17 @@
                 <% if @transfer_params && @transfer_params[:train_id].present? %>
                   <% train = Train.find_by(id: @transfer_params[:train_id]) %>
                   <% if train %>
-                    <h2 class="text-xl font-bold text-text-primary"><%= train.arrival_city %></h2>
-                    <div class="text-xs text-text-secondary mt-1">
-                      <%= train.train_number %> 预计当地<%= train.arrival_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][train.arrival_time&.wday] %> <%= train.arrival_time&.strftime('%H:%M') %>到达后用车
-                    </div>
+                    <% if @service_type == 'from_station' %>
+                      <h2 class="text-xl font-bold text-text-primary"><%= train.arrival_city %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= train.train_number %> 预计当地<%= train.arrival_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][train.arrival_time&.wday] %> <%= train.arrival_time&.strftime('%H:%M') %>到达后用车
+                      </div>
+                    <% else %>
+                      <h2 class="text-xl font-bold text-text-primary"><%= train.departure_city %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= train.train_number %> 预计当地<%= train.departure_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][train.departure_time&.wday] %> <%= train.departure_time&.strftime('%H:%M') %>出发前用车
+                      </div>
+                    <% end %>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
                   <% end %>
