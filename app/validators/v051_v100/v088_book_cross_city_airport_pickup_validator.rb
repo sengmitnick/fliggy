@@ -2,22 +2,22 @@
 
 require_relative '../base_validator'
 
-# 验证用例88: 预订虹桥机场接机服务（广州→上海航班，经济5座）
+# 验证用例88: 预订首都机场接机服务（上海→北京航班，经济5座）
 # 
 # 任务描述:
-#   用户3天后从广州飞往上海，需要在虹桥机场接机送到市区酒店。
+#   用户3天后从上海飞往北京，需要在首都机场接机送到市区酒店。
 #   Agent 需要通过搜索航班确定到达机场位置，预订接机服务，选择经济5座车型中价格最低的套餐
 # 
 # 业务流程:
 #   1. 用户选择"接我"服务（from_airport = 从机场接到目的地）
-#   2. 根据航班的起降城市搜索（广州→上海），确定到达机场（如：虹桥T2）
-#   3. 上车点：到达机场（location_from = 虹桥国际机场T2航站楼，通过航班搜索确定）
-#   4. 下车点：市区地址（location_to = 徐家汇商圈接送服务点）
+#   2. 根据航班的起降城市搜索（上海→北京），确定到达机场（如：首都T3）
+#   3. 上车点：到达机场（location_from = 首都国际机场T3航站楼，通过航班搜索确定）
+#   4. 下车点：市区地址（location_to = 三里屯商圈接送服务点）
 #   5. 浏览经济5座车型套餐，选择价格最低的
 # 
 # 复杂度分析:
 #   1. 需要理解"接机"含义：from_airport = 从机场出发，送到市区
-#   2. 需要根据航班起降城市（广州→上海）搜索航班，确定到达机场位置（location_from = 虹桥T2）
+#   2. 需要根据航班起降城市（上海→北京）搜索航班，确定到达机场位置（location_from = 首都T3）
 #   3. 需要选择下车地点（市区酒店）
 #   4. 需要筛选经济5座车型
 #   5. 需要对比同类车型不同供应商的价格
@@ -27,17 +27,17 @@ module V051V100
   class V088BookCrossCityAirportPickupValidator < BaseValidator
     self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
     self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
-    self.title = '预订虹桥机场接机服务（广州→上海航班，经济5座）'
-    self.description = '3天后从广州飞往上海，通过搜索航班确定到达机场，从虹桥机场接机送到市区酒店，选择经济5座车型中价格最低的套餐'
+    self.title = '预订首都机场接机服务（上海→北京航班，经济5座）'
+    self.description = '3天后从上海飞往北京，通过搜索航班确定到达机场，从首都机场接机送到市区酒店，选择经济5座车型中价格最低的套餐'
     self.timeout_seconds = 240
   
     def prepare
       @service_type = 'from_airport'  # 接机服务
       @transfer_type = 'airport_pickup'
-      @departure_city = '广州'  # 航班出发城市
-      @arrival_city = '上海'  # 航班降落城市
-      @arrival_airport = '虹桥国际机场T2航站楼'  # 到达机场（上车点，通过航班搜索确定）
-      @dropoff_location = '徐家汇商圈接送服务点'  # 下车点（市区地址）
+      @departure_city = '上海'  # 航班出发城市
+      @arrival_city = '北京'  # 航班降落城市
+      @arrival_airport = '首都国际机场T3航站楼'  # 到达机场（上车点，通过航班搜索确定）
+      @dropoff_location = '三里屯商圈接送服务点'  # 下车点（市区地址）
       @flight_date = (Date.current + 3.days).strftime('%Y-%m-%d')  # 3天后
       @pickup_datetime = Date.current + 3.days + 13.hours  # 3天后下午1点
       @vehicle_category = 'economy_5'  # 经济5座
@@ -53,7 +53,7 @@ module V051V100
     
       {
         task: "请预订接机服务，从机场送到市区酒店，选择经济5座车型中价格最低的套餐",
-        scenario: "3天后从广州飞往上海，需要从到达机场送到市区酒店",
+        scenario: "3天后从上海飞往北京，需要从到达机场送到市区酒店",
         flight_info: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,

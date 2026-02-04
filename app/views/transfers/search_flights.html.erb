@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-surface" data-controller="city-selector" data-city-selector-departure-city-value="<%= params[:departure_city] || '北京' %>" data-city-selector-destination-city-value="<%= params[:arrival_city] || '上海' %>">
+<div class="min-h-screen bg-surface" data-controller="city-selector" data-city-selector-departure-city-value="<%= params[:departure_city] || session.dig(:transfer_params, :departure_city) || '北京' %>" data-city-selector-destination-city-value="<%= params[:arrival_city] || session.dig(:transfer_params, :arrival_city) || '上海' %>">
   <!-- Navigation Bar -->
   <div class="flex justify-between items-center px-4 py-3">
     <%= link_to :back, class: "p-2 -ml-2 text-text-primary" do %>
@@ -38,29 +38,33 @@
         type="button"
         data-action="click->city-selector#openDeparture"
         class="text-text-secondary text-lg tracking-wide w-1/3 text-left">
-        <span data-city-selector-target="departure"><%= params[:departure_city] || '北京' %></span>
+        <span data-city-selector-target="departure"><%= params[:departure_city] || session.dig(:transfer_params, :departure_city) || '北京' %></span>
       </button>
 
       <!-- Airplane Icon (center) -->
-      <div class="relative w-12 h-12 flex items-center justify-center">
+      <button
+        type="button"
+        data-action="click->city-selector#switchCities"
+        aria-label="切换出发地和目的地"
+        class="relative w-12 h-12 flex items-center justify-center cursor-pointer active:scale-95 transition-transform hover:bg-blue-50/30 rounded-full">
         <div class="absolute inset-0 rounded-full border border-blue-100/50 bg-gradient-to-tr from-blue-50/50 to-transparent"></div>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="transform rotate-45 text-cyan-400">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="transform rotate-45 text-cyan-400 relative z-10">
           <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor"/>
         </svg>
-      </div>
+      </button>
 
       <!-- Arrival City -->
       <button
         type="button"
         data-action="click->city-selector#openDestination"
         class="text-text-secondary text-lg tracking-wide w-1/3 text-right">
-        <span data-city-selector-target="destination"><%= params[:arrival_city] || '上海' %></span>
+        <span data-city-selector-target="destination"><%= params[:arrival_city] || session.dig(:transfer_params, :arrival_city) || '上海' %></span>
       </button>
     </div>
     
     <!-- Hidden inputs for form submission -->
-    <%= hidden_field_tag :departure_city, params[:departure_city] || '北京', data: { 'city-selector-target': 'departureCityInput' } %>
-    <%= hidden_field_tag :arrival_city, params[:arrival_city] || '上海', data: { 'city-selector-target': 'destinationCityInput' } %>
+    <%= hidden_field_tag :departure_city, params[:departure_city] || session.dig(:transfer_params, :departure_city) || '北京', data: { 'city-selector-target': 'departureCityInput' } %>
+    <%= hidden_field_tag :arrival_city, params[:arrival_city] || session.dig(:transfer_params, :arrival_city) || '上海', data: { 'city-selector-target': 'destinationCityInput' } %>
 
     <!-- Date Selection -->
     <div class="flex items-center justify-between py-6 border-b border-border cursor-pointer">
@@ -95,7 +99,10 @@
                   <%= flight.departure_city %> → <%= flight.destination_city %>
                 </div>
                 <div class="text-xs text-text-muted mt-1">
-                  <%= flight.departure_time&.strftime('%m月%d日 %H:%M') %> - <%= flight.arrival_time&.strftime('%H:%M') %>
+                  起飞：<%= flight.departure_airport %> <%= flight.departure_time&.strftime('%m月%d日 %H:%M') %>
+                </div>
+                <div class="text-xs text-text-muted mt-0.5">
+                  到达：<%= flight.arrival_airport %> <%= flight.arrival_time&.strftime('%H:%M') %>
                 </div>
               </div>
               <svg class="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">

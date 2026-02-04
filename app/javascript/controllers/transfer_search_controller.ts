@@ -14,15 +14,26 @@ export default class extends Controller<HTMLElement> {
   declare readonly trainIdValue: string
 
   connect(): void {
-    console.log("TransferSearch connected")
+    console.log('🚀🚀🚀 [TransferSearch] Controller connected - VERSION 2.0 🚀🚀🚀')
+    console.log('[TransferSearch] Button element:', this.element)
+    console.log('[TransferSearch] Values:', {
+      transferType: this.transferTypeValue,
+      serviceType: this.serviceTypeValue,
+      flightId: this.flightIdValue,
+      trainId: this.trainIdValue
+    })
   }
 
   handleSearch(event: Event): void {
+    console.log('🔍🔍🔍 [TransferSearch] handleSearch CALLED 🔍🔍🔍')
     event.preventDefault()
     
-    // Get location_to from the hidden input
-    const locationInput = document.querySelector('[data-location-selector-target="locationInput"]') as HTMLInputElement
+    // Get location_to from the hidden input by ID
+    const locationInput = document.getElementById('transfer-location-to') as HTMLInputElement
     const locationTo = locationInput?.value
+    
+    console.log('[TransferSearch] locationInput element:', locationInput)
+    console.log('[TransferSearch] locationTo:', locationTo)
     
     if (!locationTo || locationTo.trim() === '') {
       // Show alert if location not selected
@@ -38,15 +49,20 @@ export default class extends Controller<HTMLElement> {
     
     // Get location_from based on flight or train
     let locationFrom = ''
-    if (this.flightIdValue) {
-      // For flights, get airport from the page
-      const flightLocationElement = document.querySelector('.text-xl.font-bold.text-text-primary') as HTMLElement
-      locationFrom = flightLocationElement?.textContent?.trim() || ''
-    } else if (this.trainIdValue) {
-      // For trains, get station from the page
-      const trainLocationElement = document.querySelector('.text-xl.font-bold.text-text-primary') as HTMLElement
-      locationFrom = trainLocationElement?.textContent?.trim() || ''
+    const locationFromElement = document.querySelector('[data-location-from]') as HTMLElement
+    if (locationFromElement) {
+      locationFrom = locationFromElement.dataset.locationFrom || ''
     }
+    
+    console.log('[TransferSearch] locationFrom:', locationFrom)
+    console.log('[TransferSearch] Building URL with params:', {
+      transfer_type: this.transferTypeValue,
+      service_type: this.serviceTypeValue,
+      location_to: locationTo,
+      location_from: locationFrom,
+      flight_id: this.flightIdValue,
+      train_id: this.trainIdValue
+    })
     
     // Build URL with all parameters
     const params = new URLSearchParams()
@@ -66,7 +82,10 @@ export default class extends Controller<HTMLElement> {
       params.append('train_id', this.trainIdValue)
     }
     
+    const finalUrl = `/transfers/packages?${params.toString()}`
+    console.log('[TransferSearch] Navigating to:', finalUrl)
+    
     // Navigate to packages page
-    window.location.href = `/transfers/packages?${params.toString()}`
+    window.location.href = finalUrl
   }
 }

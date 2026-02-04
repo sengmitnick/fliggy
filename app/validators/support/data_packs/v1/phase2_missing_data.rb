@@ -28,15 +28,17 @@ puts "正在加载 Phase 2 缺失测试数据包..."
 puts "\n=== 补充早班车数据 ==="
 
 [
-  { train_number: 'G8801', departure_city: '上海', arrival_city: '南京', time: '05:30', duration: 90, price: 134.5 },
-  { train_number: 'G8802', departure_city: '北京', arrival_city: '天津', time: '06:00', duration: 60, price: 54.5 },
-  { train_number: 'G8803', departure_city: '广州', arrival_city: '深圳', time: '06:30', duration: 75, price: 79.5 },
-  { train_number: 'G8804', departure_city: '成都', arrival_city: '重庆', time: '05:45', duration: 90, price: 96.0 }
+  { train_number: 'G8801', departure_city: '上海', arrival_city: '南京', departure_station: '上海虹桥站', arrival_station: '南京南站', time: '05:30', duration: 90, price: 134.5 },
+  { train_number: 'G8802', departure_city: '北京', arrival_city: '天津', departure_station: '北京南站', arrival_station: '天津站', time: '06:00', duration: 60, price: 54.5 },
+  { train_number: 'G8803', departure_city: '广州', arrival_city: '深圳', departure_station: '广州南站', arrival_station: '深圳北站', time: '06:30', duration: 75, price: 79.5 },
+  { train_number: 'G8804', departure_city: '成都', arrival_city: '重庆', departure_station: '成都东站', arrival_station: '重庆北站', time: '05:45', duration: 90, price: 96.0 }
 ].each do |data|
   train = Train.find_or_initialize_by(train_number: data[:train_number], data_version: '0')
   train.assign_attributes(
     departure_city: data[:departure_city],
     arrival_city: data[:arrival_city],
+    departure_station: data[:departure_station],
+    arrival_station: data[:arrival_station],
     departure_time: Time.zone.parse("#{Date.today + 1.day} #{data[:time]}"),
     arrival_time: Time.zone.parse("#{Date.today + 1.day} #{data[:time]}") + data[:duration].minutes,
     duration: data[:duration],
@@ -53,10 +55,10 @@ end
 puts "\n=== 补充过夜卧铺火车数据 ==="
 
 [
-  { train_number: 'K801', departure_city: '北京', arrival_city: '上海', dep_time: '22:30', arr_time_next_day: '07:00', duration: 510, price: 180 },
-  { train_number: 'K802', departure_city: '广州', arrival_city: '长沙', dep_time: '23:00', arr_time_next_day: '06:30', duration: 450, price: 150 },
-  { train_number: 'K803', departure_city: '成都', arrival_city: '西安', dep_time: '22:00', arr_time_next_day: '08:00', duration: 600, price: 200 },
-  { train_number: 'K819', departure_city: '北京', arrival_city: '西安', dep_time: '22:45', arr_time_next_day: '06:30', duration: 465, price: 195 }
+  { train_number: 'K801', departure_city: '北京', arrival_city: '上海', departure_station: '北京站', arrival_station: '上海站', dep_time: '22:30', arr_time_next_day: '07:00', duration: 510, price: 180 },
+  { train_number: 'K802', departure_city: '广州', arrival_city: '长沙', departure_station: '广州站', arrival_station: '长沙站', dep_time: '23:00', arr_time_next_day: '06:30', duration: 450, price: 150 },
+  { train_number: 'K803', departure_city: '成都', arrival_city: '西安', departure_station: '成都站', arrival_station: '西安站', dep_time: '22:00', arr_time_next_day: '08:00', duration: 600, price: 200 },
+  { train_number: 'K819', departure_city: '北京', arrival_city: '西安', departure_station: '北京西站', arrival_station: '西安站', dep_time: '22:45', arr_time_next_day: '06:30', duration: 465, price: 195 }
 ].each do |data|
   train = Train.find_or_initialize_by(train_number: data[:train_number], data_version: '0')
   
@@ -69,6 +71,8 @@ puts "\n=== 补充过夜卧铺火车数据 ==="
   train.assign_attributes(
     departure_city: data[:departure_city],
     arrival_city: data[:arrival_city],
+    departure_station: data[:departure_station],
+    arrival_station: data[:arrival_station],
     departure_time: dep_date_time,
     arrival_time: arr_date_time,
     duration: data[:duration],
@@ -404,15 +408,17 @@ puts "  ✓ 已为酒店添加/更新 #{created_count} 个房型数据"
 puts "\n=== 补充预算型火车数据 ==="
 
 [
-  { train_number: 'K601', departure_city: '北京', arrival_city: '石家庄', time: '08:00', duration: 180, price: 85 },
-  { train_number: 'K602', departure_city: '上海', arrival_city: '苏州', time: '09:00', duration: 60, price: 45 },
-  { train_number: 'K603', departure_city: '广州', arrival_city: '东莞', time: '10:00', duration: 90, price: 55 },
-  { train_number: 'K604', departure_city: '成都', arrival_city: '绵阳', time: '11:00', duration: 120, price: 65 }
+  { train_number: 'K601', departure_city: '北京', arrival_city: '石家庄', departure_station: '北京西站', arrival_station: '石家庄站', time: '08:00', duration: 180, price: 85 },
+  { train_number: 'K602', departure_city: '上海', arrival_city: '苏州', departure_station: '上海站', arrival_station: '苏州站', time: '09:00', duration: 60, price: 45 },
+  { train_number: 'K603', departure_city: '广州', arrival_city: '东莞', departure_station: '广州东站', arrival_station: '东莞站', time: '10:00', duration: 90, price: 55 },
+  { train_number: 'K604', departure_city: '成都', arrival_city: '绵阳', departure_station: '成都站', arrival_station: '绵阳站', time: '11:00', duration: 120, price: 65 }
 ].each do |data|
   train = Train.find_or_initialize_by(train_number: data[:train_number], data_version: '0')
   train.assign_attributes(
     departure_city: data[:departure_city],
     arrival_city: data[:arrival_city],
+    departure_station: data[:departure_station],
+    arrival_station: data[:arrival_station],
     departure_time: Time.zone.parse("#{Date.today + 1.day} #{data[:time]}"),
     arrival_time: Time.zone.parse("#{Date.today + 1.day} #{data[:time]}") + data[:duration].minutes,
     duration: data[:duration],
