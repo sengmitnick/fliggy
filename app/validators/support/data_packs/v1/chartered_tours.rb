@@ -463,12 +463,20 @@ CHARTER_CITIES.each do |city_name, city_info|
   # 2. 创建景点
   attractions_data = generate_attractions_for_city(city_name, city_info)
   Attraction.insert_all(attractions_data)
+  
+  # 为新插入的 Attraction 生成 slug（FriendlyId 需要 save 触发回调）
+  Attraction.where(city: city_name, data_version: '0', slug: [nil, '']).find_each(&:save)
+  
   attractions = Attraction.where(city: city_name, data_version: '0').index_by(&:name)
   total_attractions += attractions.size
   
   # 3. 创建包车路线
   routes_data = generate_routes_for_city(city_name, city.id)
   CharterRoute.insert_all(routes_data)
+  
+  # 为新插入的 CharterRoute 生成 slug（FriendlyId 需要 save 触发回调）
+  CharterRoute.where(city_id: city.id, slug: [nil, '']).find_each(&:save)
+  
   routes = CharterRoute.where(city_id: city.id, data_version: '0').index_by(&:name)
   total_routes += routes.size
   

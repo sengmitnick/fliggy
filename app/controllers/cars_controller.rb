@@ -3,8 +3,12 @@ class CarsController < ApplicationController
   def index
     # 获取用户当前选择的城市（从session中读取目的地信息）
     @current_city = if session[:last_destination_slug].present?
-      destination = Destination.friendly.find(session[:last_destination_slug])
-      destination.name
+      begin
+        destination = Destination.friendly.find(session[:last_destination_slug])
+        destination.name
+      rescue ActiveRecord::RecordNotFound
+        '深圳' # 默认深圳（未找到目的地时）
+      end
     else
       '深圳' # 默认深圳
     end

@@ -422,6 +422,10 @@ products_data = [
 
 MembershipProduct.insert_all(products_data)
 
+# 为新插入的 MembershipProduct 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为会员商品生成 slug..."
+MembershipProduct.where(slug: [nil, '']).find_each(&:save)
+
 puts "✓ 已创建 #{products_data.length} 个商品"
 puts "  - 低价商品(10-100元): #{products_data.count { |p| p[:price_cash] < 100 }} 个"
 puts "  - 中价商品(100-500元): #{products_data.count { |p| p[:price_cash] >= 100 && p[:price_cash] < 500 }} 个"
