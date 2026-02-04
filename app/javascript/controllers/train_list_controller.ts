@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import * as Turbo from "@hotwired/turbo"
 
 export default class extends Controller<HTMLElement> {
   static targets = [
@@ -45,12 +46,6 @@ export default class extends Controller<HTMLElement> {
     const button = event.currentTarget as HTMLButtonElement
     const filter = button.dataset.filter!
     this.toggleFilterButton(button, filter)
-  }
-
-  toggleStation(event: Event): void {
-    const button = event.currentTarget as HTMLButtonElement
-    const station = button.dataset.station!
-    this.toggleFilterButton(button, station)
   }
 
   showAdvancedFilters(): void {
@@ -163,15 +158,57 @@ export default class extends Controller<HTMLElement> {
   }
 
   applyFilters(): void {
-    console.log('Selected filters:', Array.from(this.selectedFilters))
-    // Will implement actual filtering logic later
-    // For now, just close the modal
-    this.closeModal()
+    // Build URL with current search params
+    const url = new URL(window.location.href)
     
-    // Show a toast message
-    if (typeof window.showToast === 'function') {
-      window.showToast(`已应用 ${this.selectedFilters.size} 个筛选条件`)
+    // Preserve core search params (departure_city, arrival_city, date)
+    // These are already in the URL from the initial search
+    
+    // Add seat type filters
+    const seatTypes = Array.from(this.selectedFilters).filter(f => 
+      ['商务座', '一等座', '二等座', '硬卧', '软卧', '硬座'].includes(f)
+    )
+    if (seatTypes.length > 0) {
+      url.searchParams.set('seat_types', seatTypes.join(','))
+    } else {
+      url.searchParams.delete('seat_types')
     }
+    
+    // Add departure time range
+    const depStart = parseInt(this.departureTimeStartTarget.value)
+    const depEnd = parseInt(this.departureTimeEndTarget.value)
+    if (depStart > 0 || depEnd < 1440) {
+      url.searchParams.set('departure_time_start', depStart.toString())
+      url.searchParams.set('departure_time_end', depEnd.toString())
+    } else {
+      url.searchParams.delete('departure_time_start')
+      url.searchParams.delete('departure_time_end')
+    }
+    
+    // Add arrival time range
+    const arrStart = parseInt(this.arrivalTimeStartTarget.value)
+    const arrEnd = parseInt(this.arrivalTimeEndTarget.value)
+    if (arrStart > 0 || arrEnd < 1440) {
+      url.searchParams.set('arrival_time_start', arrStart.toString())
+      url.searchParams.set('arrival_time_end', arrEnd.toString())
+    } else {
+      url.searchParams.delete('arrival_time_start')
+      url.searchParams.delete('arrival_time_end')
+    }
+    
+    // Add train type filters (from buttons)
+    const trainTypes = Array.from(this.selectedFilters).filter(f => 
+      ['高铁/动车', '普通列车'].includes(f)
+    )
+    if (trainTypes.includes('高铁/动车')) {
+      url.searchParams.set('only_high_speed', 'true')
+    } else {
+      url.searchParams.delete('only_high_speed')
+    }
+    
+    // Close modal and refresh page with Turbo
+    this.closeModal()
+    Turbo.visit(url.toString())
   }
 
   private updateAdvancedFilterIndicator(): void {

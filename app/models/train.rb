@@ -120,14 +120,60 @@ class Train < ApplicationRecord
     trains
   end
 
-  # Search trains for a route and date (no auto-generation)
+  # Search trains for a route and date with advanced filters
   def self.search(departure_city, arrival_city, date, options = {})
     trains = by_route(departure_city, arrival_city)
              .by_date(date)
              .available
 
-    # Apply filters
+    # Apply train type filter
     trains = trains.high_speed if options[:only_high_speed]
+    
+    # Apply time range filters
+    if options[:departure_time_start] && options[:departure_time_end]
+      dep_start = options[:departure_time_start].to_i
+      dep_end = options[:departure_time_end].to_i
+      if dep_start > 0 || dep_end < 1440
+        trains = trains.where(
+          "EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') BETWEEN ? AND ?",
+          dep_start, dep_end
+        )
+      end
+    end
+    
+    if options[:arrival_time_start] && options[:arrival_time_end]
+      arr_start = options[:arrival_time_start].to_i
+      arr_end = options[:arrival_time_end].to_i
+      if arr_start > 0 || arr_end < 1440
+        trains = trains.where(
+          "EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') BETWEEN ? AND ?",
+          arr_start, arr_end
+        )
+      end
+    end
+    
+    # Apply seat type filter (filter by available seats)
+    # Use subquery to avoid DISTINCT + ORDER BY conflicts
+    if options[:seat_types] && options[:seat_types].any?
+      seat_type_mapping = {
+        '商务座' => 'business_class',
+        '一等座' => 'first_class',
+        '二等座' => 'second_class',
+        '硬卧' => 'hard_sleeper',
+        '软卧' => 'soft_sleeper',
+        '硬座' => 'hard_seat'
+      }
+      
+      db_seat_types = options[:seat_types].map { |st| seat_type_mapping[st] }.compact
+      if db_seat_types.any?
+        # Use subquery with EXISTS to avoid DISTINCT
+        trains = trains.where(
+          "EXISTS (SELECT 1 FROM train_seats WHERE train_seats.train_id = trains.id " +
+          "AND train_seats.seat_type IN (?) AND train_seats.available_count > 0)",
+          db_seat_types
+        )
+      end
+    end
 
     # Apply sorting
     sort_order = options[:sort_order] == 'desc' ? :desc : :asc

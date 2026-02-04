@@ -355,30 +355,6 @@
           </div>
         </div>
 
-        <!-- 出发车站 -->
-        <div>
-          <h4 class="text-sm font-medium text-foreground mb-3">出发车站</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <% @departure_stations.each do |station| %>
-              <button data-action="click->train-list#toggleStation" data-station="<%= station %>" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-                <%= station %>
-              </button>
-            <% end %>
-          </div>
-        </div>
-
-        <!-- 到达车站 -->
-        <div>
-          <h4 class="text-sm font-medium text-foreground mb-3">到达车站</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <% @arrival_stations.each do |station| %>
-              <button data-action="click->train-list#toggleStation" data-station="<%= station %>" class="px-4 py-2 rounded-lg border border-border text-sm hover:border-primary transition-all" data-train-list-target="filterButton">
-                <%= station %>
-              </button>
-            <% end %>
-          </div>
-        </div>
-
         <!-- 座席 -->
         <div>
           <h4 class="text-sm font-medium text-foreground mb-3">座席</h4>
