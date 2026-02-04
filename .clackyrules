@@ -740,8 +740,15 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
   - `POST /api/tasks/:id/start` - 创建训练会话
   - `POST /api/verify/run` - 验证接口
 - If any API endpoint is missing, the task will fail with error before running validator simulations
-- Ensure these routes are properly configured in `config/routes.rb` before running `rake validator:simulate`
-- Run `rake validator:simulate` after creating/modifying validators to ensure all tests pass
+- Ensure these routes are properly configured in `config/routes.rb` before running validator simulations
+
+**Testing Commands**:
+- **All validators**: `rake validator:simulate` - Runs all validators (256 validators, may be slow)
+- **Single validator**: `rake validator:simulate_single[validator_id]` - Test one specific validator
+  - Example: `rake validator:simulate_single[v010_search_cheapest_flight_validator]`
+  - ALWAYS use this for debugging/testing individual validators
+  - Much faster than running all validators
+- **After creating/modifying validators**: Run `rake validator:simulate_single[your_validator_id]` first, then `rake validator:simulate` before delivery
 
 For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
 ```bash
