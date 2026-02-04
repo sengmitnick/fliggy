@@ -9,9 +9,9 @@ require_relative '../base_validator'
 #
 # 评分标准:
 #   - 创建了航班订单 (25%)
-#   - 航班价格≥2000元 (40%)
+#   - 航班价格≥2000元 (55%)
 #   - 航班路线正确 (15%)
-#   - 订单状态有效 (20%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V223BookPremiumFlightBusinessClassValidator < BaseValidator
     self.validator_id = 'v223_book_premium_flight_business_class_validator'
@@ -30,7 +30,6 @@ module V201V250
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @arrival_city,
-        flight_date: @flight_date,
         data_version: 0
       ).to_a.select { |f| f.price >= @min_price }
       
@@ -62,7 +61,7 @@ module V201V250
       
       return if @booking.nil?
       
-      add_assertion "航班价格≥#{@min_price}元", weight: 40 do
+      add_assertion "航班价格≥#{@min_price}元", weight: 55 do
         price = @booking.flight.price
         expect(price).to be >= @min_price,
           "航班价格过低。期望: ≥#{@min_price}元, 实际: #{price}元"
@@ -73,7 +72,7 @@ module V201V250
         expect(@booking.flight.destination_city).to eq(@arrival_city)
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end

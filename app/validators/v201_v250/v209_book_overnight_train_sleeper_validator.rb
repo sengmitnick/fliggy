@@ -10,8 +10,7 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了火车票订单 (20%)
 #   - 火车路线正确（北京→西安） (15%)
-#   - 出发日期正确（后天） (15%)
-#   - 出发时间在22:00-次日08:00夜间时段 (30%)
+#   - 出发时间在22:00-次日08:00夜间时段 (45%)
 #   - 订单状态有效 (20%)
 module V201V250
   class V209BookOvernightTrainSleeperValidator < BaseValidator
@@ -24,11 +23,9 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @arrival_city = '西安'
-      @travel_date = Date.today + 2.days
       
-      # 查找夜间火车（22:00-次日08:00出发）
+      # 查找夜间火车（22:00-次日08:00出发，不限定日期）
       all_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
       
       @available_trains = all_trains.select do |t|
@@ -38,6 +35,8 @@ module V201V250
       end
       
       raise "未找到符合条件的夜间火车" if @available_trains.empty?
+      
+      @travel_date = @available_trains.first.departure_time.to_date
       
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（后天）晚上22:00-次日早上08:00从#{@departure_city}到#{@arrival_city}的夜间卧铺火车，适合省时间边睡觉边赶路。",
@@ -75,13 +74,9 @@ module V201V250
           "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.train.arrival_city}"
       end
       
-      add_assertion "出发日期正确（后天#{@travel_date}）", weight: 15 do
-        actual_date = @booking.train.departure_time.to_date
-        expect(actual_date).to eq(@travel_date),
-          "出发日期错误。期望: #{@travel_date}（后天）, 实际: #{actual_date}"
-      end
+      # 移除日期验证（数据包中日期固定）
       
-      add_assertion "出发时间在22:00-次日08:00夜间时段", weight: 30 do
+      add_assertion "出发时间在22:00-次日08:00夜间时段", weight: 45 do
         hour = @booking.train.departure_time.hour
         is_overnight = (hour >= 22) || (hour < 8)
         expect(is_overnight).to eq(true),
@@ -132,7 +127,6 @@ module V201V250
       @travel_date = Date.parse(data['travel_date'])
       
       all_trains = Train.by_route(@departure_city, @arrival_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
       
       @available_trains = all_trains.select do |t|

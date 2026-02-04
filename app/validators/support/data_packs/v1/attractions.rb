@@ -357,6 +357,94 @@ attractions_data = [
     data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
+  },
+
+  # ========== 张家界景区 (V318需要) ==========
+  {
+    name: "张家界国家森林公园",
+    slug: "zhangjiajie-national-forest-park",
+    province: "湖南省",
+    city: "张家界",
+    district: "武陵源区",
+    address: "湖南省张家界市武陵源区金鞭路",
+    cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    latitude: 29.3255,
+    longitude: 110.4442,
+    description: "中国第一个国家森林公园，世界自然遗产。以独特的刃山石峰、峡谷溪流、岩溶洞穴、珍稀动植物著称。代表景点有金鞭溪、袖子溪、天子山等。",
+    opening_hours: "07:00-18:00",
+    phone: "0744-5712189",
+    rating: 4.7,
+    review_count: 18560,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+
+  # ========== 三亚景区 (V319需要：亲子活动) ==========
+  {
+    name: "三亚亚龙湾热带天堂森林公园",
+    slug: "sanya-yalong-bay-tropical-paradise",
+    province: "海南省",
+    city: "三亚",
+    district: "吉阳区",
+    address: "海南省三亚市亚龙湾国家旅游度假区",
+    cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    latitude: 18.2469,
+    longitude: 109.6576,
+    description: "亚龙湾热带天堂森林公园集山海于一体，可俘瞰亚龙湾全景。拥有热带雨林、空中缆车、亲子探险项目。是亲子游的热门选择。",
+    opening_hours: "08:00-18:00",
+    phone: "0898-38250000",
+    rating: 4.6,
+    review_count: 12560,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+
+  # ========== 崇礼滑雪场 (V320需要：寒假滑雪) ==========
+  {
+    name: "崇礼万龙滑雪场",
+    slug: "chongli-wanlong-ski-resort",
+    province: "河北省",
+    city: "张家口",
+    district: "崇礼区",
+    address: "河北省张家口市崇礼区红花梁",
+    cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    latitude: 40.9773,
+    longitude: 115.3833,
+    description: "中国首家开放的滑雪场，2022年冬奥会雪上项目比赛场地。拥有3200米雪道，适合各级别滑雪者。提供滑雪装备租赁和教学服务。",
+    opening_hours: "08:30-16:30",
+    phone: "0313-4785599",
+    rating: 4.8,
+    review_count: 15680,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+
+  # ========== 新疆薰衣草景区 (V327需要：花期限定游) ==========
+  {
+    name: "普罗旺斯风格薰衣草园",
+    slug: "provence-style-lavender-garden",
+    province: "新疆维吾尔自治区",
+    city: "伊犁",
+    district: "霍城县",
+    address: "新疆伊犁哈萨克自治州霍城县大西渠乡",
+    cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    latitude: 44.0542,
+    longitude: 81.1667,
+    description: "中国薰衣草之乡，6月花期时紫色花海壮观。提供花海摄影、薰衣草产品制作体验、田园采风等活动。是摄影爱好者的天堂。",
+    opening_hours: "09:00-20:00 (花期6-7月)",
+    phone: "0999-3028888",
+    rating: 4.7,
+    review_count: 9560,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
   }
 ]
 
@@ -880,6 +968,134 @@ tickets_data << {
   sales_count: 12560,
   validity_days: 30,
   booking_notice: "游玩当天15:00前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 张家界国家森林公园门票 (V318需要)
+attraction = attractions["张家界国家森林公园"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "张家界国家森林公园成人票",
+  ticket_type: "adult",
+  current_price: 225,
+  original_price: 248,
+  requirements: "含园区所有景点和观光车，不含索道、天门山手扶电梯等单独收费项目。",
+  sales_count: 28560,
+  validity_days: 90,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "张家界国家森林公园儿童票",
+  ticket_type: "child",
+  current_price: 118,
+  original_price: 124,
+  requirements: "适用于1.2米-1.5米儿童。含园区所有景点和观光车。",
+  sales_count: 15680,
+  validity_days: 90,
+  booking_notice: "需提前1天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 三亚亚龙湾热带天堂森林公园门票 (V319需要：亲子活动)
+attraction = attractions["三亚亚龙湾热带天堂森林公园"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "三亚亚龙湾热带天堂森林公园成人票",
+  ticket_type: "adult",
+  current_price: 165,
+  original_price: 198,
+  requirements: "含园区所有景点、空中缆车和亲子探险项目。",
+  sales_count: 18560,
+  validity_days: 90,
+  booking_notice: "游玩当天1天前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "三亚亚龙湾热带天堂森林公园儿童票",
+  ticket_type: "child",
+  current_price: 108,
+  original_price: 128,
+  requirements: "适用于1.2米-1.5米儿童。含园区所有景点和亲子项目。",
+  sales_count: 12680,
+  validity_days: 90,
+  booking_notice: "游玩当天1天前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 崇礼万龙滑雪场门票 (V320需要：寒假滑雪)
+attraction = attractions["崇礼万龙滑雪场"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "崇礼万龙滑雪场全天票",
+  ticket_type: "adult",
+  current_price: 580,
+  original_price: 650,
+  requirements: "含雪场门票、雪道缆车。不含滑雪装备租赁（可单独购买）。",
+  sales_count: 8560,
+  validity_days: 30,
+  booking_notice: "需提前1天预订，仅雪季（12月-3月）有效",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "崇礼万龙滑雪场半天票",
+  ticket_type: "adult",
+  current_price: 380,
+  original_price: 420,
+  requirements: "半天场（4小时），含雪场门票和缆车。不含装备租赁。",
+  sales_count: 12560,
+  validity_days: 30,
+  booking_notice: "需提前1天预订，仅雪季有效",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 普罗旺斯风格薰衣草园门票 (V327需要：花期限定游)
+attraction = attractions["普罗旺斯风格薰衣草园"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "普罗旺斯风格薰衣草园门票",
+  ticket_type: "adult",
+  current_price: 68,
+  original_price: 88,
+  requirements: "含薰衣草花海参观、摄影区域，不含体验活动。仅花期（6月-7月）有效。",
+  sales_count: 5680,
+  validity_days: 60,
+  booking_notice: "花期预订，需提前3天预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "普罗旺斯风格薰衣草园体验套票",
+  ticket_type: "adult",
+  current_price: 128,
+  original_price: 168,
+  requirements: "含门票+薰衣草产品制作体验（手工香袋或精油）。仅花期有效。",
+  sales_count: 3280,
+  validity_days: 60,
+  booking_notice: "花期预订，需提前3天预订",
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp

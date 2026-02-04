@@ -24,26 +24,25 @@ module V201V250
     def prepare
       @departure_city = '广州'
       @destination_city = '杭州'
-      @travel_date = Date.today + 5.days
-      @check_in_date = @travel_date
-      @check_out_date = @check_in_date + 1.day
       @max_budget = 2000
       
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @destination_city,
-        flight_date: @travel_date,
         data_version: 0
       ).to_a
       
       @available_trains = Train.by_route(@departure_city, @destination_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
         .to_a
       
       @available_hotels = Hotel.where(city: @destination_city, data_version: 0).to_a
       
       raise "未找到交通或酒店" if (@available_flights.empty? && @available_trains.empty?) || @available_hotels.empty?
+      
+      @travel_date = (@available_flights.first&.flight_date || @available_trains.first&.departure_time&.to_date || Date.today)
+      @check_in_date = @travel_date
+      @check_out_date = @check_in_date + 1.day
       
       # 计算预算内最高评分参考值
       best_quality_in_budget = 0

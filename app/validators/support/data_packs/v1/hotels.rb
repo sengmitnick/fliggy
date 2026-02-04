@@ -304,6 +304,81 @@ end
 end
 
 puts "   💾 批量插入 #{hotels_data.count} 家主要城市酒店..."
+
+# ==================== 步骤1.5: 添加验证器特定酒店到主数组 ====================
+puts "   ⚡️ 添加验证器特定酒店..."
+
+# V318: 张家界武陵源度假酒店
+hotels_data << {
+  name: "张家界武陵源度假酒店",
+  brand: "度假酒店",
+  city: "张家界",
+  address: "张家界市武陵源区武陵大道168号",
+  rating: 4.7,
+  price: 480,
+  original_price: 580,
+  distance: "3.2km",
+  features: ["免费WiFi", "景区接送", "山景房", "餐厅", "景区门票代订"],
+  star_level: 4,
+  is_featured: true,
+  display_order: 20001,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V319: 三亚亚龙湾亲子度假酒店
+hotels_data << {
+  name: "三亚亚龙湾亲子度假酒店",
+  brand: "亲子度假",
+  city: "三亚",
+  address: "三亚市亚龙湾旅游度假区龙源路88号",
+  rating: 4.8,
+  price: 880,
+  original_price: 1080,
+  distance: "1.5km",
+  features: ["免费WiFi", "儿童乐园", "游泳池", "亲子活动", "海景房", "餐厅"],
+  star_level: 5,
+  is_featured: true,
+  display_order: 20002,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V320: 崇礼万龙度假酒店
+hotels_data << {
+  name: "崇礼万龙度假酒店",
+  brand: "万龙",
+  city: "张家口",
+  address: "张家口市崇礼区红花梁滑雪场",
+  rating: 4.8,
+  price: 980,
+  original_price: 1280,
+  distance: "0.5km",
+  features: ["免费WiFi", "滑雪装备租赁", "温泉SPA", "雪道直达", "餐厅", "酒吧"],
+  star_level: 4,
+  is_featured: true,
+  display_order: 20003,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+puts "   ✓ 添加了 3 家验证器特定酒店到主数组"
+
 Hotel.insert_all(hotels_data)
 
 # ==================== 步骤2: 为酒店套餐创建配套酒店 (hotels_for_packages) ====================

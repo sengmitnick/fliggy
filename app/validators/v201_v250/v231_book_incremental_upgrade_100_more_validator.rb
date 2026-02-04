@@ -24,13 +24,9 @@ module V201V250
     def prepare
       @departure_city = '成都'
       @destination_city = '重庆'
-      @travel_date = Date.today + 1.day
-      @check_in_date = @travel_date
-      @check_out_date = @check_in_date + 1.day
       @upgrade_budget = 100
       
       @available_trains = Train.by_route(@departure_city, @destination_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
         .to_a
@@ -40,6 +36,10 @@ module V201V250
         .to_a
       
       raise "未找到交通或酒店" if @available_trains.empty? || @available_hotels.empty?
+      
+      @travel_date = @available_trains.first.departure_time.to_date
+      @check_in_date = @travel_date
+      @check_out_date = @check_in_date + 1.day
       
       # 计算基础方案价格（最便宜的组合：火车+酒店）
       min_transport_price = @available_trains.first.price_second_class
@@ -208,7 +208,6 @@ module V201V250
       @upgrade_budget = data['upgrade_budget'].to_i
       
       @available_trains = Train.by_route(@departure_city, @destination_city)
-        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
         .to_a
