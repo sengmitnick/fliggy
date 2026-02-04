@@ -46,6 +46,10 @@ cruise_lines_data = [
 
 CruiseLine.insert_all(cruise_lines_data)
 
+# 为新插入的 CruiseLine 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为游轮公司生成 slug..."
+CruiseLine.where(slug: [nil, '']).find_each(&:save)
+
 # ==================== 游轮船只数据 ====================
 
 # 获取游轮公司ID

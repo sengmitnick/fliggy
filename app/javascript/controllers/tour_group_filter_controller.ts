@@ -5,9 +5,14 @@ export default class extends Controller<HTMLElement> {
     "destinationInput",
     "durationInput",
     "groupSizeInput",
+    "packageTypeInput",
     "destinationButton",
     "durationButton",
     "groupSizeButton",
+    "packageTypeRadio",
+    "packageTypeContainer",
+    "packageTypeCircle",
+    "packageTypeText",
     "departureDisplay",
     "durationModal",
     "durationOption",
@@ -19,16 +24,27 @@ export default class extends Controller<HTMLElement> {
   static values = {
     destination: String,
     duration: String,
-    groupSize: String
+    groupSize: String,
+    packageType: String
   }
 
   declare readonly destinationInputTarget: HTMLInputElement
   declare readonly durationInputTarget: HTMLInputElement
   declare readonly groupSizeInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
+  declare readonly packageTypeInputTarget: HTMLInputElement
   declare readonly destinationButtonTargets: HTMLElement[]
   declare readonly durationButtonTargets: HTMLElement[]
   declare readonly hasGroupSizeButtonTarget: boolean
   declare readonly groupSizeButtonTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
+  declare readonly packageTypeRadioTargets: HTMLInputElement[]
+  // stimulus-validator: disable-next-line
+  declare readonly packageTypeContainerTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
+  declare readonly packageTypeCircleTargets: HTMLElement[]
+  // stimulus-validator: disable-next-line
+  declare readonly packageTypeTextTargets: HTMLElement[]
   declare readonly departureDisplayTarget: HTMLElement
   declare readonly durationModalTarget: HTMLElement
   declare readonly durationOptionTargets: HTMLElement[]
@@ -39,6 +55,8 @@ export default class extends Controller<HTMLElement> {
   declare destinationValue: string
   declare durationValue: string
   declare groupSizeValue: string
+  // stimulus-validator: disable-next-line
+  declare packageTypeValue: string
   
   private tempSelectedDuration: string = ''
 
@@ -49,6 +67,11 @@ export default class extends Controller<HTMLElement> {
     // Auto-select group size if provided via URL parameter
     if (this.groupSizeValue) {
       this.autoSelectGroupSize(this.groupSizeValue)
+    }
+    
+    // Auto-select package type if provided via URL parameter
+    if (this.packageTypeValue) {
+      this.autoSelectPackageType(this.packageTypeValue)
     }
   }
 
@@ -315,6 +338,86 @@ export default class extends Controller<HTMLElement> {
       } else {
         radio?.classList.add('bg-transparent')
         radio?.classList.remove('bg-[#FFD700]')
+      }
+    })
+  }
+  
+  // Select package type (机酒套餐 / 景酒套餐)
+  selectPackageType(event: Event): void {
+    const radio = event.currentTarget as HTMLInputElement
+    const packageType = radio.value
+    
+    this.packageTypeValue = packageType
+    this.packageTypeInputTarget.value = packageType
+    
+    // Update visual styles
+    this.updatePackageTypeStyles(packageType)
+  }
+  
+  // Auto-select package type on page load
+  private autoSelectPackageType(packageType: string): void {
+    // Set the hidden input value
+    if (this.packageTypeInputTarget) {
+      this.packageTypeInputTarget.value = packageType
+    }
+    
+    // Check the corresponding radio button
+    this.packageTypeRadioTargets.forEach(radio => {
+      if (radio.value === packageType) {
+        radio.checked = true
+      }
+    })
+    
+    // Update visual styles
+    this.updatePackageTypeStyles(packageType)
+  }
+  
+  // Update package type button styles
+  private updatePackageTypeStyles(packageType: string): void {
+    this.packageTypeContainerTargets.forEach((container) => {
+      const value = container.dataset.value
+      const circle = this.packageTypeCircleTargets.find(c => c.dataset.value === value)
+      const text = this.packageTypeTextTargets.find(t => t.dataset.value === value)
+      const innerDot = circle?.querySelector('div') as HTMLElement
+      
+      if (value === packageType) {
+        // Active state: Yellow background with border
+        container.classList.remove('border-gray-200', 'bg-white')
+        container.classList.add('bg-[#FFE8CC]', 'border-[#FFD700]', 'shadow-md')
+        
+        if (circle) {
+          circle.classList.remove('border-gray-300')
+          circle.classList.add('border-[#FFD700]', 'bg-[#FFD700]')
+        }
+        
+        if (innerDot) {
+          innerDot.classList.remove('opacity-0')
+          innerDot.classList.add('opacity-100')
+        }
+        
+        if (text) {
+          text.classList.remove('text-gray-700', 'font-medium')
+          text.classList.add('text-gray-900', 'font-bold')
+        }
+      } else {
+        // Inactive state: Gray border with white background
+        container.classList.add('border-gray-200', 'bg-white')
+        container.classList.remove('bg-[#FFE8CC]', 'border-[#FFD700]', 'shadow-md')
+        
+        if (circle) {
+          circle.classList.add('border-gray-300')
+          circle.classList.remove('border-[#FFD700]', 'bg-[#FFD700]')
+        }
+        
+        if (innerDot) {
+          innerDot.classList.add('opacity-0')
+          innerDot.classList.remove('opacity-100')
+        }
+        
+        if (text) {
+          text.classList.add('text-gray-700', 'font-medium')
+          text.classList.remove('text-gray-900', 'font-bold')
+        }
       }
     })
   }

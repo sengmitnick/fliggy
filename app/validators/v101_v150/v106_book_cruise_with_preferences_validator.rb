@@ -7,8 +7,8 @@ module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
     self.task_id = 'b2c4e7f9-1d6a-4b8e-9c3f-5a7e2d8f1b94'
-    self.title = '预订邮轮（海洋光谱号日韩航线，含岸上观光+主厨晚餐需求）'
-    self.description = '预订日韩邮轮行程，在special_requests中备注冲绳岸上观光和主厨晚餐需求'
+    self.title = '预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
+    self.description = '预订日韩邮轮行程，选择海洋光谱号最近一班6天5晚航次，在special_requests中备注冲绳岸上观光和主厨晚餐需求'
     self.timeout_seconds = 240
   
     def prepare

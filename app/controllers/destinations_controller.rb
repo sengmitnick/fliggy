@@ -22,7 +22,15 @@ class DestinationsController < ApplicationController
   def select
     # 显示城市选择modal页面
     @destinations = Destination.hot_destinations.order(name: :asc)
-    @current_location = session[:last_destination_slug] ? Destination.friendly.find(session[:last_destination_slug]).name : "深圳"
+    @current_location = if session[:last_destination_slug]
+      begin
+        Destination.friendly.find(session[:last_destination_slug]).name
+      rescue ActiveRecord::RecordNotFound
+        "深圳"
+      end
+    else
+      "深圳"
+    end
     
     # 获取所有城市
     @all_cities = City.all.order(:pinyin)
@@ -40,7 +48,18 @@ class DestinationsController < ApplicationController
   end
 
   def show
-    @destination = Destination.friendly.find(params[:id])
+    begin
+      @destination = Destination.friendly.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      # If friendly_id lookup fails, try to generate slugs and redirect
+      dest = Destination.find_by(name: params[:id]) || Destination.first
+      if dest
+        dest.save if dest.slug.blank? # Generate slug
+        redirect_to destination_path(dest.slug) and return
+      else
+        redirect_to root_path, alert: "目的地不存在" and return
+      end
+    end
     
     # 记录用户选择的城市
     session[:last_destination_slug] = @destination.slug

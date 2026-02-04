@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例502: 预订航班+机场3公里内酒店
+# 验证用例196: 预订航班+机场3公里内酒店
 #
 # 任务描述:
 #   预订航班+机场3公里内酒店（便于转机）
@@ -36,19 +36,11 @@ module V151V200
       expect(@available_flights).not_to be_empty,
         "数据包缺少#{@departure_city}→#{@arrival_city}的航班（#{@travel_date}）"
       
-      # 查找机场附近酒店（通过features或hotel_type判断）
+      # 查找机场附近酒店（优先使用distance字段）
       @airport_hotels = Hotel
         .where(city: @arrival_city, data_version: 0)
         .select { |h| is_near_airport?(h) }
         .to_a
-      
-      if @airport_hotels.empty?
-        # 如果没有明确标记的机场酒店，选择距离最近的
-        @airport_hotels = Hotel
-          .where(city: @arrival_city, data_version: 0)
-          .select { |h| h.distance && h.distance <= @max_distance }
-          .to_a
-      end
       
       expect(@airport_hotels).not_to be_empty, 
         "数据包缺少#{@arrival_city}机场附近（≤#{@max_distance}公里）的酒店"
@@ -97,8 +89,7 @@ module V151V200
       # 断言3: 酒店在机场附近（≤3公里） (30%)
       add_assertion "酒店在机场附近（≤#{@max_distance}公里）", weight: 30 do
         hotel = @hotel_booking.hotel
-        is_airport_hotel = is_near_airport?(hotel) || 
-                          (hotel.distance && hotel.distance <= @max_distance)
+        is_airport_hotel = is_near_airport?(hotel)
         
         expect(is_airport_hotel).to be(true),
           "酒店不在机场附近。酒店: #{hotel.name}（距离#{hotel.distance}公里），要求: ≤#{@max_distance}公里"
@@ -177,6 +168,13 @@ module V151V200
     private
     
     def is_near_airport?(hotel)
+      # 优先使用distance字段（更可靠）
+      if hotel.distance.present?
+        distance_km = hotel.distance.is_a?(String) ? hotel.distance.to_f : hotel.distance
+        return distance_km <= @max_distance
+      end
+      
+      # 备用: 基于文本匹配
       return true if hotel.hotel_type&.include?('机场')
       return true if hotel.name&.include?('机场')
       return true if hotel.address&.include?('机场')

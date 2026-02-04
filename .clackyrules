@@ -117,8 +117,79 @@ Do not recreate administrator functionality in User model. Administrator system 
 - **ONLY supported command**: `rake validator:reset_baseline`
 - **Location**: `app/validators/support/data_packs/v1/` (NOT `db/seeds/`)
 - **Purpose**: Store complete validation and test data for different modules
-- **Naming**: Use descriptive names like `insurances.rb`, `cruises.rb`, `hotels_all.rb`
+- **Loading order**: Files loaded alphabetically by `Dir.glob().sort` (except `base.rb` first, `z_*.rb` last)
 - **Pattern**: Use `insert_all` for batch operations, NOT `find_or_create_by!`
+
+**CRITICAL: Data Pack File Organization Rules**
+
+**Golden Rule: ONE Business Module = ONE Data Pack File**
+
+**✅ CORRECT file structure:**
+```
+base.rb              # Foundation: City, Destination, User (ONLY file that can have destroy_all)
+flights.rb           # ALL flight data: main + premium + packages + field updates
+trains.rb            # ALL train data: main + extended scenarios
+hotels.rb            # ALL hotel data: hotels + rooms + packages + associations + price fixes
+cars.rb              # ALL car rental data
+attractions.rb       # ALL attraction data: attractions + tickets + activities
+cruises.rb           # ALL cruise data
+...
+```
+
+**❌ WRONG - Scattered files (DO NOT create these patterns):**
+```
+flights.rb + flights_supplement.rb + flights_phase2_fields_update.rb  # ❌ Split into 3 files
+hotels_all.rb + hotels_for_packages.rb + hotels_phase2_fields_update.rb + hotels_all_fix.rb + z_hotel_packages_associations.rb  # ❌ Split into 5 files
+```
+
+**File Naming Convention:**
+- **Main files**: Use simple plural business name: `flights.rb`, `trains.rb`, `hotels.rb`, `cars.rb`
+- **Service modules**: Use descriptive name: `insurances.rb`, `visa_services.rb`, `internet_services.rb`
+- **Special cases**:
+  - `base.rb` - Foundation data (City, Destination, User) - loads first
+  - Use `z_` prefix ONLY when absolutely necessary for load order (rare cases)
+- **❌ NEVER use these suffixes**: `_all`, `_supplement`, `_extended`, `_phase2_fields_update`, `_fix`, `_associations`
+- **Why**: These suffixes indicate the file should be merged into the main module file
+
+**When to Create a New Data Pack File:**
+```ruby
+# ✅ CREATE NEW FILE when:
+# 1. It's a completely independent business module
+#    Example: flights.rb, hotels.rb, cars.rb (different domains)
+
+# ❌ DO NOT create new file when:
+# 1. Adding more data to existing module → Edit existing file
+#    Example: Want to add premium flights? → Edit flights.rb, don't create flights_premium.rb
+# 2. Fixing bugs in existing data → Edit existing file
+#    Example: Hotel prices wrong? → Fix in hotels.rb, don't create hotels_fix.rb
+# 3. Adding Phase 2 fields → Edit existing file
+#    Example: Need new fields? → Add to hotels.rb, don't create hotels_phase2.rb
+# 4. Creating associations between existing data → Put in appropriate file
+#    Example: HotelPackage associations? → Already in hotels.rb where packages are created
+```
+
+**Dependency Management:**
+```ruby
+# ❌ WRONG - Create separate file for dependent data
+hotel_packages.rb  # Depends on Hotel existing
+z_hotel_packages_associations.rb  # Depends on hotel_packages existing
+
+# ✅ CORRECT - Put all related logic in ONE file
+hotels.rb:
+  # Step 1: Create hotels and rooms
+  Hotel.insert_all(hotels_data)
+  HotelRoom.insert_all(rooms_data)
+  
+  # Step 2: Create packages (depends on hotels existing)
+  HotelPackage.insert_all(packages_data)
+  
+  # Step 3: Update associations (depends on packages existing)
+  packages = HotelPackage.where(data_version: 0, hotel_id: nil)
+  packages.each { |p| p.update!(hotel_id: ...) }
+  
+  # Step 4: Fix prices (depends on all data existing)
+  Hotel.find_each { |h| h.update_column(:price, h.hotel_rooms.minimum(:price)) }
+```
 
 **File Structure Template**:
 ```ruby
@@ -148,10 +219,40 @@ puts "✓ 数据包加载完成"
 - ✅ ONLY use `rake validator:reset_baseline` to load all data packs
 - ✅ Ensure data packs are COMPLETE with all required fields and associations
 - ✅ Test data completeness before committing data pack files
+- ✅ Keep ONE business module in ONE file (see File Organization Rules above)
 - ❌ NEVER use `rails runner "load ..."` for data pack loading
 - ❌ NEVER place test/validation data in `db/seeds/` directory
 - ❌ NEVER use `find_or_create_by!` for data packs (use `insert_all` instead)
 - ❌ NEVER mix production seed data with test data
+- ❌ NEVER use `destroy_all` in data pack files (ONLY exception: `base.rb`)
+- ❌ NEVER create files with suffixes like `_supplement`, `_extended`, `_phase2`, `_fix`, `_associations`
+- ❌ NEVER split one business module into multiple files
+
+**Why NO destroy_all in data packs?**
+```ruby
+# ❌ WRONG - Redundant cleanup in data pack file
+# app/validators/support/data_packs/v1/hotels.rb
+Hotel.destroy_all
+HotelRoom.destroy_all
+HotelPackage.destroy_all
+
+# ✅ CORRECT - NO cleanup needed
+# app/validators/support/data_packs/v1/hotels.rb
+# rake validator:reset_baseline already cleared ENTIRE database in Step 1
+puts "正在加载 hotels_v1 数据包..."
+Hotel.insert_all(hotels_data)  # Just insert data directly
+```
+
+**Reasoning:**
+1. `rake validator:reset_baseline` Step 1 already runs `DataVersionable.models.each { |m| m.where(data_version: 0).destroy_all }`
+2. Database is EMPTY when data packs start loading
+3. Adding `destroy_all` in each file is:
+   - **Redundant**: Deleting from already-empty tables
+   - **Performance waste**: N extra DELETE queries for nothing
+   - **Logic confusion**: Implies data packs can run independently (they can't)
+
+**ONLY Exception:**
+- `base.rb` MAY use `destroy_all` because it's foundational data that needs explicit cleanup
 
 **Date Generation in Data Packs (CRITICAL)**:
 

@@ -74,6 +74,26 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        city1: @city1,
+        city2: @city2,
+        city3: @city3,
+        train1_date: @train1_date.to_s,
+        train2_date: @train2_date.to_s
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @city1 = data['city1']
+      @city2 = data['city2']
+      @city3 = data['city3']
+      @train1_date = Date.parse(data['train1_date']) if data['train1_date']
+      @train2_date = Date.parse(data['train2_date']) if data['train2_date']
+    end
+
     def verify
       # 断言1: 创建了第一段火车订单
       add_assertion "创建了第一段火车订单（#{@city1}→#{@city2}）", weight: 25 do

@@ -6,8 +6,12 @@ class HotelsController < ApplicationController
     if params[:city].present?
       @city = params[:city]
     elsif session[:last_destination_slug].present?
-      destination = Destination.friendly.find(session[:last_destination_slug])
-      @city = destination.name
+      begin
+        destination = Destination.friendly.find(session[:last_destination_slug])
+        @city = destination.name
+      rescue ActiveRecord::RecordNotFound
+        @city = '深圳'
+      end
     else
       @city = '深圳'
     end
@@ -26,6 +30,10 @@ class HotelsController < ApplicationController
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
     @query = params[:q]
+    
+    # 存储到简短变量用于表单传递
+    @type = @hotel_type
+    @category = @room_category
 
     @hotels = Hotel.all
     
@@ -112,6 +120,10 @@ class HotelsController < ApplicationController
     @room_category = params[:room_category] # hourly - 用于显示钟点房
     @brand = params[:brand] # 品牌筛选
     @query = params[:q]
+    
+    # 存储到简短变量用于表单传递
+    @type = @hotel_type
+    @category = @room_category
     
     # NOTE: City selector data is loaded via CitySelectorDataConcern
 

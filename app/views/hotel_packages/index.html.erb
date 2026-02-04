@@ -17,8 +17,8 @@
         <% end %>
         
         <div class="flex gap-2">
-          <div class="px-4 py-1.5 rounded-full bg-black/20 backdrop-blur-sm text-surface text-sm">30</div>
-          <button class="p-2 rounded-full bg-black/20 backdrop-blur-sm">
+          
+          <button class="p-2 rounded-full bg-black/20 backdrop-blur-sm" onclick="window.showToast('精彩即将上线，敬请期待')">
             <svg class="w-6 h-6 text-surface" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
@@ -117,7 +117,7 @@
           <h3 class="text-xl font-bold text-surface mb-1">周三好货问</h3>
           <p class="text-surface/90 text-sm mb-4">爆款限时抢购</p>
           <div class="mt-auto">
-            <span class="inline-block px-4 py-1.5 bg-primary text-text-primary rounded-full text-sm font-medium">
+            <span class="inline-block px-4 py-1.5 bg-primary text-text-primary rounded-full text-sm font-medium" onclick="window.showToast('精彩即将上线，敬请期待')">
               必囤好货，限时抢购！
             </span>
           </div>
@@ -133,7 +133,7 @@
           <span class="badge-primary text-xs px-2 py-1">TOP 1</span>
         </div>
       </div>
-      <div class="rounded-2xl overflow-hidden">
+      <div class="rounded-2xl overflow-hidden" onclick="window.showToast('精彩即将上线，敬请期待')">
         <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800" alt="爆款热卖榜" class="w-full h-40 object-cover">
         <div class="bg-surface-elevated p-3">
           <p class="text-sm text-text-secondary">超划算人气套餐</p>
@@ -144,40 +144,36 @@
     <!-- 爆款直播 -->
     <div class="px-4">
       <h3 class="text-lg font-bold text-text-primary mb-3">爆款直播</h3>
-      <div class="relative rounded-2xl overflow-hidden h-48">
-        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800" alt="爆款直播" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <div class="absolute top-4 left-4 flex items-center gap-2 bg-danger/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
-          <div class="flex items-center gap-1">
-            <div class="w-2 h-2 bg-surface rounded-full animate-pulse"></div>
-            <span class="text-surface text-xs font-medium">直播中</span>
+      <%= link_to live_rooms_path, class: "block" do %>
+        <div class="relative rounded-2xl overflow-hidden h-48">
+          <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800" alt="爆款直播" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <div class="absolute top-4 left-4 flex items-center gap-2 bg-danger/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
+            <div class="flex items-center gap-1">
+              <div class="w-2 h-2 bg-surface rounded-full animate-pulse"></div>
+              <span class="text-surface text-xs font-medium">直播中</span>
+            </div>
           </div>
-        </div>
-        <div class="absolute bottom-4 left-4 right-4">
-          <p class="text-surface font-bold text-lg mb-1">爆款直播间</p>
-          <div class="flex items-center gap-2">
-            <span class="text-surface/90 text-sm">🎁</span>
+          <div class="absolute bottom-4 left-4 right-4">
+            <p class="text-surface font-bold text-lg mb-1">爆款直播间</p>
+            <div class="flex items-center gap-2">
+              <span class="text-surface/90 text-sm">🎁</span>
+            </div>
           </div>
+          <button class="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-danger flex items-center justify-center">
+            <svg class="w-6 h-6 text-surface" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
         </div>
-        <button class="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-danger flex items-center justify-center">
-          <svg class="w-6 h-6 text-surface" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
-        </button>
-      </div>
+      <% end %>
     </div>
 
     <!-- 发现好去处 -->
     <div class="px-4">
       <div class="flex items-center gap-3 mb-3 overflow-x-auto no-scrollbar pb-2">
         <h3 class="text-lg font-bold text-text-primary whitespace-nowrap">发现好去处</h3>
-        <div class="flex gap-2">
-          <%= link_to "热门景点", hotel_packages_path, class: "nav-pill active" %>
-          <%= link_to "不约可退", hotel_packages_path, class: "nav-pill" %>
-          <%= link_to "奢享套房", hotel_packages_path, class: "nav-pill" %>
-          <%= link_to "大牌酒店", hotel_packages_path, class: "nav-pill" %>
-          <%= link_to "即买即约", hotel_packages_path, class: "nav-pill" %>
-        </div>
+        
       </div>
 
       <!-- Package Grid -->

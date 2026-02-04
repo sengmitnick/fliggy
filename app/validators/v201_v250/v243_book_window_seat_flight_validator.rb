@@ -97,7 +97,6 @@ module V201V250
         seat_preference: @seat_preference,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
     end

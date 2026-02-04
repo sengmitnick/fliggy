@@ -291,8 +291,70 @@ namespace :validator do
       puts "✅ All validators have required class attributes\n"
     end
     
-    # Step 2: 检查权重总和
-    puts "🔍 Step 2: Checking weight sums..."
+    # Step 2: 检查状态保存/恢复方法
+    puts "🔍 Step 2: Checking state management methods..."
+    state_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      
+      # 检查是否有 prepare 方法
+      has_prepare = content.match?(/def\s+prepare/)
+      
+      # 提取 prepare 方法内容
+      prepare_method = content.match(/def\s+prepare.*?^\s*end/m)&.[](0)
+      
+      # 检查是否实现了状态管理方法
+      has_execution_state_data = content.match?(/def\s+execution_state_data/)
+      has_restore_from_state = content.match?(/def\s+restore_from_state/)
+      
+      # 如果有 prepare 方法，提取其中设置的实例变量（排除 @data_version）
+      if has_prepare && prepare_method
+        instance_vars = prepare_method.scan(/@(\w+)\s*=/).flatten.uniq.reject { |v| v == 'data_version' }
+        
+        # 如果 prepare 方法中设置了实例变量，就需要状态管理方法
+        if instance_vars.any?
+          if !has_execution_state_data || !has_restore_from_state
+            missing_methods = []
+            missing_methods << 'execution_state_data' unless has_execution_state_data
+            missing_methods << 'restore_from_state' unless has_restore_from_state
+            
+            state_errors << {
+              validator: validator_name,
+              file: file,
+              missing_methods: missing_methods,
+              instance_vars: instance_vars
+            }
+          end
+        end
+      end
+    end
+    
+    if state_errors.any?
+      puts "\n❌ State Management Errors Found:"
+      puts "-" * 70
+      state_errors.each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  File: #{error[:file]}"
+        puts "  Missing methods: #{error[:missing_methods].join(', ')}"
+        puts "  Instance variables in prepare: #{error[:instance_vars].map { |v| '@' + v }.join(', ')}"
+        puts "  → These variables will be nil during verify phase!"
+        puts "  → Add execution_state_data and restore_from_state methods to fix"
+      end
+      puts "-" * 70
+      puts "\n❌ #{state_errors.size} validator(s) missing state management methods"
+      puts "This will cause verify phase to fail due to nil instance variables\n"
+      exit 1
+    else
+      puts "✅ All validators with instance variables have state management\n"
+    end
+    
+    # Step 3: 检查权重总和
+    puts "🔍 Step 3: Checking weight sums..."
     weight_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -337,8 +399,8 @@ namespace :validator do
       puts "✅ All validators have correct weight sums (total = 100)\n"
     end
     
-    # Step 3: 运行模拟测试
-    puts "🧪 Step 3: Running simulations..."
+    # Step 4: 运行模拟测试
+    puts "🧪 Step 4: Running simulations..."
     puts "-" * 70
     
     # 加载所有 Validator
@@ -440,33 +502,52 @@ namespace :validator do
     puts "   💥 Exceptions: #{exceptions}" if exceptions > 0
     puts "="*70
     
-    # 列出失败的验证器详情
+    # 列出失败的验证器详情（按模块分组）
     failed_results = results.select { |r| r[:status] != 'passed' }
     if failed_results.any?
-      puts "\n❌ Failed Validators:"
+      puts "\n❌ Failed Validators (grouped by module):"
       puts "-" * 70
       
-      failed_results.each do |result|
-        validator_id = result[:validator_id]
-        status = result[:status]
-        
-        case status
-        when 'failed'
-          score = result[:verify_result][:score]
-          puts "\n#{validator_id} - FAILED (#{score}/100)"
-          result[:verify_result][:errors].each do |error|
-            puts "  → #{error}"
-          end
-        when 'error'
-          puts "\n#{validator_id} - ERROR"
-          puts "  → #{result[:error]}"
-        when 'exception'
-          puts "\n#{validator_id} - EXCEPTION"
-          puts "  → #{result[:error]}"
+      # 按模块分组
+      grouped_by_module = failed_results.group_by do |result|
+        validator_id = result[:validator_id] || result[:task_id]
+        # 提取模块前缀（v001, v051, v101等）
+        if validator_id.match?(/^v(\d+)_/)
+          range_start = ($1.to_i / 50) * 50 + 1
+          range_end = range_start + 49
+          "v#{range_start.to_s.rjust(3, '0')}_v#{range_end.to_s.rjust(3, '0')}"
+        else
+          'other'
         end
       end
       
-      puts "-" * 70
+      # 按模块输出
+      grouped_by_module.sort.each do |module_name, module_results|
+        puts "\n📦 Module: #{module_name} (#{module_results.size} failed)"
+        puts "-" * 70
+        
+        module_results.each do |result|
+          validator_id = result[:validator_id] || result[:task_id]
+          status = result[:status]
+          
+          case status
+          when 'failed'
+            score = result[:verify_result][:score]
+            puts "\n  #{validator_id} - FAILED (#{score}/100)"
+            result[:verify_result][:errors].each do |error|
+              puts "    → #{error}"
+            end
+          when 'error'
+            puts "\n  #{validator_id} - ERROR"
+            puts "    → #{result[:error]}"
+          when 'exception'
+            puts "\n  #{validator_id} - EXCEPTION"
+            puts "    → #{result[:error]}"
+          end
+        end
+      end
+      
+      puts "\n" + "-" * 70
     end
     
     puts ""

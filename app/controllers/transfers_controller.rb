@@ -129,11 +129,23 @@ class TransfersController < ApplicationController
     
     # Calculate pickup datetime from flight/train if not provided
     if @pickup_datetime.blank? && @flight.present?
-      arrival_time = @flight.arrival_time
-      @pickup_datetime = arrival_time + 30.minutes if arrival_time # 30 min buffer after landing
+      # For to_airport (dropoff), use departure time - buffer; for from_airport (pickup), use arrival time + buffer
+      if @service_type == 'to_airport'
+        departure_time = @flight.departure_time
+        @pickup_datetime = departure_time - 2.hours if departure_time # 2 hours before takeoff
+      else
+        arrival_time = @flight.arrival_time
+        @pickup_datetime = arrival_time + 30.minutes if arrival_time # 30 min buffer after landing
+      end
     elsif @pickup_datetime.blank? && @train.present?
-      arrival_time = @train.arrival_time
-      @pickup_datetime = arrival_time + 15.minutes if arrival_time # 15 min buffer after train arrives
+      # For to_station (dropoff), use departure time - buffer; for from_station (pickup), use arrival time + buffer
+      if @service_type == 'to_station'
+        departure_time = @train.departure_time
+        @pickup_datetime = departure_time - 1.hour if departure_time # 1 hour before departure
+      else
+        arrival_time = @train.arrival_time
+        @pickup_datetime = arrival_time + 15.minutes if arrival_time # 15 min buffer after train arrives
+      end
     elsif @pickup_datetime.blank?
       # Default to 2 hours from now if no datetime provided
       @pickup_datetime = 2.hours.from_now

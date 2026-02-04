@@ -991,6 +991,33 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_04_090615) do
     t.index ["hotel_id"], name: "index_hotel_facilities_on_hotel_id"
   end
 
+  create_table "hotel_highlights", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.string "title"
+    t.text "description"
+    t.string "icon"
+    t.integer "display_order", default: 0
+    t.string "data_version", limit: 50, default: "0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_hotel_highlights_on_data_version"
+    t.index ["hotel_id"], name: "index_hotel_highlights_on_hotel_id"
+  end
+
+  create_table "hotel_nearby_places", force: :cascade do |t|
+    t.bigint "hotel_id"
+    t.string "place_type"
+    t.string "name"
+    t.string "distance"
+    t.text "description"
+    t.integer "display_order", default: 0
+    t.string "data_version", limit: 50, default: "0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["data_version"], name: "index_hotel_nearby_places_on_data_version"
+    t.index ["hotel_id"], name: "index_hotel_nearby_places_on_hotel_id"
+  end
+
   create_table "hotel_package_orders", force: :cascade do |t|
     t.bigint "hotel_package_id"
     t.bigint "user_id"

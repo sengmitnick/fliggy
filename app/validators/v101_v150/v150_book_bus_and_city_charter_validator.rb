@@ -73,6 +73,26 @@ module V101V150
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        travel_date: @travel_date.to_s,
+        origin: @origin,
+        destination: @destination,
+        preferred_time: @preferred_time,
+        charter_duration: @charter_duration
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @travel_date = Date.parse(data['travel_date']) if data['travel_date']
+      @origin = data['origin']
+      @destination = data['destination']
+      @preferred_time = data['preferred_time']
+      @charter_duration = data['charter_duration']
+    end
+
     def verify
       # 断言1: 创建了汽车票订单
       add_assertion "创建了汽车票订单", weight: 30 do

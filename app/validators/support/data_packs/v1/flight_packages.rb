@@ -1,7 +1,5 @@
 # Flight Packages (机票次卡) Seed Data
 
-FlightPackage.destroy_all
-
 packages = [
   {
     title: "AG超玩会联名",

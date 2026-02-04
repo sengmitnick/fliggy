@@ -17,10 +17,6 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 
 puts "正在加载 membership_products_v1 数据包..."
 
-# 清空现有数据
-MembershipOrder.destroy_all
-MembershipProduct.destroy_all
-
 # 创建商品数据
 products_data = [
   # ========== 热门商品 ==========
@@ -425,6 +421,10 @@ products_data = [
 ]
 
 MembershipProduct.insert_all(products_data)
+
+# 为新插入的 MembershipProduct 生成 slug（FriendlyId 需要 save 触发回调）
+puts "     正在为会员商品生成 slug..."
+MembershipProduct.where(slug: [nil, '']).find_each(&:save)
 
 puts "✓ 已创建 #{products_data.length} 个商品"
 puts "  - 低价商品(10-100元): #{products_data.count { |p| p[:price_cash] < 100 }} 个"

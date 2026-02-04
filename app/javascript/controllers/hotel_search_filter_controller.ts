@@ -34,7 +34,9 @@ export default class extends Controller<HTMLElement> {
     district: { type: String, default: "" },
     priceRange: { type: String, default: "" },
     stars: { type: String, default: "" },
-    brand: { type: String, default: "" }
+    brand: { type: String, default: "" },
+    type: { type: String, default: "" },
+    roomCategory: { type: String, default: "" }
   }
 
   declare readonly sortModalTarget: HTMLElement
@@ -71,6 +73,8 @@ export default class extends Controller<HTMLElement> {
   declare priceRangeValue: string
   declare starsValue: string
   declare brandValue: string
+  declare typeValue: string
+  declare roomCategoryValue: string
 
   connect(): void {
     this.updateButtonStates()
@@ -187,6 +191,15 @@ export default class extends Controller<HTMLElement> {
     // Add search query if present
     if (this.queryValue) {
       url.searchParams.set('q', this.queryValue)
+    }
+    
+    // Preserve type and room_category parameters
+    if (this.typeValue) {
+      url.searchParams.set('type', this.typeValue)
+    }
+    
+    if (this.roomCategoryValue) {
+      url.searchParams.set('room_category', this.roomCategoryValue)
     }
     
     // Add filter parameters

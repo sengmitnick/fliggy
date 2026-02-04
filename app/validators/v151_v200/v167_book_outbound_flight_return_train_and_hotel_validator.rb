@@ -114,6 +114,30 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        departure_city: @departure_city,
+        arrival_city: @arrival_city,
+        outbound_date: @outbound_date.to_s,
+        return_date: @return_date.to_s,
+        hotel_checkin_date: @hotel_checkin_date.to_s,
+        hotel_checkout_date: @hotel_checkout_date.to_s,
+        nights: @nights
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @departure_city = data['departure_city']
+      @arrival_city = data['arrival_city']
+      @outbound_date = Date.parse(data['outbound_date']) if data['outbound_date']
+      @return_date = Date.parse(data['return_date']) if data['return_date']
+      @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
+      @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      @nights = data['nights']
+    end
+
     def verify
       # 断言1: 创建了去程航班订单
       add_assertion "创建了去程航班订单（#{@departure_city}→#{@arrival_city}）", weight: 20 do

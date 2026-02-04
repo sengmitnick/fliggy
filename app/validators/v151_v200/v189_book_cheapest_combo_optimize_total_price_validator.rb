@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例505: 预订总价最低的交通+酒店组合
+# 验证用例189: 预订总价最低的交通+酒店组合
 #
 # 任务描述:
 #   预订总价最低的往返交通+酒店组合
@@ -41,9 +41,18 @@ module V151V200
       expect(@available_flights.any? || @available_trains.any?).to be_truthy,
         "数据包缺少#{@departure_city}→#{@arrival_city}的交通工具（#{@travel_date}）"
       
+      # 边界检查: 至少有一个类别包含多个选项，以便优化比较
+      if @available_flights.size == 1 && @available_trains.empty?
+        puts "警告: 仅有1个航班选项，无法进行价格优化比较"
+      elsif @available_trains.size == 1 && @available_flights.empty?
+        puts "警告: 仅有1个火车选项，无法进行价格优化比较"
+      end
+      
       # 查找所有酒店
       @available_hotels = Hotel.where(city: @arrival_city, data_version: 0).to_a
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
+      expect(@available_hotels.size).to be >= 2,
+        "数据包中酒店数量不足（仅#{@available_hotels.size}家），无法进行价格优化比较。至少需要2家酒店。"
       
       # 计算最低组合价格
       @min_combo_price = calculate_min_combo_price

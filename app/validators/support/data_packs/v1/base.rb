@@ -427,6 +427,13 @@ if new_destinations_data.any?
   end
   
   Destination.insert_all(destinations_with_timestamps)
+  
+  # 为新插入的 Destination 生成 slug（FriendlyId 需要 save 触发回调）
+  puts "     正在为热门目的地生成 slug..."
+  new_destination_names = new_destinations_data.map { |d| d[:name] }
+  Destination.where(name: new_destination_names, slug: [nil, '']).find_each do |dest|
+    dest.save  # 触发 FriendlyId 的 before_save 回调生成 slug
+  end
 else
   puts "     所有热门目的地已存在，跳过创建"
 end
@@ -450,11 +457,28 @@ end
 
 if auto_destinations_data.any?
   Destination.insert_all(auto_destinations_data)
+  
+  # 为新插入的 Destination 生成 slug（FriendlyId 需要 save 触发回调）
+  puts "     正在为城市目的地生成 slug..."
+  auto_destination_names = auto_destinations_data.map { |d| d[:name] }
+  Destination.where(name: auto_destination_names, slug: [nil, '']).find_each do |dest|
+    dest.save  # 触发 FriendlyId 的 before_save 回调生成 slug
+  end
 else
   puts "     所有城市的 Destination 已存在，跳过创建"
 end
 
 puts "     Destination 总数: #{Destination.count}"
+
+# 最终检查：确保所有 Destination 都有 slug
+missing_slug_count = Destination.where(slug: [nil, '']).count
+if missing_slug_count > 0
+  puts "     ⚠️  发现 #{missing_slug_count} 个 Destination 缺失 slug，正在修复..."
+  Destination.where(slug: [nil, '']).find_each do |dest|
+    dest.save
+  end
+  puts "     ✓ Slug 生成完成"
+end
 
 puts "  - 城市: #{City.count} 个"
 puts "  - 目的地: #{Destination.count} 个"

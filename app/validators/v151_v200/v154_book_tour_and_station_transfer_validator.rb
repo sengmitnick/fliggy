@@ -65,6 +65,22 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        tour_date: @tour_date.to_s,
+        city: @city,
+        station_location: @station_location
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @tour_date = Date.parse(data['tour_date']) if data['tour_date']
+      @city = data['city']
+      @station_location = data['station_location']
+    end
+
     def verify
       # 断言1: 创建了跟团游订单
       add_assertion "创建了跟团游订单", weight: 30 do
@@ -89,13 +105,19 @@ module V151V200
       end
       
       # 断言3: 出发日期正确
-      add_assertion "出发日期正确（#{@tour_date}）", weight: 15 do
+      add_assertion "出发日期正确（#{@tour_date}）", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@tour_date),
           "出发日期错误。期望: #{@tour_date}（明天）, 实际: #{@tour_booking.travel_date}"
       end
       
-      # 断言4: 创建了火车站接站服务
-      add_assertion "创建了火车站接站服务", weight: 30 do
+      # 断言4: 行程天数正确（2天）
+      add_assertion "行程天数正确（2天）", weight: 10 do
+        expect(@tour_booking.tour_group_product.duration).to eq(2),
+          "行程天数错误。期望: 2天, 实际: #{@tour_booking.tour_group_product.duration}天"
+      end
+      
+      # 断言5: 创建了火车站接站服务
+      add_assertion "创建了火车站接站服务", weight: 25 do
         @transfer = Transfer
           .where(transfer_type: 'train_pickup', data_version: @data_version)
           .order(created_at: :desc)
@@ -106,11 +128,12 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言5: 接站地点正确
-      add_assertion "接站地点在北京", weight: 10 do
-        in_city = @transfer.location_from.include?(@city) || @transfer.location_to.include?(@city)
-        expect(in_city).to be(true),
-          "接站地点错误。期望包含: #{@city}, 实际: #{@transfer.location_from} -> #{@transfer.location_to}"
+      # 断言6: 接站地点正确（北京站 → 北京市区）
+      add_assertion "接站地点正确（车站→市区）", weight: 10 do
+        expect(@transfer.location_from).to include(@city),
+          "接站出发地错误。期望包含: #{@city}, 实际: #{@transfer.location_from}"
+        expect(@transfer.location_to).to include("#{@city}市区"),
+          "接站目的地错误。期望: #{@city}市区, 实际: #{@transfer.location_to}"
       end
     end
   end

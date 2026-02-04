@@ -130,6 +130,8 @@
       <%= f.hidden_field :price_min, value: @price_min, data: { hotel_search_target: "minPriceInput" } %>
       <%= f.hidden_field :price_max, value: @price_max, data: { hotel_search_target: "maxPriceInput" } %>
       <%= f.hidden_field :star_level, value: @star_level, data: { hotel_search_target: "starsInput" } %>
+      <%= f.hidden_field :type, value: @type if @type.present? %>
+      <%= f.hidden_field :room_category, value: @category if @category.present? %>
       <%= f.submit "搜索酒店", class: "block w-full text-center text-white font-bold py-3 rounded-full border-0 cursor-pointer", style: "background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);" %>
     <% end %>
 
@@ -525,28 +527,6 @@
 
       <!-- Search Suggestions Content -->
       <div class="flex-1 overflow-y-auto pb-4">
-        <!-- Search History -->
-        <div class="px-4 py-3">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5" style="color: #FFA500;" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-              </svg>
-              <span class="font-medium">搜索历史</span>
-            </div>
-            <button class="text-gray-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
-          </div>
-          <div class="flex gap-2 flex-wrap">
-            <%= link_to "深圳市·万豪", hotels_path(q: "万豪", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
-            <%= link_to "深圳市·万丽", hotels_path(q: "万丽", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
-            <%= link_to "深圳市·深圳南山区", hotels_path(q: "深圳南山区", city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children), class: "px-3 py-1.5 text-sm rounded-lg bg-gray-100 text-gray-700" %>
-          </div>
-        </div>
-
         <!-- Hot Searches -->
         <div class="px-4 py-3">
           <div class="flex items-center justify-between mb-3" data-action="click->hotel-search#toggleSection" data-section="hotSearch">
@@ -740,7 +720,7 @@
         <span class="text-xs font-medium">推荐</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center py-2 text-gray-600">
+      <button class="flex flex-col items-center justify-center py-2 text-gray-600" onclick="window.showToast('精彩即将上线，敬请期待')">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
         </svg>
@@ -754,19 +734,19 @@
         <span class="text-xs">酒店套餐</span>
       <% end %>
 
-      <button class="flex flex-col items-center justify-center py-2 text-gray-600">
+      <button class="flex flex-col items-center justify-center py-2 text-gray-600" onclick="window.showToast('精彩即将上线，敬请期待')">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <span class="text-xs">权益中心</span>
       </button>
 
-      <button class="flex flex-col items-center justify-center py-2 text-gray-600">
+      <%= link_to bookings_path, class: "flex flex-col items-center justify-center py-2 text-gray-600" do %>
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         <span class="text-xs">我的订单</span>
-      </button>
+      <% end %>
     </div>
   </div>
 

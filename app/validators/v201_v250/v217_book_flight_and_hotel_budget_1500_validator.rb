@@ -148,7 +148,6 @@ module V201V250
         total_price: best_combo[:flight].price,
         accept_terms: true,
         status: 'paid',
-        accept_terms: true,
         data_version: @data_version
       )
       
@@ -164,7 +163,6 @@ module V201V250
         payment_method: '花呗',
         total_price: best_combo[:room].price,
         status: 'paid',
-        payment_method: '花呗',
         data_version: @data_version
       )
     end

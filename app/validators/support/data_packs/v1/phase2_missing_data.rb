@@ -88,6 +88,15 @@ end
 # ========== 3. 补充短途航班数据（V207需要：飞行时长≤2小时，深圳→上海） ==========
 puts "\n=== 补充短途航班数据 ==="
 
+# 城市机场映射
+airport_map = {
+  '深圳' => '宝安T3',
+  '上海' => '虹桥T2',
+  '广州' => '白云T2',
+  '北京' => '首都T3',
+  '天津' => '滨海T2'
+}
+
 [
   { number: 'CZ3401', airline: '南航', dep: '深圳', dest: '上海', dep_time: '08:00', arr_time: '10:00', price: 680 },
   { number: 'MU5401', airline: '东航', dep: '广州', dest: '上海', dep_time: '09:00', arr_time: '11:00', price: 720 },
@@ -98,6 +107,8 @@ puts "\n=== 补充短途航班数据 ==="
     airline: data[:airline],
     departure_city: data[:dep],
     destination_city: data[:dest],
+    departure_airport: airport_map[data[:dep]] || data[:dep],
+    arrival_airport: airport_map[data[:dest]] || data[:dest],
     departure_time: data[:dep_time],
     arrival_time: data[:arr_time],
     price: data[:price],
@@ -109,21 +120,75 @@ puts "\n=== 补充短途航班数据 ==="
     mileage_accrual: '可累积里程'
   )
   flight.save! if flight.changed?
-  puts "  ✓ #{flight.new_record? ? '创建' : '更新'}航班: #{data[:number]} (#{data[:dep]}→#{data[:dest]})"
+  puts "  ✓ #{flight.new_record? ? '创建' : '更新'}航班: #{data[:number]} (#{data[:dep]}#{airport_map[data[:dep]]}→#{data[:dest]}#{airport_map[data[:dest]]})"
+end
+
+# ========== 3B. 补充上海→杭州航班数据（V211需要：5-8小时中转时间） ==========
+puts "\n=== 补充上海→杭州航班数据（支持长中转城市游） ==="
+
+# 基准：CZ8801 广州→上海 16:00-18:30 (flight_date = Date.today + 2.days)
+# 到达时间：Date.today + 2.days 18:30
+# 需要上海出发时间：23:30 (day+2) ~ 02:30 (day+3)，即5-8小时后
+[
+  { number: 'MU5511', airline: '东航', dep: '上海', dest: '杭州', dep_time: '23:30', arr_time: '00:20', price: 420, flight_date_offset: 2 },
+  { number: 'FM9201', airline: '上航', dep: '上海', dest: '杭州', dep_time: '00:30', arr_time: '01:20', price: 450, flight_date_offset: 3 },
+  { number: 'HO1205', airline: '吉祥', dep: '上海', dest: '杭州', dep_time: '01:00', arr_time: '01:50', price: 480, flight_date_offset: 3 }
+].each do |data|
+  flight = Flight.find_or_initialize_by(flight_number: data[:number], data_version: '0')
+  
+  # flight_date表示航班的"日期标识"（用于查询筛选）
+  # 对于深夜航班（≥23:00），flight_date = 当天日期
+  # 对于凌晨航班（<6:00），flight_date = 当天日期（虽然是半夜到达）
+  base_date = Date.today + data[:flight_date_offset].days
+  dep_hour, dep_min = data[:dep_time].split(':').map(&:to_i)
+  arr_hour, arr_min = data[:arr_time].split(':').map(&:to_i)
+  
+  # 构建完整的departure_time和arrival_time（带日期+时间）
+  dep_datetime = Time.zone.parse("#{base_date} #{data[:dep_time]}")
+  
+  # 如果到达时间<出发时间，说明跨天到达（如23:30出发，00:20到达）
+  arr_datetime = if arr_hour < dep_hour
+    Time.zone.parse("#{base_date + 1.day} #{data[:arr_time]}")
+  else
+    Time.zone.parse("#{base_date} #{data[:arr_time]}")
+  end
+  
+  flight.assign_attributes(
+    airline: data[:airline],
+    departure_city: data[:dep],
+    destination_city: data[:dest],
+    departure_time: dep_datetime,
+    arrival_time: arr_datetime,
+    price: data[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李1件(23kg)',
+    flight_date: base_date,  # 航班日期标识
+    meal_service: '无餐食',
+    mileage_accrual: '可累积里程',
+    departure_airport: '虹桥T2',
+    arrival_airport: '萧山T3',
+    aircraft_type: '空客320(中)',
+    available_seats: 80
+  )
+  flight.save! if flight.changed?
+  puts "  ✓ #{flight.new_record? ? '创建' : '更新'}航班: #{data[:number]} (#{data[:dep]}→#{data[:dest]} flight_date=#{base_date} dep=#{dep_datetime.strftime('%H:%M')})"
 end
 
 # ========== 4. 补充国际商务舱航班数据（V223需要：上海→纽约，价格≥2000元） ==========
 puts "\n=== 补充国际商务舱航班数据 ==="
 
 [
-  { number: 'MU587', airline: '东航', dep: '上海', dest: '纽约', dep_time: '12:30', arr_time: '14:00', price: 8500 },
-  { number: 'CA981', airline: '国航', dep: '北京', dest: '纽约', dep_time: '13:00', arr_time: '15:30', price: 8800 }
+  { number: 'MU587', airline: '东航', dep: '上海', dep_airport: '浦东T2', dest: '纽约', dest_airport: 'JFK', dep_time: '12:30', arr_time: '14:00', price: 8500 },
+  { number: 'CA981', airline: '国航', dep: '北京', dep_airport: '首都T3', dest: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 8800 }
 ].each do |data|
   flight = Flight.find_or_initialize_by(flight_number: data[:number], data_version: '0')
   flight.assign_attributes(
     airline: data[:airline],
     departure_city: data[:dep],
     destination_city: data[:dest],
+    departure_airport: data[:dep_airport],
+    arrival_airport: data[:dest_airport],
     departure_time: data[:dep_time],
     arrival_time: data[:arr_time],
     price: data[:price],
@@ -142,15 +207,17 @@ end
 puts "\n=== 补充国内商务舱/高端航班数据 ==="
 
 [
-  { number: 'CA1001', airline: '国航', dep: '北京', dest: '上海', dep_time: '09:00', arr_time: '11:30', price: 2200 },
-  { number: 'MU5001', airline: '东航', dep: '上海', dest: '深圳', dep_time: '10:00', arr_time: '13:00', price: 2400 },
-  { number: 'CZ3001', airline: '南航', dep: '广州', dest: '北京', dep_time: '08:30', arr_time: '11:30', price: 2500 }
+  { number: 'CA1001', airline: '国航', dep: '北京', dep_airport: '首都T3', dest: '上海', dest_airport: '虹桥T2', dep_time: '09:00', arr_time: '11:30', price: 2200 },
+  { number: 'MU5001', airline: '东航', dep: '上海', dep_airport: '虹桥T2', dest: '深圳', dest_airport: '宝安T3', dep_time: '10:00', arr_time: '13:00', price: 2400 },
+  { number: 'CZ3001', airline: '南航', dep: '广州', dep_airport: '白云T2', dest: '北京', dest_airport: '首都T3', dep_time: '08:30', arr_time: '11:30', price: 2500 }
 ].each do |data|
   flight = Flight.find_or_initialize_by(flight_number: data[:number], data_version: '0')
   flight.assign_attributes(
     airline: data[:airline],
     departure_city: data[:dep],
     destination_city: data[:dest],
+    departure_airport: data[:dep_airport],
+    arrival_airport: data[:dest_airport],
     departure_time: data[:dep_time],
     arrival_time: data[:arr_time],
     price: data[:price],
@@ -169,16 +236,18 @@ end
 puts "\n=== 补充支持改签的航班数据 ==="
 
 [
-  { number: 'CA1101', airline: '国航', dep: '北京', dest: '上海', dep_time: '14:00', arr_time: '16:30', price: 980, refund: '免费改签', days: 4 },
-  { number: 'MU5201', airline: '东航', dep: '上海', dest: '广州', dep_time: '15:00', arr_time: '17:30', price: 1080, refund: '免费改签，退票扣10%', days: 4 },
-  { number: 'CZ8101', airline: '南航', dep: '广州', dest: '杭州', dep_time: '09:00', arr_time: '11:00', price: 780, refund: '免费改签', days: 5 },
-  { number: 'MU5301', airline: '东航', dep: '广州', dest: '杭州', dep_time: '14:30', arr_time: '16:30', price: 850, refund: '改签免手续费', days: 5 }
+  { number: 'CA1101', airline: '国航', dep: '北京', dep_airport: '首都T3', dest: '上海', dest_airport: '虹桥T2', dep_time: '14:00', arr_time: '16:30', price: 980, refund: '免费改签', days: 4 },
+  { number: 'MU5201', airline: '东航', dep: '上海', dep_airport: '虹桥T2', dest: '广州', dest_airport: '白云T2', dep_time: '15:00', arr_time: '17:30', price: 1080, refund: '免费改签，退票扣10%', days: 4 },
+  { number: 'CZ8101', airline: '南航', dep: '广州', dep_airport: '白云T2', dest: '杭州', dest_airport: '萧山T3', dep_time: '09:00', arr_time: '11:00', price: 780, refund: '免费改签', days: 5 },
+  { number: 'MU5301', airline: '东航', dep: '广州', dep_airport: '白云T2', dest: '杭州', dest_airport: '萧山T3', dep_time: '14:30', arr_time: '16:30', price: 850, refund: '改签免手续费', days: 5 }
 ].each do |data|
   flight = Flight.find_or_initialize_by(flight_number: data[:number], data_version: '0')
   flight.assign_attributes(
     airline: data[:airline],
     departure_city: data[:dep],
     destination_city: data[:dest],
+    departure_airport: data[:dep_airport],
+    arrival_airport: data[:dest_airport],
     departure_time: data[:dep_time],
     arrival_time: data[:arr_time],
     price: data[:price],
@@ -198,22 +267,25 @@ end
 puts "\n=== 补充宽体机航班数据 ==="
 
 [
-  { number: 'CA987', airline: '国航', dep: '北京', dest: '洛杉矶', dep_time: '12:00', arr_time: '08:00', price: 7800, aircraft: '波音787' },
-  { number: 'CA8801', airline: '国航', dep: '北京', dest: '上海', dep_time: '15:00', arr_time: '17:30', price: 1680, aircraft: '宽体机' },
-  { number: 'CZ8801', airline: '南航', dep: '广州', dest: '上海', dep_time: '16:00', arr_time: '18:30', price: 1580, aircraft: '宽体机' }
+  { number: 'CA987', airline: '国航', dep: '北京', dep_airport: '首都T3', dest: '洛杉矶', dest_airport: 'LAX', dep_time: '12:00', arr_time: '08:00', price: 7800, aircraft: '波音787' },
+  { number: 'CA8801', airline: '国航', dep: '北京', dep_airport: '首都T3', dest: '上海', dest_airport: '虹桥T2', dep_time: '15:00', arr_time: '17:30', price: 1680, aircraft: '宽体机' },
+  { number: 'CZ8801', airline: '南航', dep: '广州', dep_airport: '白云T2', dest: '上海', dest_airport: '虹桥T2', dep_time: '16:00', arr_time: '18:30', price: 1580, aircraft: '宽体机' }
 ].each do |data|
   flight = Flight.find_or_initialize_by(flight_number: data[:number], data_version: '0')
+  flight_date = data[:dest] == '洛杉矶' ? Date.today + 7.days : (data[:number] == 'CZ8801' ? Date.today + 2.days : Date.today + 1.day)
   flight.assign_attributes(
     airline: data[:airline],
     departure_city: data[:dep],
     destination_city: data[:dest],
-    departure_time: data[:dep_time],
-    arrival_time: data[:arr_time],
+    departure_airport: data[:dep_airport],
+    arrival_airport: data[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{data[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{data[:arr_time]}"),
     price: data[:price],
     is_direct: true,
     stops: 0,
     baggage_allowance: '托运行李2件(每件23kg)',
-    flight_date: data[:dest] == '洛杉矶' ? Date.today + 7.days : Date.today + 1.day,
+    flight_date: flight_date,
     meal_service: '含飞机餐',
     mileage_accrual: '可累积里程',
     aircraft_type: data[:aircraft]
@@ -303,9 +375,9 @@ created_count = 0
 all_hotels.each do |hotel|
   # 为每个酒店创建3种房型（如果不存在）
   [
-    { type: 'standard', price: hotel.price, bed_type: '双床', max_guests: 2, area: 25 },
-    { type: 'deluxe', price: (hotel.price * 1.5).round, bed_type: '大床', max_guests: 2, area: 35 },
-    { type: 'suite', price: (hotel.price * 2).round, bed_type: '双床+沙发床', max_guests: 4, area: 50 }
+    { type: '标准双床房', price: hotel.price, bed_type: '双床', max_guests: 2, area: 25 },
+    { type: '豪华大床房', price: (hotel.price * 1.5).round, bed_type: '大床', max_guests: 2, area: 35 },
+    { type: '行政套房', price: (hotel.price * 2).round, bed_type: '双床+沙发床', max_guests: 4, area: 50 }
   ].each do |room_data|
     room = HotelRoom.find_or_initialize_by(
       hotel_id: hotel.id,

@@ -8,7 +8,7 @@ module V101V150
     self.validator_id = 'v103_book_mediterranean_cruise_validator'
     self.task_id = 'c3f9e2a1-5b47-4d12-9a8e-7f1e3d4a6c89'
     self.title = '预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）'
-    self.description = '预订地中海航线邮轮，选择地中海辉煌号7天6晚行程，巴塞罗那出发，预订阳台房（观景之选）'
+    self.description = '预订地中海航线邮轮，选择地中海辉煌号7天6晚行程，巴塞罗那出发，选择最近可用的班次，预订阳台房（观景之选）'
     self.timeout_seconds = 240
   
     def prepare
