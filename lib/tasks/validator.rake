@@ -302,31 +302,34 @@ namespace :validator do
       validator_name = File.basename(file, '.rb')
       content = File.read(file)
       
-      # 检查是否有 prepare 方法设置实例变量
+      # 检查是否有 prepare 方法
       has_prepare = content.match?(/def\s+prepare/)
-      has_instance_vars = content.match?(/@\w+\s*=/) && !content.match?(/@data_version/)
+      
+      # 提取 prepare 方法内容
+      prepare_method = content.match(/def\s+prepare.*?^\s*end/m)&.[](0)
       
       # 检查是否实现了状态管理方法
       has_execution_state_data = content.match?(/def\s+execution_state_data/)
       has_restore_from_state = content.match?(/def\s+restore_from_state/)
       
-      # 如果有 prepare 方法且设置了实例变量，就需要状态管理方法
-      if has_prepare && has_instance_vars
-        if !has_execution_state_data || !has_restore_from_state
-          missing_methods = []
-          missing_methods << 'execution_state_data' unless has_execution_state_data
-          missing_methods << 'restore_from_state' unless has_restore_from_state
-          
-          # 提取 prepare 方法中的实例变量
-          prepare_method = content.match(/def\s+prepare.*?^\s*end/m)&.[](0)
-          instance_vars = prepare_method&.scan(/@(\w+)\s*=/)&.flatten&.uniq&.reject { |v| v == 'data_version' } || []
-          
-          state_errors << {
-            validator: validator_name,
-            file: file,
-            missing_methods: missing_methods,
-            instance_vars: instance_vars
-          }
+      # 如果有 prepare 方法，提取其中设置的实例变量（排除 @data_version）
+      if has_prepare && prepare_method
+        instance_vars = prepare_method.scan(/@(\w+)\s*=/).flatten.uniq.reject { |v| v == 'data_version' }
+        
+        # 如果 prepare 方法中设置了实例变量，就需要状态管理方法
+        if instance_vars.any?
+          if !has_execution_state_data || !has_restore_from_state
+            missing_methods = []
+            missing_methods << 'execution_state_data' unless has_execution_state_data
+            missing_methods << 'restore_from_state' unless has_restore_from_state
+            
+            state_errors << {
+              validator: validator_name,
+              file: file,
+              missing_methods: missing_methods,
+              instance_vars: instance_vars
+            }
+          end
         end
       end
     end

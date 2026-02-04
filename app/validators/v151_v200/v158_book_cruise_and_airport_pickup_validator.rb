@@ -89,6 +89,28 @@ module V151V200
       )
     end
 
+    def execution_state_data
+      {
+        data_version: @data_version,
+        departure_date: @departure_date.to_s,
+        departure_port: @departure_port,
+        airport_location: @airport_location,
+        duration_days: @duration_days,
+        duration_nights: @duration_nights,
+        adult_count: @adult_count
+      }
+    end
+
+    def restore_from_state(data)
+      @data_version = data['data_version']
+      @departure_date = Date.parse(data['departure_date']) if data['departure_date']
+      @departure_port = data['departure_port']
+      @airport_location = data['airport_location']
+      @duration_days = data['duration_days']
+      @duration_nights = data['duration_nights']
+      @adult_count = data['adult_count']
+    end
+
     def verify
       # 断言1: 创建了邮轮订单
       add_assertion "创建了邮轮订单", weight: 30 do
