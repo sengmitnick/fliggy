@@ -116,29 +116,49 @@
             <div class="text-xs text-text-muted mb-1">
               <%= @service_type == 'from_airport' ? '降落机场' : '起飞机场' %>
             </div>
-            <%= link_to search_flights_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
-              <div class="flex-1">
-                <% if @transfer_params && @transfer_params[:flight_id].present? %>
-                  <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
-                  <% if flight %>
-                    <% # 根据service_type显示对应的机场：from_airport=降落机场, to_airport=起飞机场 %>
-                    <% airport_name = @service_type == 'from_airport' ? flight.arrival_airport : flight.departure_airport %>
-                    <% time_label = @service_type == 'from_airport' ? '到达后用车' : '出发前用车' %>
-                    <% display_time = @service_type == 'from_airport' ? flight.arrival_time : flight.departure_time %>
-                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= airport_name %>"><%= airport_name %></h2>
-                    <div class="text-xs text-text-secondary mt-1">
-                      <%= flight.flight_number %> 预计当地<%= display_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][display_time&.wday] %> <%= display_time&.strftime('%H:%M') %><%= time_label %>
-                    </div>
+            <% if @service_type == 'from_airport' %>
+              <%= link_to search_flights_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
+                <div class="flex-1">
+                  <% if @transfer_params && @transfer_params[:flight_id].present? %>
+                    <% flight = Flight.find_by(id: @transfer_params[:flight_id]) %>
+                    <% if flight %>
+                      <% # 根据service_type显示对应的机场：from_airport=降落机场, to_airport=起飞机场 %>
+                      <% airport_name = @service_type == 'from_airport' ? flight.arrival_airport : flight.departure_airport %>
+                      <% time_label = @service_type == 'from_airport' ? '到达后用车' : '出发前用车' %>
+                      <% display_time = @service_type == 'from_airport' ? flight.arrival_time : flight.departure_time %>
+                      <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= airport_name %>"><%= airport_name %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= flight.flight_number %> 预计当地<%= display_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][display_time&.wday] %> <%= display_time&.strftime('%H:%M') %><%= time_label %>
+                      </div>
+                    <% else %>
+                      <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
+                    <% end %>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
                   <% end %>
-                <% else %>
-                  <h2 class="text-lg font-bold text-text-muted">请选择机场</h2>
-                <% end %>
-              </div>
-              <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+                </div>
+                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              <% end %>
+            <% else %>
+              <button
+                type="button"
+                data-action="click->location-selector#openModal"
+                data-location-type="airport"
+                class="flex justify-between items-center w-full">
+                <div class="flex-1">
+                  <% if @transfer_params && @transfer_params[:location_from].present? %>
+                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= @transfer_params[:location_from] %>" data-location-selector-target="airportDisplay"><%= @transfer_params[:location_from] %></h2>
+                  <% else %>
+                    <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="airportDisplay">请选择机场</h2>
+                  <% end %>
+                </div>
+                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+              <%= hidden_field_tag :location_from, @transfer_params&.dig(:location_from), id: 'transfer-location-from', data: { 'location-selector-target': 'airportInput' } %>
             <% end %>
           </div>
         </div>
@@ -153,29 +173,49 @@
             <div class="text-xs text-text-muted mb-1">
               <%= @service_type == 'from_station' ? '到达火车站' : '出发火车站' %>
             </div>
-            <%= link_to search_trains_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
-              <div class="flex-1">
-                <% if @transfer_params && @transfer_params[:train_id].present? %>
-                  <% train = Train.find_by(id: @transfer_params[:train_id]) %>
-                  <% if train %>
-                    <% # 根据service_type显示对应的车站：from_station=到达车站, to_station=出发车站 %>
-                    <% station_name = @service_type == 'from_station' ? train.arrival_station : train.departure_station %>
-                    <% time_label = @service_type == 'from_station' ? '到达后用车' : '出发前用车' %>
-                    <% display_time = @service_type == 'from_station' ? train.arrival_time : train.departure_time %>
-                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= station_name %>"><%= station_name %></h2>
-                    <div class="text-xs text-text-secondary mt-1">
-                      <%= train.train_number %> 预计当地<%= display_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][display_time&.wday] %> <%= display_time&.strftime('%H:%M') %><%= time_label %>
-                    </div>
+            <% if @service_type == 'from_station' %>
+              <%= link_to search_trains_transfers_path(transfer_type: @transfer_type, service_type: @service_type), class: "flex justify-between items-center" do %>
+                <div class="flex-1">
+                  <% if @transfer_params && @transfer_params[:train_id].present? %>
+                    <% train = Train.find_by(id: @transfer_params[:train_id]) %>
+                    <% if train %>
+                      <% # 根据service_type显示对应的车站：from_station=到达车站, to_station=出发车站 %>
+                      <% station_name = @service_type == 'from_station' ? train.arrival_station : train.departure_station %>
+                      <% time_label = @service_type == 'from_station' ? '到达后用车' : '出发前用车' %>
+                      <% display_time = @service_type == 'from_station' ? train.arrival_time : train.departure_time %>
+                      <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= station_name %>"><%= station_name %></h2>
+                      <div class="text-xs text-text-secondary mt-1">
+                        <%= train.train_number %> 预计当地<%= display_time&.strftime('%m月%d日') %><%= %w[周日 周一 周二 周三 周四 周五 周六][display_time&.wday] %> <%= display_time&.strftime('%H:%M') %><%= time_label %>
+                      </div>
+                    <% else %>
+                      <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
+                    <% end %>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
                   <% end %>
-                <% else %>
-                  <h2 class="text-lg font-bold text-text-muted">请选择火车站</h2>
-                <% end %>
-              </div>
-              <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+                </div>
+                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              <% end %>
+            <% else %>
+              <button
+                type="button"
+                data-action="click->location-selector#openModal"
+                data-location-type="station"
+                class="flex justify-between items-center w-full">
+                <div class="flex-1">
+                  <% if @transfer_params && @transfer_params[:location_from].present? %>
+                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= @transfer_params[:location_from] %>" data-location-selector-target="stationDisplay"><%= @transfer_params[:location_from] %></h2>
+                  <% else %>
+                    <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="stationDisplay">请选择火车站</h2>
+                  <% end %>
+                </div>
+                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+              <%= hidden_field_tag :location_from, @transfer_params&.dig(:location_from), id: 'transfer-location-from', data: { 'location-selector-target': 'stationInput' } %>
             <% end %>
           </div>
         </div>
@@ -300,4 +340,7 @@
 
   <!-- Include Location Selector Modal -->
   <%= render 'shared/location_selector_modal' %>
+
+  <!-- Include City Selector Modal -->
+  <%= render 'shared/city_selector_modal' %>
 </div>

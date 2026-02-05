@@ -238,7 +238,8 @@ module V051V100
         check_out_date: @check_out_date,
         status: 'pending',
         contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_phone: passenger.phone,
+        data_version: @data_version
       )
     
       # 返回操作信息

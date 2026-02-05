@@ -29,7 +29,7 @@ module V101V150
     departure_port_keyword = '巴塞罗那'
     expected_days = 7
     expected_nights = 6
-    expected_cabin_category = 'oceanview'
+    expected_cabin_category = 'ocean_view'
     expected_month = 4
     adult_count = 2
 
@@ -38,10 +38,10 @@ module V101V150
       ship_keyword: ship_keyword,
       departure_port_keyword: departure_port_keyword,
       duration: "#{expected_days}天#{expected_nights}晚",
-      cabin_category: '海景房（oceanview）',
+      cabin_category: '海景房（ocean_view）',
       month: "#{expected_month}月",
       adult_count: adult_count,
-      hint: "筛选船只名包含'辉煌'、出发港包含'巴塞罗那'、duration_days=7且duration_nights=6的班次，选择#{expected_month}月份最近日期的班次，预订海景房（category='oceanview'）"
+      hint: "筛选船只名包含'辉煌'、出发港包含'巴塞罗那'、duration_days=7且duration_nights=6的班次，选择#{expected_month}月份最近日期的班次，预订海景房（category='ocean_view'）"
     }
   end
 
@@ -50,7 +50,7 @@ module V101V150
     departure_port_keyword = '巴塞罗那'
     expected_days = 7
     expected_nights = 6
-    expected_cabin_category = 'oceanview'
+    expected_cabin_category = 'ocean_view'
     expected_month = 4
     adult_count = 2
 
@@ -104,7 +104,7 @@ module V101V150
     departure_port_keyword = '巴塞罗那'
     expected_days = 7
     expected_nights = 6
-    expected_cabin_category = 'oceanview'
+    expected_cabin_category = 'ocean_view'
     expected_month = 4
     adult_count = 2
 

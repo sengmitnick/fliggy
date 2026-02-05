@@ -18,6 +18,7 @@ class HotelsController < ApplicationController
     
     @check_in = params[:check_in] || Time.zone.today
     @check_out = params[:check_out] || (Time.zone.today + 1.day)
+    @nights = (@check_out.to_date - @check_in.to_date).to_i
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0
@@ -53,10 +54,13 @@ class HotelsController < ApplicationController
     # 地区筛选
     @hotels = @hotels.by_region(@region) if @region.present?
     
-    # 类型筛选：酒店/民宿/钟点房
+    # 类型筛选：酒店/民宿/钟点房/月租房
     if @room_category == 'hourly'
       # 钟点房：查询所有有钟点房的住宿场所
       @hotels = @hotels.with_hourly_rooms
+    elsif @nights >= 7 && @hotel_type == 'homestay'
+      # 长租：当入住7天及以上且是民宿类型时，只显示有月租房的民宿
+      @hotels = @hotels.with_monthly_rooms
     elsif @hotel_type.present?
       # 酒店或民宿：按 hotel_type 筛选
       @hotels = @hotels.by_type(@hotel_type)
@@ -107,6 +111,7 @@ class HotelsController < ApplicationController
     @city = params[:city] || '深圳'
     @check_in = params[:check_in].present? ? Date.parse(params[:check_in].to_s) : Time.zone.today
     @check_out = params[:check_out].present? ? Date.parse(params[:check_out].to_s) : (Time.zone.today + 1.day)
+    @nights = (@check_out.to_date - @check_in.to_date).to_i
     @rooms = params[:rooms]&.to_i || 1
     @adults = params[:adults]&.to_i || 1
     @children = params[:children]&.to_i || 0

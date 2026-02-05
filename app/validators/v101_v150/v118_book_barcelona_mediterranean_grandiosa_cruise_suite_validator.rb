@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# 验证用例118: 预订地中海邮轮（地中海荣耀号，7天6晚，4月出发，游艇俱乐部套房）
+# 验证用例118: 预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）
 #
 # 测试内容：
-# - 邮轮筛选（地中海荣耀号/MSC Cruises）
+# - 邮轮筛选（地中海辉煌号/MSC Cruises）
 # - 出发港过滤（巴塞罗那）
 # - 行程天数匹配（7天6晚）
 # - 舱房类型选择（游艇俱乐部套房）
@@ -15,17 +15,17 @@ require_relative '../base_validator'
 # - 价格合理性验证
 #
 # 用户需求：
-# "我想4月份坐地中海荣耀号游地中海，7天6晚的行程，订4间游艇俱乐部套房"
+# "我想4月份坐地中海辉煌号游地中海，7天6晚的行程，订4间游艇俱乐部套房"
 module V101V150
   class V118BookBarcelonaMediterraneanGrandiosaCruiseSuiteValidator < BaseValidator
     self.validator_id = 'v118_book_barcelona_mediterranean_grandiosa_cruise_suite_validator'
     self.task_id = '6382841f-d24d-4564-ad55-8414ccc4741c'
-    self.title = '预订地中海邮轮（地中海荣耀号，7天6晚，4月出发，游艇俱乐部套房）'
-    self.description = '预订地中海邮轮航线，选择地中海荣耀号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
+    self.title = '预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
+    self.description = '预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
     self.timeout_seconds = 240
 
     def prepare
-      ship_keyword = '荣耀'
+      ship_keyword = '辉煌'
       departure_port_keyword = '巴塞罗那'
       expected_days = 7
       expected_nights = 6
@@ -34,19 +34,19 @@ module V101V150
       adult_count = 4
 
       {
-        task: "请预订地中海邮轮，要求地中海荣耀号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订游艇俱乐部套房（豪华之选），为#{adult_count}位成人",
+        task: "请预订地中海邮轮，要求地中海辉煌号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订游艇俱乐部套房（豪华之选），为#{adult_count}位成人",
         ship_keyword: ship_keyword,
         departure_port_keyword: departure_port_keyword,
         duration: "#{expected_days}天#{expected_nights}晚",
         cabin_category: '游艇俱乐部套房（suite）',
         month: "#{expected_month}月",
         adult_count: adult_count,
-        hint: "筛选船只名包含'荣耀'、出发港包含'巴塞罗那'、duration_days=7且duration_nights=6的班次，选择#{expected_month}月份最近日期的班次，预订套房（category='suite'）"
+        hint: "筛选船只名包含'辉煌'、出发港包含'巴塞罗那'、duration_days=7且duration_nights=6的班次，选择#{expected_month}月份最近日期的班次，预订套房（category='suite'）"
       }
     end
 
     def simulate
-      ship_keyword = '荣耀'
+      ship_keyword = '辉煌'
       departure_port_keyword = '巴塞罗那'
       expected_days = 7
       expected_nights = 6
@@ -100,7 +100,7 @@ module V101V150
     end
 
     def verify
-      ship_keyword = '荣耀'
+      ship_keyword = '辉煌'
       departure_port_keyword = '巴塞罗那'
       expected_days = 7
       expected_nights = 6
@@ -132,7 +132,7 @@ module V101V150
       
       return if @order.nil?
       
-      add_assertion "船只正确（地中海荣耀号）", weight: 15 do
+      add_assertion "船只正确（地中海辉煌号）", weight: 15 do
         ship_name = @order.cruise_product.cruise_sailing.cruise_ship.name
         expect(ship_name).to include(ship_keyword),
           "船只错误。期望: 包含'#{ship_keyword}'，实际: #{ship_name}"

@@ -8,20 +8,36 @@
        data-action="click->location-selector#stopPropagation">
     
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-      <button 
-        type="button"
-        data-action="click->location-selector#closeModal"
-        class="text-text-secondary">
-        取消
-      </button>
-      <h3 class="text-lg font-bold text-text-primary" data-location-selector-target="modalTitle">选择地点</h3>
-      <button 
-        type="button"
-        data-action="click->location-selector#confirm"
-        class="text-primary font-semibold">
-        确定
-      </button>
+    <div class="flex flex-col border-b border-border">
+      <!-- Top row: Cancel/Title/Confirm -->
+      <div class="flex items-center justify-between px-6 py-4">
+        <button 
+          type="button"
+          data-action="click->location-selector#closeModal"
+          class="text-text-secondary">
+          取消
+        </button>
+        <h3 class="text-lg font-bold text-text-primary" data-location-selector-target="modalTitle">选择地点</h3>
+        <button 
+          type="button"
+          data-action="click->location-selector#confirm"
+          class="text-primary font-semibold">
+          确定
+        </button>
+      </div>
+      
+      <!-- City selector row -->
+      <div class="px-6 pb-4">
+        <button
+          type="button"
+          data-action="click->location-selector#openCitySelector"
+          class="flex items-center gap-2 text-text-primary">
+          <span class="text-base font-medium" data-location-selector-target="cityDisplay"></span>
+          <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Search Input -->

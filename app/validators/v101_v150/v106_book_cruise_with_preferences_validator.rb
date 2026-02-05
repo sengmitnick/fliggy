@@ -2,7 +2,15 @@
 
 require_relative '../base_validator'
 
-# 验证用例106: 预订邮轮（包含岸上观光+餐饮需求）
+# 验证用例106: 预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
+#
+# 核心验证点:
+# 1. 订单创建: 邮轮订单创建成功
+# 2. 船只选择: 海洋光谱号
+# 3. 行程时长: 6天5晚
+# 4. 特殊需求备注: 岸上观光（冲绳）
+# 5. 特殊需求备注: 主厨晚餐
+# 6. 班次选择: 最近日期的可用班次
 module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
@@ -20,6 +28,7 @@ module V101V150
       @adult_count = 2
       @special_requests_keywords = ['岸上观光', '冲绳', '主厨', '晚餐']
     
+      # 查询可用船只
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     
       {
@@ -36,6 +45,7 @@ module V101V150
     end
   
     def verify
+      # 断言1: 订单已创建（权重25%）
       add_assertion "订单已创建", weight: 25 do
         all_orders = CruiseOrder
           .where(data_version: @data_version)
@@ -48,6 +58,7 @@ module V101V150
     
       return if @order.nil?
     
+      # 断言2: 船只正确（权重15%）
       add_assertion "船只正确（海洋光谱号）", weight: 15 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
@@ -55,6 +66,7 @@ module V101V150
           "船只不符合要求。期望包含: #{@ship_keyword}, 实际: #{ship.name}"
       end
     
+      # 断言3: 行程天数正确（权重10%）
       add_assertion "行程天数正确（6天5晚）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
@@ -64,6 +76,7 @@ module V101V150
           "行程晚数错误。期望: #{@duration_nights}晚, 实际: #{sailing.duration_nights}晚"
       end
     
+      # 断言4: 已备注岸上观光需求（权重20%）
       add_assertion "已备注岸上观光需求", weight: 20 do
         remark = @order.remark || ''
         shore_excursion_mentioned = remark.include?('岸上观光') || 
@@ -74,6 +87,7 @@ module V101V150
           "未在备注中说明岸上观光需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
+      # 断言5: 已备注餐饮需求（权重20%）
       add_assertion "已备注餐饮需求", weight: 20 do
         remark = @order.remark || ''
         dining_mentioned = remark.include?('主厨') ||
@@ -85,6 +99,7 @@ module V101V150
           "未在备注中说明餐饮需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
+      # 断言6: 选择了最近日期的班次（权重10%）
       add_assertion "选择了最近日期的班次", weight: 10 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
@@ -128,11 +143,14 @@ module V101V150
     end
   
     def simulate
+      # 查找演示用户（使用基线 data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
+      # 查找船只（从基线数据中查找）
       ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
       raise "未找到符合条件的船只" unless ship
     
+      # 查找日韩航线（从基线数据中查找）
       japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       raise "未找到日韩航线" unless japan_korea_route
     
@@ -147,10 +165,11 @@ module V101V150
     
       nearest_sailing = available_sailings.order(departure_date: :asc).first
     
+      # 查找内舱房舱房类型（从基线数据中查找）
       cabin_type = CabinType.where(data_version: 0, cruise_ship_id: ship.id, category: @cabin_category).first
       raise "未找到符合条件的舱房类型" unless cabin_type
     
-      # Find or create CruiseProduct
+      # 查找或创建邮轮产品（关联班次和舱房）
       cruise_product = CruiseProduct.find_or_create_by!(
         cruise_sailing_id: nearest_sailing.id,
         cabin_type_id: cabin_type.id,
@@ -166,8 +185,10 @@ module V101V150
         product.status = 'on_sale'
       end
     
+      # 计算总价（每人价格 × 成人数量）
       total_price = cruise_product.price_per_person * @adult_count
     
+      # 创建邮轮订单（包含特殊需求备注）
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: cruise_product.id,

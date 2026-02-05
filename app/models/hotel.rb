@@ -66,6 +66,11 @@ class Hotel < ApplicationRecord
     joins(:hotel_rooms).where(hotel_rooms: { room_category: 'hourly' }).distinct 
   }
   
+  # 查询有月租房的住宿场所
+  scope :with_monthly_rooms, -> { 
+    joins(:hotel_rooms).where(hotel_rooms: { room_category: 'monthly' }).distinct 
+  }
+  
   # 获取最低过夜房价（用于整晚搜索）
   def min_overnight_price
     hotel_rooms.where(room_category: 'overnight').minimum(:price) || price

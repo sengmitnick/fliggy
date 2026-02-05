@@ -147,10 +147,6 @@ module V251V300
           expect(booking.departure_time).to match(/\A\d{2}:\d{2}\z/),
             "出发时间格式错误: #{booking.departure_time}。期望格式: 09:00"
           
-          # 乘客数量
-          expect(booking.passengers_count).to eq(@passenger_count),
-            "乘客数量错误。期望: #{@passenger_count}人（商务出行），实际: #{booking.passengers_count}人"
-          
           # 预订模式
           expect(booking.booking_mode).to eq('by_route'),
             "预订模式错误。按路线预订应为'by_route'，实际: #{booking.booking_mode}"

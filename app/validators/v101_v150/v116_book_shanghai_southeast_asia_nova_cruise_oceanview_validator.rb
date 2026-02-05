@@ -11,17 +11,17 @@ require_relative '../base_validator'
 # - 舱房类型选择（海景房）
 # - 出发月份筛选（2月）
 # - 日期优化选择（选择最近可用日期）
-# - 预订数量验证（1位成人）
+# - 预订数量验证（2位成人）
 # - 价格合理性验证
 #
 # 用户需求：
-# "我想2月份坐爱达新星号游东南亚，8天7晚的行程，订1间海景房"
+# "我想2月份坐爱达新星号游东南亚，8天7晚的行程，订2间海景房"
 module V101V150
   class V116BookShanghaiSoutheastAsiaNovaCruiseOceanviewValidator < BaseValidator
     self.validator_id = 'v116_book_shanghai_southeast_asia_nova_cruise_oceanview_validator'
     self.task_id = '70a9737c-8db3-4c11-b179-2522c8f58af2'
     self.title = '预订东南亚邮轮（爱达新星号，8天7晚，2月出发，海景房）'
-    self.description = '预订东南亚邮轮航线，选择爱达新星号（环保LNG动力邮轮）2月份最近一班8天7晚行程，预订海景房（观景之选），为1位成人'
+    self.description = '预订东南亚邮轮航线，选择爱达新星号（环保LNG动力邮轮）2月份最近一班8天7晚行程，预订海景房（观景之选），为2位成人'
     self.timeout_seconds = 240
 
     def prepare
@@ -31,7 +31,7 @@ module V101V150
       expected_nights = 7
       expected_cabin_category = 'ocean_view'
       expected_month = 2
-      adult_count = 1
+      adult_count = 2
 
       {
         task: "请预订东南亚邮轮，要求爱达新星号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订海景房（观景之选），为#{adult_count}位成人",
@@ -52,7 +52,7 @@ module V101V150
       expected_nights = 7
       expected_cabin_category = 'ocean_view'
       expected_month = 2
-      adult_count = 1
+      adult_count = 2
 
       sailing = CruiseSailing
         .joins(:cruise_ship)
@@ -106,7 +106,7 @@ module V101V150
       expected_nights = 7
       expected_cabin_category = 'ocean_view'
       expected_month = 2
-      adult_count = 1
+      adult_count = 2
 
       add_assertion "订单已创建", weight: 20 do
         all_orders = CruiseOrder
