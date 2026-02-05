@@ -14,8 +14,8 @@ module V251V300
   class V253BookHangzhouClassicOneDayCharteredTourValidator < BaseValidator
     self.validator_id = 'v253_book_hangzhou_classic_one_day_chartered_tour_validator'
     self.task_id = '7e2b48e7-d591-4752-b3d8-405b73a258f5'
-    self.title = '预订杭州经典一日游（舒适5座，商务3人）- 验证出发日期、包车时长8小时、订单完整性'
-    self.description = '预订杭州经典一日游包车路线，商务3人出行，选择舒适5座车型，8小时服务。验证出发日期（明天）、包车时长（8小时）、车型舒适度、订单信息完整性。'
+    self.title = '预订杭州经典一日游（舒适5座）- 验证出发日期、包车时长8小时、订单完整性'
+    self.description = '预订杭州经典一日游包车路线，选择舒适5座车型，8小时服务。验证出发日期（明天）、包车时长（8小时）、车型舒适度、订单信息完整性。'
     self.timeout_seconds = 240
   
     def prepare
@@ -23,7 +23,7 @@ module V251V300
       @route_keyword = '经典一日游'
       @vehicle_type_name = '舒适5座'
       @duration_hours = 8
-      @passenger_count = 3
+      @passenger_count = 1  # 前端无人数选择功能，默认为1
       @travel_date = Date.today + 1.day
     
       # 查询可用路线
@@ -36,14 +36,14 @@ module V251V300
       @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: @data_version)
     
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，商务#{@passenger_count}人出行，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务",
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务",
         city: @city_name,
         route_keyword: @route_keyword,
         vehicle_type: @vehicle_type_name,
         duration_hours: @duration_hours,
         passenger_count: @passenger_count,
         travel_date: @travel_date.strftime('%Y-%m-%d'),
-        hint: "1. 在包车游搜索页选择杭州城市\n2. 浏览并选择包含'经典一日游'的路线\n3. 在车型选择页选择8小时服务时长\n4. 选择'舒适5座'车型（适合3人商务出行）\n5. 填写联系人信息并提交订单",
+        hint: "1. 在包车游搜索页选择杭州城市\n2. 浏览并选择包含'经典一日游'的路线\n3. 在车型选择页选择8小时服务时长\n4. 选择'舒适5座'车型\n5. 填写联系人信息并提交订单",
         available_routes_count: @available_routes.count,
         vehicle_available: @available_vehicle.present?
       }
@@ -95,9 +95,9 @@ module V251V300
           expect(vehicle_name).to eq(@vehicle_type_name),
             "车型错误。期望: #{@vehicle_type_name}, 实际: #{vehicle_name}"
           
-          # 验证座位数能容纳3人
-          expect(vehicle_seats).to be >= @passenger_count,
-            "车辆座位数不足。需要容纳#{@passenger_count}人，实际座位数: #{vehicle_seats}"
+          # 验证座位数（前端无人数选择，默认1人）
+          expect(vehicle_seats).to be >= 1,
+            "车辆座位数不足。实际座位数: #{vehicle_seats}"
         end
       end
       
@@ -113,7 +113,7 @@ module V251V300
       end
       
       # 断言5: 订单信息完整（权重15%）
-      # 验证联系人信息、出发日期（明天）、出发时间格式、乘客数量、预订模式
+      # 验证联系人信息、出发日期（明天）、出发时间格式、预订模式
       add_assertion "订单信息完整", weight: 15 do
         @charter_bookings.each do |booking|
           # 联系人姓名
@@ -146,10 +146,6 @@ module V251V300
           
           expect(booking.departure_time).to match(/\A\d{2}:\d{2}\z/),
             "出发时间格式错误: #{booking.departure_time}。期望格式: 09:00"
-          
-          # 乘客数量
-          expect(booking.passengers_count).to eq(@passenger_count),
-            "乘客数量错误。期望: #{@passenger_count}人（商务出行），实际: #{booking.passengers_count}人"
           
           # 预订模式
           expect(booking.booking_mode).to eq('by_route'),
@@ -215,9 +211,9 @@ module V251V300
       vehicle_type = VehicleType.find_by(name: @vehicle_type_name, data_version: '0')
       raise "未找到符合条件的车型（#{@vehicle_type_name}）" unless vehicle_type
       
-      # 验证座位数
-      if vehicle_type.seats < @passenger_count
-        raise "车型座位数（#{vehicle_type.seats}）不足以容纳#{@passenger_count}人"
+      # 验证座位数（前端无人数选择，默认1人）
+      if vehicle_type.seats < 1
+        raise "车型座位数不足（#{vehicle_type.seats}座）"
       end
     
       # 使用服务计算价格
