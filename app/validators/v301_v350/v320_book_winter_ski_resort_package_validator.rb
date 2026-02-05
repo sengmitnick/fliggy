@@ -2,8 +2,8 @@
 
 module V301V350
   class V320BookWinterSkiResortPackageValidator < BaseValidator
-    self.validator_id = 320
-    self.task_id = "d4e5f6g7-8h9i-0j1k-2l3m-4n5o6p7q8r9s"
+    self.validator_id = 'v320_book_winter_ski_resort_package_validator'
+    self.task_id = "fb78ecc4-1181-49ba-9b77-09a5c4368c42"
     self.title = "寒假滑雪季套餐预订（12月-2月）"
     self.description = "用户需要预订寒假期间（1月中旬）崇礼滑雪场+酒店+装备租赁套餐"
     self.timeout_seconds = 180
@@ -26,7 +26,7 @@ module V301V350
       # 创建滑雪场景点
       @attraction = Attraction.find_by!(
         name: @resort_name,
-        city: city,
+        city: @city_name,
         data_version: 0
       )
 
@@ -76,11 +76,14 @@ module V301V350
         visit_date: @visit_date,
         quantity: 2,
         contact_phone: '13800138000',
+        total_price: @ticket.current_price * 2,
         status: 'pending',
         data_version: @data_version
       )
       
       # 3. 创建酒店订单
+      nights = (@check_out_date - @check_in_date).to_i
+      base_price = @hotel_room.price * nights * 1
       hotel_booking = HotelBooking.create!(
         hotel_id: @hotel.id,
         hotel_room_id: @hotel_room.id,
@@ -93,11 +96,10 @@ module V301V350
         adults_count: 2,
         children_count: 0,
         payment_method: '花呗',
+        total_price: base_price,
         status: 'pending',
         data_version: @data_version
       )
-      hotel_booking.calculate_total_price
-      hotel_booking.save!
       
       {
         action: 'create_ski_ticket_and_hotel',
@@ -126,7 +128,7 @@ module V301V350
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
-          .where(hotels: { city_id: City.find_by(name: @city_name, data_version: 0)&.id })
+          .where(hotels: { city: @city_name })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a

@@ -7,7 +7,7 @@ module V251V300
   # 考点: 分类筛选功能、特定品类商品兑换
   class V270RedeemCategoryProductValidator < BaseValidator
     self.validator_id = 'v270_redeem_category_product_validator'
-    self.task_id = 'h35h2i6d-5e7f-7g4h-1d8i-9f0g1h2i3j4e'
+    self.task_id = 'c479d048-ba73-4eb7-b867-53a0abd4cdb3'
     self.title = '按分类兑换商品（年货精选）'
     self.description = '用户在年货精选分类中选择商品兑换'
     self.timeout_seconds = 300

@@ -14,7 +14,7 @@ class CarOrdersController < ApplicationController
     # 计算总价
     pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
     return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
-    days_count = (return_date - pickup_date).to_i
+    days_count = (return_date - pickup_date).to_i + 1
     @total_price = (@car.price_per_day * days_count).round
   end
 

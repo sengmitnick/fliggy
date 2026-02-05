@@ -2,23 +2,25 @@
 
 require_relative '../base_validator'
 
-# V257: 预订跟团游+意外伤害保险
+# V257: 预订黄山跟团游并购买境内旅游保险（意外伤害保障）
 #
 # 任务描述:
-#   用户需要预订跟团游并购买配套的意外伤害保险
+#   用户需要预订黄山跟团游（5天后出发，2天行程，2人），
+#   并为跟团游购买境内旅游保险（意外伤害保障），
+#   保险天数需覆盖旅游天数（至少2天）
 #
 # 评分标准:
 #   - 创建了跟团游订单 (25%)
 #   - 创建了保险订单 (25%)
-#   - 保险类型正确（境内旅游保险）(20%)
-#   - 保险保障天数与旅游天数匹配 (20%)
+#   - 保险类型正确（境内旅游保险 domestic）(20%)
+#   - 保险保障天数与旅游天数匹配（≥2天）(20%)
 #   - 订单状态有效 (10%)
 module V251V300
   class V257BookTourWithAccidentInsuranceValidator < BaseValidator
     self.validator_id = 'v257_book_tour_with_accident_insurance_validator'
     self.task_id = 'f257a001-0001-4001-8001-000000000257'
-    self.title = '预订跟团游+意外伤害保险'
-    self.description = '用户需要预订跟团游并购买配套的意外伤害保险'
+    self.title = '预订黄山跟团游并购买境内旅游保险（意外伤害保障）'
+    self.description = '用户需要预订黄山跟团游（5天后出发，2天行程，2人），并为跟团游购买境内旅游保险（意外伤害保障），保险天数需覆盖旅游天数（至少2天）'
     self.timeout_seconds = 300
     
     def prepare

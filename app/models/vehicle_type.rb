@@ -1,4 +1,6 @@
 class VehicleType < ApplicationRecord
+  include DataVersionable
+
   # Associations
   has_many :charter_bookings, dependent: :restrict_with_error
 

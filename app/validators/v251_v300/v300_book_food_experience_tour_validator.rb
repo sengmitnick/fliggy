@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V300BookFoodExperienceTourValidator < BaseValidator
     self.validator_id = 'v300_book_food_experience_tour_validator'
-    self.task_id = 'h16e8hd0-f8g2-44hb-d3ff-i4768f39fh0e'
+    self.task_id = 'a780cbb3-8b82-49be-bbea-18baaa72e179'
     self.title = '预订美食体验游'
     self.description = '用户预订美食体验游(特色餐厅+厨艺课程+市场游)'
     self.timeout_seconds = 300

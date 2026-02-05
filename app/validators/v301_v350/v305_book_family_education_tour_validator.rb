@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V305BookFamilyEducationTourValidator < BaseValidator
     self.validator_id = 'v305_book_family_education_tour_validator'
-    self.task_id = 'm61j3mi5-k3l7-49mg-i8kk-n9213k84km5j'
+    self.task_id = '5134922f-5d41-431e-b1f0-36ea208edf7f'
     self.title = '预订亲子教育游'
     self.description = '用户预订亲子教育游(科技馆+动物园+互动课程)'
     self.timeout_seconds = 300

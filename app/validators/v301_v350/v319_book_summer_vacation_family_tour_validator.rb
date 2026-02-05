@@ -2,8 +2,8 @@
 
 module V301V350
   class V319BookSummerVacationFamilyTourValidator < BaseValidator
-    self.validator_id = 319
-    self.task_id = "c3d4e5f6-7g8h-9i0j-1k2l-3m4n5o6p7q8r"
+    self.validator_id = 'v319_book_summer_vacation_family_tour_validator'
+    self.task_id = "41296cec-e182-44c9-ac20-c2180e92c487"
     self.title = "暑期亲子游高峰期预订（7-8月）"
     self.description = "用户需要预订暑期（7月中旬）北京到三亚的亲子游套餐，包含机票+酒店+亲子活动"
     self.timeout_seconds = 180
@@ -26,22 +26,22 @@ module V301V350
         data_version: 0
       )
 
-      # 创建航班
-      @outbound_flight = Flight.find_by!(
+      # 创建航班（不匹配精确时间，避免时区问题）
+      @outbound_flight = Flight.where(
         flight_number: "CA1357",
         departure_city: @departure_city,
         destination_city: @destination_city,
-        departure_time: @departure_date.to_time + 8.hours,
         data_version: 0
-      )
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @departure_date)
+       .first!
 
-      @return_flight = Flight.find_by!(
+      @return_flight = Flight.where(
         flight_number: "CA1358",
         departure_city: @destination_city,
         destination_city: @departure_city,
-        departure_time: @return_date.to_time + 14.hours,
         data_version: 0
-      )
+      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @return_date)
+       .first!
 
       # 创建亲子酒店
       @hotel = Hotel.find_by!(
@@ -58,7 +58,7 @@ module V301V350
       # 创建亲子活动景点
       @attraction = Attraction.find_by!(
         name: "三亚亚龙湾热带天堂森林公园",
-        city: city,
+        city: @destination_city,
         data_version: 0
       )
 
@@ -88,6 +88,7 @@ module V301V350
         flight_id: @outbound_flight.id,
         return_flight_id: @return_flight.id,
         trip_type: 'round_trip',
+        return_date: @return_date,
         passenger_name: passenger.name,
         passenger_id_number: passenger.id_number,
         contact_phone: passenger.phone,
@@ -98,6 +99,8 @@ module V301V350
       )
       
       # 3. 创建亲子酒店订单
+      nights = (@return_date - @departure_date).to_i
+      base_price = @hotel_room.price * nights * 1
       hotel_booking = HotelBooking.create!(
         hotel_id: @hotel.id,
         hotel_room_id: @hotel_room.id,
@@ -110,11 +113,10 @@ module V301V350
         adults_count: 2,
         children_count: 1,
         payment_method: '花呗',
+        total_price: base_price,
         status: 'pending',
         data_version: @data_version
       )
-      hotel_booking.calculate_total_price
-      hotel_booking.save!
       
       {
         action: 'create_round_trip_and_hotel',
@@ -150,8 +152,8 @@ module V301V350
       add_assertion "创建了亲子酒店订单", weight: 25 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
-          .includes(:hotel, :room)
-          .where(hotels: { city_id: City.find_by(name: @destination_city, data_version: 0)&.id })
+          .includes(:hotel, :hotel_room)
+          .where(hotels: { city: @destination_city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
@@ -202,10 +204,10 @@ module V301V350
         
         @hotel_bookings&.each do |booking|
           hotel_name = booking.hotel.name
-          room_type = booking.room&.room_type || ""
-          amenities = booking.hotel.amenities || ""
+          room_type = booking.hotel_room&.room_type || ""
+          facilities = booking.hotel.facilities || ""
           
-          if family_keywords.any? { |kw| hotel_name.include?(kw) || room_type.include?(kw) || amenities.include?(kw) }
+          if family_keywords.any? { |kw| hotel_name.include?(kw) || room_type.include?(kw) || facilities.include?(kw) }
             has_family_service = true
           end
         end

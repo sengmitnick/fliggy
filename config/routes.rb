@@ -538,7 +538,7 @@ Rails.application.routes.draw do
 
   # Profile routes
   resource :profile, only: [:show, :edit, :update], controller: 'profiles' do
-    member do
+    collection do
       get :edit_password
       patch :update_password
       get :edit_pay_password

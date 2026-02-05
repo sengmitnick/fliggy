@@ -2,8 +2,8 @@
 
 module V301V350
   class V318BookNationalDayAttractionHotelPackageValidator < BaseValidator
-    self.validator_id = 318
-    self.task_id = "b2c3d4e5-6f7g-8h9i-0j1k-2l3m4n5o6p7q"
+    self.validator_id = 'v318_book_national_day_attraction_hotel_package_validator'
+    self.task_id = "2fa37623-24e7-46f7-a054-b2c98c7c7227"
     self.title = "国庆黄金周热门景区门票+酒店套餐"
     self.description = "用户需要预订国庆期间（10月1-3日）张家界景区门票+附近酒店套餐"
     self.timeout_seconds = 180
@@ -30,7 +30,7 @@ module V301V350
       # 创建景区
       @attraction = Attraction.find_by!(
         name: @attraction_name,
-        city: city,
+        city: @city_name,
         data_version: 0
       )
 
@@ -75,11 +75,14 @@ module V301V350
         visit_date: @visit_date,
         quantity: 2,
         contact_phone: '13800138000',
+        total_price: @ticket.current_price * 2,
         status: 'pending',
         data_version: @data_version
       )
       
       # 3. 创建酒店订单
+      nights = (@check_out_date - @check_in_date).to_i
+      base_price = @hotel_room.price * nights * 1
       hotel_booking = HotelBooking.create!(
         hotel_id: @hotel.id,
         hotel_room_id: @hotel_room.id,
@@ -92,11 +95,10 @@ module V301V350
         adults_count: 2,
         children_count: 0,
         payment_method: '花呗',
+        total_price: base_price,
         status: 'pending',
         data_version: @data_version
       )
-      hotel_booking.calculate_total_price
-      hotel_booking.save!
       
       {
         action: 'create_ticket_and_hotel_orders',
@@ -125,7 +127,7 @@ module V301V350
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
-          .where(hotels: { city_id: City.find_by(name: @city_name, data_version: 0)&.id })
+          .where(hotels: { city: @city_name })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a

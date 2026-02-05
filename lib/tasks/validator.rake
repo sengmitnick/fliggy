@@ -114,18 +114,46 @@ namespace :validator do
       data_pack_files.unshift(base_file.to_s)
     end
     
-    # 加载所有数据包
+    # 加载所有数据包（静默模式 + 输出过滤）
     loaded_files = []
+    warnings = []
+    
     data_pack_files.each do |file|
       filename = File.basename(file)
       print "  → 加载 #{filename}..."
+      
       begin
+        # 捕获数据包内的 puts 输出
+        original_stdout = $stdout
+        output_buffer = StringIO.new
+        $stdout = output_buffer
+        
         load file
+        
+        # 恢复输出
+        output = output_buffer.string
+        $stdout = original_stdout
+        
+        # 检查输出中是否有警告/错误关键词
+        warning_patterns = /(警告|错误|失败|未找到|缺少|missing|error|failed|not found)/i
+        warning_lines = output.lines.select { |line| line =~ warning_patterns }
+        
+        if warning_lines.any?
+          warnings << { file: filename, messages: warning_lines }
+          puts " ⚠️"
+          warning_lines.each { |line| puts "    #{line.strip}" }
+        else
+          puts " ✓"
+        end
+        
         loaded_files << filename
-        puts " ✓"
       rescue StandardError => e
+        # 确保恢复输出
+        $stdout = original_stdout if defined?(original_stdout)
+        
         puts " ✗"
         puts "    错误: #{e.message}"
+        puts "    位置: #{e.backtrace.first}"
         puts "\n❌ 数据包加载失败，回滚操作..."
         
         # 删除已加载的数据（使用 destroy_all 以处理外键依赖）
@@ -137,26 +165,59 @@ namespace :validator do
       end
     end
     
-    # Step 3: 验证数据加载
-    puts "\n📊 Step 3: 验证数据加载结果..."
-    verification_passed = true
-    
-    expected_models = {
-      'City' => City,
-      'Flight' => Flight,
-      'User' => User,
-      'Passenger' => Passenger
-    }
-    
-    expected_models.each do |name, model|
-      count = model.where(data_version: 0).count
-      if count > 0
-        puts "  ✓ #{name}: #{count} 条记录"
-      else
-        puts "  ✗ #{name}: 0 条记录（预期应有数据）"
-        verification_passed = false
-      end
+    # 显示警告汇总
+    if warnings.any?
+      puts "\n⚠️  发现 #{warnings.size} 个数据包有警告信息"
+      puts "💡 请检查上述警告，确保数据包正确加载"
     end
+    
+    # Step 3: 验证数据包完整性
+    puts "\n🔍 Step 3: 验证数据包完整性..."
+    
+    require_relative '../../lib/data_pack_validator'
+    validator = DataPackValidator.new
+    validation_results = validator.validate_all
+    
+    # 显示验证结果摘要
+    if validation_results[:all_passed]
+      puts "✅ 所有数据包验证通过（#{validation_results[:pack_count]} 个数据包）"
+      
+      # 统计总记录数
+      total_records = 0
+      expected_models = {
+        'City' => City,
+        'Flight' => Flight,
+        'User' => User,
+        'Passenger' => Passenger,
+        'Hotel' => Hotel,
+        'Train' => Train,
+        'Attraction' => Attraction
+      }
+      
+      expected_models.each do |name, model|
+        count = model.where(data_version: 0).count
+        total_records += count if count > 0
+      end
+      
+      puts "📊 共加载 #{total_records} 条记录"
+    else
+      puts "❌ 数据包验证失败（#{validation_results[:failed_count]}/#{validation_results[:pack_count]} 个失败）"
+      puts "\n失败的数据包："
+      
+      validation_results[:packs].each do |pack_name, pack_result|
+        next if pack_result[:passed]
+        
+        puts "\n  ❌ #{pack_name}:"
+        pack_result[:errors].first(3).each do |error|
+          puts "    → #{error}"
+        end
+        puts "    ... 共 #{pack_result[:error_count]} 个错误" if pack_result[:error_count] > 3
+      end
+      
+      puts "\n💡 运行 'rake validator:validate_data_packs' 查看完整报告"
+    end
+    
+    verification_passed = validation_results[:all_passed]
     
     # 最终汇总
     puts "\n" + "="*80
@@ -167,8 +228,51 @@ namespace :validator do
       puts "  - 当前时间: #{Date.current}"
       puts "\n💡 提示: 此命令模拟甲方交付新环境的初始化过程"
       puts "   请在每天开始工作时运行此命令，确保数据包日期与当前日期同步"
+      
+      if warnings.any?
+        puts "\n⚠️  注意: #{warnings.size} 个数据包有警告信息，请检查上述输出"
+      end
     else
       puts "❌ 基线数据验证失败，请检查数据包文件"
+      puts "💡 运行 'rake validator:validate_data_packs' 查看详细验证报告"
+      exit 1
+    end
+    puts "="*80 + "\n"
+  end
+  
+  desc "Validate data pack integrity without reloading"
+  task validate_data_packs: :environment do
+    puts "\n" + "="*80
+    puts "🔍 数据包验证 - 检查已加载数据的完整性"
+    puts "="*80 + "\n"
+    
+    require_relative '../../lib/data_pack_validator'
+    validator = DataPackValidator.new
+    results = validator.validate_all
+    
+    # 详细报告
+    results[:packs].each do |pack_name, pack_result|
+      if pack_result[:passed]
+        puts "✅ #{pack_name.ljust(30)} - 所有检查通过"
+      else
+        puts "❌ #{pack_name.ljust(30)} - #{pack_result[:error_count]} 个问题"
+        pack_result[:errors].each do |error|
+          puts "  → #{error}"
+        end
+      end
+    end
+    
+    # 汇总
+    puts "\n" + "="*80
+    if results[:all_passed]
+      puts "✅ 所有数据包验证通过"
+      puts "   - 验证数据包: #{results[:pack_count]} 个"
+      puts "   - 验证时间: #{Time.current.strftime('%Y-%m-%d %H:%M:%S')}"
+    else
+      puts "❌ 数据包验证失败"
+      puts "   - 通过: #{results[:passed_count]}/#{results[:pack_count]} 个"
+      puts "   - 失败: #{results[:failed_count]}/#{results[:pack_count]} 个"
+      puts "\n💡 请修复上述问题后重新运行 'rake validator:reset_baseline'"
       exit 1
     end
     puts "="*80 + "\n"
@@ -314,6 +418,142 @@ namespace :validator do
             missing: missing_attrs
           }
         end
+        
+        # 检查 validator_id 格式：必须是字符串且与文件名一致
+        if klass.validator_id.present?
+          # 检查类型：必须是字符串
+          unless klass.validator_id.is_a?(String)
+            attribute_errors << {
+              validator: validator_name,
+              class_name: class_name,
+              file: file,
+              format_error: "validator_id 必须是字符串，当前类型: #{klass.validator_id.class}",
+              expected: "'#{validator_name}'",
+              actual: klass.validator_id.inspect
+            }
+          else
+            # 检查格式：必须与文件名一致
+            if klass.validator_id != validator_name
+              attribute_errors << {
+                validator: validator_name,
+                class_name: class_name,
+                file: file,
+                format_error: "validator_id 与文件名不一致",
+                expected: "'#{validator_name}'",
+                actual: "'#{klass.validator_id}'"
+              }
+            end
+          end
+        end
+        
+        # 检查 task_id 格式：必须符合标准 UUID 格式（8-4-4-4-12 十六进制字符）
+        if klass.task_id.present?
+          uuid_pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          unless klass.task_id.match?(uuid_pattern)
+            # 检测非法字符
+            invalid_chars = klass.task_id.gsub(/[0-9a-f-]/i, '').chars.uniq
+            error_detail = if invalid_chars.any?
+              "包含非十六进制字符: #{invalid_chars.join(', ')}"
+            else
+              "格式不符合 UUID 标准（应为 8-4-4-4-12 格式）"
+            end
+            
+            attribute_errors << {
+              validator: validator_name,
+              class_name: class_name,
+              file: file,
+              format_error: "task_id 不符合标准 UUID 格式",
+              detail: error_detail,
+              expected: "标准 UUID 格式（仅包含 0-9, a-f 字符）",
+              actual: "'#{klass.task_id}'"
+            }
+          end
+        end
+        
+        # 检查 simulate 方法实现（包括 private 方法）
+        has_simulate = klass.instance_methods(false).include?(:simulate) || 
+                      klass.private_instance_methods(false).include?(:simulate)
+        
+        if has_simulate
+          # 读取文件检查是否只是抛出 NotImplementedError
+          content = File.read(file)
+          simulate_method = content.match(/def\s+simulate.*?^\s*end/m)&.[](0)
+          if simulate_method && simulate_method.match?(/raise\s+NotImplementedError/)
+            attribute_errors << {
+              validator: validator_name,
+              class_name: class_name,
+              file: file,
+              format_error: "simulate 方法未实现（仅抛出 NotImplementedError）",
+              expected: "完整的 simulate 方法实现",
+              actual: "raise NotImplementedError"
+            }
+          end
+        else
+          attribute_errors << {
+            validator: validator_name,
+            class_name: class_name,
+            file: file,
+            format_error: "缺少 simulate 方法",
+            expected: "def simulate ... end",
+            actual: "未定义"
+          }
+        end
+        
+        # 检查 verify 方法中的 data_version 过滤
+        content = File.read(file)
+        verify_method = content.match(/def\s+verify.*?^\s*end/m)&.[](0)
+        if verify_method
+          # 查找所有 Model.where/joins/includes/find_by 查询
+          model_queries = verify_method.scan(/\b([A-Z][a-zA-Z]+)\.(where|joins|includes|find_by)/)
+          model_queries.each do |model, method|
+            next if ['Date', 'File', 'Dir', 'Rails', 'SecureRandom'].include?(model)
+            
+            # 提取该查询的完整语句（直到下一个方法调用或行尾）
+            query_pattern = /#{Regexp.escape(model)}\.#{method}.*?(?=\n\s{0,4}\w|\z)/m
+            if query_match = verify_method.match(query_pattern)
+              query_text = query_match[0]
+              # 检查是否包含 data_version 过滤
+              unless query_text.match?(/data_version:?\s*[@:]?\s*@?data_version|where\s*\(.*?data_version/)
+                attribute_errors << {
+                  validator: validator_name,
+                  class_name: class_name,
+                  file: file,
+                  format_error: "verify 方法中查询缺少 data_version 过滤",
+                  detail: "#{model}.#{method} 查询未过滤 data_version",
+                  expected: ".where(data_version: @data_version)",
+                  actual: query_text.lines.first.strip[0..80]
+                }
+                break  # 只报告第一个缺失，避免重复
+              end
+            end
+          end
+        end
+        
+        # 检查 execution_state_data 和 restore_from_state
+        prepare_method = content.match(/def\s+prepare.*?^\s*end/m)&.[](0)
+        if prepare_method
+          instance_vars = prepare_method.scan(/@(\w+)\s*=/).flatten.uniq.reject { |v| v == 'data_version' }
+          if instance_vars.any?
+            has_execution_state_data = content.match?(/def\s+execution_state_data/)
+            has_restore_from_state = content.match?(/def\s+restore_from_state/)
+            
+            if !has_execution_state_data || !has_restore_from_state
+              missing_methods = []
+              missing_methods << 'execution_state_data' unless has_execution_state_data
+              missing_methods << 'restore_from_state' unless has_restore_from_state
+              
+              attribute_errors << {
+                validator: validator_name,
+                class_name: class_name,
+                file: file,
+                format_error: "缺少状态保存/恢复方法",
+                detail: "prepare 方法设置了 #{instance_vars.size} 个实例变量，但缺少 #{missing_methods.join(', ')}",
+                expected: "def execution_state_data 和 def restore_from_state",
+                actual: "缺少: #{missing_methods.join(', ')}"
+              }
+            end
+          end
+        end
       rescue NameError => e
         attribute_errors << {
           validator: validator_name,
@@ -332,6 +572,28 @@ namespace :validator do
         puts "  File: #{error[:file]}"
         if error[:error]
           puts "  Error: #{error[:error]}"
+        elsif error[:format_error]
+          puts "  Format Error: #{error[:format_error]}"
+          if error[:detail]
+            puts "  Detail: #{error[:detail]}"
+          end
+          puts "  Expected: #{error[:expected]}"
+          puts "  Actual: #{error[:actual]}"
+          if error[:format_error].include?('validator_id')
+            puts "  → validator_id 必须是字符串类型，且与文件名完全一致"
+          elsif error[:format_error].include?('task_id')
+            puts "  → task_id 必须符合标准 UUID 格式（8-4-4-4-12，仅包含 0-9, a-f 字符）"
+            puts "  → 可使用 SecureRandom.uuid 生成标准 UUID"
+          elsif error[:format_error].include?('simulate')
+            puts "  → simulate 方法必须完整实现，不能仅抛出 NotImplementedError"
+            puts "  → 该方法用于自动测试，模拟 AI Agent 完成任务的完整流程"
+          elsif error[:format_error].include?('data_version')
+            puts "  → verify 方法中所有数据库查询必须包含 data_version 过滤"
+            puts "  → 使用 .where(data_version: @data_version) 确保会话隔离"
+          elsif error[:format_error].include?('状态保存')
+            puts "  → prepare 方法中设置的实例变量需要通过状态管理方法保存"
+            puts "  → 实现 execution_state_data 返回状态 hash，restore_from_state 恢复变量"
+          end
         elsif error[:missing]
           puts "  Missing attributes: #{error[:missing].join(', ')}"
           puts "  → 请使用新风格类属性定义（例如：self.validator_id = '...'）"

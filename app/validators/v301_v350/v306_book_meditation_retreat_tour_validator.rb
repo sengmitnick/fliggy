@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V306BookMeditationRetreatTourValidator < BaseValidator
     self.validator_id = 'v306_book_meditation_retreat_tour_validator'
-    self.task_id = 'n72k4nj6-l4m8-50nh-j9ll-o0324l95ln6k'
+    self.task_id = '13bb2b29-d9cb-4e2c-adb5-0e345081dbbc'
     self.title = '预订禅修静心游'
     self.description = '用户预订禅修静心游(寺庙+冥想+素食体验)'
     self.timeout_seconds = 300

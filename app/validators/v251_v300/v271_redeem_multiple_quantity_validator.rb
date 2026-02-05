@@ -7,7 +7,7 @@ module V251V300
   # 考点: 数量计算、总价计算
   class V271RedeemMultipleQuantityValidator < BaseValidator
     self.validator_id = 'v271_redeem_multiple_quantity_validator'
-    self.task_id = 'i46i3j7e-6f8g-8h5i-2e9j-0g1h2i3j4k5f'
+    self.task_id = '6d2fd384-9e74-4e8b-a0fc-cb3fcf871fdd'
     self.title = '批量兑换多件商品'
     self.description = '用户一次性兑换多件同一商品（如3张咖啡券）'
     self.timeout_seconds = 300
