@@ -156,9 +156,15 @@ namespace :validator do
         puts "    位置: #{e.backtrace.first}"
         puts "\n❌ 数据包加载失败，回滚操作..."
         
-        # 删除已加载的数据（使用 destroy_all 以处理外键依赖）
+        # 删除已加载的数据（使用 delete_all 绕过外键约束）
+        # reverse 确保先删除子记录（Membership），再删除父记录（User）
         DataVersionable.models.reverse.each do |model|
-          model.where(data_version: 0).destroy_all
+          begin
+            deleted_count = model.where(data_version: 0).delete_all
+            puts "  → 回滚 #{model.name}: #{deleted_count} 条" if deleted_count > 0
+          rescue StandardError => rollback_error
+            puts "  ⚠️  回滚 #{model.name} 失败: #{rollback_error.message}"
+          end
         end
         
         exit 1

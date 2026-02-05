@@ -238,4 +238,42 @@ end
 
 Flight.insert_all(all_flights)
 
-puts "✓ premium_flights_v1 数据包加载完成（#{all_flights.size}条商务舱/头等舱航班记录）"
+# ==================== 国内高端商务舱航班 ====================
+puts "\n添加国内高端商务舱航班..."
+
+high_end_domestic = []
+
+[
+  { number: 'CA1001', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '09:00', arr_time: '11:30', price: 2200 },
+  { number: 'MU5001', airline: '东航', dep_city: '上海', dep_airport: '虹桥T2', dest_city: '深圳', dest_airport: '宝安T3', dep_time: '10:00', arr_time: '13:00', price: 2400 },
+  { number: 'CZ3001', airline: '南航', dep_city: '广州', dep_airport: '白云T2', dest_city: '北京', dest_airport: '首都T3', dep_time: '08:30', arr_time: '11:30', price: 2500 }
+].each do |route|
+  flight_date = Date.today + 3.days
+  high_end_domestic << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李2件(每件32kg)',
+    flight_date: flight_date,
+    meal_service: '含高级飞机餐',
+    mileage_accrual: '可累积里程（120%）',
+    seat_class: 'business',
+    available_seats: 20,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(high_end_domestic) if high_end_domestic.any?
+puts "  ✓ 创建了 #{high_end_domestic.size} 个国内高端商务舱航班"
+
+puts "\n✅ premium_flights_v1 数据包加载完成（#{all_flights.size + high_end_domestic.size}条商务舱/头等舱航班记录）"

@@ -14,6 +14,7 @@
 # rake validator:reset_baseline
 
 require_relative '../../../../../app/helpers/image_seed_helper'
+require 'bcrypt'
 
 puts "正在加载 hotels_v1 数据包..."
 
@@ -736,12 +737,15 @@ hotels.each_slice(100) do |batch|
     has_pool = is_premium || (hotel.rating.to_f >= 4.5)
     has_gym = is_premium
     has_breakfast = hotel.rating.to_f >= 4.0
+    # 成都的某些酒店支持宠物友好
+    is_chengdu_pet_friendly = hotel.city == '成都' && ['华住', '万豪', '希尔顿'].include?(hotel.brand) && hotel.rating.to_f >= 4.0
     
     facilities_list = ['WiFi', '停车场']
     facilities_list << '游泳池' if has_pool
     facilities_list << '健身房' if has_gym
     facilities_list << '早餐' if has_breakfast
     facilities_list << '餐厅' if is_premium
+    facilities_list << '宠物友好' if is_chengdu_pet_friendly
     
     cancellation = if is_premium
       '任何时间免费取消'

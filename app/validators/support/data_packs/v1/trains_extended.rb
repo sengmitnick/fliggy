@@ -12,11 +12,11 @@
 
 puts "正在加载 trains_extended_v1 数据包（扩展未来15天）..."
 
-# 扩展日期：从第8天到第15天
-start_date = Date.today + 8.days
+# 扩展日期：从第7天到第15天（确保覆盖足够时间范围）
+start_date = Date.today + 7.days
 end_date = Date.today + 15.days
 
-puts "  扩展火车票日期范围: #{start_date} 至 #{end_date} (共8天)"
+puts "  扩展火车票日期范围: #{start_date} 至 #{end_date} (共9天)"
 
 all_trains = []
 timestamp = Time.current

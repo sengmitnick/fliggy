@@ -416,7 +416,8 @@ products_data = [
     description: 'GORE-TEX面料，专业防护',
     image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
-    featured: true
+    featured: true,
+    data_version: 0
   }
 ]
 

@@ -190,8 +190,8 @@ class DataPackValidator
       models.concat(content.scan(pattern).flatten)
     end
     
-    # 去重并排除系统表
-    models.uniq.reject { |m| system_model?(m) }
+    # 去重并排除系统表和非模型类
+    models.uniq.reject { |m| system_model?(m) || non_model_class?(m) }
   end
   
   # 判断是否为系统表（不需要验证）
@@ -205,6 +205,34 @@ class DataPackValidator
       ActiveStorage::VariantRecord
     ]
     system_models.include?(model_name)
+  end
+  
+  # 判断是否为非模型类（Ruby标准类、Gem类等）
+  def non_model_class?(model_name)
+    # 常见的非模型类：Ruby标准库、Gem类、工具类
+    non_models = %w[
+      BCrypt
+      Password
+      Date
+      Time
+      DateTime
+      String
+      Integer
+      Float
+      Array
+      Hash
+      File
+      Dir
+      JSON
+      YAML
+      Rails
+      ActiveRecord
+      ActiveSupport
+      ActionCable
+      ImageSeedHelper
+      DataVersionable
+    ]
+    non_models.include?(model_name)
   end
   
   # 验证单个模型的数据完整性

@@ -12,11 +12,11 @@
 puts "正在加载 trains_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来7天的火车票数据（从今天开始）
-start_date = Date.today
-end_date = start_date + 6.days
+# 生成未来7天的火车票数据（从昨天开始，支持西时区用户）
+start_date = Date.today - 1.day
+end_date = start_date + 7.days
 
-puts "  火车票日期范围: #{start_date} 至 #{end_date} (共7天)"
+puts "  火车票日期范围: #{start_date} 至 #{end_date} (共9天)"
 
 # ==================== 火车票数据 ====================
 all_trains = []
@@ -1269,5 +1269,124 @@ end
 
 BookingOption.insert_all(all_options) if all_options.any?
 puts "   ✓ 已为 #{Train.where(data_version: 0).count} 趟火车创建 #{all_options.size} 个订票套餐记录"
+
+# ==================== 早班车数据 (05:00-07:00) ====================
+puts "\n生成早班车数据（05:00-07:00）..."
+early_trains = []
+
+early_routes = [
+  { num: 'G8801', dep_city: '上海', arr_city: '南京', dep_station: '上海虹桥站', arr_station: '南京南站', time: '05:30', dur: 90, price: 134.5 },
+  { num: 'G8802', dep_city: '北京', arr_city: '天津', dep_station: '北京南站', arr_station: '天津站', time: '06:00', dur: 60, price: 54.5 },
+  { num: 'G8803', dep_city: '广州', arr_city: '深圳', dep_station: '广州南站', arr_station: '深圳北站', time: '06:30', dur: 75, price: 79.5 },
+  { num: 'G8804', dep_city: '成都', arr_city: '重庆', dep_station: '成都东站', arr_station: '重庆北站', time: '05:45', dur: 90, price: 96.0 }
+]
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  
+  early_routes.each do |route|
+    hour, min = route[:time].split(':').map(&:to_i)
+    early_trains << {
+      train_number: "#{route[:num]}_#{day_suffix}",
+      departure_city: route[:dep_city],
+      arrival_city: route[:arr_city],
+      departure_station: route[:dep_station],
+      arrival_station: route[:arr_station],
+      departure_time: base_datetime.change(hour: hour, min: min),
+      arrival_time: base_datetime.change(hour: hour, min: min) + route[:dur].minutes,
+      duration: route[:dur],
+      price_second_class: route[:price],
+      price_first_class: (route[:price] * 1.6).round(1),
+      price_business_class: (route[:price] * 3).round(1),
+      available_seats: 100,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Train.insert_all(early_trains) if early_trains.any?
+puts "  ✓ 创建了 #{early_trains.size} 条早班车记录"
+
+# ==================== 预算型火车数据 ====================
+puts "\n生成预算型火车数据..."
+budget_trains = []
+
+[
+  { train_number: 'K601', departure_city: '北京', arrival_city: '石家庄', departure_station: '北京西站', arrival_station: '石家庄站', time: '08:00', duration: 180, price: 85 },
+  { train_number: 'K602', departure_city: '上海', arrival_city: '苏州', departure_station: '上海站', arrival_station: '苏州站', time: '09:00', duration: 60, price: 45 },
+  { train_number: 'K603', departure_city: '广州', arrival_city: '东莞', departure_station: '广州东站', arrival_station: '东莞站', time: '10:00', duration: 90, price: 55 },
+  { train_number: 'K604', departure_city: '成都', arrival_city: '绵阳', departure_station: '成都站', arrival_station: '绵阳站', time: '11:00', duration: 120, price: 65 }
+].each do |data|
+  travel_date = Date.today + 1.day
+  budget_trains << {
+    train_number: data[:train_number],
+    departure_city: data[:departure_city],
+    arrival_city: data[:arrival_city],
+    departure_station: data[:departure_station],
+    arrival_station: data[:arrival_station],
+    departure_time: Time.zone.parse("#{travel_date} #{data[:time]}"),
+    arrival_time: Time.zone.parse("#{travel_date} #{data[:time]}") + data[:duration].minutes,
+    duration: data[:duration],
+    price_second_class: data[:price],
+    price_first_class: (data[:price] * 1.5).round(1),
+    price_business_class: (data[:price] * 2.5).round(1),
+    available_seats: 100,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Train.insert_all(budget_trains) if budget_trains.any?
+puts "  ✓ 创建了 #{budget_trains.size} 条预算型火车记录"
+
+# ==================== 北京→西安夜间火车数据 ====================
+puts "\n生成北京→西安夜间火车数据..."
+beijing_xian_night_trains = []
+
+night_train_routes = [
+  { train_number: 'Z19', departure_time: '22:35', arrival_hour: 10, arrival_min: 28, duration: 716, price: 263.5 },  # 22:35发车，次日10:28到达
+  { train_number: 'Z43', departure_time: '23:15', arrival_hour: 11, arrival_min: 35, duration: 740, price: 263.5 },  # 23:15发车，次日11:35到达
+  { train_number: 'K245', departure_time: '22:00', arrival_hour: 12, arrival_min: 18, duration: 858, price: 152.5 }, # 22:00发车，次日12:18到达
+  { train_number: 'K1363', departure_time: '23:45', arrival_hour: 13, arrival_min: 20, duration: 815, price: 152.5 } # 23:45发车，次日13:20到达
+]
+
+start_date = Date.today - 1.day
+end_date = start_date + 10.days
+
+(start_date..end_date).each do |travel_date|
+  night_train_routes.each do |route|
+    # 解析出发时间
+    dep_hour, dep_min = route[:departure_time].split(':').map(&:to_i)
+    departure_datetime = Time.zone.parse("#{travel_date} #{route[:departure_time]}")
+    
+    # 计算到达时间（次日）
+    arrival_datetime = departure_datetime + route[:duration].minutes
+    
+    beijing_xian_night_trains << {
+      train_number: route[:train_number],
+      departure_city: '北京',
+      arrival_city: '西安',
+      departure_station: '北京西站',
+      arrival_station: '西安站',
+      departure_time: departure_datetime,
+      arrival_time: arrival_datetime,
+      duration: route[:duration],
+      price_second_class: route[:price],
+      price_first_class: (route[:price] * 1.5).round(1),
+      price_business_class: (route[:price] * 2.5).round(1),
+      available_seats: 80,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Train.insert_all(beijing_xian_night_trains) if beijing_xian_night_trains.any?
+puts "  ✓ 创建了 #{beijing_xian_night_trains.size} 条北京→西安夜间火车记录（覆盖#{(end_date - start_date + 1).to_i}天）"
 
 puts "\n✅ trains_v1 数据包加载完成！"

@@ -58,6 +58,7 @@ base_date = Date.today
         price: price,
         seat_type: '新干线',
         status: 'available',
+        data_version: 0,
         created_at: timestamp,
         updated_at: timestamp
       }
@@ -96,6 +97,7 @@ europe_routes = [
         price: price,
         seat_type: '欧铁',
         status: 'available',
+        data_version: 0,
         created_at: timestamp,
         updated_at: timestamp
       }

@@ -440,12 +440,15 @@ class BaseValidator
     return unless @data_version
     
     # 使用 DataVersionable.models 获取所有注册的模型
-    # 这样无需维护硬编码的模型列表
-    DataVersionable.models.each do |model|
+    # 按依赖关系反向删除（先删除子记录如 Membership，再删除父记录如 User）
+    # reverse 可以处理大部分情况（假设模型按依赖顺序注册）
+    DataVersionable.models.reverse.each do |model|
       begin
-        model.where(data_version: @data_version).delete_all
+        deleted_count = model.where(data_version: @data_version).delete_all
+        # 静默删除，不输出日志（减少噪音）
       rescue StandardError => e
-        puts "  ⚠️  删除 #{model.name} 失败: #{e.message}"
+        # 捕获外键约束错误，但不中断回滚流程
+        puts "  ⚠️  回滚 #{model.name} 失败: #{e.message}"
       end
     end
   end

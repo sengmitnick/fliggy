@@ -61,8 +61,9 @@ Destination.insert_all(destinations_data) if destinations_data.any?
 # ==================== 火车票数据（春节返乡） ====================
 puts "  创建春节返乡火车票数据..."
 
-# 为未来60-70天生成北京→成都春运火车票（支持v317）
-start_date = Date.today + 60.days
+# 为未来59-69天生成北京→成都春运火车票（支持v317）
+# 从Date.today-1开始计算，确保覆盖西时区用户
+start_date = Date.today + 59.days
 end_date = start_date + 10.days
 
 trains_data = []

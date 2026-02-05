@@ -35,12 +35,25 @@ module DataVersionable
     DataVersionable.register_model(self)
   end
   
+  # Class methods to be added to including classes
+  class_methods do
+    # 当子类继承时自动注册
+    def inherited(subclass)
+      super
+      DataVersionable.register_model(subclass)
+    end
+  end
+  
   # 模块级别的方法（用于管理全局模型列表）
   def self.models
     @versionable_models ||= []
   end
   
   def self.register_model(model_class)
+    # 排除抽象类（如 ApplicationRecord）
+    # 抽象类没有数据库表，不需要数据版本管理
+    return if model_class.abstract_class?
+    
     models << model_class unless models.include?(model_class)
   end
   
