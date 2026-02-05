@@ -25,7 +25,7 @@ module.exports = [
       'no-unused-vars': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn', // ⚠️ Warn on 'as any' - forces proper typing
 
       'prefer-const': 'error',
       'no-var': 'error',
@@ -49,7 +49,7 @@ module.exports = [
   {
     files: ['app/javascript/controllers/**/*.ts'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      // No special exemptions - all controllers must follow type safety rules
     },
   },
   {

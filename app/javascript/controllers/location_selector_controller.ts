@@ -1,5 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Interface for cross-controller communication with car-rental-tabs
+interface CarRentalTabsController {
+  currentSelectionType: string | null;
+}
+
+// Interface for cross-controller communication with city-selector
+interface CitySelectorController {
+  openDeparture(): void;
+}
+
 export default class extends Controller<HTMLElement> {
   static targets = [
     // stimulus-validator: disable-next-line
@@ -112,13 +122,17 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
-  openModal(event: Event): void {
+  openModal(event?: Event): void {
     console.log('[LocationSelector] ========== openModal START ===========')
     
-    // Get location type from the button that triggered this modal
-    const button = event.currentTarget as HTMLElement
-    this.currentLocationType = button.dataset.locationType || ''
-    console.log('[LocationSelector] Location type:', this.currentLocationType)
+    // Get location type from the button that triggered this modal (if called via UI)
+    if (event && event.currentTarget) {
+      const button = event.currentTarget as HTMLElement
+      this.currentLocationType = button.dataset.locationType || ''
+      console.log('[LocationSelector] Location type from button:', this.currentLocationType)
+    } else {
+      console.log('[LocationSelector] Called programmatically, location type:', this.currentLocationType)
+    }
     
     // For transfers page: use arrival city from flight data (already set in initializeCurrentCity)
     if (this.hasArrivalCityValue && this.arrivalCityValue) {
@@ -130,11 +144,11 @@ export default class extends Controller<HTMLElement> {
       const carRentalController = this.application.getControllerForElementAndIdentifier(
         document.querySelector('[data-controller*="car-rental-tabs"]') as Element,
         'car-rental-tabs'
-      ) as any
+      ) as unknown as CarRentalTabsController | null
       
       let cityToUse = ''
       if (carRentalController) {
-        const selectionType = (carRentalController as any).currentSelectionType
+        const selectionType = carRentalController.currentSelectionType
         console.log('[LocationSelector] Selection type:', selectionType)
         
         if (selectionType === 'return') {
@@ -309,7 +323,7 @@ export default class extends Controller<HTMLElement> {
     const citySelectorController = this.application.getControllerForElementAndIdentifier(
       citySelectorElement,
       'city-selector'
-    ) as any
+    ) as unknown as CitySelectorController | null
 
     if (!citySelectorController) {
       console.error('[LocationSelector] City selector controller not found')
