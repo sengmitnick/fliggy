@@ -244,8 +244,55 @@ class DataPackValidator
       end
     end
     
+    # 4. 检查日期范围覆盖（针对有日期字段的模型）
+    date_range_result = validate_date_range_coverage(model_class, records)
+    errors.concat(date_range_result[:errors])
+    # 信息消息不加入 errors，单独处理（如需要可以在这里打印）
+    date_range_result[:info].each { |msg| puts "  #{msg}" } if date_range_result[:info].any?
+    
     errors
   rescue StandardError => e
     ["#{model_class.name} 验证过程出错: #{e.message}"]
+  end
+  
+  # 验证日期范围覆盖（确保数据包日期范围足够大）
+  # 原则：
+  # 1. start_date >= Date.today-1 是刚性要求（支持西时区用户） - 必须检查并报错
+  # 2. end_date 显示覆盖范围信息 - 仅供参考，不判断对错
+  def validate_date_range_coverage(model_class, records)
+    errors = []
+    info_messages = []
+    
+    # 检测模型是否有日期字段（常见字段名）
+    date_fields = %w[departure_time flight_date check_in_date visit_date start_date departure_date pickup_date]
+    date_field = model_class.column_names.find { |col| date_fields.include?(col) }
+    
+    return { errors: errors, info: info_messages } unless date_field # 没有日期字段，跳过验证
+    
+    # 获取日期范围
+    min_date = records.minimum(date_field)
+    max_date = records.maximum(date_field)
+    
+    return { errors: errors, info: info_messages } if min_date.nil? || max_date.nil?
+    
+    # 转换为 Date 对象（如果是 Time/DateTime）
+    min_date = min_date.to_date if min_date.respond_to?(:to_date)
+    max_date = max_date.to_date if max_date.respond_to?(:to_date)
+    
+    # 预期范围（基于 Date.today）
+    required_min = Date.today - 1.day  # 向前覆盖 1 天（西时区用户） - 刚性要求
+    
+    # 【刚性要求】检查最小日期是否足够早（允许 1 天误差）
+    if min_date > required_min + 1.day
+      errors << "❌ #{model_class.name} 日期范围不足：最小日期 #{min_date}，必须从 #{required_min}（Date.today-1）开始，以支持西时区用户"
+    end
+    
+    # 【信息展示】显示数据覆盖的未来天数
+    days_coverage = (max_date - Date.today).to_i
+    info_messages << "ℹ️  #{model_class.name} 日期覆盖：#{min_date} 至 #{max_date}（未来 #{days_coverage} 天）"
+    
+    { errors: errors, info: info_messages }
+  rescue StandardError => e
+    { errors: ["#{model_class.name} 日期范围验证出错: #{e.message}"], info: [] }
   end
 end
