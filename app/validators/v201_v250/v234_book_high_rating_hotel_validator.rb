@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @city = '杭州'
       @min_rating = 4.5
-      @check_in_date = Date.today + 3.days
+      @check_in_date = Date.current + 3.days
       @check_out_date = @check_in_date + 1.day
       
       @available_hotels = Hotel.where(city: @city, data_version: 0)

@@ -72,7 +72,7 @@ module V151V200
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
+        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
               "并在#{@hotel_checkin_date.strftime('%Y年%m月%d日')}（航班前一晚）预订#{@departure_city}机场附近的酒店",
         requirements: {
           departure_city: @departure_city,

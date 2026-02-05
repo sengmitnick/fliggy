@@ -24,7 +24,7 @@ module V201V250
     
     def prepare
       @destination_city = '杭州'
-      @flight_date = Date.today + 1.day
+      @flight_date = Date.current + 1.day
       @max_arrival_hour = 12
       
       # 查找早上到达的航班（12:00前）

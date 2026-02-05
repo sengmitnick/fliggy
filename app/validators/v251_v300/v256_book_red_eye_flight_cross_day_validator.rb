@@ -24,7 +24,7 @@ module V251V300
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @flight_date = Date.today + 2.days
+      @flight_date = Date.current + 2.days
       
       # 红眼航班: 23:00-次日02:00
       all_flights = Flight.where(

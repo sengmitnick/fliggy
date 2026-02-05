@@ -23,7 +23,7 @@ module V251V300
     def prepare
       @rental_days = 3
       @pickup_city = '深圳'
-      @pickup_datetime = Date.today + 2.days
+      @pickup_datetime = Date.current + 2.days
       @return_datetime = @pickup_datetime + @rental_days.days
       
       # 确保用户有足够余额

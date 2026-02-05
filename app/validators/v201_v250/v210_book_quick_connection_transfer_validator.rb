@@ -26,7 +26,7 @@ module V201V250
       @origin_city = '深圳'
       @transfer_city = '北京'
       @destination_city = '天津'
-      @travel_date = Date.today + 1.day
+      @travel_date = Date.current + 1.day
       @max_transfer_hours = 3
       
       # 查找可用航班和火车组合

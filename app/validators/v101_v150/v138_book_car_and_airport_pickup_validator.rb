@@ -17,7 +17,7 @@ module V101V150
     def prepare
       @location = "深圳"
       @category = "经济轿车"
-      @pickup_date = Date.today + 1.day
+      @pickup_date = Date.current + 1.day
       @rental_days = 3
       @return_date = @pickup_date + @rental_days.days
       @pickup_location = "深圳宝安国际机场"

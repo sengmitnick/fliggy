@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @city = '上海'
       @required_facility = '游泳池'
-      @check_in_date = Date.today + 1.day
+      @check_in_date = Date.current + 1.day
       @check_out_date = @check_in_date + 1.day
       
       # 查找包含指定设施的酒店

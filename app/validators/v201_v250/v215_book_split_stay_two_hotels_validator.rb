@@ -24,7 +24,7 @@ module V201V250
     
     def prepare
       @city = '北京'
-      @start_date = Date.today + 1.day
+      @start_date = Date.current + 1.day
       @first_hotel_nights = 2
       @second_hotel_nights = 3
       @switch_date = @start_date + @first_hotel_nights.days

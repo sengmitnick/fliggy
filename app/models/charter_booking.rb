@@ -1,4 +1,6 @@
 class CharterBooking < ApplicationRecord
+  include DataVersionable
+
   # Associations
   belongs_to :user
   belongs_to :charter_route

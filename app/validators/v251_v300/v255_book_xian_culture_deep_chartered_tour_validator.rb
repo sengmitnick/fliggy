@@ -8,7 +8,7 @@ require_relative '../base_validator'
 # 1. 路线选择: 西安文化深度游
 # 2. 车型选择: 经济5座（座位数≥1人）
 # 3. 包车时长: 6小时（半日游标准时长）
-# 4. 出发日期: 后天（Date.today + 2.days）
+# 4. 出发日期: 后天（Date.current + 2.days）
 # 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
 module V251V300
   class V255BookXianCultureDeepCharteredTourValidator < BaseValidator
@@ -24,7 +24,7 @@ module V251V300
       @vehicle_type_name = '经济5座'
       @duration_hours = 6
       @passenger_count = 1
-      @travel_date = Date.today + 2.days
+      @travel_date = Date.current + 2.days
     
       # 查询可用路线
       @available_routes = CharterRoute.where(data_version: @data_version)
@@ -137,7 +137,7 @@ module V251V300
           expect(booking.departure_date).to eq(@travel_date),
             "出发日期错误。期望: #{@travel_date}（后天），实际: #{booking.departure_date}"
           
-          expect(booking.departure_date).to be >= Date.today,
+          expect(booking.departure_date).to be >= Date.current,
             "出发日期不能早于今天。实际: #{booking.departure_date}"
           
           # 出发时间

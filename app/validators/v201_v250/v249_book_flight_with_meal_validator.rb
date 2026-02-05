@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @destination_city = '深圳'
-      @flight_date = Date.today + 4.days
+      @flight_date = Date.current + 4.days
       
       # 查找提供餐食的航班（meal_service不为空或包含"餐食"/"meal"）
       @available_flights = Flight.where(

@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @destination_city = '广州'
-      @flight_date = Date.today + 3.days
+      @flight_date = Date.current + 3.days
       @seat_preference = '靠窗'
       
       @available_flights = Flight.where(

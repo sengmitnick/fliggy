@@ -73,7 +73,7 @@ module V151V200
       @hotel_checkout_date = @selected_combo[:second].departure_time.to_date
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.today).to_i}天后）从#{@departure_city}经#{@transit_city}中转到#{@final_city}的航班，" \
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）从#{@departure_city}经#{@transit_city}中转到#{@final_city}的航班，" \
               "要求中转时间超过6小时，并在#{@transit_city}预订酒店休息",
         requirements: {
           departure_city: @departure_city,

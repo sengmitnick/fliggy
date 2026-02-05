@@ -22,7 +22,7 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @flight_date = Date.today + 2.days
+      @flight_date = Date.current + 2.days
       @next_day_date = @flight_date + 1.day
       
       # 查找23:00-23:59的航班（当天）

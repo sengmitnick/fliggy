@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @arrival_city = '纽约'
-      @flight_date = Date.today + 7.days
+      @flight_date = Date.current + 7.days
       @min_price = 2000
       
       # 查找商务舱/高价航班

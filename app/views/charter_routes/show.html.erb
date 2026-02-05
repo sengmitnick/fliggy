@@ -132,8 +132,9 @@
           <span class="text-sm text-gray-500">/6小时</span>
         </div>
       </div>
-      <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date), 
-          class: "flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-center font-bold py-4 rounded-xl shadow-lg transition-colors" do %>
+      <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date.strftime('%Y-%m-%d')), 
+          class: "flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-center font-bold py-4 rounded-xl shadow-lg transition-colors",
+          data: { turbo: "false" } do %>
         选择车型
       <% end %>
     </div>

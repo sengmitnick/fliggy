@@ -21,7 +21,7 @@ module V301V350
     self.timeout_seconds = 300
     
     def prepare
-      @travel_date = Date.today + 6.days
+      @travel_date = Date.current + 6.days
       @participant_count = 2
       @nights = 1
       

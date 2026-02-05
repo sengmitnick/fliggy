@@ -72,19 +72,19 @@
   <!-- 路线筛选Tab -->
   <div class="max-w-md mx-auto bg-white border-b border-gray-200 sticky top-[56px] z-30">
     <div class="flex">
-      <%= link_to search_charter_routes_path(city: @city&.name, category: 'all'), 
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'all', departure_date: @departure_date.strftime('%Y-%m-%d')), 
           class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'all' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
         全部路线
       <% end %>
-      <%= link_to search_charter_routes_path(city: @city&.name, category: 'featured'), 
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'featured', departure_date: @departure_date.strftime('%Y-%m-%d')), 
           class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'featured' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
         精选推荐
       <% end %>
-      <%= link_to search_charter_routes_path(city: @city&.name, category: 'classic'), 
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'classic', departure_date: @departure_date.strftime('%Y-%m-%d')), 
           class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'classic' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
         经典路线
       <% end %>
-      <%= link_to search_charter_routes_path(city: @city&.name, category: 'hot'), 
+      <%= link_to search_charter_routes_path(city: @city&.name, category: 'hot', departure_date: @departure_date.strftime('%Y-%m-%d')), 
           class: "flex-1 py-3 text-center text-sm font-medium #{@category == 'hot' ? 'text-gray-900 border-b-2 border-yellow-400' : 'text-gray-500'}" do %>
         热门路线
       <% end %>
@@ -96,7 +96,7 @@
     <% if @routes.any? %>
       <div class="space-y-4">
         <% @routes.each do |route| %>
-          <%= link_to charter_route_path(route), class: "block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow" do %>
+          <%= link_to charter_route_path(route, departure_date: @departure_date.strftime('%Y-%m-%d')), class: "block bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow" do %>
             <div class="flex">
               <!-- 路线缩略图 -->
               <div class="w-32 h-32 flex-shrink-0">

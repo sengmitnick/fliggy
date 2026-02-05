@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @destination_city = '广州'
-      @flight_date = Date.today + 3.days
+      @flight_date = Date.current + 3.days
       
       # 查找支持里程累积的航班（mileage_accrual不为空或航空公司为主流航司）
       major_airlines = ['国航', '东航', '南航', '海航', 'Air China', 'China Eastern', 'China Southern']

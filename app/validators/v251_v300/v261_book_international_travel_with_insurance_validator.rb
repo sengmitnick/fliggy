@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '泰国'
-      @travel_date = Date.today + 15.days
+      @travel_date = Date.current + 15.days
       @duration = 5
       @traveler_count = 2
       

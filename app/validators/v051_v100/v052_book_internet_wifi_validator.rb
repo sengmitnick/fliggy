@@ -144,8 +144,8 @@ module V051V100
       hk_wifis = wifis.where(region: "中国香港")
       cheapest_wifi = hk_wifis.min_by(&:daily_price)
     
-      # 使用Date.today避免时区问题
-      start_date = Date.today + 7.days
+      # 使用Date.current避免时区问题
+      start_date = Date.current + 7.days
       end_date = start_date + (@rental_days - 1).days
     
       # 创建测试用户（如果不存在）

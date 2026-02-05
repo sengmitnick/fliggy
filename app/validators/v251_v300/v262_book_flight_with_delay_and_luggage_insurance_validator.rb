@@ -24,7 +24,7 @@ module V251V300
     def prepare
       @from_city = '北京'
       @to_city = '上海'
-      @travel_date = Date.today + 3.days
+      @travel_date = Date.current + 3.days
       
       # 查找航班
       @flight = Flight

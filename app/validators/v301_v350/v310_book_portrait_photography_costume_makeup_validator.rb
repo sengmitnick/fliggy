@@ -21,7 +21,7 @@ module V301V350
     self.timeout_seconds = 300
     
     def prepare
-      @service_date = Date.today + 7.days
+      @service_date = Date.current + 7.days
       @participant_count = 1
       
       # 查找适合摄影的景点

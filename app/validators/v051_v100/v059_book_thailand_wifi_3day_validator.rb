@@ -152,8 +152,8 @@ module V051V100
       # 随机选择一个
       target_wifi = matching_wifis.sample
     
-      # 3. 计算日期（使用Date.today避免时区问题）
-      start_date = Date.today + 7.days
+      # 3. 计算日期（使用Date.current避免时区问题）
+      start_date = Date.current + 7.days
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 创建订单

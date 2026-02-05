@@ -58,7 +58,7 @@ module V151V200
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的红眼航班（23:00-02:00），" \
+        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的红眼航班（23:00-02:00），" \
               "并在#{@arrival_city}预订有24小时前台服务的酒店",
         requirements: {
           departure_city: @departure_city,

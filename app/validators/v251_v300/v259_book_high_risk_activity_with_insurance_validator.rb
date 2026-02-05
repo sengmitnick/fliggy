@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @activity_type = '滑雪'
-      @visit_date = Date.today + 7.days
+      @visit_date = Date.current + 7.days
       
       # 查找滑雪活动
       @activity = AttractionActivity

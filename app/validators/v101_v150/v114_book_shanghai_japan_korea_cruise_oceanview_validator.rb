@@ -60,7 +60,7 @@ module V101V150
       .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
       .where(duration_days: expected_days, duration_nights: expected_nights)
       .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-      .where('departure_date >= ?', Date.today)
+      .where('departure_date >= ?', Date.current)
       .where(data_version: '0')
       .order(:departure_date)
       .first
@@ -181,7 +181,7 @@ module V101V150
         .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
         .where(duration_days: expected_days, duration_nights: expected_nights)
         .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-        .where('departure_date >= ?', Date.today)
+        .where('departure_date >= ?', Date.current)
         .order(:departure_date)
         .to_a
       

@@ -22,7 +22,7 @@ module V201V250
     
     def prepare
       @city = '成都'
-      @check_in_date = Date.today + 2.days
+      @check_in_date = Date.current + 2.days
       @check_out_date = @check_in_date + 2.days
       
       # 查找宠物友好酒店（facilities包含"宠物"或"pet"）

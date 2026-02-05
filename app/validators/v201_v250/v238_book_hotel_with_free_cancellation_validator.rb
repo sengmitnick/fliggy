@@ -22,7 +22,7 @@ module V201V250
     
     def prepare
       @city = '深圳'
-      @check_in_date = Date.today + 4.days
+      @check_in_date = Date.current + 4.days
       @check_out_date = @check_in_date + 1.day
       
       # 查找支持免费取消的酒店（cancellation_policy包含"免费"或"free"）

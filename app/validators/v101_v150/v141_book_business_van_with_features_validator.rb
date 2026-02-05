@@ -17,7 +17,7 @@ module V101V150
     def prepare
       @location = "广州"
       @category = "商务车"
-      @pickup_date = Date.today + 2.days
+      @pickup_date = Date.current + 2.days
       @rental_days = 2
       @return_date = @pickup_date + @rental_days.days
       @required_transmission = "自动"

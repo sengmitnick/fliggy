@@ -62,7 +62,7 @@ module V151V200
       @hotel_checkout_date = @train_date + 1.day
       
       {
-        task: "请预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的火车，" \
+        task: "请预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的火车，" \
               "出发时间在非高峰时段（10-16点），并在#{@arrival_city}火车站附近预订酒店",
         requirements: {
           departure_city: @departure_city,

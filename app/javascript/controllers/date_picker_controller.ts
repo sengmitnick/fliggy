@@ -181,13 +181,13 @@ export default class extends Controller<HTMLElement> {
       // Chartered tours search page mode - reload with new date
       console.log('Date picker: Chartered tours search mode, reloading with new date')
       const url = new URL(window.location.href)
-      url.searchParams.set('date', dateStr)
+      url.searchParams.set('departure_date', dateStr)  // Use departure_date for consistency
       window.location.href = url.toString()
     } else if (window.location.pathname.includes('/charter_routes/search')) {
       // Charter routes search page mode - reload with new date
-      console.log('Date picker: Charter routes search mode, reloading with new date')
+      console.log('Charter routes search mode, reloading with new date')
       const url = new URL(window.location.href)
-      url.searchParams.set('date', dateStr)
+      url.searchParams.set('departure_date', dateStr)  // Use departure_date for consistency
       window.location.href = url.toString()
     } else {
       console.log('Date picker: Regular mode')

@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @city = '北京'
-      @check_in_date = Date.today + 5.days
+      @check_in_date = Date.current + 5.days
       @check_out_date = @check_in_date + 3.days  # 3晚
       @nights = (@check_out_date - @check_in_date).to_i
       

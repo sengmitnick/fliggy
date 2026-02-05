@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '成都'
-      @travel_date = Date.today + 8.days
+      @travel_date = Date.current + 8.days
       @visit_date = @travel_date
       
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

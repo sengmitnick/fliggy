@@ -95,7 +95,7 @@ module V151V200
       @check_out_date = @check_in_date + 1.day
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.today).to_i}天后）" \
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）" \
               "从#{@departure_city}到#{@arrival_city}的火车票，并预订当地酒店，总预算#{@min_budget}-#{@max_budget}元",
         requirements: {
           departure_city: @departure_city,

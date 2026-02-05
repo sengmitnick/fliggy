@@ -21,7 +21,7 @@ module V201V250
     
     def prepare
       @city = '上海'
-      @check_in_date = Date.today + 2.days
+      @check_in_date = Date.current + 2.days
       @check_out_date = @check_in_date + 1.day
       @min_rating = 4.5
       

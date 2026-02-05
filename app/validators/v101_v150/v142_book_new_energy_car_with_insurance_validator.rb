@@ -17,7 +17,7 @@ module V101V150
     def prepare
       @location = "成都"
       @category = "新能源"
-      @pickup_date = Date.today + 1.day
+      @pickup_date = Date.current + 1.day
       @rental_days = 3
       @return_date = @pickup_date + @rental_days.days
 

@@ -24,7 +24,7 @@ module V201V250
     
     def prepare
       @destination_city = '上海'
-      @flight_date = Date.today + 1.day
+      @flight_date = Date.current + 1.day
       @min_departure_hour = 23
       
       # 查找深夜航班（23:00后）

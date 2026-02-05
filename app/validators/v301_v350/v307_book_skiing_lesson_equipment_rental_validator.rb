@@ -21,7 +21,7 @@ module V301V350
     self.timeout_seconds = 300
     
     def prepare
-      @visit_date = Date.today + 3.days
+      @visit_date = Date.current + 3.days
       @participant_count = 2
       
       # 查找滑雪相关景点（使用活动类型为滑雪的景点）

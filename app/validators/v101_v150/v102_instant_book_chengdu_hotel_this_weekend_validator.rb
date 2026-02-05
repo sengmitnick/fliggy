@@ -51,7 +51,7 @@ module V101V150
       @quantity = 1
     
       # 计算下周六的日期（提前预订更符合酒店预订场景）
-      today = Date.today
+      today = Date.current
       days_until_saturday = (6 - today.wday) % 7
       days_until_saturday = 7 if days_until_saturday == 0 # 如果今天是周六，则选择下周六
       @check_in_date = today + days_until_saturday.days + 7.days # 加7天确保是下周六

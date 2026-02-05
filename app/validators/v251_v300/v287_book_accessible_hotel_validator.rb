@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @city = '上海'
-      @check_in_date = Date.today + 3.days
+      @check_in_date = Date.current + 3.days
       @check_out_date = @check_in_date + 2.days
       
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

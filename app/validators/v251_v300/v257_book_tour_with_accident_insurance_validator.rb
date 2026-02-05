@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '黄山'
-      @travel_date = Date.today + 5.days
+      @travel_date = Date.current + 5.days
       @adult_count = 2
       
       # 查找跟团游产品
