@@ -1,4 +1,8 @@
 class Administrator < ApplicationRecord
+  # Administrator 是系统模型，不使用 data_version 机制
+  default_scope { unscope(where: :data_version) }
+  skip_callback :create, :before, :set_data_version
+
   validates :name, presence: true, uniqueness: true
   validates :role, presence: true, inclusion: { in: %w[admin super_admin] }
   has_secure_password

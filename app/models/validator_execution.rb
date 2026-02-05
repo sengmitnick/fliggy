@@ -23,6 +23,10 @@
 #   execution = ValidatorExecution.find_by(execution_id: 'abc-123')
 #   state_data = execution.state_data
 class ValidatorExecution < ApplicationRecord
+  # ValidatorExecution 是系统模型，不使用 data_version 机制
+  default_scope { unscope(where: :data_version) }
+  skip_callback :create, :before, :set_data_version
+
   # 验证
   validates :execution_id, presence: true, uniqueness: true
   validates :state, presence: true
