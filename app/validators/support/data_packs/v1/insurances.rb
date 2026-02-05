@@ -55,7 +55,8 @@ insurance_products_data = []
     active: true,
     available_for_embedding: false,
     sort_order: 100 - i * 5,
-    image_url: ImageSeedHelper.random_image_from_category(:insurances)
+    image_url: ImageSeedHelper.random_image_from_category(:insurances),
+    data_version: 0
   }
   
   # 额外生成3个变种产品
@@ -80,7 +81,8 @@ insurance_products_data = []
       active: true,
       available_for_embedding: false,
       sort_order: 65 - i * 5,
-      image_url: ImageSeedHelper.random_image_from_category(:insurances)
+      image_url: ImageSeedHelper.random_image_from_category(:insurances),
+      data_version: 0
     }
   end
 end
@@ -118,7 +120,8 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 60 - i * 5,
-    image_url: ImageSeedHelper.random_image_from_category(:insurances)
+    image_url: ImageSeedHelper.random_image_from_category(:insurances),
+    data_version: 0
   }
   
   # 额外生成4个变种产品
@@ -143,7 +146,8 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 40 - i * 5,
-      image_url: ImageSeedHelper.random_image_from_category(:insurances)
+      image_url: ImageSeedHelper.random_image_from_category(:insurances),
+      data_version: 0
     }
   end
 end
@@ -175,7 +179,8 @@ end
     active: true,
     available_for_embedding: false,
     sort_order: 40 - i * 5,
-    image_url: ImageSeedHelper.random_image_from_category(:insurances)
+    image_url: ImageSeedHelper.random_image_from_category(:insurances),
+    data_version: 0
   }
   
   # 额外生成变种
@@ -200,7 +205,8 @@ end
       active: true,
       available_for_embedding: false,
       sort_order: 30 - i * 5,
-      image_url: ImageSeedHelper.random_image_from_category(:insurances)
+      image_url: ImageSeedHelper.random_image_from_category(:insurances),
+      data_version: 0
     }
   end
 end
@@ -337,7 +343,8 @@ city_pricing.each do |product_code, cities|
       insurance_product_id: product.id,
       city_id: city.id,
       price_per_day: price,
-      available: true
+      available: true,
+      data_version: 0
     }
   end
 end

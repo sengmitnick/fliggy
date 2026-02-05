@@ -190,6 +190,7 @@ destinations_config.each do |dest_config|
           display_order: all_products_data.count,
           image_url: ImageSeedHelper.random_image_from_category(:tours),
           travel_agency_id: agency_id,
+          data_version: 0,
           created_at: timestamp,
           updated_at: timestamp
         }
@@ -416,6 +417,7 @@ TourGroupProduct.find_each do |product|
       is_featured: i == 0,  # 第一个套餐为推荐套餐
       display_order: i,
       purchase_count: rand(10..500),
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     }
@@ -459,6 +461,7 @@ TourGroupProduct.find_each do |product|
         transportation: '飞机/高铁',
         service_info: '专车接站,专人引导入住酒店,提供旅游咨询服务',
         duration_minutes: 480,
+        data_version: 0,
         created_at: timestamp,
         updated_at: timestamp
       }
@@ -475,6 +478,7 @@ TourGroupProduct.find_each do |product|
         transportation: '飞机/高铁',
         service_info: '专车送站,协助办理登机/乘车手续,期待下次再见',
         duration_minutes: 360,
+        data_version: 0,
         created_at: timestamp,
         updated_at: timestamp
       }
@@ -497,6 +501,7 @@ TourGroupProduct.find_each do |product|
         transportation: '旅游大巴',
         service_info: '全天游览,包含景点门票、专业导游讲解服务、午餐',
         duration_minutes: 540,
+        data_version: 0,
         created_at: timestamp,
         updated_at: timestamp
       }
@@ -626,6 +631,7 @@ TourGroupProduct.where(destination: "三亚", duration: 6, data_version: 0)
       child_price: child_price,
       description: description,
       is_featured: i == 0,
+      data_version: 0,
       created_at: timestamp_supplement,
       updated_at: timestamp_supplement
     }

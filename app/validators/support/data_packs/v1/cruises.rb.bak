@@ -23,7 +23,6 @@ cruise_lines_data = [
     name_en: 'Royal Caribbean International',
     logo_url: ImageSeedHelper.random_image_from_category(:cruise_logos),
     description: '全球豪华游轮领导品牌，拥有超量子系列、绿洲系列等多个创新船队',
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -32,7 +31,6 @@ cruise_lines_data = [
     name_en: 'MSC Cruises',
     logo_url: ImageSeedHelper.random_image_from_category(:cruise_logos),
     description: '欧洲第一、世界第四大邮轮公司，提供地中海特色服务',
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -41,7 +39,6 @@ cruise_lines_data = [
     name_en: 'AIDA Cruises',
     logo_url: ImageSeedHelper.random_image_from_category(:cruise_logos),
     description: '德国邮轮品牌，以年轻时尚的邮轮体验著称',
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   }
@@ -69,7 +66,6 @@ cruise_ships_data = [
     tonnage: 168666,
     passenger_capacity: 4246,
     features: ['超量子系列首艘邮轮', '甲板跳伞', '正宗川菜料理', '套房专享皇家府邸'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -81,7 +77,6 @@ cruise_ships_data = [
     tonnage: 171598,
     passenger_capacity: 4500,
     features: ['米其林星级餐厅', '豪华购物长廊', '海上水上乐园'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -93,7 +88,6 @@ cruise_ships_data = [
     tonnage: 181000,
     passenger_capacity: 6334,
     features: ['欧洲最大邮轮之一', '室内娱乐长廊', '卡拉拉大理石装饰', 'MSC游艇俱乐部'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -105,7 +99,6 @@ cruise_ships_data = [
     tonnage: 137936,
     passenger_capacity: 3959,
     features: ['施华洛世奇水晶楼梯', '四维影院', '一级方程式赛车模拟器'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -117,7 +110,6 @@ cruise_ships_data = [
     tonnage: 226963,
     passenger_capacity: 6780,
     features: ['世界最大邮轮之一', '中央公园', '百老汇歌剧院', '终极深渊滑梯'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   },
@@ -129,7 +121,6 @@ cruise_ships_data = [
     tonnage: 183900,
     passenger_capacity: 5200,
     features: ['环保LNG动力', '全景观景台', '海上啤酒花园'],
-    data_version: '0',
     created_at: Time.current,
     updated_at: Time.current
   }
@@ -142,16 +133,16 @@ CruiseShip.find_each(&:save)
 # ==================== 航线数据 ====================
 
 cruise_routes_data = [
-  { name: '日韩', region: 'japan_korea', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '三峡', region: 'yangtze_river', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '南北极', region: 'north_pole', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '东南亚', region: 'southeast_asia', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '地中海', region: 'mediterranean', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '阿拉斯加', region: 'alaska', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '欧洲河轮', region: 'europe_river', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '加勒比', region: 'caribbean', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '中东', region: 'middle_east', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current },
-  { name: '西沙群岛', region: 'xisha_islands', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), data_version: '0', created_at: Time.current, updated_at: Time.current }
+  { name: '日韩', region: 'japan_korea', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '三峡', region: 'yangtze_river', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '南北极', region: 'north_pole', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '东南亚', region: 'southeast_asia', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '地中海', region: 'mediterranean', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '阿拉斯加', region: 'alaska', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '欧洲河轮', region: 'europe_river', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '加勒比', region: 'caribbean', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '中东', region: 'middle_east', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current },
+  { name: '西沙群岛', region: 'xisha_islands', icon_url: ImageSeedHelper.random_image_from_category(:cruise_destinations), created_at: Time.current, updated_at: Time.current }
 ]
 
 CruiseRoute.insert_all(cruise_routes_data)

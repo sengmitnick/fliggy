@@ -19,58 +19,74 @@ require_relative '../../../../../app/helpers/image_seed_helper'
 
 # 1. 补充过夜卧铺火车数据（V209需要）
 puts "\n=== 补充过夜卧铺火车数据 ==="
-overnight_trains = [
-  {
-    train_number: 'K801',
+
+# 为未来7天生成数据（从Date.today-1开始，支持西时区）
+start_date = Date.today - 1.day
+end_date = start_date + 10.days
+
+overnight_trains_data = []
+timestamp = Time.current
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  
+  overnight_trains_data << {
+    train_number: "K801_#{date.strftime('%m%d')}",
     departure_city: '北京',
     arrival_city: '上海',
-    departure_time: '22:30',
-    arrival_time: '07:00',
-    duration: 510,  # 8.5小时
+    departure_station: '北京站',
+    arrival_station: '上海站',
+    departure_time: base_datetime.change(hour: 22, min: 30),
+    arrival_time: (base_datetime + 1.day).change(hour: 7, min: 0),
+    duration: 510,
     price_second_class: 180,
     price_first_class: 280,
     price_business_class: 450,
     available_seats: 50,
-    data_version: '0'
-  },
-  {
-    train_number: 'K802',
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  overnight_trains_data << {
+    train_number: "K802_#{date.strftime('%m%d')}",
     departure_city: '广州',
     arrival_city: '长沙',
-    departure_time: '23:00',
-    arrival_time: '06:30',
-    duration: 450,  # 7.5小时
+    departure_station: '广州站',
+    arrival_station: '长沙站',
+    departure_time: base_datetime.change(hour: 23, min: 0),
+    arrival_time: (base_datetime + 1.day).change(hour: 6, min: 30),
+    duration: 450,
     price_second_class: 150,
     price_first_class: 230,
     price_business_class: 380,
     available_seats: 60,
-    data_version: '0'
-  },
-  {
-    train_number: 'K803',
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  overnight_trains_data << {
+    train_number: "K803_#{date.strftime('%m%d')}",
     departure_city: '成都',
     arrival_city: '西安',
-    departure_time: '22:00',
-    arrival_time: '08:00',
-    duration: 600,  # 10小时
+    departure_station: '成都站',
+    arrival_station: '西安站',
+    departure_time: base_datetime.change(hour: 22, min: 0),
+    arrival_time: (base_datetime + 1.day).change(hour: 8, min: 0),
+    duration: 600,
     price_second_class: 200,
     price_first_class: 320,
     price_business_class: 530,
     available_seats: 70,
-    data_version: '0'
+    data_version: '0',
+    created_at: timestamp,
+    updated_at: timestamp
   }
-]
-
-overnight_trains.each do |train_data|
-  existing = Train.find_by(train_number: train_data[:train_number], data_version: '0')
-  if existing
-    existing.update!(train_data)
-    puts "  ✓ 更新夜班火车: #{train_data[:train_number]} (#{train_data[:departure_time]}-#{train_data[:arrival_time]})"
-  else
-    Train.create!(train_data)
-    puts "  ✓ 创建夜班火车: #{train_data[:train_number]} (#{train_data[:departure_time]}-#{train_data[:arrival_time]})"
-  end
 end
+
+Train.insert_all(overnight_trains_data) if overnight_trains_data.any?
+puts "  ✓ 创建了 #{overnight_trains_data.size} 条过夜火车记录"
 
 # 2. 补充中转航班数据（V210, V211需要）
 # 注意：当前FlightOffer模型不支持独立的city fields，需要belongs_to Flight

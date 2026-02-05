@@ -1772,4 +1772,192 @@ end
 
 puts "   ✓ 已更新 #{flights.count} 个航班的Phase 2字段"
 
+# ==================== Phase 2 缺失航班数据 ====================
+
+puts "\n添加 Phase 2 缺失航班数据..."
+
+# 重用start_date/end_date和timestamp
+phase2_start = Date.today - 1.day
+phase2_end = Date.today + 10.days
+
+# ========== 短途航班 (V207：飞行时长≤2小时) ==========
+short_flights = []
+
+[
+  { number: 'CZ3401', airline: '南航', dep_city: '深圳', dest_city: '上海', dep_airport: '宝安T3', arr_airport: '虹桥T2', dep_time: '08:00', arr_time: '10:00', price: 680, date_offset: 2 },
+  { number: 'MU5401', airline: '东航', dep_city: '广州', dest_city: '上海', dep_airport: '白云T2', arr_airport: '虹桥T2', dep_time: '09:00', arr_time: '11:00', price: 720, date_offset: 2 },
+  { number: 'CA1401', airline: '国航', dep_city: '北京', dest_city: '天津', dep_airport: '首都T3', arr_airport: '滨海T2', dep_time: '07:30', arr_time: '08:30', price: 380, date_offset: 2 }
+].each do |route|
+  flight_date = Date.today + route[:date_offset].days
+  short_flights << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:arr_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李1件(23kg)',
+    flight_date: flight_date,
+    meal_service: '含飞机餐',
+    mileage_accrual: '可累积里程',
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(short_flights) if short_flights.any?
+puts "  ✓ 创建了 #{short_flights.size} 个短途航班"
+
+# ========== 上海→杭州深夜航班 (V211：5-8小时中转时间) ==========
+shanghai_hangzhou_flights = []
+
+[
+  { number: 'MU5511', airline: '东航', dep_time: '23:30', arr_time: '00:20', price: 420, date_offset: 2, crosses_midnight: true },
+  { number: 'FM9201', airline: '上航', dep_time: '00:30', arr_time: '01:20', price: 450, date_offset: 3, crosses_midnight: false },
+  { number: 'HO1205', airline: '吉祥', dep_time: '01:00', arr_time: '01:50', price: 480, date_offset: 3, crosses_midnight: false }
+].each do |route|
+  flight_date = Date.today + route[:date_offset].days
+  dep_hour, dep_min = route[:dep_time].split(':').map(&:to_i)
+  arr_hour, arr_min = route[:arr_time].split(':').map(&:to_i)
+  
+  dep_datetime = Time.zone.parse("#{flight_date} #{route[:dep_time]}")
+  arr_datetime = route[:crosses_midnight] ? Time.zone.parse("#{flight_date + 1.day} #{route[:arr_time]}") : Time.zone.parse("#{flight_date} #{route[:arr_time]}")
+  
+  shanghai_hangzhou_flights << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: '上海',
+    destination_city: '杭州',
+    departure_airport: '虹桥T2',
+    arrival_airport: '萧山T3',
+    departure_time: dep_datetime,
+    arrival_time: arr_datetime,
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李1件(23kg)',
+    flight_date: flight_date,
+    meal_service: '无餐食',
+    mileage_accrual: '可累积里程',
+    aircraft_type: '空客320(中)',
+    available_seats: 80,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(shanghai_hangzhou_flights) if shanghai_hangzhou_flights.any?
+puts "  ✓ 创建了 #{shanghai_hangzhou_flights.size} 个上海→杭州深夜航班"
+
+# ========== 国际商务舱航班 (V223：价格≥2000元) ==========
+international_business_flights = []
+
+[
+  { number: 'MU587', airline: '东航', dep_city: '上海', dep_airport: '浦东T2', dest_city: '纽约', dest_airport: 'JFK', dep_time: '12:30', arr_time: '14:00', price: 8500 },
+  { number: 'CA981', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 8800 }
+].each do |route|
+  flight_date = Date.today + 7.days
+  international_business_flights << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李3件(每件32kg)',
+    flight_date: flight_date,
+    meal_service: '含高级飞机餐+酒水',
+    mileage_accrual: '可累积里程（150%）',
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(international_business_flights) if international_business_flights.any?
+puts "  ✓ 创建了 #{international_business_flights.size} 个国际商务舱航班"
+
+# ========== 支持改签的航班 (V247) ==========
+rebookable_flights = []
+
+[
+  { number: 'CA1101', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '14:00', arr_time: '16:30', price: 980, refund: '免费改签', date_offset: 4 },
+  { number: 'MU5201', airline: '东航', dep_city: '上海', dep_airport: '虹桥T2', dest_city: '广州', dest_airport: '白云T2', dep_time: '15:00', arr_time: '17:30', price: 1080, refund: '免费改签，退票扣10%', date_offset: 4 },
+  { number: 'CZ8101', airline: '南航', dep_city: '广州', dep_airport: '白云T2', dest_city: '杭州', dest_airport: '萧山T3', dep_time: '09:00', arr_time: '11:00', price: 780, refund: '免费改签', date_offset: 5 },
+  { number: 'MU5301', airline: '东航', dep_city: '广州', dep_airport: '白云T2', dest_city: '杭州', dest_airport: '萧山T3', dep_time: '14:30', arr_time: '16:30', price: 850, refund: '改签免手续费', date_offset: 5 }
+].each do |route|
+  flight_date = Date.today + route[:date_offset].days
+  rebookable_flights << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李1件(23kg)',
+    flight_date: flight_date,
+    meal_service: '含飞机餐',
+    mileage_accrual: '可累积里程',
+    refund_policy: route[:refund],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(rebookable_flights) if rebookable_flights.any?
+puts "  ✓ 创建了 #{rebookable_flights.size} 个支持改签的航班"
+
+# ========== 宽体机航班 (V245：北京→洛杉矶) ==========
+widebody_flights = []
+
+[
+  { number: 'CA987', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '洛杉矶', dest_airport: 'LAX', dep_time: '12:00', arr_time: '08:00', price: 7800, aircraft: '波音787', date_offset: 7 },
+  { number: 'CA8801', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '15:00', arr_time: '17:30', price: 1680, aircraft: '宽体机', date_offset: 1 },
+  { number: 'CZ8801', airline: '南航', dep_city: '广州', dep_airport: '白云T2', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '16:00', arr_time: '18:30', price: 1580, aircraft: '宽体机', date_offset: 2 }
+].each do |route|
+  flight_date = Date.today + route[:date_offset].days
+  widebody_flights << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李2件(每件23kg)',
+    flight_date: flight_date,
+    meal_service: '含飞机餐',
+    mileage_accrual: '可累积里程',
+    aircraft_type: route[:aircraft],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(widebody_flights) if widebody_flights.any?
+puts "  ✓ 创建了 #{widebody_flights.size} 个宽体机航班"
+
 puts "\n✅ flights_v1 数据包加载完成！"
