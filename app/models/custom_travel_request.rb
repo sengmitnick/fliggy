@@ -1,4 +1,6 @@
 class CustomTravelRequest < ApplicationRecord
+  include DataVersionable
+
   belongs_to :user
 
   # Validations
