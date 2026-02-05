@@ -12,8 +12,8 @@
 puts "正在加载 trains_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来7天的火车票数据（从明天开始）
-start_date = Date.today + 1.day
+# 生成未来7天的火车票数据（从今天开始）
+start_date = Date.today
 end_date = start_date + 6.days
 
 puts "  火车票日期范围: #{start_date} 至 #{end_date} (共7天)"
@@ -44,6 +44,7 @@ timestamp = Time.current
       price_first_class: 117.0,
       price_business_class: 219.0,
       available_seats: 150,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -60,6 +61,7 @@ timestamp = Time.current
       price_first_class: 79.0,
       price_business_class: 147.0,
       available_seats: 200,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -76,6 +78,7 @@ timestamp = Time.current
       price_first_class: 117.0,
       price_business_class: 219.0,
       available_seats: 180,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -93,6 +96,7 @@ timestamp = Time.current
       price_first_class: 79.0,
       price_business_class: 147.0,
       available_seats: 220,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -109,6 +113,7 @@ timestamp = Time.current
       price_first_class: 117.0,
       price_business_class: 219.0,
       available_seats: 160,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -125,6 +130,7 @@ timestamp = Time.current
       price_first_class: 79.0,
       price_business_class: 147.0,
       available_seats: 190,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -142,6 +148,7 @@ timestamp = Time.current
       price_first_class: 117.0,
       price_business_class: 219.0,
       available_seats: 170,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -158,6 +165,7 @@ timestamp = Time.current
       price_first_class: 79.0,
       price_business_class: 147.0,
       available_seats: 210,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     }
@@ -365,6 +373,7 @@ all_trains = []
       price_first_class: 65.5,
       price_business_class: 103.0,
       available_seats: 180,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -381,6 +390,7 @@ all_trains = []
       price_first_class: 65.5,
       price_business_class: 103.0,
       available_seats: 200,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -398,6 +408,7 @@ all_trains = []
       price_first_class: 159.0,
       price_business_class: 309.0,  # 商务座是二等座的3倍
       available_seats: 150,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -414,6 +425,7 @@ all_trains = []
       price_first_class: 159.0,
       price_business_class: 309.0,
       available_seats: 160,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -431,6 +443,7 @@ all_trains = []
       price_first_class: 65.5,
       price_business_class: 103.0,
       available_seats: 190,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     },
@@ -448,6 +461,7 @@ all_trains = []
       price_first_class: 65.5,
       price_business_class: 103.0,
       available_seats: 170,
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     }
@@ -479,8 +493,14 @@ all_trains = []
   base_datetime = date.to_time.in_time_zone
   day_suffix = (date - Date.today).to_i
   trains_bj_to_sh = [
+    # 使用不同北京站点和上海站点的组合，确保测试能找到所有站点
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京站", arrival_station: "上海站", departure_time: base_datetime.change(hour: 6, min: 30), arrival_time: base_datetime.change(hour: 11, min: 0), train_number: "G#{91 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 140, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京西站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 6, min: 50), arrival_time: base_datetime.change(hour: 11, min: 20), train_number: "G#{93 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 145, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 7, min: 0), arrival_time: base_datetime.change(hour: 11, min: 30), train_number: "G#{101 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 150, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京北站", arrival_station: "上海南站", departure_time: base_datetime.change(hour: 8, min: 0), arrival_time: base_datetime.change(hour: 12, min: 30), train_number: "D#{311 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 130, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 9, min: 0), arrival_time: base_datetime.change(hour: 13, min: 28), train_number: "G#{103 + day_suffix}", duration: 268, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 180, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京站", arrival_station: "上海站", departure_time: base_datetime.change(hour: 10, min: 0), arrival_time: base_datetime.change(hour: 14, min: 30), train_number: "D#{313 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 135, data_version: 0, created_at: timestamp, updated_at: timestamp },
+    { departure_city: "北京", arrival_city: "上海", departure_station: "北京西站", arrival_station: "上海南站", departure_time: base_datetime.change(hour: 12, min: 30), arrival_time: base_datetime.change(hour: 17, min: 0), train_number: "D#{315 + day_suffix}", duration: 270, price_second_class: 443.0, price_first_class: 723.0, price_business_class: 1355.0, available_seats: 140, data_version: 0, created_at: timestamp, updated_at: timestamp },
     { departure_city: "北京", arrival_city: "上海", departure_station: "北京南站", arrival_station: "上海虹桥站", departure_time: base_datetime.change(hour: 14, min: 0), arrival_time: base_datetime.change(hour: 18, min: 30), train_number: "G#{107 + day_suffix}", duration: 270, price_second_class: 553.0, price_first_class: 933.0, price_business_class: 1748.0, available_seats: 170, data_version: 0, created_at: timestamp, updated_at: timestamp }
   ]
   all_trains.concat(trains_bj_to_sh)
