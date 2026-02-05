@@ -6,7 +6,7 @@ require_relative '../base_validator'
 module V101V150
   class V128BookWeekendFlightAndResortHotelValidator < BaseValidator
   self.validator_id = 'v128_book_weekend_flight_and_resort_hotel_validator'
-  self.task_id = 'g9h0i1j2-3a4b-5c6d-7e8f-9a0b1c2d3e4f'
+  self.task_id = '11281eb4-ad31-482c-a0de-65e7a6266e67'
   self.title = '预订周五航班+周末度假酒店（2晚）'
   self.description = '预订本周五从北京到深圳的航班，并预订深圳市区酒店（周五入住2晚，周日退房）'
   self.timeout_seconds = 300

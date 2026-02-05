@@ -7,7 +7,7 @@ module V251V300
   # 考点: 精选商品筛选、热门商品兑换
   class V269RedeemFeaturedProductValidator < BaseValidator
     self.validator_id = 'v269_redeem_featured_product_validator'
-    self.task_id = 'g24g1h5c-4d6e-6f3g-0c7h-8e9f0g1h2i3d'
+    self.task_id = '13ec476f-dde0-4a31-9337-db353ba25efa'
     self.title = '兑换精选推荐商品'
     self.description = '用户兑换积分商城首页精选推荐的热门商品'
     self.timeout_seconds = 300

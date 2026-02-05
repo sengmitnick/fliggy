@@ -234,5 +234,5 @@ module V001V050
         user_email: user.email
       }
     end
-    end
+  end
 end

@@ -7,7 +7,7 @@ module V251V300
   # 考点: 价格排序、性价比选择
   class V273RedeemLowestPriceProductValidator < BaseValidator
     self.validator_id = 'v273_redeem_lowest_price_product_validator'
-    self.task_id = 'k68k5l9g-8h0i-0j7k-4g1l-2i3j4k5l6m7h'
+    self.task_id = '4df2344f-f74d-41e8-9bf7-0b2a2e16c295'
     self.title = '按价格排序选择低价商品'
     self.description = '用户按价格升序排序，选择价格最低的商品兑换'
     self.timeout_seconds = 300

@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V302BookCulturalArtTourValidator < BaseValidator
     self.validator_id = 'v302_book_cultural_art_tour_validator'
-    self.task_id = 'j38g0jf2-h0i4-46jd-f5hh-k6980h51hj2g'
+    self.task_id = 'f24660cb-1708-4a34-a89f-6108f9775035'
     self.title = '预订文化艺术游'
     self.description = '用户预订文化艺术游(博物馆+演出+艺术体验)'
     self.timeout_seconds = 300

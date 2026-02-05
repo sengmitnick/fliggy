@@ -7,7 +7,7 @@ module V251V300
   # 考点: 高价商品兑换、积分消耗验证
   class V268RedeemHighPriceProductWithMileageValidator < BaseValidator
     self.validator_id = 'v268_redeem_high_price_product_with_mileage_validator'
-    self.task_id = 'f13f0g4b-3c5d-5e2f-9b6g-7d8e9f0g1h2c'
+    self.task_id = '5cbb17c4-ca76-4bca-b9ef-e5b0253e6d97'
     self.title = '使用大量积分兑换高价商品'
     self.description = '用户使用大量积分+现金兑换高价商品（如京东E卡）'
     self.timeout_seconds = 300

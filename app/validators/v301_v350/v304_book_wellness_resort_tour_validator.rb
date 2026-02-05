@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V304BookWellnessResortTourValidator < BaseValidator
     self.validator_id = 'v304_book_wellness_resort_tour_validator'
-    self.task_id = 'l50i2lh4-j2k6-48lf-h7jj-m8102j73jl4i'
+    self.task_id = 'd4804253-c7b6-42bc-a79b-2035d534f476'
     self.title = '预订养生度假游'
     self.description = '用户预订养生度假游(温泉+SPA+健康检查)'
     self.timeout_seconds = 300

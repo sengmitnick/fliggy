@@ -7,7 +7,7 @@ module V251V300
   # 考点: 高价值商品兑换、大额积分消耗
   class V276RedeemLuxuryProductValidator < BaseValidator
     self.validator_id = 'v276_redeem_luxury_product_validator'
-    self.task_id = 'n91n8o2j-1k3l-3m0n-7j4o-5l6m7n8o9p0k'
+    self.task_id = '5c26767f-392a-4da8-a10f-cb8b2b1c39aa'
     self.title = '兑换高端商品（茅台）'
     self.description = '用户使用大量积分兑换高端奢侈品（如茅台酒）'
     self.timeout_seconds = 300

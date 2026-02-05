@@ -7,7 +7,7 @@ module V251V300
   # 考点: 分类筛选、户外用品兑换
   class V275RedeemOutdoorProductValidator < BaseValidator
     self.validator_id = 'v275_redeem_outdoor_product_validator'
-    self.task_id = 'm80m7n1i-0j2k-2l9m-6i3n-4k5l6m7n8o9j'
+    self.task_id = 'a5aef388-200e-4f74-9c41-eecdd50281b9'
     self.title = '兑换户外运动类商品'
     self.description = '用户在户外运动分类中选择商品兑换'
     self.timeout_seconds = 300

@@ -366,8 +366,11 @@ namespace :validator do
           end
         end
         
-        # 检查 simulate 方法实现
-        if klass.instance_methods(false).include?(:simulate)
+        # 检查 simulate 方法实现（包括 private 方法）
+        has_simulate = klass.instance_methods(false).include?(:simulate) || 
+                      klass.private_instance_methods(false).include?(:simulate)
+        
+        if has_simulate
           # 读取文件检查是否只是抛出 NotImplementedError
           content = File.read(file)
           simulate_method = content.match(/def\s+simulate.*?^\s*end/m)&.[](0)
