@@ -8,17 +8,16 @@ require_relative '../base_validator'
 #   用户预订文化艺术游(博物馆+演出+艺术体验)
 #
 # 评分标准:
-#   - 创建跟团游预订(文化主题) (40%)
-#   - 选择文化艺术目的地 (25%)
-#   - 创建景区门票订单 (20%)
-#   - 出行日期正确 (10%)
-#   - 行程时长≥3天 (5%)
+#   - 创建了西安跟团游预订 (50%)
+#   - 目的地为西安 (25%)
+#   - 出行日期正确 (15%)
+#   - 行程时长≥3天 (10%)
 module V301V350
   class V302BookCulturalArtTourValidator < BaseValidator
     self.validator_id = 'v302_book_cultural_art_tour_validator'
     self.task_id = 'f24660cb-1708-4a34-a89f-6108f9775035'
-    self.title = '预订文化艺术游'
-    self.description = '用户预订文化艺术游(博物馆+演出+艺术体验)'
+    self.title = '预订西安跟团游（9天后出发，3天以上行程）'
+    self.description = '预订西安的跟团游产品，9天后出发，行程至少3天'
     self.timeout_seconds = 300
     
     def prepare
@@ -40,7 +39,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了跟团游预订(文化主题)", weight: 40 do
+      add_assertion "创建了西安跟团游预订", weight: 50 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -52,36 +51,17 @@ module V301V350
       
       return unless @tour_booking
       
-      add_assertion "选择文化艺术目的地", weight: 25 do
-        # 文化古都：西安、北京、南京、洛阳等
-        cultural_cities = ['西安', '北京', '南京', '洛阳', '苏州']
-        is_cultural_destination = cultural_cities.include?(@destination)
-        expect(is_cultural_destination).to be(true),
-          "未选择文化艺术目的地。当前: #{@destination}"
+      add_assertion "目的地为西安", weight: 25 do
+        expect(@tour_booking.tour_group_product.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}（西安），实际: #{@tour_booking.tour_group_product.destination}"
       end
       
-      add_assertion "创建了景区门票订单", weight: 20 do
-        @ticket_order = TicketOrder
-          .joins(ticket: :attraction)
-          .where(attractions: { city: @destination })
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .first
-        
-        if @ticket_order
-          expect(@ticket_order).not_to be_nil
-        else
-          # 文化游门票可能已包含在跟团游中
-          expect(true).to be(true)
-        end
-      end
-      
-      add_assertion "出行日期正确", weight: 10 do
+      add_assertion "出行日期正确", weight: 15 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
           "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
       end
       
-      add_assertion "行程时长≥3天", weight: 5 do
+      add_assertion "行程时长≥3天", weight: 10 do
         tour = @tour_booking.tour_group_product
         expect(tour.duration).to be >= 3,
           "行程天数不足。期望≥3天，实际: #{tour.duration}天"
@@ -125,23 +105,7 @@ module V301V350
         data_version: @data_version
       )
       
-      # 2. 预订景区门票(可选)
-      attraction = Attraction.where(city: @destination, data_version: 0).first
-      if attraction
-        ticket = attraction.tickets.where(ticket_type: 'adult', data_version: 0).first
-        
-        if ticket
-          TicketOrder.create!(
-            user_id: user.id,
-            ticket_id: ticket.id,
-            visit_date: @visit_date,
-            quantity: 1,
-            total_price: ticket.price,
-            status: 'pending',
-            data_version: @data_version
-          )
-        end
-      end
+      # 跟团游已包含景区门票，无需单独预订
     end
     
     private
