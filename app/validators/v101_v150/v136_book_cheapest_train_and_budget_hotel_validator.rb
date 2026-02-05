@@ -17,7 +17,7 @@ module V101V150
     def prepare
       @departure_city = "北京"
       @arrival_city = "天津"
-      @train_date = Date.today + 2.days
+      @train_date = Date.current + 2.days
       @hotel_city = "天津"
       @check_in_date = @train_date
       @check_out_date = @train_date + 1.day

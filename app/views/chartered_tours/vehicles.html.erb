@@ -31,7 +31,7 @@
     <div class="bg-white rounded-xl shadow-sm p-4">
       <div class="text-sm font-bold text-gray-900 mb-3">包车时长</div>
       <div class="grid grid-cols-2 gap-3">
-        <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date, duration_hours: 6, passenger_count: @passenger_count), 
+        <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date.strftime('%Y-%m-%d'), duration_hours: 6, passenger_count: @passenger_count), 
             class: "flex items-center justify-between p-4 rounded-xl border-2 #{@duration_hours == 6 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-white'}" do %>
           <div>
             <div class="text-base font-bold text-gray-900">6小时</div>
@@ -44,7 +44,7 @@
           <% end %>
         <% end %>
         
-        <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date, duration_hours: 8, passenger_count: @passenger_count), 
+        <%= link_to vehicles_chartered_tours_path(route_id: @route.id, departure_date: @departure_date.strftime('%Y-%m-%d'), duration_hours: 8, passenger_count: @passenger_count), 
             class: "flex items-center justify-between p-4 rounded-xl border-2 #{@duration_hours == 8 ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-white'}" do %>
           <div>
             <div class="text-base font-bold text-gray-900">8小时</div>
@@ -72,7 +72,7 @@
           <%= link_to new_charter_booking_path(
                 route_id: @route.id,
                 vehicle_type_id: vehicle.id,
-                departure_date: @departure_date,
+                departure_date: @departure_date.strftime('%Y-%m-%d'),
                 duration_hours: @duration_hours,
                 passenger_count: @passenger_count
               ), class: "block" do %>
@@ -130,7 +130,7 @@
             <%= link_to new_charter_booking_path(
                   route_id: @route.id,
                   vehicle_type_id: vehicle.id,
-                  departure_date: @departure_date,
+                  departure_date: @departure_date.strftime('%Y-%m-%d'),
                   duration_hours: @duration_hours,
                   passenger_count: @passenger_count
                 ), class: "block" do %>
@@ -186,7 +186,7 @@
             <%= link_to new_charter_booking_path(
                   route_id: @route.id,
                   vehicle_type_id: vehicle.id,
-                  departure_date: @departure_date,
+                  departure_date: @departure_date.strftime('%Y-%m-%d'),
                   duration_hours: @duration_hours,
                   passenger_count: @passenger_count
                 ), class: "block" do %>

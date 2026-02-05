@@ -24,7 +24,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @arrival_city = '杭州'
-      @travel_date = Date.today + 1.day
+      @travel_date = Date.current + 1.day
       
       # 查找所有可用火车
       @available_trains = Train.by_route(@departure_city, @arrival_city)

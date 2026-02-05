@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @destination_city = '成都'
-      @flight_date = Date.today + 3.days
+      @flight_date = Date.current + 3.days
       
       # 查找包含行李额度的航班（baggage_allowance不为空或>0）
       @available_flights = Flight.where(

@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '三亚'
-      @travel_date = Date.today + 10.days
+      @travel_date = Date.current + 10.days
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 5.days
       

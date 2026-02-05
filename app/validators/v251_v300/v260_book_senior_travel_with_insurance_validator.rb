@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '桂林'
-      @travel_date = Date.today + 10.days
+      @travel_date = Date.current + 10.days
       @senior_count = 2
       
       # 查找适合老年人的跟团游

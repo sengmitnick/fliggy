@@ -24,7 +24,7 @@ module V201V250
     def prepare
       @departure_city = '广州'
       @arrival_city = '深圳'
-      @travel_date = Date.today + 1.day
+      @travel_date = Date.current + 1.day
       @time_window_start = 18  # 18:00
       @time_window_end = 20    # 20:00
       

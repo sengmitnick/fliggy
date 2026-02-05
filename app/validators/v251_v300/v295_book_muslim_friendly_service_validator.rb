@@ -25,7 +25,7 @@ module V251V300
     
     def prepare
       @destination = '西安'
-      @travel_date = Date.today + 6.days
+      @travel_date = Date.current + 6.days
       
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       if user.balance < 3000

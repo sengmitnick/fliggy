@@ -27,7 +27,7 @@ module V201V250
       @city2 = '上海'
       @city3 = '杭州'
       @city4 = '深圳'
-      @start_date = Date.today + 1.day
+      @start_date = Date.current + 1.day
       
       # 查找各段可用交通
       @leg1_options = find_transport_options(@city1, @city2, @start_date)

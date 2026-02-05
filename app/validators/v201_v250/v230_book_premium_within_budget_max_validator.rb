@@ -40,7 +40,7 @@ module V201V250
       
       raise "未找到交通或酒店" if (@available_flights.empty? && @available_trains.empty?) || @available_hotels.empty?
       
-      @travel_date = (@available_flights.first&.flight_date || @available_trains.first&.departure_time&.to_date || Date.today)
+      @travel_date = (@available_flights.first&.flight_date || @available_trains.first&.departure_time&.to_date || Date.current)
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
       

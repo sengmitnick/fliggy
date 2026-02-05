@@ -111,7 +111,7 @@
       <div class="grid grid-cols-3 gap-3">
         <% if @routes.any? %>
           <% @routes.take(3).each do |route| %>
-            <%= link_to charter_route_path(route, departure_date: @departure_date), 
+            <%= link_to charter_route_path(route, departure_date: @departure_date.strftime('%Y-%m-%d')), 
                 class: "block bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" do %>
               <div class="aspect-square relative">
                 <img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&h=300&fit=crop" 
@@ -174,7 +174,7 @@
           <% if recommend_routes.any? %>
             <div class="space-y-3">
               <% recommend_routes.each do |route| %>
-                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                <%= link_to charter_route_path(route, departure_date: @departure_date.strftime('%Y-%m-%d')), 
                     class: "block" do %>
                   <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-32 h-32 flex-shrink-0">
@@ -219,7 +219,7 @@
           <% if classic_routes.any? %>
             <div class="space-y-3">
               <% classic_routes.each do |route| %>
-                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                <%= link_to charter_route_path(route, departure_date: @departure_date.strftime('%Y-%m-%d')), 
                     class: "block" do %>
                   <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-32 h-32 flex-shrink-0">
@@ -264,7 +264,7 @@
           <% if hot_routes.any? %>
             <div class="space-y-3">
               <% hot_routes.each do |route| %>
-                <%= link_to charter_route_path(route, departure_date: @departure_date), 
+                <%= link_to charter_route_path(route, departure_date: @departure_date.strftime('%Y-%m-%d')), 
                     class: "block" do %>
                   <div class="flex bg-surface-elevated rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-32 h-32 flex-shrink-0">

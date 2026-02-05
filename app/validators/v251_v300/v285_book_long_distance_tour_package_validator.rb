@@ -101,7 +101,7 @@ module V251V300
         child_count: 0,
         contact_name: user.name || '张三',
         contact_phone: user.phone || '13800138000',
-        travel_date: Date.today + 14.days,
+        travel_date: Date.current + 14.days,
         total_price: package.price * 2,
         status: 'confirmed',
         data_version: @data_version

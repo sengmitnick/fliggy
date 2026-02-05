@@ -18,7 +18,7 @@ module V101V150
       @pickup_location = "上海"
       @return_location = "杭州"
       @category = "SUV"
-      @pickup_date = Date.today + 2.days
+      @pickup_date = Date.current + 2.days
       @rental_days = 5
       @return_date = @pickup_date + @rental_days.days
       @required_feature = "GPS导航"

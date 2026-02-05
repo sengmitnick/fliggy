@@ -49,7 +49,7 @@ module V051V100
       @days = 5
       @quantity = 1
       @age = 65
-      @start_date = Date.today + 5.days  # 5天后开始
+      @start_date = Date.current + 5.days  # 5天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找境内旅游保险产品（注意：查询基线数据 data_version=0）

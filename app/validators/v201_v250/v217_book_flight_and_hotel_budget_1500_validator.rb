@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '深圳'
       @arrival_city = '北京'
-      @flight_date = Date.today + 2.days
+      @flight_date = Date.current + 2.days
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 1.day
       @max_budget = 1500

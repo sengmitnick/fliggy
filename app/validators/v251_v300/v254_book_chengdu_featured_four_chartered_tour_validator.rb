@@ -8,7 +8,7 @@ require_relative '../base_validator'
 # 1. 路线选择: 成都精华四景
 # 2. 车型选择: 舒适7座（座位数≥6人）
 # 3. 包车时长: 6小时（半日游标准时长）
-# 4. 出发日期: 10天后（Date.today + 10.days）
+# 4. 出发日期: 10天后（Date.current + 10.days）
 # 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
 module V251V300
   class V254BookChengduFeaturedFourCharteredTourValidator < BaseValidator
@@ -23,8 +23,8 @@ module V251V300
       @route_keyword = '精华四景'
       @vehicle_type_name = '舒适7座'
       @duration_hours = 6
-      @passenger_count = 1  # 前端无人数选择功能，默认为1
-      @travel_date = Date.today + 10.days
+      @passenger_count = 6
+      @travel_date = Date.current + 10.days
     
       # 查询可用路线
       @available_routes = CharterRoute.where(data_version: @data_version)
@@ -137,7 +137,7 @@ module V251V300
           expect(booking.departure_date).to eq(@travel_date),
             "出发日期错误。期望: #{@travel_date}（10天后），实际: #{booking.departure_date}"
           
-          expect(booking.departure_date).to be >= Date.today,
+          expect(booking.departure_date).to be >= Date.current,
             "出发日期不能早于今天。实际: #{booking.departure_date}"
           
           # 出发时间

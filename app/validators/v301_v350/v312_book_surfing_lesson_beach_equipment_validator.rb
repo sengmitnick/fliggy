@@ -21,7 +21,7 @@ module V301V350
     self.timeout_seconds = 300
     
     def prepare
-      @activity_date = Date.today + 4.days
+      @activity_date = Date.current + 4.days
       @participant_count = 2
       
       # 查找海滨景点

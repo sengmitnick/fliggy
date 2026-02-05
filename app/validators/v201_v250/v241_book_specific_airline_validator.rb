@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @destination_city = '上海'
-      @flight_date = Date.today + 2.days
+      @flight_date = Date.current + 2.days
       @airline = '东方航空'  # 指定航空公司
       
       # 查找指定航空公司的航班（airline包含关键词）

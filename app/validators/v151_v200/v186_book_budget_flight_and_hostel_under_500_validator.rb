@@ -60,7 +60,7 @@ module V151V200
       @hotel_checkout_date = @flight_date + 1.day
       
       {
-        task: "请为学生预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的低价航班和青旅/经济型酒店，" \
+        task: "请为学生预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的低价航班和青旅/经济型酒店，" \
               "总预算≤#{@max_total_budget.to_i}元",
         requirements: {
           departure_city: @departure_city,

@@ -2,12 +2,12 @@
 
 require_relative '../base_validator'
 
-# 验证用例102: 立即预约成都地区酒店套餐（本周末入住，2晚，豪华套餐）
+# 验证用例102: 立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索成都地区的酒店套餐，
 #   选择立即预约模式，选择豪华套餐选项（包含早餐+晚餐），
-#   并指定本周六入住，连住2晚
+#   并指定下周六入住，连住2晚
 # 
 # 复杂度分析:
 #   1. 需要搜索"成都"地区的酒店套餐（从多个城市中筛选）
@@ -24,7 +24,7 @@ require_relative '../base_validator'
 #   - 套餐晚数正确（2晚）(10分)
 #   - 预约模式正确（instant而非stockup）(15分)
 #   - 选择了豪华套餐选项（包含早餐+晚餐）(20分)
-#   - 入住日期正确（本周六开始，连住2晚）(15分)
+#   - 入住日期正确（下周六开始，连住2晚）(15分)
 #   - 订单价格和数量正确 (10分)
 # 
 # 使用方法:
@@ -51,7 +51,7 @@ module V101V150
       @quantity = 1
     
       # 计算下周六的日期（提前预订更符合酒店预订场景）
-      today = Date.today
+      today = Date.current
       days_until_saturday = (6 - today.wday) % 7
       days_until_saturday = 7 if days_until_saturday == 0 # 如果今天是周六，则选择下周六
       @check_in_date = today + days_until_saturday.days + 7.days # 加7天确保是下周六

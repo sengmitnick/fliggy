@@ -69,7 +69,7 @@
             <% next if packages_in_category.empty? %>
             <% is_selected = @vehicle_category.present? ? (@vehicle_category == category) : (index == 0) %>
             <% min_price = packages_in_category.minimum(:price) || 0 %>
-            <%= link_to transfers_packages_path(
+            <%= link_to packages_transfers_path(
               vehicle_category: category,
               transfer_type: @transfer_type,
               service_type: @service_type,
@@ -136,7 +136,8 @@
                       <span class="scale-75"><%= package.provider&.first(2) %></span>
                     </div>
                     <div>
-                      <div class="font-bold text-text-primary text-base"><%= package.provider %></div>
+                      <div class="font-bold text-text-primary text-base"><%= package.vehicle_brand %> <%= package.vehicle_model %></div>
+                      <div class="text-xs text-text-muted mt-0.5"><%= package.provider %></div>
                       <div class="flex flex-wrap gap-1 mt-1">
                         <% package.features_list.each do |feature| %>
                           <span class="text-[10px] text-text-muted"><%= feature %></span>

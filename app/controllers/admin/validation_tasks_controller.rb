@@ -78,8 +78,11 @@ class Admin::ValidationTasksController < Admin::BaseController
 
   # 从 validator_id 中提取目录名
   def extract_directory(validator_id)
+    # 转换为字符串（防止整数类型）
+    validator_id_str = validator_id.to_s
+    
     # 匹配格式如 v001_v050::v001_xxx
-    if validator_id =~ /^([a-z0-9_]+)::/i
+    if validator_id_str =~ /^([a-z0-9_]+)::/i
       Regexp.last_match(1)
     else
       '其他'

@@ -24,7 +24,7 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @destination_city = '三亚'
-      @travel_date = Date.today + 5.days
+      @travel_date = Date.current + 5.days
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 3.days
       @passenger_count = 4  # 4人家庭

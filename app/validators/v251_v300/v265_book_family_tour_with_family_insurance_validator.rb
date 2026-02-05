@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @destination = '三亚'
-      @travel_date = Date.today + 7.days
+      @travel_date = Date.current + 7.days
       @adult_count = 2
       @child_count = 1
       @total_persons = @adult_count + @child_count

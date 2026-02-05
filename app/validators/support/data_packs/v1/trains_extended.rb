@@ -176,4 +176,111 @@ end
 
 Train.insert_all(all_trains)
 
-puts "✓ trains_extended_v1 数据包加载完成（#{all_trains.size}条火车票记录）"
+# 获取刚创建的火车ID列表（通过train_number匹配）
+train_numbers = all_trains.map { |t| t[:train_number] }
+extended_trains = Train.where(data_version: 0, train_number: train_numbers)
+
+puts "\n找到 #{extended_trains.count} 趟扩展火车，开始创建座位和套餐数据..."
+
+# ==================== 为扩展的火车创建座位类型数据 ====================
+puts "\n为扩展的车次创建座位类型数据..."
+all_seats = []
+
+extended_trains.find_each do |train|
+  # 为每趟车创建4种座位类型
+  seat_types = [
+    { 
+      seat_type: 'second_class', 
+      price: train.price_second_class, 
+      total: rand(300..500),
+      available_ratio: rand(0.3..0.9)
+    },
+    { 
+      seat_type: 'first_class', 
+      price: train.price_first_class, 
+      total: rand(100..200),
+      available_ratio: rand(0.3..0.9)
+    },
+    { 
+      seat_type: 'business_class', 
+      price: train.price_business_class, 
+      total: rand(20..50),
+      available_ratio: rand(0.3..0.9)
+    },
+    { 
+      seat_type: 'no_seat', 
+      price: (train.price_second_class * 0.5).round(1), 
+      total: 999,
+      available_ratio: 0.99
+    }
+  ]
+  
+  seat_types.each do |seat_data|
+    available = (seat_data[:total] * seat_data[:available_ratio]).to_i
+    all_seats << {
+      train_id: train.id,
+      seat_type: seat_data[:seat_type],
+      price: seat_data[:price],
+      total_count: seat_data[:total],
+      available_count: available,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+TrainSeat.insert_all(all_seats) if all_seats.any?
+puts "   ✓ 已为扩展的 #{extended_trains.count} 趟火车创建 #{all_seats.size} 个座位类型记录"
+
+# ==================== 为扩展的火车创建订票套餐 ====================
+puts "\n为扩展的车次创建订票套餐..."
+all_options = []
+
+extended_trains.find_each do |train|
+  booking_options = [
+    {
+      train_id: train.id,
+      title: '超值7大权益',
+      description: '含送站、预约座位、延误退改、分享红包等',
+      extra_fee: 59,
+      benefits: ['送站服务', '预约座位', '延误退改', '退票无忧', '分享红包', '出行保障', '优先客服'],
+      priority: 1,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      train_id: train.id,
+      title: '登录12306购票',
+      description: '使用12306账号直接购买，享受官方价格',
+      extra_fee: 0,
+      benefits: ['官方价格', '无额外费用', '账号直购'],
+      priority: 2,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      train_id: train.id,
+      title: '免登12306购票',
+      description: '无需12306账号，快速下单',
+      extra_fee: 25,
+      benefits: ['无需12306', '快速下单', '支付便捷'],
+      priority: 3,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_options.concat(booking_options)
+end
+
+BookingOption.insert_all(all_options) if all_options.any?
+puts "   ✓ 已为扩展的 #{extended_trains.count} 趟火车创建 #{all_options.size} 个订票套餐记录"
+
+puts "\n✓ trains_extended_v1 数据包加载完成（#{all_trains.size}条火车票记录，含座位和套餐数据）"

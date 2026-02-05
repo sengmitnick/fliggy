@@ -9,7 +9,7 @@
       ), class: "text-2xl" do %>
         ←
       <% end %>
-      <span class="text-base font-medium"><%= @train.departure_time.strftime('01月%d日') %> 周<%= @train.departure_time.strftime('%w') %></span>
+      <span class="text-base font-medium"><%= @train.departure_time.strftime('%m月%d日') %> <%= %w[周日 周一 周二 周三 周四 周五 周六][@train.departure_time.wday] %></span>
       <div class="flex items-center space-x-3">
         <button type="button" onclick="window.showToast('功能开发中')" class="text-xl">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

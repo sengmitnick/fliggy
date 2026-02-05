@@ -50,7 +50,7 @@ module V051V100
       @days = 7
       @quantity = 3  # 2成人+1儿童
       @scene = '亲子游'
-      @start_date = Date.today + 7.days  # 7天后开始
+      @start_date = Date.current + 7.days  # 7天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找适合亲子游的境内旅游保险产品（注意：查询基线数据 data_version=0）

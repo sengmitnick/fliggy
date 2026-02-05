@@ -24,7 +24,7 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @destination_city = '北京'
-      @outbound_date = Date.today + 3.days
+      @outbound_date = Date.current + 3.days
       @return_date = @outbound_date + 2.days
       @check_in_date = @outbound_date
       @check_out_date = @return_date

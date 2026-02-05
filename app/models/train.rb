@@ -122,9 +122,17 @@ class Train < ApplicationRecord
 
   # Search trains for a route and date with advanced filters
   def self.search(departure_city, arrival_city, date, options = {})
-    trains = by_route(departure_city, arrival_city)
-             .by_date(date)
-             .available
+    # First check if trains exist for this route and date
+    trains = by_route(departure_city, arrival_city).by_date(date)
+    
+    # Auto-generate trains if none exist (like Flight model)
+    if trains.empty?
+      generate_for_route(departure_city, arrival_city, date)
+      trains = by_route(departure_city, arrival_city).by_date(date)
+    end
+    
+    # Apply available filter
+    trains = trains.available
 
     # Apply train type filter (legacy support for only_high_speed)
     trains = trains.high_speed if options[:only_high_speed]

@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @city = '成都'
       @room_type = '大床房'
-      @check_in_date = Date.today + 2.days
+      @check_in_date = Date.current + 2.days
       @check_out_date = @check_in_date + 2.days
       
       # 查找有指定房型的酒店

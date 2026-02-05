@@ -70,7 +70,7 @@ module V151V200
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
-        task: "请预订#{@bus_date.strftime('%Y年%m月%d日')}（#{(@bus_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的晚班大巴（18:00后出发），" \
+        task: "请预订#{@bus_date.strftime('%Y年%m月%d日')}（#{(@bus_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的晚班大巴（18:00后出发），" \
               "并在#{@arrival_city}预订支持深夜入住的酒店",
         requirements: {
           departure_city: @departure_city,

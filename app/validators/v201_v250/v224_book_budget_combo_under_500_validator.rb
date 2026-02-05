@@ -24,7 +24,7 @@ module V201V250
     def prepare
       @departure_city = '杭州'
       @arrival_city = '上海'
-      @travel_date = Date.today + 2.days
+      @travel_date = Date.current + 2.days
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
       @max_item_price = 300

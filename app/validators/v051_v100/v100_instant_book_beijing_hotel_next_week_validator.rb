@@ -51,7 +51,7 @@ module V051V100
       @quantity = 1
     
       # 计算下周一的日期
-      @check_in_date = Date.today.next_occurring(:monday)
+      @check_in_date = Date.current.next_occurring(:monday)
       @check_out_date = @check_in_date + @night_count.days
     
       # 查找北京地区的2晚套餐（注意：查询基线数据 data_version=0）
@@ -238,7 +238,8 @@ module V051V100
         check_out_date: @check_out_date,
         status: 'pending',
         contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_phone: passenger.phone,
+        data_version: @data_version
       )
     
       # 返回操作信息

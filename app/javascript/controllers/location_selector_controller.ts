@@ -11,7 +11,12 @@ export default class extends Controller<HTMLElement> {
     // stimulus-validator: disable-next-line
     "locationList",
     "locationInput",
-    "locationDisplay"
+    "locationDisplay",
+    "cityDisplay",
+    "airportDisplay",
+    "airportInput",
+    "stationDisplay",
+    "stationInput"
   ]
 
   static values = {
@@ -34,8 +39,18 @@ export default class extends Controller<HTMLElement> {
   declare readonly locationListTarget: HTMLElement
   declare readonly locationInputTarget: HTMLInputElement
   declare readonly locationDisplayTarget: HTMLElement
+  declare readonly hasCityDisplayTarget: boolean
+  declare readonly cityDisplayTarget: HTMLElement
   declare readonly hasLocationInputTarget: boolean
   declare readonly hasLocationDisplayTarget: boolean
+  declare readonly hasAirportDisplayTarget: boolean
+  declare readonly airportDisplayTarget: HTMLElement
+  declare readonly hasAirportInputTarget: boolean
+  declare readonly airportInputTarget: HTMLInputElement
+  declare readonly hasStationDisplayTarget: boolean
+  declare readonly stationDisplayTarget: HTMLElement
+  declare readonly hasStationInputTarget: boolean
+  declare readonly stationInputTarget: HTMLInputElement
   // stimulus-validator: disable-next-line
   declare readonly locationTypeValue: string
   // stimulus-validator: disable-next-line
@@ -46,17 +61,20 @@ export default class extends Controller<HTMLElement> {
   declare readonly apiEndpointValue: string
 
   private selectedLocation: { name: string; address: string } | null = null
+  private currentLocationType: string = '' // 'airport', 'station', or ''
 
   connect(): void {
     console.log("LocationSelector connected")
     // Get initial city from the page
     this.initializeCurrentCity()
-    // Listen for city changes
+    // Listen for city changes from city-selector modal
+    document.addEventListener('city-selector:city-changed', this.handleCityChange.bind(this))
     document.addEventListener('city-selector:city-selected', this.handleCityChange.bind(this))
   }
 
   disconnect(): void {
     console.log("LocationSelector disconnected")
+    document.removeEventListener('city-selector:city-changed', this.handleCityChange.bind(this))
     document.removeEventListener('city-selector:city-selected', this.handleCityChange.bind(this))
   }
 
@@ -86,11 +104,21 @@ export default class extends Controller<HTMLElement> {
     const { cityName } = customEvent.detail
     console.log('LocationSelector: City changed to', cityName)
     this.currentCityValue = cityName
-    // Reload locations when modal is opened
+    // Update city display if modal is open
+    if (this.hasCityDisplayTarget && !this.modalTarget.classList.contains('hidden')) {
+      this.cityDisplayTarget.textContent = cityName
+      // Reload locations for new city
+      this.loadLocations()
+    }
   }
 
-  openModal(): void {
+  openModal(event: Event): void {
     console.log('[LocationSelector] ========== openModal START ===========')
+    
+    // Get location type from the button that triggered this modal
+    const button = event.currentTarget as HTMLElement
+    this.currentLocationType = button.dataset.locationType || ''
+    console.log('[LocationSelector] Location type:', this.currentLocationType)
     
     // For transfers page: use arrival city from flight data (already set in initializeCurrentCity)
     if (this.hasArrivalCityValue && this.arrivalCityValue) {
@@ -152,6 +180,11 @@ export default class extends Controller<HTMLElement> {
       this.modalTitleTarget.textContent = `选择${this.currentCityValue}的地点`
     }
     
+    // Update city display
+    if (this.hasCityDisplayTarget) {
+      this.cityDisplayTarget.textContent = this.currentCityValue || '深圳'
+    }
+    
     // Clear previous content immediately
     this.locationListTarget.innerHTML = '<div class="text-center py-8 text-text-muted">加载中...</div>'
     
@@ -195,16 +228,58 @@ export default class extends Controller<HTMLElement> {
       return
     }
 
-    // Update hidden input field if exists
-    if (this.hasLocationInputTarget) {
-      this.locationInputTarget.value = this.selectedLocation.name
-    }
+    console.log('[LocationSelector] Confirming location:', this.selectedLocation.name)
+    console.log('[LocationSelector] Current location type:', this.currentLocationType)
 
-    // Update display element if exists
-    if (this.hasLocationDisplayTarget) {
-      this.locationDisplayTarget.textContent = this.selectedLocation.name
-      this.locationDisplayTarget.classList.remove("text-text-muted")
-      this.locationDisplayTarget.classList.add("text-text-primary")
+    // Update based on location type
+    if (this.currentLocationType === 'airport') {
+      // Update airport display and input
+      if (this.hasAirportDisplayTarget) {
+        this.airportDisplayTarget.textContent = this.selectedLocation.name
+        this.airportDisplayTarget.classList.remove("text-text-muted")
+        this.airportDisplayTarget.classList.add("text-text-primary")
+        console.log('[LocationSelector] Updated airportDisplay')
+      }
+      if (this.hasAirportInputTarget) {
+        this.airportInputTarget.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated airportInput')
+      }
+      // 🎯 CRITICAL: Also update hidden input for location_from
+      const locationFromInput = document.getElementById('transfer-location-from') as HTMLInputElement
+      if (locationFromInput) {
+        locationFromInput.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated transfer-location-from hidden input:', this.selectedLocation.name)
+      }
+    } else if (this.currentLocationType === 'station') {
+      // Update station display and input
+      if (this.hasStationDisplayTarget) {
+        this.stationDisplayTarget.textContent = this.selectedLocation.name
+        this.stationDisplayTarget.classList.remove("text-text-muted")
+        this.stationDisplayTarget.classList.add("text-text-primary")
+        console.log('[LocationSelector] Updated stationDisplay')
+      }
+      if (this.hasStationInputTarget) {
+        this.stationInputTarget.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated stationInput')
+      }
+      // 🎯 CRITICAL: Also update hidden input for location_from
+      const locationFromInput = document.getElementById('transfer-location-from') as HTMLInputElement
+      if (locationFromInput) {
+        locationFromInput.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated transfer-location-from hidden input:', this.selectedLocation.name)
+      }
+    } else {
+      // Default: update location display and input (for 上车点/下车点)
+      if (this.hasLocationInputTarget) {
+        this.locationInputTarget.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated locationInput')
+      }
+      if (this.hasLocationDisplayTarget) {
+        this.locationDisplayTarget.textContent = this.selectedLocation.name
+        this.locationDisplayTarget.classList.remove("text-text-muted")
+        this.locationDisplayTarget.classList.add("text-text-primary")
+        console.log('[LocationSelector] Updated locationDisplay')
+      }
     }
 
     // Dispatch event for other controllers (e.g. car-rental-tabs)
@@ -218,6 +293,31 @@ export default class extends Controller<HTMLElement> {
     document.dispatchEvent(event)
 
     this.closeModal()
+  }
+
+  // Open city selector modal
+  openCitySelector(): void {
+    console.log('[LocationSelector] Opening city selector')
+    // Find the city-selector controller on the page
+    const citySelectorElement = document.querySelector('[data-controller*="city-selector"]')
+    if (!citySelectorElement) {
+      console.error('[LocationSelector] City selector element not found')
+      return
+    }
+
+    // Get the city-selector controller instance
+    const citySelectorController = this.application.getControllerForElementAndIdentifier(
+      citySelectorElement,
+      'city-selector'
+    ) as any
+
+    if (!citySelectorController) {
+      console.error('[LocationSelector] City selector controller not found')
+      return
+    }
+
+    // Call openDeparture method to open the city selector modal
+    citySelectorController.openDeparture()
   }
 
   search(event: Event): void {

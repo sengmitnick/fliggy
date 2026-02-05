@@ -48,7 +48,7 @@ module V051V100
       @quantity = 1
       @scene = '交通综合'
       @destination = '北京'  # 明确具体城市，交通意外险需要指定出发地
-      @start_date = Date.today + 3.days  # 3天后开始
+      @start_date = Date.current + 3.days  # 3天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找全年交通意外险产品（注意：查询基线数据 data_version=0）

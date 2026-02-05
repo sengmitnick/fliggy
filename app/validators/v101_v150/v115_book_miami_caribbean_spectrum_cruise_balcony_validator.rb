@@ -11,17 +11,17 @@ require_relative '../base_validator'
 # - 舱房类型选择（阳台房）
 # - 出发月份筛选（5月）
 # - 日期优化选择（选择最近可用日期）
-# - 预订数量验证（3位成人）
+# - 预订数量验证（2位成人）
 # - 价格合理性验证
 #
 # 用户需求：
-# "我想5月份坐海洋光谱号游加勒比，10天9晚的行程，订3间阳台房"
+# "我想5月份坐海洋光谱号游加勒比，10天9晚的行程，订2间阳台房"
 module V101V150
   class V115BookMiamiCaribbeanSpectrumCruiseBalconyValidator < BaseValidator
     self.validator_id = 'v115_book_miami_caribbean_spectrum_cruise_balcony_validator'
     self.task_id = 'b4a00a86-51cd-40b8-800a-67287efdfdd6'
     self.title = '预订加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）'
-    self.description = '预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为3位成人'
+    self.description = '预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为2位成人'
     self.timeout_seconds = 240
 
     def prepare
@@ -31,7 +31,7 @@ module V101V150
       expected_nights = 9
       expected_cabin_category = 'balcony'
       expected_month = 5
-      adult_count = 3
+      adult_count = 2
 
       {
         task: "请预订加勒比邮轮，要求海洋光谱号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订阳台房（舒适之选），为#{adult_count}位成人",
@@ -52,7 +52,7 @@ module V101V150
       expected_nights = 9
       expected_cabin_category = 'balcony'
       expected_month = 5
-      adult_count = 3
+      adult_count = 2
 
       sailing = CruiseSailing
         .joins(:cruise_ship)
@@ -60,7 +60,7 @@ module V101V150
         .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
         .where(duration_days: expected_days, duration_nights: expected_nights)
         .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-        .where('departure_date >= ?', Date.today)
+        .where('departure_date >= ?', Date.current)
         .where(data_version: '0')
         .order(:departure_date)
         .first
@@ -106,7 +106,7 @@ module V101V150
       expected_nights = 9
       expected_cabin_category = 'balcony'
       expected_month = 5
-      adult_count = 3
+      adult_count = 2
 
       add_assertion "订单已创建", weight: 20 do
         all_orders = CruiseOrder
@@ -181,7 +181,7 @@ module V101V150
           .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
           .where(duration_days: expected_days, duration_nights: expected_nights)
           .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-          .where('departure_date >= ?', Date.today)
+          .where('departure_date >= ?', Date.current)
           .order(:departure_date)
           .to_a
         

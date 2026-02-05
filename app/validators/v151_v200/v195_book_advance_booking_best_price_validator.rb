@@ -24,7 +24,7 @@ module V151V200
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @future_date = Date.today + 15.days
+      @future_date = Date.current + 15.days
       
       # 查找15天后的航班
       @available_flights = Flight

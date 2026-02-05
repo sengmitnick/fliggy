@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_04_090615) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_05_115551) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1852,6 +1852,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_04_090615) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "data_version", limit: 50, default: "0", null: false
+    t.string "vehicle_model"
+    t.string "vehicle_brand"
     t.index ["data_version"], name: "index_transfer_packages_on_data_version"
   end
 

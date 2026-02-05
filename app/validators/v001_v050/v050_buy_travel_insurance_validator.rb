@@ -50,7 +50,7 @@ module V001V050
       @destination_city = '成都'
       @days = 7
       @quantity = 1
-      @start_date = Date.today + 2.days  # 后天开始（2天后）
+      @start_date = Date.current + 2.days  # 后天开始（2天后）
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找目的地城市
@@ -64,7 +64,7 @@ module V001V050
        .available_in_city(@city.id)
     
       # 计算相对时间描述
-      days_until_start = (@start_date - Date.today).to_i
+      days_until_start = (@start_date - Date.current).to_i
       start_time_desc = case days_until_start
       when 0 then "今天"
       when 1 then "明天"

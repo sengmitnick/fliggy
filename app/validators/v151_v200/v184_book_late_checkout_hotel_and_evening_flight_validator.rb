@@ -53,7 +53,7 @@ module V151V200
       
       {
         task: "请在#{@departure_city}预订支持延迟退房（下午2点后）的酒店，入住#{@hotel_checkin_date.strftime('%Y年%m月%d日')}，" \
-              "退房#{@hotel_checkout_date.strftime('%Y年%m月%d日')}，并预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.today).to_i}天后）晚上从#{@departure_city}到#{@arrival_city}的航班",
+              "退房#{@hotel_checkout_date.strftime('%Y年%m月%d日')}，并预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）晚上从#{@departure_city}到#{@arrival_city}的航班",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,

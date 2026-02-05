@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @departure_city = '深圳'
       @destination_city = '北京'
-      @flight_date = Date.today + 2.days
+      @flight_date = Date.current + 2.days
       
       # 查找直飞航班（is_direct=true或stops=0）
       @available_flights = Flight.where(

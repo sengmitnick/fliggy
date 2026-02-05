@@ -63,7 +63,7 @@ module V151V200
       @hotel_checkout_date = @friday_date + 2.days  # 周日退房
       
       {
-        task: "请预订#{@friday_date.strftime('%Y年%m月%d日')}（#{(@friday_date - Date.today).to_i}天后，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
+        task: "请预订#{@friday_date.strftime('%Y年%m月%d日')}（#{(@friday_date - Date.current).to_i}天后，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
               "并预订周末度假酒店套餐（周五到周日，2晚）",
         requirements: {
           departure_city: @departure_city,

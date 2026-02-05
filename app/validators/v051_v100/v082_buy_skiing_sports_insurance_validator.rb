@@ -49,7 +49,7 @@ module V051V100
       @days = 3
       @quantity = 1
       @scene = '滑雪'
-      @start_date = Date.today + 15.days  # 15天后开始
+      @start_date = Date.current + 15.days  # 15天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
     
       # 查找适合滑雪的境内旅游保险产品（注意：查询基线数据 data_version=0）

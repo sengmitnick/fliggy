@@ -82,7 +82,7 @@ export default class extends Controller {
       // 重新加载页面，传递新的城市参数
       const currentDate = this.getCurrentDate()
       const currentTab = this.getCurrentTab()
-      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&tab=${currentTab}`
+      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&departure_date=${currentDate}&tab=${currentTab}`
     }
   }
 
@@ -96,7 +96,7 @@ export default class extends Controller {
       // 直接导航到新城市页面
       const currentDate = this.getCurrentDate()
       const currentTab = this.getCurrentTab()
-      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&date=${currentDate}&tab=${currentTab}`
+      window.location.href = `/chartered_tours/search?city=${encodeURIComponent(cityName)}&departure_date=${currentDate}&tab=${currentTab}`
     }
   }
 
@@ -160,7 +160,7 @@ export default class extends Controller {
     const date = this.getCurrentDate()
     
     // 跳转到charter_routes搜索页面
-    window.location.href = `/charter_routes/search?city=${encodeURIComponent(city)}&date=${date}`
+    window.location.href = `/charter_routes/search?city=${encodeURIComponent(city)}&departure_date=${date}`
   }
 
   // 获取当前选择的城市
@@ -171,7 +171,8 @@ export default class extends Controller {
   // 获取当前选择的日期（从URL参数或dateDisplay目标）
   private getCurrentDate(): string {
     const urlParams = new URLSearchParams(window.location.search)
-    const dateParam = urlParams.get('date')
+    // 支持两种参数名：departure_date（新）和 date（兼容旧版）
+    const dateParam = urlParams.get('departure_date') || urlParams.get('date')
     
     if (dateParam) {
       return dateParam

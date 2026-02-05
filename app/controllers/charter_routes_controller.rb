@@ -8,7 +8,7 @@ class CharterRoutesController < ApplicationController
     @attractions = @route.attractions.order('route_attractions.position')
     
     # 获取出发日期（默认明天）
-    @departure_date = params[:departure_date].present? ? Date.parse(params[:departure_date]) : Date.tomorrow
+    @departure_date = params[:departure_date].present? ? Date.parse(params[:departure_date]) : (Date.today + 1.day)
     
     # 计算实际最低价（6小时，所有车型中的最低价）
     @vehicle_types = VehicleType.all
@@ -31,7 +31,14 @@ class CharterRoutesController < ApplicationController
     @category = params[:category] || 'all'
     
     # 获取出发日期（从URL参数或默认明天）
-    @departure_date = params[:date].present? ? Date.parse(params[:date]) : Date.tomorrow
+    # 支持两种参数名：departure_date（新）和 date（兼容旧版）
+    @departure_date = if params[:departure_date].present?
+                        Date.parse(params[:departure_date])
+                      elsif params[:date].present?
+                        Date.parse(params[:date])
+                      else
+                        Date.today + 1.day
+                      end
     
     # 获取所有城市并按地区分组（用于城市选择器）
     # 使用与首页相同的精选旅游城市列表

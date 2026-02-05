@@ -22,7 +22,7 @@ module V251V300
     
     def prepare
       @activity_type = '攀岩'
-      @visit_date = Date.today + 5.days
+      @visit_date = Date.current + 5.days
       
       # 查找极限运动活动
       @activity = AttractionActivity

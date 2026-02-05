@@ -52,7 +52,7 @@ module V151V200
       @arrival_datetime = @sample_train.arrival_time
       
       {
-        task: "请预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.today).to_i}天后）从#{@departure_city}到#{@arrival_city}的夜间火车（20:00后出发），" \
+        task: "请预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的夜间火车（20:00后出发），" \
               "并预订清晨接站服务",
         requirements: {
           departure_city: @departure_city,

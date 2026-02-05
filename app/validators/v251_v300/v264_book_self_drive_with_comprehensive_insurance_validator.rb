@@ -23,7 +23,7 @@ module V251V300
     
     def prepare
       @city = '杭州'
-      @pickup_date = Date.today + 1.day
+      @pickup_date = Date.current + 1.day
       @return_date = @pickup_date + 5.days
       @rental_days = (@return_date - @pickup_date).to_i
       

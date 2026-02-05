@@ -8,7 +8,7 @@ require_relative '../base_validator'
 # 1. 路线选择: 北京文化深度游
 # 2. 车型选择: 豪华5座（座位数≥2人）
 # 3. 包车时长: 6小时（半日游标准时长）
-# 4. 出发日期: 5天后（Date.today + 5.days）
+# 4. 出发日期: 5天后（Date.current + 5.days）
 # 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
 module V251V300
   class V251BookBeijingCultureDeepCharteredTourValidator < BaseValidator
@@ -23,8 +23,8 @@ module V251V300
       @route_keyword = '文化深度游'
       @vehicle_type_name = '豪华5座'
       @duration_hours = 6
-      @passenger_count = 1  # 前端无人数选择功能，默认为1
-      @travel_date = Date.today + 5.days
+      @passenger_count = 2
+      @travel_date = Date.current + 5.days
     
       # 查询可用路线
       @available_routes = CharterRoute.where(data_version: @data_version)
@@ -137,7 +137,7 @@ module V251V300
           expect(booking.departure_date).to eq(@travel_date),
             "出发日期错误。期望: #{@travel_date}（5天后），实际: #{booking.departure_date}"
           
-          expect(booking.departure_date).to be >= Date.today,
+          expect(booking.departure_date).to be >= Date.current,
             "出发日期不能早于今天。实际: #{booking.departure_date}"
           
           # 出发时间

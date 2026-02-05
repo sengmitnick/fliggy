@@ -6,13 +6,14 @@ require_relative '../base_validator'
 #
 # 任务描述:
 #   用户预订了从北京国贸CBD到首都国际机场T3航站楼的送机服务（明天上午08:00出发）。
+#   航班信息：CA1901 北京→上海 10:00起飞，从首都T3航站楼登机。
 #   需要创建1个订单：
 #   - 1个送机订单（国贸CBD → 首都T3，出发时间08:00）
 #
 # 复杂度分析:
 #   1. 需要明确上车地点（国贸CBD）
 #   2. 需要明确目的地机场和航站楼（首都T3）
-#   3. 需要明确出发时间（08:00）
+#   3. 需要明确出发时间（08:00，航班10:00起飞，提前2小时）
 #   4. 选择经济5座并选择最优价格
 #
 # 评分标准:
@@ -34,16 +35,16 @@ module V101V150
   class V121BookAirportDropoffValidator < BaseValidator
     self.validator_id = 'v121_book_airport_dropoff_validator'
     self.task_id = 'a8feeb5f-ef73-4817-919f-ee843937f5d8'
-    self.title = '预订送机服务（北京国贸CBD→首都机场T3）'
-    self.description = '从北京国贸CBD送机到首都国际机场T3航站楼（明天上午08:00出发）'
+    self.title = '预订送机服务（上海陆家嘴→浦东机场T2）'
+    self.description = '从上海陆家嘴金融区送机到浦东国际机场T2航站楼（明天上午06:00出发），搭乘07:00飞往成都的MU5422航班'
     self.timeout_seconds = 300
   
     def prepare
-      @city = '北京'
-      @departure_location = '国贸CBD'
-      @destination_airport = '首都国际机场T3航站楼'
+      @city = '上海'
+      @departure_location = '陆家嘴金融区'
+      @destination_airport = '浦东国际机场T2航站楼'
       @departure_date = Date.current + 1.day
-      @departure_time = Time.zone.parse("#{@departure_date} 08:00")
+      @departure_time = Time.zone.parse("#{@departure_date} 06:00")
       @vehicle_category = 'economy_5'
       @transfer_type = 'airport_dropoff'
       @service_type = 'to_airport'
@@ -76,17 +77,18 @@ module V101V150
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}上午08:00从#{@departure_location}到#{@destination_airport}的送机服务（选择经济5座车型）",
+        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}上午06:00从#{@departure_location}到#{@destination_airport}的送机服务（选择经济5座车型）。我要搭乘07:00飞往成都的MU5422航班，从浦东T2航站楼登机",
         requirements: {
           city: @city,
           departure_location: @departure_location,
           destination_airport: @destination_airport,
           departure_date: @departure_date.to_s,
-          departure_time: '08:00',
+          departure_time: '06:00',
           vehicle_category: '经济5座',
-          service_description: '送机服务（到机场）'
+          service_description: '送机服务（到机场）',
+          flight_info: 'MU5422 上海→成都 07:00起飞（浦东T2）'
         },
-        hint: "送机服务需要明确上车地点和目的地机场及航站楼。出发时间为08:00",
+        hint: "送机服务需要明确上车地点和目的地机场及航站楼。出发时间为06:00，航班07:00起飞，提前1小时到机场",
         statistics: {
           available_packages: @available_packages.count,
           price_range: {
@@ -117,18 +119,18 @@ module V101V150
       end
     
       add_assertion "目的地正确（#{@destination_airport}）", weight: 20 do
-        location_matches = @transfer.location_to.include?('首都') && @transfer.location_to.include?('T3')
+        location_matches = @transfer.location_to.include?('浦东') && @transfer.location_to.include?('T2')
         
         expect(location_matches).to be_truthy,
-          "目的地错误。期望: #{@destination_airport}（首都T3），实际: #{@transfer.location_to}"
+          "目的地错误。期望: #{@destination_airport}（浦东T2），实际: #{@transfer.location_to}"
       end
     
-      add_assertion "出发时间正确（08:00）", weight: 15 do
+      add_assertion "出发时间正确（06:00）", weight: 15 do
         pickup_hour = @transfer.pickup_datetime.hour
         pickup_minute = @transfer.pickup_datetime.min
       
-        expect(pickup_hour).to eq(8), "出发时间错误。期望: 08:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
-        expect(pickup_minute).to eq(0), "出发时间错误。期望: 08:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
+        expect(pickup_hour).to eq(6), "出发时间错误。期望: 06:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
+        expect(pickup_minute).to eq(0), "出发时间错误。期望: 06:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
       end
     
       add_assertion "价格选择合理", weight: 20 do

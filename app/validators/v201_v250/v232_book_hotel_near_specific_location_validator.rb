@@ -23,7 +23,7 @@ module V201V250
     def prepare
       @city = '北京'
       @location_keyword = 'CBD核心区'  # 市中心/商圈
-      @check_in_date = Date.today + 2.days
+      @check_in_date = Date.current + 2.days
       @check_out_date = @check_in_date + 2.days
       
       # 查找包含位置关键词的酒店

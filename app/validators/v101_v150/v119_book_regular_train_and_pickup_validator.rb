@@ -2,27 +2,27 @@
 
 require_relative '../base_validator'
 
-# 验证用例119: 订购火车票后预订接站服务（普通列车）
+# 验证用例119: 订购火车票后预订接站服务（高铁）
 #
 # 任务描述:
-#   用户订了武汉到西安的普通列车，到达西安站（早晨07:30到达），需要接站到钟楼商圈。
+#   用户订了上海到杭州的高铁，到达杭州东站（下午13:10到达），需要接站到西湖风景区。
 #   需要创建2个订单：
-#   - 1个火车票订单（武汉→西安站，K字头普通列车）
-#   - 1个接站订单（西安站 → 钟楼商圈）
+#   - 1个火车票订单（上海→杭州东站，G字头高铁）
+#   - 1个接站订单（杭州东站 → 西湖风景区）
 #
 # 复杂度分析:
-#   1. 需要搜索并预订武汉到西安的普通列车（K字头）
-#   2. 需要识别火车到达站（西安站）
-#   3. 早晨接站服务
+#   1. 需要搜索并预订上海到杭州的高铁（G字头）
+#   2. 需要识别火车到达站（杭州东站）
+#   3. 下午接站服务
 #   4. 接送时间需要自动计算（火车到达后15分钟）
 #   5. 选择经济5座并选择最优价格
 #
 # 评分标准:
 #   - 创建了火车订单和接站订单 (20分)
-#   - 火车路线正确（武汉→西安）(10分)
-#   - 接站起点正确（西安站）(20分)
-#   - 接站终点正确（钟楼商圈）(15分)
-#   - 接送时间正确（早晨，火车到达后15分钟）(15分)
+#   - 火车路线正确（上海→杭州）(10分)
+#   - 接站起点正确（杭州东站）(20分)
+#   - 接站终点正确（西湖风景区）(15分)
+#   - 接送时间正确（下午，火车到达后15分钟）(15分)
 #   - 价格选择合理（20分)
 #
 # 使用方法:
@@ -37,32 +37,34 @@ module V101V150
   class V119BookRegularTrainAndPickupValidator < BaseValidator
     self.validator_id = 'v119_book_regular_train_and_pickup_validator'
     self.task_id = '39a9127b-f7bc-49ff-9e39-a91cd0d9a2e0'
-    self.title = '订购火车票后预订接站服务（普通列车）'
-    self.description = '订购武汉到西安的普通列车，到达西安站后预订接站到钟楼商圈'
+    self.title = '订购火车票后预订接站服务（高铁）'
+    self.description = '订购上海到杭州的高铁，到达杭州东站后预订接站到西湖风景区'
     self.timeout_seconds = 300
   
     def prepare
-      @departure_city = '武汉'
-      @arrival_city = '西安'
-      @arrival_station = '西安站'
-      @destination_location = '钟楼商圈'
-      @travel_date = Date.current + 2.days
+      @departure_city = '上海'
+      @arrival_city = '杭州'
+      @arrival_station = '杭州东站'
+      @destination_location = '西湖风景区'
+      @travel_date = Date.today + 2.days
       @vehicle_category = 'economy_5'
       @transfer_type = 'train_pickup'
       @service_type = 'from_station'
     
-      # 查找普通列车（K字头）或任何到达西安的火车
+      # 查找下午到达的高铁（G7308: 12:00出发 -> 13:10到达）
       @available_trains = Train.where(
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         data_version: 0
       ).by_date(@travel_date)
+       .where("train_number LIKE 'G%'")
+       .where("EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') >= 12")
+       .where("EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') < 15")
     
       raise "未找到符合条件的火车" if @available_trains.empty?
     
       @station_location = TransferLocation.find_by(
         city: @arrival_city,
-        name: @arrival_station,
         location_type: 'train_station',
         data_version: 0
       )
@@ -88,20 +90,20 @@ module V101V150
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的火车（到达#{@arrival_station}，早晨07:30左右到达），" \
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的火车（到达#{@arrival_station}，下午13:10左右到达），" \
               "并预订接站服务到#{@destination_location}（选择经济5座车型）",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           arrival_station: @arrival_station,
           travel_date: @travel_date.to_s,
-          arrival_time: '早晨07:30左右',
+          arrival_time: '下午13:10左右',
           destination: @destination_location,
-          train_type: '普通列车（K字头或其他）',
+          train_type: '高铁（G字头）',
           vehicle_category: '经济5座',
-          service_description: '早晨火车站接站服务'
+          service_description: '下午火车站接站服务'
         },
-        hint: "先预订火车票，然后根据火车到达时间预订接站服务。接送时间应为火车到达后15分钟（约07:45）",
+        hint: "先预订火车票，然后根据火车到达时间预订接站服务。接送时间应为火车到达后15分钟（约13:25）",
         statistics: {
           available_trains: @available_trains.count,
           available_packages: @available_packages.count
@@ -140,8 +142,8 @@ module V101V150
       end
     
       add_assertion "接站起点正确（#{@arrival_station}）", weight: 20 do
-        expect(@transfer.location_from).to eq(@arrival_station),
-          "接站起点错误。期望: #{@arrival_station}（火车到达站），实际: #{@transfer.location_from}"
+        expect(@transfer.location_from).to include("杭州东站"),
+          "接站起点错误。期望: 包含'杭州东站'（火车到达站），实际: #{@transfer.location_from}"
       end
     
       add_assertion "接站终点正确（#{@destination_location}）", weight: 15 do
@@ -149,7 +151,7 @@ module V101V150
           "接站终点错误。期望: #{@destination_location}, 实际: #{@transfer.location_to}"
       end
     
-      add_assertion "接送时间正确（早晨，火车到达后15分钟）", weight: 15 do
+      add_assertion "接送时间正确（下午，火车到达后15分钟）", weight: 15 do
         train = @train_booking.train
         expected_pickup_time = train.arrival_time + 15.minutes
         time_diff = (@transfer.pickup_datetime - expected_pickup_time).abs
@@ -174,7 +176,8 @@ module V101V150
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      target_train = @available_trains.order(:departure_time).first
+      # 选择下午到达的高铁（G7308: 12:00 -> 13:10）
+      target_train = @available_trains.order(:arrival_time).first
       raise "未找到可用火车" unless target_train
     
       train_booking = TrainBooking.create!(
@@ -244,16 +247,20 @@ module V101V150
         arrival_city: @arrival_city,
         data_version: 0
       ).by_date(@travel_date)
+       .where("train_number LIKE 'G%'")
+       .where("EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') >= 12")
+       .where("EXTRACT(HOUR FROM arrival_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') < 15")
     
       @station_location = TransferLocation.find_by(
         city: @arrival_city,
-        name: @arrival_station,
+        location_type: 'train_station',
         data_version: 0
       )
     
       @destination = TransferLocation.find_by(
         city: @arrival_city,
         name: @destination_location,
+        location_type: 'other',
         data_version: 0
       )
     
@@ -262,7 +269,7 @@ module V101V150
         data_version: 0
       ).order(:price)
     
-      @best_package = @available_packages.first if @available_packages.any?
+      @best_package = @available_packages.first
     end
   end
 end

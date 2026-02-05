@@ -22,7 +22,7 @@ module V201V250
     
     def prepare
       @city = '广州'
-      @check_in_date = Date.today + 1.day
+      @check_in_date = Date.current + 1.day
       @check_out_date = @check_in_date + 2.days
       
       # 查找提供早餐的酒店（通过facilities或name包含"早餐"）
