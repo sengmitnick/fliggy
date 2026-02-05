@@ -96,6 +96,13 @@ When developing features that require User or Order models, **DO NOT create them
    - **UUID auto-generated**: task_id field automatically generated, no manual addition needed
    - **Syntax**: `rails generate validator book_hotel "预订酒店" "用户需要预订经济型酒店"`
    - **Auto-creates**: Validator file with complete boilerplate, UUID, auto-incremented validator number
+   - **⚠️ validator_id Format Requirements (CRITICAL)**:
+     - ✅ MUST be String type (NOT Integer or other types)
+     - ✅ MUST match filename exactly: `'v001_book_hotel_validator'` for `v001_book_hotel_validator.rb`
+     - ✅ Generator automatically creates correct format: `self.validator_id = 'v{number}_{name}_validator'`
+     - ❌ NEVER use numeric validator_id: `self.validator_id = 123` (WRONG)
+     - ❌ NEVER use mismatched name: `self.validator_id = 'v002_different_name'` (WRONG)
+     - 🔍 Validation: `rake validator:simulate` Step 1 checks format automatically
    - **⚠️ CRITICAL - Generator creates SKELETON ONLY**: The template intentionally leaves `simulate` method unimplemented with `raise NotImplementedError`
    - **MANDATORY Implementation Steps** (after running generator):
      1. **Implement `prepare` method**: Define task parameters, query data packs, validate data availability, return task info
@@ -105,8 +112,9 @@ When developing features that require User or Order models, **DO NOT create them
      - ❌ Leaving `simulate` method with `raise NotImplementedError` → causes validator failure
      - ❌ Forgetting `data_version: @data_version` filter in queries → picks up wrong session data
      - ❌ Not implementing `execution_state_data` and `restore_from_state` → state lost across requests
+     - ❌ Manually changing validator_id to wrong format → detected by `rake validator:simulate` Step 1
    - **Testing**: Run `rake validator:simulate` after implementation to verify all 3 methods work correctly
-   - **Documentation**: See `docs/VALIDATOR_GENERATOR.md` for complete guide
+   - **Documentation**: See `docs/VALIDATOR_ID_FORMAT_CHECK.md` for validator_id format check details
 
 Do not recreate administrator functionality in User model. Administrator system already exists. Adding admin page low priority.
 
