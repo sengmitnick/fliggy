@@ -28,6 +28,9 @@ module DataVersionable
     # 在创建记录时自动设置 data_version
     before_create :set_data_version
     
+    # 自动过滤 data_version：查询时只返回基线数据('0') + 当前会话的 data_version
+    default_scope { where(data_version: DataVersionable.current_versions) }
+    
     # 自动注册模型到全局列表（调用模块级别的方法）
     DataVersionable.register_model(self)
   end
@@ -44,6 +47,27 @@ module DataVersionable
   # 重置模型列表（仅用于测试）
   def self.reset_models!
     @versionable_models = []
+  end
+  
+  # 获取当前会话应该查询的 data_version 列表
+  # 返回: ['0'] 或 ['0', 'current_session_version']
+  def self.current_versions
+    # 从 PostgreSQL 读取当前会话的 app.data_version 变量
+    version_str = ActiveRecord::Base.connection.execute(
+      "SELECT current_setting('app.data_version', true) AS version"
+    ).first&.dig('version')
+    
+    # 如果没有设置或为 '0'，只返回基线数据
+    # 如果设置了其他值，返回基线 + 当前版本
+    if version_str.blank? || version_str == '0'
+      ['0']
+    else
+      ['0', version_str]
+    end
+  rescue => e
+    # 如果查询失败（如连接池未初始化），默认返回基线版本
+    Rails.logger.warn "[DataVersionable] Failed to get current_setting: #{e.message}"
+    ['0']
   end
   
   private

@@ -29,13 +29,13 @@ class InsurancesController < ApplicationController
     if params[:city_id].present?
       @city = City.find_by(id: params[:city_id])
       if @city
-        @products = @products.available_in_city(@city.id)
+        @products = filter_products_by_city(@products, @city.id)
       end
     elsif params[:destination].present?
       # Try to find city by name
       @city = City.find_by(name: params[:destination])
       if @city
-        @products = @products.available_in_city(@city.id)
+        @products = filter_products_by_city(@products, @city.id)
       end
     end
 
@@ -126,5 +126,14 @@ class InsurancesController < ApplicationController
   end
 
   private
-  # Write your private methods here
+  
+  def filter_products_by_city(products, city_id)
+    # Products available in city:
+    # 1. Products with city restrictions that include this city (available=true)
+    # 2. Products with NO city restrictions (available everywhere)
+    products.where(
+      "id IN (SELECT DISTINCT insurance_product_id FROM insurance_product_cities WHERE city_id = ? AND available = true) OR id NOT IN (SELECT DISTINCT insurance_product_id FROM insurance_product_cities)",
+      city_id
+    )
+  end
 end
