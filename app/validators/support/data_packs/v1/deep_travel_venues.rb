@@ -1042,4 +1042,35 @@ abroad_products = [
 
 DeepTravelProduct.insert_all(abroad_products)
 
+# ==================== 生成可约日期数据 ====================
+# 为所有导游生成未来90天的可约日期（使用Date.today避免时区问题）
+
+puts "正在生成可约日期数据..."
+
+all_guide_ids = DeepTravelGuide.pluck(:id)
+today = Date.today
+availability_data = []
+
+all_guide_ids.each do |guide_id|
+  # 生成未来90天的日期
+  (0..89).each do |days_offset|
+    date = today + days_offset.days
+    
+    # 随机设置一些日期为不可约（约15%的日期不可约）
+    is_available = (days_offset % 7 != 3 && days_offset % 7 != 4) || rand < 0.7
+    
+    availability_data << {
+      deep_travel_guide_id: guide_id,
+      available_date: date,
+      is_available: is_available,
+      data_version: '0',
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+DeepTravelAvailability.insert_all(availability_data)
+puts "✓ 成功生成 #{availability_data.size} 条可约日期记录（#{all_guide_ids.size}位导游 × 90天）"
+
 puts "✓ 深度旅行数据包加载完成"

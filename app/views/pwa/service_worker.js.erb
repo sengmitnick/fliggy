@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `旅游环境01-pwa-${CACHE_VERSION}`;
 const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -28,8 +28,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Network-first strategy for HTML pages
-// Cache-first strategy for static assets
+// Network-first strategy for HTML pages and API requests
+// Cache-first strategy for static assets only
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
@@ -37,9 +37,12 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(event.request.url);
   const isHTMLPage = event.request.headers.get('accept')?.includes('text/html');
+  const isAPIRequest = url.pathname.includes('/api/') || 
+                       url.pathname.includes('/available_dates') ||
+                       url.search.includes('format=json');
 
-  // Network-first for HTML pages (always get fresh content)
-  if (isHTMLPage) {
+  // Network-first for HTML pages and API requests (always get fresh content)
+  if (isHTMLPage || isAPIRequest) {
     event.respondWith(
       fetch(event.request)
         .then(response => response)
@@ -48,7 +51,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for static assets only (CSS, JS, images)
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {

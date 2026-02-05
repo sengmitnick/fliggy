@@ -40,15 +40,31 @@
       <div id="system-monitor-stream" data-turbo-permanent>
         <%= turbo_stream_from "system_monitor" %>
       </div>
-    <% end %><script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => console.log('ServiceWorker registered:', registration.scope))
-        .catch(error => console.error('ServiceWorker registration failed:', error));
-    });
-  }
-</script>
+    <% end %>
+    
+    <script>
+      // Unregister any existing Service Workers and clear caches
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            registration.unregister().then(() => {
+              console.log('Service Worker unregistered');
+            });
+          });
+        });
+        
+        // Clear all caches
+        if ('caches' in window) {
+          caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => {
+              caches.delete(cacheName).then(() => {
+                console.log('Cache deleted:', cacheName);
+              });
+            });
+          });
+        }
+      }
+    </script>
 
   </body>
 </html>

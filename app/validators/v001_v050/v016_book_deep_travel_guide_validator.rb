@@ -125,7 +125,7 @@ module V001V050
       end
     
       # 断言5: 订单信息完整且合理（核心评分项）
-      add_assertion "订单信息完整且合理", weight: 20 do
+      add_assertion "订单信息完整且合理", weight: 15 do
         errors = []
         guide = @booking.deep_travel_guide
         product = @booking.deep_travel_product
@@ -156,6 +156,23 @@ module V001V050
       
         expect(errors).to be_empty,
           "订单信息存在问题: #{errors.join('; ')}"
+      end
+      
+      # 断言6: 预订日期在向导的可预订时间范围内
+      add_assertion "预订日期在向导的可预订时间范围内", weight: 5 do
+        guide = @booking.deep_travel_guide
+        travel_date = @booking.travel_date
+        
+        # 查询该日期是否可约（注意：availabilities在基线数据中，data_version=0）
+        availability = guide.availabilities
+                            .where(data_version: 0)
+                            .find_by(available_date: travel_date)
+        
+        expect(availability).not_to be_nil,
+          "向导#{guide.name}在#{travel_date}没有可约时间记录"
+        
+        expect(availability.is_available).to be_truthy,
+          "向导#{guide.name}在#{travel_date}不可约（已被预订或不开放）"
       end
     end
   
@@ -199,7 +216,22 @@ module V001V050
     
       raise "未找到符合条件的向导" unless target_guide
     
-      # 3. 选择该向导的第一个产品（featured产品或销量最高的）
+      # 3. 检查出行日期是否可约，如果不可约则选择最近的可约日期
+      available_date = target_guide.availabilities
+                                   .where(data_version: 0)
+                                   .where('available_date >= ?', @travel_date)
+                                   .where(is_available: true)
+                                   .order(available_date: :asc)
+                                   .first&.available_date
+      
+      if available_date.nil?
+        raise "向导#{target_guide.name}在#{@travel_date}之后没有可约日期"
+      end
+      
+      # 如果原定日期不可约，使用最近的可约日期
+      actual_travel_date = available_date
+    
+      # 4. 选择该向导的第一个产品（featured产品或销量最高的）
       target_product = target_guide.deep_travel_products
                                    .where(data_version: 0)
                                    .order(featured: :desc, sales_count: :desc)
@@ -207,15 +239,15 @@ module V001V050
     
       raise "向导#{target_guide.name}没有可用产品" unless target_product
     
-      # 4. 计算总价（产品价格 × 成人数量）
+      # 5. 计算总价（产品价格 × 成人数量）
       total_price = target_product.price * @adult_count
     
-      # 5. 创建预订订单
+      # 6. 创建预订订单
       booking = DeepTravelBooking.create!(
         user_id: user.id,
         deep_travel_guide_id: target_guide.id,
         deep_travel_product_id: target_product.id,
-        travel_date: @travel_date,
+        travel_date: actual_travel_date,
         adult_count: @adult_count,
         child_count: 0,
         contact_name: user.email.split('@').first,
@@ -223,7 +255,8 @@ module V001V050
         total_price: total_price,
         insurance_price: 0,
         status: 'pending',
-        notes: '期待这次深度旅行体验'
+        notes: '期待这次深度旅行体验',
+        data_version: @data_version
       )
     
       # 返回操作信息
@@ -240,7 +273,9 @@ module V001V050
         product_subtitle: target_product.subtitle,
         product_location: target_product.location,
         product_price: target_product.price,
-        travel_date: @travel_date.to_s,
+        travel_date: actual_travel_date.to_s,
+        original_travel_date: @travel_date.to_s,
+        date_adjusted: (actual_travel_date != @travel_date),
         travelers: "#{@adult_count}位成人",
         total_price: total_price,
         user_email: user.email
