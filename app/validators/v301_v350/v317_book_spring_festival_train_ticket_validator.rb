@@ -2,8 +2,8 @@
 
 module V301V350
   class V317BookSpringFestivalTrainTicketValidator < BaseValidator
-    self.validator_id = 317
-    self.task_id = "a1b2c3d4-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    self.validator_id = 'v317_book_spring_festival_train_ticket_validator'
+    self.task_id = "fa4b7ee9-b151-4421-bdf0-30338b7de3f6"
     self.title = "春节返乡抢票+预订热门时段火车票"
     self.description = "用户需要预订春节期间（1月底）从北京返回成都的火车票，要求卧铺"
     self.timeout_seconds = 180
@@ -89,7 +89,7 @@ module V301V350
         
         @train_bookings = all_bookings.select { |b| 
           b.train.departure_time.to_date == @departure_date &&
-          ['卧铺', '硬卧', '软卧'].include?(b.seat_class)
+          ['first_class'].include?(b.seat_type)  # 使用一等座代表卧铺
         }
         
         expect(@train_bookings.size).to be >= 1, "未找到符合条件的订单"
@@ -116,8 +116,8 @@ module V301V350
 
       add_assertion "座位类型正确（卧铺）", weight: 20 do
         @train_bookings.each do |booking|
-          expect(['卧铺', '硬卧', '软卧']).to include(booking.seat_class),
-            "座位类型错误。期望: 卧铺类型（卧铺/硬卧/软卧），实际: #{booking.seat_class}"
+          expect(booking.seat_type).to eq('first_class'),
+            "座位类型错误。期望: first_class（一等座代表卧铺），实际: #{booking.seat_type}"
         end
       end
 
