@@ -114,18 +114,46 @@ namespace :validator do
       data_pack_files.unshift(base_file.to_s)
     end
     
-    # 加载所有数据包
+    # 加载所有数据包（静默模式 + 输出过滤）
     loaded_files = []
+    warnings = []
+    
     data_pack_files.each do |file|
       filename = File.basename(file)
       print "  → 加载 #{filename}..."
+      
       begin
+        # 捕获数据包内的 puts 输出
+        original_stdout = $stdout
+        output_buffer = StringIO.new
+        $stdout = output_buffer
+        
         load file
+        
+        # 恢复输出
+        output = output_buffer.string
+        $stdout = original_stdout
+        
+        # 检查输出中是否有警告/错误关键词
+        warning_patterns = /(警告|错误|失败|未找到|缺少|missing|error|failed|not found)/i
+        warning_lines = output.lines.select { |line| line =~ warning_patterns }
+        
+        if warning_lines.any?
+          warnings << { file: filename, messages: warning_lines }
+          puts " ⚠️"
+          warning_lines.each { |line| puts "    #{line.strip}" }
+        else
+          puts " ✓"
+        end
+        
         loaded_files << filename
-        puts " ✓"
       rescue StandardError => e
+        # 确保恢复输出
+        $stdout = original_stdout if defined?(original_stdout)
+        
         puts " ✗"
         puts "    错误: #{e.message}"
+        puts "    位置: #{e.backtrace.first}"
         puts "\n❌ 数据包加载失败，回滚操作..."
         
         # 删除已加载的数据（使用 destroy_all 以处理外键依赖）
@@ -137,26 +165,59 @@ namespace :validator do
       end
     end
     
-    # Step 3: 验证数据加载
-    puts "\n📊 Step 3: 验证数据加载结果..."
-    verification_passed = true
-    
-    expected_models = {
-      'City' => City,
-      'Flight' => Flight,
-      'User' => User,
-      'Passenger' => Passenger
-    }
-    
-    expected_models.each do |name, model|
-      count = model.where(data_version: 0).count
-      if count > 0
-        puts "  ✓ #{name}: #{count} 条记录"
-      else
-        puts "  ✗ #{name}: 0 条记录（预期应有数据）"
-        verification_passed = false
-      end
+    # 显示警告汇总
+    if warnings.any?
+      puts "\n⚠️  发现 #{warnings.size} 个数据包有警告信息"
+      puts "💡 请检查上述警告，确保数据包正确加载"
     end
+    
+    # Step 3: 验证数据包完整性
+    puts "\n🔍 Step 3: 验证数据包完整性..."
+    
+    require_relative '../../lib/data_pack_validator'
+    validator = DataPackValidator.new
+    validation_results = validator.validate_all
+    
+    # 显示验证结果摘要
+    if validation_results[:all_passed]
+      puts "✅ 所有数据包验证通过（#{validation_results[:pack_count]} 个数据包）"
+      
+      # 统计总记录数
+      total_records = 0
+      expected_models = {
+        'City' => City,
+        'Flight' => Flight,
+        'User' => User,
+        'Passenger' => Passenger,
+        'Hotel' => Hotel,
+        'Train' => Train,
+        'Attraction' => Attraction
+      }
+      
+      expected_models.each do |name, model|
+        count = model.where(data_version: 0).count
+        total_records += count if count > 0
+      end
+      
+      puts "📊 共加载 #{total_records} 条记录"
+    else
+      puts "❌ 数据包验证失败（#{validation_results[:failed_count]}/#{validation_results[:pack_count]} 个失败）"
+      puts "\n失败的数据包："
+      
+      validation_results[:packs].each do |pack_name, pack_result|
+        next if pack_result[:passed]
+        
+        puts "\n  ❌ #{pack_name}:"
+        pack_result[:errors].first(3).each do |error|
+          puts "    → #{error}"
+        end
+        puts "    ... 共 #{pack_result[:error_count]} 个错误" if pack_result[:error_count] > 3
+      end
+      
+      puts "\n💡 运行 'rake validator:validate_data_packs' 查看完整报告"
+    end
+    
+    verification_passed = validation_results[:all_passed]
     
     # 最终汇总
     puts "\n" + "="*80
@@ -167,8 +228,51 @@ namespace :validator do
       puts "  - 当前时间: #{Date.current}"
       puts "\n💡 提示: 此命令模拟甲方交付新环境的初始化过程"
       puts "   请在每天开始工作时运行此命令，确保数据包日期与当前日期同步"
+      
+      if warnings.any?
+        puts "\n⚠️  注意: #{warnings.size} 个数据包有警告信息，请检查上述输出"
+      end
     else
       puts "❌ 基线数据验证失败，请检查数据包文件"
+      puts "💡 运行 'rake validator:validate_data_packs' 查看详细验证报告"
+      exit 1
+    end
+    puts "="*80 + "\n"
+  end
+  
+  desc "Validate data pack integrity without reloading"
+  task validate_data_packs: :environment do
+    puts "\n" + "="*80
+    puts "🔍 数据包验证 - 检查已加载数据的完整性"
+    puts "="*80 + "\n"
+    
+    require_relative '../../lib/data_pack_validator'
+    validator = DataPackValidator.new
+    results = validator.validate_all
+    
+    # 详细报告
+    results[:packs].each do |pack_name, pack_result|
+      if pack_result[:passed]
+        puts "✅ #{pack_name.ljust(30)} - 所有检查通过"
+      else
+        puts "❌ #{pack_name.ljust(30)} - #{pack_result[:error_count]} 个问题"
+        pack_result[:errors].each do |error|
+          puts "  → #{error}"
+        end
+      end
+    end
+    
+    # 汇总
+    puts "\n" + "="*80
+    if results[:all_passed]
+      puts "✅ 所有数据包验证通过"
+      puts "   - 验证数据包: #{results[:pack_count]} 个"
+      puts "   - 验证时间: #{Time.current.strftime('%Y-%m-%d %H:%M:%S')}"
+    else
+      puts "❌ 数据包验证失败"
+      puts "   - 通过: #{results[:passed_count]}/#{results[:pack_count]} 个"
+      puts "   - 失败: #{results[:failed_count]}/#{results[:pack_count]} 个"
+      puts "\n💡 请修复上述问题后重新运行 'rake validator:reset_baseline'"
       exit 1
     end
     puts "="*80 + "\n"
