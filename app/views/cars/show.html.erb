@@ -62,7 +62,7 @@
   <% 
     pickup_date = @search_params[:pickup_date].present? ? Date.parse(@search_params[:pickup_date]) : Date.today
     return_date = @search_params[:return_date].present? ? Date.parse(@search_params[:return_date]) : (Date.today + 2.days)
-    days_count = (return_date - pickup_date).to_i
+    days_count = (return_date - pickup_date).to_i + 1
     pickup_location = @search_params[:pickup_location].presence || '天河国际机场T3'
     weekday_names = ['日', '一', '二', '三', '四', '五', '六']
   %>
