@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V258: 预订租车+车辆全险（含第三者责任）
+# V258: 预订成都租车3天（后天取车）并购买交通意外险（保障天数需覆盖租车期间）
 #
 # 任务描述:
-#   用户需要预订租车服务并购买车辆全险（包含第三者责任险）
+#   用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间
 #
 # 评分标准:
 #   - 创建了租车订单 (30%)
@@ -17,8 +17,8 @@ module V251V300
   class V258BookCarWithFullInsuranceValidator < BaseValidator
     self.validator_id = 'v258_book_car_with_full_insurance_validator'
     self.task_id = 'f257a001-0001-4001-8001-000000000258'
-    self.title = '预订租车+车辆全险（含第三者责任）'
-    self.description = '用户需要预订租车服务并购买车辆全险（包含第三者责任险）'
+    self.title = '预订成都租车3天（后天取车）并购买交通意外险（保障天数需覆盖租车期间）'
+    self.description = '用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间（保险天数>=租车天数）'
     self.timeout_seconds = 300
     
     def prepare
@@ -43,14 +43,14 @@ module V251V300
       raise "未找到适合#{@rental_days}天的交通意外险" if @available_insurances.empty?
       
       {
-        task: "请预订#{@city}租车（#{@pickup_date.strftime('%Y年%m月%d日')}取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买车辆全险（含第三者责任）。",
+        task: "请预订#{@city}租车（#{@pickup_date.strftime('%Y年%m月%d日')}取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买交通意外险（保障天数需覆盖整个租车期间）。",
         requirements: {
           city: @city,
           pickup_date: @pickup_date,
           return_date: @return_date,
           rental_days: @rental_days,
           insurance_type: '交通意外险',
-          insurance_coverage: '第三者责任'
+          insurance_coverage: '驾驶期间人身安全'
         },
         hint: "租车建议购买交通意外险，保障天数应与租车天数一致。"
       }
