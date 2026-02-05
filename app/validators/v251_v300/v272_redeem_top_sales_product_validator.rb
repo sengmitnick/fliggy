@@ -7,7 +7,7 @@ module V251V300
   # 考点: 排序功能、热销商品识别
   class V272RedeemTopSalesProductValidator < BaseValidator
     self.validator_id = 'v272_redeem_top_sales_product_validator'
-    self.task_id = 'j57j4k8f-7g9h-9i6j-3f0k-1h2i3j4k5l6g'
+    self.task_id = '5d612ca8-0765-4fc4-ac2a-92c6e7b84075'
     self.title = '按销量排序选择热销商品'
     self.description = '用户按销量降序排序，选择销量最高的商品兑换'
     self.timeout_seconds = 300

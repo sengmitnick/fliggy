@@ -6,7 +6,7 @@ require_relative '../base_validator'
 module V101V150
   class V127BookBusinessFlightAndLuxuryHotelValidator < BaseValidator
   self.validator_id = 'v127_book_business_flight_and_luxury_hotel_validator'
-  self.task_id = 'f8g9h0i1-2a3b-4c5d-6e7f-8a9b0c1d2e3f'
+  self.task_id = 'b106975f-dfec-4b7f-a72e-5e396465fee1'
   self.title = '预订商务舱航班+高档酒店（3晚）'
   self.description = '预订3天后从北京到上海的商务舱航班，并预订上海市区高档酒店（4星级以上，当天入住3晚）'
   self.timeout_seconds = 300

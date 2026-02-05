@@ -6,7 +6,7 @@ require_relative '../base_validator'
 module V101V150
   class V129BookCheapestFlightAndHotelComboValidator < BaseValidator
   self.validator_id = 'v129_book_cheapest_flight_and_hotel_combo_validator'
-  self.task_id = 'h0i1j2k3-4a5b-6c7d-8e9f-0a1b2c3d4e5f'
+  self.task_id = 'b74f2624-643d-4736-a48c-0aaf816eac67'
   self.title = '预订最便宜的航班+酒店组合（总价最低）'
   self.description = '预订后天从上海到深圳的航班和深圳酒店（1晚），要求航班+酒店总价最低'
   self.timeout_seconds = 300

@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V303BookOutdoorAdventureTourValidator < BaseValidator
     self.validator_id = 'v303_book_outdoor_adventure_tour_validator'
-    self.task_id = 'k49h1kg3-i1j5-47ke-g6ii-l7091i62ik3h'
+    self.task_id = 'd11ffc15-c4d4-478c-a93f-67e8662ba77f'
     self.title = '预订户外探险游'
     self.description = '用户预订户外探险游(徒步+露营+装备租赁)'
     self.timeout_seconds = 300

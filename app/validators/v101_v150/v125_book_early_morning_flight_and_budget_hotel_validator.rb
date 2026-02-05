@@ -6,7 +6,7 @@ require_relative '../base_validator'
 module V101V150
   class V125BookEarlyMorningFlightAndBudgetHotelValidator < BaseValidator
   self.validator_id = 'v125_book_early_morning_flight_and_budget_hotel_validator'
-  self.task_id = 'd6e7f8g9-0a1b-2c3d-4e5f-6a7b8c9d0e1f'
+  self.task_id = '661e90ec-e0f0-4519-a868-44e3d3e327c9'
   self.title = '预订明天早班航班+经济型酒店（提前一晚入住）'
   self.description = '预订明天早上8点前从北京到上海的航班，并预订北京首都机场附近的经济型酒店（今晚入住1晚）'
   self.timeout_seconds = 300

@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V301V350
   class V301BookSportsFitnessTourValidator < BaseValidator
     self.validator_id = 'v301_book_sports_fitness_tour_validator'
-    self.task_id = 'i27f9ie1-g9h3-45ic-e4gg-j5879g40gi1f'
+    self.task_id = 'c0e90a56-cd9b-4ef3-8486-8bc3e076e331'
     self.title = '预订运动健身游'
     self.description = '用户预订运动健身游(健身房+瑜伽课+健康餐)'
     self.timeout_seconds = 300

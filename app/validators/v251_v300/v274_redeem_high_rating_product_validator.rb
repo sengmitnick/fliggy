@@ -7,7 +7,7 @@ module V251V300
   # 考点: 评分排序、质量保证
   class V274RedeemHighRatingProductValidator < BaseValidator
     self.validator_id = 'v274_redeem_high_rating_product_validator'
-    self.task_id = 'l79l6m0h-9i1j-1k8l-5h2m-3j4k5l6m7n8i'
+    self.task_id = 'fdc187fc-0997-427d-9d9f-7a3241a8e088'
     self.title = '按评分排序选择高评分商品'
     self.description = '用户按评分降序排序，选择评分最高的商品兑换'
     self.timeout_seconds = 300
