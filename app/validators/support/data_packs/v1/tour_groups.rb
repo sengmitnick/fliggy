@@ -636,3 +636,112 @@ TourPackage.insert_all(sanya_packages_data) if sanya_packages_data.any?
 puts "✓ 为三亚产品添加了 #{sanya_packages_data.count} 个套餐"
 
 puts "\n✅ 三亚6天5晚补充数据加载完成！"
+
+# ==================== 补充：北京2日游产品（支持 v154 验证器）====================
+puts "\n🏯 补充北京2天1晚跟团游产品..."
+
+timestamp_beijing = Time.current
+beijing_agencies = TravelAgency.where("name LIKE ?", '%北京%').or(TravelAgency.where("name LIKE ?", '%天津%')).pluck(:id)
+beijing_agency_id = beijing_agencies.first || TravelAgency.first.id
+
+beijing_2day_products_data = []
+
+# 生成4个北京2日游产品
+beijing_titles = [
+  "【精品小团】北京故宫+天坛+颐和园 2天1晚 含酒店·含餐食·含门票·纯玩团",
+  "【精品小团】北京八达岭长城+明十三陵 2天1晚 4人团 纯玩无购物",
+  "【精品小团】北京天安门+故宫+长城 2天1晚 6人团 深度游览",
+  "【精品小团】北京环球影城+故宫博物院 2天1晚 含门票·纯玩团"
+]
+
+beijing_subtitles = [
+  "故宫·含酒店·纯玩团",
+  "八达岭长城·4人团·无购物",
+  "天安门故宫长城·6人团·深度游",
+  "环球影城·故宫·纯玩"
+]
+
+beijing_titles.each_with_index do |title, idx|
+  beijing_2day_products_data << {
+    title: title,
+    subtitle: beijing_subtitles[idx],
+    destination: "北京",
+    departure_city: ["北京", "天津"].sample,
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 2,
+    badge: "多日游·#{[4, 6].sample}人团",
+    price: 688 + rand(0..400),
+    original_price: 1088 + rand(0..200),
+    rating: [4.7, 4.8, 4.9].sample,
+    rating_desc: "#{rand(50..300)}条评价",
+    sales_count: rand(50..500),
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'].sample(3),
+    tags: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    departure_label: "北京出发",
+    is_featured: idx == 0,
+    display_order: 10000 + idx,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: beijing_agency_id,
+    data_version: 0,
+    created_at: timestamp_beijing,
+    updated_at: timestamp_beijing
+  }
+end
+
+TourGroupProduct.insert_all(beijing_2day_products_data) if beijing_2day_products_data.any?
+puts "✓ 添加了 #{beijing_2day_products_data.count} 个北京2天1晚跟团游产品"
+
+# 为新产品创建套餐
+beijing_packages_data = []
+
+TourGroupProduct.where(destination: "北京", duration: 2, data_version: 0)
+  .where("created_at >= ?", timestamp_beijing - 1.minute)
+  .find_each do |product|
+  # 每个产品生成2-3个套餐
+  packages_count = rand(2..3)
+  
+  packages_count.times do |i|
+    base_price = product.price
+    
+    package_price = case i
+    when 0 then base_price
+    when 1 then (base_price * rand(1.2..1.4)).to_i
+    when 2 then (base_price * rand(1.5..1.7)).to_i
+    end
+    
+    child_price = (package_price * rand(0.6..0.8)).to_i
+    
+    package_names = case i
+    when 0 then ['基础套餐', '经济套餐', '标准套餐']
+    when 1 then ['豪华套餐', '高级套餐', '优选套餐']
+    when 2 then ['至尊套餐', '尊享套餐', 'VIP套餐']
+    end
+    
+    description = case i
+    when 0
+      "✓ 三星级酒店住宿\n✓ 包含早餐\n✓ 景点首道门票\n✓ 旅游大巴接送\n✓ 专业导游服务"
+    when 1
+      "✓ 四星级酒店住宿\n✓ 包含早餐+午餐\n✓ 景点门票+特色体验\n✓ 豪华旅游大巴\n✓ 金牌导游服务\n✓ 赠送旅游意外险"
+    when 2
+      "✓ 五星级酒店住宿\n✓ 包含三餐(含特色餐)\n✓ 景点VIP通道+深度体验\n✓ 商务车接送\n✓ 资深导游一对一服务\n✓ 赠送旅游意外险"
+    end
+    
+    beijing_packages_data << {
+      tour_group_product_id: product.id,
+      name: package_names.sample,
+      price: package_price,
+      child_price: child_price,
+      description: description,
+      is_featured: i == 0,
+      data_version: 0,
+      created_at: timestamp_beijing,
+      updated_at: timestamp_beijing
+    }
+  end
+end
+
+TourPackage.insert_all(beijing_packages_data) if beijing_packages_data.any?
+puts "✓ 为北京产品添加了 #{beijing_packages_data.count} 个套餐"
+
+puts "\n✅ 北京2天1晚补充数据加载完成！"

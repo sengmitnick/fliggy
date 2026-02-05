@@ -742,6 +742,28 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 - If any API endpoint is missing, the task will fail with error before running validator simulations
 - Ensure these routes are properly configured in `config/routes.rb` before running validator simulations
 
+**Validator Lint - Static Code Analysis**:
+- **Purpose**: Detect common validator issues before runtime (stale fields, missing data_version, N+1 queries, etc.)
+- **Auto-runs**: Automatically runs as Step 0.5 in `rake validator:simulate`
+- **Manual commands**:
+  - `rake validator:lint` - Check all validators
+  - `rake validator:lint_single[validator_id]` - Check single validator (e.g., `v010`)
+  - `rake validator:lint_config` - Show configuration and rules
+  - `rake validator:lint_export[output_file]` - Export issues to JSON
+- **Configuration**: `config/validator_lint_rules.yml`
+- **Detection Types**:
+  1. **Stale Fields (HIGH)**: Detects usage of deprecated database fields
+     - Example: `Flight.discount_price` → Should use `FlightOffer.cashback_amount`
+  2. **Missing data_version (HIGH)**: Ensures `data_version: @data_version` in all queries
+  3. **Missing .includes() (MEDIUM)**: Detects potential N+1 query issues
+  4. **View Alignment (LOW)**: Checks if validators test fields actually used in views
+- **Strict Mode**: When enabled, HIGH severity issues block `rake validator:simulate`
+- **Why this matters**: Catches logic errors before they cause validator failures
+- **When to use**:
+  - ALWAYS before committing new validators
+  - ALWAYS after modifying model fields or associations
+  - ALWAYS when fixing validator failures related to missing data
+
 **Testing Commands**:
 - **All validators**: `rake validator:simulate` - Runs all validators (256 validators, may be slow)
 - **Single validator**: `rake validator:simulate_single[validator_id]` - Test one specific validator

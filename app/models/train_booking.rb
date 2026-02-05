@@ -41,6 +41,7 @@ class TrainBooking < ApplicationRecord
       '未知'
     end
   end
+  alias_method :seat_class, :seat_type_label
 
   # 获取座位信息（车厢+座位号）
   def seat_info

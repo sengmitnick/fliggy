@@ -226,6 +226,60 @@ namespace :validator do
       puts "✅ All required API endpoints are available\n"
     end
     
+    # Step 0.5: 运行 validator lint 检查
+    puts "🔍 Step 0.5: Running validator lint checks..."
+    
+    require_relative '../validator_linter'
+    linter = ValidatorLinter.new
+    issues = linter.lint_all
+    
+    config = YAML.load_file('config/validator_lint_rules.yml')
+    strict_mode = config.dig('strict_mode') || {}
+    
+    if issues.any?
+      puts "\n⚠️  Found #{issues.size} linting issue(s):"
+      puts "-" * 70
+      
+      # 按严重级别分组
+      high_issues = issues.select { |i| i.severity == 'HIGH' }
+      medium_issues = issues.select { |i| i.severity == 'MEDIUM' }
+      low_issues = issues.select { |i| i.severity == 'LOW' }
+      
+      # 显示 HIGH 问题（始终显示）
+      if high_issues.any?
+        puts "\n🔴 HIGH severity issues (#{high_issues.size}):"
+        high_issues.first(5).each do |issue|
+          puts "  → #{issue.validator} (line #{issue.line}): #{issue.message}"
+        end
+        puts "  ... and #{high_issues.size - 5} more" if high_issues.size > 5
+      end
+      
+      # 显示 MEDIUM 问题汇总
+      if medium_issues.any?
+        puts "\n🟡 MEDIUM severity issues (#{medium_issues.size}): Run 'rake validator:lint' for details"
+      end
+      
+      # 显示 LOW 问题汇总
+      if low_issues.any?
+        puts "\n🟢 LOW severity issues (#{low_issues.size}): Run 'rake validator:lint' for details"
+      end
+      
+      puts "-" * 70
+      
+      # 根据严格模式决定是否失败
+      if strict_mode['enabled'] && strict_mode['fail_on_high_severity'] && high_issues.any?
+        puts "\n❌ Lint check failed: #{high_issues.size} HIGH severity issue(s) must be fixed"
+        puts "💡 Run 'rake validator:lint' to see all issues"
+        puts "💡 Run 'rake validator:lint_single[validator_id]' to check a specific validator\n"
+        exit 1
+      else
+        puts "\n⚠️  Lint issues found but continuing (strict mode not enforced)"
+        puts "💡 Consider running 'rake validator:lint' to see details\n"
+      end
+    else
+      puts "✅ All validators passed lint checks\n"
+    end
+    
     # Step 1: 检查validator类属性完整性
     puts "🔍 Step 1: Checking validator class attributes..."
     attribute_errors = []

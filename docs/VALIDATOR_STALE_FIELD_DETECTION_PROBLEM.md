@@ -907,6 +907,110 @@ expect(booking.total_price).to eq(expected_price) &&
 
 ---
 
+## ✅ 实施状态更新
+
+### 方案 E 已完成实施 (2026-02-04)
+
+**实施时间**: 2026-02-04  
+**状态**: ✅ **COMPLETED** - 完整实施并测试通过
+
+#### 实施内容
+
+1. **核心文件已创建**:
+   - `lib/validator_linter.rb` - 核心 Linter 类（300+ 行）
+   - `config/validator_lint_rules.yml` - 完整规则配置
+   - `lib/tasks/validator_lint.rake` - Rake 任务集成
+   - `docs/VALIDATOR_LINT_IMPLEMENTATION.md` - 实施文档
+
+2. **检测能力**（4层）:
+   - ✅ Stale Fields 检测 (HIGH 严重度)
+   - ✅ data_version 缺失检测 (HIGH 严重度)
+   - ✅ N+1 Query 检测 (MEDIUM 严重度)
+   - ✅ 视图对齐检测 (LOW 严重度)
+
+3. **集成状态**:
+   - ✅ 自动运行于 `rake validator:simulate` (Step 0.5)
+   - ✅ 独立命令 `rake validator:lint`
+   - ✅ 单个验证器检查 `rake validator:lint_single[id]`
+   - ✅ Strict mode 支持（HIGH 问题阻断）
+
+4. **测试结果**:
+   - ✅ Test 1: 成功检测 v010 的 Flight.discount_price 问题
+   - ✅ Test 2: 全量扫描 256 个验证器，发现 149 个 MEDIUM 问题
+   - ✅ Test 3: 集成测试通过
+
+5. **文档更新**:
+   - ✅ `.clackyrules` 添加 Validator Lint 使用规范
+   - ✅ 创建完整实施文档
+
+#### 实际效果验证
+
+```bash
+# 临时回退 v010 到使用 discount_price 的版本
+$ git show e5d36dd^:app/validators/v001_v050/v010_search_cheapest_flight_validator.rb > v010.rb.old
+
+# 运行 lint 检测
+$ rake validator:lint_single[v010]
+
+# 输出结果:
+🔍 Scanning validator: v010_search_cheapest_flight_validator
+
+🔴 HIGH severity issues (2):
+----------------------------------------------------------------------
+  Validator: v010_search_cheapest_flight_validator
+  Category: stale_fields
+  Issue: 使用了过时字段 Flight.discount_price
+  Suggestion: 使用 FlightOffer.cashback_amount 计算返现后成本
+----------------------------------------------------------------------
+  Validator: v010_search_cheapest_flight_validator
+  Category: stale_fields
+  Issue: 使用了过时方法 Flight.final_price (依赖过时字段 discount_price)
+  Suggestion: 使用 offer.price - offer.cashback_amount 计算实际成本
+----------------------------------------------------------------------
+
+❌ Lint failed: Found 2 HIGH severity issue(s)
+```
+
+**结论**: Linter 成功检测到本文档描述的核心问题，实施方案有效。
+
+#### 后续建议
+
+1. **持续维护规则库**: 当发现新的过时字段时，更新 `config/validator_lint_rules.yml`
+2. **修复 149 个 MEDIUM 问题**: 逐步添加 `.includes()` 优化性能
+3. **考虑 CI 集成**: 在 CI 流程中强制运行 lint 检查
+4. **视图对齐检测增强**: 当前为基础实现，可考虑更精确的字段匹配
+
+详细实施文档参见: `docs/VALIDATOR_LINT_IMPLEMENTATION.md`
+
+---
+
+## 📚 附录
+
+### A. 相关文件清单
+
+```
+核心文件:
+  - app/validators/v001_v050/v010_search_cheapest_flight_validator.rb
+  - app/models/flight.rb (Lines 199-202: final_price, discount_percent)
+  - app/models/flight_offer.rb
+  - db/schema.rb (Line 820: flights.discount_price)
+
+视图文件:
+  - app/views/flights/search.html.erb (Lines 73, 110-114)
+  - app/views/bookings/new.html.erb (Lines 54, 105, 154)
+
+数据文件:
+  - app/validators/support/data_packs/v1/flights.rb
+
+实施文件 (NEW):
+  - lib/validator_linter.rb
+  - config/validator_lint_rules.yml
+  - lib/tasks/validator_lint.rake
+  - docs/VALIDATOR_LINT_IMPLEMENTATION.md
+```
+
+---
+
 ## 📞 联系方式
 
 如有疑问或建议，请通过以下方式联系：
