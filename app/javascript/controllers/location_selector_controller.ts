@@ -258,11 +258,11 @@ export default class extends Controller<HTMLElement> {
         this.airportInputTarget.value = this.selectedLocation.name
         console.log('[LocationSelector] Updated airportInput')
       }
-      // 🎯 CRITICAL: Also update hidden input for location_from
-      const locationFromInput = document.getElementById('transfer-location-from') as HTMLInputElement
-      if (locationFromInput) {
-        locationFromInput.value = this.selectedLocation.name
-        console.log('[LocationSelector] Updated transfer-location-from hidden input:', this.selectedLocation.name)
+      // 🎯 For to_airport mode: airport is destination (location_to)
+      const airportDestInput = document.getElementById('transfer-airport-destination') as HTMLInputElement
+      if (airportDestInput) {
+        airportDestInput.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated transfer-airport-destination (location_to):', this.selectedLocation.name)
       }
     } else if (this.currentLocationType === 'station') {
       // Update station display and input
@@ -276,14 +276,37 @@ export default class extends Controller<HTMLElement> {
         this.stationInputTarget.value = this.selectedLocation.name
         console.log('[LocationSelector] Updated stationInput')
       }
-      // 🎯 CRITICAL: Also update hidden input for location_from
+      // 🎯 For to_station mode: station is destination (location_to)
+      const stationDestInput = document.getElementById('transfer-station-destination') as HTMLInputElement
+      if (stationDestInput) {
+        stationDestInput.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated transfer-station-destination (location_to):', this.selectedLocation.name)
+      }
+    } else if (this.currentLocationType === 'pickup') {
+      // Update pickup/dropoff location display and input
+      if (this.hasLocationDisplayTarget) {
+        this.locationDisplayTarget.textContent = this.selectedLocation.name
+        this.locationDisplayTarget.classList.remove("text-text-muted")
+        this.locationDisplayTarget.classList.add("text-text-primary")
+        console.log('[LocationSelector] Updated locationDisplay')
+      }
+      if (this.hasLocationInputTarget) {
+        this.locationInputTarget.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated locationInput')
+      }
+      // 🎯 For to_airport/to_station: pickup is origin (location_from); for from_airport/from_station: it's destination (location_to)
       const locationFromInput = document.getElementById('transfer-location-from') as HTMLInputElement
+      const locationToInput = document.getElementById('transfer-location-to') as HTMLInputElement
       if (locationFromInput) {
         locationFromInput.value = this.selectedLocation.name
-        console.log('[LocationSelector] Updated transfer-location-from hidden input:', this.selectedLocation.name)
+        console.log('[LocationSelector] Updated transfer-location-from:', this.selectedLocation.name)
+      }
+      if (locationToInput) {
+        locationToInput.value = this.selectedLocation.name
+        console.log('[LocationSelector] Updated transfer-location-to:', this.selectedLocation.name)
       }
     } else {
-      // Default: update location display and input (for 上车点/下车点)
+      // Default: update location display and input
       if (this.hasLocationInputTarget) {
         this.locationInputTarget.value = this.selectedLocation.name
         console.log('[LocationSelector] Updated locationInput')
@@ -394,13 +417,19 @@ export default class extends Controller<HTMLElement> {
 
   private renderLocations(locations: { airports: string[], train_stations: string[], others: string[] }): void {
     console.log('[LocationSelector] renderLocations START')
+    console.log('[LocationSelector] Current location type:', this.currentLocationType)
     console.log('[LocationSelector] Airports:', locations.airports)
     console.log('[LocationSelector] Train stations:', locations.train_stations)
     console.log('[LocationSelector] Others:', locations.others)
     let html = ''
 
+    // Determine which types to show based on currentLocationType
+    const shouldShowAirports = this.currentLocationType === 'airport' || !this.currentLocationType
+    const shouldShowStations = this.currentLocationType === 'station' || !this.currentLocationType
+    const shouldShowOthers = !this.currentLocationType || this.currentLocationType === 'pickup' // Show others when type is not specified or when selecting pickup points
+
     // Airports
-    if (locations.airports && locations.airports.length > 0) {
+    if (shouldShowAirports && locations.airports && locations.airports.length > 0) {
       html += `
         <div class="mb-4">
           <h4 class="text-xs text-text-muted mb-2">机场</h4>
@@ -421,7 +450,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     // Train Stations
-    if (locations.train_stations && locations.train_stations.length > 0) {
+    if (shouldShowStations && locations.train_stations && locations.train_stations.length > 0) {
       html += `
         <div class="mb-4">
           <h4 class="text-xs text-text-muted mb-2">火车站</h4>
@@ -442,7 +471,7 @@ export default class extends Controller<HTMLElement> {
     }
 
     // Others
-    if (locations.others && locations.others.length > 0) {
+    if (shouldShowOthers && locations.others && locations.others.length > 0) {
       html += `
         <div class="mb-4">
           <h4 class="text-xs text-text-muted mb-2">其他地点</h4>
@@ -473,9 +502,10 @@ export default class extends Controller<HTMLElement> {
     // If no locations found
     if (!html) {
       console.log('[LocationSelector] No locations found, showing fallback message')
+      const locationTypeText = this.currentLocationType === 'airport' ? '机场' : (this.currentLocationType === 'station' ? '火车站' : '接送点')
       html = `
         <div class="text-center py-8 text-text-muted">
-          <p>该城市暂无接送点</p>
+          <p>该城市暂无${locationTypeText}</p>
         </div>
       `
     }

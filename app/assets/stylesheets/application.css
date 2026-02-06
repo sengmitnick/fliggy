@@ -161,6 +161,15 @@
     scrollbar-width: none;
   }
 
+  /* Scrollbar hide utility for picker */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Feiyu Travel App Custom Components */
   .service-icon {
     @apply w-16 h-16 rounded-full flex items-center justify-center;

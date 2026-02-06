@@ -58,15 +58,15 @@
     <div class="text-text-muted text-sm pb-1 cursor-pointer" onclick="window.showToast('精彩即将上线，敬请期待')">
       顺风车
     </div>
-    <%= link_to transfers_path(type: 'airport_pickup'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type == 'airport_pickup'} #{'text-text-muted text-sm pb-1' unless @transfer_type == 'airport_pickup'}" do %>
+    <%= link_to transfers_path, class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type.in?(%w[airport_pickup airport_dropoff])} #{'text-text-muted text-sm pb-1' unless @transfer_type.in?(%w[airport_pickup airport_dropoff])}" do %>
       <span>接送机</span>
-      <% if @transfer_type == 'airport_pickup' %>
+      <% if @transfer_type.in?(%w[airport_pickup airport_dropoff]) %>
         <div class="w-6 h-1 bg-black rounded-full mt-1"></div>
       <% end %>
     <% end %>
-    <%= link_to transfers_path(type: 'train_pickup'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type == 'train_pickup'} #{'text-text-muted text-sm pb-1' unless @transfer_type == 'train_pickup'}" do %>
+    <%= link_to transfers_path(service: 'from_station'), class: "flex flex-col items-center #{'text-text-primary font-bold text-lg' if @transfer_type.in?(%w[train_pickup train_dropoff])} #{'text-text-muted text-sm pb-1' unless @transfer_type.in?(%w[train_pickup train_dropoff])}" do %>
       <span>接送火车</span>
-      <% if @transfer_type == 'train_pickup' %>
+      <% if @transfer_type.in?(%w[train_pickup train_dropoff]) %>
         <div class="w-6 h-1 bg-black rounded-full mt-1"></div>
       <% end %>
     <% end %>
@@ -78,7 +78,7 @@
   <!-- Service Direction Toggle (Pickup/Dropoff) -->
   <div class="relative z-10 px-4 mt-2">
     <div class="bg-gray-200/50 p-1 rounded-full flex">
-      <% if @transfer_type == 'airport_pickup' %>
+      <% if @transfer_type.in?(%w[airport_pickup airport_dropoff]) %>
         <%= link_to transfers_path(type: @transfer_type, service: 'from_airport'), 
           class: "flex-1 py-2 rounded-full text-sm font-semibold text-center #{@service_type == 'from_airport' ? 'bg-[#FFD800] shadow-sm' : 'text-text-secondary font-medium'}" do %>
           到机场接我
@@ -104,7 +104,7 @@
   <div class="relative z-10 px-4 mt-4">
     <div class="bg-surface rounded-xl shadow-sm p-4">
       
-      <% if @transfer_type == 'airport_pickup' %>
+      <% if @transfer_type.in?(%w[airport_pickup airport_dropoff]) %>
         <!-- Airport Section -->
         <div class="flex items-start mb-6">
           <div class="mt-1 mr-3">
@@ -148,8 +148,8 @@
                 data-location-type="airport"
                 class="flex justify-between items-center w-full">
                 <div class="flex-1">
-                  <% if @transfer_params && @transfer_params[:location_from].present? %>
-                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= @transfer_params[:location_from] %>" data-location-selector-target="airportDisplay"><%= @transfer_params[:location_from] %></h2>
+                  <% if @transfer_params && @transfer_params[:location_to].present? %>
+                    <h2 class="text-xl font-bold text-text-primary" data-location-to="<%= @transfer_params[:location_to] %>" data-location-selector-target="airportDisplay"><%= @transfer_params[:location_to] %></h2>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="airportDisplay">请选择机场</h2>
                   <% end %>
@@ -158,7 +158,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
               </button>
-              <%= hidden_field_tag :location_from, @transfer_params&.dig(:location_from), id: 'transfer-location-from', data: { 'location-selector-target': 'airportInput' } %>
+              <%= hidden_field_tag :location_to, @transfer_params&.dig(:location_to), id: 'transfer-airport-destination', data: { 'location-selector-target': 'airportInput' } %>
             <% end %>
           </div>
         </div>
@@ -205,8 +205,8 @@
                 data-location-type="station"
                 class="flex justify-between items-center w-full">
                 <div class="flex-1">
-                  <% if @transfer_params && @transfer_params[:location_from].present? %>
-                    <h2 class="text-xl font-bold text-text-primary" data-location-from="<%= @transfer_params[:location_from] %>" data-location-selector-target="stationDisplay"><%= @transfer_params[:location_from] %></h2>
+                  <% if @transfer_params && @transfer_params[:location_to].present? %>
+                    <h2 class="text-xl font-bold text-text-primary" data-location-to="<%= @transfer_params[:location_to] %>" data-location-selector-target="stationDisplay"><%= @transfer_params[:location_to] %></h2>
                   <% else %>
                     <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="stationDisplay">请选择火车站</h2>
                   <% end %>
@@ -215,7 +215,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
               </button>
-              <%= hidden_field_tag :location_from, @transfer_params&.dig(:location_from), id: 'transfer-location-from', data: { 'location-selector-target': 'stationInput' } %>
+              <%= hidden_field_tag :location_to, @transfer_params&.dig(:location_to), id: 'transfer-station-destination', data: { 'location-selector-target': 'stationInput' } %>
             <% end %>
           </div>
         </div>
@@ -235,12 +235,15 @@
           <button
             type="button"
             data-action="click->location-selector#openModal"
+            data-location-type="pickup"
             class="flex justify-between items-center w-full">
             <div class="flex-1">
-              <% if @transfer_params && @transfer_params[:location_to].present? %>
-                <h2 class="text-lg font-bold text-text-primary leading-tight pr-2" data-location-selector-target="locationDisplay"><%= @transfer_params[:location_to] %></h2>
+              <% # For to_airport/to_station: pickup point is location_from; for from_airport/from_station: dropoff point is location_to %>
+              <% location_value = @service_type.in?(%w[to_airport to_station]) ? @transfer_params&.dig(:location_from) : @transfer_params&.dig(:location_to) %>
+              <% if location_value.present? %>
+                <h2 class="text-lg font-bold text-text-primary leading-tight pr-2" data-location-selector-target="locationDisplay"><%= location_value %></h2>
                 <div class="mt-2 inline-block bg-[#FFFBE0] text-[#8B5C35] text-[10px] px-2 py-1 rounded">
-                  <%= @transfer_params[:location_to] %>
+                  <%= location_value %>
                 </div>
               <% else %>
                 <h2 class="text-lg font-bold text-text-muted" data-location-selector-target="locationDisplay">请选择地点</h2>
@@ -250,14 +253,75 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
           </button>
-          <%= hidden_field_tag :location_to, @transfer_params&.dig(:location_to), id: 'transfer-location-to', data: { 'location-selector-target': 'locationInput' } %>
+          <% if @service_type.in?(%w[to_airport to_station]) %>
+            <%= hidden_field_tag :location_from, @transfer_params&.dig(:location_from), id: 'transfer-location-from', data: { 'location-selector-target': 'locationInput' } %>
+          <% else %>
+            <%= hidden_field_tag :location_to, @transfer_params&.dig(:location_to), id: 'transfer-location-to', data: { 'location-selector-target': 'locationInput' } %>
+          <% end %>
         </div>
       </div>
 
-      <!-- Estimated Distance -->
+      <!-- 预计距离（如果两个地点都已选择） -->
       <% if @transfer_params && @transfer_params[:location_from].present? && @transfer_params[:location_to].present? %>
         <div class="mt-4 text-xs text-text-muted pl-8">
           预计行驶: 48公里/51分钟
+        </div>
+      <% end %>
+
+      <!-- 
+        用车时间选择器
+        
+        显示条件：仅在"送我到机场/车站"模式下显示
+        - to_airport: 送我到机场
+        - to_station: 送我到车站
+        
+        为什么只在这两种模式下显示？
+        - from_airport/from_station：航班/火车已有到达时间，不需要用户再选择
+        - to_airport/to_station：用户需要指定什么时间来接，必须手动选择
+        
+        交互设计：
+        - 点击按钮打开 iOS 风格的滚动时间选择器
+        - 选择完成后，时间显示在按钮上（例如："今天 01/15 14:30"）
+        - transfer_search_controller.ts 会验证该字段是否已选择
+      -->
+      <% if @service_type.in?(%w[to_airport to_station]) %>
+        <div class="flex items-start mt-6" data-controller="transfer-time-picker">
+          <!-- 时钟图标 -->
+          <div class="mt-1 mr-3">
+            <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div class="text-xs text-text-muted mb-1">
+              请选择用车时间
+            </div>
+            <!-- 
+              触发按钮：点击后打开时间选择器弹窗
+              data-action: 绑定到 transfer-time-picker#openModal 方法
+            -->
+            <button
+              type="button"
+              data-action="click->transfer-time-picker#openModal"
+              class="flex justify-between items-center w-full">
+              <div class="flex-1">
+                <!-- 
+                  显示文本：
+                  - 初始值："请选择时间"（灰色）
+                  - 选择后："今天 01/15 14:30"（黑色）
+                  transfer_time_picker_controller.ts 会更新这个 <h2> 元素的内容
+                -->
+                <h2 class="text-lg font-bold text-text-muted">请选择时间</h2>
+              </div>
+              <!-- 右箭头图标 -->
+              <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- 引入时间选择器弹窗模板（定义在 app/views/shared/_transfer_time_picker_modal.html.erb） -->
+          <%= render 'shared/transfer_time_picker_modal' %>
         </div>
       <% end %>
     </div>
@@ -283,7 +347,7 @@
         data-transfer-search-train-id-value="<%= @transfer_params&.dig(:train_id) %>"
         data-action="click->transfer-search#handleSearch"
         class="w-full block text-center bg-[#FFD800] text-black font-bold text-lg py-3 rounded-full shadow-md active:scale-95 transition-transform">
-        搜索<%= @transfer_type == 'airport_pickup' ? '接送机' : '接送站' %>
+        搜索<%= @transfer_type.in?(%w[airport_pickup airport_dropoff]) ? '接送机' : '接送站' %>
       </button>
     </div>
     
@@ -298,44 +362,6 @@
   <!-- Super Value Deals Card -->
   <div class="px-4 mt-5">
     
-  </div>
-
-  <!-- Bottom Banner (Promo) -->
-  <div class="px-4 mt-4 pb-24">
-    <div class="w-full h-24 rounded-xl overflow-hidden relative bg-gradient-to-r from-blue-100 to-green-100 flex items-center justify-between px-4">
-      <div class="z-10">
-        <div class="text-[#8B5C35] font-black text-lg italic" style="-webkit-text-stroke: 1px white;">人身行李全保障</div>
-        <div class="flex items-center gap-1">
-          <div class="text-[#E67E22] font-black text-lg italic" style="-webkit-text-stroke: 1px white;">取消延误有赔偿</div>
-          <div class="bg-white text-[#E67E22] text-[9px] px-1 border border-[#E67E22] rounded">国内旅行险10元起</div>
-        </div>
-      </div>
-      
-      <div class="z-10">
-        <button class="bg-[#FF5500] text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow" onclick="window.showToast('精彩即将上线，敬请期待')">点击查看 ></button>
-      </div>
-
-      <!-- Decorative background elements -->
-      <div class="absolute bottom-0 right-16 w-16 h-16 bg-yellow-400 rounded-full opacity-50 blur-xl"></div>
-      <div class="absolute bottom-[-10px] left-[50%] transform -translate-x-1/2">
-        <svg class="w-20 h-20 text-yellow-300 drop-shadow-lg" viewBox="0 0 100 100" fill="currentColor">
-          <circle cx="50" cy="50" r="40" />
-          <circle cx="35" cy="45" r="5" fill="black"/>
-          <circle cx="65" cy="45" r="5" fill="black"/>
-          <ellipse cx="50" cy="60" rx="15" ry="10" fill="#FFAB91"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation Bar -->
-  <div class="fixed bottom-0 left-0 right-0 bg-surface border-t border-border py-2 flex justify-center items-center z-50">
-    <%= link_to bookings_path, class: "flex flex-col items-center" do %>
-      <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-      </svg>
-      <span class="text-[10px] text-text-primary mt-1 font-medium">我的订单</span>
-    <% end %>
   </div>
 
   <!-- Include Location Selector Modal -->
