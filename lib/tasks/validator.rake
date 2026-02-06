@@ -730,6 +730,86 @@ namespace :validator do
       puts "✅ All validators with instance variables have state management\n"
     end
     
+    # Step 2.5: 检查 execution_state_data 和 restore_from_state 的字段一致性
+    puts "🔍 Step 2.5: Checking state save/restore field consistency..."
+    consistency_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      
+      # 提取 execution_state_data 方法
+      execution_state_data_method = content.match(/def\s+execution_state_data.*?\{(.*?)\}/m)&.[](1)
+      # 提取 restore_from_state 方法
+      restore_from_state_method = content.match(/def\s+restore_from_state\(data\)(.*?)(?:def |private|\z)/m)&.[](1)
+      
+      if execution_state_data_method && restore_from_state_method
+        # 提取 execution_state_data 中保存的字段名
+        saved_keys = execution_state_data_method.scan(/^\s*(\w+):/).flatten
+        
+        # 提取 restore_from_state 中恢复的字段名
+        restored_keys = restore_from_state_method.scan(/@(\w+)\s*=\s*data\[/).flatten
+        
+        # 计算差异
+        saved_set = Set.new(saved_keys)
+        restored_set = Set.new(restored_keys)
+        
+        missing_in_restore = saved_set - restored_set
+        extra_in_restore = restored_set - saved_set
+        
+        if missing_in_restore.any? || extra_in_restore.any?
+          consistency_errors << {
+            validator: validator_name,
+            file: file,
+            saved_keys: saved_keys,
+            restored_keys: restored_keys,
+            missing_in_restore: missing_in_restore.to_a,
+            extra_in_restore: extra_in_restore.to_a
+          }
+        end
+      end
+    end
+    
+    if consistency_errors.any?
+      puts "\n❌ State Save/Restore Field Mismatch Found:"
+      puts "-" * 70
+      consistency_errors.first(10).each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  File: #{error[:file]}"
+        if error[:missing_in_restore].any?
+          puts "  Missing in restore_from_state: #{error[:missing_in_restore].join(', ')}"
+          puts "  → These fields are saved but NOT restored, causing nil values in verify!"
+        end
+        if error[:extra_in_restore].any?
+          puts "  Extra in restore_from_state: #{error[:extra_in_restore].join(', ')}"
+          puts "  → These fields are restored but NOT saved, will be nil on restore!"
+        end
+        puts "  Saved keys: #{error[:saved_keys].join(', ')}"
+        puts "  Restored keys: #{error[:restored_keys].join(', ')}"
+      end
+      if consistency_errors.size > 10
+        puts "\n  ... and #{consistency_errors.size - 10} more validators with mismatched fields"
+      end
+      puts "-" * 70
+      puts "\n❌ #{consistency_errors.size} validator(s) have state save/restore field mismatches"
+      puts "\n💡 规则说明:"
+      puts "  - execution_state_data 中保存的每个字段，必须在 restore_from_state 中恢复"
+      puts "  - restore_from_state 中恢复的每个字段，必须在 execution_state_data 中保存"
+      puts "  - 字段名必须完全一致（不包括 @data_version）"
+      puts "\n🔧 修复方法:"
+      puts "  1. 检查 execution_state_data 返回的 hash 中的所有 key"
+      puts "  2. 确保每个 key 在 restore_from_state 中都有对应的 @key = data['key']"
+      puts "  3. 如果有日期字段，记得使用 .to_s 保存，Date.parse() 恢复"
+      puts "  4. 如果有数值字段，记得使用 .to_f 或 .to_i 转换"
+      puts "\n⚠️  这是导致 'expected: <= nil' 验证错误的根本原因！\n"
+      exit 1
+    else
+      puts "✅ All validators have consistent state save/restore fields\n"
+    end
+    
     # Step 3: 检查 prepare 方法是否创建数据
     puts "🔍 Step 3: Checking prepare methods for data creation violations..."
     prepare_errors = []
