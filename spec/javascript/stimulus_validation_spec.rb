@@ -74,6 +74,7 @@ RSpec.describe 'Stimulus Validation', type: :system do
       registration_errors = []
       value_errors = []
       outlet_errors = []
+      duplicate_controller_errors = []
 
       view_files.each do |view_file|
         content = File.read(view_file)
@@ -498,10 +499,54 @@ RSpec.describe 'Stimulus Validation', type: :system do
         end
       end
 
+      # 🆕 Check for duplicate controller declarations (nested controllers)
+      view_files.each do |view_file|
+        content = File.read(view_file)
+        relative_path = view_file.sub(Rails.root.to_s + '/', '')
+
+        # Expand partial content before parsing
+        expanded_content = expand_partials(content, view_file)
+        doc = Nokogiri::HTML::DocumentFragment.parse(expanded_content)
+
+        # Track controller declarations at different levels
+        doc.css('[data-controller]').each do |outer_element|
+          outer_controllers = outer_element['data-controller'].split(/\s+/).map(&:strip)
+
+          # Check if any nested elements also declare the same controller
+          outer_element.css('[data-controller]').each do |nested_element|
+            next if nested_element == outer_element  # Skip self
+
+            nested_controllers = nested_element['data-controller'].split(/\s+/).map(&:strip)
+
+            # Find controllers that are declared in both outer and nested elements
+            duplicate_controllers = outer_controllers & nested_controllers
+
+            duplicate_controllers.each do |controller_name|
+              # Check if nested element has targets for this controller
+              has_targets = controller_data.dig(controller_name, :targets)&.any? do |target|
+                nested_element["data-#{controller_name}-target"]&.include?(target) ||
+                nested_element.css("[data-#{controller_name}-target*='#{target}']").any?
+              end
+
+              if has_targets
+                duplicate_controller_errors << {
+                  controller: controller_name,
+                  file: relative_path,
+                  outer_element: outer_element.to_html.lines.first.strip.truncate(100),
+                  nested_element: nested_element.to_html.lines.first.strip.truncate(100),
+                  suggestion: "Remove 'data-controller=\"#{controller_name}\"' from nested element - targets should belong to the outer controller instance"
+                }
+              end
+            end
+          end
+        end
+      end
+
       # Remove duplicates from registration errors
       registration_errors = registration_errors.uniq { |error| [error[:controller], error[:file]] }
+      duplicate_controller_errors = duplicate_controller_errors.uniq { |error| [error[:controller], error[:file], error[:nested_element]] }
 
-      total_errors = target_errors.length + target_scope_errors.length + action_errors.length + scope_errors.length + registration_errors.length + value_errors.length + outlet_errors.length
+      total_errors = target_errors.length + target_scope_errors.length + action_errors.length + scope_errors.length + registration_errors.length + value_errors.length + outlet_errors.length + duplicate_controller_errors.length
 
       puts "\n🔍 Simple Stimulus Validation Results:"
       puts "   📁 Scanned: #{view_files.length} views, #{controller_data.keys.length} controllers"
@@ -598,6 +643,16 @@ RSpec.describe 'Stimulus Validation', type: :system do
           end
         end
 
+        if duplicate_controller_errors.any?
+          puts "\n   🚨 Duplicate Controller Declarations (#{duplicate_controller_errors.length}):"
+          duplicate_controller_errors.each do |error|
+            puts "     • #{error[:controller]} declared in both outer and nested elements in #{error[:file]}"
+            puts "       Outer: #{error[:outer_element]}"
+            puts "       Nested: #{error[:nested_element]}"
+            puts "       ⚠️  This creates separate controller instances - targets in nested element won't be accessible from outer controller"
+          end
+        end
+
         error_details = []
 
         registration_errors.each do |error|
@@ -630,6 +685,10 @@ RSpec.describe 'Stimulus Validation', type: :system do
 
         action_errors.each do |error|
           error_details << "Method error: #{error[:controller]}##{error[:method]} in #{error[:file]} - #{error[:suggestion]}"
+        end
+
+        duplicate_controller_errors.each do |error|
+          error_details << "Duplicate controller declaration: #{error[:controller]} in #{error[:file]} - #{error[:suggestion]}"
         end
 
         expect(total_errors).to eq(0), "Stimulus validation failed:\n#{error_details.join("\n")}"
