@@ -138,7 +138,8 @@ module V151V200
       )
       
       # 创建酒店订单
-      room = best_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+      room = best_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
       unless room
         room = HotelRoom.create!(
           hotel_id: best_hotel.id,

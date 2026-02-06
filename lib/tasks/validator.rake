@@ -31,6 +31,31 @@ namespace :validator do
           password: admin_password
         )
       end
+    
+    # 检查 task_id 重复
+    duplicate_task_ids = task_id_map.select { |task_id, validators| validators.size > 1 }
+    
+    if duplicate_task_ids.any?
+      puts "\n❌ Duplicate task_id Found:"
+      puts "-" * 70
+      duplicate_task_ids.each do |task_id, validators|
+        puts "\n❌ task_id: #{task_id} (重复 #{validators.size} 次)"
+        validators.each do |v|
+          puts "  → #{v[:validator]} (#{v[:class_name]})"
+          puts "    File: #{v[:file]}"
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ 发现 #{duplicate_task_ids.size} 组重复的 task_id（共影响 #{duplicate_task_ids.values.flatten.size} 个 validators）"
+      puts "\n💡 原因分析:"
+      puts "  - 批量生成 validator 时，复制模板后忘记修改 task_id"
+      puts "  - API 的 find_validator 方法通过 task_id 查找，重复会导致找到错误的 validator"
+      puts "\n🔧 修复方法:"
+      puts "  1. 为每个重复的 validator 生成新的唯一 UUID"
+      puts "  2. 可使用 SecureRandom.uuid 或递增最后一位字符"
+      puts "  3. 修复后重启 Rails 服务器加载新的 task_id\n"
+      exit 1
+    end
       
       # 禁用外键约束检查
       admin_conn.exec("SET session_replication_role = 'replica';")
@@ -169,6 +194,31 @@ namespace :validator do
         
         exit 1
       end
+    end
+    
+    # 检查 task_id 重复
+    duplicate_task_ids = task_id_map.select { |task_id, validators| validators.size > 1 }
+    
+    if duplicate_task_ids.any?
+      puts "\n❌ Duplicate task_id Found:"
+      puts "-" * 70
+      duplicate_task_ids.each do |task_id, validators|
+        puts "\n❌ task_id: #{task_id} (重复 #{validators.size} 次)"
+        validators.each do |v|
+          puts "  → #{v[:validator]} (#{v[:class_name]})"
+          puts "    File: #{v[:file]}"
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ 发现 #{duplicate_task_ids.size} 组重复的 task_id（共影响 #{duplicate_task_ids.values.flatten.size} 个 validators）"
+      puts "\n💡 原因分析:"
+      puts "  - 批量生成 validator 时，复制模板后忘记修改 task_id"
+      puts "  - API 的 find_validator 方法通过 task_id 查找，重复会导致找到错误的 validator"
+      puts "\n🔧 修复方法:"
+      puts "  1. 为每个重复的 validator 生成新的唯一 UUID"
+      puts "  2. 可使用 SecureRandom.uuid 或递增最后一位字符"
+      puts "  3. 修复后重启 Rails 服务器加载新的 task_id\n"
+      exit 1
     end
     
     # 显示警告汇总
@@ -393,6 +443,7 @@ namespace :validator do
     # Step 1: 检查validator类属性完整性
     puts "🔍 Step 1: Checking validator class attributes..."
     attribute_errors = []
+    task_id_map = {}  # 用于检测 task_id 重复
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_files.each do |file|
@@ -474,6 +525,10 @@ namespace :validator do
               actual: "'#{klass.task_id}'"
             }
           end
+          
+          # 存储 task_id 用于后续重复检查
+          task_id_map[klass.task_id] ||= []
+          task_id_map[klass.task_id] << { validator: validator_name, class_name: class_name, file: file }
         end
         
         # 检查 simulate 方法实现（包括 private 方法）
@@ -610,7 +665,7 @@ namespace :validator do
       puts "Please fix these validators before running simulations\n"
       exit 1
     else
-      puts "✅ All validators have required class attributes\n"
+      puts "✅ All validators have required class attributes (including unique task_id)\n"
     end
     
     # Step 2: 检查状态保存/恢复方法

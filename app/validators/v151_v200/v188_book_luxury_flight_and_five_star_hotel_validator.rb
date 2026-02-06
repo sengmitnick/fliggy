@@ -38,9 +38,10 @@ module V151V200
       expect(@available_business_flights).not_to be_empty,
         "数据包缺少#{@departure_city}→#{@arrival_city}的商务舱航班（#{@travel_date}）"
       
-      # 查找五星级酒店
+      # 查找五星级酒店（star_level >= 5）
       @available_five_star_hotels = Hotel
-        .where(city: @arrival_city, star_level: @required_star_level, data_version: 0)
+        .where(city: @arrival_city, data_version: 0)
+        .where('star_level >= ?', @required_star_level)
         .to_a
       
       expect(@available_five_star_hotels).not_to be_empty,
@@ -92,11 +93,11 @@ module V151V200
           "舱位错误。期望: business（商务舱）, 实际: #{flight.seat_class}"
       end
       
-      # 断言3: 酒店星级正确（五星级） (15%)
+      # 断言3: 酒店星级正确（五星级，即>=5星） (15%)
       add_assertion "酒店星级正确（五星级）", weight: 15 do
         hotel = @hotel_booking.hotel
-        expect(hotel.star_level).to eq(5),
-          "酒店星级错误。期望: 5星, 实际: #{hotel.star_level}星"
+        expect(hotel.star_level).to be >= 5,
+          "酒店星级错误。期望: 至少5星, 实际: #{hotel.star_level}星"
       end
       
       # 断言4: 航班城市正确（北京→上海） (15%)
