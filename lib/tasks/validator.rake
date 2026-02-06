@@ -473,6 +473,45 @@ namespace :validator do
               expected: "标准 UUID 格式（仅包含 0-9, a-f 字符）",
               actual: "'#{klass.task_id}'"
             }
+          else
+            # 检查 UUID 是否是模式化的（非随机）
+            # 只检测明显的模式特征，避免误报
+            uuid_no_dash = klass.task_id.gsub('-', '')
+            
+            # 检测1: 包含8个或以上连续相同字符（如 00000000）
+            if uuid_no_dash.match?(/([0-9a-f])\1{7,}/i)
+              attribute_errors << {
+                validator: validator_name,
+                class_name: class_name,
+                file: file,
+                format_error: "task_id 疑似为模式化 UUID（非随机）",
+                detail: "包含大量连续相同字符（8个以上），不符合随机 UUID 特征",
+                expected: "使用 SecureRandom.uuid 生成的随机 UUID",
+                actual: "'#{klass.task_id}'"
+              }
+            # 检测2: 最后一段是 validator 编号的零填充形式（如 000000000259 for v259）
+            elsif validator_name.match?(/v(\d{3})_/) && uuid_no_dash[-12..-1].match?(/^0+#{$1}$/)
+              attribute_errors << {
+                validator: validator_name,
+                class_name: class_name,
+                file: file,
+                format_error: "task_id 疑似为模式化 UUID（包含 validator 编号）",
+                detail: "最后一段包含 validator 编号 #{$1}（零填充），不符合随机 UUID 特征",
+                expected: "使用 SecureRandom.uuid 生成的随机 UUID",
+                actual: "'#{klass.task_id}'"
+              }
+            # 检测3: UUID 多个段为简单递增序列（如 f257a001-0001-4001-8001）
+            elsif klass.task_id.split('-')[1..3].all? { |seg| seg.match?(/^[0-8]001$/) }
+              attribute_errors << {
+                validator: validator_name,
+                class_name: class_name,
+                file: file,
+                format_error: "task_id 疑似为模式化 UUID（递增序列）",
+                detail: "多个段呈现递增模式（如 0001, 4001, 8001），不符合随机 UUID 特征",
+                expected: "使用 SecureRandom.uuid 生成的随机 UUID",
+                actual: "'#{klass.task_id}'"
+              }
+            end
           end
         end
         

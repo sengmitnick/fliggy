@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V258BookCarWithFullInsuranceValidator < BaseValidator
     self.validator_id = 'v258_book_car_with_full_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000258'
+    self.task_id = '7785f506-a374-4f39-b8f3-08cffdf278fb'
     self.title = '预订成都租车3天（后天取车）并购买交通意外险（保障天数需覆盖租车期间）'
     self.description = '用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间（保险天数>=租车天数）'
     self.timeout_seconds = 300

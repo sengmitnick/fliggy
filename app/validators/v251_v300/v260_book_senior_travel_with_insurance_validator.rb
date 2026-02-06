@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V260BookSeniorTravelWithInsuranceValidator < BaseValidator
     self.validator_id = 'v260_book_senior_travel_with_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000260'
+    self.task_id = '442546c5-70c7-4519-80e7-513c856e9596'
     self.title = '预订老年人出行+高龄旅游保险'
     self.description = '用户需要为老年人（65岁以上）预订出行并购买高龄旅游保险'
     self.timeout_seconds = 300

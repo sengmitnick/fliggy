@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
-    self.task_id = 'f308a001-0001-4001-8001-000000000308'
+    self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
     self.title = '预订潜水教学+潜水体验+水下摄影'
     self.description = '用户需要预订潜水服务套餐，包含教学、体验和水下摄影服务'
     self.timeout_seconds = 300

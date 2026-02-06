@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V265BookFamilyTourWithFamilyInsuranceValidator < BaseValidator
     self.validator_id = 'v265_book_family_tour_with_family_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000265'
+    self.task_id = '89326e33-0407-4028-8d62-82ea40ebd791'
     self.title = '预订家庭游+全家保险套餐（2大1小）'
     self.description = '用户需要预订家庭游并购买全家保险套餐（2成人+1儿童）'
     self.timeout_seconds = 300
