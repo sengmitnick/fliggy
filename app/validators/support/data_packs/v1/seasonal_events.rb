@@ -496,4 +496,75 @@ flights_data << {
 Flight.insert_all(flights_data)
 puts "    ✓ 创建了 #{flights_data.size} 个暑期航班"
 
+# ==================== 门票供应商关联数据 ====================
+puts "  创建门票供应商关联数据..."
+
+# 重新加载供应商以获取 ID（attractions.rb 中已创建）
+suppliers = {}
+Supplier.where(data_version: 0).each do |supplier|
+  suppliers[supplier.name] = supplier
+end
+
+# 崇礼万龙滑雪场全天票 - 3个供应商
+cl_ticket = Ticket.joins(:attraction).find_by(
+  attractions: { name: "崇礼万龙滑雪场" },
+  ticket_type: "adult",
+  data_version: 0
+)
+
+if cl_ticket && suppliers.any?
+  ticket_suppliers_data = []
+  
+  # 携程旅行供应商
+  if suppliers["携程旅行"]
+    ticket_suppliers_data << {
+      ticket_id: cl_ticket.id,
+      supplier_id: suppliers["携程旅行"].id,
+      current_price: 360,
+      original_price: 450,
+      stock: 300,
+      discount_info: "滑雪季早鸟价",
+      sales_count: 1580,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 美团门票供应商
+  if suppliers["美团门票"]
+    ticket_suppliers_data << {
+      ticket_id: cl_ticket.id,
+      supplier_id: suppliers["美团门票"].id,
+      current_price: 365,
+      original_price: 450,
+      stock: 200,
+      discount_info: "限时特惠",
+      sales_count: 980,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 景区官方供应商
+  if suppliers["景区官方"]
+    ticket_suppliers_data << {
+      ticket_id: cl_ticket.id,
+      supplier_id: suppliers["景区官方"].id,
+      current_price: 380,
+      original_price: 450,
+      stock: -1,
+      discount_info: nil,
+      sales_count: 2560,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  TicketSupplier.insert_all(ticket_suppliers_data) if ticket_suppliers_data.any?
+  puts "    ✓ 创建了 #{ticket_suppliers_data.size} 个门票供应商关联"
+end
+
 puts "✓ seasonal_events_v1 数据包加载完成"
