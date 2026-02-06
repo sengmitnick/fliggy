@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V262BookFlightWithDelayAndLuggageInsuranceValidator < BaseValidator
     self.validator_id = 'v262_book_flight_with_delay_and_luggage_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000262'
+    self.task_id = '440e142a-b196-4ea2-a3db-3a7da7eb9633'
     self.title = '预订航班+延误险+行李险组合'
     self.description = '用户需要预订航班并购买延误险和行李险组合保险'
     self.timeout_seconds = 300

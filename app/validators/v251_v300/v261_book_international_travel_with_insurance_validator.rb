@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V261BookInternationalTravelWithInsuranceValidator < BaseValidator
     self.validator_id = 'v261_book_international_travel_with_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000261'
+    self.task_id = 'c8f11a6e-535a-4800-940e-df5c32cadd81'
     self.title = '预订境外游+国际旅游综合保险'
     self.description = '用户需要预订境外游并购买国际旅游综合保险（含医疗、意外、行李等）'
     self.timeout_seconds = 300

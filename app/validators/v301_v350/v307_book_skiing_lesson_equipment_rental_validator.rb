@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
-    self.task_id = 'f307a001-0001-4001-8001-000000000307'
+    self.task_id = '72e6f61b-18de-4434-a053-2297fd7be1b9'
     self.title = '预订滑雪教学+滑雪场门票+装备租赁'
     self.description = '用户需要预订滑雪服务套餐，包含教学、门票和装备租赁'
     self.timeout_seconds = 300

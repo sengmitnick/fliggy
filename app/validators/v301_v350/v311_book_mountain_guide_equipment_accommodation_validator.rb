@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V311BookMountainGuideEquipmentAccommodationValidator < BaseValidator
     self.validator_id = 'v311_book_mountain_guide_equipment_accommodation_validator'
-    self.task_id = 'f311a001-0001-4001-8001-000000000311'
+    self.task_id = 'd31ed871-6c15-42f0-8fd0-3dfbeddca35e'
     self.title = '预订登山向导+装备租赁+山顶住宿'
     self.description = '用户需要预订登山服务套餐，包含专业向导、装备租赁和山顶住宿'
     self.timeout_seconds = 300

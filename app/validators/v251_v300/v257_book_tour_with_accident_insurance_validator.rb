@@ -18,7 +18,7 @@ require_relative '../base_validator'
 module V251V300
   class V257BookTourWithAccidentInsuranceValidator < BaseValidator
     self.validator_id = 'v257_book_tour_with_accident_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000257'
+    self.task_id = '685c598f-4c18-4710-ac08-c68f515ff29e'
     self.title = '预订黄山跟团游并购买境内旅游保险（意外伤害保障）'
     self.description = '用户需要预订黄山跟团游（5天后出发，2天行程，2人），并为跟团游购买境内旅游保险（意外伤害保障），保险天数需覆盖旅游天数（至少2天）'
     self.timeout_seconds = 300

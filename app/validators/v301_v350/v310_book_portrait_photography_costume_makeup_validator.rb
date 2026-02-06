@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V310BookPortraitPhotographyCostumeMakeupValidator < BaseValidator
     self.validator_id = 'v310_book_portrait_photography_costume_makeup_validator'
-    self.task_id = 'f310a001-0001-4001-8001-000000000310'
+    self.task_id = '7230b4f9-7181-49ba-9478-979b313bdbca'
     self.title = '预订跟拍人像+服装租赁+化妆造型'
     self.description = '用户需要预订专业摄影服务套餐，包含跟拍、服装租赁和化妆造型'
     self.timeout_seconds = 300

@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V251V300
   class V263BookHotelWithPropertyLiabilityInsuranceValidator < BaseValidator
     self.validator_id = 'v263_book_hotel_with_property_liability_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000263'
+    self.task_id = '20880d56-4e35-423e-befa-c7df4897e258'
     self.title = '预订酒店+财产保险+责任保险'
     self.description = '用户需要预订酒店并购买财产和责任综合保险'
     self.timeout_seconds = 300

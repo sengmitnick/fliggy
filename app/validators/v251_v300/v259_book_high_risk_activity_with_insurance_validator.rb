@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V259BookHighRiskActivityWithInsuranceValidator < BaseValidator
     self.validator_id = 'v259_book_high_risk_activity_with_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000259'
+    self.task_id = '252c7d0b-4c3f-4877-9af0-1712884307df'
     self.title = '预订高风险活动+专项保险（滑雪/潜水）'
     self.description = '用户需要预订滑雪或潜水等高风险活动并购买专项运动保险'
     self.timeout_seconds = 300
