@@ -286,6 +286,140 @@ hangzhou_private_group_products = [
 TourGroupProduct.insert_all(hangzhou_private_group_products)
 puts "✓ 添加了 #{hangzhou_private_group_products.count} 个杭州4天私家团产品"
 
+# 杭州禅修静心主题产品（支持 v306 验证器）
+puts "\n🎯 添加杭州禅修静心主题产品..."
+
+hangzhou_meditation_products = [
+  {
+    title: "【多日游】杭州灵隐寺+法喜寺+径山禅修静心游 3天2晚 素食体验·冥想课程·文化讲座",
+    subtitle: "灵隐寺·禅修静心·素食体验",
+    destination: "杭州",
+    departure_city: "杭州",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 3,
+    badge: '多日游·禅修主题',
+    price: 1888,
+    original_price: 2388,
+    rating: 4.9,
+    rating_desc: "156条评价",
+    sales_count: 128,
+    highlights: ['灵隐寺禅修', '素食体验', '冥想课程', '文化讲座', '深度体验'],
+    tags: ['灵隐寺', '法喜寺', '径山寺', '素食', '禅修', '冥想', '文化主题'],
+    departure_label: "杭州出发",
+    is_featured: true,
+    display_order: all_products_data.count,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['杭州西湖国旅'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】杭州灵隐寺+法喜寺禅修静心游 4天3晚 素食禅茶·抄经体验·寺庙住宿",
+    subtitle: "禅修静心·寺庙住宿·素食禅茶",
+    destination: "杭州",
+    departure_city: "上海",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 4,
+    badge: '多日游·禅修主题',
+    price: 2488,
+    original_price: 2988,
+    rating: 4.8,
+    rating_desc: "189条评价",
+    sales_count: 167,
+    highlights: ['寺庙住宿', '素食禅茶', '抄经体验', '禅修冥想', '文化深度游'],
+    tags: ['灵隐寺', '法喜寺', '素食', '禅修', '冥想', '抄经', '寺庙住宿', '文化主题'],
+    departure_label: "上海出发",
+    is_featured: true,
+    display_order: all_products_data.count + 1,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['上海春秋旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】杭州灵隐寺+径山寺+法喜寺禅修静心深度游 5天4晚 禅修课程·素食养生·茶道体验",
+    subtitle: "禅修深度游·素食养生·茶道体验",
+    destination: "杭州",
+    departure_city: "杭州",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 5,
+    badge: '多日游·禅修主题',
+    price: 3288,
+    original_price: 3888,
+    rating: 5.0,
+    rating_desc: "203条评价",
+    sales_count: 198,
+    highlights: ['禅修课程', '素食养生', '茶道体验', '冥想静坐', '寺庙巡礼', '文化讲座'],
+    tags: ['灵隐寺', '径山寺', '法喜寺', '素食', '禅修', '冥想', '茶道', '养生', '文化主题'],
+    departure_label: "杭州出发",
+    is_featured: true,
+    display_order: all_products_data.count + 2,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['杭州携程国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】杭州灵隐寺+法喜寺禅修静心游 3天2晚 6人团 素食体验·冥想课程·禅茶一味",
+    subtitle: "禅修静心·6人小团·素食冥想",
+    destination: "杭州",
+    departure_city: "宁波",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 3,
+    badge: '多日游·6人团',
+    price: 1688,
+    original_price: 2088,
+    rating: 4.8,
+    rating_desc: "142条评价",
+    sales_count: 135,
+    highlights: ['灵隐寺禅修', '素食体验', '冥想课程', '禅茶体验', '6人小团'],
+    tags: ['灵隐寺', '法喜寺', '素食', '禅修', '冥想', '禅茶', '文化主题', '小团出行'],
+    departure_label: "宁波出发",
+    is_featured: false,
+    display_order: all_products_data.count + 3,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['杭州西湖国旅'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】杭州径山寺禅修静心游 4天3晚 8人团 禅修冥想·素食养生·文化体验",
+    subtitle: "径山寺禅修·8人团·养生体验",
+    destination: "杭州",
+    departure_city: "上海",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 4,
+    badge: '多日游·8人团',
+    price: 2188,
+    original_price: 2688,
+    rating: 4.7,
+    rating_desc: "178条评价",
+    sales_count: 156,
+    highlights: ['径山寺禅修', '冥想课程', '素食养生', '文化体验', '8人小团'],
+    tags: ['径山寺', '灵隐寺', '素食', '禅修', '冥想', '养生', '文化主题', '小团出行'],
+    departure_label: "上海出发",
+    is_featured: false,
+    display_order: all_products_data.count + 4,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['上海春秋旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+TourGroupProduct.insert_all(hangzhou_meditation_products)
+puts "✓ 添加了 #{hangzhou_meditation_products.count} 个杭州禅修静心主题产品"
+
 # 成都3日跟团游产品（支持 v156 验证器）
 puts "\n🎯 添加特定成都3日跟团游产品..."
 
@@ -428,7 +562,7 @@ puts "  批量插入 #{all_packages_data.count} 个套餐..."
 TourPackage.insert_all(all_packages_data)
 
 # ==================== 批量生成行程数据 ====================
-puts "\n📅 批量生成行程数据..."
+puts "\n📅 批量生成行程数据（智能识别景点和主题）..."
 
 all_itinerary_data = []
 timestamp = Time.current
@@ -441,21 +575,58 @@ attractions_library = {
   '特色体验' => ['当地美食', '摄影打卡', '互动体验', '文化讲解', '特色活动', '自由活动']
 }
 
+# 主题关键词配置
+theme_keywords = {
+  '禅修' => ['禅修', '冥想', '静心', '灵隐寺', '法喜寺', '径山寺', '素食', '禅茶', '抄经', '养生'],
+  '亲子' => ['亲子', '儿童', '科技馆', '动物园', '海洋馆', '乐园', '互动课程', '家庭'],
+  '海岛' => ['海岛', '海滩', '潜水', '海鲜', '温泉', '游船', '海上运动'],
+  '文化' => ['文化', '博物馆', '古镇', '历史', '遗迹', '古迹', '传统']
+}
+
 TourGroupProduct.find_each do |product|
   duration = product.duration
   destination = product.destination
   departure_city = product.departure_city
+  title = product.title
+  
+  # 从标题中提取景点名称（以+分隔的部分）
+  title_attractions = title.scan(/([\u4e00-\u9fa5]{2,8}(?:寺|山|湖|岛|海|湾|古镇|公园|景区|馆|洞|寺庙|城|村|谷|港))[+·\s]/).flatten
+  title_attractions += title.scan(/(西湖|千岛湖|乌镇|灵隐寺|法喜寺|径山寺|普陀山|蓬莱阁|天坛|故宫|长城|颐和园|天安门)/).flatten
+  title_attractions = title_attractions.uniq.first(6)
+  
+  # 识别主题
+  detected_theme = nil
+  theme_keywords.each do |theme, keywords|
+    if keywords.any? { |kw| title.include?(kw) }
+      detected_theme = theme
+      break
+    end
+  end
   
   duration.times do |i|
     day_number = i + 1
     
     if day_number == 1
       # 第一天：抵达日
+      first_day_attractions = ["从#{departure_city}出发", "#{destination}机场/车站接站", '酒店办理入住']
+      
+      # 根据主题调整第一天行程
+      case detected_theme
+      when '禅修'
+        first_day_attractions += ['素食欢迎晚餐', '禅茶体验', '晚间冥想课程(可选)']
+      when '亲子'
+        first_day_attractions += ['欢迎晚餐', '酒店周边自由活动', '儿童活动室']
+      when '海岛'
+        first_day_attractions += ['海鲜欢迎晚餐', '海滩漫步', '自由活动']
+      else
+        first_day_attractions += ['欢迎晚餐(自费)', '酒店周边自由活动']
+      end
+      
       all_itinerary_data << {
         tour_group_product_id: product.id,
         day_number: day_number,
         title: "出发日 - 抵达#{destination}",
-        attractions: ["从#{departure_city}出发", "#{destination}机场/车站接站", '酒店办理入住', '欢迎晚餐(自费)'],
+        attractions: first_day_attractions,
         assembly_point: "#{departure_city}机场/车站集合",
         disassembly_point: nil,
         transportation: '飞机/高铁',
@@ -483,23 +654,86 @@ TourGroupProduct.find_each do |product|
         updated_at: timestamp
       }
     else
-      # 中间天：精华游览日
-      category = ['自然风光', '人文历史', '休闲娱乐', '特色体验'].sample
-      day_attractions = attractions_library[category].sample(3) + [
-        "#{destination}特色景点#{day_number - 1}",
-        '当地特色午餐',
-        '下午茶时光(自费)'
-      ]
+      # 中间天：根据主题和景点生成行程
+      day_index = day_number - 2  # 从第2天开始的索引
+      
+      # 选择当天的主景点
+      main_attraction = title_attractions[day_index] || "#{destination}特色景点"
+      
+      # 根据主题生成不同风格的行程
+      case detected_theme
+      when '禅修'
+        day_title = "第#{day_number}天 - #{main_attraction}禅修体验"
+        day_attractions = [
+          '酒店素食早餐',
+          "前往#{main_attraction}",
+          "参观#{main_attraction}",
+          '禅宗文化讲座',
+          '素斋午餐',
+          ['冥想课程', '抄经体验', '禅茶一味', '茶道体验'].sample,
+          '返回酒店休息'
+        ]
+        service_info = "含素食早午餐，#{main_attraction}门票，禅修导师讲解，禅修课程指导"
+      when '亲子'
+        day_title = "第#{day_number}天 - #{main_attraction}亲子游"
+        day_attractions = [
+          '酒店早餐',
+          "前往#{main_attraction}",
+          "游览#{main_attraction}",
+          ['亲子互动活动', '科普讲解', '手工DIY体验', '儿童游乐设施'].sample,
+          '特色午餐',
+          ['家庭摄影时间', '互动游戏', '自由活动'].sample,
+          '返回酒店'
+        ]
+        service_info = "含早午餐，#{main_attraction}门票，亲子导游服务，互动体验活动"
+      when '海岛'
+        day_title = "第#{day_number}天 - #{main_attraction}海岛之旅"
+        day_attractions = [
+          '酒店早餐',
+          "前往#{main_attraction}",
+          "游览#{main_attraction}",
+          ['海滩自由活动', '海上运动体验(自费)', '潜水体验(自费)'].sample,
+          '海鲜自助午餐',
+          ['海滩漫步', '日落观赏', '海边摄影'].sample,
+          '返回酒店'
+        ]
+        service_info = "含早午餐，#{main_attraction}门票+往返船票(如需)，专业导游讲解"
+      when '文化'
+        day_title = "第#{day_number}天 - #{main_attraction}文化之旅"
+        day_attractions = [
+          '酒店早餐',
+          "前往#{main_attraction}",
+          "参观#{main_attraction}",
+          '文化讲解服务',
+          '特色午餐',
+          ['博物馆参观', '古迹探索', '民俗体验', '传统手工艺'].sample,
+          '返回酒店休息'
+        ]
+        service_info = "含早午餐，#{main_attraction}门票，文化讲解服务，深度体验"
+      else
+        # 默认通用行程
+        category = ['自然风光', '人文历史', '休闲娱乐', '特色体验'].sample
+        day_title = "第#{day_number}天 - #{main_attraction}#{category}游"
+        day_attractions = [
+          '酒店早餐',
+          "前往#{main_attraction}",
+          "游览#{main_attraction}"
+        ] + attractions_library[category].sample(2) + [
+          '当地特色午餐',
+          '返回酒店休息'
+        ]
+        service_info = "含早午餐，#{main_attraction}门票，专业导游讲解服务"
+      end
       
       all_itinerary_data << {
         tour_group_product_id: product.id,
         day_number: day_number,
-        title: "第#{day_number}天 - #{destination}#{category}深度游",
+        title: day_title,
         attractions: day_attractions,
         assembly_point: nil,
         disassembly_point: nil,
         transportation: '旅游大巴',
-        service_info: '全天游览,包含景点门票、专业导游讲解服务、午餐',
+        service_info: service_info,
         duration_minutes: 540,
         data_version: 0,
         created_at: timestamp,

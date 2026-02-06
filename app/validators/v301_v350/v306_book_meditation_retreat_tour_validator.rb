@@ -17,8 +17,8 @@ module V301V350
   class V306BookMeditationRetreatTourValidator < BaseValidator
     self.validator_id = 'v306_book_meditation_retreat_tour_validator'
     self.task_id = '13bb2b29-d9cb-4e2c-adb5-0e345081dbbc'
-    self.title = '预订禅修静心游'
-    self.description = '用户预订禅修静心游(寺庙+冥想+素食体验)'
+    self.title = '预订杭州禅修静心游（1人，14天后出发，至少3天）'
+    self.description = '用户预订杭州的禅修静心跟团游，14天后出发，1成人，行程至少3天，选择高评分（≥4.5）的禅修/文化主题行程，包含寺庙参观、冥想体验和素食'
     self.timeout_seconds = 300
     
     def prepare
@@ -53,8 +53,8 @@ module V301V350
       
       add_assertion "选择禅修/文化主题行程", weight: 30 do
         tour = @tour_booking.tour_group_product
-        # 禅修主题通常评分高、行程较长、价格适中
-        is_meditation_tour = tour.rating >= 4.5 && tour.duration >= 3
+        # 禅修主题必须包含相关关键词：禅修/寺庙/冥想/素食
+        is_meditation_tour = tour.title.match?(/(禅修|灵隐寺|法喜寺|径山寺|冥想|素食|禅茶|抄经|养生|静心)/)
         expect(is_meditation_tour).to be(true),
           "未选择禅修主题行程。当前行程: #{tour.title}, 评分: #{tour.rating}, 天数: #{tour.duration}天"
       end
@@ -71,7 +71,7 @@ module V301V350
       end
       
       add_assertion "订单状态正确", weight: 5 do
-        valid_statuses = ['pending', 'paid']
+        valid_statuses = ['pending', 'confirmed', 'paid']
         expect(valid_statuses).to include(@tour_booking.status),
           "订单状态错误: #{@tour_booking.status}"
       end
@@ -80,17 +80,18 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 选择禅修主题跟团游(至少3天，高评分)
+      # 选择禅修主题跟团游(至少3天，包含寺庙/禅修关键词)
       tour_product = TourGroupProduct
         .where(destination: @destination, data_version: 0)
-        .where("duration >= ? AND rating >= ?", 3, 4.5)
+        .where("duration >= ? AND (title LIKE ? OR title LIKE ? OR title LIKE ? OR title LIKE ?)", 
+               3, '%禅修%', '%寺%', '%冥想%', '%素食%')
         .order(rating: :desc)
         .first
       
-      # 如果没有满足条件的，降低要求
+      # 如果没有禅修主题，降低要求（只需行程≥30天、评分高4.5）
       tour_product ||= TourGroupProduct
         .where(destination: @destination, data_version: 0)
-        .where("duration >= ?", 3)
+        .where("duration >= ? AND rating >= ?", 3, 4.5)
         .order(rating: :desc)
         .first!
       
