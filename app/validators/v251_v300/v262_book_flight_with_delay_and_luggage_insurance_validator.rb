@@ -2,23 +2,23 @@
 
 require_relative '../base_validator'
 
-# V262: 预订航班+延误险+行李险组合
+# V262: 预订北京到上海航班并购买含延误保障的交通意外险
 #
 # 任务描述:
-#   用户需要预订航班并购买延误险和行李险组合保险
+#   用户需要预订3天后从北京到上海的航班，并购买交通意外险（必须包含航班延误保障）
 #
 # 评分标准:
 #   - 创建了航班订单 (30%)
 #   - 创建了保险订单 (25%)
-#   - 保险类型正确（交通意外险或航空保险）(20%)
+#   - 保险类型正确（交通意外险）(20%)
 #   - 保险包含延误保障 (15%)
 #   - 订单状态有效 (10%)
 module V251V300
   class V262BookFlightWithDelayAndLuggageInsuranceValidator < BaseValidator
     self.validator_id = 'v262_book_flight_with_delay_and_luggage_insurance_validator'
     self.task_id = '440e142a-b196-4ea2-a3db-3a7da7eb9633'
-    self.title = '预订航班+延误险+行李险组合'
-    self.description = '用户需要预订航班并购买延误险和行李险组合保险'
+    self.title = '预订北京到上海航班并购买含延误保障的交通意外险'
+    self.description = '用户需要预订3天后从北京到上海的航班，并购买交通意外险（必须包含航班延误保障），确保订单状态有效'
     self.timeout_seconds = 300
     
     def prepare
@@ -43,15 +43,15 @@ module V251V300
       raise "未找到包含航班延误保障的保险产品" if @available_insurances.empty?
       
       {
-        task: "请预订#{@from_city}到#{@to_city}的航班（#{@travel_date.strftime('%Y年%m月%d日')}），并购买延误险+行李险组合保险。",
+        task: "请预订#{@from_city}到#{@to_city}的航班（#{@travel_date.strftime('%Y年%m月%d日')}），并购买含航班延误保障的交通意外险。",
         requirements: {
           from_city: @from_city,
           to_city: @to_city,
           travel_date: @travel_date,
-          insurance_type: '航空保险',
-          insurance_coverage: '延误+行李'
+          insurance_type: '交通意外险',
+          insurance_coverage: '航班延误保障'
         },
-        hint: "航班出行建议购买含航班延误保障和行李丢失保障的交通意外险。"
+        hint: "航班出行建议购买含航班延误保障的交通意外险。"
       }
     end
     
@@ -81,7 +81,7 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险类型正确（交通意外险或航空保险）", weight: 20 do
+      add_assertion "保险类型正确（交通意外险）", weight: 20 do
         product_type = @insurance_order.insurance_product.product_type
         expect(product_type).to eq('transport'),
           "保险类型错误。航班需购买交通意外险。期望: transport，实际: #{product_type}"
