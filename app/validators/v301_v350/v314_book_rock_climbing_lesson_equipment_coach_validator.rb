@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V314BookRockClimbingLessonEquipmentCoachValidator < BaseValidator
     self.validator_id = 'v314_book_rock_climbing_lesson_equipment_coach_validator'
-    self.task_id = 'f314a001-0001-4001-8001-000000000314'
+    self.task_id = '58118f22-f2ac-492b-bf85-a73a4786c8aa'
     self.title = '预订攀岩教学+安全装备+教练陪同'
     self.description = '用户需要预订攀岩服务套餐，包含教学、安全装备和教练陪同'
     self.timeout_seconds = 300

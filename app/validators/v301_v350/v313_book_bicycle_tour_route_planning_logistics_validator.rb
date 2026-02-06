@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V313BookBicycleTourRoutePlanningLogisticsValidator < BaseValidator
     self.validator_id = 'v313_book_bicycle_tour_route_planning_logistics_validator'
-    self.task_id = 'f313a001-0001-4001-8001-000000000313'
+    self.task_id = '808b3eb8-c5d7-43e8-b730-d9d6c79ab5cb'
     self.title = '预订自行车骑行+路线规划+后勤支持'
     self.description = '用户需要预订自行车骑行服务，包含路线规划和后勤支持'
     self.timeout_seconds = 300

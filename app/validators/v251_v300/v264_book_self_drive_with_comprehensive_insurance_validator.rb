@@ -16,7 +16,7 @@ require_relative '../base_validator'
 module V251V300
   class V264BookSelfDriveWithComprehensiveInsuranceValidator < BaseValidator
     self.validator_id = 'v264_book_self_drive_with_comprehensive_insurance_validator'
-    self.task_id = 'f257a001-0001-4001-8001-000000000264'
+    self.task_id = '7c2e2d2c-6733-4917-9166-69ac075dd6ce'
     self.title = '预订自驾游+人身险+车险+道路救援'
     self.description = '用户需要预订自驾游并购买人身险、车险和道路救援组合保险'
     self.timeout_seconds = 300

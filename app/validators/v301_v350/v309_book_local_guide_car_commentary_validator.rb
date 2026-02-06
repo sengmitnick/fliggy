@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V309BookLocalGuideCarCommentaryValidator < BaseValidator
     self.validator_id = 'v309_book_local_guide_car_commentary_validator'
-    self.task_id = 'f309a001-0001-4001-8001-000000000309'
+    self.task_id = 'f4d35905-7889-4569-8f32-a0b6c76a7873'
     self.title = '预订当地司导+包车+景点讲解'
     self.description = '用户需要预订深度旅行服务，包含专业导游、包车和景点讲解'
     self.timeout_seconds = 300

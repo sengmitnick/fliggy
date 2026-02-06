@@ -444,6 +444,8 @@ rake validator:validate_data_packs EXPORT=report.json
 - [x] Phase 1.1: 创建 DataPackValidator 类
 - [x] Phase 1.2: 修改 validator.rake 输出捕获逻辑  
 - [x] Phase 1.3: 添加 validate_data_packs 任务
+- [x] **Phase 1.4: 添加关联表完整性检查（ASSOCIATION_RULES）** ✨ NEW
+- [x] **Phase 1.5: 添加业务规则验证（BUSINESS_RULES）** ✨ NEW
 - [ ] Phase 2.1: 批量清理数据包冗余输出
 - [ ] Phase 2.2: 统一数据包输出格式
 - [ ] Phase 3.1: 完善所有数据包验证规则
@@ -461,3 +463,4 @@ rake validator:validate_data_packs EXPORT=report.json
 - 原始讨论：https://github.com/your-org/your-repo/issues/xxx
 - 相关文档：`docs/VALIDATOR_DESIGN.md`
 - 数据包目录：`app/validators/support/data_packs/v1/`
+- **新增功能文档**：`docs/DATA_PACK_ASSOCIATION_VALIDATION.md` - 关联表完整性检查和业务规则验证 ✨

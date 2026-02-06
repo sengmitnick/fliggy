@@ -26,6 +26,76 @@ class DataPackValidator
   # This version should match db/schema.rb ActiveRecord::Schema.define(version: ...)
   VALIDATED_SCHEMA_VERSION = '2026_02_05_115551'
   
+  # 关联表完整性规则 - 定义必需的关联关系
+  # 格式: { 主表 => [{ association: 关联名, model: 关联模型, required: 是否必需, description: 说明 }] }
+  ASSOCIATION_RULES = {
+    'Ticket' => [
+      { 
+        association: :ticket_suppliers, 
+        model: 'TicketSupplier', 
+        required: true, 
+        description: '门票必须关联至少1个供应商（用户购买时需选择供应商）',
+        min_count: 1,
+        check_fields: { current_price: '供应商价格不能为空', stock: '库存信息必须设置（-1表示无限库存）' }
+      }
+    ],
+    'Hotel' => [
+      { 
+        association: :hotel_rooms, 
+        model: 'HotelRoom', 
+        required: true, 
+        description: '酒店必须关联至少1个房型（用户预订时需选择房型）',
+        min_count: 1,
+        check_fields: { price: '房型价格不能为空', room_type: '房型类型不能为空' }
+      }
+    ],
+    'Flight' => [
+      { 
+        association: :flight_offers, 
+        model: 'FlightOffer', 
+        required: false,  # FlightOffer 不是必需的（可以使用 Flight.price）
+        description: '航班可以有多个套餐优惠（非必需，但推荐创建）',
+        min_count: 0,
+        check_fields: { price: '套餐价格不能为空' }
+      }
+    ],
+    'Attraction' => [
+      { 
+        association: :tickets, 
+        model: 'Ticket', 
+        required: false,  # 有些景点可能是免费的，没有门票
+        description: '景点可以有门票（如果 is_free=false 则应该有门票）',
+        min_count: 0,
+        conditional: ->(record) { !record.is_free }  # 仅对收费景点要求
+      }
+    ]
+  }.freeze
+  
+  # 业务规则验证 - 检查关键业务字段
+  BUSINESS_RULES = {
+    'TicketSupplier' => [
+      { field: :current_price, rule: ->(val) { val.present? && val > 0 }, message: 'current_price 必须大于0' },
+      { field: :stock, rule: ->(val) { val.present? && (val > 0 || val == -1) }, message: 'stock 必须大于0或为-1（无限库存）' }
+    ],
+    'HotelRoom' => [
+      { field: :price, rule: ->(val) { val.present? && val > 0 }, message: 'price 必须大于0' },
+      { field: :room_type, rule: ->(val) { val.present? }, message: 'room_type 不能为空' }
+    ],
+    'FlightOffer' => [
+      { field: :price, rule: ->(val) { val.present? && val > 0 }, message: 'price 必须大于0' }
+    ],
+    'Ticket' => [
+      { field: :price, rule: ->(val) { val.present? && val > 0 }, message: 'price 必须大于0' }
+    ],
+    'Hotel' => [
+      { field: :price, rule: ->(val) { val.present? && val >= 0 }, message: 'price 不能为空（可以为0但必须有值）' }
+    ],
+    'Flight' => [
+      { field: :price, rule: ->(val) { val.present? && val > 0 }, message: 'price 必须大于0' },
+      { field: :available_seats, rule: ->(val) { val.present? && val >= 0 }, message: 'available_seats 不能为空' }
+    ]
+  }.freeze
+  
   def initialize
     @errors = []
     @warnings = []
@@ -278,10 +348,13 @@ class DataPackValidator
     # 信息消息不加入 errors，单独处理（如需要可以在这里打印）
     date_range_result[:info].each { |msg| puts "  #{msg}" } if date_range_result[:info].any?
     
-    # 5. 检查关联数据完整性（针对特定模型）
-    association_result = validate_associations(model_class, records)
-    errors.concat(association_result[:errors])
-    association_result[:warnings].each { |msg| puts "  ⚠️  #{msg}" } if association_result[:warnings].any?
+    # 5. 检查关联表完整性（根据 ASSOCIATION_RULES）
+    association_errors = validate_associations(model_class, records)
+    errors.concat(association_errors)
+    
+    # 6. 检查业务规则（根据 BUSINESS_RULES）
+    business_errors = validate_business_rules(model_class, records)
+    errors.concat(business_errors)
     
     errors
   rescue StandardError => e
@@ -329,97 +402,117 @@ class DataPackValidator
     { errors: ["#{model_class.name} 日期范围验证出错: #{e.message}"], info: [] }
   end
   
-  # 验证关联数据完整性（针对特定模型）
-  # 检查模型的关联记录是否完整（如行程安排、图片等）
+  # 验证关联表完整性（检查必需的关联是否存在）
+  # 这是解决 V259 问题的核心：确保 Ticket 有 TicketSupplier，Hotel 有 HotelRoom 等
   def validate_associations(model_class, records)
     errors = []
-    warnings = []
+    model_name = model_class.name
     
-    # 定义需要验证关联的模型配置
-    # 格式：{ 模型名 => { association: 关联名, required: 是否必需, threshold: 缺失阈值比例 } }
-    association_rules = {
-      'TourGroupProduct' => {
-        association: :tour_itinerary_days,
-        required: true,
-        threshold: 0.02,  # 允许最多2%的记录缺失行程安排（容错）
-        message: '缺少行程安排（tour_itinerary_days）'
-      },
-      'Hotel' => {
-        association: :hotel_rooms,
-        required: true,
-        threshold: 0.05,  # 允许最多5%的记录缺失房间
-        message: '缺少房间信息（hotel_rooms）'
-      },
-      'Attraction' => {
-        association: :tickets,
-        required: true,
-        threshold: 0.1,  # 允许最多10%的记录缺失门票
-        message: '缺少门票信息（tickets）'
-      }
-    }
+    # 检查是否有关联规则定义
+    rules = ASSOCIATION_RULES[model_name]
+    return errors unless rules
     
-    # 检查当前模型是否需要验证关联
-    rule = association_rules[model_class.name]
-    return { errors: errors, warnings: warnings } unless rule
+    # 抽样检查前 5 条记录
+    sample_records = records.limit(5)
     
-    # 检查关联是否存在
-    association_name = rule[:association]
-    unless model_class.reflect_on_association(association_name)
-      warnings << "#{model_class.name} 模型没有 #{association_name} 关联（跳过验证）"
-      return { errors: errors, warnings: warnings }
-    end
-    
-    # 动态检测模型的显示字段（title 或 name）
-    display_field = if model_class.column_names.include?('title')
-                      'title'
-                    elsif model_class.column_names.include?('name')
-                      'name'
-                    else
-                      nil
-                    end
-    
-    # 先计数（不使用 select）
-    missing_count = records.left_joins(association_name)
-                          .where(association_name => { id: nil })
-                          .count
-    
-    total_count = records.count
-    missing_ratio = missing_count.to_f / total_count
-    
-    if missing_count > 0
-      if missing_ratio > rule[:threshold]
-        # 超过阈值，报错
-        errors << "❌ #{model_class.name} 有 #{missing_count}/#{total_count} (#{(missing_ratio * 100).round(1)}%) 条记录#{rule[:message]}（超过阈值 #{(rule[:threshold] * 100).round(1)}%）"
+    rules.each do |rule|
+      association_name = rule[:association]
+      required = rule[:required]
+      min_count = rule[:min_count] || (required ? 1 : 0)
+      description = rule[:description]
+      check_fields = rule[:check_fields] || {}
+      conditional = rule[:conditional]  # 条件检查（可选）
+      
+      # 检查模型是否定义了此关联
+      unless model_class.reflect_on_association(association_name)
+        errors << "⚠️  #{model_name} 模型未定义关联 :#{association_name}（配置可能有误）"
+        next
+      end
+      
+      # 统计有多少记录缺少关联
+      missing_count = 0
+      missing_examples = []
+      
+      sample_records.each do |record|
+        # 如果有条件检查，先判断是否需要此关联
+        if conditional && !conditional.call(record)
+          next  # 不满足条件，跳过检查
+        end
         
-        # 再查询获取示例记录（这次使用 select）
-        select_fields = [:id]
-        select_fields << display_field.to_sym if display_field
+        associated_records = record.send(association_name)
+        count = associated_records.is_a?(ActiveRecord::Relation) ? associated_records.count : (associated_records ? 1 : 0)
         
-        sample_records = records.left_joins(association_name)
-                               .where(association_name => { id: nil })
-                               .select(*select_fields)
-                               .limit(5)
+        if count < min_count
+          missing_count += 1
+          missing_examples << { id: record.id, name: record.try(:name) || 'N/A', count: count }
+        end
         
-        sample_records.each do |record|
-          if display_field
-            record_name = record.send(display_field)
-            errors << "  → #{record_name} (ID: #{record.id})"
-          else
-            errors << "  → ID: #{record.id}"
+        # 检查关联记录的必需字段
+        if count > 0 && check_fields.any?
+          associated_records = [associated_records] unless associated_records.is_a?(ActiveRecord::Relation)
+          associated_records.each do |assoc_record|
+            check_fields.each do |field, message|
+              value = assoc_record.send(field)
+              if value.nil? || (value.respond_to?(:empty?) && value.empty?) || (value.is_a?(Numeric) && value == 0 && field != :stock)
+                errors << "❌ #{model_name}(ID:#{record.id}) 的关联 #{rule[:model]}(ID:#{assoc_record.id}) #{message}"
+              end
+            end
           end
         end
-        
-        if missing_count > 5
-          errors << "  ... 还有 #{missing_count - 5} 条记录缺失"
+      end
+      
+      # 如果必需关联缺失，报告错误
+      if required && missing_count > 0
+        errors << "❌ #{model_name} 缺少必需关联 #{rule[:model]}：#{missing_count}/#{sample_records.count} 条记录缺失（#{description}）"
+        missing_examples.first(3).each do |example|
+          errors << "   → 示例: ID=#{example[:id]}, 名称=#{example[:name]}, 关联数=#{example[:count]}"
         end
-      else
-        # 未超过阈值，仅警告
-        warnings << "#{model_class.name} 有 #{missing_count}/#{total_count} (#{(missing_ratio * 100).round(1)}%) 条记录#{rule[:message]}（在阈值范围内）"
+        
+        # 提供修复建议
+        errors << "   💡 修复建议: 在数据包中为 #{model_name} 创建关联的 #{rule[:model]} 记录"
+        errors << "   💡 参考: 查看 app/validators/support/data_packs/v1/attractions.rb 中的 TicketSupplier 创建示例"
       end
     end
     
-    { errors: errors, warnings: warnings }
+    errors
   rescue StandardError => e
-    { errors: ["#{model_class.name} 关联验证出错: #{e.message}"], warnings: [] }
+    ["#{model_class.name} 关联验证出错: #{e.message}"]
+  end
+  
+  # 验证业务规则（检查关键业务字段的有效性）
+  def validate_business_rules(model_class, records)
+    errors = []
+    model_name = model_class.name
+    
+    # 检查是否有业务规则定义
+    rules = BUSINESS_RULES[model_name]
+    return errors unless rules
+    
+    # 抽样检查前 3 条记录
+    sample_records = records.limit(3)
+    
+    sample_records.each_with_index do |record, index|
+      rules.each do |rule|
+        field = rule[:field]
+        validation_rule = rule[:rule]
+        message = rule[:message]
+        
+        # 检查字段是否存在
+        unless record.respond_to?(field)
+          next  # 字段不存在，跳过检查
+        end
+        
+        value = record.send(field)
+        
+        # 执行验证规则
+        unless validation_rule.call(value)
+          errors << "❌ #{model_name} 记录业务规则违反（样本 #{index + 1}，ID: #{record.id}）: #{message}（当前值: #{value.inspect}）"
+        end
+      end
+    end
+    
+    errors
+  rescue StandardError => e
+    ["#{model_class.name} 业务规则验证出错: #{e.message}"]
   end
 end

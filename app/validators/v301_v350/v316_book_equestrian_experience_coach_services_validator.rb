@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V316BookEquestrianExperienceCoachServicesValidator < BaseValidator
     self.validator_id = 'v316_book_equestrian_experience_coach_services_validator'
-    self.task_id = 'f316a001-0001-4001-8001-000000000316'
+    self.task_id = '244a3782-51c5-4cc3-a3bd-393309099f3b'
     self.title = '预订马术体验+教练指导+马场服务'
     self.description = '用户需要预订马术体验服务，包含专业教练指导和马场服务'
     self.timeout_seconds = 300

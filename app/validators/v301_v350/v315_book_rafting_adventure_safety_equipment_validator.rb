@@ -15,7 +15,7 @@ require_relative '../base_validator'
 module V301V350
   class V315BookRaftingAdventureSafetyEquipmentValidator < BaseValidator
     self.validator_id = 'v315_book_rafting_adventure_safety_equipment_validator'
-    self.task_id = 'f315a001-0001-4001-8001-000000000315'
+    self.task_id = 'aa4e64f9-e897-40dd-9c3e-c0c7fbcf8a58'
     self.title = '预订漂流探险+安全保障+装备提供'
     self.description = '用户需要预订漂流探险服务，包含安全保障和装备提供'
     self.timeout_seconds = 300
