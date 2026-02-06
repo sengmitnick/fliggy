@@ -751,3 +751,268 @@ TourPackage.insert_all(beijing_packages_data) if beijing_packages_data.any?
 puts "✓ 为北京产品添加了 #{beijing_packages_data.count} 个套餐"
 
 puts "\n✅ 北京2天1晚补充数据加载完成！"
+
+# ==================== 补充：北京2日游产品行程安排 ====================
+puts "\n📅 添加北京2天1晚行程安排..."
+
+timestamp_itinerary = Time.current
+beijing_itinerary_data = []
+
+# 查询刚创建的4个北京产品
+beijing_products = TourGroupProduct.where(destination: "北京", duration: 2, data_version: 0)
+  .where("created_at >= ?", timestamp_beijing - 1.minute)
+  .order(:id)
+  .to_a
+
+if beijing_products.any?
+  beijing_products.each do |product|
+    # 根据产品标题判断类型，生成对应行程
+    if product.title.include?("故宫+天坛+颐和园")
+      # 产品1：故宫+天坛+颐和园 2天1晚
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 1,
+        title: "第1天 - 抵达北京·故宫+天坛",
+        attractions: ["#{product.departure_city}出发", "北京机场/车站接站", "前往酒店办理入住", "午餐后游览故宫博物院", "参观天坛公园", "王府井步行街自由活动"],
+        assembly_point: "#{product.departure_city}机场/车站集合",
+        disassembly_point: nil,
+        transportation: "飞机/高铁+旅游大巴",
+        service_info: "专车接站，含午餐晚餐，故宫讲解服务，天坛门票",
+        duration_minutes: 540,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 2,
+        title: "第2天 - 颐和园·返程",
+        attractions: ["酒店早餐", "游览颐和园", "昆明湖游船体验", "特色午餐", "专车送站", "返回#{product.departure_city}"],
+        assembly_point: nil,
+        disassembly_point: "北京机场/车站",
+        transportation: "旅游大巴+飞机/高铁",
+        service_info: "含早餐午餐，颐和园门票+游船，专车送站",
+        duration_minutes: 420,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+    elsif product.title.include?("八达岭长城+明十三陵")
+      # 产品2：八达岭长城+明十三陵 2天1晚
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 1,
+        title: "第1天 - 抵达北京·八达岭长城",
+        attractions: ["#{product.departure_city}出发", "北京机场/车站接站", "前往八达岭长城", "登长城观景", "长城脚下农家菜午餐", "入住酒店", "晚餐自由安排"],
+        assembly_point: "#{product.departure_city}机场/车站集合",
+        disassembly_point: nil,
+        transportation: "飞机/高铁+旅游大巴",
+        service_info: "专车接站，含午餐，长城门票+缆车，4人精品小团",
+        duration_minutes: 540,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 2,
+        title: "第2天 - 明十三陵·返程",
+        attractions: ["酒店早餐", "游览明十三陵-长陵", "神道参观", "特色午餐", "专车送站", "返回#{product.departure_city}"],
+        assembly_point: nil,
+        disassembly_point: "北京机场/车站",
+        transportation: "旅游大巴+飞机/高铁",
+        service_info: "含早餐午餐，明十三陵门票，纯玩无购物",
+        duration_minutes: 420,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+    elsif product.title.include?("天安门+故宫+长城")
+      # 产品3：天安门+故宫+长城 2天1晚
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 1,
+        title: "第1天 - 抵达北京·天安门+故宫",
+        attractions: ["#{product.departure_city}出发", "北京机场/车站接站", "天安门广场升旗仪式(如时间允许)", "游览故宫博物院", "景山公园俯瞰紫禁城", "入住酒店"],
+        assembly_point: "#{product.departure_city}机场/车站集合",
+        disassembly_point: nil,
+        transportation: "飞机/高铁+旅游大巴",
+        service_info: "专车接站，含午餐晚餐，故宫深度讲解，6人精品团",
+        duration_minutes: 540,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 2,
+        title: "第2天 - 八达岭长城·返程",
+        attractions: ["酒店早餐", "前往八达岭长城", "登长城体验", "长城脚下午餐", "专车送站", "返回#{product.departure_city}"],
+        assembly_point: nil,
+        disassembly_point: "北京机场/车站",
+        transportation: "旅游大巴+飞机/高铁",
+        service_info: "含早餐午餐，长城门票+缆车，深度游览",
+        duration_minutes: 420,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+    elsif product.title.include?("环球影城+故宫博物院")
+      # 产品4：环球影城+故宫博物院 2天1晚
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 1,
+        title: "第1天 - 抵达北京·北京环球影城",
+        attractions: ["#{product.departure_city}出发", "北京机场/车站接站", "前往北京环球影城", "全天畅玩环球影城", "哈利波特魔法世界", "变形金刚基地", "入住酒店"],
+        assembly_point: "#{product.departure_city}机场/车站集合",
+        disassembly_point: nil,
+        transportation: "飞机/高铁+旅游大巴",
+        service_info: "专车接站，环球影城门票，快速通行证(可选)",
+        duration_minutes: 600,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+      beijing_itinerary_data << {
+        tour_group_product_id: product.id,
+        day_number: 2,
+        title: "第2天 - 故宫博物院·返程",
+        attractions: ["酒店早餐", "游览故宫博物院", "珍宝馆参观", "御花园漫步", "特色午餐", "专车送站", "返回#{product.departure_city}"],
+        assembly_point: nil,
+        disassembly_point: "北京机场/车站",
+        transportation: "旅游大巴+飞机/高铁",
+        service_info: "含早餐午餐，故宫门票+讲解，纯玩团",
+        duration_minutes: 420,
+        data_version: 0,
+        created_at: timestamp_itinerary,
+        updated_at: timestamp_itinerary
+      }
+    end
+  end
+end
+
+TourItineraryDay.insert_all(beijing_itinerary_data) if beijing_itinerary_data.any?
+puts "✓ 为 #{beijing_products.count} 个北京产品添加了 #{beijing_itinerary_data.count} 天行程"
+
+# ==================== 补充：三亚6日游产品行程安排 ====================
+puts "\n📅 添加三亚6天5晚行程安排..."
+
+sanya_itinerary_data = []
+
+# 查询所有三亚6天产品（包括之前创建的12个缺少行程的产品）
+sanya_products = TourGroupProduct.where(destination: "三亚", duration: 6, data_version: 0)
+  .where("created_at >= ?", timestamp_supplement - 1.minute)
+  .order(:id)
+  .to_a
+
+if sanya_products.any?
+  sanya_products.each do |product|
+    # 从标题中提取景点信息
+    attractions_in_title = product.title.scan(/(蜈支洲岛|亚龙湾|天涯海角|南山寺|呀诺达雨林|大小洞天)/).flatten
+    
+    # 第1天：抵达三亚
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 1,
+      title: "第1天 - 抵达三亚·欢迎晚宴",
+      attractions: ["#{product.departure_city}出发", "三亚凤凰机场接机", "前往酒店办理入住", "自由活动", "三亚海鲜欢迎晚宴"],
+      assembly_point: "#{product.departure_city}机场集合",
+      disassembly_point: nil,
+      transportation: "飞机+旅游大巴",
+      service_info: "专车接机，入住海景酒店，含欢迎晚宴",
+      duration_minutes: 300,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+    
+    # 第2天：根据景点组合动态生成
+    day2_attraction = attractions_in_title[0] || "亚龙湾"
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 2,
+      title: "第2天 - #{day2_attraction}一日游",
+      attractions: ["酒店早餐", "前往#{day2_attraction}", "#{day2_attraction}深度游览", "海滩自由活动", "特色海鲜午餐", "返回酒店休息"],
+      assembly_point: nil,
+      disassembly_point: nil,
+      transportation: "旅游大巴",
+      service_info: "含早午餐，#{day2_attraction}门票，专业导游讲解",
+      duration_minutes: 480,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+    
+    # 第3天
+    day3_attraction = attractions_in_title[1] || "蜈支洲岛"
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 3,
+      title: "第3天 - #{day3_attraction}精华游",
+      attractions: ["酒店早餐", "前往#{day3_attraction}", "#{day3_attraction}游览", "水上项目体验(自费)", "海鲜自助午餐", "下午茶时光", "返回酒店"],
+      assembly_point: nil,
+      disassembly_point: nil,
+      transportation: "旅游大巴",
+      service_info: "含早午餐，#{day3_attraction}门票+往返船票(如需)",
+      duration_minutes: 540,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+    
+    # 第4天
+    day4_attraction = attractions_in_title[2] || "南山寺"
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 4,
+      title: "第4天 - #{day4_attraction}文化之旅",
+      attractions: ["酒店早餐", "前往#{day4_attraction}", "#{day4_attraction}参观", "素斋午餐", "祈福体验", "返回酒店自由活动"],
+      assembly_point: nil,
+      disassembly_point: nil,
+      transportation: "旅游大巴",
+      service_info: "含早午餐，#{day4_attraction}门票，文化讲解服务",
+      duration_minutes: 480,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+    
+    # 第5天
+    day5_attraction = attractions_in_title[3] || "大小洞天"
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 5,
+      title: "第5天 - #{day5_attraction}探秘",
+      attractions: ["酒店早餐", "前往#{day5_attraction}", "#{day5_attraction}游览", "自然风光摄影", "特色午餐", "三亚免税店购物(自由安排)", "海滩漫步"],
+      assembly_point: nil,
+      disassembly_point: nil,
+      transportation: "旅游大巴",
+      service_info: "含早午餐，#{day5_attraction}门票，摄影指导",
+      duration_minutes: 540,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+    
+    # 第6天：返程
+    sanya_itinerary_data << {
+      tour_group_product_id: product.id,
+      day_number: 6,
+      title: "第6天 - 自由活动·返程",
+      attractions: ["酒店早餐", "酒店周边自由活动", "退房", "专车送机", "返回#{product.departure_city}", "结束愉快旅程"],
+      assembly_point: nil,
+      disassembly_point: "三亚凤凰机场",
+      transportation: "旅游大巴+飞机",
+      service_info: "含早餐，专车送机，协助办理登机手续",
+      duration_minutes: 360,
+      data_version: 0,
+      created_at: timestamp_itinerary,
+      updated_at: timestamp_itinerary
+    }
+  end
+end
+
+TourItineraryDay.insert_all(sanya_itinerary_data) if sanya_itinerary_data.any?
+puts "✓ 为 #{sanya_products.count} 个三亚产品添加了 #{sanya_itinerary_data.count} 天行程"
+
+puts "\n✅ 所有补充行程数据加载完成！"

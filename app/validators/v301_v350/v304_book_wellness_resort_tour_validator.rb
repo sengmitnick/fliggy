@@ -17,8 +17,8 @@ module V301V350
   class V304BookWellnessResortTourValidator < BaseValidator
     self.validator_id = 'v304_book_wellness_resort_tour_validator'
     self.task_id = 'd4804253-c7b6-42bc-a79b-2035d534f476'
-    self.title = '预订养生度假游'
-    self.description = '用户预订养生度假游(温泉+SPA+健康检查)'
+    self.title = '预订杭州高评分养生度假酒店（≥3晚含温泉SPA）'
+    self.description = '用户需要预订杭州的养生度假酒店，8天后入住，住宿≥3晚，要求选择高评分养生酒店（评分≥4.5或价格≥600元），并预订温泉或SPA体验活动'
     self.timeout_seconds = 300
     
     def prepare

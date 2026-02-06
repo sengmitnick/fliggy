@@ -96,6 +96,23 @@
   </div>
 </div>
 
+<!-- 酒店服务特色 -->
+<% if @hotel.features.present? && @hotel.features.is_a?(Array) && @hotel.features.any? %>
+<div class="bg-white p-4 border-t border-gray-100">
+  <h3 class="text-base font-bold text-gray-900 mb-3">酒店服务特色</h3>
+  <div class="grid grid-cols-4 gap-3">
+    <% @hotel.features.take(8).each do |feature| %>
+      <div class="text-center">
+        <div class="w-12 h-12 mx-auto bg-gradient-to-br <%= feature_gradient_class(feature) %> rounded-lg flex items-center justify-center mb-1">
+          <%= feature_icon_svg(feature).html_safe %>
+        </div>
+        <div class="text-xs text-gray-700"><%= feature %></div>
+      </div>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
 <!-- F2直通希尔顿银会员 -->
 <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-4 border-t border-gray-100">
   <div class="flex items-center justify-between">

@@ -17,8 +17,8 @@ module V301V350
   class V305BookFamilyEducationTourValidator < BaseValidator
     self.validator_id = 'v305_book_family_education_tour_validator'
     self.task_id = '5134922f-5d41-431e-b1f0-36ea208edf7f'
-    self.title = '预订亲子教育游'
-    self.description = '用户预订亲子教育游(科技馆+动物园+互动课程)'
+    self.title = '预订北京亲子教育游（2大1小，2天以上）'
+    self.description = '用户预订北京的亲子教育跟团游，12天后出发，2成人1儿童家庭组合，行程至少2天，包含科技馆、博物馆等教育景点'
     self.timeout_seconds = 300
     
     def prepare
@@ -60,10 +60,10 @@ module V301V350
       end
       
       add_assertion "预订2大1小组合", weight: 20 do
-        passenger_count = @tour_booking.adult_count + @tour_booking.child_count
-        # 至少2人(2大1小)
-        expect(passenger_count).to be >= 2,
-          "乘客数量不足。期望≥2人(2大1小)，实际: #{passenger_count}人"
+        expect(@tour_booking.adult_count).to eq(2),
+          "成人数量错误。期望: 2大人，实际: #{@tour_booking.adult_count}大人"
+        expect(@tour_booking.child_count).to eq(1),
+          "儿童数量错误。期望: 1儿童，实际: #{@tour_booking.child_count}儿童"
       end
       
       add_assertion "出行日期正确", weight: 10 do

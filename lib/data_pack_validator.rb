@@ -278,6 +278,11 @@ class DataPackValidator
     # 信息消息不加入 errors，单独处理（如需要可以在这里打印）
     date_range_result[:info].each { |msg| puts "  #{msg}" } if date_range_result[:info].any?
     
+    # 5. 检查关联数据完整性（针对特定模型）
+    association_result = validate_associations(model_class, records)
+    errors.concat(association_result[:errors])
+    association_result[:warnings].each { |msg| puts "  ⚠️  #{msg}" } if association_result[:warnings].any?
+    
     errors
   rescue StandardError => e
     ["#{model_class.name} 验证过程出错: #{e.message}"]
@@ -322,5 +327,99 @@ class DataPackValidator
     { errors: errors, info: info_messages }
   rescue StandardError => e
     { errors: ["#{model_class.name} 日期范围验证出错: #{e.message}"], info: [] }
+  end
+  
+  # 验证关联数据完整性（针对特定模型）
+  # 检查模型的关联记录是否完整（如行程安排、图片等）
+  def validate_associations(model_class, records)
+    errors = []
+    warnings = []
+    
+    # 定义需要验证关联的模型配置
+    # 格式：{ 模型名 => { association: 关联名, required: 是否必需, threshold: 缺失阈值比例 } }
+    association_rules = {
+      'TourGroupProduct' => {
+        association: :tour_itinerary_days,
+        required: true,
+        threshold: 0.02,  # 允许最多2%的记录缺失行程安排（容错）
+        message: '缺少行程安排（tour_itinerary_days）'
+      },
+      'Hotel' => {
+        association: :hotel_rooms,
+        required: true,
+        threshold: 0.05,  # 允许最多5%的记录缺失房间
+        message: '缺少房间信息（hotel_rooms）'
+      },
+      'Attraction' => {
+        association: :tickets,
+        required: true,
+        threshold: 0.1,  # 允许最多10%的记录缺失门票
+        message: '缺少门票信息（tickets）'
+      }
+    }
+    
+    # 检查当前模型是否需要验证关联
+    rule = association_rules[model_class.name]
+    return { errors: errors, warnings: warnings } unless rule
+    
+    # 检查关联是否存在
+    association_name = rule[:association]
+    unless model_class.reflect_on_association(association_name)
+      warnings << "#{model_class.name} 模型没有 #{association_name} 关联（跳过验证）"
+      return { errors: errors, warnings: warnings }
+    end
+    
+    # 动态检测模型的显示字段（title 或 name）
+    display_field = if model_class.column_names.include?('title')
+                      'title'
+                    elsif model_class.column_names.include?('name')
+                      'name'
+                    else
+                      nil
+                    end
+    
+    # 先计数（不使用 select）
+    missing_count = records.left_joins(association_name)
+                          .where(association_name => { id: nil })
+                          .count
+    
+    total_count = records.count
+    missing_ratio = missing_count.to_f / total_count
+    
+    if missing_count > 0
+      if missing_ratio > rule[:threshold]
+        # 超过阈值，报错
+        errors << "❌ #{model_class.name} 有 #{missing_count}/#{total_count} (#{(missing_ratio * 100).round(1)}%) 条记录#{rule[:message]}（超过阈值 #{(rule[:threshold] * 100).round(1)}%）"
+        
+        # 再查询获取示例记录（这次使用 select）
+        select_fields = [:id]
+        select_fields << display_field.to_sym if display_field
+        
+        sample_records = records.left_joins(association_name)
+                               .where(association_name => { id: nil })
+                               .select(*select_fields)
+                               .limit(5)
+        
+        sample_records.each do |record|
+          if display_field
+            record_name = record.send(display_field)
+            errors << "  → #{record_name} (ID: #{record.id})"
+          else
+            errors << "  → ID: #{record.id}"
+          end
+        end
+        
+        if missing_count > 5
+          errors << "  ... 还有 #{missing_count - 5} 条记录缺失"
+        end
+      else
+        # 未超过阈值，仅警告
+        warnings << "#{model_class.name} 有 #{missing_count}/#{total_count} (#{(missing_ratio * 100).round(1)}%) 条记录#{rule[:message]}（在阈值范围内）"
+      end
+    end
+    
+    { errors: errors, warnings: warnings }
+  rescue StandardError => e
+    { errors: ["#{model_class.name} 关联验证出错: #{e.message}"], warnings: [] }
   end
 end
