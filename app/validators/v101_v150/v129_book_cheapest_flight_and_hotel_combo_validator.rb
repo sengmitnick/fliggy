@@ -36,7 +36,11 @@ module V101V150
 
     @cheapest_flight = @available_flights.first
     @cheapest_hotel = @available_hotels.first
-    @min_total_price = @cheapest_flight.price + @cheapest_hotel.price
+    # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+    @cheapest_room = @cheapest_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
+    raise "未找到符合条件的房间" if @cheapest_room.nil?
+    
+    @min_total_price = @cheapest_flight.price + @cheapest_room.price
 
     {
       task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@arrival_city}的航班和#{@hotel_city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住1晚），要求选择航班+酒店总价最低的组合。",
@@ -127,7 +131,8 @@ module V101V150
     )
 
     hotel = @cheapest_hotel
-    room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+    # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+    room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
     HotelBooking.create!(
       user: user,
       hotel: hotel,
@@ -152,7 +157,8 @@ module V101V150
       hotel_city: @hotel_city,
       check_in_date: @check_in_date.to_s,
       check_out_date: @check_out_date.to_s,
-      min_total_price: @min_total_price
+      min_total_price: @min_total_price,
+      cheapest_room_id: @cheapest_room&.id
     }
   end
 
@@ -179,6 +185,8 @@ module V101V150
 
     @cheapest_flight = @available_flights.first
     @cheapest_hotel = @available_hotels.first
+    # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+    @cheapest_room = @cheapest_hotel&.hotel_rooms&.where(data_version: 0, room_category: 'overnight')&.order(price: :asc)&.first
   end
   end
 end

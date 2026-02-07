@@ -119,7 +119,8 @@ module V101V150
     )
 
     hotel = @available_hotels.first
-    room = hotel.hotel_rooms.where(data_version: 0).order(price: :desc).first
+    # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+    room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :desc).first
     HotelBooking.create!(
       user: user,
       hotel: hotel,
@@ -142,6 +143,7 @@ module V101V150
       arrival_city: @arrival_city,
       flight_date: @flight_date.to_s,
       hotel_city: @hotel_city,
+      min_star_level: @min_star_level,
       check_in_date: @check_in_date.to_s,
       check_out_date: @check_out_date.to_s
     }
@@ -152,6 +154,7 @@ module V101V150
     @arrival_city = data['arrival_city']
     @flight_date = Date.parse(data['flight_date'])
     @hotel_city = data['hotel_city']
+    @min_star_level = data['min_star_level']
     @check_in_date = Date.parse(data['check_in_date'])
     @check_out_date = Date.parse(data['check_out_date'])
 
@@ -165,7 +168,7 @@ module V101V150
     @available_hotels = Hotel.where(
       city: @hotel_city,
       data_version: 0
-    ).order(price: :desc)
+    ).where('star_level >= ?', @min_star_level).order(price: :asc)
   end
   end
 end

@@ -5,7 +5,7 @@ require_relative '../base_validator'
 module V101V150
   class V136BookCheapestTrainAndBudgetHotelValidator < BaseValidator
     self.validator_id = 'v136_book_cheapest_train_and_budget_hotel_validator'
-    self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e1f'
+    self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e2f'
     self.title = '预订最便宜火车票+经济型酒店（总价最低）'
     self.description = '预订后天北京到天津的火车票（二等座），并预订天津经济型酒店1晚，要求火车票+酒店总价最低'
     self.timeout_seconds = 300
@@ -146,6 +146,8 @@ module V101V150
         hotel_city: @hotel_city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
+        max_hotel_price: @max_hotel_price,
+        max_train_price: @max_train_price,
         min_total_price: @min_total_price
       }
     end
@@ -157,6 +159,8 @@ module V101V150
       @hotel_city = data['hotel_city']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @max_hotel_price = data['max_hotel_price'].to_f
+      @max_train_price = data['max_train_price'].to_f
       @min_total_price = data['min_total_price'].to_f
 
       @available_trains = Train.where(

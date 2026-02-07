@@ -16,8 +16,8 @@ module V101V150
     @arrival_city = '深圳'
     
     today = Date.current
+    # 计算本周五：如果今天是周五则为今天，否则为下一个周五
     days_until_friday = (5 - today.wday) % 7
-    days_until_friday = 7 if days_until_friday == 0
     @flight_date = today + days_until_friday.days
     
     @hotel_city = '深圳'
@@ -128,7 +128,8 @@ module V101V150
     )
 
     hotel = @available_hotels.first
-    room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+    # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+    room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
     HotelBooking.create!(
       user: user,
       hotel: hotel,

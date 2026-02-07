@@ -5,8 +5,27 @@ class TransfersController < ApplicationController
 
   # GET /transfers - Homepage with service type selection (airport/train)
   def index
-    @transfer_type = params[:transfer_type] || params[:type] || 'airport_pickup'
+    # 从参数获取 service_type（优先级最高）
     @service_type = params[:service_type] || params[:service] || 'from_airport'
+    
+    # 🎯 CRITICAL: transfer_type 必须根据 service_type 动态设置
+    # - to_airport (送我到机场) → airport_dropoff
+    # - from_airport (到机场接我) → airport_pickup
+    # - to_station (送我到车站) → train_dropoff
+    # - from_station (到车站接我) → train_pickup
+    @transfer_type = case @service_type
+                    when 'to_airport'
+                      'airport_dropoff'
+                    when 'from_airport'
+                      'airport_pickup'
+                    when 'to_station'
+                      'train_dropoff'
+                    when 'from_station'
+                      'train_pickup'
+                    else
+                      # 兼容旧参数 type（如果没有 service_type）
+                      params[:transfer_type] || params[:type] || 'airport_pickup'
+                    end
     
     # Get user's recent flight/train bookings for quick selection
     @recent_flights = current_user.bookings.where(status: ['confirmed', 'pending'])
@@ -101,7 +120,61 @@ class TransfersController < ApplicationController
     @train_id = params[:train_id] || session.dig(:transfer_params, :train_id)
     @location_from = params[:location_from] || session.dig(:transfer_params, :location_from)
     @location_to = params[:location_to] || session.dig(:transfer_params, :location_to)
-    @pickup_datetime = params[:pickup_datetime] || session.dig(:transfer_params, :pickup_datetime)
+    
+    # 🎯 CRITICAL: 处理 pickup_time 文本参数（从time picker传递的文本格式）
+    # 格式示例: 
+    # - "今天 01/15 14:30"
+    # - "明天 01/16 06:00"
+    # - "01月17日 周三 18:45"
+    if params[:pickup_time].present?
+      pickup_time_text = params[:pickup_time].strip
+      Rails.logger.info "[Transfer Packages] Parsing pickup_time: #{pickup_time_text}"
+      
+      begin
+        # 格式1和2: "今天/明天 MM/DD HH:MM"
+        if pickup_time_text =~ /(今天|明天)\s+(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})/
+          relative_day = $1
+          month = $2.to_i
+          day = $3.to_i
+          hour = $4.to_i
+          minute = $5.to_i
+          
+          # 确定日期
+          base_date = relative_day == '今天' ? Date.current : Date.current + 1.day
+          
+          # 构造 DateTime（使用用户时区）
+          @pickup_datetime = Time.zone.parse("#{base_date.year}-#{month}-#{day} #{hour}:#{minute}")
+          
+          Rails.logger.info "[Transfer Packages] Parsed pickup_datetime (format 1): #{@pickup_datetime}"
+        
+        # 格式3: "MM月DD日 周X HH:MM"
+        elsif pickup_time_text =~ /(\d{2})月(\d{2})日\s+周[一二三四五六日]\s+(\d{2}):(\d{2})/
+          month = $1.to_i
+          day = $2.to_i
+          hour = $3.to_i
+          minute = $4.to_i
+          
+          # 确定年份（如果月份小于当前月份，说明是明年）
+          year = Date.current.year
+          if month < Date.current.month
+            year += 1
+          end
+          
+          # 构造 DateTime
+          @pickup_datetime = Time.zone.parse("#{year}-#{month}-#{day} #{hour}:#{minute}")
+          
+          Rails.logger.info "[Transfer Packages] Parsed pickup_datetime (format 3): #{@pickup_datetime}"
+        else
+          Rails.logger.warn "[Transfer Packages] Failed to parse pickup_time format: #{pickup_time_text}"
+        end
+      rescue => e
+        Rails.logger.error "[Transfer Packages] Error parsing pickup_time: #{e.message}"
+      end
+    end
+    
+    # 如果没有解析成功，尝试从session获取
+    @pickup_datetime ||= params[:pickup_datetime] || session.dig(:transfer_params, :pickup_datetime)
+    
     @transfer_type = params[:transfer_type] || session.dig(:transfer_params, :transfer_type) || 'airport_pickup'
     @service_type = params[:service_type] || session.dig(:transfer_params, :service_type) || 'from_airport'
     

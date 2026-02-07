@@ -31,6 +31,31 @@ namespace :validator do
           password: admin_password
         )
       end
+    
+    # 检查 task_id 重复
+    duplicate_task_ids = task_id_map.select { |task_id, validators| validators.size > 1 }
+    
+    if duplicate_task_ids.any?
+      puts "\n❌ Duplicate task_id Found:"
+      puts "-" * 70
+      duplicate_task_ids.each do |task_id, validators|
+        puts "\n❌ task_id: #{task_id} (重复 #{validators.size} 次)"
+        validators.each do |v|
+          puts "  → #{v[:validator]} (#{v[:class_name]})"
+          puts "    File: #{v[:file]}"
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ 发现 #{duplicate_task_ids.size} 组重复的 task_id（共影响 #{duplicate_task_ids.values.flatten.size} 个 validators）"
+      puts "\n💡 原因分析:"
+      puts "  - 批量生成 validator 时，复制模板后忘记修改 task_id"
+      puts "  - API 的 find_validator 方法通过 task_id 查找，重复会导致找到错误的 validator"
+      puts "\n🔧 修复方法:"
+      puts "  1. 为每个重复的 validator 生成新的唯一 UUID"
+      puts "  2. 可使用 SecureRandom.uuid 或递增最后一位字符"
+      puts "  3. 修复后重启 Rails 服务器加载新的 task_id\n"
+      exit 1
+    end
       
       # 禁用外键约束检查
       admin_conn.exec("SET session_replication_role = 'replica';")
@@ -169,6 +194,31 @@ namespace :validator do
         
         exit 1
       end
+    end
+    
+    # 检查 task_id 重复
+    duplicate_task_ids = task_id_map.select { |task_id, validators| validators.size > 1 }
+    
+    if duplicate_task_ids.any?
+      puts "\n❌ Duplicate task_id Found:"
+      puts "-" * 70
+      duplicate_task_ids.each do |task_id, validators|
+        puts "\n❌ task_id: #{task_id} (重复 #{validators.size} 次)"
+        validators.each do |v|
+          puts "  → #{v[:validator]} (#{v[:class_name]})"
+          puts "    File: #{v[:file]}"
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ 发现 #{duplicate_task_ids.size} 组重复的 task_id（共影响 #{duplicate_task_ids.values.flatten.size} 个 validators）"
+      puts "\n💡 原因分析:"
+      puts "  - 批量生成 validator 时，复制模板后忘记修改 task_id"
+      puts "  - API 的 find_validator 方法通过 task_id 查找，重复会导致找到错误的 validator"
+      puts "\n🔧 修复方法:"
+      puts "  1. 为每个重复的 validator 生成新的唯一 UUID"
+      puts "  2. 可使用 SecureRandom.uuid 或递增最后一位字符"
+      puts "  3. 修复后重启 Rails 服务器加载新的 task_id\n"
+      exit 1
     end
     
     # 显示警告汇总
@@ -393,6 +443,7 @@ namespace :validator do
     # Step 1: 检查validator类属性完整性
     puts "🔍 Step 1: Checking validator class attributes..."
     attribute_errors = []
+    task_id_map = {}  # 用于检测 task_id 重复
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
     validator_files.each do |file|
@@ -513,6 +564,10 @@ namespace :validator do
               }
             end
           end
+          
+          # 存储 task_id 用于后续重复检查
+          task_id_map[klass.task_id] ||= []
+          task_id_map[klass.task_id] << { validator: validator_name, class_name: class_name, file: file }
         end
         
         # 检查 simulate 方法实现（包括 private 方法）
@@ -649,7 +704,7 @@ namespace :validator do
       puts "Please fix these validators before running simulations\n"
       exit 1
     else
-      puts "✅ All validators have required class attributes\n"
+      puts "✅ All validators have required class attributes (including unique task_id)\n"
     end
     
     # Step 2: 检查状态保存/恢复方法
@@ -712,6 +767,86 @@ namespace :validator do
       exit 1
     else
       puts "✅ All validators with instance variables have state management\n"
+    end
+    
+    # Step 2.5: 检查 execution_state_data 和 restore_from_state 的字段一致性
+    puts "🔍 Step 2.5: Checking state save/restore field consistency..."
+    consistency_errors = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      
+      # 提取 execution_state_data 方法
+      execution_state_data_method = content.match(/def\s+execution_state_data.*?\{(.*?)\}/m)&.[](1)
+      # 提取 restore_from_state 方法
+      restore_from_state_method = content.match(/def\s+restore_from_state\(data\)(.*?)(?:def |private|\z)/m)&.[](1)
+      
+      if execution_state_data_method && restore_from_state_method
+        # 提取 execution_state_data 中保存的字段名
+        saved_keys = execution_state_data_method.scan(/^\s*(\w+):/).flatten
+        
+        # 提取 restore_from_state 中恢复的字段名
+        restored_keys = restore_from_state_method.scan(/@(\w+)\s*=\s*data\[/).flatten
+        
+        # 计算差异
+        saved_set = Set.new(saved_keys)
+        restored_set = Set.new(restored_keys)
+        
+        missing_in_restore = saved_set - restored_set
+        extra_in_restore = restored_set - saved_set
+        
+        if missing_in_restore.any? || extra_in_restore.any?
+          consistency_errors << {
+            validator: validator_name,
+            file: file,
+            saved_keys: saved_keys,
+            restored_keys: restored_keys,
+            missing_in_restore: missing_in_restore.to_a,
+            extra_in_restore: extra_in_restore.to_a
+          }
+        end
+      end
+    end
+    
+    if consistency_errors.any?
+      puts "\n❌ State Save/Restore Field Mismatch Found:"
+      puts "-" * 70
+      consistency_errors.first(10).each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  File: #{error[:file]}"
+        if error[:missing_in_restore].any?
+          puts "  Missing in restore_from_state: #{error[:missing_in_restore].join(', ')}"
+          puts "  → These fields are saved but NOT restored, causing nil values in verify!"
+        end
+        if error[:extra_in_restore].any?
+          puts "  Extra in restore_from_state: #{error[:extra_in_restore].join(', ')}"
+          puts "  → These fields are restored but NOT saved, will be nil on restore!"
+        end
+        puts "  Saved keys: #{error[:saved_keys].join(', ')}"
+        puts "  Restored keys: #{error[:restored_keys].join(', ')}"
+      end
+      if consistency_errors.size > 10
+        puts "\n  ... and #{consistency_errors.size - 10} more validators with mismatched fields"
+      end
+      puts "-" * 70
+      puts "\n❌ #{consistency_errors.size} validator(s) have state save/restore field mismatches"
+      puts "\n💡 规则说明:"
+      puts "  - execution_state_data 中保存的每个字段，必须在 restore_from_state 中恢复"
+      puts "  - restore_from_state 中恢复的每个字段，必须在 execution_state_data 中保存"
+      puts "  - 字段名必须完全一致（不包括 @data_version）"
+      puts "\n🔧 修复方法:"
+      puts "  1. 检查 execution_state_data 返回的 hash 中的所有 key"
+      puts "  2. 确保每个 key 在 restore_from_state 中都有对应的 @key = data['key']"
+      puts "  3. 如果有日期字段，记得使用 .to_s 保存，Date.parse() 恢复"
+      puts "  4. 如果有数值字段，记得使用 .to_f 或 .to_i 转换"
+      puts "\n⚠️  这是导致 'expected: <= nil' 验证错误的根本原因！\n"
+      exit 1
+    else
+      puts "✅ All validators have consistent state save/restore fields\n"
     end
     
     # Step 3: 检查 prepare 方法是否创建数据

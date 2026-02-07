@@ -1,0 +1,87 @@
+<!-- Transfer Time Picker Modal -->
+<div data-transfer-time-picker-target="modal"
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"
+     data-action="click->transfer-time-picker#closeModal">
+  
+  <!-- Modal Content -->
+  <div class="fixed bottom-0 left-0 right-0 bg-surface rounded-t-3xl max-h-[85vh] flex flex-col"
+       data-action="click->transfer-time-picker#stopPropagation">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border">
+      <button 
+        type="button"
+        data-action="click->transfer-time-picker#closeModal"
+        class="text-text-secondary">
+        取消
+      </button>
+      <h3 class="text-lg font-bold text-text-primary">用车时间（当地时间）</h3>
+      <button 
+        type="button"
+        data-action="click->transfer-time-picker#confirm"
+        class="text-primary font-semibold">
+        确定
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-hidden">
+      <!-- Scrollable Picker Container -->
+      <div class="flex justify-center items-center py-8 relative">
+        <!-- Selection highlight bar -->
+        <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-12 bg-gray-100 border-y border-gray-300 pointer-events-none z-0"></div>
+        
+        <!-- Date Picker -->
+        <div class="flex-1 relative z-10" data-transfer-time-picker-target="dateColumn">
+          <div class="h-60 overflow-y-scroll snap-y snap-mandatory scrollbar-hide" data-transfer-time-picker-target="dateScroll" data-action="scroll->transfer-time-picker#updateDate">
+            <div class="h-24"></div> <!-- Top padding -->
+            <%
+              today = Date.current
+              30.times do |i|
+                date = today + i.days
+                weekday = %w[周日 周一 周二 周三 周四 周五 周六][date.wday]
+                date_text = if i == 0
+                  "今天 #{date.strftime('%m/%d')}"
+                elsif i == 1
+                  "明天 #{date.strftime('%m/%d')}"
+                else
+                  "#{date.strftime('%m月%d日')} #{weekday}"
+                end
+            %>
+              <div class="h-12 flex items-center justify-center snap-center" data-date="<%= date.to_s %>">
+                <span class="text-base font-medium text-gray-700"><%= date_text %></span>
+              </div>
+            <% end %>
+            <div class="h-24"></div> <!-- Bottom padding -->
+          </div>
+        </div>
+        
+        <!-- Hour Picker -->
+        <div class="flex-1 relative z-10" data-transfer-time-picker-target="hourColumn">
+          <div class="h-60 overflow-y-scroll snap-y snap-mandatory scrollbar-hide" data-transfer-time-picker-target="hourScroll" data-action="scroll->transfer-time-picker#updateHour">
+            <div class="h-24"></div> <!-- Top padding -->
+            <% 24.times do |hour| %>
+              <div class="h-12 flex items-center justify-center snap-center" data-hour="<%= hour %>">
+                <span class="text-base font-medium text-gray-700"><%= sprintf('%02d', hour) %></span>
+              </div>
+            <% end %>
+            <div class="h-24"></div> <!-- Bottom padding -->
+          </div>
+        </div>
+        
+        <!-- Minute Picker -->
+        <div class="flex-1 relative z-10" data-transfer-time-picker-target="minuteColumn">
+          <div class="h-60 overflow-y-scroll snap-y snap-mandatory scrollbar-hide" data-transfer-time-picker-target="minuteScroll" data-action="scroll->transfer-time-picker#updateMinute">
+            <div class="h-24"></div> <!-- Top padding -->
+            <% 60.times do |minute| %>
+              <div class="h-12 flex items-center justify-center snap-center" data-minute="<%= minute %>">
+                <span class="text-base font-medium text-gray-700"><%= sprintf('%02d', minute) %></span>
+              </div>
+            <% end %>
+            <div class="h-24"></div> <!-- Bottom padding -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
