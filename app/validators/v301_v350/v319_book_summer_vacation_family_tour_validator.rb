@@ -4,8 +4,8 @@ module V301V350
   class V319BookSummerVacationFamilyTourValidator < BaseValidator
     self.validator_id = 'v319_book_summer_vacation_family_tour_validator'
     self.task_id = "41296cec-e182-44c9-ac20-c2180e92c487"
-    self.title = "预订15天后北京到三亚的往返机票（CA1357/CA1358）+三亚亚龙湾亲子度假酒店（5晚，2大1小）"
-    self.description = "用户需要预订15天后北京到三亚的往返机票（CA1357/CA1358），三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，2成人+1儿童）"
+    self.title = "预订15天后北京到三亚往返机票+三亚亚龙湾亲子度假酒店亲子家庭房（5晚，2大1小）"
+    self.description = "用户需要预订15天后北京到三亚的往返机票，以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，2成人+1儿童，酒店入住日期与航班衔接）"
     self.timeout_seconds = 180
 
     def prepare
@@ -15,18 +15,16 @@ module V301V350
       @departure_city = "北京"
       @destination_city = "三亚"
       
-      # 查找15天后的北京→三亚航班
+      # 查找15天后的北京→三亚航班（任意航班）
       @outbound_flight = Flight.find_by!(
-        flight_number: "CA1357",
         departure_city: @departure_city,
         destination_city: @destination_city,
         flight_date: @departure_date,
         data_version: 0
       )
       
-      # 查找20天后的三亚→北京航班
+      # 查找20天后的三亚→北京航班（任意航班）
       @return_flight = Flight.find_by!(
-        flight_number: "CA1358",
         departure_city: @destination_city,
         destination_city: @departure_city,
         flight_date: @return_date,
@@ -65,14 +63,12 @@ module V301V350
       )
 
       {
-        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}（15天后）从北京到三亚的往返机票（CA1357/CA1358），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住#{@departure_date.strftime('%m月%d日')}至#{@return_date.strftime('%m月%d日')}，共5晚，2成人+1儿童）。",
+        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}（15天后）从北京到三亚的往返机票，以及三亚亚龙湾亲子度假酒店亲子家庭房（入住#{@departure_date.strftime('%m月%d日')}至#{@return_date.strftime('%m月%d日')}，共5晚，2成人+1儿童）。",
         requirements: {
           departure_city: '北京',
           destination_city: '三亚',
           departure_date: @departure_date,
           return_date: @return_date,
-          outbound_flight: 'CA1357',
-          return_flight: 'CA1358',
           nights: 5,
           hotel_name: '三亚亚龙湾亲子度假酒店',
           room_type: '亲子家庭房',
