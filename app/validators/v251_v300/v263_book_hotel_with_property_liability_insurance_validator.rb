@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# V263: 预订酒店+财产保险+责任保险
+# V263: 预订深圳酒店（明天入住，住3晚）+境内旅游保险
 #
 # 任务描述:
-#   用户需要预订酒店并购买财产和责任综合保险
+#   用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消）
 #
 # 评分标准:
-#   - 创建了酒店订单 (35%)
+#   - 创建了深圳酒店订单 (35%)
 #   - 创建了保险订单 (30%)
 #   - 保险类型正确（境内旅游保险）(20%)
 #   - 订单状态有效 (15%)
@@ -16,8 +16,8 @@ module V251V300
   class V263BookHotelWithPropertyLiabilityInsuranceValidator < BaseValidator
     self.validator_id = 'v263_book_hotel_with_property_liability_insurance_validator'
     self.task_id = '20880d56-4e35-423e-befa-c7df4897e258'
-    self.title = '预订酒店+财产保险+责任保险'
-    self.description = '用户需要预订酒店并购买财产和责任综合保险'
+    self.title = '预订深圳酒店（明天入住，住3晚）+境内旅游保险'
+    self.description = '用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消）'
     self.timeout_seconds = 300
     
     def prepare
@@ -43,13 +43,13 @@ module V251V300
       raise "未找到适合#{@nights}天的保险产品" if @available_insurances.empty?
       
       {
-        task: "请预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，住#{@nights}晚），并购买财产保险和责任保险。",
+        task: "请预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，住#{@nights}晚），并购买境内旅游保险（保障意外、医疗和行程取消）。",
         requirements: {
           city: @city,
           check_in_date: @check_in_date,
           nights: @nights,
-          insurance_type: '旅游保险',
-          insurance_coverage: '财产+责任'
+          insurance_type: '境内旅游保险',
+          insurance_coverage: '意外+医疗+行程取消'
         },
         hint: "住宿期间建议购买旅游保险，保障个人财产和责任风险。"
       }
