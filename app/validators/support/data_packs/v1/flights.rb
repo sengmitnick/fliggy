@@ -1960,4 +1960,488 @@ end
 Flight.insert_all(widebody_flights) if widebody_flights.any?
 puts "  ✓ 创建了 #{widebody_flights.size} 个宽体机航班"
 
+# ==================== 商务舱和头等舱航班数据 ====================
+# 为v188-v200验证器提供高端舱位选择
+
+puts "\n=== 添加商务舱/头等舱航班 ==="
+
+premium_flights_data = []
+premium_start_date = Date.today
+premium_end_date = premium_start_date + 15.days
+
+puts "  商务舱/头等舱航班日期范围: #{premium_start_date} 至 #{premium_end_date} (共16天)"
+
+(premium_start_date..premium_end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - premium_start_date).to_i
+  
+  # 北京 -> 上海商务舱/头等舱
+  premium_flights_data << {
+    departure_city: "北京",
+    destination_city: "上海",
+    departure_time: base_datetime.change(hour: 8, min: 30),
+    arrival_time: base_datetime.change(hour: 11, min: 0),
+    departure_airport: "首都T3",
+    arrival_airport: "虹桥T2",
+    airline: "中国国航",
+    flight_number: "CA#{1800 + day_suffix}",
+    aircraft_type: "波音787(大)",
+    price: 1580.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 20,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  premium_flights_data << {
+    departure_city: "北京",
+    destination_city: "上海",
+    departure_time: base_datetime.change(hour: 14, min: 0),
+    arrival_time: base_datetime.change(hour: 16, min: 30),
+    departure_airport: "大兴",
+    arrival_airport: "浦东T2",
+    airline: "东方航空",
+    flight_number: "MU#{5200 + day_suffix}",
+    aircraft_type: "空客350(大)",
+    price: 1680.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 24,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  premium_flights_data << {
+    departure_city: "北京",
+    destination_city: "上海",
+    departure_time: base_datetime.change(hour: 10, min: 0),
+    arrival_time: base_datetime.change(hour: 12, min: 30),
+    departure_airport: "首都T3",
+    arrival_airport: "虹桥T2",
+    airline: "中国国航",
+    flight_number: "CA#{1900 + day_suffix}",
+    aircraft_type: "波音777(大)",
+    price: 2580.0,
+    discount_price: 0.0,
+    seat_class: "first",
+    available_seats: 8,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  # 上海 -> 北京商务舱/头等舱
+  premium_flights_data << {
+    departure_city: "上海",
+    destination_city: "北京",
+    departure_time: base_datetime.change(hour: 9, min: 0),
+    arrival_time: base_datetime.change(hour: 11, min: 30),
+    departure_airport: "虹桥T2",
+    arrival_airport: "首都T3",
+    airline: "中国国航",
+    flight_number: "CA#{1801 + day_suffix}",
+    aircraft_type: "波音787(大)",
+    price: 1580.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 20,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  premium_flights_data << {
+    departure_city: "上海",
+    destination_city: "北京",
+    departure_time: base_datetime.change(hour: 15, min: 30),
+    arrival_time: base_datetime.change(hour: 18, min: 0),
+    departure_airport: "浦东T2",
+    arrival_airport: "大兴",
+    airline: "东方航空",
+    flight_number: "MU#{5201 + day_suffix}",
+    aircraft_type: "空客350(大)",
+    price: 1680.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 24,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  # 北京 -> 广州商务舱
+  premium_flights_data << {
+    departure_city: "北京",
+    destination_city: "广州",
+    departure_time: base_datetime.change(hour: 7, min: 30),
+    arrival_time: base_datetime.change(hour: 10, min: 45),
+    departure_airport: "首都T2",
+    arrival_airport: "白云T2",
+    airline: "南方航空",
+    flight_number: "CZ#{3100 + day_suffix}",
+    aircraft_type: "波音787(大)",
+    price: 1780.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 28,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  premium_flights_data << {
+    departure_city: "北京",
+    destination_city: "广州",
+    departure_time: base_datetime.change(hour: 13, min: 0),
+    arrival_time: base_datetime.change(hour: 16, min: 15),
+    departure_airport: "大兴",
+    arrival_airport: "白云T2",
+    airline: "南方航空",
+    flight_number: "CZ#{3200 + day_suffix}",
+    aircraft_type: "空客330(大)",
+    price: 1880.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 24,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  # 广州 -> 北京商务舱
+  premium_flights_data << {
+    departure_city: "广州",
+    destination_city: "北京",
+    departure_time: base_datetime.change(hour: 8, min: 0),
+    arrival_time: base_datetime.change(hour: 11, min: 15),
+    departure_airport: "白云T2",
+    arrival_airport: "首都T2",
+    airline: "南方航空",
+    flight_number: "CZ#{3101 + day_suffix}",
+    aircraft_type: "波音787(大)",
+    price: 1780.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 28,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  # 上海 -> 深圳商务舱
+  premium_flights_data << {
+    departure_city: "上海",
+    destination_city: "深圳",
+    departure_time: base_datetime.change(hour: 10, min: 30),
+    arrival_time: base_datetime.change(hour: 13, min: 15),
+    departure_airport: "虹桥T2",
+    arrival_airport: "宝安T3",
+    airline: "东方航空",
+    flight_number: "MU#{5300 + day_suffix}",
+    aircraft_type: "空客321(中)",
+    price: 1380.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 16,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+  
+  # 深圳 -> 上海商务舱
+  premium_flights_data << {
+    departure_city: "深圳",
+    destination_city: "上海",
+    departure_time: base_datetime.change(hour: 14, min: 0),
+    arrival_time: base_datetime.change(hour: 16, min: 45),
+    departure_airport: "宝安T3",
+    arrival_airport: "虹桥T2",
+    airline: "东方航空",
+    flight_number: "MU#{5301 + day_suffix}",
+    aircraft_type: "空客321(中)",
+    price: 1380.0,
+    discount_price: 0.0,
+    seat_class: "business",
+    available_seats: 16,
+    flight_date: date,
+    created_at: timestamp,
+    updated_at: timestamp,
+    data_version: '0'
+  }
+end
+
+Flight.insert_all(premium_flights_data)
+puts "  ✓ 创建了 #{premium_flights_data.size} 个商务舱/头等舱航班"
+
+# 国内高端商务舱航班（特定日期）
+high_end_domestic = []
+[
+  { number: 'CA1001', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '09:00', arr_time: '11:30', price: 2200 },
+  { number: 'MU5001', airline: '东航', dep_city: '上海', dep_airport: '虹桥T2', dest_city: '深圳', dest_airport: '宝安T3', dep_time: '10:00', arr_time: '13:00', price: 2400 },
+  { number: 'CZ3001', airline: '南航', dep_city: '广州', dep_airport: '白云T2', dest_city: '北京', dest_airport: '首都T3', dep_time: '08:30', arr_time: '11:30', price: 2500 }
+].each do |route|
+  flight_date = Date.today + 3.days
+  high_end_domestic << {
+    flight_number: route[:number],
+    airline: route[:airline],
+    departure_city: route[:dep_city],
+    destination_city: route[:dest_city],
+    departure_airport: route[:dep_airport],
+    arrival_airport: route[:dest_airport],
+    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    price: route[:price],
+    is_direct: true,
+    stops: 0,
+    baggage_allowance: '托运行李2件(每件32kg)',
+    flight_date: flight_date,
+    meal_service: '含高级飞机餐',
+    mileage_accrual: '可累积里程（120%）',
+    seat_class: 'business',
+    available_seats: 20,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
+Flight.insert_all(high_end_domestic) if high_end_domestic.any?
+puts "  ✓ 创建了 #{high_end_domestic.size} 个国内高端商务舱航班"
+
+# ==================== 航班套餐产品（次卡） ====================
+puts "\n=== 创建航班套餐产品 ==="
+
+flight_packages_data = [
+  {
+    title: "AG超玩会联名",
+    subtitle: "国内·单人单程",
+    price: 298,
+    original_price: 498,
+    discount_label: "超低价",
+    badge_text: "1次卡",
+    badge_color: "#FF9800",
+    destination: "全国",
+    image_url: "/images/packages/1540959733332-eab4deabeeaf.jpg",
+    valid_days: 365,
+    description: "AG超玩会联名机票次卡，全国航线任选，有效期1年",
+    features: ["全国航线通用", "有效期1年", "不限航司", "可退可改"],
+    status: "active",
+    data_version: 0
+  },
+  {
+    title: "24节气卡小寒卡",
+    subtitle: "国内·单人单程",
+    price: 299,
+    original_price: 599,
+    discount_label: "超低价",
+    badge_text: "1次卡",
+    badge_color: "#03A9F4",
+    destination: "全国",
+    image_url: "/images/packages/1436491865332-7a61a109cc05.jpg",
+    valid_days: 365,
+    description: "24节气主题机票次卡，冬季出行专属优惠",
+    features: ["全国航线通用", "有效期1年", "不限航司", "节日特惠"],
+    status: "active",
+    data_version: 0
+  },
+  {
+    title: "国际机票盲盒",
+    subtitle: "666元飞全球",
+    price: 666,
+    original_price: 2999,
+    discount_label: "每日秒杀",
+    badge_text: "盲盒",
+    badge_color: "#F44336",
+    destination: "全球",
+    image_url: "/images/packages/1488085061387-422e29b40080.jpg",
+    valid_days: 180,
+    description: "国际机票盲盒，666元飞全球，16点开抢",
+    features: ["全球航线", "惊喜目的地", "超值优惠", "有效期半年"],
+    status: "active",
+    data_version: 0
+  },
+  {
+    title: "去昆明专线",
+    subtitle: "国内热门航线",
+    price: 399,
+    original_price: 899,
+    discount_label: "5折起",
+    badge_text: "直播",
+    badge_color: "#E91E63",
+    destination: "昆明",
+    image_url: "/images/packages/1570168007204-dfb528c6958f.jpg",
+    valid_days: 365,
+    description: "昆明专线机票次卡，四季如春好去处",
+    features: ["昆明专线", "全年有效", "多航班可选", "旺季适用"],
+    status: "active",
+    data_version: 0
+  },
+  {
+    title: "去三亚海岛游",
+    subtitle: "阳光沙滩海浪",
+    price: 499,
+    original_price: 1299,
+    discount_label: "新品情报站",
+    badge_text: "2次卡",
+    badge_color: "#00BCD4",
+    destination: "三亚",
+    image_url: "/images/packages/1559827260-dc66d52bef19.jpg",
+    valid_days: 365,
+    description: "三亚海岛游机票次卡，往返2次，全年无休",
+    features: ["往返2次", "全年有效", "含税费", "度假首选"],
+    status: "active",
+    data_version: 0
+  },
+  {
+    title: "去成都吃火锅",
+    subtitle: "美食之都专线",
+    price: 299,
+    original_price: 799,
+    discount_label: "限时特惠",
+    badge_text: "1次卡",
+    badge_color: "#FF5722",
+    destination: "成都",
+    image_url: "/images/packages/1561814053-c52db5e102e2.jpg",
+    valid_days: 365,
+    description: "成都美食之旅机票次卡，品尝正宗川菜",
+    features: ["成都专线", "美食推荐", "有效期1年", "多航班"],
+    status: "active",
+    data_version: 0
+  }
+]
+
+FlightPackage.insert_all(flight_packages_data) if flight_packages_data.any?
+puts "  ✓ 创建了 #{flight_packages_data.size} 个航班套餐产品"
+
+# ==================== 为所有航班统一生成 FlightOffer ====================
+# 为没有FlightOffer的航班生成4种套餐类型
+
+puts "\n=== 生成航班套餐 ==="
+
+# 查找所有没有FlightOffer的航班
+flights_without_offers = Flight.where(data_version: 0)
+  .left_joins(:flight_offers)
+  .where(flight_offers: { id: nil })
+  .to_a
+
+puts "   找到 #{flights_without_offers.count} 个航班需要生成套餐"
+
+if flights_without_offers.any?
+  all_offers = []
+  timestamp = Time.current
+  
+  flights_without_offers.each do |flight|
+    base_price = flight.price.to_f
+    
+    # Package 1: 超值精选 (Best Value)
+    all_offers << {
+      flight_id: flight.id,
+      provider_name: '超值精选',
+      offer_type: 'featured',
+      price: base_price,
+      original_price: base_price + 42,
+      cashback_amount: 0,
+      discount_items: ['无免费托运行李'],
+      services: ['退改¥92起', '经济舱', '仅全额电子发票'],
+      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
+      baggage_info: '手提行李7KG/尺寸20',
+      meal_included: false,
+      refund_policy: '退改¥92起',
+      is_featured: true,
+      display_order: 0,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    # Package 2: 选座无忧 (Seat Selection)
+    all_offers << {
+      flight_id: flight.id,
+      provider_name: '选座无忧',
+      offer_type: 'standard',
+      price: base_price + 8,
+      original_price: base_price + 50,
+      cashback_amount: 24,
+      discount_items: ['无免费托运行李'],
+      services: ['退改¥92起', '经济舱', '仅全额电子发票'],
+      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
+      baggage_info: '含合餐权益',
+      meal_included: false,
+      refund_policy: '手提行李7KG/尺寸20',
+      is_featured: false,
+      display_order: 1,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    # Package 3: 返现礼遇 (Cashback Package)
+    all_offers << {
+      flight_id: flight.id,
+      provider_name: '返现礼遇',
+      offer_type: 'cashback',
+      price: base_price + 120,
+      original_price: base_price + 220,
+      cashback_amount: 90,
+      discount_items: ['无免费托运行李'],
+      services: ['经济舱', '全额电子发票'],
+      tags: [
+        '返¥520里程礼包',
+        '手提行李7KG/尺寸20',
+        '成人可订返现',
+        '仅限预定电子票'
+      ],
+      baggage_info: '返¥520里程礼包',
+      meal_included: false,
+      refund_policy: '手提行李7KG/尺寸20',
+      is_featured: false,
+      display_order: 2,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    # Package 4: 家庭好选 (Family Choice)
+    all_offers << {
+      flight_id: flight.id,
+      provider_name: '家庭好选',
+      offer_type: 'family',
+      price: base_price + 5,
+      original_price: base_price + 40,
+      cashback_amount: 20,
+      discount_items: ['结果送出票'],
+      services: ['经济舱', '1.7折'],
+      tags: [
+        '结果送出票',
+        '结果提交'
+      ],
+      baggage_info: '结果送出票',
+      meal_included: false,
+      refund_policy: '结果提交',
+      is_featured: false,
+      display_order: 3,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  FlightOffer.insert_all(all_offers)
+  puts "   ✓ 已生成 #{all_offers.count} 个套餐（为 #{flights_without_offers.count} 个航班）"
+else
+  puts "   ℹ️  所有航班已有套餐，跳过"
+end
+
 puts "\n✅ flights_v1 数据包加载完成！"
