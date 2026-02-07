@@ -885,6 +885,99 @@ namespace :validator do
       puts "✅ All prepare methods only query data (no creation/modification)\n"
     end
     
+    # Step 4.5: 检查 simulate 方法中是否私自创建 data_version: 0 的数据（绕过数据包）
+    puts "🔍 Step 4.5: Checking simulate methods for data_version: 0 creation violations..."
+    simulate_violations = []
+    
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb')
+      
+      validator_name = File.basename(file, '.rb')
+      content = File.read(file)
+      
+      # 提取 simulate 方法内容
+      simulate_method = content.match(/def\s+simulate.*?^\s*end/m)&.[](0)
+      
+      if simulate_method
+        violations = []
+        
+        # 检查 1: 直接创建 data_version: 0 的记录（最严重违规）
+        if simulate_method.match?(/\.create[!]?\([^)]*data_version:\s*0/m)
+          # 提取具体的创建语句
+          creation_statements = simulate_method.scan(/(\w+)\.create[!]?\([^)]*data_version:\s*0[^)]*\)/m).flatten.uniq
+          violations << "直接创建 data_version: 0 的记录: #{creation_statements.join(', ')}"
+        end
+        
+        # 检查 2: 使用 || Model.create 模式绕过数据包（后备创建）
+        # 模式: @variable || Model.create!(..., data_version: 0)
+        if simulate_method.match?(/@\w+\s*\|\|\s*\w+\.create[!]?\([^)]*data_version:\s*0/m)
+          fallback_patterns = simulate_method.scan(/@(\w+)\s*\|\|\s*(\w+)\.create[!]?/m)
+          pattern_str = fallback_patterns.map { |var, model| "@#{var} || #{model}.create" }.join(', ')
+          violations << "使用后备创建模式绕过数据包: #{pattern_str}"
+        end
+        
+        # 检查 3: 在 simulate 中使用 insert / insert_all with data_version: 0
+        if simulate_method.match?(/\.(insert|insert_all)\([^)]*data_version:\s*0/m)
+          violations << "使用 insert/insert_all 创建 data_version: 0 的记录"
+        end
+        
+        if violations.any?
+          # 提取具体的违规代码行（用于展示）
+          violation_lines = []
+          simulate_method.each_line.with_index do |line, idx|
+            if line.match?(/data_version:\s*0/) && (line.match?(/\.create/) || line.match?(/\.insert/))
+              violation_lines << { line_num: idx + 1, code: line.strip }
+            end
+          end
+          
+          simulate_violations << {
+            validator: validator_name,
+            file: file,
+            violations: violations,
+            code_samples: violation_lines.first(5)  # 只显示前5个违规行
+          }
+        end
+      end
+    end
+    
+    if simulate_violations.any?
+      puts "\n❌ Simulate Method Data Creation Violations Found:"
+      puts "-" * 70
+      simulate_violations.each do |error|
+        puts "\n#{error[:validator]}"
+        puts "  File: #{error[:file]}"
+        puts "  违规操作:"
+        error[:violations].each { |v| puts "    → #{v}" }
+        
+        if error[:code_samples].any?
+          puts "  违规代码示例:"
+          error[:code_samples].each do |sample|
+            puts "    第#{sample[:line_num]}行: #{sample[:code]}"
+          end
+        end
+      end
+      puts "-" * 70
+      puts "\n❌ #{simulate_violations.size} validator(s) have simulate methods that create data_version: 0 records"
+      puts "\n💡 规则说明:"
+      puts "  - simulate 方法中创建的订单/业务记录必须使用 @data_version（会话隔离）"
+      puts "  - 只有基础数据（Attraction, Hotel, Flight等）才能 data_version: 0"
+      puts "  - 基础数据应该来自数据包，不应该在 simulate 中创建"
+      puts "  - 使用 @variable || Model.create 模式是绕过数据包的典型反模式"
+      puts "\n🔧 修复方法:"
+      puts "  1. 删除所有 @variable || Model.create!(..., data_version: 0) 后备创建代码"
+      puts "  2. 在 prepare 方法中使用 find_by! 查询数据（不创建）"
+      puts "  3. 如果数据不存在，在对应的数据包文件中添加（使用 insert_all）"
+      puts "  4. simulate 方法中创建订单/业务记录时使用 data_version: @data_version"
+      puts "\n⚠️  Why this matters:"
+      puts "  - 在 simulate 中私自创建 data_version: 0 的数据会污染基线数据"
+      puts "  - 这些数据会影响其他 validator 的执行，造成数据包依赖混乱"
+      puts "  - 正确的做法是完善数据包，让所有 validator 共享同一份基线数据\n"
+      exit 1
+    else
+      puts "✅ All simulate methods only create session-scoped data (@data_version)\n"
+    end
+    
     # Step 5: 检查权重总和
     puts "🔍 Step 5: Checking weight sums..."
     weight_errors = []
