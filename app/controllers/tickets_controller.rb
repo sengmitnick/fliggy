@@ -32,26 +32,28 @@ class TicketsController < ApplicationController
     
     # 转换为视图需要的格式
     @tickets = attractions.map do |attraction|
-      # 获取最低价格的门票
+      # 获取最低价格的门票（如果有）
       min_ticket = attraction.tickets.available.order(:current_price).first
       
-      # 跳过没有门票的景点
-      next if min_ticket.nil?
+      # 免费景点显示 "免费" 标签
+      is_free = min_ticket.nil?
       
       {
-        id: min_ticket.id,  # 使用门票 ID 而不是景点 ID
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800", # 默认图片，后续可以添加 cover_image
-        badge: attraction.review_count > 1000 ? '热门' : nil,
+        id: attraction.id,  # 使用景点 ID
+        slug: attraction.slug,  # 使用 FriendlyId slug
+        image: attraction.cover_image_url.presence || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+        badge: is_free ? '免费' : (attraction.review_count > 1000 ? '热门' : nil),
         title: attraction.name,
         rating: attraction.rating > 0 ? attraction.rating : nil,
         rating_desc: "#{attraction.review_count}条评价",
         tags: [], # 可以后续添加景点标签字段
         provider: '官方',
         sales: "已售#{attraction.review_count}",
-        price: min_ticket&.current_price&.to_i&.to_s || '0',
-        price_suffix: '起'
+        price: is_free ? nil : (min_ticket&.current_price&.to_i&.to_s || '0'),
+        price_suffix: '起',
+        is_free: is_free
       }
-    end.compact
+    end
     
     # 如果没有数据，显示空结果
     @tickets = [] if @tickets.empty?
