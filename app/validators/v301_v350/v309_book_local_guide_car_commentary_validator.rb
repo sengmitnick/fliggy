@@ -2,22 +2,24 @@
 
 require_relative '../base_validator'
 
-# V309: 预订当地司导+包车+景点讲解
+# V309: 预订北京深度旅行服务（5天后，4人，导游+包车+景点讲解）
 #
 # 任务描述:
-#   用户需要预订深度旅行服务，包含专业导游、包车和景点讲解
+#   用户需要预订北京的深度旅行服务（5天后，4人），包含专业导游、包车和景点讲解。
+#   需要创建2个订单：深度旅行订单和包车订单，两个订单的服务日期需一致，且状态和价格有效。
 #
 # 评分标准:
-#   - 创建了深度旅行订单（导游讲解）(40%)
-#   - 创建了包车订单 (30%)
-#   - 服务日期正确 (20%)
-#   - 订单状态和价格有效 (10%)
+#   - 创建了深度旅行订单（导游讲解）(35%)
+#   - 创建了包车订单 (25%)
+#   - 两个订单的服务日期正确（5天后）且一致 (15%)
+#   - 参与人数正确（4人成人） (15%)
+#   - 两个订单的状态和价格有效 (10%)
 module V301V350
   class V309BookLocalGuideCarCommentaryValidator < BaseValidator
     self.validator_id = 'v309_book_local_guide_car_commentary_validator'
     self.task_id = 'f4d35905-7889-4569-8f32-a0b6c76a7873'
-    self.title = '预订当地司导+包车+景点讲解'
-    self.description = '用户需要预订深度旅行服务，包含专业导游、包车和景点讲解'
+    self.title = '预订北京深度旅行服务（5天后，4人，导游+包车+景点讲解）'
+    self.description = '用户需要预订北京的深度旅行服务（5天后，4人），包含专业导游、包车和景点讲解。需要创建深度旅行订单和包车订单两个订单，服务日期一致，状态和价格有效。'
     self.timeout_seconds = 300
     
     def prepare
@@ -59,7 +61,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了深度旅行订单（导游讲解）", weight: 40 do
+      add_assertion "创建了深度旅行订单（导游讲解）", weight: 35 do
         @deep_travel_booking = DeepTravelBooking
           .joins(:deep_travel_product)
           .where(deep_travel_products: { location: @location })
@@ -71,7 +73,7 @@ module V301V350
       
       return if @deep_travel_booking.nil?
       
-      add_assertion "创建了包车订单", weight: 30 do
+      add_assertion "创建了包车订单", weight: 25 do
         @car_order = CarOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -80,7 +82,7 @@ module V301V350
         expect(@car_order).not_to be_nil, "未找到包车订单"
       end
       
-      add_assertion "服务日期正确", weight: 20 do
+      add_assertion "服务日期正确", weight: 15 do
         expect(@deep_travel_booking.travel_date).to eq(@travel_date),
           "深度旅行日期错误。期望: #{@travel_date}，实际: #{@deep_travel_booking.travel_date}"
         
@@ -88,6 +90,13 @@ module V301V350
           expect(@car_order.pickup_datetime.to_date).to eq(@travel_date),
             "包车取车日期错误。期望: #{@travel_date}，实际: #{@car_order.pickup_datetime.to_date}"
         end
+      end
+      
+      add_assertion "参与人数正确（4人成人）", weight: 15 do
+        expect(@deep_travel_booking.adult_count).to eq(@participant_count),
+          "成人数量错误。期望: #{@participant_count}人，实际: #{@deep_travel_booking.adult_count}人"
+        expect(@deep_travel_booking.child_count).to eq(0),
+          "儿童数量错误。期望: 0人，实际: #{@deep_travel_booking.child_count}人"
       end
       
       add_assertion "订单状态和价格有效", weight: 10 do

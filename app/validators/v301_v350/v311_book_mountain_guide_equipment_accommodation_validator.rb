@@ -2,22 +2,22 @@
 
 require_relative '../base_validator'
 
-# V311: 预订登山向导+装备租赁+山顶住宿
+# V311: 预订登山门票+向导装备+山顶住宿
 #
 # 任务描述:
-#   用户需要预订登山服务套餐，包含专业向导、装备租赁和山顶住宿
+#   用户需要预订登山服务套餐，包含景点门票、登山向导+装备租赁活动、山顶住宿
 #
 # 评分标准:
-#   - 创建了深度旅行订单（登山向导）(35%)
-#   - 创建了酒店订单（山顶住宿）(30%)
-#   - 创建了装备租赁订单（租车模拟）(20%)
+#   - 创建了景点门票订单（登山门票）(25%)
+#   - 创建了景点活动订单（登山向导+装备租赁）(35%)
+#   - 创建了酒店订单（山顶住宿）(25%)
 #   - 订单状态和价格有效 (15%)
 module V301V350
   class V311BookMountainGuideEquipmentAccommodationValidator < BaseValidator
     self.validator_id = 'v311_book_mountain_guide_equipment_accommodation_validator'
     self.task_id = 'd31ed871-6c15-42f0-8fd0-3dfbeddca35e'
-    self.title = '预订登山向导+装备租赁+山顶住宿'
-    self.description = '用户需要预订登山服务套餐，包含专业向导、装备租赁和山顶住宿'
+    self.title = '预订6天后2人华山登山套餐（门票+向导装备活动+山顶住宿1晚）'
+    self.description = '用户需要6天后去华山，2人参与，预订登山服务套餐，包含景点门票、登山向导+装备租赁活动、山顶住宿1晚，需创建景点门票订单、景点活动订单、酒店订单，订单状态和价格有效'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,24 +25,27 @@ module V301V350
       @participant_count = 2
       @nights = 1
       
-      # 查找山区景点
+      # 固定地点为华山
       @attraction = Attraction
-        .where("name LIKE ? OR name LIKE ?", '%山%', '%峰%')
+        .joins(:tickets, :attraction_activities)
+        .where(name: '华山', data_version: 0)
+        .where(tickets: { ticket_type: 'adult', data_version: 0 })
+        .where(attraction_activities: { data_version: 0 })
+        .first
+      
+      raise "未找到华山景点" unless @attraction
+      
+      # 查找华山景点门票（成人票）
+      @ticket = @attraction.tickets.where(ticket_type: 'adult', data_version: 0).first
+      raise "未找到华山的门票" unless @ticket
+      
+      # 查找登山活动（向导+装备租赁）
+      @climbing_activity = @attraction.attraction_activities
+        .where("name LIKE ? OR name LIKE ? OR name LIKE ?", '%登山%', '%向导%', '%装备%')
         .where(data_version: 0)
         .first
       
-      @attraction ||= Attraction.where(data_version: 0).first
-      raise "未找到山区景点" unless @attraction
-      
-      # 查找深度旅行产品（登山向导）
-      @deep_travel_product = DeepTravelProduct
-        .joins(:deep_travel_guide)
-        .where(data_version: 0)
-        .first
-      
-      raise "未找到深度旅行产品" unless @deep_travel_product
-      
-      @guide = @deep_travel_product.deep_travel_guide
+      raise "未找到华山的登山活动" unless @climbing_activity
       
       # 查找酒店（山顶住宿）
       @hotel = Hotel.where(data_version: 0).order(Arel.sql('RANDOM()')).first
@@ -51,35 +54,47 @@ module V301V350
       @hotel_room = @hotel.hotel_rooms.where(data_version: 0).first
       raise "未找到#{@hotel.name}的可用房间" unless @hotel_room
       
-      # 查找装备租赁（租车模拟）
-      @car = Car.where(data_version: 0).first
-      raise "未找到可用车辆（装备租赁）" unless @car
-      
       {
-        task: "请预订#{@attraction.name}登山服务（#{@travel_date.strftime('%Y年%m月%d日')}出发，#{@participant_count}人），包含专业向导、装备租赁和山顶住宿#{@nights}晚。",
+        task: "请预订华山登山服务（#{@travel_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含景点门票、登山向导+装备租赁活动、山顶住宿#{@nights}晚。",
         requirements: {
-          attraction: @attraction.name,
+          attraction: '华山',
           travel_date: @travel_date,
           participant_count: @participant_count,
           nights: @nights,
-          services: ['专业向导', '装备租赁', '山顶住宿']
+          ticket: @ticket.name,
+          climbing_activity: @climbing_activity.name,
+          hotel: @hotel.name
         },
-        hint: "需要预订深度旅行（向导）、酒店住宿和装备租赁。"
+        hint: "需要预订华山景点门票、景点活动（登山向导+装备）、酒店住宿。"
       }
     end
     
     def verify
-      add_assertion "创建了深度旅行订单（登山向导）", weight: 35 do
-        @deep_travel_booking = DeepTravelBooking
+      add_assertion "创建了景点门票订单（登山门票）", weight: 20 do
+        @ticket_order = TicketOrder
+          .joins(ticket: :attraction)
+          .where(attractions: { id: @attraction.id })
           .where(data_version: @data_version)
+          .order(created_at: :desc)
           .first
         
-        expect(@deep_travel_booking).not_to be_nil, "未找到深度旅行订单（登山向导）"
+        expect(@ticket_order).not_to be_nil, "未找到景点门票订单"
       end
       
-      return if @deep_travel_booking.nil?
+      return if @ticket_order.nil?
       
-      add_assertion "创建了酒店订单（山顶住宿）", weight: 30 do
+      add_assertion "创建了景点活动订单（登山向导+装备租赁）", weight: 20 do
+        @activity_order = ActivityOrder
+          .joins(attraction_activity: :attraction)
+          .where(attractions: { id: @attraction.id })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        
+        expect(@activity_order).not_to be_nil, "未找到景点活动订单（登山向导+装备）"
+      end
+      
+      add_assertion "创建了酒店订单（山顶住宿）", weight: 20 do
         @hotel_booking = HotelBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -88,27 +103,54 @@ module V301V350
         expect(@hotel_booking).not_to be_nil, "未找到酒店订单（山顶住宿）"
       end
       
-      add_assertion "创建了装备租赁订单（租车模拟）", weight: 20 do
-        @car_order = CarOrder
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .first
+      add_assertion "门票和活动订单时间正确（#{@travel_date}）", weight: 15 do
+        expect(@ticket_order.visit_date).to eq(@travel_date),
+          "门票游玩日期错误。期望: #{@travel_date}（6天后），实际: #{@ticket_order.visit_date}"
         
-        expect(@car_order).not_to be_nil, "未找到装备租赁订单"
+        if @activity_order
+          expect(@activity_order.visit_date).to eq(@travel_date),
+            "活动游玩日期错误。期望: #{@travel_date}（6天后），实际: #{@activity_order.visit_date}"
+        end
       end
       
-      add_assertion "订单状态和价格有效", weight: 15 do
-        expect(@deep_travel_booking.status).to be_in(['pending', 'paid', 'confirmed'])
-        expect(@deep_travel_booking.total_price).to be > 0
+      add_assertion "酒店入住日期正确（#{@travel_date}）", weight: 10 do
+        if @hotel_booking
+          expect(@hotel_booking.check_in_date).to eq(@travel_date),
+            "酒店入住日期错误。期望: #{@travel_date}（6天后），实际: #{@hotel_booking.check_in_date}"
+          
+          expected_checkout = @travel_date + @nights
+          expect(@hotel_booking.check_out_date).to eq(expected_checkout),
+            "酒店退房日期错误。期望: #{expected_checkout}（住#{@nights}晚），实际: #{@hotel_booking.check_out_date}"
+        end
+      end
+      
+      add_assertion "人数正确（#{@participant_count}人）", weight: 10 do
+        expect(@ticket_order.quantity).to eq(@participant_count),
+          "门票数量错误。期望: #{@participant_count}张，实际: #{@ticket_order.quantity}张"
+        
+        if @activity_order
+          expect(@activity_order.quantity).to eq(@participant_count),
+            "活动人数错误。期望: #{@participant_count}人，实际: #{@activity_order.quantity}人"
+        end
+        
+        if @hotel_booking
+          expect(@hotel_booking.adults_count).to eq(@participant_count),
+            "酒店入住人数错误。期望: #{@participant_count}人，实际: #{@hotel_booking.adults_count}人"
+        end
+      end
+      
+      add_assertion "订单状态和价格有效", weight: 5 do
+        expect(@ticket_order.status).to be_in(['pending', 'paid', 'confirmed'])
+        expect(@ticket_order.total_price).to be > 0
+        
+        if @activity_order
+          expect(@activity_order.status).to be_in(['pending', 'paid', 'confirmed'])
+          expect(@activity_order.total_price).to be > 0
+        end
         
         if @hotel_booking
           expect(@hotel_booking.status).to be_in(['pending', 'paid', 'confirmed'])
           expect(@hotel_booking.total_price).to be > 0
-        end
-        
-        if @car_order
-          expect(@car_order.status).to be_in(['pending', 'paid', 'confirmed'])
-          expect(@car_order.total_price).to be > 0
         end
       end
     end
@@ -116,23 +158,32 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建深度旅行订单（登山向导）
-      DeepTravelBooking.create!(
+      # 1. 创建景点门票订单（登山门票）
+      TicketOrder.create!(
         user: user,
-        deep_travel_guide: @guide,
-        deep_travel_product: @deep_travel_product,
-        travel_date: @travel_date,
-        adult_count: @participant_count,
-        child_count: 0,
-        contact_name: user.name,
+        ticket: @ticket,
+        visit_date: @travel_date,
+        quantity: @participant_count,
         contact_phone: '13800138000',
-        total_price: @deep_travel_product.price,
+        total_price: @ticket.current_price * @participant_count,
         insurance_price: 0,
         status: 'paid',
         data_version: @data_version
       )
       
-      # 2. 创建酒店订单（山顶住宿）
+      # 2. 创建景点活动订单（登山向导+装备租赁）
+      ActivityOrder.create!(
+        user: user,
+        attraction_activity: @climbing_activity,
+        visit_date: @travel_date,
+        quantity: @participant_count,
+        total_price: @climbing_activity.current_price * @participant_count,
+        insurance_type: 'basic',
+        status: 'paid',
+        data_version: @data_version
+      )
+      
+      # 3. 创建酒店订单（山顶住宿）
       check_in_date = @travel_date
       check_out_date = check_in_date + @nights
       
@@ -152,24 +203,6 @@ module V301V350
         status: 'paid',
         data_version: @data_version
       )
-      
-      # 3. 创建装备租赁订单（租车模拟）
-      pickup_datetime = @travel_date.to_time + 9.hours
-      return_datetime = (@travel_date + @nights).to_time + 18.hours
-      
-      CarOrder.create!(
-        user: user,
-        car: @car,
-        pickup_datetime: pickup_datetime,
-        return_datetime: return_datetime,
-        total_price: @car.price_per_day * (@nights + 1),
-        pickup_location: @attraction.name,
-        driver_name: user.name,
-        driver_id_number: '310101198001011234',
-        contact_phone: '13800138000',
-        status: 'paid',
-        data_version: @data_version
-      )
     end
     
     private
@@ -180,11 +213,10 @@ module V301V350
         participant_count: @participant_count,
         nights: @nights,
         attraction_id: @attraction&.id,
-        deep_travel_product_id: @deep_travel_product&.id,
-        guide_id: @guide&.id,
+        ticket_id: @ticket&.id,
+        climbing_activity_id: @climbing_activity&.id,
         hotel_id: @hotel&.id,
-        hotel_room_id: @hotel_room&.id,
-        car_id: @car&.id
+        hotel_room_id: @hotel_room&.id
       }
     end
     
@@ -194,11 +226,10 @@ module V301V350
       @nights = data['nights']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
-      @deep_travel_product = DeepTravelProduct.find(data['deep_travel_product_id']) if data['deep_travel_product_id']
-      @guide = DeepTravelGuide.find(data['guide_id']) if data['guide_id']
+      @ticket = Ticket.find(data['ticket_id']) if data['ticket_id']
+      @climbing_activity = AttractionActivity.find(data['climbing_activity_id']) if data['climbing_activity_id']
       @hotel = Hotel.find(data['hotel_id']) if data['hotel_id']
       @hotel_room = HotelRoom.find(data['hotel_room_id']) if data['hotel_room_id']
-      @car = Car.find(data['car_id']) if data['car_id']
     end
   end
 end

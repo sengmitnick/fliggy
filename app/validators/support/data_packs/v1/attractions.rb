@@ -2114,4 +2114,135 @@ if supplemental_activities_data.any?
   puts "✓ 创建了 #{supplemental_activities_data.size} 个补充景点内项目"
 end
 
+# ==================== 为华山添加门票和登山活动 ====================
+# 用于V311：预订登山门票+向导装备+山顶住宿
+
+puts "\n为华山添加门票和登山活动..."
+
+huashan_tickets_data = []
+huashan_activities_data = []
+
+if (huashan = Attraction.find_by(name: '华山', data_version: 0))
+  # 添加华山门票
+  huashan_tickets_data << {
+    attraction_id: huashan.id,
+    name: "华山景区成人票",
+    ticket_type: "adult",
+    original_price: 180,
+    current_price: 160,
+    discount_info: "线上预订立减20元",
+    requirements: "身高1.4米以上游客",
+    booking_notice: "请至少提前2小时预订；凭订单短信至景区售票处换票；1.2米以下儿童免票；门票当日有效。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 15600,
+    stock: 2000,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  huashan_tickets_data << {
+    attraction_id: huashan.id,
+    name: "华山景区儿童票",
+    ticket_type: "child",
+    original_price: 90,
+    current_price: 80,
+    discount_info: "儿童优惠票",
+    requirements: "身高1.2米-1.4米儿童",
+    booking_notice: "请至少提前2小时预订；凭订单短信至景区售票处换票；需出示儿童身份证件；门票当日有效。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 5200,
+    stock: 800,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为华山添加2张门票（成人票、儿童票）"
+end
+
+# 华山景点内项目 (V311需要：登山向导+装备租赁)
+if (huashan = Attraction.find_by(name: '华山', data_version: 0))
+  huashan_activities_data << {
+    attraction_id: huashan.id,
+    name: "登山向导+装备租赁服务",
+    activity_type: "运动体验",
+    current_price: 580,
+    description: "专业登山向导带领，适合初学者。包含登山装备租赁（登山杖、安全绳、头盔、手套）、向导讲解服务、安全保障。每次限制最多6人，保障服务质量。",
+    duration: "6-8小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为华山添加1个活动（登山向导+装备租赁）"
+else
+  puts "     ⚠ 警告：未找到华山景点，跳过登山活动创建"
+end
+
+# 批量插入华山门票数据
+if huashan_tickets_data.any?
+  Ticket.insert_all(huashan_tickets_data)
+  puts "✓ 创建了 #{huashan_tickets_data.size} 张华山门票"
+end
+
+# 批量插入华山活动数据
+if huashan_activities_data.any?
+  AttractionActivity.insert_all(huashan_activities_data)
+  puts "✓ 创建了 #{huashan_activities_data.size} 个华山活动"
+end
+
+# ==================== 深圳大梅沙海滨公园活动数据 ====================
+# 为冲浪验证器v312提供数据支持
+
+dameisha = Attraction.find_by(name: "深圳大梅沙海滨公园", data_version: 0)
+
+dameisha_activities_data = []
+
+if dameisha
+  puts "正在为深圳大梅沙海滨公园添加冲浪相关活动..."
+  
+  # 活动1: 冲浪教学（含装备）
+  dameisha_activities_data << {
+    attraction_id: dameisha.id,
+    name: "冲浪教学（含装备）",
+    activity_type: "水上运动",
+    current_price: 280,
+    description: "专业冲浪教练一对一指导，适合初学者。包含冲浪板、防寒服、脚绳等全套装备租赁，课程时长2小时，保障安全。",
+    duration: "2小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 活动2: 海滩娱乐项目
+  dameisha_activities_data << {
+    attraction_id: dameisha.id,
+    name: "海滩娱乐项目",
+    activity_type: "娱乐演出",
+    current_price: 150,
+    description: "包含沙滩排球、摩托艇、香蕉船、飞鱼艇等多项海上娱乐活动，任选其一体验，感受海滨乐趣。",
+    duration: "1小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为深圳大梅沙海滨公园添加2个活动（冲浪教学+海滩娱乐）"
+else
+  puts "     ⚠ 警告：未找到深圳大梅沙海滨公园景点，跳过冲浪活动创建"
+end
+
+# 批量插入大梅沙活动数据
+if dameisha_activities_data.any?
+  AttractionActivity.insert_all(dameisha_activities_data)
+  puts "✓ 创建了 #{dameisha_activities_data.size} 个深圳大梅沙活动"
+end
+
 puts "✓ 景点数据包加载完成"

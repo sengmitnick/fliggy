@@ -8,49 +8,51 @@ require_relative '../base_validator'
 #   用户需要预订冲浪服务套餐，包含教学、海滩娱乐和装备提供
 #
 # 评分标准:
-#   - 创建了冲浪活动订单 (40%)
-#   - 创建了额外娱乐活动订单 (30%)
-#   - 活动日期正确 (20%)
+#   - 创建了冲浪活动订单 (30%)
+#   - 景点正确 (10%)
+#   - 创建了额外娱乐活动订单 (20%)
+#   - 活动日期正确 (15%)
+#   - 人数正确 (15%)
 #   - 订单状态和价格有效 (10%)
 module V301V350
   class V312BookSurfingLessonBeachEquipmentValidator < BaseValidator
     self.validator_id = 'v312_book_surfing_lesson_beach_equipment_validator'
     self.task_id = 'c132957d-cbea-4e0b-8190-acd5d2d2ce30'
-    self.title = '预订冲浪教学+海滩娱乐+装备提供'
-    self.description = '用户需要预订冲浪服务套餐，包含教学、海滩娱乐和装备提供'
+    self.title = '预订4天后2人深圳大梅沙冲浪服务套餐（教学+海滩娱乐+装备）'
+    self.description = '用户需要4天后去深圳大梅沙海滨公园预订冲浪服务套餐，2人参与，包含冲浪教学、海滩娱乐和装备提供，需创建冲浪活动订单和海滩娱乐活动订单，活动日期和人数正确，订单状态和价格有效'
     self.timeout_seconds = 300
     
     def prepare
       @activity_date = Date.current + 4.days
       @participant_count = 2
       
-      # 查找海滨景点
+      # 固定为深圳大梅沙海滨公园
       @attraction = Attraction
-        .where("name LIKE ? OR name LIKE ? OR name LIKE ?", '%海%', '%滩%', '%岛%')
-        .where(data_version: 0)
+        .joins(:attraction_activities)
+        .where(name: '深圳大梅沙海滨公园', data_version: 0)
+        .where(attraction_activities: { data_version: 0 })
         .first
       
-      @attraction ||= Attraction.where(data_version: 0).first
-      raise "未找到海滨景点" unless @attraction
+      raise "未找到深圳大梅沙海滨公园" unless @attraction
       
       # 查找活动
       @surfing_activity = @attraction.attraction_activities.where(data_version: 0).first
       @entertainment_activity = @attraction.attraction_activities.where(data_version: 0).second
       
       {
-        task: "请预订#{@attraction.name}的冲浪服务（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含冲浪教学、海滩娱乐和装备提供。",
+        task: "请预订深圳大梅沙海滨公园的冲浪服务（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含冲浪教学、海滩娱乐和装备提供。",
         requirements: {
           attraction: @attraction.name,
           activity_date: @activity_date,
           participant_count: @participant_count,
           services: ['冲浪教学', '海滩娱乐', '装备提供']
         },
-        hint: "需要预订多个活动：冲浪教学和海滩娱乐。"
+        hint: "需要预订深圳大梅沙海滨公园的多个活动：冲浪教学和海滩娱乐。"
       }
     end
     
     def verify
-      add_assertion "创建了冲浪活动订单", weight: 40 do
+      add_assertion "创建了冲浪活动订单", weight: 30 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -59,14 +61,19 @@ module V301V350
           .order(created_at: :asc)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
+        expect(all_activity_orders).not_to be_empty, "未找到深圳大梅沙海滨公园的活动订单"
         @surfing_order = all_activity_orders.first
         expect(@surfing_order).not_to be_nil, "未找到冲浪活动订单"
       end
       
       return if @surfing_order.nil?
       
-      add_assertion "创建了额外娱乐活动订单", weight: 30 do
+      add_assertion "景点正确（深圳大梅沙海滨公园）", weight: 10 do
+        expect(@surfing_order.attraction_activity.attraction.name).to eq('深圳大梅沙海滨公园'),
+          "景点错误。期望: 深圳大梅沙海滨公园，实际: #{@surfing_order.attraction_activity.attraction.name}"
+      end
+      
+      add_assertion "创建了额外娱乐活动订单", weight: 20 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -85,13 +92,23 @@ module V301V350
         end
       end
       
-      add_assertion "活动日期正确", weight: 20 do
+      add_assertion "活动日期正确（#{@activity_date}，4天后）", weight: 15 do
         expect(@surfing_order.visit_date).to eq(@activity_date),
-          "冲浪活动日期错误。期望: #{@activity_date}，实际: #{@surfing_order.visit_date}"
+          "冲浪活动日期错误。期望: #{@activity_date}（4天后），实际: #{@surfing_order.visit_date}"
         
         if @entertainment_order
           expect(@entertainment_order.visit_date).to eq(@activity_date),
-            "娱乐活动日期错误。期望: #{@activity_date}，实际: #{@entertainment_order.visit_date}"
+            "娱乐活动日期错误。期望: #{@activity_date}（4天后），实际: #{@entertainment_order.visit_date}"
+        end
+      end
+      
+      add_assertion "人数正确（#{@participant_count}人）", weight: 15 do
+        expect(@surfing_order.quantity).to eq(@participant_count),
+          "冲浪活动人数错误。期望: #{@participant_count}人，实际: #{@surfing_order.quantity}人"
+        
+        if @entertainment_order
+          expect(@entertainment_order.quantity).to eq(@participant_count),
+            "娱乐活动人数错误。期望: #{@participant_count}人，实际: #{@entertainment_order.quantity}人"
         end
       end
       

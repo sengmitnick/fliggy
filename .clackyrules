@@ -811,6 +811,61 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
   - ALWAYS after modifying model fields or associations
   - ALWAYS when fixing validator failures related to missing data
 
+**Validator Simulate Data Creation Rules - CRITICAL**:
+- **❗️ NEVER create `data_version: 0` records in simulate methods**
+- **❗️ NEVER use `@variable || Model.create!(..., data_version: 0)` fallback pattern**
+- **❗️ All foundation data MUST come from data packs**
+- **Detection**: Step 4.5 in `rake validator:simulate` automatically detects violations
+- **Violations found**: 35 validators currently violating (v163-v200, v257, v260, v261, v265, v308, v310, v312, v314, v315, v316)
+- **Why this matters**:
+  - Pollutes baseline data (data_version: 0)
+  - Breaks test isolation between validators
+  - Masks data pack gaps
+  - Creates execution order dependencies
+- **Correct patterns**:
+  1. **Data packs** create foundation data (`Attraction`, `Hotel`, `Flight` with `data_version: 0`)
+  2. **Prepare** queries data with `find_by!` (NEVER creates)
+  3. **Simulate** creates business records (`Orders`, `Bookings` with `data_version: @data_version`)
+- **Fix workflow**:
+  1. Identify missing foundation data
+  2. Add to appropriate data pack file (`app/validators/support/data_packs/v1/`)
+  3. Update `prepare` to use `find_by!` (ensure data exists)
+  4. Update `simulate` to remove fallback creation
+  5. Test with `rake validator:reset_baseline` then `rake validator:simulate_single[validator_id]`
+- **Example violation (v312)**:
+  ```ruby
+  # ❌ WRONG - Creates data_version: 0 as fallback
+  def simulate
+    surfing_activity = @surfing_activity || AttractionActivity.create!(
+      attraction: @attraction,
+      name: '冲浪教学（含装备）',
+      data_version: 0  # ❌ Pollutes baseline!
+    )
+  end
+  
+  # ✅ CORRECT - Foundation data from data pack, orders session-scoped
+  # 1. Add to data pack (attractions.rb)
+  AttractionActivity.insert_all([
+    { name: '冲浪教学（含装备）', ..., data_version: 0 }
+  ])
+  
+  # 2. Update prepare
+  def prepare
+    @surfing_activity = @attraction.attraction_activities
+      .where(name: '冲浪教学（含装备）', data_version: 0)
+      .first!  # Must exist in data pack
+  end
+  
+  # 3. Update simulate
+  def simulate
+    ActivityOrder.create!(
+      attraction_activity: @surfing_activity,  # ✅ From prepare
+      data_version: @data_version  # ✅ Session-scoped
+    )
+  end
+  ```
+- **See**: `docs/VALIDATOR_SIMULATE_DATA_VERSION_0_CHECK.md` for detailed documentation
+
 **Testing Commands**:
 - **All validators**: `rake validator:simulate` - Runs all validators (256 validators, may be slow)
 - **Single validator**: `rake validator:simulate_single[validator_id]` - Test one specific validator
