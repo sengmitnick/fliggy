@@ -2196,4 +2196,53 @@ if huashan_activities_data.any?
   puts "✓ 创建了 #{huashan_activities_data.size} 个华山活动"
 end
 
+# ==================== 深圳大梅沙海滨公园活动数据 ====================
+# 为冲浪验证器v312提供数据支持
+
+dameisha = Attraction.find_by(name: "深圳大梅沙海滨公园", data_version: 0)
+
+dameisha_activities_data = []
+
+if dameisha
+  puts "正在为深圳大梅沙海滨公园添加冲浪相关活动..."
+  
+  # 活动1: 冲浪教学（含装备）
+  dameisha_activities_data << {
+    attraction_id: dameisha.id,
+    name: "冲浪教学（含装备）",
+    activity_type: "水上运动",
+    current_price: 280,
+    description: "专业冲浪教练一对一指导，适合初学者。包含冲浪板、防寒服、脚绳等全套装备租赁，课程时长2小时，保障安全。",
+    duration: "2小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 活动2: 海滩娱乐项目
+  dameisha_activities_data << {
+    attraction_id: dameisha.id,
+    name: "海滩娱乐项目",
+    activity_type: "娱乐演出",
+    current_price: 150,
+    description: "包含沙滩排球、摩托艇、香蕉船、飞鱼艇等多项海上娱乐活动，任选其一体验，感受海滨乐趣。",
+    duration: "1小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为深圳大梅沙海滨公园添加2个活动（冲浪教学+海滩娱乐）"
+else
+  puts "     ⚠ 警告：未找到深圳大梅沙海滨公园景点，跳过冲浪活动创建"
+end
+
+# 批量插入大梅沙活动数据
+if dameisha_activities_data.any?
+  AttractionActivity.insert_all(dameisha_activities_data)
+  puts "✓ 创建了 #{dameisha_activities_data.size} 个深圳大梅沙活动"
+end
+
 puts "✓ 景点数据包加载完成"
