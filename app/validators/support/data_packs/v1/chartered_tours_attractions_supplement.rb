@@ -1927,6 +1927,32 @@ attraction_activities_data << {
   updated_at: timestamp
 }
 
+# V310需要：人像跟拍服务
+attraction_activities_data << {
+  attraction_id: attraction.id,
+  name: "人像跟拍服务",
+  activity_type: "摄影服务",
+  current_price: 688,
+  description: "专业摄影师全程跟拍，提供40张精修照片。拍摄地点：观光层、空中走廊、外滩全景。拍摄后48小时内电子交付。",
+  duration: "2-3小时",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V310需要：服装租赁+化妆造型
+attraction_activities_data << {
+  attraction_id: attraction.id,
+  name: "服装租赁+化妆造型",
+  activity_type: "摄影服务",
+  current_price: 388,
+  description: "提供多套主题服装选择（旗袍、礼服、民国风等），包含专业化妆造型服务。服装租赁时长4小时。",
+  duration: "4小时",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
 # 批量插入景点内项目数据
 AttractionActivity.insert_all(attraction_activities_data)
 
@@ -2301,6 +2327,109 @@ end
 if nanshan_activities_data.any?
   AttractionActivity.insert_all(nanshan_activities_data)
   puts "✓ 创建了 #{nanshan_activities_data.size} 个南山一棵树攀岩活动"
+end
+
+# ==================== 为 V315 添加漂流活动 ====================
+# V315需要：漂流探险+安全保障+装备提供
+# V315的查询逻辑：.where("name LIKE ? OR name LIKE ? OR name LIKE ?", '%江%', '%河%', '%峡%').first
+# 第一个匹配的景点是"长江索道"
+
+puts "\n为长江索道添加漂流活动..."
+
+changjiang_rafting_activities = []
+
+if (changjiang_cableway = Attraction.find_by(name: '长江索道', data_version: 0))
+  changjiang_rafting_activities << {
+    attraction_id: changjiang_cableway.id,
+    name: "长江观光漂流",
+    activity_type: "水上运动",
+    current_price: 480,
+    description: "长江观光漂流体验，包含全套安全装备（头盔、救生衣、漂流船）、专业教练全程陪同、运动保险。适合无经验者，沿途欣赏两江交汇美景。",
+    duration: "3-4小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为长江索道添加漂流活动"
+else
+  puts "     ⚠ 警告：未找到长江索道景点，跳过漂流活动创建"
+end
+
+if changjiang_rafting_activities.any?
+  AttractionActivity.insert_all(changjiang_rafting_activities)
+  puts "✓ 创建了 #{changjiang_rafting_activities.size} 个长江索道漂流活动"
+end
+
+# ==================== 为 V316 添加马术活动 ====================
+# V316需要：马术体验+教练指导+马场服务
+# V316的查询逻辑：.where("name LIKE ? OR name LIKE ?", '%草原%', '%马场%').first
+# 创建专门的马场景点以支持马术活动
+
+puts "\n创建马场景点并添加马术活动..."
+
+# 创建马场景点
+equestrian_attractions_data = []
+equestrian_activities_data = []
+
+equestrian_attractions_data << {
+  name: "八达岭国际马场",
+  city: "北京",
+  province: "北京",
+  description: "位于长城脚下的专业马术训练基地，拥有国际标准马场和专业教练团队。提供从基础骑乘到高级马术的全方位培训服务，适合各年龄段马术爱好者。",
+  address: "北京市延庆区八达岭镇",
+  latitude: 40.3587,
+  longitude: 115.9870,
+  rating: 4.7,
+  cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+puts "     ✓ 准备创建八达岭国际马场"
+
+# 批量插入马场景点
+if equestrian_attractions_data.any?
+  Attraction.insert_all(equestrian_attractions_data)
+  puts "✓ 创建了 #{equestrian_attractions_data.size} 个马场景点"
+  
+  # 为马场添加马术体验活动
+  if (equestrian_center = Attraction.find_by(name: '八达岭国际马场', data_version: 0))
+    equestrian_activities_data << {
+      attraction_id: equestrian_center.id,
+      name: "马术体验课程",
+      activity_type: "运动体验",
+      current_price: 380,
+      description: "专业马术教练一对一指导，适合零基础学员。包含马场服务、全套骑马装备租赁（头盔、护具、骑马服、马靴）、基础骑乘技巧教学、运动保险。体验路线约2公里，包含平地和小坡练习。",
+      duration: "2-3小时",
+      image_url: ImageSeedHelper.random_image_from_category(:activities),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    equestrian_activities_data << {
+      attraction_id: equestrian_center.id,
+      name: "亲子马术体验",
+      activity_type: "运动体验",
+      current_price: 680,
+      description: "适合家庭参与的马术体验活动，一位教练带领一个家庭（最多3人）。包含马场服务、装备租赁、安全讲解、基础骑乘教学、合影服务。",
+      duration: "2小时",
+      image_url: ImageSeedHelper.random_image_from_category(:activities),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    puts "     ✓ 为八达岭国际马场添加马术活动"
+  end
+end
+
+if equestrian_activities_data.any?
+  AttractionActivity.insert_all(equestrian_activities_data)
+  puts "✓ 创建了 #{equestrian_activities_data.size} 个马术活动"
 end
 
 puts "✓ 景点数据包加载完成"

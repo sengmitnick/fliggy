@@ -885,8 +885,8 @@ namespace :validator do
       puts "✅ All prepare methods only query data (no creation/modification)\n"
     end
     
-    # Step 4.5: 检查 simulate 方法中是否私自创建 data_version: 0 的数据（绕过数据包）
-    puts "🔍 Step 4.5: Checking simulate methods for data_version: 0 creation violations..."
+    # Step 5: 检查 simulate 方法中是否私自创建 data_version: 0 的数据（绕过数据包）
+    puts "🔍 Step 5: Checking simulate methods for data_version: 0 creation violations..."
     simulate_violations = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -978,8 +978,8 @@ namespace :validator do
       puts "✅ All simulate methods only create session-scoped data (@data_version)\n"
     end
     
-    # Step 5: 检查权重总和
-    puts "🔍 Step 5: Checking weight sums..."
+    # Step 6: 检查权重总和
+    puts "🔍 Step 6: Checking weight sums..."
     weight_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -1024,8 +1024,8 @@ namespace :validator do
       puts "✅ All validators have correct weight sums (total = 100)\n"
     end
     
-    # Step 6: 运行模拟测试
-    puts "🧪 Step 6: Running simulations..."
+    # Step 7: 运行模拟测试
+    puts "🧪 Step 7: Running simulations..."
     puts "-" * 70
     
     # 加载所有 Validator
