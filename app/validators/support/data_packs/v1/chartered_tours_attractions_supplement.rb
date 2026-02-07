@@ -2432,4 +2432,206 @@ if equestrian_activities_data.any?
   puts "✓ 创建了 #{equestrian_activities_data.size} 个马术活动"
 end
 
+# ==================== 为杭州西湖添加门票和自行车租赁活动 ====================
+# 用于V313：预订杭州西湖3人自行车环湖骑行服务
+
+puts "\n为杭州西湖添加门票和自行车租赁活动..."
+
+xihu_tickets_data = []
+xihu_activities_data = []
+xihu_ticket_suppliers_data = []
+
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  # 添加西湖门票（免费景区，但游船、部分景点需门票）
+  xihu_tickets_data << {
+    attraction_id: xihu.id,
+    name: "西湖游船票",
+    ticket_type: "adult",
+    original_price: 55,
+    current_price: 45,
+    discount_info: "线上预订立减10元",
+    requirements: "身高1.2米以上游客",
+    booking_notice: "请至少提前1小时预订；凭订单短信至码头换票；1.2米以下儿童免票；门票当日有效。游船路线：断桥→三潭印月→岳庙码头，约45分钟。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 12800,
+    stock: 2000,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_tickets_data << {
+    attraction_id: xihu.id,
+    name: "西湖游船票（儿童票）",
+    ticket_type: "child",
+    original_price: 28,
+    current_price: 25,
+    discount_info: "儿童优惠票",
+    requirements: "身高1.2米以下儿童",
+    booking_notice: "请至少提前1小时预订；凭订单短信至码头换票；需成人陪同；门票当日有效。游船路线：断桥→三潭印月→岳庙码头。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 4200,
+    stock: 1000,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为杭州西湖添加2张门票（游船成人票、游船儿童票）"
+end
+
+# 杭州西湖景点内项目 (V313需要：自行车租赁服务)
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "双人自行车租赁",
+    activity_type: "ride",
+    current_price: 80,
+    description: "环西湖骑行体验，双人自行车租赁。包含车辆、头盔、锁具。推荐路线：断桥→白堤→平湖秋月→苏堤→雷峰塔，全程约10公里。租赁时长4小时，押金200元。",
+    duration: "4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "单人自行车租赁",
+    activity_type: "ride",
+    current_price: 50,
+    description: "环西湖骑行体验，单人自行车租赁。包含车辆、头盔、锁具。推荐路线：沿湖骑行，自由探索西湖美景。租赁时长4小时，押金100元。",
+    duration: "4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "电动自行车租赁",
+    activity_type: "ride",
+    current_price: 120,
+    description: "环西湖电动自行车租赁，省力便捷。包含电动车、头盔、充电器、锁具。续航30公里，适合全天游览。租赁时长8小时，押金300元。",
+    duration: "8小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为杭州西湖添加3个活动（双人自行车、单人自行车、电动自行车租赁）"
+else
+  puts "     ⚠ 警告：未找到杭州西湖景点，跳过自行车租赁活动创建"
+end
+
+# 批量插入西湖门票数据
+if xihu_tickets_data.any?
+  Ticket.insert_all(xihu_tickets_data)
+  puts "✓ 创建了 #{xihu_tickets_data.size} 张西湖门票"
+end
+
+# 为西湖门票添加供应商关联
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  boat_ticket = Ticket.find_by(attraction_id: xihu.id, name: '西湖游船票', data_version: 0)
+  child_ticket = Ticket.find_by(attraction_id: xihu.id, ticket_type: 'child', data_version: 0)
+  
+  if boat_ticket && child_ticket
+    # 游船成人票供应商
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 1,  # 携程旅行
+      current_price: 45,
+      original_price: 55,
+      stock: 800,
+      discount_info: '线上预订立减10元',
+      sales_count: 6400,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 2,  # 飞猪旅行
+      current_price: 42,
+      original_price: 55,
+      stock: 1000,
+      discount_info: '新用户立减13元',
+      sales_count: 4800,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 4,  # 景区官方
+      current_price: 55,
+      original_price: 55,
+      stock: 2000,
+      discount_info: nil,
+      sales_count: 1600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    # 游船儿童票供应商
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 1,  # 携程旅行
+      current_price: 25,
+      original_price: 28,
+      stock: 500,
+      discount_info: '儿童优惠票',
+      sales_count: 2000,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 2,  # 飞猪旅行
+      current_price: 23,
+      original_price: 28,
+      stock: 600,
+      discount_info: '新用户立减5元',
+      sales_count: 1600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 4,  # 景区官方
+      current_price: 28,
+      original_price: 28,
+      stock: 1000,
+      discount_info: nil,
+      sales_count: 600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    puts "     ✓ 为西湖门票添加供应商关联（6个）"
+  end
+end
+
+if xihu_ticket_suppliers_data.any?
+  TicketSupplier.insert_all(xihu_ticket_suppliers_data)
+  puts "✓ 创建了 #{xihu_ticket_suppliers_data.size} 个西湖门票供应商关联"
+end
+
+# 批量插入西湖活动数据
+if xihu_activities_data.any?
+  AttractionActivity.insert_all(xihu_activities_data)
+  puts "✓ 创建了 #{xihu_activities_data.size} 个西湖自行车租赁活动"
+end
+
 puts "✓ 景点数据包加载完成"

@@ -2,98 +2,139 @@
 
 require_relative '../base_validator'
 
-# V313: 预订自行车骑行+路线规划+后勤支持
+# V313: 预订杭州西湖5天后3人自行车环湖骑行服务
 #
 # 任务描述:
-#   用户需要预订自行车骑行服务，包含路线规划和后勤支持
+#   用户需要预订杭州西湖自行车环湖骑行服务（5天后，3人参加），
+#   包含景区门票和自行车租赁（双人车+单人车），涉及门票订单和景点活动订单
 #
 # 评分标准:
-#   - 创建了深度旅行订单（骑行向导）(40%)
-#   - 创建了租车订单（自行车租赁）(35%)
-#   - 服务日期正确 (15%)
+#   - 创建了景点门票订单（40%)
+#   - 创建了自行车租赁订单（35%)
+#   - 景点和日期正确 (15%)
 #   - 订单状态和价格有效 (10%)
 module V301V350
   class V313BookBicycleTourRoutePlanningLogisticsValidator < BaseValidator
     self.validator_id = 'v313_book_bicycle_tour_route_planning_logistics_validator'
     self.task_id = '808b3eb8-c5d7-43e8-b730-d9d6c79ab5cb'
-    self.title = '预订自行车骑行+路线规划+后勤支持'
-    self.description = '用户需要预订自行车骑行服务，包含路线规划和后勤支持'
+    self.title = '预订杭州西湖5天后3人自行车环湖骑行服务'
+    self.description = '用户需要预订杭州西湖自行车环湖骑行服务（5天后，3人参加），包含景区门票和自行车租赁（双人车+单人车）'
     self.timeout_seconds = 300
     
     def prepare
-      @tour_date = Date.current + 5.days
+      @visit_date = Date.current + 5.days
       @participant_count = 3
-      @location = '华东'
+      @city = '杭州'
+      @attraction_name = '西湖'
       
-      # 查找华东地区的深度旅行产品（路线规划）
-      @deep_travel_product = DeepTravelProduct
-        .joins(:deep_travel_guide)
-        .where("deep_travel_products.location LIKE ?", "%#{@location}%")
-        .where(data_version: 0)
-        .first
+      # 查找杭州西湖景点
+      @attraction = Attraction
+        .where(name: @attraction_name, city: @city, data_version: 0)
+        .first!
       
-      @deep_travel_product ||= DeepTravelProduct
-        .joins(:deep_travel_guide)
-        .where(data_version: 0)
-        .first
+      # 查找西湖游船门票
+      @boat_ticket = @attraction.tickets
+        .where(name: '西湖游船票', data_version: 0)
+        .first!
       
-      raise "未找到深度旅行产品" unless @deep_travel_product
+      # 查找自行车租赁活动（优先双人车）
+      @bicycle_activity_double = @attraction.attraction_activities
+        .where("name LIKE ?", "%双人%自行车%")
+        .where(activity_type: 'ride', data_version: 0)
+        .first!
       
-      @guide = @deep_travel_product.deep_travel_guide
-      
-      # 查找租车服务（自行车租赁）
-      @car = Car.where(data_version: 0, category: 'sedan').first
-      @car ||= Car.where(data_version: 0).first
-      raise "未找到可用车辆（自行车租赁）" unless @car
+      # 查找单人自行车租赁
+      @bicycle_activity_single = @attraction.attraction_activities
+        .where("name LIKE ?", "%单人%自行车%")
+        .where(activity_type: 'ride', data_version: 0)
+        .first!
       
       {
-        task: "请预订自行车骑行服务（#{@tour_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含专业路线规划和后勤支持。",
+        task: "请为#{@participant_count}人预订#{@city}#{@attraction_name}的自行车环湖骑行服务（#{@visit_date.strftime('%Y年%m月%d日')}），包含景区门票和自行车租赁。",
         requirements: {
-          tour_date: @tour_date,
+          city: @city,
+          attraction: @attraction_name,
+          visit_date: @visit_date,
           participant_count: @participant_count,
-          services: ['路线规划', '骑行向导', '自行车租赁', '后勤支持']
+          services: ['景区门票（游船）', '自行车租赁']
         },
-        hint: "需要预订深度旅行产品（向导+规划）和租车服务（自行车）。"
+        hint: "需要预订#{@attraction_name}门票（#{@participant_count}张成人票）和自行车租赁（1辆双人车+1辆单人车，共#{@participant_count}人）。推荐路线：断桥→白堤→平湖秋月→苏堤→雷峰塔。"
       }
     end
     
     def verify
-      add_assertion "创建了深度旅行订单（骑行向导）", weight: 40 do
-        @deep_travel_booking = DeepTravelBooking
-          .where(data_version: @data_version)
-          .first
-        
-        expect(@deep_travel_booking).not_to be_nil, "未找到深度旅行订单（骑行向导）"
-      end
-      
-      return if @deep_travel_booking.nil?
-      
-      add_assertion "创建了租车订单（自行车租赁）", weight: 35 do
-        @car_order = CarOrder
+      add_assertion "创建了景区门票订单（西湖游船票）", weight: 40 do
+        all_ticket_orders = TicketOrder
+          .joins(ticket: :attraction)
+          .includes(:ticket)
+          .where(attractions: { name: @attraction_name, city: @city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
-          .first
+          .to_a
         
-        expect(@car_order).not_to be_nil, "未找到租车订单（自行车租赁）"
+        expect(all_ticket_orders).not_to be_empty, "未找到#{@attraction_name}门票订单"
+        
+        @ticket_orders = all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
+        expect(@ticket_orders.size).to be >= @participant_count,
+          "门票数量不足。期望至少#{@participant_count}张，实际找到#{@ticket_orders.size}张"
       end
       
-      add_assertion "服务日期正确", weight: 15 do
-        expect(@deep_travel_booking.travel_date).to eq(@tour_date),
-          "深度旅行日期错误。期望: #{@tour_date}，实际: #{@deep_travel_booking.travel_date}"
+      return if @ticket_orders.nil? || @ticket_orders.empty?
+      
+      add_assertion "创建了自行车租赁订单", weight: 35 do
+        all_activity_orders = ActivityOrder
+          .joins(attraction_activity: :attraction)
+          .includes(:attraction_activity)
+          .where(attractions: { name: @attraction_name, city: @city })
+          .where(attraction_activities: { activity_type: 'ride' })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
         
-        if @car_order
-          expect(@car_order.pickup_datetime.to_date).to eq(@tour_date),
-            "租车日期错误。期望: #{@tour_date}，实际: #{@car_order.pickup_datetime.to_date}"
+        expect(all_activity_orders).not_to be_empty, "未找到自行车租赁订单"
+        
+        @bicycle_orders = all_activity_orders
+        total_bicycles = @bicycle_orders.sum(&:quantity)
+        
+        expect(total_bicycles).to be >= 2,
+          "自行车数量不足。期望至少2辆（1辆双人车+1辆单人车），实际找到#{total_bicycles}辆"
+      end
+      
+      add_assertion "景点和游玩日期正确", weight: 15 do
+        @ticket_orders.each do |order|
+          expect(order.ticket.attraction.name).to eq(@attraction_name),
+            "景点错误。期望: #{@attraction_name}，实际: #{order.ticket.attraction.name}"
+          
+          expect(order.visit_date).to eq(@visit_date),
+            "门票游玩日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
+        end
+        
+        if @bicycle_orders
+          @bicycle_orders.each do |order|
+            expect(order.attraction_activity.attraction.name).to eq(@attraction_name),
+              "自行车租赁景点错误。期望: #{@attraction_name}，实际: #{order.attraction_activity.attraction.name}"
+            
+            expect(order.visit_date).to eq(@visit_date),
+              "自行车租赁日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
+          end
         end
       end
       
       add_assertion "订单状态和价格有效", weight: 10 do
-        expect(@deep_travel_booking.status).to be_in(['pending', 'paid', 'confirmed'])
-        expect(@deep_travel_booking.total_price).to be > 0
+        @ticket_orders.each do |order|
+          expect(order.status).to be_in(['pending', 'paid', 'confirmed']),
+            "门票订单状态异常: #{order.status}"
+          expect(order.total_price).to be > 0,
+            "门票订单价格无效: #{order.total_price}"
+        end
         
-        if @car_order
-          expect(@car_order.status).to be_in(['pending', 'paid', 'confirmed'])
-          expect(@car_order.total_price).to be > 0
+        if @bicycle_orders
+          @bicycle_orders.each do |order|
+            expect(order.status).to be_in(['pending', 'paid', 'confirmed']),
+              "自行车租赁订单状态异常: #{order.status}"
+            expect(order.total_price).to be > 0,
+              "自行车租赁订单价格无效: #{order.total_price}"
+          end
         end
       end
     end
@@ -101,38 +142,49 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建深度旅行订单（骑行向导+路线规划）
-      DeepTravelBooking.create!(
+      # 1. 创建门票订单（3张成人票）
+      @participant_count.times do
+        TicketOrder.create!(
+          user: user,
+          ticket: @boat_ticket,
+          visit_date: @visit_date,
+          quantity: 1,
+          total_price: @boat_ticket.current_price,
+          contact_phone: '13800138000',
+          passenger_id: user.id,
+          passenger_ids: [user.id],
+          status: 'paid',
+          data_version: @data_version
+        )
+      end
+      
+      # 2. 创建自行车租赁订单（1辆双人车）
+      ActivityOrder.create!(
         user: user,
-        deep_travel_guide: @guide,
-        deep_travel_product: @deep_travel_product,
-        travel_date: @tour_date,
-        adult_count: @participant_count,
-        child_count: 0,
-        contact_name: user.name,
+        attraction_activity: @bicycle_activity_double,
+        visit_date: @visit_date,
+        quantity: 1,  # 1辆双人车
+        total_price: @bicycle_activity_double.current_price,
+        passenger_name: user.name,
         contact_phone: '13800138000',
-        total_price: @deep_travel_product.price,
-        insurance_price: 0,
+        passenger_ids: [user.id],
         status: 'paid',
-        notes: '骑行向导+路线规划+后勤支持',
+        notes: '双人自行车租赁，2人使用',
         data_version: @data_version
       )
       
-      # 2. 创建租车订单（自行车租赁）
-      pickup_datetime = @tour_date.to_time + 9.hours
-      return_datetime = @tour_date.to_time + 18.hours
-      
-      CarOrder.create!(
+      # 3. 创建自行车租赁订单（1辆单人车）
+      ActivityOrder.create!(
         user: user,
-        car: @car,
-        pickup_datetime: pickup_datetime,
-        return_datetime: return_datetime,
-        total_price: @car.price_per_day,
-        pickup_location: '骑行起点',
-        driver_name: user.name,
-        driver_id_number: '310101198001011234',
+        attraction_activity: @bicycle_activity_single,
+        visit_date: @visit_date,
+        quantity: 1,  # 1辆单人车
+        total_price: @bicycle_activity_single.current_price,
+        passenger_name: user.name,
         contact_phone: '13800138000',
+        passenger_ids: [user.id],
         status: 'paid',
+        notes: '单人自行车租赁，1人使用',
         data_version: @data_version
       )
     end
@@ -141,23 +193,27 @@ module V301V350
     
     def execution_state_data
       {
-        tour_date: @tour_date.to_s,
+        visit_date: @visit_date.to_s,
         participant_count: @participant_count,
-        location: @location,
-        deep_travel_product_id: @deep_travel_product&.id,
-        guide_id: @guide&.id,
-        car_id: @car&.id
+        city: @city,
+        attraction_name: @attraction_name,
+        attraction_id: @attraction&.id,
+        boat_ticket_id: @boat_ticket&.id,
+        bicycle_activity_double_id: @bicycle_activity_double&.id,
+        bicycle_activity_single_id: @bicycle_activity_single&.id
       }
     end
     
     def restore_from_state(data)
-      @tour_date = Date.parse(data['tour_date'])
+      @visit_date = Date.parse(data['visit_date'])
       @participant_count = data['participant_count']
-      @location = data['location']
+      @city = data['city']
+      @attraction_name = data['attraction_name']
       
-      @deep_travel_product = DeepTravelProduct.find(data['deep_travel_product_id']) if data['deep_travel_product_id']
-      @guide = DeepTravelGuide.find(data['guide_id']) if data['guide_id']
-      @car = Car.find(data['car_id']) if data['car_id']
+      @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
+      @boat_ticket = Ticket.find(data['boat_ticket_id']) if data['boat_ticket_id']
+      @bicycle_activity_double = AttractionActivity.find(data['bicycle_activity_double_id']) if data['bicycle_activity_double_id']
+      @bicycle_activity_single = AttractionActivity.find(data['bicycle_activity_single_id']) if data['bicycle_activity_single_id']
     end
   end
 end
