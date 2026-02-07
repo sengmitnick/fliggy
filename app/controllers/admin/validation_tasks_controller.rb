@@ -34,6 +34,9 @@ class Admin::ValidationTasksController < Admin::BaseController
     # 检查是否为多轮对话验证器
     @is_multi_turn = check_multi_turn_validator(@task[:validator_id])
     
+    # 提取验证器的断言信息
+    @assertions = extract_validator_assertions(@task[:validator_id])
+    
     # 查找上一个和下一个任务
     current_index = @tasks.index { |t| t[:validator_id] == @task[:validator_id] }
     @prev_task = @tasks[current_index - 1] if current_index && current_index > 0
@@ -115,5 +118,51 @@ class Admin::ValidationTasksController < Admin::BaseController
     end
     
     false
+  end
+  
+  # 提取验证器的断言信息（通过解析 verify 方法源码）
+  def extract_validator_assertions(validator_id)
+    validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
+    
+    validator_files.each do |file|
+      next if file.end_with?('base_validator.rb') || file.end_with?('multi_turn_base_validator.rb')
+      
+      relative_path = file.gsub(Rails.root.join('app/validators/').to_s, '')
+      class_path = relative_path.gsub('.rb', '').split('/')
+      class_name = class_path.map(&:camelize).join('::')
+      
+      begin
+        klass = class_name.constantize
+        next unless klass < BaseValidator
+        
+        # 匹配 validator_id
+        if klass.validator_id == validator_id
+          # 读取文件内容并解析断言
+          return parse_assertions_from_file(file)
+        end
+      rescue StandardError => e
+        Rails.logger.error "Failed to extract assertions for #{validator_id}: #{e.message}"
+        next
+      end
+    end
+    
+    []
+  end
+  
+  # 解析验证器文件中的 add_assertion 调用
+  def parse_assertions_from_file(file_path)
+    assertions = []
+    content = File.read(file_path)
+    
+    # 正则匹配 add_assertion "名称", weight: 数字 do
+    # 支持单引号和双引号，支持多行
+    content.scan(/add_assertion\s+(["'])(.+?)\1\s*,\s*weight:\s*(\d+)/m) do |quote, name, weight|
+      assertions << {
+        name: name.strip,
+        weight: weight.to_i
+      }
+    end
+    
+    assertions
   end
 end

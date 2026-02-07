@@ -78,6 +78,41 @@
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">UUID (task_id)</dt>
             <dd class="mt-1 text-sm font-mono text-gray-600 dark:text-gray-400 text-xs"><%= @task[:task_id] %></dd>
           </div>
+          
+          <!-- 断言条件表格 -->
+          <% if @assertions&.any? %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">验证断言（共 <%= @assertions.size %> 项）</dt>
+            <dd class="mt-1">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                  <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
+                      <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">断言名称</th>
+                      <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">权重</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                    <% @assertions.each_with_index do |assertion, index| %>
+                    <tr>
+                      <td class="px-3 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400"><%= index + 1 %></td>
+                      <td class="px-3 py-2 text-gray-900 dark:text-gray-100"><%= assertion[:name] %></td>
+                      <td class="px-3 py-2 whitespace-nowrap text-right text-gray-900 dark:text-gray-100"><%= assertion[:weight] %>%</td>
+                    </tr>
+                    <% end %>
+                  </tbody>
+                  <tfoot class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <td colspan="2" class="px-3 py-2 text-right text-xs font-medium text-gray-700 dark:text-gray-300">总计：</td>
+                      <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-bold text-gray-900 dark:text-gray-100"><%= @assertions.sum { |a| a[:weight] } %>%</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </dd>
+          </div>
+          <% end %>
         </dl>
       </div>
     </div>
@@ -392,6 +427,62 @@
         const scorePercent = (data.score * 100).toFixed(0);
         const isPass = data.score >= 0.6;
         
+        // 生成断言列表 HTML
+        const assertionsHtml = data.assertions && data.assertions.length > 0 ? `
+          <div class="mt-6">
+            <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+              </svg>
+              断言检查详情
+            </h4>
+            <div class="space-y-3">
+              ${data.assertions.map((assertion, index) => {
+                const isPassed = assertion.passed;
+                const bgColor = isPassed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20';
+                const borderColor = isPassed ? 'border-green-200 dark:border-green-700' : 'border-red-200 dark:border-red-700';
+                const textColor = isPassed ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200';
+                const iconColor = isPassed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                
+                return `
+                  <div class="${bgColor} border ${borderColor} rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                      <div class="flex items-start flex-1">
+                        <div class="mt-0.5 mr-3">
+                          <svg class="w-5 h-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${isPassed 
+                              ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                              : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                            }
+                          </svg>
+                        </div>
+                        <div class="flex-1">
+                          <div class="font-medium ${textColor} mb-1">
+                            ${index + 1}. ${assertion.name}
+                          </div>
+                          ${assertion.error ? `
+                            <div class="text-sm text-red-700 dark:text-red-300 mt-2 pl-4 border-l-2 border-red-400 dark:border-red-600">
+                              ${assertion.error}
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
+                      <div class="ml-4 text-right">
+                        <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${isPassed ? 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200'}">
+                          权重: ${assertion.weight}%
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          ${isPassed ? `+${assertion.weight}分` : '0分'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : '';
+        
         resultContent.innerHTML = `
           <div class="p-6 rounded-lg ${isPass ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800'}">
             <div class="mb-3">
@@ -421,14 +512,19 @@
                   ${scorePercent}%
                 </div>
                 <div class="text-sm ${isPass ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                  得分
+                  总得分
                 </div>
               </div>
             </div>
-            <div class="border-t ${isPass ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'} pt-4 mt-4">
-              <h4 class="font-semibold ${isPass ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'} mb-2">详细信息：</h4>
-              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${data.reason || '无详细信息'}</p>
-            </div>
+            
+            ${assertionsHtml}
+            
+            ${data.reason && data.reason !== '无详细信息' ? `
+              <div class="border-t ${isPass ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'} pt-4 mt-4">
+                <h4 class="font-semibold ${isPass ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'} mb-2">概要信息：</h4>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${data.reason}</p>
+              </div>
+            ` : ''}
           </div>
         `;
         
