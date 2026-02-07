@@ -4,20 +4,34 @@ module V301V350
   class V319BookSummerVacationFamilyTourValidator < BaseValidator
     self.validator_id = 'v319_book_summer_vacation_family_tour_validator'
     self.task_id = "41296cec-e182-44c9-ac20-c2180e92c487"
-    self.title = "暑期亲子游高峰期预订（7-8月）"
-    self.description = "用户需要预订暑期（7月中旬）北京到三亚的亲子游套餐，包含机票+酒店+亲子活动"
+    self.title = "预订15天后北京到三亚的往返机票（CA1357/CA1358）+三亚亚龙湾亲子度假酒店（5晚，2大1小）"
+    self.description = "用户需要预订15天后北京到三亚的往返机票（CA1357/CA1358），三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，2成人+1儿童）"
     self.timeout_seconds = 180
 
     def prepare
-      # 暑期时间：7月15日出发，7月20日返回
-      current_year = Date.today.year
-      @departure_date = Date.new(current_year, 7, 15)
-      if @departure_date < Date.today
-        @departure_date = Date.new(current_year + 1, 7, 15)
-      end
-      @return_date = @departure_date + 5.days
+      # 15天后出发，5晚行程
+      @departure_date = Date.today + 15.days
+      @return_date = Date.today + 20.days
       @departure_city = "北京"
       @destination_city = "三亚"
+      
+      # 查找15天后的北京→三亚航班
+      @outbound_flight = Flight.find_by!(
+        flight_number: "CA1357",
+        departure_city: @departure_city,
+        destination_city: @destination_city,
+        flight_date: @departure_date,
+        data_version: 0
+      )
+      
+      # 查找20天后的三亚→北京航班
+      @return_flight = Flight.find_by!(
+        flight_number: "CA1358",
+        departure_city: @destination_city,
+        destination_city: @departure_city,
+        flight_date: @return_date,
+        data_version: 0
+      )
       
       # 创建目的地
       city = City.find_by!(name: @destination_city, data_version: 0)
@@ -25,23 +39,6 @@ module V301V350
         name: @destination_city,
         data_version: 0
       )
-
-      # 创建航班（不匹配精确时间，避免时区问题）
-      @outbound_flight = Flight.where(
-        flight_number: "CA1357",
-        departure_city: @departure_city,
-        destination_city: @destination_city,
-        data_version: 0
-      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @departure_date)
-       .first!
-
-      @return_flight = Flight.where(
-        flight_number: "CA1358",
-        departure_city: @destination_city,
-        destination_city: @departure_city,
-        data_version: 0
-      ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @return_date)
-       .first!
 
       # 创建亲子酒店
       @hotel = Hotel.find_by!(
@@ -68,12 +65,21 @@ module V301V350
       )
 
       {
-        departure_date: @departure_date.to_s,
-        return_date: @return_date.to_s,
-        departure_city: @departure_city,
-        destination_city: @destination_city,
-        hotel_name: @hotel.name,
-        task_info: "用户预订暑期亲子游套餐"
+        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}（15天后）从北京到三亚的往返机票（CA1357/CA1358），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住#{@departure_date.strftime('%m月%d日')}至#{@return_date.strftime('%m月%d日')}，共5晚，2成人+1儿童）。",
+        requirements: {
+          departure_city: '北京',
+          destination_city: '三亚',
+          departure_date: @departure_date,
+          return_date: @return_date,
+          outbound_flight: 'CA1357',
+          return_flight: 'CA1358',
+          nights: 5,
+          hotel_name: '三亚亚龙湾亲子度假酒店',
+          room_type: '亲子家庭房',
+          adults: 2,
+          children: 1
+        },
+        hint: "建议选择包含儿童设施的酒店，机票和酒店日期要衔接。"
       }
     end
 
@@ -171,11 +177,11 @@ module V301V350
       return if (@flight_bookings.nil? || @flight_bookings.empty?) && 
                 (@hotel_bookings.nil? || @hotel_bookings.empty?)
 
-      add_assertion "航班日期正确（暑期：#{@departure_date}出发）", weight: 15 do
+      add_assertion "航班日期正确（15天后：#{@departure_date}出发）", weight: 15 do
         @flight_bookings&.each do |booking|
           actual_date = booking.flight.departure_time.to_date
           expect(actual_date).to eq(@departure_date),
-            "出发日期错误。期望: #{@departure_date}（暑期高峰），实际: #{actual_date}"
+            "出发日期错误。期望: #{@departure_date}（15天后），实际: #{actual_date}"
         end
       end
 

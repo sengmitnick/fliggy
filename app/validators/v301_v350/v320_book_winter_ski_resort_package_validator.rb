@@ -4,12 +4,12 @@ module V301V350
   class V320BookWinterSkiResortPackageValidator < BaseValidator
     self.validator_id = 'v320_book_winter_ski_resort_package_validator'
     self.task_id = "fb78ecc4-1181-49ba-9b77-09a5c4368c42"
-    self.title = "寒假滑雪季套餐预订（12月-2月）"
-    self.description = "用户需要预订寒假期间（1月中旬）崇礼滑雪场+酒店+装备租赁套餐"
+    self.title = "预订45天后崇礼万龙滑雪场门票+崇礼万龙度假酒店（2晚，2人）"
+    self.description = "用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）"
     self.timeout_seconds = 180
 
     def prepare
-      # 寒假滑雪季：明年1月15日
+      # 45天后滑雪
       @visit_date = Date.today + 45.days
       @check_in_date = @visit_date
       @check_out_date = @visit_date + 2.days
@@ -56,12 +56,19 @@ module V301V350
       )
 
       {
-        visit_date: @visit_date.to_s,
-        check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s,
-        resort_name: @resort_name,
-        city_name: @city_name,
-        task_info: "用户预订寒假滑雪季套餐"
+        task: "请预订#{@visit_date.strftime('%Y年%m月%d日')}（45天后）的崇礼万龙滑雪场成人滑雪票2张，以及崇礼万龙度假酒店滑雪主题大床房（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
+        requirements: {
+          resort_name: @resort_name,
+          city_name: @city_name,
+          visit_date: @visit_date,
+          check_in_date: @check_in_date,
+          check_out_date: @check_out_date,
+          ticket_quantity: 2,
+          nights: 2,
+          hotel_name: '崇礼万龙度假酒店',
+          room_type: '滑雪主题大床房'
+        },
+        hint: "滑雪票和酒店可以分别预订，注意日期要匹配。"
       }
     end
 
@@ -151,10 +158,10 @@ module V301V350
         end
       end
 
-      add_assertion "滑雪日期正确（寒假滑雪季：#{@visit_date}）", weight: 15 do
+      add_assertion "滑雪日期正确（45天后：#{@visit_date}）", weight: 15 do
         @ticket_orders&.each do |order|
           expect(order.visit_date).to eq(@visit_date),
-            "滑雪日期错误。期望: #{@visit_date}（寒假滑雪季），实际: #{order.visit_date}"
+            "滑雪日期错误。期望: #{@visit_date}（45天后），实际: #{order.visit_date}"
         end
       end
 
