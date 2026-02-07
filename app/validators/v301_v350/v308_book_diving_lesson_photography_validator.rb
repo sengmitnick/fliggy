@@ -5,12 +5,12 @@ require_relative '../base_validator'
 # V308: 预订蜈支洲岛潜水服务（4天后，2人）
 #
 # 任务描述:
-#   用户需要预订蜈支洲岛的潜水服务（4天后，2人），需要购买：1）景区门票（TicketOrder），2）潜水活动（ActivityOrder），3）水下摄影服务（ActivityOrder）
+#   用户需要预订蜈支洲岛的潜水服务（4天后，2人），包含景区门票、潜水教学+体验和水下摄影服务
 #
 # 评分标准:
-#   - 创建了景区门票订单（TicketOrder）(25%)
-#   - 创建了潜水活动订单（ActivityOrder）(30%)
-#   - 创建了摄影服务订单（ActivityOrder）(25%)
+#   - 购买了景区门票(25%)
+#   - 预订了潜水活动(30%)
+#   - 预订了摄影服务(25%)
 #   - 活动日期正确（4天后）(15%)
 #   - 订单状态和价格有效 (5%)
 module V301V350
@@ -18,7 +18,7 @@ module V301V350
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
     self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
     self.title = '预订蜈支洲岛潜水服务（4天后，2人）'
-    self.description = '用户需要预订蜈支洲岛的潜水服务（4天后，2人），需要购买：1）景区门票（TicketOrder），2）潜水活动（ActivityOrder），3）水下摄影服务（ActivityOrder）'
+    self.description = '用户需要预订蜈支洲岛的潜水服务（4天后，2人），包含景区门票、潜水教学+体验和水下摄影服务'
     self.timeout_seconds = 300
     
     def prepare
@@ -35,20 +35,20 @@ module V301V350
       @photography_activity = @attraction.attraction_activities.find_by(name: '水下摄影服务')
       
       {
-        task: "请预订蜈支洲岛的潜水服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含景区门票、潜水教学、潜水体验和水下摄影。",
+        task: "请预订蜈支洲岛的潜水服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含景区门票、潜水教学+体验和水下摄影服务。",
         requirements: {
           attraction: '蜈支洲岛',
           visit_date: @visit_date,
           participant_count: @participant_count,
-          orders: ['门票订单（TicketOrder）', '潜水活动订单（ActivityOrder）', '摄影服务订单（ActivityOrder）']
+          services: ['景区门票', '潜水教学+体验', '水下摄影服务']
         },
-        hint: "需要创建3个订单：1）景区门票 2）潜水体验 3）水下摄影服务。"
+        hint: "需要购买景区门票，并预订潜水体验和水下摄影服务。"
       }
     end
     
     def verify
-      # 断言1: 创建了景区门票订单（TicketOrder）
-      add_assertion "创建了景区门票订单（TicketOrder，#{@attraction.name}）", weight: 25 do
+      # 断言1: 购买了景区门票
+      add_assertion "购买了景区门票（#{@attraction.name}）", weight: 25 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
@@ -57,17 +57,17 @@ module V301V350
           .order(created_at: :asc)
           .to_a
         
-        expect(all_ticket_orders).not_to be_empty, "未找到#{@attraction.name}的门票订单（TicketOrder）"
+        expect(all_ticket_orders).not_to be_empty, "未找到#{@attraction.name}的门票订单"
         @ticket_order = all_ticket_orders.first
-        expect(@ticket_order).not_to be_nil, "未找到景区门票订单"
+        expect(@ticket_order).not_to be_nil, "未购买景区门票"
         expect(@ticket_order.quantity).to eq(@participant_count),
           "门票数量错误。期望: #{@participant_count}张，实际: #{@ticket_order.quantity}张"
       end
       
       return if @ticket_order.nil?
       
-      # 断言2: 创建了潜水活动订单（ActivityOrder）
-      add_assertion "创建了潜水活动订单（ActivityOrder，潜水教学+体验）", weight: 30 do
+      # 断言2: 预订了潜水活动
+      add_assertion "预订了潜水活动（潜水教学+体验）", weight: 30 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -76,15 +76,15 @@ module V301V350
           .order(created_at: :asc)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单（ActivityOrder）"
+        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
         @diving_order = all_activity_orders.find { |o| o.attraction_activity.name.include?('潜水') }
-        expect(@diving_order).not_to be_nil, "未找到潜水活动订单"
+        expect(@diving_order).not_to be_nil, "未预订潜水活动"
       end
       
       return if @diving_order.nil?
       
-      # 断言3: 创建了摄影服务订单（ActivityOrder）
-      add_assertion "创建了摄影服务订单（ActivityOrder，水下摄影服务）", weight: 25 do
+      # 断言3: 预订了摄影服务
+      add_assertion "预订了摄影服务（水下摄影服务）", weight: 25 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -94,10 +94,10 @@ module V301V350
           .to_a
         
         expect(all_activity_orders.size).to be >= 2,
-          "活动订单数量不足。期望至少2个订单（潜水+摄影），实际找到#{all_activity_orders.size}个"
+          "活动订单数量不足。期望至少2个活动（潜水+摄影），实际找到#{all_activity_orders.size}个"
         
         @photography_order = all_activity_orders.find { |o| o.attraction_activity.name.include?('摄影') }
-        expect(@photography_order).not_to be_nil, "未找到摄影服务订单"
+        expect(@photography_order).not_to be_nil, "未预订摄影服务"
       end
       
       # 断言4: 游玩日期正确（4天后）
