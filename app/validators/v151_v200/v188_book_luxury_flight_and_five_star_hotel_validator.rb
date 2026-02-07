@@ -146,23 +146,7 @@ module V151V200
       
       # 创建酒店订单（五星级）
       hotel = @available_five_star_hotels.first
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '豪华双人间',
-          bed_type: 'king',
-          price: 800.0,
-          original_price: 1000.0,
-          area: 45.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'deluxe',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(

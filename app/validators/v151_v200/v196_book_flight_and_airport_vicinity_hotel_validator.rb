@@ -133,22 +133,7 @@ module V151V200
       
       # 选择机场酒店
       airport_hotel = @airport_hotels.min_by(&:price)
-      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: airport_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: airport_hotel.price,
-          original_price: airport_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(

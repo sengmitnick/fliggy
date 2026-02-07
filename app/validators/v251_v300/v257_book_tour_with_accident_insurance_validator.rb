@@ -110,16 +110,12 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建跟团游订单
+      tour_package = @tour_product.tour_packages.where(data_version: 0).first!
+      
       tour_booking = TourGroupBooking.create!(
         user: user,
         tour_group_product: @tour_product,
-        tour_package: @tour_product.tour_packages.where(data_version: 0).first || TourPackage.create!(
-          tour_group_product: @tour_product,
-          name: "#{@tour_product.title}标准套餐",
-          price: @tour_product.price,
-          child_price: @tour_product.price * 0.5,
-          data_version: 0
-        ),
+        tour_package: tour_package,
         travel_date: @travel_date,
         adult_count: @adult_count,
         child_count: 0,

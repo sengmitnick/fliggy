@@ -136,15 +136,7 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建攀岩活动订单
-      climbing_activity = @climbing_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '攀岩体验',
-        activity_type: '极限运动',
-        description: '专业教练带领，适合初学者和进阶者。包含全套安全装备、技术指导。',
-        current_price: 280,
-        duration: '2-3小时',
-        data_version: 0
-      )
+      climbing_activity = @climbing_activity
       
       activity_order = ActivityOrder.create!(
         user: user,

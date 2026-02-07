@@ -85,13 +85,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 创建攀岩活动订单（包含教学、装备、教练）
-      climbing_activity = @climbing_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '攀岩教学（含装备+教练）',
-        description: '专业教练一对一指导，提供全套安全装备',
-        current_price: 320,
-        data_version: 0
-      )
+      climbing_activity = @climbing_activity
       
       ActivityOrder.create!(
         user: user,

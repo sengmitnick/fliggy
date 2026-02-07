@@ -171,22 +171,7 @@ module V151V200
       
       # 找到最便宜的酒店
       cheapest_hotel = @available_hotels.first
-      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: cheapest_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: cheapest_hotel.price,
-          original_price: cheapest_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = go_train.arrival_time.to_date
       HotelBooking.create!(

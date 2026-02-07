@@ -85,13 +85,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 创建漂流活动订单（包含安全保障和装备）
-      rafting_activity = @rafting_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '激情漂流（含装备+保险）',
-        description: '专业向导带队，提供全套安全装备和救生设备',
-        current_price: 180,
-        data_version: 0
-      )
+      rafting_activity = @rafting_activity
       
       ActivityOrder.create!(
         user: user,

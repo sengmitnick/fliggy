@@ -124,22 +124,7 @@ module V151V200
       
       # 创建中转城市酒店订单
       hotel = @available_hotels.first
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '钟点房',
-          size: 20.0,
-          bed_type: 'double',
-          price: 150.0,
-          original_price: 200.0,
-          amenities: ['免费WiFi', '空调', '热水'].to_json,
-          breakfast_included: false,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

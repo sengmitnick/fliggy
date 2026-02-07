@@ -121,22 +121,7 @@ module V151V200
       
       # 创建酒店订单（选择价格较高的酒店，表示度假型）
       hotel = @available_hotels.first
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '度假大床房',
-          bed_type: 'king',
-          price: hotel.price,
-          original_price: hotel.original_price,
-          area: 35.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'deluxe',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

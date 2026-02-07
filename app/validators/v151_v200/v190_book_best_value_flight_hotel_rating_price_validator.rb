@@ -137,22 +137,7 @@ module V151V200
       
       # 创建酒店订单
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = best_value_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: best_value_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: best_value_hotel.price,
-          original_price: best_value_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = best_value_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(

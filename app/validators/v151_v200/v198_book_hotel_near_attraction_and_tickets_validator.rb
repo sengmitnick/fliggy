@@ -123,22 +123,7 @@ module V151V200
       
       # 创建酒店订单
       hotel = @available_hotels.min_by(&:price)
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: hotel.price,
-          original_price: hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       # 入住前一天
       HotelBooking.create!(

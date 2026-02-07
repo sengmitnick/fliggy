@@ -41,14 +41,15 @@ module V151V200
       
       expect(@available_trains).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}早班火车（6-8点）"
       
-      # 查找北京的酒店
+      # 查找北京的4星级以上酒店（含早餐房型）
       @available_hotels = Hotel
         .where("city LIKE ?", "%#{@departure_city}%")
+        .where("star_level >= ?", 4)
         .where(data_version: 0)
         .limit(20)
         .to_a
       
-      expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
+      expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的4星级以上酒店"
       
       @hotel_checkin_date = @train_date - 1.day  # 前一晚入住
       @hotel_checkout_date = @train_date  # 火车当天退房
@@ -93,22 +94,7 @@ module V151V200
       # 创建酒店订单（含早餐）
       hotel = @available_hotels.first
       # 优先查找含早餐的房型
-      room = hotel.hotel_rooms.where(data_version: 0).where("room_type LIKE ?", "%早%").order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '标准双人间（含早）',
-          bed_type: 'double',
-          area: 25.0,
-          max_guests: 2,
-          price: 350.0,
-          original_price: 450.0,
-          has_window: true,
-          available_rooms: 10,
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).where("room_type LIKE ?", "%早%").order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

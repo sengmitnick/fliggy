@@ -85,13 +85,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 创建马术活动订单（包含教练和马场服务）
-      equestrian_activity = @equestrian_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '马术体验（含教练+装备）',
-        description: '专业马术教练一对一指导，提供全套骑行装备和护具',
-        current_price: 280,
-        data_version: 0
-      )
+      equestrian_activity = @equestrian_activity
       
       ActivityOrder.create!(
         user: user,

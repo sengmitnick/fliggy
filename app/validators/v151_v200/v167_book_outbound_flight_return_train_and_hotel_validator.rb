@@ -84,22 +84,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 400.0,
-          original_price: 500.0,
-          amenities: ['免费WiFi', '空调', '热水'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
