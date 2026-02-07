@@ -139,8 +139,8 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建租车订单
-      pickup_datetime = @pickup_date.to_time + 9.hours
-      return_datetime = @return_date.to_time + 18.hours
+      pickup_datetime = @pickup_date.beginning_of_day + 9.hours
+      return_datetime = @return_date.beginning_of_day + 18.hours
       
       car_order = CarOrder.create!(
         user: user,
@@ -159,8 +159,9 @@ module V251V300
       # 2. 创建保险订单（3人）
       insurance_product = @available_insurances.first
       start_date = @pickup_date
-      end_date = @return_date
-      unit_price = insurance_product.price_per_day * @rental_days
+      end_date = @return_date  # 保险结束日期 = 还车日期
+      insurance_days = (@return_date - @pickup_date).to_i + 1  # 包含首尾两天，例如2月9日到2月14日 = 6天
+      unit_price = insurance_product.price_per_day * insurance_days
       
       # 3人投保人名单
       insured_persons = [user.name, "#{user.name}的同伴A", "#{user.name}的同伴B"]
@@ -173,7 +174,7 @@ module V251V300
         related_booking_id: car_order.id,
         start_date: start_date,
         end_date: end_date,
-        days: @rental_days,
+        days: insurance_days,  # 使用正确的保险天数（包含首尾）
         destination: @city,
         destination_type: 'domestic',
         insured_persons: insured_persons,

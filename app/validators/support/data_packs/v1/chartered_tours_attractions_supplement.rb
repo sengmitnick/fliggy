@@ -2,13 +2,22 @@
 
 require_relative '../../../../../app/helpers/image_seed_helper'
 
-# 景点数据包 - 使用 insert_all 批量插入
-# 包含景点、门票、景点内项目、一日游等数据
+# 景点补充数据包 - chartered_tours.rb 的补充文件
+# 
+# 用途：
+# 1. 创建22个精选高质量景点（深圳、上海、北京等热门城市）
+# 2. 为精选景点添加详细门票、活动、一日游数据
+# 3. 为 chartered_tours.rb 创建的景点（华山、南山一棵树等）补充门票和活动
 #
-# ⚠️ 注意：景点没有 image_url 字段，所以无需迁移图片
-# 但其他模型（门票、一日游等）可能需要图片
+# ⚠️ 加载顺序依赖：
+# - chartered_tours.rb 先加载（批量创建74个城市的基础景点）
+# - 本文件后加载（通过字母顺序：chartered_tours < chartered_tours_attractions_supplement）
+# - 使用 find_by 查询 chartered_tours.rb 创建的景点，为其补充门票和活动
+#
+# 加载方式：
+# rake validator:reset_baseline
 
-puts "正在加载景点数据包..."
+puts "正在加载景点补充数据包（chartered_tours_attractions_supplement）..."
 
 timestamp = Time.current
 
@@ -2243,6 +2252,55 @@ end
 if dameisha_activities_data.any?
   AttractionActivity.insert_all(dameisha_activities_data)
   puts "✓ 创建了 #{dameisha_activities_data.size} 个深圳大梅沙活动"
+end
+
+# ==================== 南山一棵树攀岩活动数据 ====================
+# 为攀岩验证器v266/v310/v314/v315/v316提供数据支持
+
+nanshan = Attraction.find_by(name: "南山一棵树", data_version: 0)
+
+nanshan_activities_data = []
+
+if nanshan
+  puts "正在为南山一棵树添加攀岩相关活动..."
+  
+  # 活动1: 攀岩教学+安全装备+教练陪同
+  nanshan_activities_data << {
+    attraction_id: nanshan.id,
+    name: "攀岩教学+安全装备+教练陪同",
+    activity_type: "运动体验",
+    current_price: 380,
+    description: "专业攀岩教练一对一指导，适合初学者。包含攀岩装备租赁（安全绳、头盔、手套、攀岩鞋）、教学课程、教练全程陪同，保障安全。每次限制最多4人。",
+    duration: "2-3小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 活动2: 极限攀岩挑战
+  nanshan_activities_data << {
+    attraction_id: nanshan.id,
+    name: "极限攀岩挑战",
+    activity_type: "运动体验",
+    current_price: 580,
+    description: "适合有经验的攀岩爱好者，挑战高难度线路。包含专业装备、教练保护、运动伤害保险。难度系数5.10-5.12。",
+    duration: "3-4小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为南山一棵树添加2个活动（攀岩教学+极限攀岩）"
+else
+  puts "     ⚠ 警告：未找到南山一棵树景点，跳过攀岩活动创建"
+end
+
+# 批量插入南山攀岩活动数据
+if nanshan_activities_data.any?
+  AttractionActivity.insert_all(nanshan_activities_data)
+  puts "✓ 创建了 #{nanshan_activities_data.size} 个南山一棵树攀岩活动"
 end
 
 puts "✓ 景点数据包加载完成"

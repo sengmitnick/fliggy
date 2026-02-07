@@ -121,11 +121,19 @@ module V251V300
       
       # 1. 创建跟团游订单
       tour_package = @tour_product.tour_packages.where(data_version: 0).first!
+      base_price = (tour_package.price * @adult_count) + (tour_package.child_price * @child_count)
       
       tour_booking = TourGroupBooking.create!(
         user: user,
         tour_group_product: @tour_product,
         tour_package: tour_package,
+        travel_date: @travel_date,
+        adult_count: @adult_count,
+        child_count: @child_count,
+        contact_name: user.name,
+        contact_phone: '13800138000',
+        insurance_type: 'none',
+        total_price: base_price,
         status: 'confirmed',
         data_version: @data_version
       )

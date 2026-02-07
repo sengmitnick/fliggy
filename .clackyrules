@@ -153,10 +153,14 @@ hotels_all.rb + hotels_for_packages.rb + hotels_phase2_fields_update.rb + hotels
 **File Naming Convention:**
 - **Main files**: Use simple plural business name: `flights.rb`, `trains.rb`, `hotels.rb`, `cars.rb`
 - **Service modules**: Use descriptive name: `insurances.rb`, `visa_services.rb`, `internet_services.rb`
+- **Supplement files with loading dependency**: Use parent name prefix for alphabetical ordering
+  - Example: `chartered_tours.rb` + `chartered_tours_attractions_supplement.rb`
+  - Alphabetical order ensures: `chartered_tours` loads before `chartered_tours_attractions_supplement`
+  - Parent file creates foundation data, supplement file adds details via `find_by`
 - **Special cases**:
   - `base.rb` - Foundation data (City, Destination, User) - loads first
-  - Use `z_` prefix ONLY when absolutely necessary for load order (rare cases)
-- **❌ NEVER use these suffixes**: `_all`, `_supplement`, `_extended`, `_phase2_fields_update`, `_fix`, `_associations`
+  - Use `z_` prefix ONLY when file must load LAST after ALL other files (rare cases)
+- **❌ NEVER use these suffixes**: `_all`, `_extended`, `_phase2_fields_update`, `_fix`, `_associations`
 - **Why**: These suffixes indicate the file should be merged into the main module file
 
 **When to Create a New Data Pack File:**
@@ -198,6 +202,49 @@ hotels.rb:
   # Step 4: Fix prices (depends on all data existing)
   Hotel.find_each { |h| h.update_column(:price, h.hotel_rooms.minimum(:price)) }
 ```
+
+**Loading Order Control Strategies:**
+
+**Strategy 1: Alphabetical Prefix (Recommended for parent-supplement pattern)**
+```ruby
+# Use case: Supplement file depends on parent file's data
+# Example: chartered_tours.rb creates attractions, supplement adds tickets/activities
+
+# Parent file (loads first)
+chartered_tours.rb:
+  Attraction.insert_all(attractions_data)  # Creates bulk attractions
+
+# Supplement file (loads second - alphabetically after parent)
+chartered_tours_attractions_supplement.rb:
+  # Queries attractions created by parent file
+  huashan = Attraction.find_by(name: '华山', data_version: 0)
+  if huashan
+    Ticket.insert_all([...])  # Adds tickets to existing attraction
+  end
+
+# ✅ Naming ensures load order: chartered_tours < chartered_tours_attractions_supplement
+# ✅ Supplement uses find_by to reference parent's data
+# ✅ Clear parent-child relationship via naming
+```
+
+**Strategy 2: z_ Prefix (Use only when must load LAST after ALL files)**
+```ruby
+# Use case: File depends on data from MULTIPLE other files
+# Example: Cross-module associations that need all base data loaded first
+
+flights.rb           # Loads normally
+hotels.rb            # Loads normally
+carriers.rb          # Loads normally
+z_flight_hotel_packages.rb  # Loads LAST - depends on flights + hotels + carriers
+
+# ⚠️ Only use z_ when supplement depends on MULTIPLE unrelated modules
+# ❌ Don't use z_ for single-parent supplements (use alphabetical prefix instead)
+```
+
+**When to use each strategy:**
+- **Alphabetical prefix**: Single-parent dependency (supplement enhances ONE parent file)
+- **z_ prefix**: Multi-parent dependency (file needs data from MULTIPLE unrelated files)
+- **Merge files**: If only adding more of the same data type (no dependency, same module)
 
 **File Structure Template**:
 ```ruby
