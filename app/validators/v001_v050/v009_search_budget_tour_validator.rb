@@ -154,7 +154,9 @@ module V001V050
       @destination = data['destination']
       @budget = data['budget']
       @adult_count = data['adult_count'] || 1
+      @budget_products_count = data['budget_products_count']&.to_i
       @most_popular = TourGroupProduct.find_by(id: data['most_popular_id']) if data['most_popular_id']
+      @most_popular_sales = data['most_popular_sales']&.to_i
     end
   
     # 模拟 AI Agent 操作：搜索昆明预算内最受欢迎产品并预订

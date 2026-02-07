@@ -44,15 +44,23 @@ module V151V200
       expect(@available_flights).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}低价航班（≤#{@max_flight_price}元）"
       
       # 查找低价酒店（≤200元）
+      # CRITICAL: 只选择拥有≤200元整晚房的酒店，避免钟点房误导
       @available_hotels = Hotel
         .joins(:hotel_rooms)
         .where("hotels.city LIKE ?", "%#{@arrival_city}%")
         .where("hotel_rooms.price <= ?", @max_hotel_price)
+        .where("hotel_rooms.room_category = ?", 'overnight')  # 只考虑整晚房
         .where(hotels: { data_version: 0 })
         .where(hotel_rooms: { data_version: 0 })
         .distinct
-        .limit(20)
         .to_a
+      
+      # 按整晚房最低价排序
+      @available_hotels.sort_by! do |hotel|
+        hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').minimum(:price) || Float::INFINITY
+      end
+      
+      @available_hotels = @available_hotels.first(20)
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}低价酒店（≤#{@max_hotel_price}元）"
       

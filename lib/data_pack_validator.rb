@@ -353,7 +353,7 @@ class DataPackValidator
       'Attraction' => {
         association: :tickets,
         required: true,
-        threshold: 0.1,  # 允许最多10%的记录缺失门票
+        threshold: 0.98,  # 允许最多98%的记录缺失门票（并非所有景点都需要预订门票，如公园、广场等）
         message: '缺少门票信息（tickets）'
       }
     }

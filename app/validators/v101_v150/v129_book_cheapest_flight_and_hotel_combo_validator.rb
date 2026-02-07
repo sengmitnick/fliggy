@@ -186,7 +186,11 @@ module V101V150
     @cheapest_flight = @available_flights.first
     @cheapest_hotel = @available_hotels.first
     # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-    @cheapest_room = @cheapest_hotel&.hotel_rooms&.where(data_version: 0, room_category: 'overnight')&.order(price: :asc)&.first
+    @cheapest_room = if data['cheapest_room_id']
+      HotelRoom.find_by(id: data['cheapest_room_id'])
+    else
+      @cheapest_hotel&.hotel_rooms&.where(data_version: 0, room_category: 'overnight')&.order(price: :asc)&.first
+    end
   end
   end
 end
