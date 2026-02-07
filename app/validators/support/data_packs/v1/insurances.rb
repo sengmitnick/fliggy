@@ -30,7 +30,8 @@ insurance_products_data = []
   { name: '境内旅游险-尊享款', code: 'PICC-DOM-001', accident: 1000000, medical: 100000, cancellation: 20000, price: 10.0, scenes: ['自驾游', '户外运动', '高原游'] },
   { name: '海岛度假保险', code: 'CPIC-DOM-001', accident: 800000, medical: 80000, cancellation: 15000, price: 12.0, scenes: ['海岛游', '亲子游', '潜水'], min_days: 3, max_days: 15 },
   { name: '携宠旅行保险', code: 'ZA-DOM-001', accident: 500000, medical: 50000, cancellation: 0, price: 15.0, scenes: ['携宠出行', '携宠旅游', '自驾游'], pet_liability: 10000 },
-  { name: '滑雪运动保险', code: 'HT-DOM-001', accident: 1000000, medical: 150000, cancellation: 0, price: 25.0, scenes: ['滑雪', '户外运动', '高原游'], sports_injury: 100000, min_days: 1, max_days: 15 }
+  { name: '滑雪运动保险', code: 'HT-DOM-001', accident: 1000000, medical: 150000, cancellation: 0, price: 25.0, scenes: ['滑雪', '户外运动', '高原游'], sports_injury: 100000, min_days: 1, max_days: 15 },
+  { name: '极限运动保险', code: 'JD-DOM-002', accident: 1200000, medical: 200000, cancellation: 0, price: 35.0, scenes: ['攀岩', '蹦极', '跳伞', '户外运动', '潜水'], sports_injury: 150000, min_days: 1, max_days: 7 }
 ].each_with_index do |config, i|
   # 基础产品
   insurance_products_data << {
@@ -263,6 +264,15 @@ city_pricing = {
     '哈尔滨' => 22.0,
     '长春' => 23.0,
     '张家口' => 24.0
+  },
+  'JD-DOM-002' => {
+    '北京' => 35.0,
+    '上海' => 35.0,
+    '广州' => 33.0,
+    '深圳' => 33.0,
+    '成都' => 32.0,
+    '杭州' => 34.0,
+    '三亚' => 36.0
   },
   'JD-INT-001' => {
     '北京' => 25.0,
