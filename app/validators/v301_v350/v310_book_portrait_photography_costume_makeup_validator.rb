@@ -2,10 +2,11 @@
 
 require_relative '../base_validator'
 
-# V310: 预订跟拍人像+服装租赁+化妆造型
+# V310: 预订上海东方明珠7天后的人像跟拍+服装化妆套餐（1人，需创建2个活动订单）
 #
 # 任务描述:
-#   用户需要预订专业摄影服务套餐，包含跟拍、服装租赁和化妆造型
+#   用户需要为7天后在上海东方明珠预订专业摄影服务套餐（1人），
+#   包含人像跟拍服务和服装租赁+化妆造型服务，需要分别创建2个活动订单
 #
 # 评分标准:
 #   - 创建了摄影服务订单（活动订单）(40%)
@@ -16,30 +17,30 @@ module V301V350
   class V310BookPortraitPhotographyCostumeMakeupValidator < BaseValidator
     self.validator_id = 'v310_book_portrait_photography_costume_makeup_validator'
     self.task_id = '7230b4f9-7181-49ba-9478-979b313bdbca'
-    self.title = '预订跟拍人像+服装租赁+化妆造型'
-    self.description = '用户需要预订专业摄影服务套餐，包含跟拍、服装租赁和化妆造型'
+    self.title = '预订上海东方明珠7天后的人像跟拍+服装化妆套餐（1人，需创建2个活动订单）'
+    self.description = '用户需要为7天后在上海东方明珠预订专业摄影服务套餐（1人），包含人像跟拍服务和服装租赁+化妆造型服务，需要分别创建2个活动订单'
     self.timeout_seconds = 300
     
     def prepare
       @service_date = Date.current + 7.days
       @participant_count = 1
+      @attraction_name = '上海东方明珠广播电视塔'
       
-      # 查找适合摄影的景点
+      # 查找上海东方明珠（适合摄影的地标景点）
       @attraction = Attraction
-        .where(data_version: 0)
-        .order(Arel.sql('RANDOM()'))
+        .where(name: @attraction_name, data_version: 0)
         .first
       
-      raise "未找到可用景点" unless @attraction
+      raise "未找到景点：#{@attraction_name}" unless @attraction
       
       # 查找摄影相关活动
       @photography_activity = @attraction.attraction_activities.where(data_version: 0).first
       @costume_activity = @attraction.attraction_activities.where(data_version: 0).second
       
       {
-        task: "请预订#{@attraction.name}的专业摄影服务（#{@service_date.strftime('%Y年%m月%d日')}，1人），包含人像跟拍、服装租赁和化妆造型。",
+        task: "请预订上海东方明珠的专业摄影服务（#{@service_date.strftime('%Y年%m月%d日')}，1人），包含人像跟拍、服装租赁和化妆造型。",
         requirements: {
-          attraction: @attraction.name,
+          attraction: @attraction_name,
           service_date: @service_date,
           participant_count: @participant_count,
           services: ['人像跟拍', '服装租赁', '化妆造型']
@@ -58,7 +59,7 @@ module V301V350
           .order(created_at: :asc)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
+        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction_name}的活动订单"
         @photography_order = all_activity_orders.first
         expect(@photography_order).not_to be_nil, "未找到摄影服务订单"
       end
@@ -152,6 +153,7 @@ module V301V350
       {
         service_date: @service_date.to_s,
         participant_count: @participant_count,
+        attraction_name: @attraction_name,
         attraction_id: @attraction&.id,
         photography_activity_id: @photography_activity&.id,
         costume_activity_id: @costume_activity&.id
@@ -161,6 +163,7 @@ module V301V350
     def restore_from_state(data)
       @service_date = Date.parse(data['service_date'])
       @participant_count = data['participant_count']
+      @attraction_name = data['attraction_name'] || '上海东方明珠广播电视塔'
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @photography_activity = AttractionActivity.find(data['photography_activity_id']) if data['photography_activity_id']

@@ -6,7 +6,7 @@ class AttractionActivity < ApplicationRecord
   
   validates :name, presence: true
   validates :current_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :activity_type, inclusion: { in: %w[experience ride show dining photo_service] }
+  validates :activity_type, inclusion: { in: %w[experience ride show dining photo_service 互动体验 交通工具 动物互动 娱乐演出 摄影服务 水上运动 运动体验 餐饮服务] }
   
   scope :by_type, ->(type) { where(activity_type: type) if type.present? }
   scope :popular, -> { order(sales_count: :desc) }
