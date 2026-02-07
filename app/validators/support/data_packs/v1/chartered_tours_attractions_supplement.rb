@@ -2200,8 +2200,9 @@ if (huashan = Attraction.find_by(name: '华山', data_version: 0))
   puts "     ✓ 为华山添加2张门票（成人票、儿童票）"
 end
 
-# 华山景点内项目 (V311需要：登山向导+装备租赁)
+# 华山景点内项目 (V311需要：登山向导+装备租赁, V314需要：攀岩教学+安全装备+教练陪同)
 if (huashan = Attraction.find_by(name: '华山', data_version: 0))
+  # 活动1: 登山向导+装备租赁服务 (V311)
   huashan_activities_data << {
     attraction_id: huashan.id,
     name: "登山向导+装备租赁服务",
@@ -2214,9 +2215,22 @@ if (huashan = Attraction.find_by(name: '华山', data_version: 0))
     updated_at: timestamp
   }
   
-  puts "     ✓ 为华山添加1个活动（登山向导+装备租赁）"
+  # 活动2: 攀岩教学+安全装备+教练陪同 (V314)
+  huashan_activities_data << {
+    attraction_id: huashan.id,
+    name: "攀岩教学+安全装备+教练陪同",
+    activity_type: "运动体验",
+    current_price: 480,
+    description: "华山攀岩专业教练一对一指导，适合初学者和进阶者。包含攀岩装备租赁（安全绳、头盔、手套、攀岩鞋）、教学课程、教练全程陪同、运动保险，保障安全。每次限制最多4人。",
+    duration: "3-4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为华山添加2个活动（登山向导+装备租赁、攀岩教学+安全装备+教练）"
 else
-  puts "     ⚠ 警告：未找到华山景点，跳过登山活动创建"
+  puts "     ⚠ 警告：未找到华山景点，跳过登山和攀岩活动创建"
 end
 
 # 批量插入华山门票数据
