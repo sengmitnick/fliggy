@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V265: 预订家庭游+全家保险套餐（2大1小）
+# V265: 预订三亚家庭游（2大1小，7天后出发）+全家境内保险套餐（3人投保）
 #
 # 任务描述:
-#   用户需要预订家庭游并购买全家保险套餐（2成人+1儿童）
+#   用户需要预订三亚家庭跟团游（2成人+1儿童，7天后出发），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）
 #
 # 评分标准:
 #   - 创建了跟团游订单 (30%)
@@ -17,8 +17,8 @@ module V251V300
   class V265BookFamilyTourWithFamilyInsuranceValidator < BaseValidator
     self.validator_id = 'v265_book_family_tour_with_family_insurance_validator'
     self.task_id = '89326e33-0407-4028-8d62-82ea40ebd791'
-    self.title = '预订家庭游+全家保险套餐（2大1小）'
-    self.description = '用户需要预订家庭游并购买全家保险套餐（2成人+1儿童）'
+    self.title = '预订三亚家庭游（2大1小，7天后出发）+全家境内保险套餐（3人投保）'
+    self.description = '用户需要预订三亚家庭跟团游（2成人+1儿童，7天后出发），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）'
     self.timeout_seconds = 300
     
     def prepare

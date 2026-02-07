@@ -2,22 +2,25 @@
 
 require_relative '../base_validator'
 
-# V263: 预订酒店+财产保险+责任保险
+# V263: 预订深圳酒店（明天入住，住3晚）+境内旅游保险（投保人与入住人一致，保险期限覆盖住宿期间）
 #
 # 任务描述:
-#   用户需要预订酒店并购买财产和责任综合保险
+#   用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消）
+#   要求投保人姓名与入住人一致，保险起止日期覆盖住宿期间
 #
 # 评分标准:
-#   - 创建了酒店订单 (35%)
-#   - 创建了保险订单 (30%)
-#   - 保险类型正确（境内旅游保险）(20%)
-#   - 订单状态有效 (15%)
+#   - 创建了深圳酒店订单 (25%)
+#   - 入住日期正确（明天入住，住3晚）(10%)
+#   - 创建了保险订单 (20%)
+#   - 保险类型正确（境内旅游保险）(15%)
+#   - 投保人姓名与入住人一致 (15%)
+#   - 保险起止日期覆盖住宿期间 (15%)
 module V251V300
   class V263BookHotelWithPropertyLiabilityInsuranceValidator < BaseValidator
     self.validator_id = 'v263_book_hotel_with_property_liability_insurance_validator'
     self.task_id = '20880d56-4e35-423e-befa-c7df4897e258'
-    self.title = '预订酒店+财产保险+责任保险'
-    self.description = '用户需要预订酒店并购买财产和责任综合保险'
+    self.title = '预订深圳酒店+境内旅游保险（投保人与入住人一致，保险期限覆盖住宿期间）'
+    self.description = '用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消），要求投保人姓名与入住人一致，保险起止日期覆盖住宿期间'
     self.timeout_seconds = 300
     
     def prepare
@@ -43,23 +46,23 @@ module V251V300
       raise "未找到适合#{@nights}天的保险产品" if @available_insurances.empty?
       
       {
-        task: "请预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，住#{@nights}晚），并购买财产保险和责任保险。",
+        task: "请预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，住#{@nights}晚），并购买境内旅游保险（保障意外、医疗和行程取消）。",
         requirements: {
           city: @city,
           check_in_date: @check_in_date,
           nights: @nights,
-          insurance_type: '旅游保险',
-          insurance_coverage: '财产+责任'
+          insurance_type: '境内旅游保险',
+          insurance_coverage: '意外+医疗+行程取消'
         },
         hint: "住宿期间建议购买旅游保险，保障个人财产和责任风险。"
       }
     end
     
     def verify
-      add_assertion "创建了酒店订单", weight: 35 do
+      add_assertion "创建了酒店订单", weight: 25 do
         all_bookings = HotelBooking
           .joins(:hotel)
-          .includes(:hotel)
+          .includes(:hotel, :user)
           .where(hotels: { city: @city })
           .where(data_version: @data_version)
           .to_a
@@ -70,8 +73,17 @@ module V251V300
       
       return if @hotel_booking.nil?
       
-      add_assertion "创建了保险订单", weight: 30 do
+      add_assertion "入住日期正确（明天入住，住3晚）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}（明天），实际: #{@hotel_booking.check_in_date}"
+        
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}（#{@nights}晚后），实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "创建了保险订单", weight: 20 do
         @insurance_order = InsuranceOrder
+          .includes(:insurance_product)
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
@@ -81,15 +93,35 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险类型正确（境内旅游保险）", weight: 20 do
+      add_assertion "保险类型正确（境内旅游保险）", weight: 15 do
         product_type = @insurance_order.insurance_product.product_type
         expect(product_type).to eq('domestic'),
           "保险类型错误。期望: domestic（境内旅游），实际: #{product_type}"
       end
       
-      add_assertion "订单状态有效", weight: 15 do
-        expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
-        expect(@insurance_order.status).to be_in(['pending', 'paid'])
+      add_assertion "投保人姓名与入住人一致", weight: 15 do
+        guest_name = @hotel_booking.guest_name
+        insured_persons = @insurance_order.insured_persons || []
+        
+        expect(insured_persons).not_to be_empty, "保险订单缺少投保人信息"
+        expect(insured_persons).to include(guest_name),
+          "投保人姓名与入住人不一致。入住人: #{guest_name}, 投保人: #{insured_persons.join(', ')}"
+      end
+      
+      add_assertion "保险起止日期覆盖住宿期间", weight: 15 do
+        insurance_start = @insurance_order.start_date
+        insurance_end = @insurance_order.end_date
+        
+        expect(insurance_start).not_to be_nil, "保险订单缺少起始日期"
+        expect(insurance_end).not_to be_nil, "保险订单缺少结束日期"
+        
+        # 保险起始日期应该<=入住日期
+        expect(insurance_start).to be <= @check_in_date,
+          "保险起始日期晚于入住日期。入住日期: #{@check_in_date}, 保险起始: #{insurance_start}"
+        
+        # 保险结束日期应该>=退房日期-1天（因为退房当天不需要保障）
+        expect(insurance_end).to be >= (@check_out_date - 1.day),
+          "保险结束日期早于住宿期间。退房日期: #{@check_out_date}, 保险结束: #{insurance_end}"
       end
     end
     
