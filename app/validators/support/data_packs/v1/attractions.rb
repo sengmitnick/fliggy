@@ -1746,6 +1746,58 @@ ticket_suppliers_data << {
   updated_at: timestamp
 }
 
+# 为其他所有门票添加供应商（已有供应商的跳过）
+tickets.each do |key, ticket|
+  # 跳过已有供应商的门票（广州长隆三张票）
+  next if key.start_with?('广州长隆野生动物世界')
+  
+  # 为每张门票添加3个供应商：携程、飞猪、景区官方
+  base_price = ticket.current_price
+  original_price = ticket.original_price
+  
+  # 供应商1：携程旅行（价格与门票current_price一致）
+  ticket_suppliers_data << {
+    ticket_id: ticket.id,
+    supplier_id: suppliers["携程旅行"].id,
+    current_price: base_price,
+    original_price: original_price,
+    stock: 500,
+    discount_info: base_price < original_price ? "线上预订立减#{(original_price - base_price).to_i}元" : nil,
+    sales_count: (ticket.sales_count * 0.4).to_i,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 供应商2：飞猪旅行（价格更低5元）
+  ticket_suppliers_data << {
+    ticket_id: ticket.id,
+    supplier_id: suppliers["飞猪旅行"].id,
+    current_price: base_price - 5,
+    original_price: original_price,
+    stock: 600,
+    discount_info: "新用户立减#{(original_price - base_price + 5).to_i}元",
+    sales_count: (ticket.sales_count * 0.3).to_i,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 供应商3：景区官方（原价）
+  ticket_suppliers_data << {
+    ticket_id: ticket.id,
+    supplier_id: suppliers["景区官方"].id,
+    current_price: original_price,
+    original_price: original_price,
+    stock: 1000,
+    discount_info: nil,
+    sales_count: (ticket.sales_count * 0.3).to_i,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+end
+
 TicketSupplier.insert_all(ticket_suppliers_data) if ticket_suppliers_data.any?
 
 puts "✓ 创建了 #{ticket_suppliers_data.size} 个门票供应商关联"
