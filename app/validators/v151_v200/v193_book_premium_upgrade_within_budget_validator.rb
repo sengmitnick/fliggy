@@ -180,7 +180,11 @@ module V151V200
       
       @available_flights.each do |flight|
         @available_hotels.each do |hotel|
-          total = flight.price + hotel.price
+          # CRITICAL: 使用整晚房最低价，不是Hotel.price（可能是钟点房）
+          min_overnight_price = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').minimum(:price)
+          next unless min_overnight_price  # 跳过没有整晚房的酒店
+          
+          total = flight.price + min_overnight_price
           next if total > @max_budget
           
           score = (seat_class_score[flight.seat_class] || 1) + (hotel.star_level || 3)
@@ -209,6 +213,16 @@ module V151V200
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @max_budget = data['max_budget']
+      
+      # Restore @best_upgrade
+      if data['best_upgrade_score']
+        @available_flights = Flight
+          .where(departure_city: @departure_city, destination_city: @arrival_city, data_version: 0)
+          .select { |f| f.departure_time.to_date == @travel_date }
+          .to_a
+        @available_hotels = Hotel.where(city: @arrival_city, data_version: 0).to_a
+        @best_upgrade = find_best_upgrade_within_budget
+      end
     end
   end
 end

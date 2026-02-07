@@ -192,6 +192,11 @@ module V151V200
       
       # 创建酒店订单
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
+      # 选择整晚房最低价的酒店
+      cheapest_hotel = @available_hotels.min_by do |hotel|
+        hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').minimum(:price) || Float::INFINITY
+      end
+      
       room = cheapest_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
       unless room
         room = HotelRoom.create!(
@@ -230,9 +235,12 @@ module V151V200
       min_train_price = @available_trains.any? ? @available_trains.min_by(&:price_second_class).price_second_class.to_f : Float::INFINITY
       min_transport = [min_flight_price, min_train_price].min
       
-      min_hotel_price = @available_hotels.min_by(&:price).price.to_f
+      # CRITICAL: 使用整晚房最低价，不是Hotel.price（可能是钟点房）
+      min_hotel_overnight_price = @available_hotels.map do |hotel|
+        hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').minimum(:price) || Float::INFINITY
+      end.min
       
-      min_transport + (min_hotel_price * @stay_nights)
+      min_transport + (min_hotel_overnight_price * @stay_nights)
     end
     
     def find_cheapest_transportation

@@ -719,8 +719,8 @@ namespace :validator do
       puts "✅ All validators with instance variables have state management\n"
     end
     
-    # Step 2.5: 检查 execution_state_data 和 restore_from_state 的字段一致性
-    puts "🔍 Step 2.5: Checking state save/restore field consistency..."
+    # Step 3: 检查 execution_state_data 和 restore_from_state 的字段一致性
+    puts "🔍 Step 3: Checking state save/restore field consistency..."
     consistency_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -737,10 +737,19 @@ namespace :validator do
       
       if execution_state_data_method && restore_from_state_method
         # 提取 execution_state_data 中保存的字段名
-        saved_keys = execution_state_data_method.scan(/^\s*(\w+):/).flatten
+        # 支持两种格式:
+        # 1. 多行: { city: @city, budget: @budget }
+        # 2. 单行: { origin: @origin, destination: @destination, target_date: @target_date.to_s }
+        saved_keys = execution_state_data_method.scan(/(\w+):/).flatten.uniq
         
         # 提取 restore_from_state 中恢复的字段名
-        restored_keys = restore_from_state_method.scan(/@(\w+)\s*=\s*data\[/).flatten
+        # 匹配模式:
+        # 1. @var = data['key'] 或 @var = data["key"]
+        # 2. @var = Date.parse(data['key'])
+        # 3. @var = Model.find_by(id: data['key'])
+        # 4. @var = data['key'].to_i/to_f/to_s
+        # 策略: 提取所有 data['key'] 或 data["key"] 中的 key
+        restored_keys = restore_from_state_method.scan(/data\[(['"])(\w+)\1\]/).map { |m| m[1] }.uniq
         
         # 计算差异
         saved_set = Set.new(saved_keys)
@@ -799,8 +808,8 @@ namespace :validator do
       puts "✅ All validators have consistent state save/restore fields\n"
     end
     
-    # Step 3: 检查 prepare 方法是否创建数据
-    puts "🔍 Step 3: Checking prepare methods for data creation violations..."
+    # Step 4: 检查 prepare 方法是否创建数据
+    puts "🔍 Step 4: Checking prepare methods for data creation violations..."
     prepare_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -876,8 +885,8 @@ namespace :validator do
       puts "✅ All prepare methods only query data (no creation/modification)\n"
     end
     
-    # Step 4: 检查权重总和
-    puts "🔍 Step 4: Checking weight sums..."
+    # Step 5: 检查权重总和
+    puts "🔍 Step 5: Checking weight sums..."
     weight_errors = []
     
     validator_files = Dir[Rails.root.join('app/validators/**/*_validator.rb')]
@@ -922,8 +931,8 @@ namespace :validator do
       puts "✅ All validators have correct weight sums (total = 100)\n"
     end
     
-    # Step 5: 运行模拟测试
-    puts "🧪 Step 5: Running simulations..."
+    # Step 6: 运行模拟测试
+    puts "🧪 Step 6: Running simulations..."
     puts "-" * 70
     
     # 加载所有 Validator
