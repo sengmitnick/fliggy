@@ -20,14 +20,15 @@ require_relative '../base_validator'
 #   - 目的地正确（上海） (15分)
 #   - 发车日期正确（后天） (10分)
 #   - 发车时间在晚上（≥18:00） (30分)
-#   - 乘车人数正确（1人） (10分)
+#   - 乘车人数正确（1人） (5分)
+#   - 乘客信息正确（来自demo_user） (5分)
 #
 module V001V050
   class V046BookBusHangzhouShanghaiValidator < BaseValidator
     self.validator_id = 'v046_book_bus_hangzhou_shanghai_validator'
     self.task_id = 'c8106cd5-941e-4b67-85f1-432f67d556a9'
-    self.title = '预订后天杭州到上海晚上汽车票（18:00后，1人）'
-    self.description = '搜索杭州到上海的汽车票，找到发车时间在18:00后的班次'
+    self.title = '给张三预订后天杭州到上海晚上的汽车票（18:00后）'
+    self.description = 'Agent 需要为张三预订后天从杭州到上海的汽车票，找到发车时间在18:00后的班次'
     self.timeout_seconds = 240
   
     def prepare
@@ -90,9 +91,17 @@ module V001V050
           "发车时间不符合要求。要求: ≥18:00, 实际: #{departure_time}"
       end
     
-      add_assertion "乘车人数正确（1人）", weight: 10 do
+      add_assertion "乘车人数正确（1人）", weight: 5 do
         expect(@order.passenger_count).to eq(1),
           "乘车人数不正确。期望: 1人, 实际: #{@order.passenger_count}人"
+      end
+    
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 5 do
+        passenger = @order.passengers.first
+        expect(passenger&.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{passenger&.passenger_name}"
+        expect(passenger&.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{passenger&.passenger_id_number}"
       end
     end
   
@@ -111,6 +120,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       target_ticket = BusTicket.where(
         origin: @origin,
@@ -128,8 +138,8 @@ module V001V050
       )
     
       order.passengers.create!(
-        passenger_name: '张三',
-        passenger_id_number: '110101199001011234'
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number
       )
     
       { action: 'create_bus_order', departure_time: target_ticket.departure_time }

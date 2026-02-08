@@ -91,7 +91,7 @@
       </div>
 
       <% if @passengers.any? %>
-        <% @passengers.first(5).each do |passenger| %>
+        <% @passengers.each do |passenger| %>
           <div class="flex items-center justify-between py-4 border-t border-gray-50"
                data-action="click->bus-ticket-order#togglePassenger"
                data-passenger-id="<%= passenger.id %>"
@@ -108,7 +108,7 @@
               <div>
                 <div class="flex items-center mb-1">
                   <span class="text-[17px] font-bold mr-2"><%= passenger.name %></span>
-                  <span class="text-[10px] text-gray-500 border border-gray-300 rounded px-1 py-[1px]">成人票</span>
+                  <span class="text-[10px] <%= passenger.child_ticket? ? 'text-orange-600 border-orange-300 bg-orange-50' : 'text-gray-500 border-gray-300' %> border rounded px-1 py-[1px]"><%= passenger.ticket_type_label %></span>
                 </div>
                 <div class="text-gray-400 text-sm tracking-wide">
                   <%= passenger.id_type %> <%= passenger.id_number.gsub(/(\d{6})(\d{8})(\d{4})/, '\1 \2 \3') %>

@@ -35,6 +35,8 @@
 |------|---------|---------|--------------|------------|
 | 酒店入住人 | passengers | "给张三预订酒店" | `user.passengers.find_by!(name: '张三', data_version: 0)` | guest_name, guest_phone |
 | 机票/火车票 | passengers | "给张三订机票" | `user.passengers.find_by!(name: '张三', data_version: 0)` | passenger_id |
+| 景点门票 | User + contacts | "帮张三预订门票" | user + `user.contacts.find_by!(name: '张三', data_version: 0)` | user_id + contact_phone |
+| 景点活动 | User + contacts | "帮张三预订活动" | user + `user.contacts.find_by!(name: '张三', data_version: 0)` | user_id + contact_phone |
 | WiFi联系人 | contacts | "帮张三订WiFi" | `user.contacts.find_by!(name: '张三', data_version: 0)` | contact_name, contact_phone |
 | 电话卡邮寄 | addresses | "邮寄到张三的地址" | `user.addresses.find_by!(is_default: true, data_version: 0)` | address 字段 |
 | 深度旅游向导 | passengers + contacts | "给张三预订深度旅游" | passenger + contact 分别查询 | traveler_* + contact_* |
@@ -43,6 +45,10 @@
 
 **为什么酒店用 passengers 不用 contacts？**  
 → 入住人需要身份证号（实名制），passengers 表有 `id_number` 字段
+
+**为什么景点门票/活动用 User + contacts？**  
+→ user_id：订单所属用户（张三）  
+→ contact_phone：联系电话，应从 user.contacts 表获取（13800138000）
 
 **深度旅游向导为什么需要两个信息？**  
 → 游客信息（traveler_*）需要身份证，联系人（contact_*）用于沟通
@@ -96,6 +102,8 @@ return if @order.nil?  # Guard clause
 ### 3.3 数据规范验证
 
 **必须验证数据来自 demo_user，不是硬编码：**
+
+**示例 1：酒店入住人信息**
 ```ruby
 add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
   expect(@order.guest_name).to eq('张三'),
@@ -104,8 +112,22 @@ add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
 end
 ```
 
+**示例 2：景点门票/活动订单**
+```ruby
+add_assertion "订单属于张三", weight: 15 do
+  expected_user = User.find_by(email: 'demo@travel01.com', data_version: 0)
+  expected_contact = expected_user.contacts.find_by(name: '张三', data_version: 0)
+  
+  expect(@order.user_id).to eq(expected_user.id),
+    "订单用户错误。期望: 张三（#{expected_user.email}）, 实际: #{@order.user&.email}"
+  expect(@order.contact_phone).to eq(expected_contact.phone),
+    "联系电话错误。期望: #{expected_contact.phone}（demo_user数据）, 实际: #{@order.contact_phone}"
+end
+```
+
 **为什么需要这条断言？**  
-→ 防止 AI Agent 硬编码任意名字通过验证
+→ 防止 AI Agent 硬编码任意名字通过验证  
+→ 确保订单关联到正确的用户账号
 
 ---
 

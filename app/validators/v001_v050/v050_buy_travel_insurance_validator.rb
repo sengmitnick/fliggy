@@ -39,8 +39,8 @@ module V001V050
   class V050BuyTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v050_buy_travel_insurance_validator'
     self.task_id = '1eb4c6df-76fd-415c-bf02-08b4ce823dc5'
-    self.title = '购买成都出行的境内旅游保险（后天出发，7天，1人，该城市最便宜）'
-    self.description = '为成都出行购买境内旅游保险（后天出发），根据成都的差异化定价选择7天保障期最便宜的产品'
+    self.title = '给张三购买成都出行的境内旅游保险（后天出发，7天，该城市最便宜）'
+    self.description = 'Agent 需要为张三购买成都出行的境内旅游保险（后天出发，保隙7天），根据成都的差异化定价选择最便宜的产品'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

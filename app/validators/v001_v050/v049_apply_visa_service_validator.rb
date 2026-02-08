@@ -21,7 +21,8 @@ require_relative '../base_validator'
 #   - 国家正确（泰国）(15分)
 #   - 签证类型正确（旅游签证）(15分)
 #   - 选择了最快出签的服务商 (30分)
-#   - 订单价格和人数正确 (20分)
+#   - 订单价格和人数正确 (10分)
+#   - 联系人和地址信息正确（来自demo_user） (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -35,8 +36,8 @@ module V001V050
   class V049ApplyVisaServiceValidator < BaseValidator
     self.validator_id = 'v049_apply_visa_service_validator'
     self.task_id = '98c2a07d-46cc-4dba-ab27-fc783c9d3c09'
-    self.title = '办理泰国旅游签证（1人，最快出签）'
-    self.description = '需要搜索泰国旅游签证服务，选择办理时长最短的服务商并成功创建订单'
+    self.title = '给张三办理泰国旅游签证（最快出签）'
+    self.description = 'Agent 需要为张三办理泰国旅游签证，在多个服务商中选择办理时长最短的'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -118,7 +119,7 @@ module V001V050
       end
     
       # 断言5: 订单价格和人数正确
-      add_assertion "订单价格和人数正确", weight: 20 do
+      add_assertion "订单价格和人数正确", weight: 10 do
         expected_total = @visa_order.visa_product.price * @visa_order.traveler_count
         actual_total = @visa_order.total_price
       
@@ -127,6 +128,16 @@ module V001V050
       
         expect(actual_total).to eq(expected_total),
           "订单总价错误。期望: #{expected_total}元（单价#{@visa_order.visa_product.price}元 × #{@visa_order.traveler_count}人），实际: #{actual_total}元"
+      end
+    
+      # 断言6: 联系人和地址信息正确
+      add_assertion "联系人和地址信息正确（张三 13800138000 北京朝阳）", weight: 10 do
+        expect(@visa_order.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@visa_order.contact_name}"
+        expect(@visa_order.contact_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@visa_order.contact_phone}"
+        expect(@visa_order.delivery_address).to include('北京'),
+          "地址错误。期望包含: 北京（demo_user数据）, 实际: #{@visa_order.delivery_address}"
       end
     end
   
@@ -162,6 +173,8 @@ module V001V050
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      address = user.addresses.find_by!(is_default: true, data_version: 0)
     
       # 2. 查找泰国
       thailand = Country.find_by!(name: @country_name, data_version: 0)
@@ -181,6 +194,7 @@ module V001V050
       raise "未找到可用的签证产品" unless fastest_product
     
       # 5. 创建签证订单
+      full_address = "#{address.province}#{address.city}#{address.district}#{address.detail}"
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: fastest_product.id,
@@ -189,9 +203,9 @@ module V001V050
         total_price: fastest_product.price * @traveler_count,
         expected_date: Date.current + 30.days,  # 预计出行日期30天后
         delivery_method: 'express',
-        delivery_address: '北京市朝阳区建国路118号',
-        contact_name: '张三',
-        contact_phone: '13800138000',
+        delivery_address: full_address,
+        contact_name: contact.name,
+        contact_phone: contact.phone,
         status: 'pending',
         insurance_selected: false,
         insurance_price: 0

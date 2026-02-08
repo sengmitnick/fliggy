@@ -22,7 +22,8 @@ require_relative '../base_validator'
 #   - 城市正确（武汉）(15分)
 #   - 套餐晚数正确（2晚）(15分)
 #   - 选择了含早或豪华套餐（而非不含早的标准套餐）(30分)
-#   - 订单价格和数量正确 (20分)
+#   - 订单价格和数量正确 (10分)
+#   - 联系人信息正确（来自demo_user） (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -36,8 +37,8 @@ module V001V050
   class V048BookHotelPackageValidator < BaseValidator
     self.validator_id = 'v048_book_hotel_package_validator'
     self.task_id = '42336f26-7a26-4d2a-a07e-4f6841c05257'
-    self.title = '囤货武汉地区酒店套餐（2晚，1份，最佳性价比选项）'
-    self.description = '需要搜索武汉地区的2晚酒店套餐，囤货购买1份（先囤再约），从套餐选项中选择性价比最佳的（含早或豪华套餐）'
+    self.title = '给张三囤货武汉地区2晚酒店套餐（1份，最佳性价比选项）'
+    self.description = 'Agent 需要为张三囤货购买武汉地区的2晚酒店套餐（1份），先囤再约，从套餐选项中选择性价比最佳的（含早或豪华套餐）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -110,12 +111,20 @@ module V001V050
       end
     
       # 断言5: 订单价格和数量正确
-      add_assertion "订单价格和数量正确", weight: 20 do
+      add_assertion "订单价格和数量正确", weight: 10 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
       
         expect(actual_total).to eq(expected_total),
           "订单总价错误。期望: #{expected_total}元（单价#{@package_order.package_option.price}元 × #{@package_order.quantity}份），实际: #{actual_total}元"
+      end
+    
+      # 断言6: 联系人信息正确
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
+        expect(@package_order.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@package_order.contact_phone}"
       end
     end
   
@@ -149,8 +158,8 @@ module V001V050
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      # 2. 查找测试乘客（酒店需要实名信息）
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找武汉地区的2晚套餐
       available_packages = HotelPackage.where(

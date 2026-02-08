@@ -18,15 +18,16 @@ require_relative '../base_validator'
 #   - 订单已创建 (20分)
 #   - 目的地正确（杭州） (25分)
 #   - 出发日期正确（明天） (15分)
-#   - 天数正确（3天2晚） (30分)
+#   - 天数正确（3天2晚） (20分)
 #   - 人数正确（1成人0儿童） (10分)
+#   - 联系人信息正确（来自demo_user） (10分)
 #
 module V001V050
   class V041BookTourHangzhouValidator < BaseValidator
     self.validator_id = 'v041_book_tour_hangzhou_validator'
     self.task_id = '919fcf7b-af3e-484c-a6a1-e8d86fbf4ee7'
-    self.title = '预订明天杭州3天2晚跟团游（1成人）'
-    self.description = '搜索杭州的跟团游产品，找到3天2晚的产品并完成预订'
+    self.title = '给张三预订明天杭州3天2晚跟团游'
+    self.description = 'Agent 需要为张三预订明天出发的杭州3天2晚跟团游，选择合适的产品并完成预订'
     self.timeout_seconds = 240
   
     def prepare
@@ -77,7 +78,7 @@ module V001V050
           "出发日期不正确。期望: #{@departure_date}（明天）, 实际: #{departure_date}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 30 do
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 20 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
       end
@@ -87,6 +88,13 @@ module V001V050
           "成人数量错误。期望: 1, 实际: #{@booking.adult_count}"
         expect(@booking.child_count).to eq(0),
           "儿童数量错误。期望: 0, 实际: #{@booking.child_count}"
+      end
+    
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
+        expect(@booking.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.contact_name}"
+        expect(@booking.contact_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
       end
     end
   
@@ -105,6 +113,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
     
       target_tour = TourGroupProduct.where(
         destination: @destination,
@@ -126,8 +135,8 @@ module V001V050
         travel_date: @departure_date,
         adult_count: adult_count,
         child_count: child_count,
-        contact_name: '张三',
-        contact_phone: '13800138000',
+        contact_name: contact.name,
+        contact_phone: contact.phone,
         insurance_type: 'none',
         total_price: total_price,
         status: 'pending'
