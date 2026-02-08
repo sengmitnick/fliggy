@@ -9,7 +9,7 @@ module V101V150
   class V149BookBusAndStationTransferValidator < BaseValidator
     self.validator_id = 'v149_book_bus_and_station_transfer_validator'
     self.task_id = 'd9e0f1a2-3b4c-5d6e-7f8a-9b0c1d2e3f4a'
-    self.title = '预订汽车票后预订火车站接站服务（上海-杭州）'
+    self.title = '预订明天汽车票后预订火车站接站服务（上海-杭州）'
     self.description = '预订明天中午上海到杭州的汽车票，并预订杭州火车站接站服务'
     self.timeout_seconds = 300
 

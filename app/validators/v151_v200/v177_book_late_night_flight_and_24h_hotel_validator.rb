@@ -23,7 +23,7 @@ module V151V200
   class V177BookLateNightFlightAnd24hHotelValidator < BaseValidator
     self.validator_id = 'v177_book_late_night_flight_and_24h_hotel_validator'
     self.task_id = '5d7b3426-da2e-4269-acb8-185afdd1fc1a'
-    self.title = '预订红眼航班和24小时前台酒店'
+    self.title = '预订3天后红眼航班和24小时前台酒店（1人）'
     self.description = '用户需要预订深夜23点到凌晨2点之间的红眼航班，并预订有24小时前台服务的酒店'
     self.timeout_seconds = 300
   

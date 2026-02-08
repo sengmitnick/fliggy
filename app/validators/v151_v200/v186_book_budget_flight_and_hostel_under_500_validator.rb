@@ -23,7 +23,7 @@ module V151V200
   class V186BookBudgetFlightAndHostelUnder500Validator < BaseValidator
     self.validator_id = 'v186_book_budget_flight_and_hostel_under_500_validator'
     self.task_id = '157ef268-c392-49fc-b869-c11412299bca'
-    self.title = '预订预算航班和青旅组合'
+    self.title = '预订4天后预算航班和青旅组合（总预算≤500元，1人）'
     self.description = '学生出行，需要预订航班+青旅，总预算≤500元'
     self.timeout_seconds = 300
   

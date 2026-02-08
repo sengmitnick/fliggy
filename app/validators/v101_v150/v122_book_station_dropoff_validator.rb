@@ -34,7 +34,7 @@ module V101V150
   class V122BookStationDropoffValidator < BaseValidator
     self.validator_id = 'v122_book_station_dropoff_validator'
     self.task_id = 'b7afcc22-6dff-4fb6-a389-a675def90300'
-    self.title = '预订送站服务（上海外滩→上海虹桥站）'
+    self.title = '预订后天送站服务（上海外滩→上海虹桥站）'
     self.description = '从上海外滩送站到上海虹桥火车站（后天下午14:00出发）'
     self.timeout_seconds = 300
   

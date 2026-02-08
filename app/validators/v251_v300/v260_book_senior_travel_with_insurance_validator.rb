@@ -21,7 +21,7 @@ module V251V300
   class V260BookSeniorTravelWithInsuranceValidator < BaseValidator
     self.validator_id = 'v260_book_senior_travel_with_insurance_validator'
     self.task_id = '442546c5-70c7-4519-80e7-513c856e9596'
-    self.title = '预订桂林跟团游+为2位老年人购买境内高龄旅游保险'
+    self.title = '预订桂林跟团游（10天后出发）+为2位老年人购买境内高龄旅游保险'
     self.description = '用户需要为2位老年人（65岁以上）预订桂林跟团游（10天后出发，行程≤5天），并购买境内旅游保险，保额要求：意外身故≥50万元、意外医疗≥5万元'
     self.timeout_seconds = 300
     

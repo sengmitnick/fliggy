@@ -16,7 +16,7 @@ module V201V250
   class V234BookHighRatingHotelValidator < BaseValidator
     self.validator_id = 'v234_book_high_rating_hotel_validator'
     self.task_id = '0ff0c1ff-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '预订高评分酒店（≥4.5星）'
+    self.title = '预订高评分酒店（3天后入住，≥4.5星）'
     self.description = '用户需要预订高评分酒店（评分≥4.5星）'
     self.timeout_seconds = 300
     

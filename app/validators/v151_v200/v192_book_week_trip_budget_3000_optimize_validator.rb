@@ -18,7 +18,7 @@ module V151V200
   class V192BookWeekTripBudget3000OptimizeValidator < BaseValidator
     self.validator_id = 'v192_book_week_trip_budget_3000_optimize_validator'
     self.task_id = 'a91aa487-9ae2-4ef6-83e2-44b428900100'
-    self.title = '预订7天行程，总预算≤3000元'
+    self.title = '预订4天后7天行程，总预算≤3000元（7晚）'
     self.description = '预订7天行程（往返+住宿），总预算≤3000元'
     self.timeout_seconds = 300
     

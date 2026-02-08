@@ -22,7 +22,7 @@ module V151V200
   class V179BookNightBusAndLateCheckinHotelValidator < BaseValidator
     self.validator_id = 'v179_book_night_bus_and_late_checkin_hotel_validator'
     self.task_id = 'd1757d07-df13-446b-ba4c-23790c798232'
-    self.title = '预订晚班大巴和深夜入住酒店'
+    self.title = '预订3天后晚班大巴和深夜入住酒店（1人）'
     self.description = '用户需要预订晚上出发的长途大巴，并预订支持深夜入住的酒店'
     self.timeout_seconds = 300
   

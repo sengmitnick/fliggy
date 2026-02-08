@@ -20,7 +20,7 @@ module V101V150
   class V116BookShanghaiSoutheastAsiaNovaCruiseOceanviewValidator < BaseValidator
     self.validator_id = 'v116_book_shanghai_southeast_asia_nova_cruise_oceanview_validator'
     self.task_id = '70a9737c-8db3-4c11-b179-2522c8f58af2'
-    self.title = '预订东南亚邮轮（爱达新星号，8天7晚，2月出发，海景房）'
+    self.title = '预订上海出发东南亚邮轮（爱达新星号，8天7晚，2月出发，海景房）'
     self.description = '预订东南亚邮轮航线，选择爱达新星号（环保LNG动力邮轮）2月份最近一班8天7晚行程，预订海景房（观景之选），为2位成人'
     self.timeout_seconds = 240
 

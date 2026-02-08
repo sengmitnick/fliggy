@@ -18,7 +18,7 @@ module V201V250
   class V215BookSplitStayTwoHotelsValidator < BaseValidator
     self.validator_id = 'v215_book_split_stay_two_hotels_validator'
     self.task_id = '4ff576f9-5f5f-4f8f-ff8f-9f1a2b3c4d5f'
-    self.title = '预订分住两家酒店（5天分段）'
+    self.title = '预订明天分住两家酒店（5天分段）（2个）'
     self.description = '用户需要预订北京5天行程，分住2家酒店（前2晚A酒店+后3晚B酒店）'
     self.timeout_seconds = 300
     

@@ -16,7 +16,7 @@ module V201V250
   class V250BookMileageAccrualFlightValidator < BaseValidator
     self.validator_id = 'v250_book_mileage_accrual_flight_validator'
     self.task_id = '5ff5b0ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '预订里程累积航班（常旅客计划）'
+    self.title = '预订3天后里程累积航班（常旅客计划）'
     self.description = '用户需要预订可累积里程的航班（参与常旅客计划）'
     self.timeout_seconds = 300
     

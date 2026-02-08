@@ -37,7 +37,7 @@ module V151V200
   class V174BookInternationalFlightAndPickupValidator < BaseValidator
     self.validator_id = 'v174_book_international_flight_and_pickup_validator'
     self.task_id = '6c54e97f-e56a-441b-adcb-a0be3cb045e2'
-    self.title = '国际航班到达后预订接机服务'
+    self.title = '国际航班3天后到达后预订接机服务'
     self.description = '订购国际航班到达上海浦东T2（深夜），预订接机到陆家嘴金融区'
     self.timeout_seconds = 300
   

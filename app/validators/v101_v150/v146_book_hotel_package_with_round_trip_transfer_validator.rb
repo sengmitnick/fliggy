@@ -9,7 +9,7 @@ module V101V150
   class V146BookHotelPackageWithRoundTripTransferValidator < BaseValidator
     self.validator_id = 'v146_book_hotel_package_with_round_trip_transfer_validator'
     self.task_id = 'a6b7c8d9-0e1f-2a3b-4c5d-6e7f8a9b0c1d'
-    self.title = '预订酒店套餐后预订往返接送服务（深圳2晚）'
+    self.title = '预订明天酒店套餐后预订往返接送服务（深圳2晚）'
     self.description = '预订明天深圳酒店套餐2晚，并预订往返机场接送服务（接机+送机）'
     self.timeout_seconds = 300
 

@@ -17,7 +17,7 @@ module V151V200
   class V200BookScenicResortAndCharterTourValidator < BaseValidator
     self.validator_id = 'v200_book_scenic_resort_and_charter_tour_validator'
     self.task_id = '1c8e72f9-d895-4e13-9e5d-912749a6b8c5'
-    self.title = '预订景区内酒店+包车游览'
+    self.title = '预订4天后景区内酒店+包车游览'
     self.description = '预订景区内酒店+包车游览服务'
     self.timeout_seconds = 300
     

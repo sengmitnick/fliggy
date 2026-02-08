@@ -9,7 +9,7 @@ module V151V200
   class V163BookRoundTripFlightAndHotelValidator < BaseValidator
     self.validator_id = 'v163_book_round_trip_flight_and_hotel_validator'
     self.task_id = 'a3b4c5d6-7e8f-9a0b-1c2d-3e4f5a6b7c8d'
-    self.title = '预订往返航班并预订酒店住宿（北京⇄上海，3晚）'
+    self.title = '预订明天往返航班并预订酒店住宿（北京⇄上海，3晚）'
     self.description = '预订后天北京到上海的往返航班（去程后天，返程第5天），并预订上海酒店3晚住宿'
     self.timeout_seconds = 300
 

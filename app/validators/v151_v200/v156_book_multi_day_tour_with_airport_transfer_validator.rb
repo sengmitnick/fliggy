@@ -9,7 +9,7 @@ module V151V200
   class V156BookMultiDayTourWithAirportTransferValidator < BaseValidator
     self.validator_id = 'v156_book_multi_day_tour_with_airport_transfer_validator'
     self.task_id = 'f1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b7c'
-    self.title = '预订跟团游并预订机场往返接送服务（成都3日游）'
+    self.title = '预订明天跟团游并预订机场往返接送服务（成都3日游）'
     self.description = '预订明天成都3日跟团游，并预订机场往返接送服务（接机+送机）'
     self.timeout_seconds = 300
 

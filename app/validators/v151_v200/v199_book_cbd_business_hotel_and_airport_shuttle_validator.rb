@@ -17,7 +17,7 @@ module V151V200
   class V199BookCbdBusinessHotelAndAirportShuttleValidator < BaseValidator
     self.validator_id = 'v199_book_cbd_business_hotel_and_airport_shuttle_validator'
     self.task_id = '1b8f7359-8e4c-4e2f-a7c8-ff25c53c02a3'
-    self.title = '预订CBD商务酒店+机场快线接送'
+    self.title = '预订3天后CBD商务酒店+机场快线接送'
     self.description = '预订CBD商务酒店+机场快线接送服务'
     self.timeout_seconds = 300
     

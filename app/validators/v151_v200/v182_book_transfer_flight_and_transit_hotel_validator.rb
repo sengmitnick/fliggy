@@ -23,7 +23,7 @@ module V151V200
   class V182BookTransferFlightAndTransitHotelValidator < BaseValidator
     self.validator_id = 'v182_book_transfer_flight_and_transit_hotel_validator'
     self.task_id = '9aedf66b-ff40-41d2-9ff5-3e63982462a1'
-    self.title = '预订中转航班和中转城市酒店休息'
+    self.title = '预订明天中转航班和中转城市酒店休息（2个航班，1人）'
     self.description = '用户需要预订中转航班（间隔>6小时），并在中转城市预订酒店休息'
     self.timeout_seconds = 300
   

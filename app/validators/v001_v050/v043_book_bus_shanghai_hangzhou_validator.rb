@@ -16,15 +16,16 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (25分)
-#   - 出发地正确（上海） (20分)
-#   - 目的地正确（杭州） (20分)
+#   - 出发地正确（上海） (15分)
+#   - 目的地正确（杭州） (15分)
+#   - 发车日期正确（后天） (10分)
 #   - 发车时间在下午（≥12:00） (35分)
 #
 module V001V050
   class V043BookBusShanghaiHangzhouValidator < BaseValidator
     self.validator_id = 'v043_book_bus_shanghai_hangzhou_validator'
     self.task_id = '2a23e38d-47cb-47ea-bf9a-0d132a606f5f'
-    self.title = '预订后天上海到杭州下午汽车票（12:00后）'
+    self.title = '预订后天上海到杭州下午汽车票（12:00后，1人）'
     self.description = '搜索上海到杭州的汽车票，找到发车时间在12:00后的班次'
     self.timeout_seconds = 240
   
@@ -66,12 +67,19 @@ module V001V050
     
       return unless @order
     
-      add_assertion "出发地正确（#{@origin}）", weight: 20 do
-        expect(@order.bus_ticket.origin).to eq(@origin)
+      add_assertion "出发地正确（#{@origin}）", weight: 15 do
+        expect(@order.bus_ticket.origin).to eq(@origin),
+          "出发地错误。期望: #{@origin}, 实际: #{@order.bus_ticket.origin}"
       end
     
-      add_assertion "目的地正确（#{@destination}）", weight: 20 do
-        expect(@order.bus_ticket.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 15 do
+        expect(@order.bus_ticket.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}, 实际: #{@order.bus_ticket.destination}"
+      end
+    
+      add_assertion "发车日期正确（后天）", weight: 10 do
+        expect(@order.bus_ticket.departure_date).to eq(@target_date),
+          "发车日期不正确。期望: #{@target_date}（后天）, 实际: #{@order.bus_ticket.departure_date}"
       end
     
       add_assertion "发车时间在下午（≥12:00）", weight: 35 do

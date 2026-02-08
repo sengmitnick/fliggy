@@ -15,7 +15,7 @@ module V101V150
   class V107CharteredTourBookingValidator < BaseValidator
     self.validator_id = 'v107_chartered_tour_booking_validator'
     self.task_id = 'e9d3f5a7-2c8b-4e1f-a6d9-8b4c1f7e3a52'
-    self.title = '预订定制游（上海经典路线，8小时包车）'
+    self.title = '预订明天定制游（上海经典路线，8小时包车）'
     self.description = '预订上海定制游，选择经典路线，预订8小时包车服务，选择7座商务车，4位乘客，明天出发'
     self.timeout_seconds = 240
   

@@ -17,7 +17,7 @@ module V151V200
   class V197BookTrainAndStationVicinityHotelValidator < BaseValidator
     self.validator_id = 'v197_book_train_and_station_vicinity_hotel_validator'
     self.task_id = '23d8d144-0925-4316-8fec-88215475aef4'
-    self.title = '预订火车+火车站1公里内酒店'
+    self.title = '预订3天后火车+火车站1公里内酒店'
     self.description = '预订火车+火车站1公里内酒店（步行可达）'
     self.timeout_seconds = 300
     

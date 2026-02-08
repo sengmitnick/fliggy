@@ -16,7 +16,7 @@ module V251V300
   class V296BookAllergySpecialNeedsValidator < BaseValidator
     self.validator_id = 'v296_book_allergy_special_needs_validator'
     self.task_id = 'af3f1d29-bc35-4308-9368-1d4c82e27868'
-    self.title = '预订过敏体质特殊需求'
+    self.title = '预订过敏体质特殊需求（4天后入住）'
     self.description = '用户预订过敏体质特殊需求服务'
     self.timeout_seconds = 300
     

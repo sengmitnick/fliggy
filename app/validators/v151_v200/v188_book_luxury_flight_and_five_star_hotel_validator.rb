@@ -18,7 +18,7 @@ module V151V200
   class V188BookLuxuryFlightAndFiveStarHotelValidator < BaseValidator
     self.validator_id = 'v188_book_luxury_flight_and_five_star_hotel_validator'
     self.task_id = 'cb093340-9f54-4e5d-bcd0-fe9ac36bde61'
-    self.title = '预订商务舱+五星酒店'
+    self.title = '预订后天商务舱+五星酒店（1人）'
     self.description = '高端商务出行，预订商务舱+五星酒店'
     self.timeout_seconds = 300
     

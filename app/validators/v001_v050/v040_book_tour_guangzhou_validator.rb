@@ -17,15 +17,16 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (25分)
-#   - 目的地正确（广州） (25分)
-#   - 天数正确（4天3晚） (20分)
-#   - 人员组成正确（1成人1儿童） (30分)
+#   - 目的地正确（广州） (20分)
+#   - 出发日期正确（大后天） (15分)
+#   - 天数正确（4天3晚） (15分)
+#   - 人员组成正确（1成人1儿童） (25分)
 #
 module V001V050
   class V040BookTourGuangzhouValidator < BaseValidator
     self.validator_id = 'v040_book_tour_guangzhou_validator'
     self.task_id = 'ad551c7d-fd66-466b-b84b-f041af95feaf'
-    self.title = '预订大后天广州4天3晚跟团游（1成人1儿童）'
+    self.title = '预订3天后广州4天3晚跟团游（1成人1儿童）'
     self.description = '搜索广州的跟团游产品，找到4天3晚的产品并预订1成人1儿童'
     self.timeout_seconds = 240
   
@@ -70,15 +71,23 @@ module V001V050
     
       return unless @booking
     
-      add_assertion "目的地正确（#{@destination}）", weight: 25 do
-        expect(@booking.tour_group_product.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 20 do
+        expect(@booking.tour_group_product.destination).to eq(@destination),
+          "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 20 do
-        expect(@booking.tour_group_product.duration).to eq(@duration)
+      add_assertion "出发日期正确（大后天）", weight: 15 do
+        departure_date = @booking.travel_date
+        expect(departure_date).to eq(@departure_date),
+          "出发日期不正确。期望: #{@departure_date}（大后天）, 实际: #{departure_date}"
       end
     
-      add_assertion "人员组成正确（1成人1儿童）", weight: 30 do
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 15 do
+        expect(@booking.tour_group_product.duration).to eq(@duration),
+          "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
+      end
+    
+      add_assertion "人员组成正确（1成人1儿童）", weight: 25 do
         adult_ok = @booking.adult_count == @adult_count
         child_ok = @booking.child_count == @child_count
       

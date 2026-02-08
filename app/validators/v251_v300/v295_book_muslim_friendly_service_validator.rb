@@ -19,7 +19,7 @@ module V251V300
   class V295BookMuslimFriendlyServiceValidator < BaseValidator
     self.validator_id = 'v295_book_muslim_friendly_service_validator'
     self.task_id = '16fd7e2d-f8e9-49c8-91fc-72958aa2ec90'
-    self.title = '预订穆斯林友好服务'
+    self.title = '预订穆斯林友好服务（6天后出发）'
     self.description = '用户预订穆斯林友好服务（清真餐+礼拜室）'
     self.timeout_seconds = 300
     

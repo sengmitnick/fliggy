@@ -31,7 +31,7 @@ module V001V050
   class V022BookAnyTrainBeijingShanghaiValidator < BaseValidator
     self.validator_id = 'v022_book_any_train_beijing_shanghai_validator'
     self.task_id = '832e7a7a-93f7-4014-8ee9-ed77b8139494'
-    self.title = '预订明天北京到上海任意高铁'
+    self.title = '预订明天北京到上海任意高铁（1人）'
     self.description = '搜索明天北京到上海的高铁，选择任意一班车次并完成预订'
     self.timeout_seconds = 240
   

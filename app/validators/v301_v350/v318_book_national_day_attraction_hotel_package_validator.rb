@@ -4,7 +4,7 @@ module V301V350
   class V318BookNationalDayAttractionHotelPackageValidator < BaseValidator
     self.validator_id = 'v318_book_national_day_attraction_hotel_package_validator'
     self.task_id = "2fa37623-24e7-46f7-a054-b2c98c7c7227"
-    self.title = "预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，2人）"
+    self.title = "预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，1间房，2人）"
     self.description = "用户需要预订7天后的张家界国家森林公园成人门票（2张）和张家界武陵源度假酒店豪华双床房（入住2晚）"
     self.timeout_seconds = 180
 

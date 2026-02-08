@@ -22,7 +22,7 @@ module V151V200
   class V178BookNoonTrainAndEarlyCheckinHotelValidator < BaseValidator
     self.validator_id = 'v178_book_noon_train_and_early_checkin_hotel_validator'
     self.task_id = '86a07e7f-aa31-4d1d-a9c7-4d13777246bb'
-    self.title = '预订中午前到达火车和提前入住酒店'
+    self.title = '预订3天后中午前到达火车和提前入住酒店（1人）'
     self.description = '用户需要预订上午到达（12点前）的火车，并预订支持提前入住的酒店'
     self.timeout_seconds = 300
   

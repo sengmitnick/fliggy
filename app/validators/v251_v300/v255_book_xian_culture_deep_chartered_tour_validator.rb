@@ -14,7 +14,7 @@ module V251V300
   class V255BookXianCultureDeepCharteredTourValidator < BaseValidator
     self.validator_id = 'v255_book_xian_culture_deep_chartered_tour_validator'
     self.task_id = '55af070c-6229-4df7-ac27-966662a1af17'
-    self.title = '预订西安文化深度游（经济5座）- 验证出发日期、包车时长6小时、订单完整性'
+    self.title = '预订西安文化深度游（后天出发，经济5座）- 验证出发日期、包车时长6小时、订单完整性'
     self.description = '预订西安文化深度游包车路线，选择经济5座车型，6小时服务。验证出发日期（后天）、包车时长（6小时）、车型经济性、订单信息完整性。'
     self.timeout_seconds = 240
   

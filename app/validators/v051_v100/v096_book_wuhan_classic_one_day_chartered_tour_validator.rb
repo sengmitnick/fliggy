@@ -14,7 +14,7 @@ module V051V100
   class V096BookWuhanClassicOneDayCharteredTourValidator < BaseValidator
     self.validator_id = 'v096_book_wuhan_classic_one_day_chartered_tour_validator'
     self.task_id = 'eba7a78e-2541-4232-b0cf-427687f70264'
-    self.title = '预订武汉经典一日包车游（经济7座，家庭5人）- 验证出发日期、包车时长8小时、订单完整性'
+    self.title = '预订3天后武汉经典一日包车游（经济7座，家庭5人，8小时）'
     self.description = '预订武汉经典一日游包车路线，家庭5人出行，选择经济7座车型，8小时服务。验证出发日期（3天后）、包车时长（8小时）、车型座位数、订单信息完整性。'
     self.timeout_seconds = 240
   

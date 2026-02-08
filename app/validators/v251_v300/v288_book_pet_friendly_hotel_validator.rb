@@ -16,7 +16,7 @@ module V251V300
   class V288BookPetFriendlyHotelValidator < BaseValidator
     self.validator_id = 'v288_book_pet_friendly_hotel_validator'
     self.task_id = 'c98da49b-44d4-45bb-848a-ddedf749cf01'
-    self.title = '预订宠物友好酒店'
+    self.title = '预订宠物友好酒店（4天后入住）'
     self.description = '用户预订宠物友好酒店+宠物托运服务'
     self.timeout_seconds = 300
     

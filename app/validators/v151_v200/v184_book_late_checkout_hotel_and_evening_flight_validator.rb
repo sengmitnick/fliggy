@@ -23,7 +23,7 @@ module V151V200
   class V184BookLateCheckoutHotelAndEveningFlightValidator < BaseValidator
     self.validator_id = 'v184_book_late_checkout_hotel_and_evening_flight_validator'
     self.task_id = '2fc00235-eef6-4b3e-ab69-d838b5038fd8'
-    self.title = '预订延迟退房酒店和晚班航班'
+    self.title = '预订明天延迟退房酒店和晚班航班（1人）'
     self.description = '用户需要预订支持延迟退房（下午2点后）的酒店，并预订晚上的航班'
     self.timeout_seconds = 300
   

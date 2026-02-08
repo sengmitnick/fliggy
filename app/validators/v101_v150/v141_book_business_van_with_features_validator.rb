@@ -6,7 +6,7 @@ module V101V150
   class V141BookBusinessVanWithFeaturesValidator < BaseValidator
     self.validator_id = 'v141_book_business_van_with_features_validator'
     self.task_id = 'b1c2d3e4-5f6a-7b8c-9d0e-1f2a3b4c5d6e'
-    self.title = '预订商务车（自动挡+儿童座椅）'
+    self.title = '预订后天商务车（自动挡+儿童座椅）'
     self.description = '预订后天广州商务车2天，要求自动挡+儿童座椅'
     self.timeout_seconds = 300
 

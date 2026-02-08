@@ -17,15 +17,16 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (25分)
-#   - 出发地正确（深圳） (20分)
-#   - 目的地正确（广州） (20分)
+#   - 出发地正确（深圳） (15分)
+#   - 目的地正确（广州） (15分)
+#   - 发车日期正确（大后天） (10分)
 #   - 价格符合预算（≤50元） (35分)
 #
 module V001V050
   class V045BookBusShenzhenGuangzhouValidator < BaseValidator
     self.validator_id = 'v045_book_bus_shenzhen_guangzhou_validator'
     self.task_id = '7de96a19-469c-4768-8dec-ed836ac17124'
-    self.title = '预订大后天深圳到广州最便宜汽车票（预算≤50元）'
+    self.title = '预订3天后深圳到广州最便宜汽车票（预算≤50元，1人）'
     self.description = '搜索深圳到广州的汽车票，找到价格≤50元的班次'
     self.timeout_seconds = 240
   
@@ -70,12 +71,19 @@ module V001V050
     
       return unless @order
     
-      add_assertion "出发地正确（#{@origin}）", weight: 20 do
-        expect(@order.bus_ticket.origin).to eq(@origin)
+      add_assertion "出发地正确（#{@origin}）", weight: 15 do
+        expect(@order.bus_ticket.origin).to eq(@origin),
+          "出发地错误。期望: #{@origin}, 实际: #{@order.bus_ticket.origin}"
       end
     
-      add_assertion "目的地正确（#{@destination}）", weight: 20 do
-        expect(@order.bus_ticket.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 15 do
+        expect(@order.bus_ticket.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}, 实际: #{@order.bus_ticket.destination}"
+      end
+    
+      add_assertion "发车日期正确（大后天）", weight: 10 do
+        expect(@order.bus_ticket.departure_date).to eq(@target_date),
+          "发车日期不正确。期望: #{@target_date}（大后天）, 实际: #{@order.bus_ticket.departure_date}"
       end
     
       add_assertion "价格符合预算（≤#{@budget}元）", weight: 35 do

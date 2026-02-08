@@ -37,7 +37,7 @@ module V051V100
   class V082BuySkiingSportsInsuranceValidator < BaseValidator
     self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
     self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
-    self.title = '购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
+    self.title = '购买滑雪运动保险（哈尔滨15天后出行，3天，运动医疗保额最高）'
     self.description = '为哈尔滨滑雪之旅购买运动保险，选择运动医疗保额最高的专业滑雪保险'
     self.timeout_seconds = 240
   

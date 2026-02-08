@@ -9,7 +9,7 @@ module V151V200
   class V153BookTourAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v153_book_tour_and_airport_pickup_validator'
     self.task_id = 'c8d9e0f1-2a3b-4c5d-6e7f-8a9b0c1d2e4f'
-    self.title = '预订跟团游并预订机场接机服务（广州市内1日游）'
+    self.title = '预订明天跟团游并预订机场接机服务（广州市内1日游）'
     self.description = '预订明天广州市内1日跟团游，并预订机场接机服务'
     self.timeout_seconds = 300
 

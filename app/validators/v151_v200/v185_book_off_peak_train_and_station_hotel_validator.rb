@@ -23,7 +23,7 @@ module V151V200
   class V185BookOffPeakTrainAndStationHotelValidator < BaseValidator
     self.validator_id = 'v185_book_off_peak_train_and_station_hotel_validator'
     self.task_id = '06619bd5-4bb7-44a3-8584-7b2aef743850'
-    self.title = '预订避开高峰时段火车和火车站附近酒店'
+    self.title = '预订明天避开高峰时段火车和火车站附近酒店（1人）'
     self.description = '用户需要预订非高峰时段（10-16点）的火车，并预订火车站附近酒店'
     self.timeout_seconds = 300
   

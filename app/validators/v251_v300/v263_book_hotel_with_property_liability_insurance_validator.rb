@@ -19,7 +19,7 @@ module V251V300
   class V263BookHotelWithPropertyLiabilityInsuranceValidator < BaseValidator
     self.validator_id = 'v263_book_hotel_with_property_liability_insurance_validator'
     self.task_id = '20880d56-4e35-423e-befa-c7df4897e258'
-    self.title = '预订深圳酒店+境内旅游保险（投保人与入住人一致，保险期限覆盖住宿期间）'
+    self.title = '预订明天深圳酒店+境内旅游保险（投保人与入住人一致，保险期限覆盖住宿期间）'
     self.description = '用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消），要求投保人姓名与入住人一致，保险起止日期覆盖住宿期间'
     self.timeout_seconds = 300
     

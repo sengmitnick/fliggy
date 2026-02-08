@@ -16,7 +16,7 @@ module V251V300
   class V294BookVegetarianServiceValidator < BaseValidator
     self.validator_id = 'v294_book_vegetarian_service_validator'
     self.task_id = 'd91a0668-9efb-4c74-b6f2-78d678ebde69'
-    self.title = '预订素食主义者服务'
+    self.title = '预订素食主义者服务（8天后出发）'
     self.description = '用户预订素食主义者专属服务（素食餐+酒店）'
     self.timeout_seconds = 300
     

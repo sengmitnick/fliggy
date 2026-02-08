@@ -17,7 +17,7 @@ module V151V200
   class V193BookPremiumUpgradeWithinBudgetValidator < BaseValidator
     self.validator_id = 'v193_book_premium_upgrade_within_budget_validator'
     self.task_id = '8cf29355-6c7f-458c-855e-c12a75be9643'
-    self.title = '预算内升级最高等级'
+    self.title = '预订3天后预算内升级最高等级（1人）'
     self.description = '预订经济舱+标准房，预算内升级最高等级'
     self.timeout_seconds = 300
     

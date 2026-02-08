@@ -17,7 +17,7 @@ module V101V150
   class V108LongTermHomestayValidator < BaseValidator
     self.validator_id = 'v108_long_term_homestay_validator'
     self.task_id = 'a8f4e3b7-9c2d-4e1f-b6a9-5d7c3e8f2a61'
-    self.title = '预订长租民宿（杭州西湖区，月租，性价比优先）'
+    self.title = '预订长租民宿（杭州西湖区，月租30天，1间房1成人，性价比优先）'
     self.description = '在杭州西湖区预订适合长租的民宿（30天以上），选择价格最低的月租房。注: 目前只有杭州有月租民宿'
     self.timeout_seconds = 300
   

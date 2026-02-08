@@ -16,7 +16,7 @@ module V251V300
   class V292BookStudentBudgetPackageValidator < BaseValidator
     self.validator_id = 'v292_book_student_budget_package_validator'
     self.task_id = 'fd50ec27-3219-4bab-9a00-659b10b5aeb0'
-    self.title = '预订学生特惠套餐'
+    self.title = '预订5天后学生特惠套餐（≤500元）'
     self.description = '用户预订学生特惠套餐（学生票+青旅+优惠）'
     self.timeout_seconds = 300
     

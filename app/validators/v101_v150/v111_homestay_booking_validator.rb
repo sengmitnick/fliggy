@@ -26,7 +26,7 @@ module V101V150
   class V111HomestayBookingValidator < BaseValidator
     self.validator_id = 'v111_homestay_booking_validator'
     self.task_id = '7874748d-a0b8-4725-a536-ff9141c0fed1'
-    self.title = '预订热门民宿（上海CBD核心区）'
+    self.title = '预订热门民宿（上海CBD核心区，2晚，1间房2成人）'
     self.description = '在上海CBD核心区预订评分最高的民宿，入住2晚'
     self.timeout_seconds = 300
   

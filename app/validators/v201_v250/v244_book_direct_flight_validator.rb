@@ -16,7 +16,7 @@ module V201V250
   class V244BookDirectFlightValidator < BaseValidator
     self.validator_id = 'v244_book_direct_flight_validator'
     self.task_id = '9ff95aff-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '预订直飞航班（不转机）'
+    self.title = '预订后天直飞航班（不转机）'
     self.description = '用户需要预订直飞航班（不转机）'
     self.timeout_seconds = 300
     

@@ -37,7 +37,7 @@ module V101V150
   class V119BookRegularTrainAndPickupValidator < BaseValidator
     self.validator_id = 'v119_book_regular_train_and_pickup_validator'
     self.task_id = '39a9127b-f7bc-49ff-9e39-a91cd0d9a2e0'
-    self.title = '订购火车票后预订接站服务（高铁）'
+    self.title = '订购火车票后预订接站服务（高铁，1人）'
     self.description = '订购上海到杭州的高铁，到达杭州东站后预订接站到西湖风景区'
     self.timeout_seconds = 300
   

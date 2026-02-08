@@ -16,7 +16,7 @@ module V201V250
   class V249BookFlightWithMealValidator < BaseValidator
     self.validator_id = 'v249_book_flight_with_meal_validator'
     self.task_id = '4ff4afff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '预订含餐食服务的航班'
+    self.title = '预订4天后含餐食服务的航班'
     self.description = '用户需要预订包含餐食服务的航班'
     self.timeout_seconds = 300
     

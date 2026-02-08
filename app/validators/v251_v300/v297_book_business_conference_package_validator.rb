@@ -17,7 +17,7 @@ module V251V300
   class V297BookBusinessConferencePackageValidator < BaseValidator
     self.validator_id = 'v297_book_business_conference_package_validator'
     self.task_id = 'e83b5fa7-c5d9-41e8-a0cd-f1435c06ce7b'
-    self.title = '预订商务会议套餐'
+    self.title = '预订5天后商务会议套餐（3晚）'
     self.description = '用户预订商务会议套餐(会议室+住宿+餐饮)'
     self.timeout_seconds = 300
     

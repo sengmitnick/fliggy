@@ -17,7 +17,7 @@ module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
     self.task_id = '98182723-1c20-486b-b2c2-ba4d2e48e1df'
-    self.title = '预订航班+机场3公里内酒店'
+    self.title = '预订3天后航班+机场3公里内酒店'
     self.description = '预订航班+机场3公里内酒店（便于转机）'
     self.timeout_seconds = 300
     

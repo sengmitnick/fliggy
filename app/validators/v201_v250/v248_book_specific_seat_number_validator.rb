@@ -16,7 +16,7 @@ module V201V250
   class V248BookSpecificSeatNumberValidator < BaseValidator
     self.validator_id = 'v248_book_specific_seat_number_validator'
     self.task_id = '3ff39eff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '预订特定座位号（如过道座）'
+    self.title = '预订后天特定座位号（如过道座）'
     self.description = '用户需要预订特定座位号或座位位置（如过道座、紧急出口排）'
     self.timeout_seconds = 300
     

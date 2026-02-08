@@ -18,7 +18,7 @@ module V301V350
   class V301BookSportsFitnessTourValidator < BaseValidator
     self.validator_id = 'v301_book_sports_fitness_tour_validator'
     self.task_id = 'c0e90a56-cd9b-4ef3-8486-8bc3e076e331'
-    self.title = '预订深圳运动健身度假酒店'
+    self.title = '预订6天后深圳运动健身度假酒店（4晚）（1间房，1成人，0儿童）'
     self.description = '预订深圳的运动健身度假套餐（6天后入住，住4晚），酒店需配备健身房、游泳池等运动设施，适合健身爱好者'
     self.timeout_seconds = 300
     

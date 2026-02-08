@@ -17,7 +17,7 @@ module V151V200
   class V189BookCheapestComboOptimizeTotalPriceValidator < BaseValidator
     self.validator_id = 'v189_book_cheapest_combo_optimize_total_price_validator'
     self.task_id = 'bba54fa4-35b4-4a29-942d-dd4d80abcd6d'
-    self.title = '预订总价最低的交通+酒店组合'
+    self.title = '预订后天总价最低的交通+酒店组合（1人）'
     self.description = '预订总价最低的往返交通+酒店组合'
     self.timeout_seconds = 300
     
