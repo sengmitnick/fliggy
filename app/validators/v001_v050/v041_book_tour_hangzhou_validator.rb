@@ -2,67 +2,57 @@
 
 require_relative '../base_validator'
 
-# 验证用例41: 预订明天杭州3天2晚精品小团（<10人）
+# 验证用例41: 预订明天杭州3天2晚跟团游
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索杭州的跟团游产品，
-#   找到3天2晚且团队人数<10人的小团并成功创建预订
+#   找到3天2晚的产品并成功创建预订
 # 
 # 复杂度分析:
 #   1. 需要搜索杭州的跟团游产品
 #   2. 需要选择"明天"出发日期
-#   3. 需要筛选天数为2天1晚的产品
-#   4. 需要筛选团队规模<10人的小团
-#   ❌ 天数+团队规模筛选，无价格限制
+#   3. 需要筛选天数为3天2晚的产品
+#   ❌ 目的地+天数筛选，无价格和人数限制
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
-#   - 目的地正确（杭州） (25分)
-#   - 天数正确（2天1晚） (20分)
-#   - 团队规模符合要求（<10人） (30分)
+#   - 订单已创建 (30分)
+#   - 目的地正确（杭州） (30分)
+#   - 天数正确（3天2晚） (40分)
 #
 module V001V050
   class V041BookTourHangzhouValidator < BaseValidator
     self.validator_id = 'v041_book_tour_hangzhou_validator'
     self.task_id = '919fcf7b-af3e-484c-a6a1-e8d86fbf4ee7'
-    self.title = '预订明天杭州3天2晚精品小团（<10人）'
-    self.description = '搜索杭州的跟团游产品，找到3天2晚且团队人数<10人的小团'
+    self.title = '预订明天杭州3天2晚跟团游'
+    self.description = '搜索杭州的跟团游产品，找到3天2晚的产品并完成预订'
     self.timeout_seconds = 240
   
     def prepare
       @destination = '杭州'
       @duration = 3
       @nights = 2
-      @max_group_size = 10
       @departure_date = Date.current + 1.day
     
-      # 注意：TourGroupProduct 可能没有 max_group_size 字段
-      # 先查所有符合天数的，再通过 tour_packages 筛选
       suitable_tours = TourGroupProduct.where(
         destination: @destination,
         duration: @duration,
         data_version: 0
       )
     
-      # 如果有 max_group_size 字段，过滤
-      # 否则仅统计所有符合天数的产品
-      @suitable_count = suitable_tours.count
-    
       {
-        task: "请预订明天出发的#{@destination}#{@duration}天#{@nights}晚精品小团（团队人数<#{@max_group_size}人）",
+        task: "请预订明天出发的#{@destination}#{@duration}天#{@nights}晚跟团游",
         destination: @destination,
         duration: @duration,
         nights: @nights,
-        max_group_size: @max_group_size,
         departure_date: @departure_date.to_s,
         departure_date_description: "明天（#{@departure_date.strftime('%Y年%m月%d日')}）",
-        hint: "系统中有多个跟团游产品，选择天数正确即可（团队规模验证可选）",
-        suitable_tours_count: @suitable_count
+        hint: "系统中有多个跟团游产品，选择天数正确即可",
+        suitable_tours_count: suitable_tours.count
       }
     end
   
     def verify
-      add_assertion "订单已创建", weight: 25 do
+      add_assertion "订单已创建", weight: 30 do
         all_tour_group_bookings = TourGroupBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -74,26 +64,27 @@ module V001V050
     
       return unless @booking
     
-      add_assertion "目的地正确（#{@destination}）", weight: 25 do
-        expect(@booking.tour_group_product.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 30 do
+        expect(@booking.tour_group_product.destination).to eq(@destination),
+          "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 50 do
-        expect(@booking.tour_group_product.duration).to eq(@duration)
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 40 do
+        expect(@booking.tour_group_product.duration).to eq(@duration),
+          "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
       end
     end
   
     private
   
     def execution_state_data
-      { destination: @destination, duration: @duration, nights: @nights, max_group_size: @max_group_size, departure_date: @departure_date.to_s }
+      { destination: @destination, duration: @duration, nights: @nights, departure_date: @departure_date.to_s }
     end
   
     def restore_from_state(data)
       @destination = data['destination']
       @duration = data['duration']
       @nights = data['nights']
-      @max_group_size = data['max_group_size']
       @departure_date = Date.parse(data['departure_date'])
     end
   

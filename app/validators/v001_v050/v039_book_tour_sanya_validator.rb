@@ -18,8 +18,9 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 目的地正确（三亚） (20分)
-#   - 天数正确（6天5晚） (20分)
-#   - 价格符合预算（≤4500元/人） (40分)
+#   - 出发日期正确（后天） (15分)
+#   - 天数正确（6天5晚） (15分)
+#   - 价格符合预算（≤4500元/人） (30分)
 #
 module V001V050
   class V039BookTourSanyaValidator < BaseValidator
@@ -78,14 +79,22 @@ module V001V050
       return unless @booking
     
       add_assertion "目的地正确（#{@destination}）", weight: 20 do
-        expect(@booking.tour_group_product.destination).to eq(@destination)
+        expect(@booking.tour_group_product.destination).to eq(@destination),
+          "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 20 do
-        expect(@booking.tour_group_product.duration).to eq(@duration)
+      add_assertion "出发日期正确（后天）", weight: 15 do
+        departure_date = @booking.travel_date
+        expect(departure_date).to eq(@departure_date),
+          "出发日期不正确。期望: #{@departure_date}（后天）, 实际: #{departure_date}"
       end
     
-      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 40 do
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 15 do
+        expect(@booking.tour_group_product.duration).to eq(@duration),
+          "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
+      end
+    
+      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 30 do
         price_per_person = @booking.tour_package.price
       
         expect(price_per_person <= @budget_per_person).to be_truthy,

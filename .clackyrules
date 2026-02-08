@@ -915,11 +915,32 @@ ALWAYS prefer TailwindCSS v3 and Stimulus controllers for UI behavior. NO pure J
 
 **Testing Commands**:
 - **All validators**: `rake validator:simulate` - Runs all validators (256 validators, may be slow)
+  - **Execution flow**:
+    1. Step 0-7: Pre-validation checks (lint, format, state management, data violations, weights, API endpoints)
+    2. Executes all validators with progress tracking
+    3. Groups and reports failures
+  - **Use case**: Full test suite before deployment/commit
+  - **Output**: Summary with grouped failures
+  
 - **Single validator**: `rake validator:simulate_single[validator_id]` - Test one specific validator
-  - Example: `rake validator:simulate_single[v010_search_cheapest_flight_validator]`
-  - ALWAYS use this for debugging/testing individual validators
-  - Much faster than running all validators
-- **After creating/modifying validators**: Run `rake validator:simulate_single[your_validator_id]` first, then `rake validator:simulate` before delivery
+  - **Execution flow**:
+    1. Pre-execution checks (Steps 1-6: validator_id format, state management, prepare/simulate violations, weight sum)
+    2. Executes the specified validator
+    3. Outputs detailed JSON results (prepare_info, simulate_info, verify_result)
+  - **Use case**: Development and debugging single validators
+  - **Output**: Detailed JSON format with all execution phases
+  - **Example**: `rake validator:simulate_single[v010_search_cheapest_flight_validator]`
+  - **ALWAYS use this** for debugging/testing individual validators - much faster than full simulate
+  
+- **Key Differences**:
+  - `validator:simulate` = Full test suite with comprehensive pre-checks (Step 0-7) + all validators
+  - `validator:simulate_single` = Quick targeted testing with essential pre-checks (Step 1-6) + one validator
+  - Both commands now include pre-execution validation to catch issues before running simulations
+  - `simulate_single` skips Step 0 (lint) and Step 7 (API endpoint check) for faster iteration
+  
+- **After creating/modifying validators**: 
+  1. Run `rake validator:simulate_single[your_validator_id]` first for quick feedback
+  2. Run `rake validator:simulate` before delivery to ensure no regressions
 
 For authenticated curl: `rails dev:token[test@example.com]` outputs the token and example curl command (will create user if not exists). Copy the token and use it:
 ```bash

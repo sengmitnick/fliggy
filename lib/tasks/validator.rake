@@ -1189,6 +1189,9 @@ namespace :validator do
   
   desc "Run simulation for a specific validator"
   task :simulate_single, [:validator_id] => :environment do |t, args|
+    # Load ValidatorChecker module
+    require_relative 'validator_checker'
+    
     validator_id = args[:validator_id]
     
     unless validator_id
@@ -1235,9 +1238,34 @@ namespace :validator do
       exit 1
     end
     
+    # Find the validator file path
+    validator_file = validator_files.find do |file|
+      content = File.read(file)
+      validator_id_match = content.match(/self\.validator_id\s*=\s*['"]([^'"]+)['"]/) 
+      validator_id_match && validator_id_match[1] == validator_id
+    end
+    
+    unless validator_file
+      puts "❌ Could not find validator file for: #{validator_id}"
+      exit 1
+    end
+    
     puts "\n" + "="*70
     puts "🧪 Testing: #{validator_class.title}"
     puts "   ID: #{validator_class.validator_id}"
+    puts "="*70 + "\n"
+    
+    # Run pre-execution checks on this specific validator
+    check_result = ValidatorChecker.check(validator_file: validator_file)
+    
+    unless check_result[:success]
+      ValidatorChecker.print_errors(check_result[:errors])
+      puts "\n❌ Pre-execution checks failed. Please fix the issues above before running simulation.\n"
+      exit 1
+    end
+    
+    puts "\n" + "="*70
+    puts "🎬 Running Simulation"
     puts "="*70 + "\n"
     
     instance = validator_class.new(SecureRandom.uuid)
