@@ -16,11 +16,12 @@ require_relative '../base_validator'
 #   ❌ 价格优先，简化版性价比
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
+#   - 订单已创建 (20分)
 #   - 出发地正确（深圳） (15分)
 #   - 目的地正确（广州） (15分)
 #   - 发车日期正确（大后天） (10分)
-#   - 价格符合预算（≤50元） (35分)
+#   - 价格符合预算（≤50元） (30分)
+#   - 乘车人数正确（1人） (10分)
 #
 module V001V050
   class V045BookBusShenzhenGuangzhouValidator < BaseValidator
@@ -59,7 +60,7 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 25 do
+      add_assertion "订单已创建", weight: 20 do
         all_bus_ticket_orders = BusTicketOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -86,11 +87,16 @@ module V001V050
           "发车日期不正确。期望: #{@target_date}（大后天）, 实际: #{@order.bus_ticket.departure_date}"
       end
     
-      add_assertion "价格符合预算（≤#{@budget}元）", weight: 35 do
+      add_assertion "价格符合预算（≤#{@budget}元）", weight: 30 do
         price = @order.bus_ticket.price
       
         expect(price <= @budget).to be_truthy,
           "价格超出预算。预算: ≤#{@budget}元, 实际: #{price}元"
+      end
+    
+      add_assertion "乘车人数正确（1人）", weight: 10 do
+        expect(@order.passenger_count).to eq(1),
+          "乘车人数不正确。期望: 1人, 实际: #{@order.passenger_count}人"
       end
     end
   

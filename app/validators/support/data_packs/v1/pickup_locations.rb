@@ -16,6 +16,17 @@ PickupLocation.delete_all
 
 # 自取地点数据
 PickupLocation.insert_all([
+  # 北京
+  {
+    city: '北京',
+    district: '朝阳区',
+    detail: '北京市朝阳区建国路88号SOHO现代城',
+    phone: '13800138000',
+    business_hours: '9:00-21:00',
+    notes: '(漫游超人)(北京时间)',
+    is_active: true,
+    data_version: 0
+  },
   # 南宁
   {
     city: '南宁',

@@ -26,11 +26,15 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要先理解航班→确定机场→选地址→对比价格→预订
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 服务类型正确（airport_pickup）(15分)
-#   - 选择了车辆类型 (15分)
-#   - 选择了最便宜的套餐 (30分)
-#   - 订单价格正确 (20分)
+#   - 订单已创建 (15分)
+#   - 服务类型正确（airport_pickup）(10分)
+#   - 上车点正确（虹桥T2）(10分)
+#   - 下车点正确（上海站）(10分)
+#   - 选择了车辆类型 (10分)
+#   - 乘客人数正确（1人）(5分)
+#   - 行李数量正确（1件）(5分)
+#   - 选择了最便宜的套餐 (25分)
+#   - 订单价格正确 (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -60,6 +64,8 @@ module V051V100
       @arrival_airport = '虹桥T2' # 降落机场（上车点）
       @destination_address = '上海站' # 下车点（上海火车站，明确要求）
       @flight_date = (Date.current + 2.days).strftime('%Y-%m-%d') # 后天
+      @passenger_count = 1 # 乘客人数
+      @luggage_count = 1 # 行李数量
     
       @location_from = @arrival_airport # 上车点 = 虹桥T2
       @location_to = @destination_address # 下车点 = 上海站
@@ -92,7 +98,7 @@ module V051V100
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 20 do
+      add_assertion "订单已创建", weight: 15 do
         @transfer = Transfer.order(created_at: :desc).first
         expect(@transfer).not_to be_nil, "未找到任何接送机订单记录"
       end
@@ -100,20 +106,44 @@ module V051V100
       return unless @transfer # 如果没有订单，后续断言无法继续
     
       # 断言2: 服务类型正确
-      add_assertion "服务类型正确（airport_pickup）", weight: 15 do
+      add_assertion "服务类型正确（airport_pickup）", weight: 10 do
         actual_type = @transfer.transfer_type
         expect(actual_type).to eq(@transfer_type),
           "服务类型错误。期望: #{@transfer_type}, 实际: #{actual_type}"
       end
     
-      # 断言3: 选择了车辆类型
-      add_assertion "选择了车辆类型", weight: 15 do
+      # 断言3: 上车点正确
+      add_assertion "上车点正确（#{@location_from}）", weight: 10 do
+        expect(@transfer.location_from).to eq(@location_from),
+          "上车点错误。期望: #{@location_from}, 实际: #{@transfer.location_from}"
+      end
+    
+      # 断言4: 下车点正确
+      add_assertion "下车点正确（#{@location_to}）", weight: 10 do
+        expect(@transfer.location_to).to eq(@location_to),
+          "下车点错误。期望: #{@location_to}, 实际: #{@transfer.location_to}"
+      end
+    
+      # 断言5: 选择了车辆类型
+      add_assertion "选择了车辆类型", weight: 10 do
         expect(@transfer.transfer_package_id).not_to be_nil, "未选择车辆套餐"
         expect(@transfer.transfer_package).not_to be_nil, "车辆套餐记录不存在"
       end
     
-      # 断言4: 选择了最便宜的套餐（核心评分项）
-      add_assertion "选择了最便宜的套餐", weight: 30 do
+      # 断言6: 乘客人数正确
+      add_assertion "乘客人数正确（1人）", weight: 5 do
+        expect(@transfer.passenger_count).to eq(@passenger_count),
+          "乘客人数错误。期望: #{@passenger_count}人, 实际: #{@transfer.passenger_count}人"
+      end
+    
+      # 断言7: 行李数量正确
+      add_assertion "行李数量正确（1件）", weight: 5 do
+        expect(@transfer.luggage_count).to eq(@luggage_count),
+          "行李数量错误。期望: #{@luggage_count}件, 实际: #{@transfer.luggage_count}件"
+      end
+    
+      # 断言8: 选择了最便宜的套餐（核心评分项）
+      add_assertion "选择了最便宜的套餐", weight: 25 do
         # 获取所有可用套餐
         all_packages = TransferPackage.where(
           is_active: true,
@@ -131,8 +161,8 @@ module V051V100
           "实际选择: #{@transfer.transfer_package.name} #{@transfer.transfer_package.category_name}（#{actual_price}元）"
       end
     
-      # 断言5: 订单价格正确
-      add_assertion "订单价格正确", weight: 20 do
+      # 断言9: 订单价格正确
+      add_assertion "订单价格正确", weight: 10 do
         expected_price = @transfer.transfer_package.price
         actual_price = @transfer.total_price
       
@@ -153,6 +183,8 @@ module V051V100
         arrival_airport: @arrival_airport,
         destination_address: @destination_address,
         flight_date: @flight_date,
+        passenger_count: @passenger_count,
+        luggage_count: @luggage_count,
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime.to_s
@@ -168,6 +200,8 @@ module V051V100
       @arrival_airport = data['arrival_airport']
       @destination_address = data['destination_address']
       @flight_date = data['flight_date']
+      @passenger_count = data['passenger_count']
+      @luggage_count = data['luggage_count']
       @location_from = data['location_from']
       @location_to = data['location_to']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
@@ -208,6 +242,8 @@ module V051V100
         pickup_datetime: @pickup_datetime,
         passenger_name: '张三',
         passenger_phone: '13800138000',
+        passenger_count: @passenger_count,
+        luggage_count: @luggage_count,
         total_price: cheapest_package.price,
         discount_amount: 0,
         status: 'pending',

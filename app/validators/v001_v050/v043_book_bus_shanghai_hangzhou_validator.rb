@@ -15,11 +15,12 @@ require_relative '../base_validator'
 #   ❌ 时间段筛选，无价格限制
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
+#   - 订单已创建 (20分)
 #   - 出发地正确（上海） (15分)
 #   - 目的地正确（杭州） (15分)
 #   - 发车日期正确（后天） (10分)
-#   - 发车时间在下午（≥12:00） (35分)
+#   - 发车时间在下午（≥12:00） (30分)
+#   - 乘车人数正确（1人） (10分)
 #
 module V001V050
   class V043BookBusShanghaiHangzhouValidator < BaseValidator
@@ -55,7 +56,7 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 25 do
+      add_assertion "订单已创建", weight: 20 do
         all_bus_ticket_orders = BusTicketOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -82,11 +83,16 @@ module V001V050
           "发车日期不正确。期望: #{@target_date}（后天）, 实际: #{@order.bus_ticket.departure_date}"
       end
     
-      add_assertion "发车时间在下午（≥12:00）", weight: 35 do
+      add_assertion "发车时间在下午（≥12:00）", weight: 30 do
         departure_time = @order.bus_ticket.departure_time
       
         expect(departure_time >= @afternoon_cutoff).to be_truthy,
           "发车时间不符合要求。要求: ≥12:00, 实际: #{departure_time}"
+      end
+    
+      add_assertion "乘车人数正确（1人）", weight: 10 do
+        expect(@order.passenger_count).to eq(1),
+          "乘车人数不正确。期望: 1人, 实际: #{@order.passenger_count}人"
       end
     end
   

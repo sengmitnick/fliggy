@@ -18,10 +18,11 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要先搜索景点→选择票种→对比供应商→预订
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
+#   - 订单已创建 (20分)
 #   - 景点正确（深圳欢乐港湾）(20分)
 #   - 票种正确（成人票）(15分)
-#   - 游玩日期正确（明天）(15分)
+#   - 游玩日期正确（明天）(10分)
+#   - 数量正确（1张）(10分)
 #   - 选择了最便宜的供应商 (25分)
 # 
 # 使用方法:
@@ -36,7 +37,7 @@ module V001V050
   class V047BookAttractionTicketValidator < BaseValidator
     self.validator_id = 'v047_book_attraction_ticket_validator'
     self.task_id = '72f0aacf-7273-46bb-a334-35194205d1d1'
-    self.title = '预订明天深圳欢乐港湾成人票（1张，最便宜供应商）'
+    self.title = '预订明天深圳欢乐港湾成人票1张（最便宜供应商）'
     self.description = '需要搜索深圳欢乐港湾的门票，选择成人票中最便宜的供应商并成功创建订单'
     self.timeout_seconds = 240
   
@@ -103,7 +104,7 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 25 do
+      add_assertion "订单已创建", weight: 20 do
         all_ticket_orders = TicketOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -133,12 +134,18 @@ module V001V050
       end
     
       # 断言4: 游玩日期正确
-      add_assertion "游玩日期正确", weight: 15 do
+      add_assertion "游玩日期正确", weight: 10 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "游玩日期错误。期望: #{@visit_date}, 实际: #{@ticket_order.visit_date}"
       end
     
-      # 断言5: 选择了最便宜的供应商（核心评分项）
+      # 断言5: 数量正确（1张）
+      add_assertion "数量正确（1张）", weight: 10 do
+        expect(@ticket_order.quantity).to eq(@quantity),
+          "数量错误。期望: #{@quantity}张, 实际: #{@ticket_order.quantity}张"
+      end
+    
+      # 断言6: 选择了最便宜的供应商（核心评分项）
       add_assertion "选择了最便宜的供应商", weight: 25 do
         # 判断游玩日期是否为周末
         is_weekend = [0, 6].include?(@visit_date.wday)

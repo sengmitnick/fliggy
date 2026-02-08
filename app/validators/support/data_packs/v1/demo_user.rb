@@ -95,13 +95,19 @@ if demo_user.persisted?
   end
   
   # 添加联系人
-  if demo_user.contacts.where(name: '王五').none?
+  if demo_user.contacts.where(name: '张三').none?
     demo_user.contacts.create!([
+      {
+        name: '张三',
+        phone: '13800138000',
+        email: 'zhangsan@example.com',
+        is_default: true,
+        data_version: 0
+      },
       {
         name: '王五',
         phone: '13700137000',
         email: 'wangwu@example.com',
-        is_default: true,
         data_version: 0
       },
       {
@@ -111,7 +117,7 @@ if demo_user.persisted?
         data_version: 0
       }
     ])
-    puts "     ✓ 添加联系人: 王五, 赵六"
+    puts "     ✓ 添加联系人: 张三, 王五, 赵六"
   end
   
   # 添加收货地址

@@ -15,10 +15,11 @@ require_relative '../base_validator'
 #   ❌ 时间优先，无价格限制
 # 
 # 评分标准:
-#   - 订单已创建 (30分)
-#   - 出发地正确（北京） (25分)
-#   - 目的地正确（天津） (25分)
+#   - 订单已创建 (25分)
+#   - 出发地正确（北京） (20分)
+#   - 目的地正确（天津） (20分)
 #   - 发车日期正确（明天） (20分)
+#   - 乘车人数正确（1人） (15分)
 #
 module V001V050
   class V044BookBusBeijingTianjinValidator < BaseValidator
@@ -55,7 +56,7 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 30 do
+      add_assertion "订单已创建", weight: 25 do
         all_bus_ticket_orders = BusTicketOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -67,16 +68,24 @@ module V001V050
     
       return unless @order
     
-      add_assertion "出发地正确（#{@origin}）", weight: 25 do
-        expect(@order.bus_ticket.origin).to eq(@origin)
+      add_assertion "出发地正确（#{@origin}）", weight: 20 do
+        expect(@order.bus_ticket.origin).to eq(@origin),
+          "出发地不正确。期望: #{@origin}, 实际: #{@order.bus_ticket.origin}"
       end
     
-      add_assertion "目的地正确（#{@destination}）", weight: 25 do
-        expect(@order.bus_ticket.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 20 do
+        expect(@order.bus_ticket.destination).to eq(@destination),
+          "目的地不正确。期望: #{@destination}, 实际: #{@order.bus_ticket.destination}"
       end
     
       add_assertion "发车日期正确（明天）", weight: 20 do
-        expect(@order.bus_ticket.departure_date).to eq(@target_date)
+        expect(@order.bus_ticket.departure_date).to eq(@target_date),
+          "发车日期不正确。期望: #{@target_date}（明天）, 实际: #{@order.bus_ticket.departure_date}"
+      end
+    
+      add_assertion "乘车人数正确（1人）", weight: 15 do
+        expect(@order.passenger_count).to eq(1),
+          "乘车人数不正确。期望: 1人, 实际: #{@order.passenger_count}人"
       end
     end
   

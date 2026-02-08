@@ -127,8 +127,9 @@
     <div class="flex justify-between items-center">
       <span class="font-medium text-gray-900">联系人姓名</span>
       <div class="flex items-center space-x-1 cursor-pointer" data-action="click->wifi-booking#openAddressPicker">
-        <% if current_user.addresses.any? %>
-          <input type="text" value="<%= current_user.addresses.first.name %>" 
+        <% if current_user.contacts.any? %>
+          <% default_contact = current_user.contacts.find_by(is_default: true) || current_user.contacts.first %>
+          <input type="text" value="<%= default_contact.name %>" 
                  class="text-right text-sm text-gray-900 outline-none w-32" 
                  placeholder="请输入联系人姓名"
                  data-wifi-booking-target="contactName">
@@ -147,8 +148,9 @@
     <!-- 联系人电话 -->
     <div class="flex justify-between items-center pb-3">
       <span class="font-medium text-gray-900">联系人电话</span>
-      <% if current_user.addresses.any? %>
-        <input type="tel" value="<%= current_user.addresses.first.phone %>" 
+      <% if current_user.contacts.any? %>
+        <% default_contact = current_user.contacts.find_by(is_default: true) || current_user.contacts.first %>
+        <input type="tel" value="<%= default_contact.phone %>" 
                class="text-right text-sm text-gray-900 outline-none w-40" 
                placeholder="请输入联系人电话"
                data-wifi-booking-target="contactPhone">
@@ -228,12 +230,12 @@
   </div>
 </div>
 
-<!-- 收货地址选择器模态框 -->
+<!-- 联系人选择器模态框 -->
 <div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
      data-wifi-booking-target="addressPickerModal">
   <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto p-4 pb-24">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-bold">选择收货地址</h3>
+      <h3 class="text-lg font-bold">选择联系人</h3>
       <button data-action="click->wifi-booking#closeAddressPicker" class="text-gray-400">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -241,24 +243,23 @@
       </button>
     </div>
     
-    <!-- 收货地址列表 -->
+    <!-- 联系人列表 -->
     <div class="space-y-2 max-h-96 overflow-y-auto">
-      <% if current_user.addresses.any? %>
-        <% current_user.addresses.each do |address| %>
-          <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if address.is_default %>"
+      <% if current_user.contacts.any? %>
+        <% current_user.contacts.order(is_default: :desc, created_at: :desc).each do |contact| %>
+          <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if contact.is_default %>"
                data-action="click->wifi-booking#selectAddress"
-               data-address-name="<%= address.name %>"
-               data-address-phone="<%= address.phone %>">
+               data-address-name="<%= contact.name %>"
+               data-address-phone="<%= contact.phone %>">
             <div class="flex justify-between items-start">
               <div class="flex-1">
                 <div class="flex items-center mb-1">
-                  <span class="font-medium text-gray-900"><%= address.name %></span>
-                  <span class="ml-2 text-gray-600"><%= address.phone %></span>
-                  <% if address.is_default %>
+                  <span class="font-medium text-gray-900"><%= contact.name %></span>
+                  <span class="ml-2 text-gray-600"><%= contact.phone %></span>
+                  <% if contact.is_default %>
                     <span class="ml-2 text-xs bg-[#FFDD00] text-black px-2 py-0.5 rounded">默认</span>
                   <% end %>
                 </div>
-                <div class="text-sm text-gray-500"><%= address.full_address %></div>
               </div>
               <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -268,7 +269,7 @@
         <% end %>
       <% else %>
         <div class="text-center py-8 text-gray-500">
-          <p>暂无收货地址</p>
+          <p>暂无联系人</p>
           <p class="text-sm mt-2">请手动输入联系人信息</p>
         </div>
       <% end %>
