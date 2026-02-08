@@ -2,29 +2,31 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订深圳到北京后天的最低价机票
+# 验证用例: 给张三订后天从深圳到北京的最便宜机票
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳到北京后天的航班，
-#   找到价格最低的航班并成功创建订单。
+#   找到价格最低的航班并为张三成功创建订单。
 #   
 #   具体要求:
+#   - 受益人: 张三（demo_user 的 passenger）
 #   - 出发城市: 深圳
 #   - 目的城市: 北京
 #   - 出发日期: 后天（当前日期 + 2天）
 #   - 价格要求: 必须选择该航线当天的最低价航班
-#   - 操作要求: 完整填写订单信息（乘客姓名、身份证号、联系电话等）
 #   
 #   测试场景:
 #   系统中会有多个深圳到北京的航班，价格各不相同。
-#   Agent 需要正确筛选目标日期的航班，对比价格，选择最便宜的选项。
+#   Agent 需要正确筛选目标日期的航班，对比价格，选择最便宜的选项，
+#   并使用 demo_user 的出行人数据（张三）填写订单信息。
 # 
 # 评分标准:
 #   - 订单已创建 (20分) - 系统中存在新创建的订单记录
 #   - 出发城市正确 (10分) - 订单中的航班出发城市为深圳
 #   - 目的城市正确 (10分) - 订单中的航班目的城市为北京
-#   - 出发日期正确 (20分) - 订单中的航班日期为后天（+2天）
-#   - 选择了最低价航班 (40分) - 所选航班价格等于该航线当天的最低价
+#   - 出发日期正确 (15分) - 订单中的航班日期为后天（+2天）
+#   - 乘客信息正确 (10分) - 乘客姓名和身份证号来自 demo_user 的 passengers（张三）
+#   - 选择了最低价航班 (35分) - 所选航班价格等于该航线当天的最低价
 # 
 # 使用方法:
 #   # 准备阶段
@@ -38,8 +40,8 @@ module V001V050
   class V003BookFlightValidator < BaseValidator
     self.validator_id = 'v003_book_flight_validator'
     self.task_id = '5fb8453d-648a-4944-bb52-7e0e7eb4f58c'
-    self.title = ' 预订深圳到北京后天的最低价机票'
-    self.description = '需要在系统中搜索深圳到北京后天的航班，找到价格最低的航班并成功创建订单。'
+    self.title = '给张三订后天从深圳到北京的最便宜机票'
+    self.description = '需要在系统中搜索深圳到北京后天的航班，找到价格最低的航班并为张三成功创建订单。'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -69,19 +71,20 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订一张后天从#{@origin}到#{@destination}的低价机票",
+        task: "请给张三预订一张后天从#{@origin}到#{@destination}的低价机票",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
         date_description: "后天（#{@target_date.strftime('%Y年%m月%d日')}）",
-        requirement: "必须选择该航线当天的最低价航班",
+        passenger_name: "张三",
+        requirement: "必须选择该航线当天的最低价航班，乘客信息使用张三（demo_user 的出行人）",
         hint: "系统中有多个航班可选，价格从 #{@lowest_price} 元到 #{max_price} 元不等，请仔细对比后选择最便宜的航班",
         available_flights_count: available_flights.count,
         price_range: {
           lowest: @lowest_price,
           highest: max_price
         },
-        scoring_note: "选择最低价航班占评分权重40%，请务必进行价格对比"
+        scoring_note: "选择最低价航班占评分权重35%，乘客信息正确占10%，请务必使用 demo_user 的出行人数据"
       }
     end
   
@@ -109,12 +112,21 @@ module V001V050
       end
     
       # 断言3: 出发日期正确
-      add_assertion "出发日期正确", weight: 20 do
-        expect(@booking.flight.flight_date).to eq(@target_date)
+      add_assertion "出发日期正确（后天 #{@target_date}）", weight: 15 do
+        expect(@booking.flight.flight_date).to eq(@target_date),
+          "出发日期错误。期望: #{@target_date}（后天）, 实际: #{@booking.flight.flight_date}"
       end
     
-      # 断言4: 选择了最低价航班（核心评分项）
-      add_assertion "选择了最低价航班", weight: 40 do
+      # 断言4: 乘客信息正确（来自 demo_user 数据）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user 出行人）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证号错误。期望: 110101199001011234（张三的身份证号）, 实际: #{@booking.passenger_id_number}"
+      end
+    
+      # 断言5: 选择了最低价航班（核心评分项）
+      add_assertion "选择了最低价航班", weight: 35 do
         # 查找该航线的所有航班
         all_flights = Flight.where(
           departure_city: @origin,
