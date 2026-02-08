@@ -28,8 +28,8 @@ module V051V100
   class V058BookUsaSim7dayValidator < BaseValidator
     self.validator_id = 'v058_book_usa_sim_7day_validator'
     self.task_id = 'abd44239-e7bc-4665-ba95-4f6167f22c8e'
-    self.title = '购买美国7天共10GB流量SIM卡（数量1张）'
-    self.description = '搜索美国地区的SIM卡，找到7天有效期且总流量为共10GB的产品并购买1张'
+    self.title = '帮小明买美国7天共10GB流量SIM卡（买1张）'
+    self.description = '小明要去美国7天，帮他买一张7天有效期、共10GB流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -153,7 +153,11 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: '小明',
+          phone: user.passengers.find_by(name: '小明', data_version: 0)&.phone || '13500135001',
+          address: user.addresses.find_by(data_version: 0)&.full_address || '北京市朝阳区建国路88号SOHO现代城'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

@@ -28,8 +28,8 @@ module V051V100
   class V055BookKoreaSim3dayValidator < BaseValidator
     self.validator_id = 'v055_book_korea_sim_3day_validator'
     self.task_id = '6bc431af-a23f-422a-b4cf-17d17ab01d20'
-    self.title = '购买韩国3天共5GB流量SIM卡（数量1张）'
-    self.description = '搜索韩国地区的SIM卡，找到3天有效期且总流量为共5GB的产品并购买1张'
+    self.title = '帮李四买韩国3天共5GB流量SIM卡（买1张）'
+    self.description = '李四要去韩国3天，帮他买一张3天有效期、共5GB流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -153,7 +153,11 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: user.addresses.find_by(name: '李四', data_version: 0)&.name || '李四',
+          phone: user.addresses.find_by(name: '李四', data_version: 0)&.phone || '13900139000',
+          address: user.addresses.find_by(name: '李四', data_version: 0)&.full_address || '上海市浦东新区陆家嘴环路1000号'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

@@ -35,8 +35,8 @@ module V051V100
   class V059BookThailandWifi3dayValidator < BaseValidator
     self.validator_id = 'v059_book_thailand_wifi_3day_validator'
     self.task_id = '6b2013cb-010e-4832-8605-40a394c83748'
-    self.title = '预订泰国随身WiFi（1台、3天、4G经济版）'
-    self.description = '搜索泰国WiFi租赁服务，选择4G经济版并成功创建3天租赁订单'
+    self.title = '帮李四租泰国随身WiFi（1台、3天、选4G经济版）'
+    self.description = '李四要去泰国3天，帮他租一台随身WiFi，选4G经济版（最便宜），7天后上海浦东自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -175,7 +175,11 @@ module V051V100
           address: "上海市浦东新区世纪大道1000号",
           method: "mail"
         }.to_json,
-        contact_info: { name: '李四', phone: '13900139000', address: '上海市浦东新区世纪大道1000号' }.to_json,
+        contact_info: {
+          name: user.addresses.find_by(name: '李四', data_version: 0)&.name || '李四',
+          phone: user.addresses.find_by(name: '李四', data_version: 0)&.phone || '13900139000',
+          address: user.addresses.find_by(name: '李四', data_version: 0)&.full_address || '上海市浦东新区陆家嘴环路1000号'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

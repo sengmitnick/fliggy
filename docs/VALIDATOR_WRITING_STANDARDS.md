@@ -35,8 +35,10 @@
 |------|---------|------------|----------|
 | 酒店入住人 | passengers | guest_name, guest_phone | 字符串 |
 | 机票/火车票 | passengers | passenger_id | ID |
+| **接送机服务** | **passengers** | **passenger_name, passenger_phone** | **字符串** |
 | 景点门票/活动 | User + contacts | user_id + contact_phone | ID + 字符串 |
 | **保险被保人** | **passengers** | **insured_persons** | **`[{name, id_number}]`** |
+| **流量包充值** | **passengers** | **contact_info: {phone}** | **JSON字符串** |
 | WiFi联系人 | contacts | contact_name, contact_phone | 字符串 |
 | 电话卡邮寄 | addresses | address 字段 | 字符串 |
 | 深度旅游/跟团游 | passengers + contacts | traveler_*/contact_* + booking_travelers | 混合 |
@@ -82,23 +84,52 @@ return if @order.nil?  # Guard clause
 
 **总和必须 = 100%**
 
-### 3.3 数据规范验证
+### 3.3 乘客/联系人信息验证
 
-**必须验证数据来自 demo_user，不是硬编码：**
+**核心原则：** prepare 查询 `data_version: 0` → simulate 使用实例变量 → verify 验证
 
-**示例：保险被保人信息**
+**✅ 标准模式：**
 ```ruby
-add_assertion "被保人信息填写正确（姓名+身份证号）", weight: 5 do
-  insured_persons = @order.insured_persons || []
-  expect(insured_persons).not_to be_empty, "未填写被保人信息"
-  
-  zhang_san = insured_persons.find { |p| p['name'] == '张三' }
-  expect(zhang_san).not_to be_nil, "未找到被保人'张三'"
-  expect(zhang_san['id_number']).not_to be_empty, "被保人'张三'未填写身份证号"
+# prepare: 查询基础数据
+@passenger = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+  .passengers.find_by!(name: '张三', data_version: 0)
+@expected_phone = @passenger.phone
+
+# simulate: 使用实例变量
+ModelName.create!(
+  passenger_name: @passenger.name,
+  passenger_phone: @expected_phone,  # 或 contact_info: JSON.generate({phone: @expected_phone})
+  data_version: @data_version
+)
+
+# verify: 验证匹配
+add_assertion "乘客信息正确", weight: 10 do
+  expect(@order.passenger_phone).to eq(@expected_phone)
 end
 ```
 
+**❌ 禁止：**
+- simulate 中查询 `data_version: 0`
+- 硬编码后备值：`@phone || '13800138000'`
 
+### 3.4 特殊字段验证
+
+**保险被保人（JSON数组）：**
+```ruby
+add_assertion "被保人信息正确（姓名+身份证号）", weight: 5 do
+  insured = @order.insured_persons.find { |p| p['name'] == '张三' }
+  expect(insured).not_to be_nil
+  expect(insured['id_number']).not_to be_empty
+end
+```
+
+**流量包手机号（JSON对象）：**
+```ruby
+add_assertion "手机号正确", weight: 15 do
+  phone = JSON.parse(@order.contact_info)['phone']
+  expect(phone).to eq(@expected_phone)
+end
+```
 
 ---
 
@@ -109,7 +140,9 @@ end
 | WiFi租赁 | delivery_method: 'pickup' | PickupLocation 表 | 只能自取 |
 | 电话卡 | delivery_method: 'mail' | user.addresses | 只能邮寄 |
 | 酒店/机票/火车 | guest_name / passenger_id | user.passengers | 需实名 |
+| **接送机服务** | **passenger_name, passenger_phone** | **user.passengers** | **字符串** |
 | **保险** | **insured_persons** | **user.passengers** | **`[{name, id_number}]`** |
+| **流量包充值** | **contact_info: {phone}** | **user.passengers** | **JSON字符串** |
 | 跟团游/深度游 | contact_* + booking_travelers | passengers + contacts | 联系人 + 出行人 |
 
 ---
@@ -122,13 +155,16 @@ end
 - [ ] 删除具体地址、电话、操作步骤
 
 ### 数据引用检查
-- [ ] 需身份证号的用 passengers（酒店/机票/保险）
+- [ ] 乘客信息在 prepare 中预查询（避免 simulate 中使用 data_version: 0）
+- [ ] 需身份证号的用 passengers（酒店/机票/保险/接送机）
 - [ ] 删除 `User.find_or_create_by!` 创建用户
+- [ ] simulate 中无 `data_version: 0` 的查询或创建
 
 ### 验证断言检查
 - [ ] 第一条断言查询订单 + 包含 `data_version: @data_version`
 - [ ] 查询只过滤核心实体，不过滤待验证属性
-- [ ] 添加数据规范验证（入住人/联系人来自 demo_user）
+- [ ] 乘客信息验证：姓名和电话合并为单个断言（10分）
+- [ ] 添加数据规范验证（乘客/联系人来自 demo_user）
 - [ ] 权重总和 = 100%
 
 ---

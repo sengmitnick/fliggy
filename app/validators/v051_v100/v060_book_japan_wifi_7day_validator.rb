@@ -35,8 +35,8 @@ module V051V100
   class V060BookJapanWifi7dayValidator < BaseValidator
     self.validator_id = 'v060_book_japan_wifi_7day_validator'
     self.task_id = '68b99d80-bc33-4659-9f14-7c4f80578a72'
-    self.title = '预订日本随身WiFi（2台、7天、4G无限量）'
-    self.description = '搜索日本WiFi租赁服务，选择4G无限量版并成功创建7天2台租赁订单'
+    self.title = '帮王五租日本随身WiFi（2台、7天、选4G无限量）'
+    self.description = '王五全家要去日本7天，帮他租2台随身WiFi，选4G无限量版，5天后北京朝阳自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -178,7 +178,11 @@ module V051V100
           address: "广州市天河区天河路230号",
           method: "mail"
         }.to_json,
-        contact_info: { name: '王五', phone: '13700137000', address: '广州市天河区天河路230号' }.to_json,
+        contact_info: {
+          name: user.contacts.find_by(name: '王五', data_version: 0)&.name || '王五',
+          phone: user.contacts.find_by(name: '王五', data_version: 0)&.phone || '13700137000',
+          address: user.addresses.find_by(data_version: 0)&.full_address || '北京市朝阳区建国路88号SOHO现代城'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

@@ -13,10 +13,10 @@ require_relative '../base_validator'
 #   - 订单已创建 (20分) - 系统中存在跟团游订单记录
 #   - 目的地正确（三亚） (10分) - 订单的目的地必须是三亚
 #   - 天数正确（5天4晚） (10分) - 订单的行程天数必须是5天
-#   - 价格符合预算（≤5000元/人，总价≤10000元） (20分) - 成人单价不超过5000元
+#   - 价格符合预算（≤5000元/人，总价≤10000元） (25分) - 成人单价不超过5000元
 #   - 预订人数正确（2个成人，0个儿童） (10分) - 成人数量为2，儿童数量为0
 #   - 联系人信息正确 (10分) - 联系人姓名和电话来自 demo_user 的 passengers（张三）
-#   - 小团要求（<15人） (5分) - 所选套餐的总人数少于15人
+#   - 小团要求（<15人） (10分) - 所选套餐的总人数少于15人
 #   - 旅客列表正确（张三、李四） (15分) - 必须选择张三和李四作为出行人
 # 
 # 使用方法:
@@ -102,7 +102,7 @@ module V001V050
       end
     
       # 断言4: 价格符合预算（核心评分项）
-      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 20 do
+      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 25 do
         # 获取成人单价（不含保险）
         expect(@booking.tour_package).not_to be_nil, "未找到套餐信息"
         adult_unit_price = @booking.tour_package.price
@@ -130,7 +130,7 @@ module V001V050
       end
     
       # 断言7: 小团要求
-      add_assertion "小团要求", weight: 5 do
+      add_assertion "小团要求", weight: 10 do
         product = @booking.tour_group_product
         
         # 检查标题或 tags 中是否包含"小团"相关关键词
@@ -164,8 +164,8 @@ module V001V050
         # 验证李四的身份证号
         lisi = travelers.find { |t| t.traveler_name == '李四' }
         expect(lisi).not_to be_nil, "未找到旅客李四"
-        expect(lisi.id_number).to eq('110101199002022345'),
-          "李四身份证号错误。期望: 110101199002022345, 实际: #{lisi.id_number}"
+        expect(lisi.id_number).to eq('110101199001012345'),
+          "李四身份证号错误。期望: 110101199001012345, 实际: #{lisi.id_number}"
       end
     end
   

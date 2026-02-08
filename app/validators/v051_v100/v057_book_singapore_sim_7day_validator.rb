@@ -28,8 +28,8 @@ module V051V100
   class V057BookSingaporeSim7dayValidator < BaseValidator
     self.validator_id = 'v057_book_singapore_sim_7day_validator'
     self.task_id = '24205fa9-acae-42c0-ae53-fae2238238d2'
-    self.title = '购买新加坡7天无限量流量SIM卡（数量1张）'
-    self.description = '搜索新加坡地区的SIM卡，找到7天有效期且流量为"无限量"的产品并购买1张'
+    self.title = '帮刘强买新加坡7天无限量流量SIM卡（买1张）'
+    self.description = '刘强要去新加坡7天，帮他买一张7天有效期、无限量流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -153,7 +153,11 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: '刘强',
+          phone: user.passengers.find_by(name: '刘强', data_version: 0)&.phone || '13600136001',
+          address: user.addresses.find_by(data_version: 0)&.full_address || '北京市朝阳区建国路88号SOHO现代城'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

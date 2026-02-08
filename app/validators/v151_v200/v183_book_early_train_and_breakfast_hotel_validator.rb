@@ -24,7 +24,7 @@ module V151V200
   class V183BookEarlyTrainAndBreakfastHotelValidator < BaseValidator
     self.validator_id = 'v183_book_early_train_and_breakfast_hotel_validator'
     self.task_id = '2f272b8e-e252-4a44-82fc-bb22b88361f7'
-    self.title = '预订明天早班火车和含早餐酒店（1人）'
+    self.title = '预订明天早班火车和含早餐酒店'
     self.description = '用户需要预订早班火车（6-8点出发），并预订前一晚含早餐的酒店'
     self.timeout_seconds = 300
   

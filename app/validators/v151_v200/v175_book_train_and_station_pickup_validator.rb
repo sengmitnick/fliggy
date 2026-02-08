@@ -37,7 +37,7 @@ module V151V200
   class V175BookTrainAndStationPickupValidator < BaseValidator
     self.validator_id = 'v175_book_train_and_station_pickup_validator'
     self.task_id = '77ad42cd-6c18-4752-b8e4-f7ec1532fee0'
-    self.title = '订购后天火车票后预订接站服务（高铁，1人）'
+    self.title = '订觭后天火车票后预订接站服务（高铁）'
     self.description = '订购北京到南京的高铁，到达南京南站后预订接站到新街口商圈'
     self.timeout_seconds = 300
   

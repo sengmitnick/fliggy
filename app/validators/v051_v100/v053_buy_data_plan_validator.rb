@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例53: 购买日本天包漫游流量中最便宜的流量包
+# 验证用例53: 给张三购买日本天包漫游流量（选最便宜的）
 # 
 # ⚠️ 重要说明:
 #   本验证器测试的是 InternetDataPlan（漫游流量包），NOT InternetSimCard（SIM卡）
@@ -13,7 +13,9 @@ require_relative '../base_validator'
 #   两者是不同的产品类型！
 # 
 # 任务描述:
-#   搜索日本漫游流量包 → 筛选天包类型 → 对比价格 → 选最便宜的 → 填写手机号 → 创建订单
+#   通过联系人选择器选择张三 → 自动填充他的手机号 → 选择日本天包最便宜的流量包 → 创建订单
+#   
+#   重要：手机号必须通过联系人（Passenger）获取，不是手动输入
 #   
 #   包含三种套餐类型（InternetDataPlan的plan_type字段）:
 #   - 天包: 按天计费，如日本1天(28元)、3天(68元)、7天(128元)
@@ -22,9 +24,9 @@ require_relative '../base_validator'
 #   
 #   筛选条件: region='日本' AND plan_type='天包' AND data_version=0（基线数据）
 #   最便宜: 日本1天漫游包，28元（天包类型）
-#   运营商: 中国电信 180 2712 8600
+#   联系人: 张三（Passenger表中is_self=true的记录）
+#   手机号: 从张三的Passenger记录获取
 #   流量: 0.5GB/天，4G/5G漫游
-#   手机号: 13800138000
 #   
 #   数据隔离: 使用data_version字段标记当前验证会话的订单，避免跨会话数据污染
 # 
@@ -32,15 +34,17 @@ require_relative '../base_validator'
 #   1. 浏览日本流量包: 筛选天包类型
 #   2. 对比价格: 1天(28元) < 3天(68元) < 7天(128元)
 #   3. 选最便宜: 28元（日本1天漫游包，天包类型）
-#   4. 填写手机号: 13800138000
-#   5. 计算总价: 28×1=28元
+#   4. 点击联系人按钮: 选择张三（从Passenger表获取）
+#   5. 自动填充手机号: 张三的电话号码
+#   6. 计算总价: 28×1=28元
 # 
 # 评分标准:
 #   - 订单已创建（使用data_version隔离会话） (20分)
-#   - 订单类型=data_plan (15分)
-#   - 选了具体流量包产品 (15分)
-#   - 选了日本天包中最便宜的28元日本1天漫游包（基于data_version=0的基线数据） (30分)
-#   - 总价=28元 (20分)
+#   - 订单类型=data_plan (10分)
+#   - 选了具体流量包产品 (10分)
+#   - 选了日本天包中最便宜的28元日本1天漫游包（基于data_version=0的基线数据） (35分)
+#   - 手机号与张三的Passenger记录一致 (15分)
+#   - 总价=28元 (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -54,8 +58,8 @@ module V051V100
   class V053BuyDataPlanValidator < BaseValidator
     self.validator_id = 'v053_buy_data_plan_validator'
     self.task_id = '22f7ecf1-8018-4a3f-8c00-f6fce7bee108'
-    self.title = '购买日本天包漫游流量中最便宜的流量包'
-    self.description = '需要搜索日本漫游流量包产品（InternetDataPlan），筛选天包类型，选择价格最低的套餐（28元）并成功创建订单。注意：这是漫游流量包，不是SIM卡！'
+    self.title = '给张三买日本天包漫游流量（选最便宜的）'
+    self.description = '张三要去日本旅游，通过联系人选择器选择张三，帮他买天包漫游流量（运营商漫游包），选最便宜的套餐'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -64,6 +68,11 @@ module V051V100
       @region = '日本'
       @plan_type = '天包'
       @quantity = 1     # 1份
+    
+      # 查找张三的联系人信息（从Passenger表获取）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_passenger = user.passengers.find_by!(is_self: true, data_version: 0)
+      @zhangsan_phone = @zhangsan_passenger.phone
     
       # 查找日本天包流量包产品（注意：查询基线数据 data_version=0）
       @available_data_plans = InternetDataPlan.where(
@@ -74,13 +83,15 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "购买日本天包漫游流量: 1份、选最便宜的、填手机号",
+        task: "给张三购买日本天包漫游流量: 通过联系人选择器选择张三、1份、选最便宜的",
         product_type: "InternetDataPlan（漫游流量包，NOT SIM卡）",
         order_type_expected: "data_plan",
         region: @region,
         plan_type: @plan_type,
         quantity: @quantity,
-        hint: "从日本天包类型漫游流量包（InternetDataPlan）中选择价格最低的套餐(28元，日本1天漫游包)。这是运营商漫游包，不是境外SIM卡。手机号: 13800138000",
+        contact_name: @zhangsan_passenger.name,
+        contact_phone: @zhangsan_phone,
+        hint: "从日本天包类型漫游流量包（InternetDataPlan）中选择价格最低的套餐(28元，日本1天漫游包)。这是运营商漫游包，不是境外SIM卡。通过联系人选择器选择张三（#{@zhangsan_passenger.name}），系统会自动填充他的手机号（#{@zhangsan_phone}）",
         available_data_plans_count: @available_data_plans.count
       }
     end
@@ -99,7 +110,7 @@ module V051V100
       return unless @internet_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 订单类型正确（必须是data_plan，不是sim_card）
-      add_assertion "订单类型正确（data_plan）", weight: 15 do
+      add_assertion "订单类型正确（data_plan）", weight: 10 do
         actual_type = @internet_order.order_type
         expect(actual_type).to eq('data_plan'),
           "订单类型错误。期望: data_plan（漫游流量包），实际: #{actual_type}。" \
@@ -107,7 +118,7 @@ module V051V100
       end
     
       # 断言3: 选择了具体的漫游流量包产品（InternetDataPlan）
-      add_assertion "选择了具体的流量包产品", weight: 15 do
+      add_assertion "选择了具体的流量包产品", weight: 10 do
         expect(@internet_order.orderable_type).to eq('InternetDataPlan'), 
           "未选择流量包产品（orderable_type错误）。" \
           "期望: InternetDataPlan（漫游流量包），实际: #{@internet_order.orderable_type}。" \
@@ -117,7 +128,7 @@ module V051V100
       end
     
       # 断言4: 选择了日本天包中最便宜的流量包（核心评分项）
-      add_assertion "选择了日本天包中最便宜的流量包", weight: 30 do
+      add_assertion "选择了日本天包中最便宜的流量包", weight: 35 do
         # 获取日本天包流量包
         japan_daily_data_plans = InternetDataPlan.where(
           region: '日本',
@@ -144,8 +155,24 @@ module V051V100
           "实际选择: #{data_plan.name}（#{actual_price}元）"
       end
     
-      # 断言5: 订单价格正确
-      add_assertion "订单价格正确", weight: 20 do
+      # 断言5: 手机号与张三的Passenger记录一致
+      add_assertion "手机号与张三的联系人信息一致", weight: 15 do
+        contact_info = begin
+          JSON.parse(@internet_order.contact_info)
+        rescue JSON::ParserError, TypeError
+          nil
+        end
+      
+        expect(contact_info).not_to be_nil, "contact_info 为空或无法解析"
+        actual_phone = contact_info['phone']
+        
+        expect(actual_phone).to eq(@zhangsan_phone),
+          "手机号与张三的联系人记录不一致。期望: #{@zhangsan_phone}（张三的Passenger记录），实际: #{actual_phone}。" \
+          "请通过联系人选择器选择张三，而不是手动输入手机号"
+      end
+    
+      # 断言6: 订单价格正确
+      add_assertion "订单价格正确", weight: 10 do
         data_plan = @internet_order.orderable
         expected_price = data_plan.price * @quantity
         actual_price = @internet_order.total_price
@@ -163,7 +190,8 @@ module V051V100
       {
         region: @region,
         plan_type: @plan_type,
-        quantity: @quantity
+        quantity: @quantity,
+        zhangsan_phone: @zhangsan_phone
       }
     end
   
@@ -171,7 +199,8 @@ module V051V100
     def restore_from_state(data)
       @region = data['region']
       @plan_type = data['plan_type']
-      @quantity = data['quantity']
+      @quantity = data['quantity'].to_i if data['quantity']
+      @zhangsan_phone = data['zhangsan_phone']
     
       # 重新加载可用流量包列表
       @available_data_plans = InternetDataPlan.where(
@@ -179,14 +208,22 @@ module V051V100
         plan_type: @plan_type,
         data_version: 0
       )
+      
+      # 重新获取张三的联系人信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_passenger = user.passengers.find_by!(is_self: true, data_version: 0)
     end
   
-    # 模拟 AI Agent 操作：购买日本天包流量，选择最便宜的
+    # 模拟 AI Agent 操作：给张三购买日本天包流量，选择最便宜的
     def simulate
       # 1. 查找测试用户（数据包中已创建，使用基线数据data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找日本天包流量包产品（筛选基线数据data_version=0）
+      # 2. 从联系人获取张三的手机号
+      zhangsan_passenger = user.passengers.find_by!(is_self: true, data_version: 0)
+      zhangsan_phone = zhangsan_passenger.phone
+    
+      # 3. 查找日本天包流量包产品（筛选基线数据data_version=0）
       available_data_plans = InternetDataPlan.where(
         region: @region,
         plan_type: @plan_type,
@@ -195,15 +232,15 @@ module V051V100
     
       raise "未找到任何日本天包流量包产品" if available_data_plans.empty?
     
-      # 3. 选择价格最低的流量包
+      # 4. 选择价格最低的流量包
       cheapest_data_plan = available_data_plans.min_by(&:price)
     
       raise "未找到可用的日本天包流量包产品" unless cheapest_data_plan
     
-      # 4. 计算总价：单价 × 数量
+      # 5. 计算总价：单价 × 数量
       total_price = cheapest_data_plan.price * @quantity
     
-      # 5. 创建境外上网订单（使用data_version标记当前会话）
+      # 6. 创建境外上网订单（使用data_version标记当前会话）
       internet_order = InternetOrder.create!(
         user_id: user.id,
         orderable_type: 'InternetDataPlan',
@@ -214,7 +251,7 @@ module V051V100
         total_price: total_price,
         delivery_method: nil,
         contact_info: JSON.generate({
-          phone: '13800138000'
+          phone: zhangsan_phone  # 使用从Passenger获取的手机号
         }),
         rental_info: JSON.generate({
           validity_days: cheapest_data_plan.validity_days,

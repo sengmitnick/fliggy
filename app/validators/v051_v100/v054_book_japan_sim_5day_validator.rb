@@ -28,8 +28,8 @@ module V051V100
   class V054BookJapanSim5dayValidator < BaseValidator
     self.validator_id = 'v054_book_japan_sim_5day_validator'
     self.task_id = 'f3339f0c-cc3f-45bf-9565-315994f07e25'
-    self.title = '购买日本5天共10GB流量SIM卡（数量1张）'
-    self.description = '搜索日本地区的SIM卡，找到5天有效期且总流量为共10GB的产品并购买1张'
+    self.title = '帮张三买日本5天共10GB流量SIM卡（买1张）'
+    self.description = '张三要去日本5天，帮他买一张5天有效期、共10GB流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -159,7 +159,11 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: user.addresses.find_by(name: '张三', data_version: 0)&.name || '张三',
+          phone: user.addresses.find_by(name: '张三', data_version: 0)&.phone || '13800138000',
+          address: user.addresses.find_by(name: '张三', data_version: 0)&.full_address || '北京市朝阳区建国路88号SOHO现代城'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

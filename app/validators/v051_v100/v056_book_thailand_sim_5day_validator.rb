@@ -28,8 +28,8 @@ module V051V100
   class V056BookThailandSim5dayValidator < BaseValidator
     self.validator_id = 'v056_book_thailand_sim_5day_validator'
     self.task_id = '78281c9c-a2e5-4a59-aa7e-f013fb164c5a'
-    self.title = '购买泰国7天无限量流量SIM卡（数量1张）'
-    self.description = '搜索泰国地区的SIM卡，找到7天有效期且流量为"无限量"的产品并购买1张'
+    self.title = '帮王芳买泰国7天无限量流量SIM卡（买1张）'
+    self.description = '王芳要去泰国7天，帮她买一张7天有效期、无限量流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -153,7 +153,11 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: '王芳',
+          phone: user.passengers.find_by(name: '王芳', data_version: 0)&.phone || '13700137001',
+          address: user.addresses.find_by(data_version: 0)&.full_address || '北京市朝阳区建国路88号SOHO现代城'
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )

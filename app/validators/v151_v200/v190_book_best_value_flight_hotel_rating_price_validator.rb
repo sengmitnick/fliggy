@@ -17,7 +17,7 @@ module V151V200
   class V190BookBestValueFlightHotelRatingPriceValidator < BaseValidator
     self.validator_id = 'v190_book_best_value_flight_hotel_rating_price_validator'
     self.task_id = '19700fc3-d99e-4691-bf05-a9d0b855d17a'
-    self.title = '预订3天后性价比最高组合（1人）'
+    self.title = '预订明天性价比最高组合（1人）'
     self.description = '预订性价比最高组合（评分/价格比最优）'
     self.timeout_seconds = 300
     

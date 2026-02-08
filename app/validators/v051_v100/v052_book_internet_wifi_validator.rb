@@ -34,7 +34,7 @@ module V051V100
     self.validator_id = 'v052_book_internet_wifi_validator'
     self.task_id = '05db4166-de34-4d4b-9078-6e672b53bb21'
     self.title = '帮张三订去中国香港的随身WiFi（租1台用5天，选最便宜的，北京朝阳区自取）'
-    self.description = '张三下周要去中国香港出差5天，需要租一台随身WiFi。帮他从可用的WiFi产品中选最便宜的（日租金最低），7天后到北京朝阳区自取，联系人填张三'
+    self.description = '张三下周要去中国香港出差5天，帮他租一台随身WiFi，选最便宜的（日租金最低），7天后到北京朝阳区自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -148,16 +148,18 @@ module V051V100
           "取件方式错误。期望: #{@delivery_method}（自取）, 实际: #{actual_method}"
       end
     
-      # 断言9: 联系人信息正确（张三）
-      add_assertion "联系人信息正确（张三）", weight: 5 do
+      # 断言9: 联系人信息来自demo_user（张三）
+      add_assertion "联系人信息来自demo_user（张三 13800138000）", weight: 5 do
         actual_name = @internet_order.contact_info&.dig('name') || @internet_order.contact_info&.dig(:name)
         actual_phone = @internet_order.contact_info&.dig('phone') || @internet_order.contact_info&.dig(:phone)
         
-        expect(actual_name).to eq(@contact_name),
-          "联系人姓名错误。期望: #{@contact_name}, 实际: #{actual_name}"
-        # 电话号码应该是张三的电话（从联系人或地址中获取）
-        expect(actual_phone).not_to be_nil,
-          "联系人电话为空"
+        # 验证联系人姓名来自demo_user的联系人
+        expect(actual_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（来自demo_user.contacts）, 实际: #{actual_name}"
+        
+        # 验证电话号码来自demo_user的联系人
+        expect(actual_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（来自demo_user.contacts），实际: #{actual_phone}"
       end
     
       # 断言10: 订单价格正确
