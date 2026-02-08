@@ -32,8 +32,8 @@ module V001V050
   class V012SearchCheapestEuropeTrainValidator < BaseValidator
     self.validator_id = 'v012_search_cheapest_europe_train_validator'
     self.task_id = '4d893f09-9fc7-4b28-a51a-a3b529160719'
-    self.title = '搜索明天从巴黎到阿姆斯特丹最便宜的火车票（1人）'
-    self.description = '搜索明天从巴黎北站到阿姆斯特丹中央车站的火车票，找出价格最便宜的班次并预订（1人出行）'
+    self.title = '给张三订明天去阿姆斯特丹的火车票（选最便宜的）'
+    self.description = '给张三预订明天从巴黎北站到阿姆斯特丹中央车站的火车票，找出价格最便宜的班次并预订'
     self.timeout_seconds = 300
   
     # 准备阶段：插入测试数据
@@ -61,7 +61,8 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请搜索明天从#{@origin}到#{@destination}的火车票，找出价格最便宜的班次并预订（#{@passenger_count}人出行）",
+        task: "给张三订明天去阿姆斯特丹的火车票（选最便宜的）",
+        task_detail: "请搜索明天从#{@origin}到#{@destination}的火车票，找出价格最便宜的班次并预订（#{@passenger_count}人出行）",
         region: @region,
         origin: @origin,
         destination: @destination,
@@ -76,34 +77,50 @@ module V001V050
   
     # 验证阶段：检查是否找到并预订了最便宜的班次
     def verify
-      # 断言1: 必须有订单创建
-      add_assertion "订单已创建", weight: 15 do
+      # 断言1: 必须有订单创建（查询过滤核心实体：线路）
+      add_assertion "创建了境外火车票订单", weight: 20 do
         all_abroad_ticket_orders = AbroadTicketOrder
-          .where(data_version: @data_version)
+          .joins(:abroad_ticket)
+          .where(
+            abroad_tickets: {
+              origin: @origin,
+              destination: @destination,
+              departure_date: @target_date,
+              data_version: 0
+            },
+            data_version: @data_version
+          )
           .order(created_at: :desc)
           .to_a
-        expect(all_abroad_ticket_orders).not_to be_empty, "未找到任何AbroadTicketOrder记录"
+        expect(all_abroad_ticket_orders).not_to be_empty, "未找到任何#{@origin}→#{@destination}的AbroadTicketOrder记录"
         @order = all_abroad_ticket_orders.first
-        # Replaced by expect(all_abroad_ticket_orders).not_to be_empty above, "未找到任何境外票务订单记录"
       end
     
-      return unless @order
+      return if @order.nil?
     
-      # 断言2: 线路正确（巴黎→阿姆斯特丹）
-      add_assertion "线路正确（#{@origin} → #{@destination}）", weight: 15 do
+      # 断言2: 线路正确（核心实体验证）
+      add_assertion "线路正确（#{@origin} → #{@destination}）", weight: 10 do
         expect(@order.abroad_ticket.origin).to eq(@origin),
-          "出发地不正确。预期: #{@origin}, 实际: #{@order.abroad_ticket.origin}"
+          "出发地不正确。期望: #{@origin}, 实际: #{@order.abroad_ticket.origin}"
         expect(@order.abroad_ticket.destination).to eq(@destination),
-          "目的地不正确。预期: #{@destination}, 实际: #{@order.abroad_ticket.destination}"
+          "目的地不正确。期望: #{@destination}, 实际: #{@order.abroad_ticket.destination}"
       end
     
       # 断言3: 日期正确
-      add_assertion "出发日期正确（明天）", weight: 10 do
+      add_assertion "出发日期正确（明天 #{@target_date.strftime('%m月%d日')}）", weight: 10 do
         expect(@order.abroad_ticket.departure_date).to eq(@target_date),
-          "出发日期不正确。预期: #{@target_date}, 实际: #{@order.abroad_ticket.departure_date}"
+          "出发日期不正确。期望: #{@target_date.strftime('%Y年%m月%d日')}（明天）, 实际: #{@order.abroad_ticket.departure_date.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言4: 选择了最便宜的班次（核心评分）
+      # 断言4: 乘客信息正确（验证来自 demo_user，不是硬编码）
+      add_assertion "乘客信息正确（张三 13800138000）", weight: 10 do
+        expect(@order.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@order.passenger_name}"
+        expect(@order.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@order.contact_phone}"
+      end
+    
+      # 断言5: 选择了最便宜的班次（核心评分）
       add_assertion "选择了最便宜的班次", weight: 30 do
         # 重新查询该线路所有班次找出最低价
         route_trains = AbroadTicket.where(
@@ -123,7 +140,7 @@ module V001V050
           "未选择最便宜的班次。该线路最低价: ¥#{min_price}, 实际预订: ¥#{booked_price}"
       end
     
-      # 断言5: 订单金额准确
+      # 断言6: 订单金额准确
       add_assertion "订单金额准确", weight: 10 do
         expected_price = @order.abroad_ticket.price
       
@@ -131,8 +148,8 @@ module V001V050
           "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@order.total_price}"
       end
     
-      # 断言6: 出行人数正确（1人）
-      add_assertion "出行人数正确（#{@passenger_count}人）", weight: 20 do
+      # 断言7: 出行人数正确（1人）
+      add_assertion "出行人数正确（#{@passenger_count}人）", weight: 10 do
         # AbroadTicketOrder模型是单个乘客，验证passenger_name存在
         expect(@order.passenger_name).to be_present,
           "未找到乘客信息"
@@ -187,7 +204,7 @@ module V001V050
       # 3. 找出最便宜的
       target_train = route_trains.order(:price).first
     
-      # 4. 创建订单（固定参数）
+      # 4. 创建订单
       order = AbroadTicketOrder.create!(
         abroad_ticket_id: target_train.id,
         user_id: user.id,
@@ -197,7 +214,8 @@ module V001V050
         passenger_type: 'adult',
         seat_category: 'standard',
         total_price: target_train.price,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

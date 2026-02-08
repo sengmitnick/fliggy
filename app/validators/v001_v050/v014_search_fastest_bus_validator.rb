@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 搜索后天杭州到深圳行程时间最短的班次（1人）
+# 验证用例: 给张三订后天去深圳的大巴票（选最快的）
 # 
 # 任务描述:
 #   Agent 需要搜索后天杭州到深圳的所有大巴班次，
@@ -31,8 +31,8 @@ module V001V050
   class V014SearchFastestBusValidator < BaseValidator
     self.validator_id = 'v014_search_fastest_bus_validator'
     self.task_id = 'fc259aa8-f8e6-4d52-b9df-e72bf3076317'
-    self.title = '搜索后天杭州到深圳行程时间最短的汽车票（1人）'
-    self.description = '搜索后天杭州到深圳的所有班次，找出行程时间最短的并预订（1人乘车）'
+    self.title = '给张三订后天去深圳的大巴票（选最快的）'
+    self.description = '给张三搜索后天杭州到深圳的大巴班次，找出行程时间最短的并预订'
     self.timeout_seconds = 300
   
     # 准备阶段：插入测试数据
@@ -81,32 +81,50 @@ module V001V050
   
     # 验证阶段：检查是否找到并预订了最短行程的班次
     def verify
-      # 断言1: 必须有订单创建
-      add_assertion "订单已创建", weight: 15 do
+      # 断言1: 必须有订单创建（包含核心实体过滤）
+      add_assertion "创建了大巴票订单", weight: 20 do
         all_bus_ticket_orders = BusTicketOrder
-          .where(data_version: @data_version)
+          .joins(:bus_ticket)
+          .where(
+            bus_tickets: {
+              origin: @origin,
+              destination: @destination,
+              departure_date: @target_date,
+              data_version: 0
+            },
+            data_version: @data_version
+          )
           .order(created_at: :desc)
           .to_a
-        expect(all_bus_ticket_orders).not_to be_empty, "未找到任何BusTicketOrder记录"
+        expect(all_bus_ticket_orders).not_to be_empty, "未找到任何大巴票订单记录"
         @order = all_bus_ticket_orders.first
-        # Replaced by expect(all_bus_ticket_orders).not_to be_empty above, "未找到任何大巴票订单记录"
       end
     
       return unless @order
     
       # 断言2: 路线正确
       add_assertion "路线正确（杭州→深圳）", weight: 10 do
-        expect(@order.bus_ticket.origin).to eq(@origin)
-        expect(@order.bus_ticket.destination).to eq(@destination)
+        expect(@order.bus_ticket.origin).to eq(@origin),
+          "出发城市错误。期望: #{@origin}, 实际: #{@order.bus_ticket.origin}"
+        expect(@order.bus_ticket.destination).to eq(@destination),
+          "到达城市错误。期望: #{@destination}, 实际: #{@order.bus_ticket.destination}"
       end
     
       # 断言3: 日期正确
-      add_assertion "出发日期正确", weight: 10 do
+      add_assertion "出发日期正确（后天）", weight: 10 do
         expect(@order.bus_ticket.departure_date).to eq(@target_date),
-          "出发日期不正确。预期: #{@target_date}, 实际: #{@order.bus_ticket.departure_date}"
+          "出发日期错误。期望: #{@target_date}（后天）, 实际: #{@order.bus_ticket.departure_date}"
       end
     
-      # 断言4: 正确识别最短行程时间（核心评分）
+      # 断言4: 乘客信息正确（验证来自 demo_user，不是硬编码）
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        passenger = @order.passengers.first
+        expect(passenger).not_to be_nil, "未找到乘客信息"
+        expect(passenger.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{passenger.passenger_name}"
+      end
+    
+      # 断言5: 正确识别最短行程时间（核心评分）
       add_assertion "选择了行程时间最短的班次", weight: 30 do
         # 重新计算所有班次的行程时间
         all_buses = BusTicket.where(
@@ -123,25 +141,25 @@ module V001V050
         booked_duration = @order.bus_ticket.duration_minutes
       
         expect(booked_duration).to eq(shortest_duration),
-          "未选择行程时间最短的班次。最短: #{shortest_duration}分钟, 实际选择: #{booked_duration}分钟"
+          "未选择行程时间最短的班次。期望: #{shortest_duration}分钟（最短）, 实际: #{booked_duration}分钟"
       end
     
-      # 断言5: 订单信息准确
-      add_assertion "订单金额准确", weight: 20 do
+      # 断言6: 订单信息准确
+      add_assertion "订单金额正确", weight: 10 do
         expected_price = @order.bus_ticket.price
       
         expect(@order.total_price).to be_within(1).of(expected_price),
-          "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@order.total_price}"
+          "订单金额错误。期望: ¥#{expected_price}, 实际: ¥#{@order.total_price}"
       end
     
-      # 断言6: 乘车人数正确（1人）
-      add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 15 do
+      # 断言7: 乘车人数正确（1人）
+      add_assertion "乘车人数正确（#{@passenger_count}人）", weight: 10 do
         expect(@order.passenger_count).to eq(@passenger_count),
-          "乘车人数不正确。预期: #{@passenger_count}人, 实际: #{@order.passenger_count}人"
+          "乘车人数错误。期望: #{@passenger_count}人, 实际: #{@order.passenger_count}人"
       
         # 验证乘客信息存在
         expect(@order.passengers.count).to eq(@passenger_count),
-          "乘客信息数量不正确。预期: #{@passenger_count}人, 实际: #{@order.passengers.count}人"
+          "乘客信息数量错误。期望: #{@passenger_count}人, 实际: #{@order.passengers.count}人"
       end
     end
   
@@ -190,19 +208,24 @@ module V001V050
     
       target_bus = buses_with_duration.min_by(&:duration_minutes)
     
-      # 4. 创建订单（固定参数）
+      # 4. 查找 demo_user 的乘客数据
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+    
+      # 5. 创建订单（使用 data_version 隔离）
       order = BusTicketOrder.create!(
         bus_ticket_id: target_bus.id,
         user_id: user.id,
         passenger_count: 1,
         total_price: target_bus.price,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
-      # 创建乘客信息
+      # 6. 创建乘客信息（使用 demo_user 数据）
       order.passengers.create!(
-        passenger_name: '张三',
-        passenger_id_number: '110101199001011234'
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        data_version: @data_version
       )
     
       # 返回操作信息

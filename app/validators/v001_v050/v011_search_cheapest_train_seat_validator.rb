@@ -33,8 +33,8 @@ module V001V050
   class V011SearchCheapestTrainSeatValidator < BaseValidator
     self.validator_id = 'v011_search_cheapest_train_seat_validator'
     self.task_id = 'd75371f7-bbc5-489d-a7e6-c1a4a8222c82'
-    self.title = '搜索后天北京到天津最便宜的车票（1人）'
-    self.description = '搜索后天北京到天津的所有车次，找出最便宜的车票（对比不同座位类型）并完成预订（1人出行）'
+    self.title = '给张三订后天去天津的火车票（选最便宜的）'
+    self.description = '给张三预订后天从北京到天津的火车票，找出最便宜的车票（对比不同座位类型）并完成预订'
     self.timeout_seconds = 300
   
     # 准备阶段：插入测试数据
@@ -73,7 +73,8 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请搜索后天从#{@origin}到#{@destination}的所有车次，找出最便宜的车票并预订（#{@passenger_count}人出行）",
+        task: "给张三订后天去天津的火车票（选最便宜的）",
+        task_detail: "请搜索后天从#{@origin}到#{@destination}的所有车次，找出最便宜的车票并预订（#{@passenger_count}人出行）",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -91,33 +92,50 @@ module V001V050
   
     # 验证阶段：检查是否找到并预订了最便宜的车票
     def verify
-      # 断言1: 必须有订单创建
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 必须有订单创建（查询过滤核心实体：路线）
+      add_assertion "创建了火车票订单", weight: 20 do
         all_train_bookings = TrainBooking
-          .where(data_version: @data_version)
+          .joins(:train)
+          .where(
+            trains: {
+              departure_city: @origin,
+              arrival_city: @destination,
+              data_version: 0
+            },
+            data_version: @data_version
+          )
           .order(created_at: :desc)
           .to_a
-        expect(all_train_bookings).not_to be_empty, "未找到任何TrainBooking记录"
+        expect(all_train_bookings).not_to be_empty, "未找到任何#{@origin}→#{@destination}的TrainBooking记录"
         @booking = all_train_bookings.first
-        # Replaced by expect(all_train_bookings).not_to be_empty above, "未找到任何火车票订单记录"
       end
     
-      return unless @booking
+      return if @booking.nil?
     
-      # 断言2: 路线正确
+      # 断言2: 路线正确（核心实体验证）
       add_assertion "路线正确（北京→天津）", weight: 10 do
-        expect(@booking.train.departure_city).to eq(@origin)
-        expect(@booking.train.arrival_city).to eq(@destination)
+        expect(@booking.train.departure_city).to eq(@origin),
+          "出发城市错误。期望: #{@origin}, 实际: #{@booking.train.departure_city}"
+        expect(@booking.train.arrival_city).to eq(@destination),
+          "到达城市错误。期望: #{@destination}, 实际: #{@booking.train.arrival_city}"
       end
     
       # 断言3: 日期正确
-      add_assertion "出发日期正确", weight: 10 do
+      add_assertion "出发日期正确（后天 #{@target_date.strftime('%m月%d日')}）", weight: 10 do
         booking_date = @booking.train.departure_time.to_date
         expect(booking_date).to eq(@target_date),
-          "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
+          "出发日期不正确。期望: #{@target_date.strftime('%Y年%m月%d日')}（后天）, 实际: #{booking_date.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言4: 正确识别最便宜的车票（核心评分）
+      # 断言4: 乘客信息正确（验证来自 demo_user，不是硬编码）
+      add_assertion "乘客信息正确（张三 13800138000）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
+      end
+    
+      # 断言5: 正确识别最便宜的车票（核心评分）
       add_assertion "选择了最便宜的车票（对比所有座位类型）", weight: 25 do
         # 重新计算所有车次所有座位类型的价格
         all_trains = Train.where(
@@ -154,8 +172,8 @@ module V001V050
           "实际选择: ¥#{booked_price} (#{@booking.train.train_number} #{@booking.seat_type})"
       end
     
-      # 断言5: 订单金额准确
-      add_assertion "订单总价准确", weight: 20 do
+      # 断言6: 订单金额准确
+      add_assertion "订单总价准确", weight: 15 do
         # 获取座位价格
         seat = @booking.train.train_seats.find_by(seat_type: @booking.seat_type)
         expected_price = seat.price
@@ -164,8 +182,8 @@ module V001V050
           "订单金额不正确。预期: ¥#{expected_price}, 实际: ¥#{@booking.total_price}"
       end
     
-      # 断言6: 出行人数正确（1人）
-      add_assertion "出行人数正确（#{@passenger_count}人）", weight: 15 do
+      # 断言7: 出行人数正确（1人）
+      add_assertion "出行人数正确（#{@passenger_count}人）", weight: 10 do
         # TrainBooking模型是单个乘客，验证passenger_name存在
         expect(@booking.passenger_name).to be_present,
           "未找到乘客信息"
@@ -205,8 +223,8 @@ module V001V050
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找乘客
-      passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)
+      # 2. 查找乘客（使用 demo_user 关联查询）
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找最便宜的车票（遍历所有车次和座位类型）
       all_trains = Train.where(
@@ -231,7 +249,7 @@ module V001V050
         end
       end
     
-      # 4. 创建订单（固定参数）
+      # 4. 创建订单
       booking = TrainBooking.create!(
         train_id: target_train.id,
         user_id: user.id,
@@ -241,7 +259,8 @@ module V001V050
         seat_type: target_seat.seat_type,
         accept_terms: true,
         total_price: target_seat.price,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息
