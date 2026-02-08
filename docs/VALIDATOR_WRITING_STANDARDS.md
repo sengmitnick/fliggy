@@ -31,32 +31,15 @@
 
 **使用规则：**
 
-| 场景 | 使用数据 | 题目写法 | simulate 代码 | verify 校验 |
-|------|---------|---------|--------------|------------|
-| 酒店入住人 | passengers | "给张三预订酒店" | `user.passengers.find_by!(name: '张三', data_version: 0)` | guest_name, guest_phone |
-| 机票/火车票 | passengers | "给张三订机票" | `user.passengers.find_by!(name: '张三', data_version: 0)` | passenger_id |
-| 景点门票 | User + contacts | "帮张三预订门票" | user + `user.contacts.find_by!(name: '张三', data_version: 0)` | user_id + contact_phone |
-| 景点活动 | User + contacts | "帮张三预订活动" | user + `user.contacts.find_by!(name: '张三', data_version: 0)` | user_id + contact_phone |
-| WiFi联系人 | contacts | "帮张三订WiFi" | `user.contacts.find_by!(name: '张三', data_version: 0)` | contact_name, contact_phone |
-| 电话卡邮寄 | addresses | "邮寄到张三的地址" | `user.addresses.find_by!(is_default: true, data_version: 0)` | address 字段 |
-| 深度旅游向导 | passengers + contacts | "给张三预订深度旅游" | passenger + contact 分别查询 | traveler_* + contact_* |
-| 跟团游（单人） | passengers + contacts | "给张三预订跟团游" | passenger + contact 分别查询 | contact_* + booking_travelers |
-| 跟团游（多人/儿童） | passengers + contacts | "给张三和小明预订跟团游" | 每个出行人单独查询 | contact_* + 多条 booking_travelers |
-
-**为什么酒店用 passengers 不用 contacts？**  
-→ 入住人需要身份证号（实名制），passengers 表有 `id_number` 字段
-
-**为什么景点门票/活动用 User + contacts？**  
-→ user_id：订单所属用户（张三）  
-→ contact_phone：联系电话，应从 user.contacts 表获取（13800138000）
-
-**深度旅游向导为什么需要两个信息？**  
-→ 游客信息（traveler_*）需要身份证，联系人（contact_*）用于沟通
-
-**跟团游为什么需要联系人和出行人？**  
-→ 联系人（contact_name/contact_phone）：用于旅行社沟通，可能不是出行人  
-→ 出行人（booking_travelers）：实际参团游客，需要身份证号（订机票/酒店）  
-→ 多人/儿童场景：**必须在标题和描述中明确列出所有出行人姓名**（如："给张三和小明预订..."）
+| 场景 | 使用数据 | verify 字段 | 数据格式 |
+|------|---------|------------|----------|
+| 酒店入住人 | passengers | guest_name, guest_phone | 字符串 |
+| 机票/火车票 | passengers | passenger_id | ID |
+| 景点门票/活动 | User + contacts | user_id + contact_phone | ID + 字符串 |
+| **保险被保人** | **passengers** | **insured_persons** | **`[{name, id_number}]`** |
+| WiFi联系人 | contacts | contact_name, contact_phone | 字符串 |
+| 电话卡邮寄 | addresses | address 字段 | 字符串 |
+| 深度旅游/跟团游 | passengers + contacts | traveler_*/contact_* + booking_travelers | 混合 |
 
 **❌ 禁止：**
 - 硬编码姓名、电话、地址
@@ -103,44 +86,31 @@ return if @order.nil?  # Guard clause
 
 **必须验证数据来自 demo_user，不是硬编码：**
 
-**示例 1：酒店入住人信息**
+**示例：保险被保人信息**
 ```ruby
-add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
-  expect(@order.guest_name).to eq('张三'),
-    "入住人姓名错误。期望: 张三（demo_user数据）, 实际: #{@order.guest_name}"
-  expect(@order.guest_phone).to eq('13800138000')
-end
-```
-
-**示例 2：景点门票/活动订单**
-```ruby
-add_assertion "订单属于张三", weight: 15 do
-  expected_user = User.find_by(email: 'demo@travel01.com', data_version: 0)
-  expected_contact = expected_user.contacts.find_by(name: '张三', data_version: 0)
+add_assertion "被保人信息填写正确（姓名+身份证号）", weight: 5 do
+  insured_persons = @order.insured_persons || []
+  expect(insured_persons).not_to be_empty, "未填写被保人信息"
   
-  expect(@order.user_id).to eq(expected_user.id),
-    "订单用户错误。期望: 张三（#{expected_user.email}）, 实际: #{@order.user&.email}"
-  expect(@order.contact_phone).to eq(expected_contact.phone),
-    "联系电话错误。期望: #{expected_contact.phone}（demo_user数据）, 实际: #{@order.contact_phone}"
+  zhang_san = insured_persons.find { |p| p['name'] == '张三' }
+  expect(zhang_san).not_to be_nil, "未找到被保人'张三'"
+  expect(zhang_san['id_number']).not_to be_empty, "被保人'张三'未填写身份证号"
 end
 ```
 
-**为什么需要这条断言？**  
-→ 防止 AI Agent 硬编码任意名字通过验证  
-→ 确保订单关联到正确的用户账号
+
 
 ---
 
 ## 四、业务规则速查
 
-| 业务 | 交付方式 | 字段 | 数据来源 | 备注 |
-|------|---------|------|---------|------|
-| WiFi租赁 | **只能自取** | delivery_method: 'pickup' | PickupLocation 表 | - |
-| 电话卡 | **只能邮寄** | delivery_method: 'mail' | user.addresses | - |
-| 酒店 | N/A | guest_name, guest_phone | user.passengers | 需实名 |
-| 机票/火车 | N/A | passenger_id | user.passengers | 需实名 |
-| 深度旅游向导 | N/A | traveler_* + contact_* | passengers + contacts | 游客需实名 + 联系人 |
-| 跟团游 | N/A | contact_* + booking_travelers | passengers + contacts | 联系人 + 出行人（多人需明确姓名） |
+| 业务 | 字段 | 数据来源 | 格式 |
+|------|------|---------|------|
+| WiFi租赁 | delivery_method: 'pickup' | PickupLocation 表 | 只能自取 |
+| 电话卡 | delivery_method: 'mail' | user.addresses | 只能邮寄 |
+| 酒店/机票/火车 | guest_name / passenger_id | user.passengers | 需实名 |
+| **保险** | **insured_persons** | **user.passengers** | **`[{name, id_number}]`** |
+| 跟团游/深度游 | contact_* + booking_travelers | passengers + contacts | 联系人 + 出行人 |
 
 ---
 
@@ -152,9 +122,7 @@ end
 - [ ] 删除具体地址、电话、操作步骤
 
 ### 数据引用检查
-- [ ] 酒店入住人使用 passengers（不是 contacts）
-- [ ] WiFi联系人使用 contacts
-- [ ] 邮寄地址使用 addresses
+- [ ] 需身份证号的用 passengers（酒店/机票/保险）
 - [ ] 删除 `User.find_or_create_by!` 创建用户
 
 ### 验证断言检查
