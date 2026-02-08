@@ -143,9 +143,39 @@ if demo_user.persisted?
         detail: '陆家嘴环路1000号',
         address_type: 'delivery',
         data_version: 0
+      },
+      {
+        name: '王芳',
+        phone: '13700137001',
+        province: '广东省',
+        city: '广州',
+        district: '天河区',
+        detail: '珠江新城花城大道85号',
+        address_type: 'delivery',
+        data_version: 0
+      },
+      {
+        name: '刘强',
+        phone: '13600136001',
+        province: '广东省',
+        city: '深圳',
+        district: '南山区',
+        detail: '科技园南区深圳湾科技生态园',
+        address_type: 'delivery',
+        data_version: 0
+      },
+      {
+        name: '小明',
+        phone: '13500135001',
+        province: '四川省',
+        city: '成都',
+        district: '高新区',
+        detail: '天府大道中段天府软件园',
+        address_type: 'delivery',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴"
+    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴, 广州天河, 深圳南山, 成都高新"
   end
   
   puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 50)"
