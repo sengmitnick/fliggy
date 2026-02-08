@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订后天东京到京都的新干线列车票（上午12:00之前）
+# 验证用例: 给张三预订后天东京到京都的新干线列车票（上午12:00之前）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索后天东京到京都的新干线车票，
@@ -12,8 +12,9 @@ require_relative '../base_validator'
 #   - 订单已创建 (20分)
 #   - 地区正确（日本） (10分)
 #   - 路线正确（东京→京都） (20分)
-#   - 出发日期正确（后天） (20分)
-#   - 时间段正确（上午） (30分)
+#   - 出发日期正确（后天） (15分)
+#   - 乘客信息正确（张三） (10分)
+#   - 时间段正确（上午） (25分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -27,7 +28,7 @@ module V001V050
   class V007BookJapanTrainMorningValidator < BaseValidator
     self.validator_id = 'v007_book_japan_train_morning_validator'
     self.task_id = 'e29cd5e5-5173-4c40-b61f-924be315c7a2'
-    self.title = '预订后天东京到京都的上午新干线车票'
+    self.title = '给张三预订后天东京到京都的上午新干线车票'
     self.description = '搜索后天东京到京都的新干线车票，选择上午（12:00之前）的班次并预订'
     self.timeout_seconds = 300
   
@@ -54,7 +55,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订一张后天上午从#{@origin}到#{@destination}的新干线车票",
+        task: "请给张三预订一张后天上午从#{@origin}到#{@destination}的新干线车票",
         region: @region,
         origin: @origin,
         destination: @destination,
@@ -95,13 +96,21 @@ module V001V050
       end
     
       # 断言4: 出发日期正确
-      add_assertion "出发日期正确（后天）", weight: 20 do
+      add_assertion "出发日期正确（后天）", weight: 15 do
         expect(@order.abroad_ticket.departure_date).to eq(@target_date),
           "出发日期不正确。预期: #{@target_date}, 实际: #{@order.abroad_ticket.departure_date}"
       end
     
-      # 断言5: 时间段正确（上午）（核心评分项）
-      add_assertion "出发时间在上午（12:00之前）", weight: 30 do
+      # 断言5: 乘客信息正确（来自 demo_user 的 passengers）
+      add_assertion "乘客信息正确（张三 13800138000）", weight: 10 do
+        expect(@order.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@order.passenger_name}"
+        expect(@order.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@order.contact_phone}"
+      end
+    
+      # 断言6: 时间段正确（上午）（核心评分项）
+      add_assertion "出发时间在上午（12:00之前）", weight: 25 do
         start_time = @order.abroad_ticket.time_slot_start
       
         expect(start_time).to be < @morning_cutoff,
@@ -138,7 +147,10 @@ module V001V050
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找符合条件的班次（上午）
+      # 2. 查找乘客信息（从 demo_user 的 passengers 表）
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+    
+      # 3. 查找符合条件的班次（上午）
       morning_trains = AbroadTicket.where(
         region: @region,
         origin: @origin,
@@ -151,12 +163,12 @@ module V001V050
       # 随机选择一个
       target_train = morning_trains.sample
     
-      # 3. 创建订单（固定参数）
+      # 4. 创建订单（使用 passenger 数据）
       order = AbroadTicketOrder.create!(
         abroad_ticket_id: target_train.id,
         user_id: user.id,
-        passenger_name: '张三',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        contact_phone: passenger.phone,
         contact_email: 'demo@travel01.com',
         passenger_type: 'adult',
         seat_category: 'standard',

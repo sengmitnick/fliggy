@@ -20,10 +20,14 @@
 
 ## 二、demo_user 数据使用
 
+**数据文件：** `app/validators/support/data_packs/v1/demo_user.rb`
+
 **demo@travel01.com 提供：**
 - **passengers**（出行人）: 张三、李四、王芳、刘强、小明、小红
 - **contacts**（联系人）: 张三、王五、赵六  
 - **addresses**（收货地址）: 张三（北京朝阳）、李四（上海浦东）
+
+**查看详细信息：** 查看上述文件了解完整的姓名、电话、身份证号、地址等信息。
 
 **使用规则：**
 
