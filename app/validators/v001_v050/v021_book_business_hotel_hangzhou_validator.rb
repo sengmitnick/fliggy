@@ -32,7 +32,7 @@ module V001V050
   class V021BookBusinessHotelHangzhouValidator < BaseValidator
     self.validator_id = 'v021_book_business_hotel_hangzhou_validator'
     self.task_id = 'f25a6149-ef4c-4812-8a81-2965ba558232'
-    self.title = '预订后天杭州商务酒店（1晚，1间房1成人）'
+    self.title = '给张三预订后天杭州商务酒店（1晚）'
     self.description = '搜索杭州的酒店，找到类型为"商务酒店"的酒店并完成后天入住1晚的预订'
     self.timeout_seconds = 240
   
@@ -53,7 +53,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订后天入住#{@city}的#{@brand}（入住1晚）",
+        task: "请给张三预订后天入住#{@city}的#{@brand}（入住1晚）",
         city: @city,
         hotel_brand: @brand,
         check_in_date: @check_in_date.to_s,
@@ -109,10 +109,18 @@ module V001V050
       end
     
       # 断言6: 酒店类型正确（核心评分项）
-      add_assertion "酒店品牌正确（#{@brand}）", weight: 25 do
+      add_assertion "酒店品牌正确（#{@brand}）", weight: 15 do
         actual_brand = @hotel_booking.hotel.brand
         expect(actual_brand).to eq(@brand),
           "酒店品牌错误。期望: #{@brand}, 实际: #{actual_brand || '未分类'}"
+      end
+    
+      # 断言7: 入住人信息正确（来自demo_user）
+      add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq('张三'),
+          "入住人姓名错误。期望: 张三（demo_user数据）, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq('13800138000'),
+          "入住人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@hotel_booking.guest_phone}"
       end
     end
   
@@ -138,6 +146,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      guest = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 随机选择一家杭州的商务酒店
       target_hotel = Hotel.where(
@@ -167,8 +176,8 @@ module V001V050
         total_price: target_hotel_room.price * @nights,
         payment_method: '花呗',
         status: 'pending',
-        guest_name: user.email.split('@').first,
-        guest_phone: '13800138000'
+        guest_name: guest.name,
+        guest_phone: guest.phone
       )
     
       {

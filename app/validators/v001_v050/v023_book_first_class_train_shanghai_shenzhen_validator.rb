@@ -24,7 +24,7 @@ module V001V050
   class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
     self.validator_id = 'v023_book_first_class_train_shanghai_shenzhen_validator'
     self.task_id = 'a09b2f8a-8e9f-44bc-b9e4-ddf833016e09'
-    self.title = '预订后天上海到深圳的一等座（1人）'
+    self.title = '给张三订后天上海到深圳的一等座'
     self.description = '搜索后天上海到深圳的高铁，选择一等座并完成预订'
     self.timeout_seconds = 240
   
@@ -41,7 +41,7 @@ module V001V050
       ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
     
       {
-        task: "请预订一张后天从#{@origin}到#{@destination}的高铁票（一等座）",
+        task: "请给张三预订一张后天从#{@origin}到#{@destination}的高铁票（一等座）",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -79,9 +79,17 @@ module V001V050
           "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
       end
     
-      add_assertion "座位类型正确（一等座）", weight: 30 do
+      add_assertion "座位类型正确（一等座）", weight: 20 do
         expect(@booking.seat_type).to eq(@seat_type),
           "应选择一等座，实际选择: #{@booking.seat_type_label}"
+      end
+    
+      # 断言5: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

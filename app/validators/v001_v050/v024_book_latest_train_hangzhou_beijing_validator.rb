@@ -24,7 +24,7 @@ module V001V050
   class V024BookLatestTrainHangzhouBeijingValidator < BaseValidator
     self.validator_id = 'v024_book_latest_train_hangzhou_beijing_validator'
     self.task_id = '432ed3bc-72d8-4243-8408-9bda6ef0a064'
-    self.title = '预订明天杭州到北京最晚的高铁（1人）'
+    self.title = '给张三订明天杭州到北京最晚的高铁'
     self.description = '在明天的车次中找到发车时间最晚的高铁并完成预订'
     self.timeout_seconds = 240
   
@@ -44,7 +44,7 @@ module V001V050
       @latest_departure_time = latest_train&.departure_time
     
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}最晚的高铁票",
+        task: "请给张三预订一张明天从#{@origin}到#{@destination}最晚的高铁票",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -80,7 +80,7 @@ module V001V050
         expect(booking_date).to eq(@target_date)
       end
     
-      add_assertion "选择了最晚的车次", weight: 40 do
+      add_assertion "选择了最晚的车次", weight: 30 do
         all_trains = Train.where(
           departure_city: @origin,
           arrival_city: @destination,
@@ -91,6 +91,14 @@ module V001V050
       
         expect(@booking.train.departure_time).to eq(latest_time),
           "未选择最晚车次。最晚发车: #{latest_time.strftime('%H:%M')}, 实际选择: #{@booking.train.departure_time.strftime('%H:%M')}"
+      end
+    
+      # 断言5: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

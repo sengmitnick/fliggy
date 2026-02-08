@@ -38,12 +38,19 @@
 | WiFi联系人 | contacts | "帮张三订WiFi" | `user.contacts.find_by!(name: '张三', data_version: 0)` | contact_name, contact_phone |
 | 电话卡邮寄 | addresses | "邮寄到张三的地址" | `user.addresses.find_by!(is_default: true, data_version: 0)` | address 字段 |
 | 深度旅游向导 | passengers + contacts | "给张三预订深度旅游" | passenger + contact 分别查询 | traveler_* + contact_* |
+| 跟团游（单人） | passengers + contacts | "给张三预订跟团游" | passenger + contact 分别查询 | contact_* + booking_travelers |
+| 跟团游（多人/儿童） | passengers + contacts | "给张三和小明预订跟团游" | 每个出行人单独查询 | contact_* + 多条 booking_travelers |
 
 **为什么酒店用 passengers 不用 contacts？**  
 → 入住人需要身份证号（实名制），passengers 表有 `id_number` 字段
 
 **深度旅游向导为什么需要两个信息？**  
 → 游客信息（traveler_*）需要身份证，联系人（contact_*）用于沟通
+
+**跟团游为什么需要联系人和出行人？**  
+→ 联系人（contact_name/contact_phone）：用于旅行社沟通，可能不是出行人  
+→ 出行人（booking_travelers）：实际参团游客，需要身份证号（订机票/酒店）  
+→ 多人/儿童场景：**必须在标题和描述中明确列出所有出行人姓名**（如："给张三和小明预订..."）
 
 **❌ 禁止：**
 - 硬编码姓名、电话、地址
@@ -111,6 +118,7 @@ end
 | 酒店 | N/A | guest_name, guest_phone | user.passengers | 需实名 |
 | 机票/火车 | N/A | passenger_id | user.passengers | 需实名 |
 | 深度旅游向导 | N/A | traveler_* + contact_* | passengers + contacts | 游客需实名 + 联系人 |
+| 跟团游 | N/A | contact_* + booking_travelers | passengers + contacts | 联系人 + 出行人（多人需明确姓名） |
 
 ---
 

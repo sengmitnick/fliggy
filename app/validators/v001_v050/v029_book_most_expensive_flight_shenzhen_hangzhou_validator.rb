@@ -24,7 +24,7 @@ module V001V050
   class V029BookMostExpensiveFlightShenzhenHangzhouValidator < BaseValidator
     self.validator_id = 'v029_book_most_expensive_flight_shenzhen_hangzhou_validator'
     self.task_id = 'a83f2e9b-740d-4542-87e8-8e5d44e5cf6d'
-    self.title = '预订明天深圳到杭州最贵的航班'
+    self.title = '给张三订明天深圳到杭州最贵的航班'
     self.description = '搜索明天深圳到杭州的航班，找到价格最高的航班并完成预订'
     self.timeout_seconds = 240
   
@@ -43,7 +43,7 @@ module V001V050
       @highest_price = available_flights.maximum(:price)
     
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}价格最高的航班",
+        task: "请给张三预订一张明天从#{@origin}到#{@destination}价格最高的航班",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -79,7 +79,7 @@ module V001V050
         expect(@booking.flight.flight_date).to eq(@target_date)
       end
     
-      add_assertion "选择了最贵的航班", weight: 40 do
+      add_assertion "选择了最贵的航班", weight: 30 do
         all_flights = Flight.where(
           departure_city: @origin,
           destination_city: @destination,
@@ -91,6 +91,14 @@ module V001V050
       
         expect(@booking.flight.price).to eq(highest_price),
           "未选择最贵航班。最高价: #{highest_price}元, 实际选择: #{@booking.flight.price}元"
+      end
+    
+      # 断言5: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

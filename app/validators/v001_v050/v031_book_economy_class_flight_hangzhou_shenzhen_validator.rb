@@ -24,7 +24,7 @@ module V001V050
   class V031BookEconomyClassFlightHangzhouShenzhenValidator < BaseValidator
     self.validator_id = 'v031_book_economy_class_flight_hangzhou_shenzhen_validator'
     self.task_id = '8a584a64-cfdb-471b-88f4-93b13e200d0b'
-    self.title = '预订明天杭州到深圳经济舱航班'
+    self.title = '给张三订明天杭州到深圳经济舱机票'
     self.description = '搜索明天杭州到深圳的航班，选择经济舱航班并完成预订'
     self.timeout_seconds = 240
   
@@ -43,7 +43,7 @@ module V001V050
       )
     
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}的经济舱航班",
+        task: "给张三订一张明天从#{@origin}到#{@destination}的经济舱机票",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -56,27 +56,41 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = Booking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何订单记录"
+        all_bookings = Booking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_bookings).not_to be_empty, "未找到任何订单记录"
+        @booking = all_bookings.first
       end
     
       return unless @booking
     
-      add_assertion "出发城市正确", weight: 15 do
-        expect(@booking.flight.departure_city).to eq(@origin)
+      add_assertion "航线正确（#{@origin}→#{@destination}）", weight: 20 do
+        expect(@booking.flight.departure_city).to eq(@origin),
+          "出发城市错误。期望: #{@origin}, 实际: #{@booking.flight.departure_city}"
+        expect(@booking.flight.destination_city).to eq(@destination),
+          "目的城市错误。期望: #{@destination}, 实际: #{@booking.flight.destination_city}"
       end
     
-      add_assertion "目的城市正确", weight: 15 do
-        expect(@booking.flight.destination_city).to eq(@destination)
+      add_assertion "出发日期正确（明天 #{@target_date.strftime('%Y-%m-%d')}）", weight: 15 do
+        expect(@booking.flight.flight_date).to eq(@target_date),
+          "出发日期错误。期望: #{@target_date}（明天）, 实际: #{@booking.flight.flight_date}"
       end
     
-      add_assertion "出发日期正确", weight: 20 do
-        expect(@booking.flight.flight_date).to eq(@target_date)
-      end
-    
-      add_assertion "舱位正确（经济舱）", weight: 30 do
+      add_assertion "舱位正确（经济舱）", weight: 20 do
         expect(@booking.flight.seat_class).to eq(@seat_class),
           "舱位错误。期望: 经济舱, 实际: #{@booking.flight.seat_class}"
+      end
+    
+      add_assertion "乘机人信息正确（张三 13800138000）", weight: 25 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘机人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   
@@ -95,7 +109,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = Passenger.find_by!(user: user, name: '张三', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       target_flight = Flight.where(
         departure_city: @origin,
@@ -113,7 +127,8 @@ module V001V050
         contact_phone: passenger.phone,
         total_price: target_flight.price,
         status: 'pending',
-        accept_terms: true
+        accept_terms: true,
+        data_version: @data_version
       )
     
       { action: 'create_booking', flight_number: target_flight.flight_number }
