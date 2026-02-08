@@ -31,15 +31,19 @@
 
 **使用规则：**
 
-| 场景 | 使用数据 | 题目写法 | simulate 代码 |
-|------|---------|---------|--------------|
-| 酒店入住人 | passengers | "给张三预订酒店" | `user.passengers.find_by!(name: '张三', data_version: 0)` |
-| 机票/火车票 | passengers | "给张三订机票" | `user.passengers.find_by!(name: '张三', data_version: 0)` |
-| WiFi联系人 | contacts | "帮张三订WiFi" | `user.contacts.find_by!(name: '张三', data_version: 0)` |
-| 电话卡邮寄 | addresses | "邮寄到张三的地址" | `user.addresses.find_by!(is_default: true, data_version: 0)` |
+| 场景 | 使用数据 | 题目写法 | simulate 代码 | verify 校验 |
+|------|---------|---------|--------------|------------|
+| 酒店入住人 | passengers | "给张三预订酒店" | `user.passengers.find_by!(name: '张三', data_version: 0)` | guest_name, guest_phone |
+| 机票/火车票 | passengers | "给张三订机票" | `user.passengers.find_by!(name: '张三', data_version: 0)` | passenger_id |
+| WiFi联系人 | contacts | "帮张三订WiFi" | `user.contacts.find_by!(name: '张三', data_version: 0)` | contact_name, contact_phone |
+| 电话卡邮寄 | addresses | "邮寄到张三的地址" | `user.addresses.find_by!(is_default: true, data_version: 0)` | address 字段 |
+| 深度旅游向导 | passengers + contacts | "给张三预订深度旅游" | passenger + contact 分别查询 | traveler_* + contact_* |
 
 **为什么酒店用 passengers 不用 contacts？**  
 → 入住人需要身份证号（实名制），passengers 表有 `id_number` 字段
+
+**深度旅游向导为什么需要两个信息？**  
+→ 游客信息（traveler_*）需要身份证，联系人（contact_*）用于沟通
 
 **❌ 禁止：**
 - 硬编码姓名、电话、地址
@@ -100,12 +104,13 @@ end
 
 ## 四、业务规则速查
 
-| 业务 | 交付方式 | 字段 | 数据来源 |
-|------|---------|------|---------|
-| WiFi租赁 | **只能自取** | delivery_method: 'pickup' | PickupLocation 表 |
-| 电话卡 | **只能邮寄** | delivery_method: 'mail' | user.addresses |
-| 酒店 | N/A | guest_name, guest_phone | user.passengers |
-| 机票/火车 | N/A | passenger_id | user.passengers |
+| 业务 | 交付方式 | 字段 | 数据来源 | 备注 |
+|------|---------|------|---------|------|
+| WiFi租赁 | **只能自取** | delivery_method: 'pickup' | PickupLocation 表 | - |
+| 电话卡 | **只能邮寄** | delivery_method: 'mail' | user.addresses | - |
+| 酒店 | N/A | guest_name, guest_phone | user.passengers | 需实名 |
+| 机票/火车 | N/A | passenger_id | user.passengers | 需实名 |
+| 深度旅游向导 | N/A | traveler_* + contact_* | passengers + contacts | 游客需实名 + 联系人 |
 
 ---
 
