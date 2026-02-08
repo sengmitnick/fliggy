@@ -36,7 +36,7 @@ module V051V100
   class V076ApplyKoreaGroupVisaValidator < BaseValidator
     self.validator_id = 'v076_apply_korea_group_visa_validator'
     self.task_id = 'c8b9e386-8c54-40ca-a684-bcb5f833bb16'
-    self.title = '办理韩国团体签证（5人，成功率100%，最便宜）'
+    self.title = '给李四等5人办理韩国团体签证（成功率100%，最便宜）'
     self.description = '为5人团队办理韩国团体签证，要求成功率100%且价格最便宜'
     self.timeout_seconds = 240
   
@@ -99,7 +99,7 @@ module V051V100
       end
     
       # 断言3: 签证类型正确（团体签证）
-      add_assertion "签证类型正确（团体签证）", weight: 25 do
+      add_assertion "签证类型正确（团体签证）", weight: 20 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}。" \
@@ -113,7 +113,7 @@ module V051V100
       end
     
       # 断言5: 成功率100%
-      add_assertion "成功率100%", weight: 15 do
+      add_assertion "成功率100%", weight: 10 do
         success_rate = @visa_order.visa_product.success_rate
       
         expect(success_rate).to eq(@required_success_rate),
@@ -139,6 +139,18 @@ module V051V100
           "未选择价格最便宜的产品。" \
           "应选: #{cheapest_product.name}（#{cheapest_price}元/人，成功率#{cheapest_product.success_rate}%），" \
           "实际选择: #{@visa_order.visa_product.name}（#{actual_price}元/人，成功率#{@visa_order.visa_product.success_rate}%）"
+      end
+    
+      # 断言7: 联系人姓名正确（李四）
+      add_assertion "联系人姓名正确（李四）", weight: 5 do
+        expect(@visa_order.contact_name).to eq('李四'),
+          "联系人姓名错误。期望: 李四，实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言8: 联系电话正确（李四的电话）
+      add_assertion "联系电话正确（李四的电话）", weight: 5 do
+        expect(@visa_order.contact_phone).to eq('13900139000'),
+          "联系电话错误。期望: 13900139000（李四），实际: #{@visa_order.contact_phone}"
       end
     end
   
@@ -177,8 +189,9 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理韩国团体签证（5人，成功率100%，最便宜）
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户和联系人（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact_passenger = user.passengers.find_by!(name: '李四', data_version: 0)
     
       # 2. 查找韩国
       korea = Country.find_by!(name: @country_name, data_version: 0)
@@ -207,11 +220,12 @@ module V051V100
         expected_date: Date.current + 30.days,  # 预计出行日期30天后
         delivery_method: 'express',
         delivery_address: '广州市天河区珠江新城花城大道5号',
-        contact_name: '陈伟',
-        contact_phone: '13700137000',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息

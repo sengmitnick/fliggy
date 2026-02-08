@@ -35,7 +35,7 @@ module V051V100
   class V077ApplyAustraliaEvisaMinimalMaterialsValidator < BaseValidator
     self.validator_id = 'v077_apply_australia_evisa_minimal_materials_validator'
     self.task_id = '0c821879-db54-42b8-9526-3336bb7af223'
-    self.title = '办理澳大利亚电子签证（材料最少，上门取件）'
+    self.title = '给王芳办理澳大利亚电子签证（材料最少，上门取件）'
     self.description = '办理澳大利亚电子签证，选择所需材料最少且支持上门取件的产品'
     self.timeout_seconds = 240
   
@@ -97,7 +97,7 @@ module V051V100
       end
     
       # 断言3: 签证类型正确（电子签证）
-      add_assertion "签证类型正确（电子签证）", weight: 20 do
+      add_assertion "签证类型正确（电子签证）", weight: 15 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}。" \
@@ -105,7 +105,7 @@ module V051V100
       end
     
       # 断言4: 支持上门取件
-      add_assertion "支持上门取件", weight: 20 do
+      add_assertion "支持上门取件", weight: 15 do
         home_pickup = @visa_order.visa_product.home_pickup
       
         expect(home_pickup).to be_truthy,
@@ -132,6 +132,18 @@ module V051V100
           "未选择所需材料最少的产品。" \
           "应选: #{minimal_product.name}（需要#{minimal_count}种材料，#{minimal_product.processing_days}个工作日，#{minimal_product.price}元），" \
           "实际选择: #{@visa_order.visa_product.name}（需要#{actual_count}种材料，#{@visa_order.visa_product.processing_days}个工作日，#{@visa_order.visa_product.price}元）"
+      end
+    
+      # 断言6: 联系人姓名正确（王芳）
+      add_assertion "联系人姓名正确（王芳）", weight: 5 do
+        expect(@visa_order.contact_name).to eq('王芳'),
+          "联系人姓名错误。期望: 王芳，实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言7: 联系电话正确（王芳的电话）
+      add_assertion "联系电话正确（王芳的电话）", weight: 5 do
+        expect(@visa_order.contact_phone).to eq('13700137001'),
+          "联系电话错误。期望: 13700137001（王芳），实际: #{@visa_order.contact_phone}"
       end
     end
   
@@ -169,8 +181,9 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理澳大利亚电子签证（材料最少，上门取件）
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户和联系人（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact_passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
     
       # 2. 查找澳大利亚
       australia = Country.find_by!(name: @country_name, data_version: 0)
@@ -200,11 +213,12 @@ module V051V100
         expected_date: Date.current + 60.days,  # 预计出行日期60天后
         delivery_method: 'pickup',  # 上门取件
         delivery_address: '深圳市南山区科技园南区深南大道10000号',
-        contact_name: '赵敏',
-        contact_phone: '13600136000',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息

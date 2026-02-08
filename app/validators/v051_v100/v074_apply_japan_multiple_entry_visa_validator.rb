@@ -35,7 +35,7 @@ module V051V100
   class V074ApplyJapanMultipleEntryVisaValidator < BaseValidator
     self.validator_id = 'v074_apply_japan_multiple_entry_visa_validator'
     self.task_id = 'a4946c84-0632-454e-b424-c8bd78c3c138'
-    self.title = '办理日本多次往返签证（对比3年/5年期，选最快出签）'
+    self.title = '给张三办理日本多次往返签证（对比3年/5年期，选最快出签）'
     self.description = '需要办理日本多次签证，对比3年和5年签证的办理时效，选择最快的'
     self.timeout_seconds = 240
   
@@ -95,7 +95,7 @@ module V051V100
       end
     
       # 断言3: 签证类型正确（多次签证）
-      add_assertion "签证类型正确（多次签证）", weight: 25 do
+      add_assertion "签证类型正确（多次签证）", weight: 20 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}。" \
@@ -103,7 +103,7 @@ module V051V100
       end
     
       # 断言4: 选择了办理时间最短的多次签证（核心评分项）
-      add_assertion "选择了办理时间最短的多次签证", weight: 30 do
+      add_assertion "选择了办理时间最短的多次签证", weight: 25 do
         # 获取所有日本多次签证产品
         japan = Country.find_by(name: @country_name, data_version: 0)
         all_products = VisaProduct.where(
@@ -130,6 +130,18 @@ module V051V100
       
         expect(actual_total).to eq(expected_total),
           "订单总价错误。期望: #{expected_total}元（单价#{@visa_order.visa_product.price}元 × #{@visa_order.traveler_count}人），实际: #{actual_total}元"
+      end
+    
+      # 断言6: 联系人姓名正确（张三）
+      add_assertion "联系人姓名正确（张三）", weight: 5 do
+        expect(@visa_order.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三，实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言7: 联系电话正确（张三的电话）
+      add_assertion "联系电话正确（张三的电话）", weight: 5 do
+        expect(@visa_order.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（张三），实际: #{@visa_order.contact_phone}"
       end
     end
   
@@ -166,8 +178,9 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理日本多次签证，选择办理时间最短的
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户和联系人（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact_passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 2. 查找日本
       japan = Country.find_by!(name: @country_name, data_version: 0)
@@ -196,11 +209,12 @@ module V051V100
         expected_date: Date.current + 60.days,  # 预计出行日期60天后
         delivery_method: 'express',
         delivery_address: '北京市朝阳区建国路118号',
-        contact_name: '李明',
-        contact_phone: '13800138000',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息

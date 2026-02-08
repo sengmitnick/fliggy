@@ -18,7 +18,143 @@
 
 ---
 
-## 二、demo_user 数据使用
+## 四、日期/时间处理最佳实践
+
+### 4.1 日期描述原则
+
+**问题：** 使用“本周末”有歧义
+
+当今天是周六或周日时，“本周末”含义不清：
+- 如果今天是周六：“本周末”指今天还是明天？
+- 如果今天是周日：“本周末”指今天还是已过去？
+
+**✅ 解决方案：使用明确的星期几**
+- 使用 **“下周六”** 而非“本周末”
+- 如果需要本周六，使用 **“这周六”**
+
+### 4.2 周末日期计算模式
+
+#### 场景：预订下周六的门票/酒店/活动
+
+**错误做法：**
+```ruby
+# ✖️ 问题：使用“本周末”描述
+self.title = '给张三等4人预订本周末长隆野生动物世界成人票'
+self.description = '帮张三等4人订本周末的长隆门票'  # 歧义！
+
+# prepare
+today = Date.current
+@visit_date = today + (6 - today.wday).days  # 如果今天是周六，wday=6，结果是今天0天！
+```
+
+**✅ 正确做法（v071 案例）：**
+
+```ruby
+# 标题：使用“下周六”明确表达
+self.title = '给张三等4人预订下周六广州长隆野生动物世界成人票（最便宜）'
+
+# 描述：同样使用“下周六”
+self.description = '帮张三、李四、王芳、刘强这4个人订下周六的长隆野生动物世界门票，要最便宜的那家'
+
+# prepare：计算下周六日期（处理边界情况）
+today = Date.current
+
+if today.saturday?
+  # 如果今天是周六，选择下一个周六（7天后）
+  @visit_date = today + 7.days
+else
+  # 其他日子，计算到下一个周六的天数
+  days_until_next_saturday = (6 - today.wday) % 7
+  days_until_next_saturday = 7 if days_until_next_saturday == 0  # 如果今天是周日，下周六是7天后
+  @visit_date = today + days_until_next_saturday.days
+end
+
+# task 描述：使用统一的“下周六”（不再需要 @date_description_short 变量）
+{
+  task: "请为4位成人预订下周六（#{@visit_date.strftime('%Y年%m月%d日')}）长隆野生动物世界的成人票",
+  visit_date: @visit_date.to_s,
+  date_description: "下周六（#{@visit_date.strftime('%Y年%m月%d日')}）"
+}
+```
+
+**逻辑解释：**
+
+| 今天 | today.wday | 计算逻辑 | 结果 |
+|------|-----------|---------|------|
+| 周一 | 1 | (6-1) % 7 = 5 | 5天后（本周六） |
+| 周二 | 2 | (6-2) % 7 = 4 | 4天后（本周六） |
+| 周三 | 3 | (6-3) % 7 = 3 | 3天后（本周六） |
+| 周四 | 4 | (6-4) % 7 = 2 | 2天后（本周六） |
+| 周五 | 5 | (6-5) % 7 = 1 | 1天后（明天周六） |
+| **周六** | **6** | **特殊处理** | **7天后（下周六）** |
+| **周日** | **0** | **(6-0)%7=6 → 修正为7** | **7天后（下周六）** |
+
+**关键边界处理：**
+1. **周六当天**：直接 +7 days（不能选今天）
+2. **周日当天**：(6-0)%7=6 → 修正为 7（不能选明天的周一）
+
+### 4.3 数据包日期范围要求
+
+**问题：** 如果今天是周一，“下周六”是 12 天后。如果数据包只有 7 天范围，会导致验证器失败。
+
+**✅ 解决方案：数据包必须覆盖 14 天以上**
+
+**所有与日期相关的数据包文件，必须确保：**
+
+```ruby
+# app/validators/support/data_packs/v1/trains.rb
+# app/validators/support/data_packs/v1/flights.rb
+# app/validators/support/data_packs/v1/hotels.rb
+# 等所有需要生成未来日期数据的文件
+
+start_date = Date.today - 1.day  # 支持西时区用户
+end_date = start_date + 14.days  # 至少 14 天，共 16 天范围
+
+puts "数据范围: #{start_date} 至 #{end_date} (共16天)"
+
+(start_date..end_date).each do |date|
+  # 生成该日期的数据（火车票/航班/酒店等）
+end
+```
+
+**原因：**
+- **最远场景**：周一预订“下周六” = 12 天后
+- **安全边界**：14 天范围确保所有场景都有数据
+- **时区兼容**：`Date.today - 1.day` 起始支持 UTC-12 用户
+
+**检查命令：**
+```bash
+# 搜索所有有日期范围的数据包
+grep -r "end_date.*+.*days" app/validators/support/data_packs/v1/
+
+# 确保所有结果都是 + 14.days 或更多
+```
+
+### 4.4 日期描述用语对照表
+
+| 用语 | 适用场景 | 计算逻辑 | 注意事项 |
+|------|---------|---------|----------|
+| 明天 | 任意日期 | `Date.current + 1.day` | 无歧义 |
+| 后天 | 任意日期 | `Date.current + 2.days` | 无歧义 |
+| 这周六 | 需要本周六 | `(6 - today.wday).days` | 周六/周日需特殊处理 |
+| **下周六** | **下一个周六** | **见上述逻辑** | **推荐！无歧义** |
+| ✖️ 本周末 | 禁止使用 | - | 周六/周日有歧义 |
+| ✖️ 本周几 | 禁止使用 | - | 周六/周日不适用 |
+
+### 4.5 时间段描述原则
+
+**✅ 正确方式：**
+- “晚上8点后出发” → `departure_time > '20:00'`
+- “下午航班” → `departure_time.hour.between?(12, 17)`
+- “凌晨1点前到达” → `arrival_time < '01:00' AND arrival_date = departure_date + 1`
+
+**✖️ 错误方式：**
+- “晚上航班” → 模糊（18:00还是20:00？）
+- “半夜” → 歧义（23:00还是00:00？）
+
+---
+
+## 五、demo_user 数据使用
 
 **数据文件：** `app/validators/support/data_packs/v1/demo_user.rb`
 
@@ -52,9 +188,9 @@
 
 ---
 
-## 三、verify 断言规则
+## 六、verify 断言规则
 
-### 3.1 查询过滤原则
+### 6.1 查询过滤原则
 
 **第一条断言必须查询并存储订单：**
 ```ruby
@@ -78,7 +214,7 @@ return if @order.nil?  # Guard clause
 
 **为什么？** 如果查询包含 `visit_date: @expected_date`，日期错误时报"未找到订单"而不是"日期错误"，失去评分粒度。
 
-### 3.2 断言权重分配
+### 6.2 断言权重分配
 
 - **订单存在** (20-25%): 查询订单 + 存储到实例变量
 - **核心实体** (10-15%): 酒店名/景点名/航班号正确
@@ -87,7 +223,7 @@ return if @order.nil?  # Guard clause
 
 **总和必须 = 100%**
 
-### 3.3 乘客/联系人信息验证
+### 6.3 乘客/联系人信息验证
 
 **核心原则：** prepare 查询 `data_version: 0` → simulate 使用实例变量 → verify 验证
 
@@ -116,7 +252,11 @@ end
 
 **标题格式：**
 - 2-3人：列全名 → `给张三、李四、王芳预订长城门票（3人，最便宜）`
-- 4人以上：简化 → `给张三一家和朋友预订度假村门票（6人，最优惠）`
+- 4人以上：简化 → `给张三等4人预订这周六广州长隆野生动物世界成人票（最便宜）`
+
+**描述格式（⚠️ 必须包含具体人名）：**
+- ✅ `帮张三、李四、王芳、刘强这4个人订这周六的长隆野生动物世界门票，要最便宜的那家`
+- ❌ `为4位成人预订本周末的长隆野生动物世界门票并选择最便宜供应商` ← 无具体人名
 
 **代码模式：**
 ```ruby
@@ -158,7 +298,72 @@ end
 - **独立儿童**：仅儿童票，联系人是孩子本人
 - **大团体**（5人以上）：根据年龄动态分票种
 
-### 3.4 特殊字段验证
+**完整示例：v071（4人朋友结伴）**
+
+```ruby
+# 标题
+self.title = '给张三等4人预订这周六广州长隆野生动物世界成人票（最便宜）'
+
+# 描述（⚠️ 必须包含具体人名）
+self.description = '帮张三、李四、王芳、刘强这4个人订这周六的长隆野生动物世界门票，要最便宜的那家'
+
+# prepare: 查询4位乘客 + 计算下一个周六日期
+user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+@passengers = user.passengers.where(data_version: 0, name: ['张三', '李四', '王芳', '刘强']).to_a
+raise "未找到足够的乘客信息" if @passengers.size < 4
+@contact_passenger = @passengers.first  # 张三作为联系人
+
+# 计算下一个周六（避免"本周末"歧义）
+today = Date.current
+if today.saturday?
+  @visit_date = today + 7.days  # 如果今天是周六，选下周六
+  @date_description_short = "下周六"
+elsif today.sunday?
+  @visit_date = today + 6.days  # 如果今天是周日，选6天后的周六
+  @date_description_short = "这周六"
+else
+  @visit_date = today + (6 - today.wday).days  # 工作日，选本周六
+  @date_description_short = "这周六"
+end
+
+# simulate: 创建订单（quantity=4）
+TicketOrder.create!(
+  ticket_id: cheapest_ticket.id,
+  supplier_id: cheapest_supplier.id,
+  quantity: 4,
+  contact_phone: @contact_passenger.phone,  # 张三的电话
+  passenger_ids: @passengers.map(&:id),     # 4人的ID数组
+  visit_date: @visit_date,
+  data_version: @data_version
+)
+
+# verify: 联系人（10分）+ 乘客信息（10分）
+add_assertion "联系电话正确（张三的电话）", weight: 10 do
+  expect(@ticket_order.contact_phone).to eq('13800138000'),
+    "联系电话错误。期望: 13800138000（张三），实际: #{@ticket_order.contact_phone}"
+end
+
+add_assertion "乘客信息正确（4位乘客）", weight: 10 do
+  expect(@ticket_order.passenger_ids).to be_present, "未填写乘客信息"
+  expect(@ticket_order.passenger_ids.size).to eq(4),
+    "乘客数量错误。期望: 4位，实际: #{@ticket_order.passenger_ids&.size || 0}位"
+  
+  passenger_names = Passenger.where(id: @ticket_order.passenger_ids, data_version: 0).pluck(:name)
+  expected_names = ['张三', '李四', '王芳', '刘强']
+  expect(passenger_names.sort).to eq(expected_names.sort),
+    "乘客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
+end
+```
+
+**关键点：**
+1. **title**：简化为"张三等4人"（不列全名）
+2. **description**：必须列出4个具体人名（张三、李四、王芳、刘强）
+3. **日期计算**：使用"这周六"/"下周六"而非"本周末"（避免周六/周日当天的歧义）
+4. **prepare**：使用 `where(name: [...])` 批量查询4人 + 动态计算日期描述
+5. **simulate**：`quantity=4` + `passenger_ids` 数组包含4人ID
+6. **verify**：联系人断言（10分）+ 乘客信息断言（10分）= 合计20分
+
+### 6.4 特殊字段验证
 
 **WiFi租赁/SIM卡/电话卡收货地址（20-25分）：**
 ```ruby
@@ -220,6 +425,7 @@ end
 ### 题目检查
 - [ ] 格式："给XX预订..." 或 "帮XX订..."
 - [ ] 包含受益人和关键约束
+- [ ] **多人场景：description 必须包含具体人名（如：张三、李四、王芳、刘强），不能用"4位成人"等泛指**
 - [ ] 删除具体地址、电话、操作步骤
 
 ### 数据引用检查
