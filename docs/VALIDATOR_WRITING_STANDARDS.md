@@ -40,7 +40,7 @@
 | **保险被保人** | **passengers** | **insured_persons** | **`[{name, id_number}]`** |
 | **流量包充值** | **passengers** | **contact_info: {phone}** | **JSON字符串** |
 | WiFi联系人 | contacts | contact_name, contact_phone | 字符串 |
-| 电话卡邮寄 | addresses | address 字段 | 字符串 |
+| **SIM卡/电话卡邮寄** | **addresses** | **contact_info: {name, phone, address}** | **JSON字符串 + delivery_method: 'mail'** |
 | 深度旅游/跟团游 | passengers + contacts | traveler_*/contact_* + booking_travelers | 混合 |
 
 **❌ 禁止：**
@@ -131,6 +131,30 @@ add_assertion "手机号正确", weight: 15 do
 end
 ```
 
+**SIM卡/电话卡收货地址：**
+```ruby
+# prepare: 查询默认地址
+@default_address = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+  .addresses.find_by!(is_default: true, data_version: 0)
+
+# simulate: 使用真实地址
+full_address = "#{@default_address.province}#{@default_address.city}#{@default_address.district}#{@default_address.detail}"
+InternetOrder.create!(
+  delivery_method: 'mail',
+  contact_info: { name: @default_address.name, phone: @default_address.phone, address: full_address }.to_json,
+  data_version: @data_version
+)
+
+# verify: 验证邮寄方式和收货地址（20-25分）
+add_assertion "收货地址正确", weight: 25 do
+  expect(@order.delivery_method).to eq('mail')
+  contact_info = JSON.parse(@order.contact_info)
+  expect(contact_info['name']).to eq(@default_address.name)
+  expect(contact_info['phone']).to eq(@default_address.phone)
+  expect(contact_info['address']).to include(@default_address.province, @default_address.city)
+end
+```
+
 ---
 
 ## 四、业务规则速查
@@ -138,7 +162,7 @@ end
 | 业务 | 字段 | 数据来源 | 格式 |
 |------|------|---------|------|
 | WiFi租赁 | delivery_method: 'pickup' | PickupLocation 表 | 只能自取 |
-| 电话卡 | delivery_method: 'mail' | user.addresses | 只能邮寄 |
+| **SIM卡/电话卡** | **delivery_method: 'mail'<br>contact_info: {name, phone, address}** | **user.addresses (is_default: true)** | **JSON字符串** |
 | 酒店/机票/火车 | guest_name / passenger_id | user.passengers | 需实名 |
 | **接送机服务** | **passenger_name, passenger_phone** | **user.passengers** | **字符串** |
 | **保险** | **insured_persons** | **user.passengers** | **`[{name, id_number}]`** |
@@ -157,6 +181,7 @@ end
 ### 数据引用检查
 - [ ] 乘客信息在 prepare 中预查询（避免 simulate 中使用 data_version: 0）
 - [ ] 需身份证号的用 passengers（酒店/机票/保险/接送机）
+- [ ] **需收货地址的用 addresses（SIM卡/电话卡邮寄）**
 - [ ] 删除 `User.find_or_create_by!` 创建用户
 - [ ] simulate 中无 `data_version: 0` 的查询或创建
 
@@ -164,7 +189,8 @@ end
 - [ ] 第一条断言查询订单 + 包含 `data_version: @data_version`
 - [ ] 查询只过滤核心实体，不过滤待验证属性
 - [ ] 乘客信息验证：姓名和电话合并为单个断言（10分）
-- [ ] 添加数据规范验证（乘客/联系人来自 demo_user）
+- [ ] **收货地址验证：邮寄方式 + 姓名 + 电话 + 地址省市（20-25分）**
+- [ ] 添加数据规范验证（乘客/联系人/地址来自 demo_user）
 - [ ] 权重总和 = 100%
 
 ---
