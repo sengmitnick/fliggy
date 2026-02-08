@@ -32,8 +32,6 @@
 - **家庭2**: 刘强（夫）+ 陈静（妻）+ 小红（女）  
 - **其他**: 李四（张三的弟弟）
 
-**查看详细信息：** 查看上述文件了解完整的姓名、电话、身份证号、地址等信息。
-
 **使用规则：**
 
 | 场景 | 使用数据 | verify 字段 | 数据格式 |
@@ -95,7 +93,6 @@ return if @order.nil?  # Guard clause
 
 #### 单人场景（基础模式）
 
-**✅ 标准模式：**
 ```ruby
 # prepare: 查询基础数据
 @passenger = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -105,77 +102,99 @@ return if @order.nil?  # Guard clause
 # simulate: 使用实例变量
 ModelName.create!(
   passenger_name: @passenger.name,
-  passenger_phone: @expected_phone,  # 或 contact_info: JSON.generate({phone: @expected_phone})
+  passenger_phone: @expected_phone,
   data_version: @data_version
 )
 
-# verify: 验证匹配
+# verify: 验证匹配（10分）
 add_assertion "乘客信息正确", weight: 10 do
   expect(@order.passenger_phone).to eq(@expected_phone)
 end
 ```
 
-#### 家庭/多人场景（家庭门票模式）
+#### 多人场景（家庭/朋友/亲子/独立儿童/大团体）
 
-**示例：v069 - 张三一家预订迪士尼门票（2成人+1儿童）**
+**标题格式：**
+- 2-3人：列全名 → `给张三、李四、王芳预订长城门票（3人，最便宜）`
+- 4人以上：简化 → `给张三一家和朋友预订度假村门票（6人，最优惠）`
 
-**✅ 标准模式：**
+**代码模式：**
 ```ruby
-# 1. 标题：具体家庭成员姓名
-title = '张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）'
-
-# 2. 描述：明确列出成员
-description = '为张三一家（张三、王芳、小明）预订迪士尼门票，通过2个订单实现，选择最便宜的供应商'
-
-# 3. prepare: 查询所有家庭成员
+# prepare: 查询所有出行人
 user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
 @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+@lisi = user.passengers.find_by!(name: '李四', data_version: 0)
 @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
-@xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
 
-@expected_contact_phone = @zhangsan.phone
-@expected_passenger_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
+@expected_contact_phone = @zhangsan.phone  # 联系人
+@expected_passenger_names = [@zhangsan.name, @lisi.name, @wangfang.name]
 
-# 4. simulate: passenger_ids 关联游客
+# simulate: 使用 passenger_ids 关联游客
 TicketOrder.create!(
   ticket_id: adult_ticket.id,
-  contact_phone: @zhangsan.phone,
-  passenger_ids: [@zhangsan.id, @wangfang.id],  # 成人票游客
-  quantity: 2,
+  contact_phone: @expected_contact_phone,
+  passenger_ids: [@zhangsan.id, @lisi.id, @wangfang.id],
+  quantity: 3,
   data_version: @data_version
 )
 
-TicketOrder.create!(
-  ticket_id: child_ticket.id,
-  contact_phone: @zhangsan.phone,
-  passenger_ids: [@xiaoming.id],  # 儿童票游客
-  quantity: 1,
-  data_version: @data_version
-)
-
-# 5. verify: 分两个断言验证（合计 20%）
-add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
-  [@adult_orders, @child_orders].flatten.each do |order|
-    expect(order.contact_phone).to eq(@expected_contact_phone)
-  end
+# verify: 联系人（10分）+ 游客信息（10分）= 合计20分
+add_assertion "联系人信息正确（#{@expected_contact_phone}）", weight: 10 do
+  @orders.each { |o| expect(o.contact_phone).to eq(@expected_contact_phone) }
 end
 
-add_assertion "游客信息正确（张三、王芳、小明）", weight: 10 do
-  all_passenger_ids = (@adult_orders + @child_orders).flat_map { |o| o.passenger_ids || [] }.compact
-  actual_passengers = Passenger.where(id: all_passenger_ids, data_version: 0)
-  actual_names = actual_passengers.pluck(:name).sort
-  
+add_assertion "游客信息正确（张三、李四、王芳）", weight: 10 do
+  all_ids = @orders.flat_map { |o| o.passenger_ids || [] }.compact.uniq
+  actual_names = Passenger.where(id: all_ids, data_version: 0).pluck(:name).sort
   expect(actual_names).to match_array(@expected_passenger_names.sort),
     "游客名单错误。期望: #{@expected_passenger_names.sort.join('、')}，实际: #{actual_names.join('、')}"
 end
 ```
 
-**❌ 禁止：**
-- 标题使用抽象描述："2成人+1儿童" ❌ → "张三一家（张三、王芳、小明）" ✅
-- simulate 中查询 `data_version: 0`
-- 硬编码后备值：`@phone || '13800138000'`
+**场景差异：**
+- **家庭出游**（父母+孩子）：成人票订单 + 儿童票订单，联系人通常是父亲
+- **朋友结伴**（3-5成人）：单个成人票订单，quantity=人数
+- **亲子游**（妈妈+孩子）：成人票1张 + 儿童票1张，联系人是母亲
+- **独立儿童**：仅儿童票，联系人是孩子本人
+- **大团体**（5人以上）：根据年龄动态分票种
 
 ### 3.4 特殊字段验证
+
+**WiFi租赁/SIM卡/电话卡收货地址（20-25分）：**
+```ruby
+# prepare: 查询收货地址
+# WiFi租赁：按受益人姓名查询（给张三订WiFi → 查张三地址）
+@address = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+  .addresses.find_by!(name: '张三', data_version: 0)
+
+# SIM卡/电话卡：查询默认地址（is_default: true）
+@address = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+  .addresses.find_by!(is_default: true, data_version: 0)
+
+@expected_name = @address.name
+@expected_phone = @address.phone
+@expected_address_keyword = '北京'  # 用于验证
+
+# simulate: 使用真实地址
+full_address = "#{@address.province}#{@address.city}#{@address.district}#{@address.detail}"
+InternetOrder.create!(
+  delivery_method: 'mail',
+  contact_info: { name: @expected_name, phone: @expected_phone, address: full_address }.to_json,
+  data_version: @data_version
+)
+
+# verify: 验证邮寄方式和收货地址
+add_assertion "收货地址正确（#{@expected_name}的#{@expected_address_keyword}地址）", weight: 20 do
+  expect(@order.delivery_method).to eq('mail'),
+    "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
+  
+  contact_info = JSON.parse(@order.contact_info)
+  expect(contact_info['name']).to eq(@expected_name)
+  expect(contact_info['phone']).to eq(@expected_phone)
+  expect(contact_info['address']).to include(@expected_address_keyword),
+    "收货地址错误。期望包含: #{@expected_address_keyword}"
+end
+```
 
 **保险被保人（JSON数组）：**
 ```ruby
@@ -194,58 +213,9 @@ add_assertion "手机号正确", weight: 15 do
 end
 ```
 
-**WiFi租赁/SIM卡/电话卡收货地址：**
-```ruby
-# prepare: 查询收货地址
-# WiFi租赁：按受益人姓名查询（给张三订WiFi → 查张三地址）
-@address = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-  .addresses.find_by!(name: '张三', data_version: 0)
-@expected_name = @address.name
-@expected_phone = @address.phone
-@expected_address_keyword = '北京'  # 用于验证
-
-# SIM卡/电话卡：查询默认地址（is_default: true）
-@address = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-  .addresses.find_by!(is_default: true, data_version: 0)
-
-# simulate: 使用真实地址
-full_address = "#{@address.province}#{@address.city}#{@address.district}#{@address.detail}"
-InternetOrder.create!(
-  delivery_method: 'mail',
-  contact_info: { name: @expected_name, phone: @expected_phone, address: full_address }.to_json,
-  data_version: @data_version
-)
-
-# verify: 验证邮寄方式和收货地址（20-25分）
-add_assertion "收货地址正确（#{@expected_name}的#{@expected_address_keyword}地址）", weight: 20 do
-  expect(@order.delivery_method).to eq('mail'),
-    "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
-  
-  contact_info = JSON.parse(@order.contact_info)
-  expect(contact_info['name']).to eq(@expected_name)
-  expect(contact_info['phone']).to eq(@expected_phone)
-  expect(contact_info['address']).to include(@expected_address_keyword),
-    "收货地址错误。期望包含: #{@expected_address_keyword}"
-end
-```
-
 ---
 
-## 四、业务规则速查
-
-| 业务 | 字段 | 数据来源 | 格式 |
-|------|------|---------|------|
-| **WiFi租赁** | **delivery_method: 'mail'<br>contact_info: {name, phone, address}** | **user.addresses（按受益人查询）** | **JSON字符串** |
-| **SIM卡/电话卡** | **delivery_method: 'mail'<br>contact_info: {name, phone, address}** | **user.addresses (is_default: true)** | **JSON字符串** |
-| 酒店/机票/火车 | guest_name / passenger_id | user.passengers | 需实名 |
-| **接送机服务** | **passenger_name, passenger_phone** | **user.passengers** | **字符串** |
-| **保险** | **insured_persons** | **user.passengers** | **`[{name, id_number}]`** |
-| **流量包充值** | **contact_info: {phone}** | **user.passengers** | **JSON字符串** |
-| 跟团游/深度游 | contact_* + booking_travelers | passengers + contacts | 联系人 + 出行人 |
-
----
-
-## 五、检查清单
+## 四、检查清单
 
 ### 题目检查
 - [ ] 格式："给XX预订..." 或 "帮XX订..."
@@ -262,9 +232,9 @@ end
 ### 验证断言检查
 - [ ] 第一条断言查询订单 + 包含 `data_version: @data_version`
 - [ ] 查询只过滤核心实体，不过滤待验证属性
-- [ ] 乘客信息验证：姓名和电话合并为单个断言（10分）
+- [ ] 单人场景：乘客信息验证（姓名+电话，10分）
+- [ ] **多人场景：联系人断言（10分）+ 游客信息断言（10分）= 合计20分**
 - [ ] **收货地址验证：邮寄方式 + 姓名 + 电话 + 地址省市（20-25分）**
-- [ ] **家庭门票验证：联系人断言（10分）+ 游客信息断言（10分）= 合计20分**
 - [ ] 添加数据规范验证（乘客/联系人/地址来自 demo_user）
 - [ ] 权重总和 = 100%
 
