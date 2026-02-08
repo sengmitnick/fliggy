@@ -42,7 +42,7 @@ module V051V100
   class V066BuyThailandDataPlan1dayValidator < BaseValidator
     self.validator_id = 'v066_buy_thailand_data_plan_1day_validator'
     self.task_id = '5911f0c3-51a6-470b-a262-304a3c34c010'
-    self.title = '购买泰国流量包（语音包、68元）'
+    self.title = '给王芳购买泰国流量包（语音包）'
     self.description = '搜索泰国流量包产品，选择语音包套餐（支持境外拨打回境内）并成功创建订单'
     self.timeout_seconds = 240
   
@@ -61,13 +61,18 @@ module V051V100
     
       @matching_count = matching_data_plans.count
     
+      # 查询乘客信息（预加载）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_phone = @passenger.phone
+    
       # 返回给 Agent 的任务信息
       {
-        task: "请购买一份泰国语音包100分钟流量包",
+        task: "给王芳购买泰国流量包（语音包）",
         region: @region,
         data_limit: @data_limit,
         quantity: @quantity,
-        hint: "泰国语音包流量包选项: 100分钟(68元)、200分钟(118元)、500分钟(268元)。选择100分钟套餐，68元。手机号: 13700137000",
+        hint: "泰国语音包流量包选项: 100分钟(68元)、200分钟(118元)、500分钟(268元)。选择100分钟套餐，68元",
         matching_count: @matching_count
       }
     end
@@ -86,19 +91,19 @@ module V051V100
       return unless @order # 如果没有订单，后续断言无法继续
     
       # 断言2: 订单类型正确（data_plan）
-      add_assertion "订单类型正确（data_plan）", weight: 15 do
+      add_assertion "订单类型正确（data_plan）", weight: 10 do
         expect(@order.order_type).to eq('data_plan'),
           "订单类型不正确。预期: data_plan, 实际: #{@order.order_type}"
       end
     
       # 断言3: 地区正确
-      add_assertion "地区正确（泰国）", weight: 15 do
+      add_assertion "地区正确（泰国）", weight: 10 do
         expect(@order.region).to eq(@region),
           "地区不正确。预期: #{@region}, 实际: #{@order.region}"
       end
     
       # 断言4: 选择了泰国语音包流量包
-      add_assertion "选择了泰国语音包流量包", weight: 30 do
+      add_assertion "选择了泰国语音包流量包", weight: 20 do
         data_plan = @order.orderable
         expect(data_plan).not_to be_nil, "未选择具体的流量包产品"
         expect(data_plan.region).to eq(@region), "流量包地区不匹配"
@@ -116,6 +121,14 @@ module V051V100
         expect(@order.total_price).to eq(expected_price),
           "总价不正确。预期: #{expected_price}元（#{data_plan.price}元 × #{@quantity}份），实际: #{@order.total_price}元"
       end
+    
+      # 断言6: 手机号码正确（来自 demo_user）
+      add_assertion "手机号码正确（#{@expected_phone}）", weight: 20 do
+        contact_info = @order.contact_info.is_a?(String) ? (JSON.parse(@order.contact_info) rescue {}) : (@order.contact_info || {})
+      
+        expect(contact_info['phone']).to eq(@expected_phone),
+          "手机号码错误。期望: #{@expected_phone}, 实际: #{contact_info['phone']}"
+      end
     end
   
     private
@@ -126,7 +139,8 @@ module V051V100
         region: @region,
         data_limit: @data_limit,
         quantity: @quantity,
-        matching_count: @matching_count
+        matching_count: @matching_count,
+        expected_phone: @expected_phone
       }
     end
   
@@ -136,6 +150,7 @@ module V051V100
       @data_limit = data['data_limit']
       @quantity = data['quantity']
       @matching_count = data['matching_count']
+      @expected_phone = data['expected_phone']
     end
   
     # 模拟 AI Agent 操作：购买泰国语音包流量包
@@ -165,7 +180,7 @@ module V051V100
           unit_price: target_data_plan.price
         }.to_json,
         total_price: target_data_plan.price * @quantity,
-        contact_info: { phone: '13700137000' }.to_json,
+        contact_info: { phone: @expected_phone }.to_json,
         status: 'pending',
         data_version: @data_version
       )
