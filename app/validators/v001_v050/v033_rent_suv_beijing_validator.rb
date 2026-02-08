@@ -54,18 +54,29 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
-        @order = CarOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何租车订单记录"
+      add_assertion "订单已创建", weight: 15 do
+        all_orders = CarOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_orders).not_to be_empty, "未找到任何租车订单记录"
+        @order = all_orders.first
       end
     
       return unless @order
     
-      add_assertion "城市正确（北京）", weight: 20 do
+      add_assertion "城市正确（北京）", weight: 15 do
         expect(@order.car.location).to eq(@location)
       end
     
-      add_assertion "车型正确（SUV）", weight: 30 do
+      add_assertion "取车日期正确（后天 #{@pickup_date.strftime('%Y-%m-%d')}）", weight: 15 do
+        pickup_date = @order.pickup_datetime.to_date
+        expect(pickup_date).to eq(@pickup_date),
+          "取车日期不正确。期望: #{@pickup_date}（后天）, 实际: #{pickup_date}"
+      end
+    
+      add_assertion "车型正确（SUV）", weight: 25 do
         expect(@order.car.category).to eq(@category),
           "车型不正确。期望: #{@category}, 实际: #{@order.car.category}"
       end

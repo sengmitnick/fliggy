@@ -2,23 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 搜索明天欧洲境内最便宜的火车票（1人）
+# 验证用例: 搜索明天从巴黎到阿姆斯特丹最便宜的火车票（1人）
 # 
 # 任务描述:
-#   Agent 需要搜索明天所有欧洲境内的火车票，
+#   Agent 需要搜索明天从巴黎北站到阿姆斯特丹中央车站的火车票，
 #   找出价格最便宜的班次并成功创建订单（1人出行）
 # 
 # 评分标准:
-#   - 搜索到了所有欧洲班次 (15分)
+#   - 搜索到了正确的线路（巴黎→阿姆斯特丹） (15分)
 #   - 正确识别最便宜的班次 (35分)
 #   - 成功创建订单 (20分)
 #   - 订单信息准确 (10分)
 #   - 出行人数正确（1人） (20分)
 # 
 # 难点:
-#   - 需要对比所有欧洲路线的价格
-#   - 需要找出全局最低价格
-#   - 需要理解"欧洲境内"概念（region=europe）
+#   - 需要对比该线路所有时段的价格
+#   - 需要找出该线路的最低价格
+#   - 需要理解欧洲火车站名称（巴黎北站 Paris Nord → 阿姆斯特丹中央车站 Amsterdam Centraal）
 # 
 # 使用方法:
 #   # 准备阶段
@@ -32,39 +32,45 @@ module V001V050
   class V012SearchCheapestEuropeTrainValidator < BaseValidator
     self.validator_id = 'v012_search_cheapest_europe_train_validator'
     self.task_id = '4d893f09-9fc7-4b28-a51a-a3b529160719'
-    self.title = '搜索明天欧洲境内最便宜的火车票（1人）'
-    self.description = '搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订（1人出行）'
+    self.title = '搜索明天从巴黎到阿姆斯特丹最便宜的火车票（1人）'
+    self.description = '搜索明天从巴黎北站到阿姆斯特丹中央车站的火车票，找出价格最便宜的班次并预订（1人出行）'
     self.timeout_seconds = 300
   
     # 准备阶段：插入测试数据
     def prepare
       # 数据已经通过 load_data_pack 自动加载
       @region = 'europe'
+      @origin = '巴黎北站'
+      @destination = '阿姆斯特丹中央车站'
       @target_date = Date.current + 1.day  # 明天
       @passenger_count = 1  # 出行人数
     
-      # 查找所有欧洲班次（注意：查询基线数据）
-      europe_trains = AbroadTicket.where(
+      # 查找该线路的所有班次（注意：查询基线数据）
+      route_trains = AbroadTicket.where(
         region: @region,
         ticket_type: 'train',
+        origin: @origin,
+        destination: @destination,
         departure_date: @target_date,
         data_version: 0
       )
     
       # 找出最便宜的价格
-      @cheapest_price = europe_trains.minimum(:price)
-      @total_trains = europe_trains.count
+      @cheapest_price = route_trains.minimum(:price)
+      @total_trains = route_trains.count
     
       # 返回给 Agent 的任务信息
       {
-        task: "请搜索明天所有欧洲境内的火车票，找出价格最便宜的班次并预订（#{@passenger_count}人出行）",
+        task: "请搜索明天从#{@origin}到#{@destination}的火车票，找出价格最便宜的班次并预订（#{@passenger_count}人出行）",
         region: @region,
+        origin: @origin,
+        destination: @destination,
         date: @target_date.to_s,
         date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
         passenger_count: @passenger_count,
-        hint: "需要对比所有欧洲路线的价格，找出最低价",
+        hint: "需要对比该线路所有时段的价格，找出最低价",
         total_trains: @total_trains,
-        price_range: "#{europe_trains.minimum(:price).to_f.round(2)} - #{europe_trains.maximum(:price).to_f.round(2)} 元"
+        price_range: "#{route_trains.minimum(:price).to_f.round(2)} - #{route_trains.maximum(:price).to_f.round(2)} 元"
       }
     end
   
@@ -72,16 +78,23 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建
       add_assertion "订单已创建", weight: 15 do
-        @order = AbroadTicketOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何境外票务订单记录"
+        all_abroad_ticket_orders = AbroadTicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_abroad_ticket_orders).not_to be_empty, "未找到任何AbroadTicketOrder记录"
+        @order = all_abroad_ticket_orders.first
+        # Replaced by expect(all_abroad_ticket_orders).not_to be_empty above, "未找到任何境外票务订单记录"
       end
     
       return unless @order
     
-      # 断言2: 地区正确（欧洲）
-      add_assertion "地区正确（欧洲）", weight: 10 do
-        expect(@order.abroad_ticket.region).to eq(@region),
-          "地区不正确。预期: #{@region}, 实际: #{@order.abroad_ticket.region}"
+      # 断言2: 线路正确（巴黎→阿姆斯特丹）
+      add_assertion "线路正确（#{@origin} → #{@destination}）", weight: 15 do
+        expect(@order.abroad_ticket.origin).to eq(@origin),
+          "出发地不正确。预期: #{@origin}, 实际: #{@order.abroad_ticket.origin}"
+        expect(@order.abroad_ticket.destination).to eq(@destination),
+          "目的地不正确。预期: #{@destination}, 实际: #{@order.abroad_ticket.destination}"
       end
     
       # 断言3: 日期正确
@@ -91,21 +104,23 @@ module V001V050
       end
     
       # 断言4: 选择了最便宜的班次（核心评分）
-      add_assertion "选择了最便宜的班次", weight: 35 do
-        # 重新查询所有欧洲班次找出最低价
-        all_europe_trains = AbroadTicket.where(
+      add_assertion "选择了最便宜的班次", weight: 30 do
+        # 重新查询该线路所有班次找出最低价
+        route_trains = AbroadTicket.where(
           region: @region,
           ticket_type: 'train',
+          origin: @origin,
+          destination: @destination,
           departure_date: @target_date,
           data_version: 0
         )
       
-        min_price = all_europe_trains.minimum(:price)
+        min_price = route_trains.minimum(:price)
         booked_price = @order.abroad_ticket.price
       
         # 允许0.01的浮点误差
         expect(booked_price).to be_within(0.01).of(min_price),
-          "未选择最便宜的班次。最低价: ¥#{min_price}, 实际预订: ¥#{booked_price}"
+          "未选择最便宜的班次。该线路最低价: ¥#{min_price}, 实际预订: ¥#{booked_price}"
       end
     
       # 断言5: 订单金额准确
@@ -134,6 +149,8 @@ module V001V050
     def execution_state_data
       {
         region: @region,
+        origin: @origin,
+        destination: @destination,
         target_date: @target_date.to_s,
         passenger_count: @passenger_count,
         cheapest_price: @cheapest_price,
@@ -144,27 +161,31 @@ module V001V050
     # 从状态恢复实例变量
     def restore_from_state(data)
       @region = data['region']
+      @origin = data['origin']
+      @destination = data['destination']
       @target_date = Date.parse(data['target_date'])
       @passenger_count = data['passenger_count'] || 1
       @cheapest_price = data['cheapest_price']
       @total_trains = data['total_trains']
     end
   
-    # 模拟 AI Agent 操作：搜索欧洲最便宜的火车票并预订
+    # 模拟 AI Agent 操作：搜索巴黎到阿姆斯特丹最便宜的火车票并预订
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找所有欧洲班次
-      all_europe_trains = AbroadTicket.where(
+      # 2. 查找该线路的所有班次
+      route_trains = AbroadTicket.where(
         region: @region,
         ticket_type: 'train',
+        origin: @origin,
+        destination: @destination,
         departure_date: @target_date,
         data_version: 0
       )
     
       # 3. 找出最便宜的
-      target_train = all_europe_trains.order(:price).first
+      target_train = route_trains.order(:price).first
     
       # 4. 创建订单（固定参数）
       order = AbroadTicketOrder.create!(

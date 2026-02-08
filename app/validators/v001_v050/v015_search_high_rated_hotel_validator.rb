@@ -81,8 +81,13 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 15 do
-        @hotel_booking = HotelBooking.order(created_at: :desc).first
-        expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
+        all_hotel_bookings = HotelBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_hotel_bookings).not_to be_empty, "未找到任何HotelBooking记录"
+        @hotel_booking = all_hotel_bookings.first
+        # Replaced by expect(all_hotel_bookings).not_to be_empty above, "未找到任何酒店订单记录"
       end
     
       return unless @hotel_booking # 如果没有订单，后续断言无法继续

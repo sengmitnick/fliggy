@@ -165,7 +165,7 @@ module V301V350
         end
       end
 
-      add_assertion "酒店位置靠近滑雪场", weight: 15 do
+      add_assertion "酒店位置靠近滑雪场", weight: 10 do
         @hotel_bookings&.each do |booking|
           hotel_name = booking.hotel.name
           hotel_address = booking.hotel.address || ""
@@ -174,6 +174,17 @@ module V301V350
           has_ski_location = ski_keywords.any? { |kw| hotel_name.include?(kw) || hotel_address.include?(kw) }
           expect(has_ski_location).to be(true),
             "酒店位置不在滑雪场附近。酒店名称: #{hotel_name}"
+        end
+      end
+      
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
+        @hotel_bookings&.each do |booking|
+          expect(booking.rooms_count).to eq(1),
+            "房间数错误。期望: 1间房，实际: #{booking.rooms_count}间房"
+          expect(booking.adults_count).to eq(2),
+            "成人数错误。期望: 2成人，实际: #{booking.adults_count}成人"
+          expect(booking.children_count).to eq(0),
+            "儿童数错误。期望: 0儿童，实际: #{booking.children_count}儿童"
         end
       end
     end

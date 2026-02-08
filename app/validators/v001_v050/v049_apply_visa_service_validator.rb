@@ -71,8 +71,13 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @visa_order = VisaOrder.order(created_at: :desc).first
-        expect(@visa_order).not_to be_nil, "未找到任何签证订单记录"
+        all_visa_orders = VisaOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_visa_orders).not_to be_empty, "未找到任何VisaOrder记录"
+        @visa_order = all_visa_orders.first
+        # Replaced by expect(all_visa_orders).not_to be_empty above, "未找到任何签证订单记录"
       end
     
       return unless @visa_order # 如果没有订单，后续断言无法继续

@@ -191,7 +191,7 @@ module V301V350
         end
       end
 
-      add_assertion "酒店入住日期与航班衔接", weight: 15 do
+      add_assertion "酒店入住日期与航班衔接", weight: 10 do
         @hotel_bookings&.each do |booking|
           expect(booking.check_in_date).to eq(@departure_date),
             "入住日期应与出发日期一致"
@@ -199,8 +199,19 @@ module V301V350
             "退房日期应与返程日期一致"
         end
       end
+      
+      add_assertion "房间数和人数正确（1间房，2成人，1儿童）", weight: 10 do
+        @hotel_bookings&.each do |booking|
+          expect(booking.rooms_count).to eq(1),
+            "房间数错误。期望: 1间房，实际: #{booking.rooms_count}间房"
+          expect(booking.adults_count).to eq(2),
+            "成人数错误。期望: 2成人，实际: #{booking.adults_count}成人"
+          expect(booking.children_count).to eq(1),
+            "儿童数错误。期望: 1儿童，实际: #{booking.children_count}儿童"
+        end
+      end
 
-      add_assertion "选择了适合家庭的酒店或活动", weight: 10 do
+      add_assertion "选择了适合家庭的酒店或活动", weight: 5 do
         family_keywords = ['亲子', '家庭', '儿童']
         has_family_service = false
         

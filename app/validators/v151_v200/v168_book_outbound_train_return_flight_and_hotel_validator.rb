@@ -181,9 +181,15 @@ module V151V200
       return if @hotel_booking.nil?
       
       # 断言6: 酒店入住日期正确
-      add_assertion "酒店入住日期正确（火车当天）", weight: 15 do
+      add_assertion "酒店入住日期正确（火车当天）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言7: 酒店退房日期正确
+      add_assertion "酒店退房日期正确（住#{@nights}晚）", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}（住#{@nights}晚）, 实际: #{@hotel_booking.check_out_date}"
       end
     end
   end

@@ -22,18 +22,21 @@ require_relative '../base_validator'
 #     - 租赁天数: 3天（1月12日-14日）
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
+#   - 订单已创建 (15分)
 #     * 系统中存在新创建的租车订单
 #   
-#   - 城市正确（深圳） (15分)
+#   - 城市正确（深圳） (10分)
 #     * 订单关联的车辆所在城市为深圳
 #   
-#   - 车辆类型正确（经济型轿车） (25分)
+#   - 车辆类型正确（经济型轿车） (20分)
 #     * 订单关联的车辆类型为"经济轿车"
 #   
-#   - 价格符合预算（≤200元/天） (25分)
+#   - 价格符合预算（≤200元/天） (30分)
 #     * 所选车辆的日租金不超过200元
 #     * 这是核心评分项，确保Agent理解预算约束
+#   
+#   - 取车日期正确（后天） (10分)
+#     * 取车日期为当前日期 + 2天
 #   
 #   - 租赁天数正确（3天） (15分)
 #     * 根据订单的取车时间和还车时间计算
@@ -92,34 +95,47 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 20 do
-        @order = CarOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何租车订单记录"
+      add_assertion "订单已创建", weight: 15 do
+        all_orders = CarOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_orders).not_to be_empty, "未找到任何租车订单记录"
+        @order = all_orders.first
       end
     
       return unless @order # 如果没有订单，后续断言无法继续
     
       # 断言2: 城市正确
-      add_assertion "城市正确（深圳）", weight: 15 do
+      add_assertion "城市正确（深圳）", weight: 10 do
         expect(@order.car.location).to eq(@location),
           "城市不正确。预期: #{@location}, 实际: #{@order.car.location}"
       end
     
       # 断言3: 车辆类型正确
-      add_assertion "车辆类型正确（经济轿车）", weight: 25 do
+      add_assertion "车辆类型正确（经济轿车）", weight: 20 do
         expect(@order.car.category).to eq(@category),
           "车辆类型不正确。预期: #{@category}, 实际: #{@order.car.category}"
       end
     
       # 断言4: 价格符合预算（核心评分项）
-      add_assertion "价格符合预算（≤#{@budget_per_day}元/天）", weight: 25 do
+      add_assertion "价格符合预算（≤#{@budget_per_day}元/天）", weight: 30 do
         daily_price = @order.car.price_per_day
       
         expect(daily_price).to be <= @budget_per_day,
           "价格超出预算。预算: ≤#{@budget_per_day}元/天, 实际: #{daily_price}元/天"
       end
     
-      # 断言5: 租赁天数正确
+      # 断言5: 取车日期正确
+      add_assertion "取车日期正确（后天 #{@pickup_date.strftime('%Y-%m-%d')}）", weight: 10 do
+        pickup_date = @order.pickup_datetime.to_date
+      
+        expect(pickup_date).to eq(@pickup_date),
+          "取车日期不正确。预期: #{@pickup_date}（后天）, 实际: #{pickup_date}"
+      end
+    
+      # 断言6: 租赁天数正确
       add_assertion "租赁天数正确（3天）", weight: 15 do
         # 从订单中计算天数（包括当天）
         return_date = @order.return_datetime.to_date

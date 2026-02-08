@@ -37,8 +37,13 @@ module V051V100
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = DeepTravelBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何深度旅行预订记录"
+        all_deep_travel_bookings = DeepTravelBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_deep_travel_bookings).not_to be_empty, "未找到任何DeepTravelBooking记录"
+        @booking = all_deep_travel_bookings.first
+        # Replaced by expect(all_deep_travel_bookings).not_to be_empty above, "未找到任何深度旅行预订记录"
       end
     
       return unless @booking

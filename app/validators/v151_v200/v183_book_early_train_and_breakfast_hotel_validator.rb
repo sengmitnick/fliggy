@@ -158,13 +158,19 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住前一晚 (15%)
-      add_assertion "酒店入住前一晚", weight: 15 do
+      # 断言5: 酒店入住前一晚 (10%)
+      add_assertion "酒店入住前一晚", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车前一晚）, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      # 断言6: 酒店含早餐 (5%)
+      # 断言7: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}（火车当天早上）, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言8: 酒店含早餐 (5%)
       add_assertion "酒店含早餐", weight: 5 do
         room = @hotel_booking.hotel_room
         expect(room.room_type).to match(/早/),

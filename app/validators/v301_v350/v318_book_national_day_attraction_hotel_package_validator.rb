@@ -160,12 +160,23 @@ module V301V350
         end
       end
 
-      add_assertion "酒店入住退房日期正确（7天后入住，住2晚：#{@check_in_date}至#{@check_out_date}）", weight: 20 do
+      add_assertion "酒店入住退房日期正确（7天后入住，住2晚：#{@check_in_date}至#{@check_out_date}）", weight: 15 do
         @hotel_bookings&.each do |booking|
           expect(booking.check_in_date).to eq(@check_in_date),
             "入住日期错误。期望: #{@check_in_date}, 实际: #{booking.check_in_date}"
           expect(booking.check_out_date).to eq(@check_out_date),
             "退房日期错误。期望: #{@check_out_date}, 实际: #{booking.check_out_date}"
+        end
+      end
+      
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
+        @hotel_bookings&.each do |booking|
+          expect(booking.rooms_count).to eq(1),
+            "房间数错误。期望: 1间房，实际: #{booking.rooms_count}间房"
+          expect(booking.adults_count).to eq(2),
+            "成人数错误。期望: 2成人，实际: #{booking.adults_count}成人"
+          expect(booking.children_count).to eq(0),
+            "儿童数错误。期望: 0儿童，实际: #{booking.children_count}儿童"
         end
       end
     end

@@ -73,8 +73,12 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @booking = TourGroupBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何跟团游订单记录"
+        all_tour_group_bookings = TourGroupBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_tour_group_bookings).not_to be_empty, "未找到任何跟团游订单记录"
+        @booking = all_tour_group_bookings.first
       end
     
       return unless @booking # 如果没有订单，后续断言无法继续

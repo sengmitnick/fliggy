@@ -62,8 +62,13 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建
       add_assertion "订单已创建", weight: 30 do
-        @hotel_booking = HotelBooking.order(created_at: :desc).first
-        expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
+        all_hotel_bookings = HotelBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_hotel_bookings).not_to be_empty, "未找到任何HotelBooking记录"
+        @hotel_booking = all_hotel_bookings.first
+        # Replaced by expect(all_hotel_bookings).not_to be_empty above, "未找到任何酒店订单记录"
       end
     
       return unless @hotel_booking
@@ -75,15 +80,25 @@ module V001V050
       end
     
       # 断言3: 入住日期正确
-      add_assertion "入住日期正确（明天）", weight: 20 do
+      add_assertion "入住日期正确（明天）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
     
       # 断言4: 离店日期正确
-      add_assertion "离店日期正确（后天，共1晚）", weight: 20 do
+      add_assertion "离店日期正确（后天，共1晚）", weight: 15 do
         expect(@hotel_booking.check_out_date).to eq(@check_out_date),
           "离店日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言5: 房间数和人数正确
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 10 do
+        expect(@hotel_booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间, 实际: #{@hotel_booking.rooms_count}间"
+        expect(@hotel_booking.adults_count).to eq(1),
+          "成人数错误。期望: 1人, 实际: #{@hotel_booking.adults_count}人"
+        expect(@hotel_booking.children_count).to eq(0),
+          "儿童数错误。期望: 0人, 实际: #{@hotel_booking.children_count}人"
       end
     end
   

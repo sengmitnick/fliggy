@@ -117,12 +117,13 @@ export default class extends Controller<HTMLElement> {
       this.promptTextTarget.textContent = "请选择离店日期"
     } else {
       // Selecting check-out date
-      if (this.checkInDate && selectedDate <= this.checkInDate) {
-        // If selected date is before or same as check-in, make it the new check-in
+      if (this.checkInDate && selectedDate < this.checkInDate) {
+        // If selected date is BEFORE check-in, make it the new check-in
         this.checkInDate = selectedDate
         this.checkOutDate = null
         this.promptTextTarget.textContent = "请选择离店日期"
       } else {
+        // Allow selecting same date as check-in (for single-day selection)
         this.checkOutDate = selectedDate
       }
     }

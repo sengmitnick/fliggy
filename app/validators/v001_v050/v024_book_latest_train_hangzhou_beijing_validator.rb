@@ -56,8 +56,13 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = TrainBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+        all_train_bookings = TrainBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_train_bookings).not_to be_empty, "未找到任何TrainBooking记录"
+        @booking = all_train_bookings.first
+        # Replaced by expect(all_train_bookings).not_to be_empty above, "未找到任何火车票订单记录"
       end
     
       return unless @booking
@@ -78,7 +83,8 @@ module V001V050
       add_assertion "选择了最晚的车次", weight: 40 do
         all_trains = Train.where(
           departure_city: @origin,
-          arrival_city: @destination
+          arrival_city: @destination,
+          data_version: 0
         ).where(departure_time: @target_date.beginning_of_day..@target_date.end_of_day)
       
         latest_time = all_trains.maximum(:departure_time)

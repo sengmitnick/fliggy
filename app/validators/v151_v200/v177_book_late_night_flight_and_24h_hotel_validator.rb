@@ -159,11 +159,17 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为航班到达当天 (20%)
-      add_assertion "酒店入住日期正确（航班到达当天）", weight: 20 do
+      # 断言5: 酒店入住日期为航班到达当天 (15%)
+      add_assertion "酒店入住日期正确（航班到达当天）", weight: 15 do
         arrival_date = @flight_booking.flight.arrival_time.to_date
         expect(@hotel_booking.check_in_date).to eq(arrival_date),
           "入住日期错误。期望: #{arrival_date}（航班到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

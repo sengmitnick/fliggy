@@ -167,11 +167,17 @@ module V151V200
           "酒店价格过高。期望: ≤#{@max_hotel_price.to_i}元, 实际: #{hotel_price}元"
       end
       
-      # 断言5: 总价≤500元 (30%)
-      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 30 do
+      # 断言5: 总价≤500元 (25%)
+      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 25 do
         total_price = @flight_booking.total_price + @hotel_booking.total_price
         expect(total_price).to be <= @max_total_budget,
           "总价超出预算。期望: ≤#{@max_total_budget.to_i}元, 实际: #{total_price}元（航班#{@flight_booking.total_price}+酒店#{@hotel_booking.total_price}）"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

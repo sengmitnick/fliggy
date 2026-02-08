@@ -173,9 +173,16 @@ module V151V200
       end
       
       # 断言5: 入住日期正确（邮轮前一晚）
-      add_assertion "入住日期正确（邮轮前一晚）", weight: 20 do
+      add_assertion "入住日期正确（邮轮前一晚）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（邮轮前一晚）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 退房日期正确（住1晚）
+      add_assertion "退房日期正确（住1晚）", weight: 5 do
+        expected_checkout = @hotel_checkin_date + 1.day
+        expect(@hotel_booking.check_out_date).to eq(expected_checkout),
+          "退房日期错误。期望: #{expected_checkout}（入住次日）, 实际: #{@hotel_booking.check_out_date}"
       end
     end
   end

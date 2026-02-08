@@ -42,7 +42,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了酒店预订(含健身设施)", weight: 40 do
+      add_assertion "创建了酒店预订(含健身设施)", weight: 35 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @city })
@@ -54,7 +54,7 @@ module V301V350
       
       return unless @hotel_booking
       
-      add_assertion "选择配备健身房的酒店", weight: 40 do
+      add_assertion "选择配备健身房的酒店", weight: 35 do
         hotel = @hotel_booking.hotel
         # 健身设施：健身房、游泳池等
         has_fitness = hotel.facilities.to_s.match?(/健身|游泳池|泳池|运动/i)
@@ -62,7 +62,7 @@ module V301V350
           "酒店未配备健身设施。当前设施: #{hotel.facilities}"
       end
       
-      add_assertion "入住日期正确", weight: 15 do
+      add_assertion "入住日期正确", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
@@ -71,6 +71,15 @@ module V301V350
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
         expect(actual_nights).to be >= 3,
           "住宿天数不足。期望≥3晚，实际: #{actual_nights}晚"
+      end
+      
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 15 do
+        expect(@hotel_booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间房，实际: #{@hotel_booking.rooms_count}间房"
+        expect(@hotel_booking.adults_count).to eq(1),
+          "成人数错误。期望: 1成人，实际: #{@hotel_booking.adults_count}成人"
+        expect(@hotel_booking.children_count).to eq(0),
+          "儿童数错误。期望: 0儿童，实际: #{@hotel_booking.children_count}儿童"
       end
     end
     

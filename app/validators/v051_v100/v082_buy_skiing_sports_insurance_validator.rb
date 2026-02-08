@@ -84,8 +84,13 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @insurance_order = InsuranceOrder.order(created_at: :desc).first
-        expect(@insurance_order).not_to be_nil, "未找到任何保险订单记录"
+        all_insurance_orders = InsuranceOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_insurance_orders).not_to be_empty, "未找到任何InsuranceOrder记录"
+        @insurance_order = all_insurance_orders.first
+        # Replaced by expect(all_insurance_orders).not_to be_empty above, "未找到任何保险订单记录"
       end
     
       return unless @insurance_order # 如果没有订单，后续断言无法继续

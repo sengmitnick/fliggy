@@ -55,8 +55,13 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = Booking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何订单记录"
+        all_bookings = Booking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_bookings).not_to be_empty, "未找到任何Booking记录"
+        @booking = all_bookings.first
+        # Replaced by expect(all_bookings).not_to be_empty above, "未找到任何订单记录"
       end
     
       return unless @booking
@@ -77,7 +82,8 @@ module V001V050
         all_flights = Flight.where(
           departure_city: @origin,
           destination_city: @destination,
-          flight_date: @target_date
+          flight_date: @target_date,
+          data_version: 0
         )
       
         earliest_time = all_flights.minimum(:departure_time)

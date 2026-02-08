@@ -48,8 +48,13 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 30 do
-        @order = CarOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何租车订单记录"
+        all_orders = CarOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_orders).not_to be_empty, "未找到任何租车订单记录"
+        @order = all_orders.first
       end
     
       return unless @order

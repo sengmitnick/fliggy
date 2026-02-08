@@ -163,8 +163,8 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店位置靠近火车站 (20%)
-      add_assertion "酒店位置靠近火车站", weight: 20 do
+      # 断言5: 酒店位置靠近火车站 (15%)
+      add_assertion "酒店位置靠近火车站", weight: 15 do
         hotel = @hotel_booking.hotel
         is_near_station = hotel.name.include?('火车站') || 
                           (hotel.address && hotel.address.include?('火车站'))
@@ -173,6 +173,12 @@ module V151V200
         # 否则只要在到达城市即可接受（因为数据包限制）
         expect(hotel.city).to include(@arrival_city),
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

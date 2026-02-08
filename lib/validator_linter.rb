@@ -126,27 +126,64 @@ class ValidatorLinter
   def check_data_version(validator_name, content, file_path)
     issues = []
     
-    # 查找所有 .where(...) 调用
-    where_clauses = content.scan(/^[ \t]*(\w+)\.where\([^)]*\)(?!.*data_version)/m)
+    # 提取 verify 方法的内容
+    verify_method = extract_method_content(content, 'verify')
+    return issues unless verify_method
     
-    where_clauses.each do |match|
-      model_name = match[0]
-      next if model_name == 'described_class' # 跳过测试代码
-      next if system_model?(model_name) # 跳过系统表
+    # 查找所有业务模型的查询方法调用
+    # 支持模式：Model.where(...), Model.find(...), Model.order(...), Model.all 等
+    business_models = %w[
+      CarOrder HotelBooking TrainBooking TourGroupBooking TicketOrder 
+      ActivityOrder BusTicketOrder CharterBooking DeepTravelBooking 
+      CruiseOrder HotelPackageOrder InsuranceOrder VisaOrder InternetOrder
+      AbroadTicketOrder MembershipOrder
+      Flight Train Hotel Car Ticket Attraction TourGroupProduct
+    ]
+    
+    business_models.each do |model|
+      # 查找该模型的查询调用
+      query_patterns = [
+        /#{model}\.where\([^)]*\)/,
+        /#{model}\.find_by\([^)]*\)/,
+        /#{model}\.order\([^)]*\)/,
+        /#{model}\.all/,
+        /#{model}\.first/,
+        /#{model}\.last/
+      ]
       
-      # 检查是否在同一查询链中有 data_version
-      line_number = find_line_number(content, /#{Regexp.escape(model_name)}\.where/)
-      context = extract_context_lines(content, line_number, 3)
-      
-      unless context.match?(/data_version.*@data_version/)
-        issues << Issue.new(
-          validator: validator_name,
-          severity: 'HIGH',
-          category: 'data_version',
-          message: "#{model_name}.where 查询缺少 data_version 过滤",
-          suggestion: "添加 .where(data_version: @data_version) 确保会话隔离",
-          line: line_number
-        )
+      query_patterns.each do |pattern|
+        if verify_method.match?(pattern)
+          # 找到查询调用，检查是否有 data_version 过滤
+          # 提取查询语句的上下文（可能跨多行）
+          match_position = verify_method.index(pattern)
+          next unless match_position
+          
+          # 提取完整的查询链（可能跨多行，直到遇到终止符如 .first, .to_a, 或换行后非链式调用）
+          query_chain = extract_query_chain(verify_method, match_position)
+          
+          # 检查查询链中是否包含任何形式的 data_version 过滤
+          # 认可的模式：
+          # 1. data_version: @data_version (会话隔离数据)
+          # 2. data_version: 0 (基线/基础数据)
+          unless query_chain.match?(/data_version:\s*(@data_version|0)/)
+            # 计算行号
+            line_number = find_line_number_in_method(content, 'verify', pattern)
+            
+            issues << Issue.new(
+              validator: validator_name,
+              severity: 'HIGH',
+              category: 'data_version',
+              message: "#{model} 查询缺少 data_version 过滤（verify 方法中）",
+              suggestion: "添加 .where(data_version: @data_version) 确保会话隔离",
+              line: line_number,
+              details: {
+                model: model,
+                query_snippet: query_chain[0..100]
+              }
+            )
+            break # 每个模型只报告一次
+          end
+        end
       end
     end
     
@@ -334,6 +371,46 @@ class ValidatorLinter
   def system_model?(model_name)
     system_models = %w[Administrator Session AdminOplog ValidatorExecution ActiveStorage]
     system_models.any? { |sm| model_name.include?(sm) }
+  end
+  
+  # 提取方法内容
+  def extract_method_content(content, method_name)
+    # 匹配方法定义到下一个方法定义或 end
+    pattern = /def\s+#{method_name}\s*\n(.*?)(?=\n\s*def\s+|\n\s*private\s*\n|\n\s*end\s*\n\s*end)/m
+    match = content.match(pattern)
+    match ? match[1] : nil
+  end
+  
+  # 提取完整的查询链
+  def extract_query_chain(text, start_position)
+    # 从起始位置开始，提取完整的方法链（可能跨多行）
+    remaining_text = text[start_position..-1]
+    
+    # 匹配到查询终止符：换行后的非空白非点号非右括号字符
+    # 支持多行查询链：.where(...).order(...).first 等
+    # 包括括号内的内容
+    chain_pattern = /^.*?(?=\n\s*(?:add_assertion|expect|return|#|$|def\s|end\s))/m
+    match = remaining_text.match(chain_pattern)
+    match ? match[0] : remaining_text[0..200]
+  end
+  
+  # 在特定方法中查找匹配的行号
+  def find_line_number_in_method(content, method_name, pattern)
+    lines = content.lines
+    in_method = false
+    method_pattern = /def\s+#{method_name}/
+    
+    lines.each_with_index do |line, index|
+      if line.match?(method_pattern)
+        in_method = true
+      elsif in_method && line.match?(/^\s*def\s+|^\s*private\s*$|^\s*end\s*$/)
+        in_method = false
+      elsif in_method && line.match?(pattern)
+        return index + 1
+      end
+    end
+    
+    nil
   end
   
   def severity_icon(severity)

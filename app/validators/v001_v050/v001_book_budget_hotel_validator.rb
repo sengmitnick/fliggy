@@ -86,8 +86,12 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @hotel_booking = HotelBooking.order(created_at: :desc).first
-        expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
+        all_hotel_bookings = HotelBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_hotel_bookings).not_to be_empty, "未找到任何酒店订单记录"
+        @hotel_booking = all_hotel_bookings.first
       end
     
       return unless @hotel_booking # 如果没有订单，后续断言无法继续
@@ -104,9 +108,25 @@ module V001V050
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
     
-      # 断言4: 价格符合预算（核心评分项）
+      # 断言4: 离店日期正确
+      add_assertion "离店日期正确（入住#{@nights}晚）", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "离店日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言5: 房间数和人数正确
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 5 do
+        expect(@hotel_booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间, 实际: #{@hotel_booking.rooms_count}间"
+        expect(@hotel_booking.adults_count).to eq(1),
+          "成人数错误。期望: 1人, 实际: #{@hotel_booking.adults_count}人"
+        expect(@hotel_booking.children_count).to eq(0),
+          "儿童数错误。期望: 0人, 实际: #{@hotel_booking.children_count}人"
+      end
+    
+      # 断言6: 价格符合预算（核心评分项）
       # CRITICAL FIX: 检查整晚房价而不是包含钟点房的hotel.price
-      add_assertion "价格符合预算", weight: 30 do
+      add_assertion "价格符合预算", weight: 25 do
         # 获取订单实际使用的房型价格（必须是过夜房型）
         hotel_room = @hotel_booking.hotel_room
         expect(hotel_room.room_category).to eq('overnight'),
@@ -117,9 +137,9 @@ module V001V050
           "价格超出预算。预算: ≤#{@budget}元, 实际: #{hotel_room_price}元"
       end
     
-      # 断言5: 选择了性价比最高的酒店（核心评分项）
+      # 断言7: 选择了性价比最高的酒店（核心评分项）
       # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
-      add_assertion "选择了性价比最高的酒店", weight: 20 do
+      add_assertion "选择了性价比最高的酒店", weight: 15 do
         # 查找所有符合预算的酒店（只考虑整晚房价）
         # 使用子查询方式获取最低整晚房价
         eligible_hotels_with_price = Hotel.where(

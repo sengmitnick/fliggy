@@ -69,8 +69,13 @@ module V051V100
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @ticket_order = TicketOrder.order(created_at: :desc).first
-        expect(@ticket_order).not_to be_nil, "未找到任何门票订单记录"
+        all_ticket_orders = TicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_ticket_orders).not_to be_empty, "未找到任何TicketOrder记录"
+        @ticket_order = all_ticket_orders.first
+        # Replaced by expect(all_ticket_orders).not_to be_empty above, "未找到任何门票订单记录"
       end
     
       return unless @ticket_order

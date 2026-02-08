@@ -42,7 +42,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了酒店预订(温泉度假村)", weight: 40 do
+      add_assertion "创建了酒店预订(温泉度假村)", weight: 35 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @city })
@@ -54,7 +54,7 @@ module V301V350
       
       return unless @hotel_booking
       
-      add_assertion "选择高评分养生酒店", weight: 25 do
+      add_assertion "选择高评分养生酒店", weight: 20 do
         hotel = @hotel_booking.hotel
         # 养生酒店通常评分高、价格适中
         is_wellness_hotel = hotel.rating >= 4.5 || hotel.price >= 600
@@ -62,7 +62,7 @@ module V301V350
           "未选择高评分养生酒店。当前酒店: #{hotel.name}, 评分: #{hotel.rating}, 价格: ¥#{hotel.price}"
       end
       
-      add_assertion "创建了SPA/温泉活动订单", weight: 20 do
+      add_assertion "创建了SPA/温泉活动订单", weight: 15 do
         @activity_order = ActivityOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -76,7 +76,7 @@ module V301V350
         end
       end
       
-      add_assertion "入住日期正确", weight: 10 do
+      add_assertion "入住日期正确", weight: 5 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
@@ -85,6 +85,15 @@ module V301V350
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
         expect(actual_nights).to be >= 3,
           "住宿天数不足。期望≥3晚，实际: #{actual_nights}晚"
+      end
+      
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 20 do
+        expect(@hotel_booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间房，实际: #{@hotel_booking.rooms_count}间房"
+        expect(@hotel_booking.adults_count).to eq(2),
+          "成人数错误。期望: 2成人，实际: #{@hotel_booking.adults_count}成人"
+        expect(@hotel_booking.children_count).to eq(0),
+          "儿童数错误。期望: 0儿童，实际: #{@hotel_booking.children_count}儿童"
       end
     end
     

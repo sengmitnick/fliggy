@@ -188,8 +188,8 @@ module V151V200
           "酒店城市错误。期望: #{@transit_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住时间在中转间隔内 (20%)
-      add_assertion "酒店入住时间在中转间隔内", weight: 20 do
+      # 断言5: 酒店入住时间在中转间隔内 (15%)
+      add_assertion "酒店入住时间在中转间隔内", weight: 15 do
         arrival_date = @first_booking.flight.arrival_time.to_date
         departure_date = @second_booking.flight.departure_time.to_date
         
@@ -198,6 +198,12 @@ module V151V200
           "入住日期过早。期望: >= #{arrival_date}, 实际: #{@hotel_booking.check_in_date}"
         expect(@hotel_booking.check_in_date).to be <= departure_date,
           "入住日期过晚。期望: <= #{departure_date}, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

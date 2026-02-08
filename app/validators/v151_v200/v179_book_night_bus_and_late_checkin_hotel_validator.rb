@@ -168,8 +168,8 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为大巴到达当天 (20%)
-      add_assertion "酒店入住日期正确（大巴到达当天）", weight: 20 do
+      # 断言5: 酒店入住日期为大巴到达当天 (15%)
+      add_assertion "酒店入住日期正确（大巴到达当天）", weight: 15 do
         bus = @bus_order.bus_ticket
         # departure_time 和 arrival_time 是字符串，需要解析
         dep_hour = Time.parse(bus.departure_time).hour
@@ -182,6 +182,12 @@ module V151V200
         end
         expect(@hotel_booking.check_in_date).to eq(arrival_date),
           "入住日期错误。期望: #{arrival_date}（大巴到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     
