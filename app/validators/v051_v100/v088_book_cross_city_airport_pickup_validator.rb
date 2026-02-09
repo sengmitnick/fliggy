@@ -115,11 +115,11 @@ module V051V100
           "实际: #{@transfer.transfer_package.name} #{@transfer.transfer_package.category_name}（#{actual_price}元）"
       end
     
-      add_assertion "乘客信息正确（张三）", weight: 20 do
+      add_assertion "联系人信息正确（张三）", weight: 20 do
         expect(@transfer.passenger_name).to eq(@expected_passenger_name),
-          "乘客姓名错误。期望: #{@expected_passenger_name}，实际: #{@transfer.passenger_name}"
+          "联系人姓名错误。期望: #{@expected_passenger_name}，实际: #{@transfer.passenger_name}"
         expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
-          "乘客电话错误。期望: #{@expected_passenger_phone}，实际: #{@transfer.passenger_phone}"
+          "联系人电话错误。期望: #{@expected_passenger_phone}，实际: #{@transfer.passenger_phone}"
       end
     end
   
