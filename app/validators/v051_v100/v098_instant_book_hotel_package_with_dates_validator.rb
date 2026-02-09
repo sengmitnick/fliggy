@@ -52,6 +52,12 @@ module V051V100
       @check_in_date = Date.tomorrow
       @check_out_date = @check_in_date + @night_count.days
     
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
+    
       # 查找上海地区的2晚套餐（注意：查询基线数据 data_version=0）
       @available_packages = HotelPackage.where(
         city: @city,
@@ -75,7 +81,7 @@ module V051V100
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（基于当前会话）
-      add_assertion "订单已创建", weight: 20 do
+      add_assertion "订单已创建", weight: 15 do
         all_orders = HotelPackageOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -110,7 +116,7 @@ module V051V100
       end
     
       # 断言5: 选择了含早餐的选项（核心评分项）
-      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 20 do
+      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 15 do
         selected_option = @package_order.package_option
         option_name = selected_option.name
         option_description = selected_option.description
@@ -143,7 +149,15 @@ module V051V100
           "离店日期错误。期望: #{@check_out_date.strftime('%Y年%m月%d日')}（#{@night_count}晚后）, 实际: #{actual_check_out&.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言7: 订单价格和数量正确
+      # 断言7: 联系人信息正确（10%）
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@package_order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@package_order.contact_phone}"
+      end
+    
+      # 断言8: 订单价格和数量正确（10%）
       add_assertion "订单价格和数量正确", weight: 10 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
@@ -165,7 +179,9 @@ module V051V100
         night_count: @night_count,
         quantity: @quantity,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -176,6 +192,8 @@ module V051V100
       @quantity = data['quantity']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_contact_name = data['expected_contact_name'] || '张三'
+      @expected_contact_phone = data['expected_contact_phone'] || '13800138000'
     
       # 重新加载可用套餐列表
       @available_packages = HotelPackage.where(
@@ -191,7 +209,7 @@ module V051V100
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
       # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找上海地区的2晚套餐
       available_packages = HotelPackage.where(

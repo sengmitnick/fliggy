@@ -115,6 +115,8 @@ end_date = start_date + 14.days  # 至少 14 天
 | 场景 | 使用数据 | verify 字段 | delivery_method |
 |------|---------|------------|----------------|
 | 酒店入住人/机票/火车票 | passengers | guest_name/passenger_id | - |
+| **酒店套餐预订** | **passengers** | **contact_name + contact_phone** | - |
+| **邮轮预订** | **passengers** | **contact_name + contact_phone + passenger_info** | - |
 | **景点门票/活动** | **passengers** | **contact_phone + passenger_ids** | - |
 | **WiFi/SIM卡邮寄** | **addresses** | **contact_info: {name, phone, address}** | **'mail'（只支持邮寄）** |
 | **签证申请** | **passengers + addresses** | **contact_name, contact_phone, delivery_address** | **'mail'（只支持邮寄）** |
@@ -194,7 +196,32 @@ add_assertion "乘客信息正确", weight: 10 do
 end
 ```
 
-**示例2：老年人保险（v080）**
+**示例2：酒店套餐预订（v098）**
+```ruby
+# prepare - 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+@passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+@expected_contact_name = @passenger.name
+@expected_contact_phone = @passenger.phone
+
+# simulate - 使用实例变量，避免重复查询
+passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+HotelPackageOrder.create!(
+  contact_name: passenger.name,
+  contact_phone: passenger.phone,
+  data_version: @data_version
+)
+
+# verify（10分）
+add_assertion "联系人信息正确（张三）", weight: 10 do
+  expect(@package_order.contact_name).to eq(@expected_contact_name),
+    "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@package_order.contact_name}"
+  expect(@package_order.contact_phone).to eq(@expected_contact_phone),
+    "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@package_order.contact_phone}"
+end
+```
+
+**示例3：老年人保险（v080）**
 ```ruby
 # prepare - 必须使用张建国（65岁），不是张三（34岁）
 user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -217,6 +244,74 @@ add_assertion "被保险人信息正确（张建国）", weight: 5 do
   expect(zhangjianguo_record['id_number']).to eq(@expected_insured_id_number)
 end
 ```
+
+#### 多人场景（邮轮预订）
+
+**业务特点：**
+- 多人共用一个订单，包含乘客信息数组（passenger_info）
+- 可以从乘客中任选一人作为联系人
+- 需要验证联系人电话与姓名匹配
+
+**代码模式（v095 案例）：**
+```ruby
+# prepare
+user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+@zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+@lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+@expected_passenger_names = [@zhangsan.name, @lisi.name]
+
+# 有效联系人电话映射
+@valid_contact_phones = {
+  '张三' => @zhangsan.phone,
+  '李四' => @lisi.phone
+}
+
+# simulate：随机选择联系人
+contact_names = ['张三', '李四']
+selected_contact_name = contact_names.sample
+contact_passenger = selected_contact_name == '张三' ? zhangsan : lisi
+
+# 创建乘客信息数组
+passenger_info = [
+  { name: zhangsan.name, id_number: zhangsan.id_number, phone: zhangsan.phone },
+  { name: lisi.name, id_number: lisi.id_number, phone: lisi.phone }
+]
+
+CruiseOrder.create!(
+  contact_name: contact_passenger.name,
+  contact_phone: contact_passenger.phone,
+  passenger_info: passenger_info,
+  quantity: 2,
+  data_version: @data_version
+)
+
+# verify：乘客信息（10分）+ 联系人（5分）= 合计15分
+add_assertion "乘客信息正确（张三、李四）", weight: 10 do
+  passenger_list = @order.passenger_list  # 模型方法解析 passenger_info
+  expect(passenger_list).not_to be_empty,
+    "乘客信息缺失"
+  
+  passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact.sort
+  expect(passenger_names).to match_array(@expected_passenger_names.sort),
+    "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
+end
+
+add_assertion "联系人信息正确（张三或李四）", weight: 5 do
+  valid_contacts = ['张三', '李四']
+  expect(valid_contacts).to include(@order.contact_name),
+    "联系人姓名错误。期望: 张三或李四, 实际: #{@order.contact_name}"
+  
+  expected_phone = @valid_contact_phones[@order.contact_name]
+  expect(@order.contact_phone).to eq(expected_phone),
+    "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
+end
+```
+
+**关键点：**
+- ✅ 乘客信息验证：使用 `match_array` 验证数组包含所有期望乘客
+- ✅ 联系人验证：支持任选一人，动态验证电话匹配
+- ✅ 权重分配：乘客信息（10分）> 联系人（5分）
+- ❌ 不要固定联系人：`expect(@order.contact_name).to eq('张三')`
 
 #### 多人场景（门票/活动）
 
@@ -318,14 +413,14 @@ end
 - ✅ 支持任选：`expect(['张三', '李四']).to include(@order.contact_name)`
 - ✅ 动态验证电话和地址：根据联系人姓名匹配对应的电话和地址
 
-**与门票/活动场景的区别：**
+**不同场景对比：**
 
-| 维度 | 门票/活动 | 签证申请 |
-|------|---------|---------|
-| 订单结构 | quantity=4 + passenger_ids | traveler_count=2 + 单个联系人 |
-| 联系人要求 | 固定一人 | 多人任选其一 |
-| 验证字段 | contact_phone + passenger_ids | contact_name + contact_phone + delivery_address |
-| 权重分配 | 联系人10分 + 游客10分 | 联系人3分 + 电话3分 + 地址4分 |
+| 维度 | 门票/活动 | 邮轮预订 | 酒店套餐 | 签证申请 |
+|------|---------|---------|---------|---------|
+| 订单结构 | quantity=4 + passenger_ids | quantity=2 + passenger_info | quantity=1 + contact | traveler_count=2 + 单个联系人 |
+| 联系人要求 | 固定一人 | 多人任选其一 | 固定一人 | 多人任选其一 |
+| 验证字段 | contact_phone + passenger_ids | contact_name + contact_phone + passenger_info | contact_name + contact_phone | contact_name + contact_phone + delivery_address |
+| 权重分配 | 联系人10分 + 游客10分 | 乘客10分 + 联系人5分 | 联系人10分 | 联系人3分 + 电话3分 + 地址4分 |
 
 ### 4.4 特殊字段验证
 
@@ -381,6 +476,8 @@ end
 - [ ] 查询只过滤核心实体，不过滤待验证属性
 - [ ] 单人场景：乘客信息验证（10分）
 - [ ] **多人门票/活动场景：联系人（10分）+ 游客信息（10分）= 20分**
+- [ ] **邮轮多人场景：乘客信息（10分）+ 联系人（5分，支持任选）= 15分**
+- [ ] **酒店套餐单人场景：联系人（10分）**
 - [ ] **签证多人场景：配送方式（5分）+ 联系人姓名（2分，支持任选）+ 电话匹配（2分）+ 地址匹配（1分）= 10分**
 - [ ] **收货地址验证：邮寄方式 + 姓名 + 电话 + 地址（20-25分）**
 - [ ] **签证/WiFi/SIM卡：必须验证 `delivery_method: 'mail'`**
