@@ -2,29 +2,37 @@
 
 require_relative '../base_validator'
 
-# V256: 预订红眼航班（跨日）
+# V256: 给张三预订红眼航班（跨日，省钱）
 #
 # 任务描述:
-#   用户需要预订后天23:00-次日02:00北京→上海红眼航班
+#   帮张三预订后天23:00-次日02:00北京→上海红眼航班（省钱）
 #
 # 评分标准:
 #   - 创建了航班订单 (20%)
 #   - 航班路线正确（北京→上海） (15%)
-#   - 出发日期正确（后天） (15%)
+#   - 起飞日期正确（后天） (10%)
 #   - 起飞时间在23:00-次日02:00红眼时段 (30%)
-#   - 订单状态有效 (20%)
+#   - 乘客信息正确（张三） (10%)
+#   - 订单状态有效 (15%)
 module V251V300
   class V256BookRedEyeFlightCrossDayValidator < BaseValidator
     self.validator_id = 'v256_book_red_eye_flight_cross_day_validator'
     self.task_id = '4d5576f9-5f5f-4e9b-bf8f-9f1a2b3c4d5f'
-    self.title = '预订后天红眼航班（跨日）'
-    self.description = '用户需要预订后天23:00-次日02:00北京→上海红眼航班'
+    self.title = '给张三预订红眼航班（后天北京→上海，23:00-次日02:00）'
+    self.description = '帮张三预订后天23:00-次日02:00从北京到上海的红眼航班，省钱实惠'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
       @flight_date = Date.current + 2.days
+      
+      # 查询 demo_user 和乘客信息（基线数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_id = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone
       
       # 红眼航班: 23:00-次日02:00
       all_flights = Flight.where(
@@ -43,8 +51,9 @@ module V251V300
       raise "未找到符合条件的红眼航班" if @available_flights.empty?
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）晚上23:00-次日凌晨02:00从#{@departure_city}到#{@arrival_city}的红眼航班，价格实惠适合省钱。",
+        task: "请为张三预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）晚上23:00-次日凌晨02:00从#{@departure_city}到#{@arrival_city}的红眼航班，价格实惠适合省钱。",
         requirements: {
+          passenger_name: '张三',
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           flight_date: @flight_date,
@@ -78,7 +87,7 @@ module V251V300
           "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.flight.destination_city}"
       end
       
-      add_assertion "起飞日期正确（后天#{@flight_date}）", weight: 15 do
+      add_assertion "起飞日期正确（后天#{@flight_date}）", weight: 10 do
         expect(@booking.flight.flight_date).to eq(@flight_date),
           "航班日期错误。期望: #{@flight_date}（后天）, 实际: #{@booking.flight.flight_date}"
       end
@@ -90,7 +99,18 @@ module V251V300
           "非红眼航班时段。期望: 23:00-次日02:00, 实际: #{@booking.flight.departure_time.strftime('%H:%M')}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        expect(@booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@booking.passenger_name}"
+        
+        expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客证件号错误。期望: #{@expected_passenger_id}, 实际: #{@booking.passenger_id_number}"
+        
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 15 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end
@@ -105,9 +125,9 @@ module V251V300
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @zhangsan.name,
+        passenger_id_number: @zhangsan.id_number,
+        contact_phone: @zhangsan.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -121,7 +141,10 @@ module V251V300
       {
         departure_city: @departure_city,
         arrival_city: @arrival_city,
-        flight_date: @flight_date.to_s
+        flight_date: @flight_date.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -129,6 +152,9 @@ module V251V300
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @flight_date = Date.parse(data['flight_date'])
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
       
       all_flights = Flight.where(
         departure_city: @departure_city,
