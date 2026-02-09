@@ -2,26 +2,27 @@
 
 require_relative '../base_validator'
 
-# 验证用例77: 办理澳大利亚电子签证（1人，材料最少，上门取件）
+# 验证用例77: 办理澳大利亚电子签证（1人，材料最少，邮寄方式）
 # 
 # 任务描述:
 #   Agent 需要办理澳大利亚电子签证，
-#   选择所需材料最少且支持上门取件的产品
+#   选择所需材料最少的产品，使用邮寄方式
 # 
 # 复杂度分析:
 #   1. 需要搜索"澳大利亚"国家的签证产品
-#   2. 需要选择"电子签证"类型
-#   3. 需要筛选支持上门取件（home_pickup=true）的产品
-#   4. 需要对比所需材料数量（material_count）
-#   5. 需要选择材料数量最少的产品
-#   ❌ 不能一次性提供：需要先搜索→筛选电子签→确认取件→对比材料数
+#   2. 需要选择"旅游签证"类型
+#   3. 需要对比所需材料数量（material_count）
+#   4. 需要选择材料数量最少的产品
+#   5. 使用邮寄方式（delivery_method: 'mail'）
+#   ❌ 不能一次性提供：需要先搜索→筛选类型→对比材料数
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 国家正确（澳大利亚）(15分)
-#   - 签证类型正确（电子签证）(20分)
-#   - 支持上门取件 (20分)
+#   - 签证类型正确（旅游签证）(15分)
+#   - 使用邮寄方式 (20分)
 #   - 选择了所需材料最少的产品 (25分)
+#   - 联系人和地址信息正确 (5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -35,8 +36,8 @@ module V051V100
   class V077ApplyAustraliaEvisaMinimalMaterialsValidator < BaseValidator
     self.validator_id = 'v077_apply_australia_evisa_minimal_materials_validator'
     self.task_id = '0c821879-db54-42b8-9526-3336bb7af223'
-    self.title = '给王芳办理澳大利亚电子签证（材料最少，上门取件）'
-    self.description = '办理澳大利亚电子签证，选择所需材料最少且支持上门取件的产品'
+    self.title = '给王芳办理澳大利亚电子签证（材料最少，邮寄方式）'
+    self.description = '办理澳大利亚电子签证，选择所需材料最少的产品，使用邮寄方式'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -46,15 +47,14 @@ module V051V100
       @product_type = '旅游签证'
       @traveler_count = 1
     
-      # 查找澳大利亚的电子签证产品（注意：查询基线数据 data_version=0）
+      # 查找澳大利亚的旅游签证产品（注意：查询基线数据 data_version=0）
       australia = Country.find_by(name: @country_name, data_version: 0)
       raise "未找到国家: #{@country_name}" unless australia
     
-      # 查找支持上门取件的电子签证产品
+      # 查找旅游签证产品
       @available_products = VisaProduct.where(
         country_id: australia.id,
         product_type: @product_type,
-        home_pickup: true,
         data_version: 0
       )
     
@@ -64,13 +64,13 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请办理#{@country_name}#{@product_type}（#{@traveler_count}人），选择所需材料最少且支持上门取件的产品",
+        task: "请办理#{@country_name}#{@product_type}（#{@traveler_count}人），选择所需材料最少的产品，使用邮寄方式",
         country_name: @country_name,
         product_type: @product_type,
         traveler_count: @traveler_count,
-        hint: "电子签证无需邮寄护照原件，办理更便捷。请选择支持上门取件（home_pickup）且所需材料数量（material_count）最少的产品",
+        hint: "澳大利亚旅游签证为电子签证，无需邮寄护照原件。请选择所需材料数量（material_count）最少的产品，并使用邮寄方式（delivery_method: 'mail'）",
         available_products_count: @available_products.count,
-        note: "上门取件服务可以节省寄送材料的时间，材料越少办理越便捷"
+        note: "材料越少办理越便捷，邮寄方式需要填写收货地址"
       }
     end
   
@@ -96,30 +96,29 @@ module V051V100
           "国家错误。期望: #{@country_name}, 实际: #{actual_country}"
       end
     
-      # 断言3: 签证类型正确（电子签证）
-      add_assertion "签证类型正确（电子签证）", weight: 15 do
+      # 断言3: 签证类型正确（旅游签证）
+      add_assertion "签证类型正确（旅游签证）", weight: 15 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}。" \
-          "电子签证无需邮寄护照原件，获批后会发送电子签证页"
+          "澳大利亚旅游签证为电子签证，无需邮寄护照原件"
       end
     
-      # 断言4: 支持上门取件
-      add_assertion "支持上门取件", weight: 15 do
-        home_pickup = @visa_order.visa_product.home_pickup
+      # 断言4: 使用邮寄方式
+      add_assertion "使用邮寄方式", weight: 20 do
+        delivery_method = @visa_order.delivery_method
       
-        expect(home_pickup).to be_truthy,
-          "所选产品不支持上门取件。期望: home_pickup=true, 实际: home_pickup=#{home_pickup}"
+        expect(delivery_method).to eq('mail'),
+          "配送方式错误。期望: mail（邮寄），实际: #{delivery_method}"
       end
     
       # 断言5: 选择了所需材料最少的产品（核心评分项）
       add_assertion "选择了所需材料最少的产品", weight: 25 do
-        # 获取所有支持上门取件的澳大利亚电子签证产品
+        # 获取所有澳大利亚旅游签证产品
         australia = Country.find_by(name: @country_name, data_version: 0)
         all_products = VisaProduct.where(
           country_id: australia.id,
           product_type: @product_type,
-          home_pickup: true,
           data_version: 0
         )
       
@@ -135,15 +134,25 @@ module V051V100
       end
     
       # 断言6: 联系人姓名正确（王芳）
-      add_assertion "联系人姓名正确（王芳）", weight: 5 do
+      add_assertion "联系人姓名正确（王芳）", weight: 2 do
         expect(@visa_order.contact_name).to eq('王芳'),
           "联系人姓名错误。期望: 王芳，实际: #{@visa_order.contact_name}"
       end
     
       # 断言7: 联系电话正确（王芳的电话）
-      add_assertion "联系电话正确（王芳的电话）", weight: 5 do
+      add_assertion "联系电话正确（王芳的电话）", weight: 2 do
         expect(@visa_order.contact_phone).to eq('13700137001'),
           "联系电话错误。期望: 13700137001（王芳），实际: #{@visa_order.contact_phone}"
+      end
+    
+      # 断言8: 收货地址与联系人匹配
+      add_assertion "收货地址与联系人匹配", weight: 1 do
+        # 王芳地址: 广东省广州天河区珠江新城花城大道85号
+        expected_pattern = /广东.*广州.*天河.*85/
+        actual_address = @visa_order.delivery_address || ''
+      
+        expect(actual_address).to match(expected_pattern),
+          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
       end
     end
   
@@ -172,7 +181,6 @@ module V051V100
         @available_products = VisaProduct.where(
           country_id: australia.id,
           product_type: @product_type,
-          home_pickup: true,
           data_version: 0
         )
         @minimal_materials_product = @available_products.min_by { |p| p.material_count || 999 }
@@ -184,15 +192,15 @@ module V051V100
       # 1. 查找测试用户和联系人（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       contact_passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      contact_address = user.addresses.find_by!(name: '王芳', data_version: 0)
     
       # 2. 查找澳大利亚
       australia = Country.find_by!(name: @country_name, data_version: 0)
     
-      # 3. 查找支持上门取件的澳大利亚电子签证产品
+      # 3. 查找澳大利亚旅游签证产品
       visa_products = VisaProduct.where(
         country_id: australia.id,
         product_type: @product_type,
-        home_pickup: true,
         data_version: 0
       )
     
@@ -203,7 +211,10 @@ module V051V100
     
       raise "未找到可用的签证产品" unless minimal_product
     
-      # 5. 创建签证订单
+      # 5. 拼接完整地址
+      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+    
+      # 6. 创建签证订单
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: minimal_product.id,
@@ -211,8 +222,8 @@ module V051V100
         unit_price: minimal_product.price,
         total_price: minimal_product.price * @traveler_count,
         expected_date: Date.current + 60.days,  # 预计出行日期60天后
-        delivery_method: 'pickup',  # 上门取件
-        delivery_address: '深圳市南山区科技园南区深南大道10000号',
+        delivery_method: 'mail',  # 邮寄方式
+        delivery_address: full_address,
         contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
         status: 'pending',
@@ -230,7 +241,7 @@ module V051V100
         product_type: minimal_product.product_type,
         processing_days: minimal_product.processing_days,
         material_count: minimal_product.material_count,
-        home_pickup: minimal_product.home_pickup,
+        delivery_method: 'mail',
         price: minimal_product.price,
         traveler_count: @traveler_count,
         total_price: visa_order.total_price,

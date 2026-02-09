@@ -300,7 +300,7 @@ visa_products_data.concat([
     success_rate: 98.5,
     material_count: 3,
     can_simplify: true,
-    home_pickup: true,
+    home_pickup: false,  # 前端只支持邮寄方式
     refused_reapply: false,
     supports_family: true,
     merchant_name: "武汉碧海蓝天旅游专营店",
@@ -322,7 +322,7 @@ visa_products_data.concat([
     success_rate: 99.2,
     material_count: 2,
     can_simplify: true,
-    home_pickup: true,
+    home_pickup: false,  # 前端只支持邮寄方式
     refused_reapply: false,
     supports_family: true,
     merchant_name: "湖南宝中旅行社专营店",

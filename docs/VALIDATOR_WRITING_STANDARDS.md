@@ -65,16 +65,24 @@ end_date = start_date + 14.days  # 至少 14 天
 
 **使用规则：**
 
-| 场景 | 使用数据 | verify 字段 |
-|------|---------|------------|
-| 酒店入住人/机票/火车票 | passengers | guest_name/passenger_id |
-| **景点门票/活动** | **passengers** | **contact_phone + passenger_ids** |
-| **WiFi/SIM卡邮寄** | **addresses** | **contact_info: {name, phone, address}** |
-| **签证申请** | **passengers + addresses** | **contact_name, contact_phone, delivery_address** |
+| 场景 | 使用数据 | verify 字段 | delivery_method |
+|------|---------|------------|----------------|
+| 酒店入住人/机票/火车票 | passengers | guest_name/passenger_id | - |
+| **景点门票/活动** | **passengers** | **contact_phone + passenger_ids** | - |
+| **WiFi/SIM卡邮寄** | **addresses** | **contact_info: {name, phone, address}** | **'mail'（只支持邮寄）** |
+| **签证申请** | **passengers + addresses** | **contact_name, contact_phone, delivery_address** | **'mail'（只支持邮寄）** |
+
+**⚠️ 业务规则约束：**
+
+**WiFi/SIM卡/签证申请：只支持邮寄方式（delivery_method: 'mail'）**
+- ❌ 禁止：`home_pickup: true`（上门取件/自取）
+- ✅ 必须：`delivery_method: 'mail'`
+- 原因：前端只支持邮寄配送，不支持上门取件功能
 
 **❌ 禁止：**
 - 硬编码姓名、电话、地址
 - 在 simulate 中创建新用户：`User.find_or_create_by!(...)`
+- 在签证/WiFi/SIM卡业务中使用 `home_pickup: true` 或 `delivery_method: 'pickup'`
 
 ---
 
@@ -180,6 +188,7 @@ end
 - 多人共用一个订单，只需填写一个联系人和收货地址
 - 可以从申请人中任选一人作为联系人
 - 收货地址必须与联系人的地址一致
+- **⚠️ 只支持邮寄方式（delivery_method: 'mail'），禁止使用上门取件**
 
 **代码模式（v075 案例）：**
 ```ruby
@@ -199,23 +208,29 @@ VisaOrder.create!(
   traveler_count: @traveler_count,
   contact_name: contact_passenger.name,
   contact_phone: contact_passenger.phone,
+  delivery_method: 'mail',  # ✅ 必须：只支持邮寄方式
   delivery_address: full_address,
   data_version: @data_version
 )
 
-# verify：联系人（3分）+ 电话匹配（3分）+ 地址匹配（4分）= 合计10分
-add_assertion "联系人姓名正确（张三或李四）", weight: 3 do
+# verify：配送方式（5分）+ 联系人（2分）+ 电话匹配（2分）+ 地址匹配（1分）= 合计10分
+add_assertion "使用邮寄方式", weight: 5 do
+  expect(@visa_order.delivery_method).to eq('mail'),
+    "配送方式错误。期望: mail（邮寄），实际: #{@visa_order.delivery_method}"
+end
+
+add_assertion "联系人姓名正确（张三或李四）", weight: 2 do
   valid_names = ['张三', '李四']
   expect(valid_names).to include(@visa_order.contact_name)
 end
 
-add_assertion "联系电话与联系人匹配", weight: 3 do
+add_assertion "联系电话与联系人匹配", weight: 2 do
   valid_pairs = { '张三' => '13800138000', '李四' => '13900139000' }
   expected_phone = valid_pairs[@visa_order.contact_name]
   expect(@visa_order.contact_phone).to eq(expected_phone)
 end
 
-add_assertion "收货地址与联系人匹配", weight: 4 do
+add_assertion "收货地址与联系人匹配", weight: 1 do
   valid_addresses = {
     '张三' => /北京.*朝阳.*建国路.*SOHO/,
     '李四' => /上海.*浦东.*陆家嘴.*1000/
@@ -226,6 +241,7 @@ end
 ```
 
 **关键点：**
+- ✅ **必须验证邮寄方式**：`expect(@order.delivery_method).to eq('mail')`（5分）
 - ❌ 不要固定联系人：`expect(@order.contact_name).to eq('张三')`
 - ✅ 支持任选：`expect(['张三', '李四']).to include(@order.contact_name)`
 - ✅ 动态验证电话和地址：根据联系人姓名匹配对应的电话和地址
@@ -284,6 +300,7 @@ end
 - [ ] 乘客信息在 prepare 中预查询（避免 simulate 中使用 data_version: 0）
 - [ ] 需身份证号的用 passengers（酒店/机票/保险）
 - [ ] **需收货地址的用 addresses：WiFi租赁（按受益人姓名）、SIM卡（is_default: true）、签证申请（按联系人姓名）**
+- [ ] **签证/WiFi/SIM卡业务：必须使用 `delivery_method: 'mail'`（只支持邮寄）**
 - [ ] 删除 `User.find_or_create_by!` 创建用户
 - [ ] simulate 中无 `data_version: 0` 的查询或创建
 
@@ -292,8 +309,9 @@ end
 - [ ] 查询只过滤核心实体，不过滤待验证属性
 - [ ] 单人场景：乘客信息验证（10分）
 - [ ] **多人门票/活动场景：联系人（10分）+ 游客信息（10分）= 20分**
-- [ ] **签证多人场景：联系人姓名（3分，支持任选）+ 电话匹配（3分）+ 地址匹配（4分）= 10分**
+- [ ] **签证多人场景：配送方式（5分）+ 联系人姓名（2分，支持任选）+ 电话匹配（2分）+ 地址匹配（1分）= 10分**
 - [ ] **收货地址验证：邮寄方式 + 姓名 + 电话 + 地址（20-25分）**
+- [ ] **签证/WiFi/SIM卡：必须验证 `delivery_method: 'mail'`**
 - [ ] 权重总和 = 100%
 
 ---
