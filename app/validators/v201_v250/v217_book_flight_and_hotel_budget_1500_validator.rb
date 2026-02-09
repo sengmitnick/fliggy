@@ -16,8 +16,8 @@ module V201V250
   class V217BookFlightAndHotelBudget1500Validator < BaseValidator
     self.validator_id = 'v217_book_flight_and_hotel_budget_1500_validator'
     self.task_id = 'a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d'
-    self.title = '预订航班+酒店（总预算≤1500元）'
-    self.description = '用户需要预订航班+酒店，总预算≤1500元'
+    self.title = '给张三预订后天深圳→北京航班+酒店（总预算≤1500元）'
+    self.description = '帮张三订后天从深圳到北京的航班+酒店（当晚入住1晚），总预算不超过1500元'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,6 +27,13 @@ module V201V250
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 1.day
       @max_budget = 1500
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_id_number = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       # 查找可用航班
       @available_flights = Flight.where(
@@ -94,7 +101,17 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "总价格≤#{@max_budget}元", weight: 40 do
+      add_assertion "航班日期正确（#{@flight_date.strftime('%m月%d日')}）", weight: 10 do
+        expect(@flight_booking.flight.flight_date).to eq(@flight_date),
+          "航班日期错误。期望: #{@flight_date}, 实际: #{@flight_booking.flight.flight_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（#{@check_in_date.strftime('%m月%d日')}）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      add_assertion "总价格≤#{@max_budget}元", weight: 20 do
         flight_price = @flight_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = flight_price + hotel_price
@@ -103,7 +120,14 @@ module V201V250
           "总价格超出预算。航班: #{flight_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客/入住人信息正确（张三）", weight: 10 do
+        expect(@flight_booking.passenger_name).to eq(@expected_guest_name),
+          "航班乘客姓名错误。期望: #{@expected_guest_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed']),
           "航班订单状态异常。实际状态: #{@flight_booking.status}"
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed']),
@@ -142,9 +166,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:flight],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_guest_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: best_combo[:flight].price,
         accept_terms: true,
         status: 'paid',
@@ -158,8 +182,8 @@ module V201V250
         hotel_room_id: best_combo[:room].id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         payment_method: '花呗',
         total_price: best_combo[:room].price,
         status: 'paid',
@@ -176,7 +200,10 @@ module V201V250
         flight_date: @flight_date.to_s,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        max_budget: @max_budget
+        max_budget: @max_budget,
+        expected_guest_name: @expected_guest_name,
+        expected_id_number: @expected_id_number,
+        expected_phone: @expected_phone
       }
     end
     
@@ -187,6 +214,9 @@ module V201V250
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
       @max_budget = data['max_budget']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_id_number = data['expected_id_number']
+      @expected_phone = data['expected_phone']
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

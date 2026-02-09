@@ -17,8 +17,8 @@ module V201V250
   class V211BookLongLayoverCityTourValidator < BaseValidator
     self.validator_id = 'v211_book_long_layover_city_tour_validator'
     self.task_id = '0fb132f5-1f1f-4f4f-ff4f-5f7a8b9c0d1f'
-    self.title = '预订长中转城市游览（5-8小时）'
-    self.description = '用户需要预订后天广州→上海→杭州航班，中转时间5-8小时可市内游览'
+    self.title = '给张三预订后天广州→上海→杭州航班（中转5-8小时可市内游）'
+    self.description = '帮张三订后天从广州经上海到杭州的航班，要求在上海中转时间5-8小时，时间足够市内游览'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,6 +27,13 @@ module V201V250
       @destination_city = '杭州'
       @min_layover_hours = 5
       @max_layover_hours = 8
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_id_number = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       # 查找可用航班组合（不限定日期）
       first_flights = Flight.where(
@@ -117,7 +124,14 @@ module V201V250
           "中转时间过长。期望: ≤#{@max_layover_hours}小时, 实际: #{layover_hours.round(1)}小时"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        expect(@first_booking.passenger_name).to eq(@expected_passenger_name),
+          "第一段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@first_booking.passenger_name}"
+        expect(@second_booking.passenger_name).to eq(@expected_passenger_name),
+          "第二段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@second_booking.passenger_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@first_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@second_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -132,9 +146,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:first_flight],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_passenger_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: best_combo[:first_flight].price,
         accept_terms: true,
         status: 'paid',
@@ -144,9 +158,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:second_flight],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_passenger_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: best_combo[:second_flight].price,
         accept_terms: true,
         status: 'paid',
@@ -163,7 +177,10 @@ module V201V250
         destination_city: @destination_city,
         travel_date: @travel_date.to_s,
         min_layover_hours: @min_layover_hours,
-        max_layover_hours: @max_layover_hours
+        max_layover_hours: @max_layover_hours,
+        expected_passenger_name: @expected_passenger_name,
+        expected_id_number: @expected_id_number,
+        expected_phone: @expected_phone
       }
     end
     
@@ -174,6 +191,9 @@ module V201V250
       @travel_date = Date.parse(data['travel_date'])
       @min_layover_hours = data['min_layover_hours']
       @max_layover_hours = data['max_layover_hours']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_id_number = data['expected_id_number']
+      @expected_phone = data['expected_phone']
       
       first_flights = Flight.where(
         departure_city: @origin_city,

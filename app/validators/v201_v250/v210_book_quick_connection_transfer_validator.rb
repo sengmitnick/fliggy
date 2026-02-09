@@ -13,13 +13,14 @@ require_relative '../base_validator'
 #   - 第二段火车路线正确（北京→天津） (10%)
 #   - 出发日期正确（明天） (10%)
 #   - 中转时间≤3小时且衔接合理 (30%)
-#   - 订单状态有效 (20%)
+#   - 乘客信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V210BookQuickConnectionTransferValidator < BaseValidator
     self.validator_id = 'v210_book_quick_connection_transfer_validator'
     self.task_id = '9fa021f4-0f0f-4f3f-ff3f-4f6a7b8c9d0f'
-    self.title = '预订明天快速中转（航班转火车≤3小时）'
-    self.description = '用户需要预订明天深圳→北京→天津，航班转火车，中转时间≤3小时'
+    self.title = '给张三预订明天快速中转（深圳→北京→天津，航班转火车，中转时间≤3小时）'
+    self.description = '张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时'
     self.timeout_seconds = 300
     
     def prepare
@@ -28,6 +29,13 @@ module V201V250
       @destination_city = '天津'
       @travel_date = Date.current + 1.day
       @max_transfer_hours = 3
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
       # 查找可用航班和火车组合
       flights = Flight.where(
@@ -118,7 +126,18 @@ module V201V250
           "中转时间过长。期望: ≤#{@max_transfer_hours}小时, 实际: #{transfer_hours.round(1)}小时"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@flight_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "航班乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@flight_booking.passenger_id_number}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "火车乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@train_booking.passenger_id_number}"
+        expect(@flight_booking.contact_phone).to eq(@expected_contact_phone),
+          "航班联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@flight_booking.contact_phone}"
+        expect(@train_booking.contact_phone).to eq(@expected_contact_phone),
+          "火车联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@train_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -130,12 +149,13 @@ module V201V250
       # 选择中转时间最短的组合
       best_combo = @valid_combinations.min_by { |c| c[:transfer_hours] }
       
+      # 使用 prepare 中预查询的乘客数据
       Booking.create!(
         user: user,
         flight: best_combo[:flight],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: best_combo[:flight].price,
         accept_terms: true,
         status: 'paid',
@@ -145,9 +165,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: best_combo[:train],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: best_combo[:train].price_second_class,
@@ -165,7 +185,10 @@ module V201V250
         transfer_city: @transfer_city,
         destination_city: @destination_city,
         travel_date: @travel_date.to_s,
-        max_transfer_hours: @max_transfer_hours
+        max_transfer_hours: @max_transfer_hours,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -175,6 +198,13 @@ module V201V250
       @destination_city = data['destination_city']
       @travel_date = Date.parse(data['travel_date'])
       @max_transfer_hours = data['max_transfer_hours']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
       
       flights = Flight.where(
         departure_city: @origin_city,

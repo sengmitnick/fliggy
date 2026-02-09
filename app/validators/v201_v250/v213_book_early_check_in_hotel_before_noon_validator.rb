@@ -18,14 +18,21 @@ module V201V250
   class V213BookEarlyCheckInHotelBeforeNoonValidator < BaseValidator
     self.validator_id = 'v213_book_early_check_in_hotel_before_noon_validator'
     self.task_id = '2fd354f7-3f3f-4f6f-ff6f-7f9a0b1c2d3f'
-    self.title = '预订明天航班+酒店早入住（12:00前）'
-    self.description = '用户需要预订明天早上航班到杭州+酒店12:00前提前入住'
+    self.title = '给张三预订明天早上航班到杭州+酒店12:00前提前入住'
+    self.description = '帮张三订明天早上到杭州的航班（12:00前到达），并预订杭州酒店当天入住，支持提前入住'
     self.timeout_seconds = 300
     
     def prepare
       @destination_city = '杭州'
       @flight_date = Date.current + 1.day
       @max_arrival_hour = 12
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_id_number = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       # 查找早上到达的航班（12:00前）
       @available_flights = Flight.where(
@@ -100,7 +107,14 @@ module V201V250
           "入住日期错误。期望: #{arrival_date}（到达日期）, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客/入住人信息正确（张三）", weight: 10 do
+        expect(@flight_booking.passenger_name).to eq(@expected_guest_name),
+          "航班乘客姓名错误。期望: #{@expected_guest_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -117,9 +131,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_guest_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: flight.price,
         status: 'paid',
         accept_terms: true,
@@ -137,8 +151,8 @@ module V201V250
         hotel_room: room,
         check_in_date: arrival_date,
         check_out_date: arrival_date + 1.day,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: hotel.price,
         status: 'paid',
@@ -154,7 +168,10 @@ module V201V250
         destination_city: @destination_city,
         flight_date: @flight_date.to_s,
         max_arrival_hour: @max_arrival_hour,
-        check_in_date: @check_in_date.to_s
+        check_in_date: @check_in_date.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_id_number: @expected_id_number,
+        expected_phone: @expected_phone
       }
     end
     
@@ -163,6 +180,9 @@ module V201V250
       @flight_date = Date.parse(data['flight_date'])
       @max_arrival_hour = data['max_arrival_hour']
       @check_in_date = Date.parse(data['check_in_date'])
+      @expected_guest_name = data['expected_guest_name']
+      @expected_id_number = data['expected_id_number']
+      @expected_phone = data['expected_phone']
       
       @available_flights = Flight.where(
         destination_city: @destination_city,

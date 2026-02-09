@@ -11,13 +11,14 @@ require_relative '../base_validator'
 #   - 创建了火车票订单 (20%)
 #   - 火车路线正确（上海→南京） (15%)
 #   - 出发时间在05:00-07:00清晨时段 (45%)
-#   - 订单状态有效 (20%)
+#   - 乘客信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V206BookSunriseTrainEarlyBirdValidator < BaseValidator
     self.validator_id = 'v206_book_sunrise_train_early_bird_validator'
     self.task_id = '5e6687f0-6f6f-4f9c-cf9f-0f2a3b4c5d6e'
-    self.title = '预订清晨早班火车（1人）'
-    self.description = '用户需要预订明天05:00-07:00最早班次上海→南京高铁'
+    self.title = '给张三预订明天清晨早班火车（时间窗口05:00-07:00，上海→南京）'
+    self.description = '张三需要预订明天05:00-07:00从上海到南京的最早班次高铁'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +26,13 @@ module V201V250
       @arrival_city = '南京'
       @time_window_start = 5   # 05:00
       @time_window_end = 7     # 07:00
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
       # 查找清晨早班火车（不限定日期）
       all_trains = Train.by_route(@departure_city, @arrival_city)
@@ -85,7 +93,14 @@ module V201V250
           "出发时间过晚。期望: <#{@time_window_end}:00, 实际: #{@booking.train.departure_time.strftime('%H:%M')}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@booking.passenger_id_number}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end
@@ -97,12 +112,13 @@ module V201V250
       # 选择符合清晨时段的火车（优先选择最早的）
       train = @available_trains.min_by { |t| t.departure_time }
       
+      # 使用 prepare 中预查询的乘客数据
       TrainBooking.create!(
         user: user,
         train: train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: train.price_second_class,
@@ -120,7 +136,10 @@ module V201V250
         arrival_city: @arrival_city,
         travel_date: @travel_date.to_s,
         time_window_start: @time_window_start,
-        time_window_end: @time_window_end
+        time_window_end: @time_window_end,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -130,6 +149,13 @@ module V201V250
       @travel_date = Date.parse(data['travel_date'])
       @time_window_start = data['time_window_start']
       @time_window_end = data['time_window_end']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
       
       all_trains = Train.by_route(@departure_city, @arrival_city)
         .where(data_version: 0)

@@ -12,13 +12,14 @@ require_relative '../base_validator'
 #   - 航班路线正确（深圳→北京） (15%)
 #   - 起飞日期正确（明天） (15%)
 #   - 起飞时间在9:00-12:00窗口内 (30%)
-#   - 订单状态有效 (20%)
+#   - 乘客信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V202BookMorningFlightTimeWindowValidator < BaseValidator
     self.validator_id = 'v202_book_morning_flight_time_window_validator'
     self.task_id = 'eab7dcf4-8b17-4de8-9f8b-98eaa110ac1f'
-    self.title = '预订明天上午航班（时间窗口）'
-    self.description = '用户需要预订明天9:00-12:00深圳→北京的航班（商务出行）'
+    self.title = '给张三预订明天上午航班（时间窗口9:00-12:00，深圳→北京）'
+    self.description = '张三需要预订明天9:00-12:00从深圳到北京的航班，适合商务出行'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,6 +28,13 @@ module V201V250
       @flight_date = Date.current + 1.day
       @time_window_start = 9  # 9:00
       @time_window_end = 12   # 12:00
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
       # 查找符合时间窗口的航班
       all_flights = Flight.where(
@@ -92,7 +100,14 @@ module V201V250
           "起飞时间过晚。期望: <#{@time_window_end}:00, 实际: #{@booking.flight.departure_time.strftime('%H:%M')}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@booking.passenger_id_number}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end
@@ -104,12 +119,13 @@ module V201V250
       # 选择符合时间窗口的航班（优先选择价格低的）
       flight = @available_flights.min_by(&:price)
       
+      # 使用 prepare 中预查询的乘客数据
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -125,7 +141,10 @@ module V201V250
         arrival_city: @arrival_city,
         flight_date: @flight_date.to_s,
         time_window_start: @time_window_start,
-        time_window_end: @time_window_end
+        time_window_end: @time_window_end,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -135,6 +154,13 @@ module V201V250
       @flight_date = Date.parse(data['flight_date'])
       @time_window_start = data['time_window_start']
       @time_window_end = data['time_window_end']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
       
       all_flights = Flight.where(
         departure_city: @departure_city,
