@@ -23,7 +23,7 @@ module V051V100
       @location = '北京'
       @product_keyword = '故宫'
       @travel_date = Date.current + 5.days
-      @adult_count = 2
+      @adult_count = 1
     
       @qualified_guides = DeepTravelGuide.where(data_version: 0)
                                          .where('rating >= ?', @min_rating)

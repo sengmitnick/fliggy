@@ -7,8 +7,8 @@ module V051V100
   class V097RedeemTokyoCosmosCosmeticsShopCouponValidator < BaseValidator
     self.validator_id = 'v097_redeem_tokyo_cosmos_cosmetics_shop_coupon_validator'
     self.task_id = 'c25157f9-a90e-48be-b0f5-f3b8b941e478'
-    self.title = '兑换东京科摩思药妆店优惠券（满额立减7%）'
-    self.description = '兑换东京歌舞伎町科摩思药妆店的优惠券，选择折扣最高的'
+    self.title = '给张三兑换东京科摩思药妆店优惠券（满额立减7%）'
+    self.description = '给张三兑换东京歌舞伎町科摩思药妆店的优惠券，选择折扣最高的'
     self.timeout_seconds = 180
   
     def prepare
@@ -31,7 +31,7 @@ module V051V100
   
     def verify
       add_assertion "优惠券已兑换", weight: 20 do
-        @user_coupon = UserCoupon.order(created_at: :desc).first
+        @user_coupon = UserCoupon.where(data_version: @data_version).order(created_at: :desc).first
         expect(@user_coupon).not_to be_nil, "未找到任何优惠券兑换记录"
       end
     
@@ -98,7 +98,8 @@ module V051V100
         abroad_coupon_id: highest_discount.id,
         status: 'claimed',
         claimed_at: Time.current,
-        expires_at: Time.current + 1.year
+        expires_at: Time.current + 1.year,
+        data_version: @data_version
       )
     end
     end

@@ -39,8 +39,8 @@ module V051V100
   class V098InstantBookHotelPackageWithDatesValidator < BaseValidator
     self.validator_id = 'v098_instant_book_hotel_package_with_dates_validator'
     self.task_id = '89f42d1c-3e8b-4a9f-b2c1-7d5e9a6f8c3a'
-    self.title = '立即预约明天上海地区酒店套餐（2晚，含早餐）'
-    self.description = '需要搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
+    self.title = '给张三立即预约明天上海地区酒店套餐（2晚，含早餐）'
+    self.description = '给张三搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -51,6 +51,12 @@ module V051V100
       @quantity = 1
       @check_in_date = Date.tomorrow
       @check_out_date = @check_in_date + @night_count.days
+    
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
     
       # 查找上海地区的2晚套餐（注意：查询基线数据 data_version=0）
       @available_packages = HotelPackage.where(
@@ -75,7 +81,7 @@ module V051V100
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（基于当前会话）
-      add_assertion "订单已创建", weight: 20 do
+      add_assertion "订单已创建", weight: 15 do
         all_orders = HotelPackageOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -110,7 +116,7 @@ module V051V100
       end
     
       # 断言5: 选择了含早餐的选项（核心评分项）
-      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 20 do
+      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 15 do
         selected_option = @package_order.package_option
         option_name = selected_option.name
         option_description = selected_option.description
@@ -143,7 +149,15 @@ module V051V100
           "离店日期错误。期望: #{@check_out_date.strftime('%Y年%m月%d日')}（#{@night_count}晚后）, 实际: #{actual_check_out&.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言7: 订单价格和数量正确
+      # 断言7: 联系人信息正确（10%）
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@package_order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@package_order.contact_phone}"
+      end
+    
+      # 断言8: 订单价格和数量正确（10%）
       add_assertion "订单价格和数量正确", weight: 10 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
@@ -165,7 +179,9 @@ module V051V100
         night_count: @night_count,
         quantity: @quantity,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -176,6 +192,8 @@ module V051V100
       @quantity = data['quantity']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_contact_name = data['expected_contact_name'] || '张三'
+      @expected_contact_phone = data['expected_contact_phone'] || '13800138000'
     
       # 重新加载可用套餐列表
       @available_packages = HotelPackage.where(
@@ -191,7 +209,7 @@ module V051V100
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
       # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找上海地区的2晚套餐
       available_packages = HotelPackage.where(
@@ -223,7 +241,7 @@ module V051V100
       target_hotel = available_hotels.first
     
       # 7. 创建酒店套餐订单（立即预约模式：需要入住日期和酒店）
-      package_order = HotelPackageOrder.create!(
+      HotelPackageOrder.create!(
         hotel_package_id: target_package.id,
         package_option_id: target_option.id,
         hotel_id: target_hotel.id,
@@ -236,28 +254,9 @@ module V051V100
         check_out_date: @check_out_date,
         status: 'pending',
         contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_phone: passenger.phone,
+        data_version: @data_version
       )
-    
-      # 返回操作信息
-      {
-        action: 'create_hotel_package_order',
-        order_id: package_order.id,
-        order_number: package_order.order_number,
-        package_title: target_package.title,
-        package_brand: target_package.brand_name,
-        hotel_name: target_hotel.name,
-        hotel_city: target_hotel.city,
-        option_name: target_option.name,
-        option_description: target_option.description,
-        price: target_option.price,
-        quantity: @quantity,
-        total_price: package_order.total_price,
-        booking_type: 'instant',
-        check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s,
-        user_email: user.email
-      }
     end
   end
 end

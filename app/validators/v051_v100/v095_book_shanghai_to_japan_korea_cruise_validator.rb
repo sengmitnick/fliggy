@@ -8,8 +8,8 @@ module V051V100
   class V095BookShanghaiToJapanKoreaCruiseValidator < BaseValidator
     self.validator_id = 'v095_book_shanghai_to_japan_korea_cruise_validator'
     self.task_id = '25e31a26-07fd-4515-91c9-91e037c21aa4'
-    self.title = '预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
-    self.description = '预订香港出发的日韩邮轮，选择海洋光谱号1月份最近一班6天5晚行程，预订内舱房（性价比之选），为2位成人'
+    self.title = '给张三、李四预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
+    self.description = '给张三、李四预订香港出发的日韩邮轮，选择海洋光谱号1月份最近一班6天5晚行程，预订内舱房（性价比之选），共2位成人'
     self.timeout_seconds = 240
   
     def prepare
@@ -20,6 +20,18 @@ module V051V100
       @cabin_category = 'interior'
       @adult_count = 2
       @expected_month = 1  # 1月出发（冬季日韩航线）
+    
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_names = [@zhangsan.name, @lisi.name]
+      
+      # 有效联系人电话映射
+      @valid_contact_phones = {
+        '张三' => @zhangsan.phone,
+        '李四' => @lisi.phone
+      }
     
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     
@@ -32,13 +44,14 @@ module V051V100
         adult_count: @adult_count,
         departure_month: '1月（冬季日韩航线）',
         hint: "筛选船只名包含'海洋光谱号'、出发港包含'香港'、duration_days=6且duration_nights=5的班次，选择1月份最近日期的班次，预订内舱房（category='interior'），预订数量为2位成人",
-        available_ships_count: @available_ships.count
+        available_ships_count: @available_ships.count,
+        expected_passengers: @expected_passenger_names.join('、')
       }
     end
   
     def verify
-      # 断言1: 订单已创建（20%）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建（15%）
+      add_assertion "订单已创建", weight: 15 do
         all_orders = CruiseOrder
           .joins(cruise_product: { cruise_sailing: :cruise_ship })
           .where(cruise_ships: { name: @ship_keyword })
@@ -52,8 +65,8 @@ module V051V100
     
       return unless @order
     
-      # 断言2: 船只正确（15%）
-      add_assertion "船只正确（#{@ship_keyword}）", weight: 15 do
+      # 断言2: 船只正确（10%）
+      add_assertion "船只正确（#{@ship_keyword}）", weight: 10 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
         expect(ship.name).to include(@ship_keyword),
@@ -100,8 +113,30 @@ module V051V100
           "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
       end
     
-      # 断言8: 选择了1月份最近日期的班次（10%）- 在所有符合条件的1月班次中选择最早的
-      add_assertion "选择了1月份最近日期的班次", weight: 10 do
+      # 断言8: 乘客信息正确（10%）- 验证包含张三和李四
+      add_assertion "乘客信息正确（张三、李四）", weight: 10 do
+        passenger_list = @order.passenger_list
+        expect(passenger_list).not_to be_empty,
+          "乘客信息缺失"
+        
+        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact.sort
+        expect(passenger_names).to match_array(@expected_passenger_names.sort),
+          "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
+      end
+    
+      # 断言9: 联系人信息正确（5%）- 验证联系人为张三或李四，且电话匹配
+      add_assertion "联系人信息正确（张三或李四）", weight: 5 do
+        valid_contacts = ['张三', '李四']
+        expect(valid_contacts).to include(@order.contact_name),
+          "联系人姓名错误。期望: 张三或李四, 实际: #{@order.contact_name}"
+        
+        expected_phone = @valid_contact_phones[@order.contact_name]
+        expect(@order.contact_phone).to eq(expected_phone),
+          "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
+      end
+    
+      # 断言10: 选择了1月份最近日期的班次（5%）- 在所有符合条件的1月班次中选择最早的
+      add_assertion "选择了1月份最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         
         # 筛选符合条件的班次：正确的出发港、行程天数、出发月份
@@ -129,7 +164,9 @@ module V051V100
         duration_nights: @duration_nights, 
         cabin_category: @cabin_category, 
         adult_count: @adult_count,
-        expected_month: @expected_month
+        expected_month: @expected_month,
+        expected_passenger_names: @expected_passenger_names,
+        valid_contact_phones: @valid_contact_phones
       }
     end
   
@@ -141,11 +178,15 @@ module V051V100
       @cabin_category = data['cabin_category']
       @adult_count = data['adult_count']
       @expected_month = data['expected_month']
+      @expected_passenger_names = data['expected_passenger_names'] || ['张三', '李四']
+      @valid_contact_phones = data['valid_contact_phones'] || { '张三' => '13800138000', '李四' => '13900139000' }
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     end
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      lisi = user.passengers.find_by!(name: '李四', data_version: 0)
     
       # 查找船只
       ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
@@ -187,17 +228,29 @@ module V051V100
     
       total_price = cruise_product.price_per_person * @adult_count
     
+      # 随机选择联系人（张三或李四）
+      contact_names = ['张三', '李四']
+      selected_contact_name = contact_names.sample
+      contact_passenger = selected_contact_name == '张三' ? zhangsan : lisi
+      
+      # 创建乘客信息数组
+      passenger_info = [
+        { name: zhangsan.name, id_number: zhangsan.id_number, phone: zhangsan.phone },
+        { name: lisi.name, id_number: lisi.id_number, phone: lisi.phone }
+      ]
+    
       # 创建订单（2位成人）
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: cruise_product.id,
         quantity: @adult_count,
-        contact_name: '周八',
-        contact_phone: '13800138006',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
+        passenger_info: passenger_info,
         total_price: total_price,
         accept_terms: true,
         status: 'pending',
-        data_version: 0
+        data_version: @data_version
       )
     end
     end

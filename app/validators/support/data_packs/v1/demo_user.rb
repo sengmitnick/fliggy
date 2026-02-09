@@ -125,7 +125,7 @@ if demo_user.persisted?
     puts "     ✓ 添加默认乘机人: 张三, 张建国(爷爷), 李四, 王芳, 刘强, 小明, 小红, 陈静"
   end
   
-  # 添加联系人
+  # 添加联系人（与出行人数据对应）
   if demo_user.contacts.where(name: '张三').none?
     demo_user.contacts.create!([
       {
@@ -136,19 +136,49 @@ if demo_user.persisted?
         data_version: 0
       },
       {
-        name: '王五',
-        phone: '13700137000',
-        email: 'wangwu@example.com',
+        name: '张建国',
+        phone: '13200132000',
+        email: 'zhangjianguo@example.com',
         data_version: 0
       },
       {
-        name: '赵六',
-        phone: '13600136000',
-        email: 'zhaoliu@example.com',
+        name: '李四',
+        phone: '13900139000',
+        email: 'lisi@example.com',
+        data_version: 0
+      },
+      {
+        name: '王芳',
+        phone: '13700137001',
+        email: 'wangfang@example.com',
+        data_version: 0
+      },
+      {
+        name: '刘强',
+        phone: '13600136001',
+        email: 'liuqiang@example.com',
+        data_version: 0
+      },
+      {
+        name: '小明',
+        phone: '13500135001',
+        email: 'xiaoming@example.com',
+        data_version: 0
+      },
+      {
+        name: '小红',
+        phone: '13400134001',
+        email: 'xiaohong@example.com',
+        data_version: 0
+      },
+      {
+        name: '陈静',
+        phone: '13300133001',
+        email: 'chenjing@example.com',
         data_version: 0
       }
     ])
-    puts "     ✓ 添加联系人: 张三, 王五, 赵六"
+    puts "     ✓ 添加联系人: 张三, 张建国, 李四, 王芳, 刘强, 小明, 小红, 陈静"
   end
   
   # 添加收货地址

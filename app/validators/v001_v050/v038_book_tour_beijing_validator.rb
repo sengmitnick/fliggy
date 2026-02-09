@@ -26,8 +26,8 @@ module V001V050
   class V038BookTourBeijingValidator < BaseValidator
     self.validator_id = 'v038_book_tour_beijing_validator'
     self.task_id = '7e12c3ec-f7d0-4e6f-9f78-82db90598ec7'
-    self.title = '给张三预订明天北京4天3晚跟团游（2成人）'
-    self.description = '搜索北京的跟团游产品，找到4天3晚的产品并预订2位成人'
+    self.title = '给张三、李四预订明天北京4天3晚跟团游（2成人）'
+    self.description = '搜索北京的跟团游产品，找到4天3晚的产品并为张三、李四预订（2位成人）'
     self.timeout_seconds = 240
   
     def prepare
@@ -36,6 +36,18 @@ module V001V050
       @nights = 3
       @adult_count = 2
       @departure_date = Date.current + 1.day
+      
+      # 查询出行人和联系人（demo_user 数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      @lisi_contact = user.contacts.find_by!(name: '李四', data_version: 0)
+      
+      # 联系人可以是张三或李四（多选一）
+      @valid_contact_names = ['张三', '李四']
+      @valid_contact_phones = {
+        '张三' => @zhangsan_contact.phone,
+        '李四' => @lisi_contact.phone
+      }
     
       suitable_tours = TourGroupProduct.where(
         destination: @destination,
@@ -90,11 +102,10 @@ module V001V050
           "成人数量不正确。期望: #{@adult_count}人, 实际: #{@booking.adult_count}人"
       end
     
-      add_assertion "联系人信息正确（张三 13800138000）", weight: 5 do
-        expect(@booking.contact_name).to eq('张三'),
-          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.contact_name}"
-        expect(@booking.contact_phone).to eq('13800138000'),
-          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
+      add_assertion "联系人信息正确（从出行人中选择：张三或李四）", weight: 5 do
+        expect(@valid_contact_phones.values).to include(@booking.contact_phone),
+          "联系人电话错误。应从出行人中选择：#{@valid_contact_names.join('、')}，" \
+          "对应电话：#{@valid_contact_phones.values.join('、')}，实际: #{@booking.contact_phone}"
       end
     
       add_assertion "出行人信息正确（#{@adult_count}位成人）", weight: 10 do
@@ -118,7 +129,8 @@ module V001V050
     private
   
     def execution_state_data
-      { destination: @destination, duration: @duration, nights: @nights, adult_count: @adult_count, departure_date: @departure_date.to_s }
+      { destination: @destination, duration: @duration, nights: @nights, adult_count: @adult_count, departure_date: @departure_date.to_s,
+        valid_contact_names: @valid_contact_names, valid_contact_phones: @valid_contact_phones }
     end
   
     def restore_from_state(data)
@@ -127,6 +139,8 @@ module V001V050
       @nights = data['nights']
       @adult_count = data['adult_count']
       @departure_date = Date.parse(data['departure_date'])
+      @valid_contact_names = data['valid_contact_names']
+      @valid_contact_phones = data['valid_contact_phones']
     end
   
     def simulate
