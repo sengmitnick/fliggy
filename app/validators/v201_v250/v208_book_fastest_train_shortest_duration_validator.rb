@@ -11,20 +11,28 @@ require_relative '../base_validator'
 #   - 创建了火车票订单 (20%)
 #   - 火车路线正确（上海→杭州） (15%)
 #   - 出发日期正确（明天） (15%)
-#   - 选择了行程时间最短的车次（≤理论最短时间+10分钟） (30%)
+#   - 选择了行程时间最短的车次（≤理论最短时间+10分钟） (20%)
+#   - 乘客信息正确 (10%)
 #   - 订单状态有效 (20%)
 module V201V250
   class V208BookFastestTrainShortestDurationValidator < BaseValidator
     self.validator_id = 'v208_book_fastest_train_shortest_duration_validator'
     self.task_id = '7f8809f2-8f8f-4f1e-ef1f-2f4a5b6c7d8f'
-    self.title = '预订明天最快高铁（行程时间最短，1人）'
-    self.description = '用户需要预订明天上海→杭州，行程时间最短的高铁'
+    self.title = '给张三预订明天最快高铁（行程时间最短，上海→杭州）'
+    self.description = '张三需要预订明天从上海到杭州的高铁，要求行程时间最短'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '上海'
       @arrival_city = '杭州'
       @travel_date = Date.current + 1.day
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
       # 查找所有可用火车
       @available_trains = Train.by_route(@departure_city, @arrival_city)
@@ -80,10 +88,17 @@ module V201V250
           "出发日期错误。期望: #{@travel_date}（明天）, 实际: #{actual_date}"
       end
       
-      add_assertion "选择了行程时间最短的车次", weight: 30 do
+      add_assertion "选择了行程时间最短的车次", weight: 20 do
         duration = @booking.train.duration
         expect(duration).to be <= @acceptable_max_duration,
           "未选择最快车次。最短行程: #{@min_duration}分钟, 实际: #{duration}分钟（允许误差10分钟）"
+      end
+      
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@booking.passenger_id_number}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
       end
       
       add_assertion "订单状态有效", weight: 20 do
@@ -98,12 +113,13 @@ module V201V250
       # 选择行程时间最短的火车
       train = @available_trains.min_by(&:duration)
       
+      # 使用 prepare 中预查询的乘客数据
       TrainBooking.create!(
         user: user,
         train: train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: train.price_second_class,
@@ -121,7 +137,10 @@ module V201V250
         arrival_city: @arrival_city,
         travel_date: @travel_date.to_s,
         min_duration: @min_duration,
-        acceptable_max_duration: @acceptable_max_duration
+        acceptable_max_duration: @acceptable_max_duration,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -131,6 +150,13 @@ module V201V250
       @travel_date = Date.parse(data['travel_date'])
       @min_duration = data['min_duration']
       @acceptable_max_duration = data['acceptable_max_duration']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)

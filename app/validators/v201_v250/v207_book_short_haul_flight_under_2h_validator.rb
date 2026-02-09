@@ -11,19 +11,27 @@ require_relative '../base_validator'
 #   - 创建了航班订单 (20%)
 #   - 航班路线正确（深圳→上海） (15%)
 #   - 飞行时长≤2小时 (45%)
-#   - 订单状态有效 (20%)
+#   - 乘客信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V207BookShortHaulFlightUnder2hValidator < BaseValidator
     self.validator_id = 'v207_book_short_haul_flight_under_2h_validator'
     self.task_id = '6f7798f1-7f7f-4f0d-df0f-1f3a4b5c6d7f'
-    self.title = '预订短途航班（飞行时长≤2小时）'
-    self.description = '用户需要预订后天深圳→上海航班，飞行时长≤2小时'
+    self.title = '给张三预订后天短途航班（飞行时长≤2小时，深圳→上海）'
+    self.description = '张三需要预订后天从深圳到上海的航班，要求飞行时长≤2小时'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '深圳'
       @arrival_city = '上海'
       @max_duration_minutes = 120  # 2小时 = 120分钟
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
       # 查找符合时长要求的航班（不限定日期）
       all_flights = Flight.where(
@@ -84,7 +92,14 @@ module V201V250
           "飞行时长超出要求。期望: ≤#{@max_duration_minutes}分钟（2小时）, 实际: #{duration}分钟"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@booking.passenger_id_number}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end
@@ -96,12 +111,13 @@ module V201V250
       # 选择符合时长要求的航班（优先选择时长最短的）
       flight = @available_flights.min_by(&:duration_minutes)
       
+      # 使用 prepare 中预查询的乘客数据
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -116,7 +132,10 @@ module V201V250
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         flight_date: @flight_date.to_s,
-        max_duration_minutes: @max_duration_minutes
+        max_duration_minutes: @max_duration_minutes,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -125,6 +144,13 @@ module V201V250
       @arrival_city = data['arrival_city']
       @flight_date = Date.parse(data['flight_date'])
       @max_duration_minutes = data['max_duration_minutes']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
       
       all_flights = Flight.where(
         departure_city: @departure_city,

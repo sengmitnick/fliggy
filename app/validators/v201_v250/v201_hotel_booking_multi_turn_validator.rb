@@ -10,10 +10,11 @@ require_relative '../multi_turn_base_validator'
 #   使用 AI 驱动的模拟用户进行多轮对话测试
 #
 # 评分标准:
-#   - 创建了酒店订单 (30%)
+#   - 创建了酒店订单 (25%)
 #   - 酒店城市正确 (20%)
-#   - 价格在预算范围内 (25%)
-#   - 入住日期正确 (25%)
+#   - 价格在预算范围内 (20%)
+#   - 入住日期正确 (20%)
+#   - 入住人信息正确 (15%)
 #
 # 使用方法:
 #   # 准备阶段
@@ -27,8 +28,8 @@ module V201V250
   class V201HotelBookingMultiTurnValidator < MultiTurnBaseValidator
     self.validator_id = 'v201_hotel_booking_multi_turn_validator'
     self.task_id = '0b2d6f73-3d61-4dab-84da-4de740b906a3'
-    self.title = '我想订个酒店'
-    self.description = '用户模糊描述需求，AI助手通过反问获取信息后完成酒店预订'
+    self.title = '给张三预订酒店（模糊需求，多轮对话）'
+    self.description = '张三模糊描述需求（我想订个酒店），AI助手通过反问获取城市、预算、日期等信息后完成预订'
     self.timeout_seconds = 300
     self.max_turns = 10
     
@@ -38,6 +39,12 @@ module V201V250
       @budget = 500
       @check_in_date = 3.days.from_now.to_date
       @check_out_date = 4.days.from_now.to_date
+      
+      # 预查询乘客数据（避免 simulate 中使用 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_guest_phone = @passenger.phone
       
       # 返回任务信息
       {
@@ -72,7 +79,7 @@ module V201V250
     # 验证阶段：检查任务是否完成
     def verify
       # 断言1: 创建了酒店订单
-      add_assertion "创建了酒店订单", weight: 30 do
+      add_assertion "创建了酒店订单", weight: 25 do
         all_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel, :hotel_room)
@@ -100,7 +107,7 @@ module V201V250
       end
       
       # 断言3: 价格在预算范围内
-      add_assertion "价格在预算范围内（≤#{@budget}元）", weight: 25 do
+      add_assertion "价格在预算范围内（≤#{@budget}元）", weight: 20 do
         @hotel_bookings.each do |booking|
           price = booking.total_price || booking.hotel.price
           expect(price).to be <= @budget,
@@ -109,10 +116,18 @@ module V201V250
       end
       
       # 断言4: 入住日期正确
-      add_assertion "入住日期正确（#{@check_in_date}）", weight: 25 do
+      add_assertion "入住日期正确（#{@check_in_date}）", weight: 20 do
         @hotel_bookings.each do |booking|
           expect(booking.check_in_date).to eq(@check_in_date),
             "入住日期错误。期望: #{@check_in_date}, 实际: #{booking.check_in_date}"
+        end
+      end
+      
+      # 断言5: 入住人信息正确
+      add_assertion "入住人信息正确（#{@expected_guest_name}）", weight: 15 do
+        @hotel_bookings.each do |booking|
+          expect(booking.guest_phone).to eq(@expected_guest_phone),
+            "入住人电话错误。期望: #{@expected_guest_phone}（#{@expected_guest_name}）, 实际: #{booking.guest_phone}"
         end
       end
     end
@@ -147,7 +162,7 @@ module V201V250
       
       raise "未找到符合条件的酒店房间（城市: #{@city}, 预算: ≤#{@budget}元）" unless target_hotel && target_hotel_room
       
-      # 创建酒店订单
+      # 创建酒店订单（使用 prepare 中预查询的乘客数据）
       hotel_booking = HotelBooking.create!(
         hotel_id: target_hotel.id,
         hotel_room_id: target_hotel_room.id,
@@ -160,8 +175,8 @@ module V201V250
         total_price: target_hotel_room.price,
         payment_method: '花呗',
         status: 'pending',
-        guest_name: user.email.split('@').first,
-        guest_phone: '13800138000',
+        guest_name: @passenger.name,
+        guest_phone: @passenger.phone,
         data_version: @data_version
       )
       
@@ -184,7 +199,9 @@ module V201V250
         city: @city,
         budget: @budget,
         check_in_date: @check_in_date&.to_s,
-        check_out_date: @check_out_date&.to_s
+        check_out_date: @check_out_date&.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -194,6 +211,12 @@ module V201V250
       @budget = data['budget']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_guest_phone = data['expected_guest_phone']
+      
+      # 恢复乘客对象
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_guest_name, data_version: 0)
     end
   end
 end
