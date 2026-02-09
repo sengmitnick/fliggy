@@ -109,9 +109,10 @@
             <%= hidden_field_tag 'transfer[pickup_datetime]', @pickup_datetime %>
             <%= hidden_field_tag 'transfer[flight_number]', @flight&.flight_number %>
             <%= hidden_field_tag 'transfer[train_number]', @train&.train_number %>
-            <%= hidden_field_tag 'transfer[passenger_name]', current_user.name, 
+            <% default_passenger = current_user.passengers.find_by(is_self: true) || current_user.passengers.first %>
+            <%= hidden_field_tag 'transfer[passenger_name]', default_passenger&.name || current_user.name, 
                   data: { transfer_passenger_selector_target: "passengerNameInput" } %>
-            <%= hidden_field_tag 'transfer[passenger_phone]', current_user.phone.presence || '13800138000', 
+            <%= hidden_field_tag 'transfer[passenger_phone]', default_passenger&.phone || current_user.phone.presence || '13800138000', 
                   data: { transfer_passenger_selector_target: "passengerPhoneInput" } %>
             <%= hidden_field_tag 'transfer[transfer_package_id]', packages_in_category.first&.id, id: "package_id_#{category}" %>
 
@@ -175,9 +176,10 @@
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
             </svg>
             <div>
-              <div class="text-xs text-gray-500">乘车人</div>
+              <div class="text-xs text-gray-500">联系人</div>
               <div class="text-sm font-medium text-gray-900" data-transfer-passenger-selector-target="selectedPassenger">
-                <%= current_user.name %>
+                <% default_passenger = current_user.passengers.find_by(is_self: true) || current_user.passengers.first %>
+                <%= default_passenger&.name || current_user.name %>
               </div>
             </div>
           </div>
