@@ -2,15 +2,15 @@
 
 require_relative '../base_validator'
 
-# V149: 预订上海到杭州汽车票 + 火车站接站服务
+# V149: 预订汽车票 + 火车站接站服务
 # 验证用户能够完成汽车票预订+火车站接站服务的组合下单
 
 module V101V150
   class V149BookBusAndStationTransferValidator < BaseValidator
     self.validator_id = 'v149_book_bus_and_station_transfer_validator'
     self.task_id = 'd9e0f1a2-3b4c-5d6e-7f8a-9b0c1d2e3f4a'
-    self.title = '预订明天汽车票后预订火车站接站服务（上海-杭州）'
-    self.description = '预订明天中午上海到杭州的汽车票，并预订杭州火车站接站服务'
+    self.title = '给张三预订明天汽车票后预订火车站接站服务（上海-杭州，从南京坐火车来）'
+    self.description = '帮张三预订明天中午上海到杭州的汽车票，并预订杭州东站接站服务（接从南京坐火车来的人）'
     self.timeout_seconds = 300
 
     def prepare
@@ -18,6 +18,12 @@ module V101V150
       @origin = '上海'
       @destination = '杭州'
       @pickup_location = '杭州东站'
+      
+      # 预查询乘客信息（用于 simulate）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_id = @zhangsan.id_number
       
       # 查找可用的汽车票（中午班次）
       @available_tickets = BusTicket
@@ -32,6 +38,7 @@ module V101V150
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       ticket = @available_tickets.first
       
       # 创建汽车票订单
@@ -45,8 +52,8 @@ module V101V150
       )
       
       order.passengers.create!(
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234'
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number
       )
       
       # 计算抵达时间，预订接站服务
@@ -62,8 +69,8 @@ module V101V150
         location_to: "#{@destination}市区",
         pickup_datetime: pickup_datetime,
         vehicle_type: 'economy_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         total_price: 60.0,
         status: 'pending',
         data_version: @data_version
@@ -76,8 +83,7 @@ module V101V150
         travel_date: @travel_date.to_s,
         origin: @origin,
         destination: @destination,
-        preferred_time: @preferred_time,
-        station_location: @station_location
+        pickup_location: @pickup_location
       }
     end
 
@@ -86,13 +92,12 @@ module V101V150
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @origin = data['origin']
       @destination = data['destination']
-      @preferred_time = data['preferred_time']
-      @station_location = data['station_location']
+      @pickup_location = data['pickup_location']
     end
 
     def verify
       # 断言1: 创建了汽车票订单
-      add_assertion "创建了汽车票订单", weight: 30 do
+      add_assertion "创建了汽车票订单", weight: 25 do
         all_orders = BusTicketOrder
           .joins(:bus_ticket)
           .includes(:bus_ticket)
@@ -125,7 +130,17 @@ module V101V150
           "发车日期错误。期望: #{@travel_date}（明天）, 实际: #{@bus_order.bus_ticket.departure_date}"
       end
       
-      # 断言5: 创建了火车站接站服务
+      # 断言5: 乘车人信息正确（张三）
+      add_assertion "乘车人信息正确（张三）", weight: 10 do
+        passenger = @bus_order.passengers.first
+        expect(passenger).not_to be_nil, "未找到乘车人信息"
+        expect(passenger.passenger_name).to eq(@expected_passenger_name),
+          "乘车人姓名错误。期望: #{@expected_passenger_name}，实际: #{passenger.passenger_name}"
+        expect(passenger.passenger_id_number).to eq(@expected_passenger_id),
+          "乘车人身份证错误。期望: #{@expected_passenger_id}，实际: #{passenger.passenger_id_number}"
+      end
+      
+      # 断言6: 创建了火车站接站服务
       add_assertion "创建了火车站接站服务", weight: 20 do
         @transfer = Transfer
           .where(transfer_type: 'train_pickup', data_version: @data_version)
@@ -137,7 +152,7 @@ module V101V150
       
       return if @transfer.nil?
       
-      # 断言6: 接站地点正确
+      # 断言7: 接站地点正确
       add_assertion "接站地点正确（#{@pickup_location}）", weight: 10 do
         expect(@transfer.location_from).to eq(@pickup_location),
           "接站地点错误。期望: #{@pickup_location}, 实际: #{@transfer.location_from}"
