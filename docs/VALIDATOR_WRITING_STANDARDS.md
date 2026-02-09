@@ -59,9 +59,51 @@ end_date = start_date + 14.days  # 至少 14 天
 
 **数据文件：** `app/validators/support/data_packs/v1/demo_user.rb`
 
+**家庭关系说明：**
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 家庭1：张三一家（三口之家 + 爷爷）                           │
+│   - 张建国（男，65岁，1959年生）- 爷爷（张三的父亲）         │
+│   - 张三（男，34岁，1990年生）- 丈夫/父亲                    │
+│   - 王芳（女，39岁，1985年生）- 妻子/母亲                    │
+│   - 小明（男，9岁，2015年生）- 儿子                          │
+├─────────────────────────────────────────────────────────────┤
+│ 家庭2：刘强一家（三口之家）                                  │
+│   - 刘强（男，36岁，1988年生）- 丈夫/父亲                    │
+│   - 陈静（女，35岁，1989年生）- 妻子/母亲                    │
+│   - 小红（女，6岁，2018年生）- 女儿                          │
+├─────────────────────────────────────────────────────────────┤
+│ 其他关系：                                                   │
+│   - 李四（男，34岁，1990年生）- 张三的弟弟                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
 **demo@travel01.com 提供：**
-- **passengers**（出行人）: 张三、李四、王芳、刘强、小明、小红、陈静
-- **addresses**（收货地址）: 张三（北京朝阳）、李四（上海浦东）
+
+**passengers（出行人）:**
+
+| 姓名 | 年龄 | 出生年份 | 身份证号 | 电话 | 关系 | 适用场景 |
+|------|-----|----------|------------------|-------------|------|----------|
+| 张建国 | 65岁 | 1959年 | 110101195912155555 | 13200132000 | 老人 | **老年人保险/酒店/机票** |
+| 张三 | 34岁 | 1990年 | 110101199001011234 | 13800138000 | 成人 | 酒店/机票/门票 |
+| 李四 | 34岁 | 1990年 | 110101199002022345 | 13900139000 | 成人 | 酒店/机票/门票 |
+| 王芳 | 39岁 | 1985年 | 110101198506153456 | 13700137001 | 成人 | 酒店/机票/门票 |
+| 刘强 | 36岁 | 1988年 | 110101198803214567 | 13600136001 | 成人 | 酒店/机票/门票 |
+| 陈静 | 35岁 | 1989年 | 110101198904158901 | 13300133001 | 成人 | 酒店/机票/门票 |
+| 小明 | 9岁 | 2015年 | 110101201507085678 | 13500135001 | 儿童 | 儿童票/亲子游 |
+| 小红 | 6岁 | 2018年 | 110101201808126789 | 13400134001 | 儿童 | 儿童票/亲子游 |
+
+**addresses（收货地址）:**
+- 张三（北京朝阳SOHO）
+- 李四（上海浦东陆家嘴）
+- 王芳（广州天河珠江新城）
+- 刘强（深圳南山科技园）
+- 小明（成都高新区）
+
+**contacts（联系人）:**
+- 张三 (13800138000)
+- 王五 (13700137000)
+- 赵六 (13600136000)
 
 **使用规则：**
 
@@ -127,6 +169,7 @@ return if @order.nil?  # Guard clause
 
 #### 单人场景
 
+**示例1：成人酒店预订**
 ```ruby
 # prepare
 @passenger = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -143,6 +186,30 @@ ModelName.create!(
 # verify（10分）
 add_assertion "乘客信息正确", weight: 10 do
   expect(@order.passenger_phone).to eq(@expected_phone)
+end
+```
+
+**示例2：老年人保险（v080）**
+```ruby
+# prepare - 必须使用张建国（65岁），不是张三（34岁）
+user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+@zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)  # 65岁老人
+@expected_insured_name = @zhangjianguo.name
+@expected_insured_id_number = @zhangjianguo.id_number
+
+# simulate
+insured_persons_data = [{ name: @zhangjianguo.name, id_number: @zhangjianguo.id_number }]
+InsuranceOrder.create!(
+  insured_persons: insured_persons_data,
+  data_version: @data_version
+)
+
+# verify（5分）
+add_assertion "被保险人信息正确（张建国）", weight: 5 do
+  insured_persons = @insurance_order.insured_persons || []
+  zhangjianguo_record = insured_persons.find { |p| p['name'] == @expected_insured_name }
+  expect(zhangjianguo_record).not_to be_nil
+  expect(zhangjianguo_record['id_number']).to eq(@expected_insured_id_number)
 end
 ```
 
