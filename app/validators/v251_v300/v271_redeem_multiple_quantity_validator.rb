@@ -1,31 +1,34 @@
 # frozen_string_literal: true
 
 module V251V300
-  # V271: 批量兑换多件商品
+  # V271: 兑换多个不同商品
   #
-  # 场景: 用户一次性兑换多件同一商品（如3张咖啡券）
-  # 考点: 数量计算、总价计算
+  # 场景: 用户兑换3个不同的低价商品（咖啡券、奶茶券、代金券）
+  # 考点: 订单创建、积分余额扣除、多商品兑换
   class V271RedeemMultipleQuantityValidator < BaseValidator
     self.validator_id = 'v271_redeem_multiple_quantity_validator'
     self.task_id = '6d2fd384-9e74-4e8b-a0fc-cb3fcf871fdd'
-    self.title = '批量兑换多件商品'
-    self.description = '用户一次性兑换多件同一商品（如3张咖啡券）'
+    self.title = '给张三兑换3个不同的低价商品'
+    self.description = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）'
     self.timeout_seconds = 300
     
     def prepare
-      @product_name = '蜜雪冰城 5元代金券'
-      @quantity = 3
+      @product_names = ['瑞幸咖啡券 9.9元', '蜜雪冰城 5元代金券', '肯德基早餐券']
+      @expected_shipping_address = '杭州市西湖区文三路90号'
       
-      # 查找商品
-      @product = MembershipProduct.find_by(name: @product_name, data_version: 0)
-      raise "未找到商品: #{@product_name}" if @product.nil?
+      # 查找3个商品
+      @products = @product_names.map do |name|
+        product = MembershipProduct.find_by(name: name, data_version: 0)
+        raise "未找到商品: #{name}" if product.nil?
+        product
+      end
       
-      # 确保用户有足够的积分和余额
+      # 确保用户有足够的积分和余额（用于兑换3个商品）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       membership = user.membership
       
-      required_points = @product.price_mileage * @quantity
-      required_cash = @product.price_cash * @quantity
+      required_points = @products.sum(&:price_mileage)
+      required_cash = @products.sum(&:price_cash)
       
       if membership.points < required_points
         raise "用户积分不足。需要: #{required_points}积分，当前: #{membership.points}积分"
@@ -36,84 +39,99 @@ module V251V300
       end
       
       {
-        task: "请在积分商城兑换#{@quantity}张#{@product_name}",
+        task: "请在积分商城兑换3个不同的商品：#{@product_names.join('、')}",
         requirements: {
-          product_name: @product_name,
-          quantity: @quantity,
-          total_mileage: @product.price_mileage * @quantity,
-          total_cash: @product.price_cash * @quantity
+          product_names: @product_names,
+          count: 3
         },
-        hint: "需要兑换#{@quantity}张券，总计#{@product.price_mileage * @quantity}积分 + #{@product.price_cash * @quantity}元。"
+        hint: "需要兑换3个不同商品，总计#{required_points}积分 + #{required_cash}元。"
       }
     end
     
     def verify
-      add_assertion "创建了兑换订单", weight: 25 do
+      add_assertion "创建了3个兑换订单", weight: 20 do
         all_orders = MembershipOrder
           .joins(:membership_product)
           .includes(:membership_product)
-          .where(membership_products: { name: @product_name })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
         
-        @order = all_orders.first
-        expect(@order).not_to be_nil, "未找到#{@product_name}的兑换订单"
+        @orders = all_orders
+        expect(@orders.size).to eq(3),
+          "订单数量错误。期望: 3个订单, 实际: #{@orders.size}个订单"
       end
       
-      return if @order.nil?
+      return if @orders.nil? || @orders.empty?
       
-      add_assertion "商品正确（#{@product_name}）", weight: 15 do
-        expect(@order.membership_product.name).to eq(@product_name)
+      add_assertion "兑换了3个不同的商品", weight: 25 do
+        product_names = @orders.map { |o| o.membership_product.name }.uniq
+        expect(product_names.size).to eq(3),
+          "商品种类错误。期望: 3种不同商品, 实际: #{product_names.size}种商品（#{product_names.join('、')}）"
       end
       
-      add_assertion "数量正确（#{@quantity}件）", weight: 20 do
-        expect(@order.quantity).to eq(@quantity),
-          "数量错误。期望: #{@quantity}件, 实际: #{@order.quantity}件"
+      add_assertion "包含瑞幸咖啡券 9.9元", weight: 15 do
+        product_names = @orders.map { |o| o.membership_product.name }
+        expect(product_names).to include('瑞幸咖啡券 9.9元'),
+          "未找到瑞幸咖啡券 9.9元订单。已兑换: #{product_names.join('、')}"
       end
       
-      add_assertion "总积分正确（#{@product.price_mileage * @quantity}积分）", weight: 20 do
-        expected_total = @product.price_mileage * @quantity
-        expect(@order.total_mileage).to eq(expected_total),
-          "总积分错误。期望: #{expected_total}积分, 实际: #{@order.total_mileage}积分"
+      add_assertion "包含蜜雪冰城 5元代金券", weight: 15 do
+        product_names = @orders.map { |o| o.membership_product.name }
+        expect(product_names).to include('蜜雪冰城 5元代金券'),
+          "未找到蜜雪冰城 5元代金券订单。已兑换: #{product_names.join('、')}"
       end
       
-      add_assertion "总金额正确（#{@product.price_cash * @quantity}元）", weight: 20 do
-        expected_total = @product.price_cash * @quantity
-        expect(@order.total_cash).to eq(expected_total),
-          "总金额错误。期望: #{expected_total}元, 实际: #{@order.total_cash}元"
+      add_assertion "包含肯德基早餐券", weight: 15 do
+        product_names = @orders.map { |o| o.membership_product.name }
+        expect(product_names).to include('肯德基早餐券'),
+          "未找到肯德基早餐券订单。已兑换: #{product_names.join('、')}"
+      end
+      
+      add_assertion "收货地址正确", weight: 10 do
+        @orders.each do |order|
+          expect(order.shipping_address).to eq(@expected_shipping_address),
+            "收货地址错误。期望: #{@expected_shipping_address}, 实际: #{order.shipping_address}"
+        end
       end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      MembershipOrder.create!(
-        user: user,
-        membership_product: @product,
-        quantity: @quantity,
-        price_cash: @product.price_cash,
-        price_mileage: @product.price_mileage,
-        total_cash: @product.price_cash * @quantity,
-        total_mileage: @product.price_mileage * @quantity,
-        contact_name: user.name,
-        contact_phone: user.phone || '13800138000',
-        shipping_address: '杭州市西湖区文三路90号',
-        status: 'paid',
-        data_version: @data_version
-      )
+      # 为3个不同商品创建订单
+      @products.each do |product|
+        MembershipOrder.create!(
+          user: user,
+          membership_product: product,
+          quantity: 1,
+          price_cash: product.price_cash,
+          price_mileage: product.price_mileage,
+          total_cash: product.price_cash * 1,
+          total_mileage: product.price_mileage * 1,
+          contact_name: user.name,
+          contact_phone: user.phone || '13800138000',
+          shipping_address: '杭州市西湖区文三路90号',
+          status: 'paid',
+          data_version: @data_version
+        )
+      end
     end
     
     private
     
     def execution_state_data
-      { product_name: @product_name, product_id: @product&.id, quantity: @quantity }
+      { 
+        product_names: @product_names, 
+        product_ids: @products&.map(&:id)
+      }
     end
     
     def restore_from_state(data)
-      @product_name = data['product_name']
-      @quantity = data['quantity']
-      @product = MembershipProduct.find(data['product_id']) if data['product_id']
+      @product_names = data['product_names']
+      if data['product_ids']
+        @products = data['product_ids'].map { |id| MembershipProduct.find(id) }
+      end
     end
   end
 end

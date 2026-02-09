@@ -416,6 +416,23 @@ products_data = [
     description: 'GORE-TEX面料，专业防护',
     image_url: ImageSeedHelper.random_image_from_category(:products),
     region: 'international',
+    featured: true
+  },
+  
+  # ========== 机票次卡 ==========
+  {
+    name: '机票次卡 10次经济舱套餐',
+    slug: 'flight-multi-pass-10',
+    category: 'travel',
+    price_cash: 2800.00,
+    price_mileage: 50000,
+    original_price: 4500.00,
+    sales_count: 267,
+    stock: 500,
+    rating: 4.9,
+    description: '10次国内经济舱航班套餐，全国航线通用，有效期1年',
+    image_url: ImageSeedHelper.random_image_from_category(:flights),
+    region: 'domestic',
     featured: true,
     data_version: 0
   }
