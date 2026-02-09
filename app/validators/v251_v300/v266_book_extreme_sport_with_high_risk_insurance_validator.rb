@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V266: 预订山景景点5天后攀岩活动+购买含运动伤害保障保险
+# V266: 给张三预订5天后山景景点攀岩活动+购买含运动伤害保障保险
 #
 # 任务描述:
-#   用户需要在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，
+#   帮张三在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，
 #   并购买包含运动伤害保障（滑雪/户外运动/潜水场景或运动伤害保额>0）的专项保险，
 #   确保订单状态有效
 #
@@ -13,19 +13,26 @@ require_relative '../base_validator'
 #   - 创建了攀岩活动订单（山景景点，5天后） (25%)
 #   - 活动日期正确（5天后） (10%)
 #   - 创建了保险订单 (20%)
-#   - 保险包含高风险运动保障（滑雪/户外运动/潜水场景或运动伤害保额>0） (35%)
+#   - 联系人信息正确（张三）(10%)
+#   - 被保险人信息正确 (10%)
+#   - 保险包含高风险运动保障（滑雪/户外运动/潜水场景或运动伤害保额>0） (15%)
 #   - 订单状态有效（pending/paid/completed） (10%)
 module V251V300
   class V266BookExtremeSportWithHighRiskInsuranceValidator < BaseValidator
     self.validator_id = 'v266_book_extreme_sport_with_high_risk_insurance_validator'
     self.task_id = '97bbddca-e45e-43e7-814c-88eaf6396ea0'
-    self.title = '预订山景景点5天后攀岩活动+购买含运动伤害保障保险'
-    self.description = '用户需要在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，并购买包含运动伤害保障（滑雪/户外运动/潜水场景或运动伤害保额>0）的专项保险，确保订单状态有效'
+    self.title = '给张三预订5天后山景景点攀岩活动+购买含运动伤害保障保险'
+    self.description = '帮张三在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，并购买包含运动伤害保障（滑雪/户外运动/潜水场景或运动伤害保额>0）的专项保险，确保订单状态有效'
     self.timeout_seconds = 300
     
     def prepare
       @activity_type = '攀岩'
       @visit_date = Date.current + 5.days
+      
+      # 查询用户和乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_phone = @zhangsan.phone
       
       # 查找适合攀岩的山景景点
       @attraction = Attraction
@@ -67,7 +74,7 @@ module V251V300
       raise "未找到适合的保险产品" if @available_insurances.empty?
       
       {
-        task: "请在#{@attraction.name}预订攀岩活动（#{@visit_date.strftime('%Y年%m月%d日')}），并购买高风险专项保险（包含运动伤害保障）。",
+        task: "请帮张三在#{@attraction.name}预订攀岩活动（#{@visit_date.strftime('%Y年%m月%d日')}，5天后），并购买高风险专项保险（包含运动伤害保障）。",
         requirements: {
           attraction: @attraction.name,
           activity_type: '攀岩',
@@ -110,7 +117,19 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险包含高风险运动保障", weight: 35 do
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@activity_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@activity_order.contact_phone}"
+      end
+      
+      add_assertion "被保险人信息正确", weight: 10 do
+        insured_persons = @insurance_order.insured_persons || []
+        actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
+        expect(actual_names).to include(@zhangsan.name),
+          "被保险人信息错误。期望包含: #{@zhangsan.name}，实际: #{actual_names.join('、')}"
+      end
+      
+      add_assertion "保险包含高风险运动保障", weight: 15 do
         scenes = @insurance_order.insurance_product.scenes || []
         coverage = @insurance_order.insurance_product.coverage_details || {}
         
@@ -143,13 +162,14 @@ module V251V300
         attraction_activity: climbing_activity,
         visit_date: @visit_date,
         quantity: 1,
+        contact_phone: @expected_contact_phone,
         total_price: climbing_activity.current_price,
         insurance_type: 'premium',  # 高风险活动建议购买保险
         status: 'paid',
         data_version: @data_version
       )
       
-      # 2. 创建保险订单（优先选择有攀岩场景的，其次运动伤害保额>0的）
+      # 2. 创建保险订单（优先选择有攀岩场景的，其次运动伤害保额>0的，使用预查询的乘客信息）
       insurance_product = @available_insurances
         .select { |p| (p.scenes || []).include?('攀岩') }
         .first
@@ -163,6 +183,11 @@ module V251V300
       days = 1
       unit_price = insurance_product.price_per_day * days
       
+      insured_persons_data = [{
+        name: @zhangsan.name,
+        id_number: @zhangsan.id_number
+      }]
+      
       InsuranceOrder.create!(
         user: user,
         insurance_product: insurance_product,
@@ -174,7 +199,7 @@ module V251V300
         days: days,
         destination: @attraction.city,
         destination_type: 'domestic',
-        insured_persons: [user.name],
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: 1,
         total_price: unit_price,
@@ -190,7 +215,8 @@ module V251V300
         activity_type: @activity_type,
         visit_date: @visit_date.to_s,
         attraction_id: @attraction&.id,
-        climbing_activity_id: @climbing_activity&.id
+        climbing_activity_id: @climbing_activity&.id,
+        zhangsan_id: @zhangsan&.id
       }
     end
     
@@ -200,6 +226,12 @@ module V251V300
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @climbing_activity = AttractionActivity.find(data['climbing_activity_id']) if data['climbing_activity_id']
+      
+      # 恢复乘客信息
+      if data['zhangsan_id']
+        @zhangsan = Passenger.find(data['zhangsan_id'])
+        @expected_contact_phone = @zhangsan.phone
+      end
       
       @available_insurances = InsuranceProduct
         .where(product_type: 'domestic', data_version: 0)

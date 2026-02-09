@@ -18,8 +18,8 @@ module V251V300
   class V264BookSelfDriveWithComprehensiveInsuranceValidator < BaseValidator
     self.validator_id = 'v264_book_self_drive_with_comprehensive_insurance_validator'
     self.task_id = '7c2e2d2c-6733-4917-9166-69ac075dd6ce'
-    self.title = '3人在杭州预订明天5天自驾游并购买适合自驾场景的旅游保险'
-    self.description = '3人需要在杭州预订明天开始的5天自驾游（明天取车，5天后还车），并购买适合自驾游场景的旅游保险，保险需为3人投保，保险时间需与租车时间一致，保障天数覆盖整个租车期间（5天）'
+    self.title = '给张三、李四、王芳预订明天杭州5天自驾游+适合自驾场景的旅游保险'
+    self.description = '帮张三、李四、王芳3人在杭州预订明天开始的5天自驾游（明天取车，5天后还车），并购买适合自驾游场景的旅游保险，保险需为3人投保，保险时间需与租车时间一致，保障天数覆盖整个租车期间（5天）'
     self.timeout_seconds = 300
     
     def prepare
@@ -28,6 +28,16 @@ module V251V300
       @return_date = @pickup_date + 5.days
       @rental_days = (@return_date - @pickup_date).to_i
       @travelers_count = 3
+      
+      # 查询用户和乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_driver_name = @zhangsan.name
+      @expected_driver_id_number = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone
+      @expected_insured_names = [@zhangsan.name, @lisi.name, @wangfang.name]
       
       # 查找租车产品
       @car = Car
@@ -53,7 +63,7 @@ module V251V300
       raise "未找到适合#{@rental_days}天的保险产品" if @available_insurances.empty?
       
       {
-        task: "请为#{@travelers_count}人预订#{@city}自驾游（#{@pickup_date.strftime('%Y年%m月%d日')}取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买适合自驾游场景的旅游保险。",
+        task: "请帮张三、李四、王芳3人预订#{@city}自驾游（#{@pickup_date.strftime('%Y年%m月%d日')}取车，明天取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买适合自驾游场景的旅游保险。3人都需要投保。",
         requirements: {
           city: @city,
           pickup_date: @pickup_date,
@@ -105,14 +115,26 @@ module V251V300
           "保险类型不适合自驾游。产品类型: #{product_type}，场景: #{scenes.inspect}"
       end
       
-      add_assertion "保险人数正确（#{@travelers_count}人）", weight: 15 do
+      add_assertion "驾驶员信息正确（张三）", weight: 10 do
+        expect(@car_order.driver_name).to eq(@expected_driver_name),
+          "驾驶员姓名错误。期望: #{@expected_driver_name}，实际: #{@car_order.driver_name}"
+      end
+      
+      add_assertion "保险人数正确（#{@travelers_count}人）", weight: 10 do
         insured_count = @insurance_order.insured_persons&.size || 0
         
         expect(insured_count).to eq(@travelers_count),
           "保险人数错误。期望: #{@travelers_count}人，实际: #{insured_count}人"
       end
       
-      add_assertion "保险保障天数正确", weight: 10 do
+      add_assertion "被保险人信息正确（张三、李四、王芳）", weight: 10 do
+        insured_persons = @insurance_order.insured_persons || []
+        actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
+        expect(actual_names).to match_array(@expected_insured_names),
+          "被保险人姓名错误。期望: #{@expected_insured_names.join('、')}，实际: #{actual_names.join('、')}"
+      end
+      
+      add_assertion "保险保障天数正确", weight: 5 do
         insurance_days = @insurance_order.days
         pickup = @car_order.pickup_datetime.to_date
         return_dt = @car_order.return_datetime.to_date
@@ -122,7 +144,7 @@ module V251V300
           "保险天数不足。租车天数: #{rental_days}天，保险天数: #{insurance_days}天"
       end
       
-      add_assertion "保险时间与租车时间一致", weight: 10 do
+      add_assertion "保险时间与租车时间一致", weight: 5 do
         insurance_start = @insurance_order.start_date
         insurance_end = @insurance_order.end_date
         rental_start = @car_order.pickup_datetime.to_date
@@ -138,16 +160,16 @@ module V251V300
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建租车订单
+      # 1. 创建租车订单（使用预查询的乘客信息）
       pickup_datetime = @pickup_date.beginning_of_day + 9.hours
       return_datetime = @return_date.beginning_of_day + 18.hours
       
       car_order = CarOrder.create!(
         user: user,
         car: @car,
-        driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: @expected_driver_name,
+        driver_id_number: @expected_driver_id_number,
+        contact_phone: @expected_contact_phone,
         pickup_datetime: pickup_datetime,
         return_datetime: return_datetime,
         pickup_location: @car.pickup_location,
@@ -156,15 +178,19 @@ module V251V300
         data_version: @data_version
       )
       
-      # 2. 创建保险订单（3人）
+      # 2. 创建保险订单（3人，使用预查询的乘客信息）
       insurance_product = @available_insurances.first
       start_date = @pickup_date
       end_date = @return_date  # 保险结束日期 = 还车日期
       insurance_days = (@return_date - @pickup_date).to_i + 1  # 包含首尾两天，例如2月9日到2月14日 = 6天
       unit_price = insurance_product.price_per_day * insurance_days
       
-      # 3人投保人名单
-      insured_persons = [user.name, "#{user.name}的同伴A", "#{user.name}的同伴B"]
+      # 3人投保人名单（使用预查询的乘客信息）
+      insured_persons_data = [
+        { name: @zhangsan.name, id_number: @zhangsan.id_number },
+        { name: @lisi.name, id_number: @lisi.id_number },
+        { name: @wangfang.name, id_number: @wangfang.id_number }
+      ]
       
       InsuranceOrder.create!(
         user: user,
@@ -177,7 +203,7 @@ module V251V300
         days: insurance_days,  # 使用正确的保险天数（包含首尾）
         destination: @city,
         destination_type: 'domestic',
-        insured_persons: insured_persons,
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: @travelers_count,
         total_price: unit_price * @travelers_count,
@@ -195,7 +221,10 @@ module V251V300
         return_date: @return_date.to_s,
         rental_days: @rental_days,
         travelers_count: @travelers_count,
-        car_id: @car&.id
+        car_id: @car&.id,
+        zhangsan_id: @zhangsan&.id,
+        lisi_id: @lisi&.id,
+        wangfang_id: @wangfang&.id
       }
     end
     
@@ -207,6 +236,17 @@ module V251V300
       @travelers_count = data['travelers_count'] || 3
       
       @car = Car.find(data['car_id']) if data['car_id']
+      
+      # 恢复乘客信息
+      if data['zhangsan_id'] && data['lisi_id'] && data['wangfang_id']
+        @zhangsan = Passenger.find(data['zhangsan_id'])
+        @lisi = Passenger.find(data['lisi_id'])
+        @wangfang = Passenger.find(data['wangfang_id'])
+        @expected_driver_name = @zhangsan.name
+        @expected_driver_id_number = @zhangsan.id_number
+        @expected_contact_phone = @zhangsan.phone
+        @expected_insured_names = [@zhangsan.name, @lisi.name, @wangfang.name]
+      end
       
       @available_insurances = InsuranceProduct
         .where(product_type: 'domestic', data_version: 0)
