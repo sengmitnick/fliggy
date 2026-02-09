@@ -37,7 +37,7 @@ module V151V200
   class V173BookFlightAndAirportPickupEconomy7Validator < BaseValidator
     self.validator_id = 'v173_book_flight_and_airport_pickup_economy7_validator'
     self.task_id = 'c85d1c59-9430-4f34-9f74-9064baa17824'
-    self.title = '订购机票后预订接机服务（经济7座，多人出行）'
+    self.title = '订觭4天后机票后预订接机服务（经济7座，多人出行）'
     self.description = '家庭6人出游，订购成都到杭州的机票，到达萧山机场后预订接机到西湖，选择经济7座'
     self.timeout_seconds = 300
   

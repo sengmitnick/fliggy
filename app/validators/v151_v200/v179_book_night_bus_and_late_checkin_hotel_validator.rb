@@ -22,7 +22,7 @@ module V151V200
   class V179BookNightBusAndLateCheckinHotelValidator < BaseValidator
     self.validator_id = 'v179_book_night_bus_and_late_checkin_hotel_validator'
     self.task_id = 'd1757d07-df13-446b-ba4c-23790c798232'
-    self.title = '预订晚班大巴和深夜入住酒店'
+    self.title = '预订3天后晚班大巴和深夜入住酒店（1人）'
     self.description = '用户需要预订晚上出发的长途大巴，并预订支持深夜入住的酒店'
     self.timeout_seconds = 300
   
@@ -105,22 +105,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 200.0,
-          original_price: 300.0,
-          amenities: ['免费WiFi', '空调', '热水', '24小时前台'].to_json,
-          breakfast_included: false,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -183,8 +168,8 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为大巴到达当天 (20%)
-      add_assertion "酒店入住日期正确（大巴到达当天）", weight: 20 do
+      # 断言5: 酒店入住日期为大巴到达当天 (15%)
+      add_assertion "酒店入住日期正确（大巴到达当天）", weight: 15 do
         bus = @bus_order.bus_ticket
         # departure_time 和 arrival_time 是字符串，需要解析
         dep_hour = Time.parse(bus.departure_time).hour
@@ -197,6 +182,12 @@ module V151V200
         end
         expect(@hotel_booking.check_in_date).to eq(arrival_date),
           "入住日期错误。期望: #{arrival_date}（大巴到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

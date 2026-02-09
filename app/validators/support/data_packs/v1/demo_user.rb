@@ -9,6 +9,23 @@
 # 
 # 加载时机：
 # - 系统启动时自动加载（config/initializers/validator_baseline.rb）
+#
+# 家庭关系说明：
+# ┌─────────────────────────────────────────────────────────────┐
+# │ 家庭1：张三一家（三口之家 + 爷爷）                           │
+# │   - 张建国（男，65岁，1959年生）- 爷爷（张三的父亲）         │
+# │   - 张三（男，34岁，1990年生）- 丈夫/父亲                    │
+# │   - 王芳（女，39岁，1985年生）- 妻子/母亲                    │
+# │   - 小明（男，9岁，2015年生）- 儿子                          │
+# ├─────────────────────────────────────────────────────────────┤
+# │ 家庭2：刘强一家（三口之家）                                  │
+# │   - 刘强（男，36岁，1988年生）- 丈夫/父亲                    │
+# │   - 陈静（女，35岁，1989年生）- 妻子/母亲                    │
+# │   - 小红（女，6岁，2018年生）- 女儿                          │
+# ├─────────────────────────────────────────────────────────────┤
+# │ 其他关系：                                                   │
+# │   - 李四（男，34岁，1990年生）- 张三的弟弟                   │
+# └─────────────────────────────────────────────────────────────┘
 
 
 demo_user = User.find_or_create_by(email: 'demo@travel01.com') do |u|
@@ -56,6 +73,13 @@ if demo_user.persisted?
         data_version: 0
       },
       {
+        name: '张建国',
+        id_type: '身份证',
+        id_number: '110101195912155555',  # 1959年出生 - 老人（65岁）- 小明的爷爷
+        phone: '13200132000',
+        data_version: 0
+      },
+      {
         name: '李四',
         id_type: '身份证',
         id_number: '110101199002022345',  # 1990年出生 - 成人（34岁）
@@ -89,19 +113,32 @@ if demo_user.persisted?
         id_number: '110101201808126789',  # 2018年出生 - 儿童（6岁）
         phone: '13400134001',
         data_version: 0
+      },
+      {
+        name: '陈静',
+        id_type: '身份证',
+        id_number: '110101198904158901',  # 1989年出生 - 成人（35岁）
+        phone: '13300133001',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加默认乘机人: 张三, 李四, 王芳, 刘强, 小明, 小红"
+    puts "     ✓ 添加默认乘机人: 张三, 张建国(爷爷), 李四, 王芳, 刘强, 小明, 小红, 陈静"
   end
   
   # 添加联系人
-  if demo_user.contacts.where(name: '王五').none?
+  if demo_user.contacts.where(name: '张三').none?
     demo_user.contacts.create!([
+      {
+        name: '张三',
+        phone: '13800138000',
+        email: 'zhangsan@example.com',
+        is_default: true,
+        data_version: 0
+      },
       {
         name: '王五',
         phone: '13700137000',
         email: 'wangwu@example.com',
-        is_default: true,
         data_version: 0
       },
       {
@@ -111,7 +148,7 @@ if demo_user.persisted?
         data_version: 0
       }
     ])
-    puts "     ✓ 添加联系人: 王五, 赵六"
+    puts "     ✓ 添加联系人: 张三, 王五, 赵六"
   end
   
   # 添加收货地址
@@ -137,9 +174,39 @@ if demo_user.persisted?
         detail: '陆家嘴环路1000号',
         address_type: 'delivery',
         data_version: 0
+      },
+      {
+        name: '王芳',
+        phone: '13700137001',
+        province: '广东省',
+        city: '广州',
+        district: '天河区',
+        detail: '珠江新城花城大道85号',
+        address_type: 'delivery',
+        data_version: 0
+      },
+      {
+        name: '刘强',
+        phone: '13600136001',
+        province: '广东省',
+        city: '深圳',
+        district: '南山区',
+        detail: '科技园南区深圳湾科技生态园',
+        address_type: 'delivery',
+        data_version: 0
+      },
+      {
+        name: '小明',
+        phone: '13500135001',
+        province: '四川省',
+        city: '成都',
+        district: '高新区',
+        detail: '天府大道中段天府软件园',
+        address_type: 'delivery',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴"
+    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴, 广州天河, 深圳南山, 成都高新"
   end
   
   puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 50)"

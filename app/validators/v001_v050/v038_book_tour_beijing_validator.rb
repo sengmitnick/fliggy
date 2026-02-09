@@ -17,15 +17,16 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (25分)
-#   - 目的地正确（北京） (25分)
-#   - 天数正确（4天3晚） (25分)
-#   - 成人数量正确（2人） (25分)
+#   - 目的地正确（北京） (20分)
+#   - 出发日期正确（明天） (15分)
+#   - 天数正确（4天3晚） (20分)
+#   - 成人数量正确（2人） (20分)
 #
 module V001V050
   class V038BookTourBeijingValidator < BaseValidator
     self.validator_id = 'v038_book_tour_beijing_validator'
     self.task_id = '7e12c3ec-f7d0-4e6f-9f78-82db90598ec7'
-    self.title = '预订明天北京4天3晚跟团游（2成人）'
+    self.title = '给张三预订明天北京4天3晚跟团游（2成人）'
     self.description = '搜索北京的跟团游产品，找到4天3晚的产品并预订2位成人'
     self.timeout_seconds = 240
   
@@ -43,7 +44,7 @@ module V001V050
       )
     
       {
-        task: "请预订明天出发的#{@destination}#{@duration}天#{@nights}晚跟团游（#{@adult_count}位成人）",
+        task: "给张三预订明天出发的#{@destination}#{@duration}天#{@nights}晚跟团游（#{@adult_count}位成人）",
         destination: @destination,
         duration: @duration,
         nights: @nights,
@@ -57,23 +58,60 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 25 do
-        @booking = TourGroupBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何跟团游订单记录"
+        all_tour_group_bookings = TourGroupBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_tour_group_bookings).not_to be_empty, "未找到任何TourGroupBooking记录"
+        @booking = all_tour_group_bookings.first
+        # Replaced by expect(all_tour_group_bookings).not_to be_empty above, "未找到任何跟团游订单记录"
       end
     
       return unless @booking
     
-      add_assertion "目的地正确（#{@destination}）", weight: 25 do
-        expect(@booking.tour_group_product.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 20 do
+        expect(@booking.tour_group_product.destination).to eq(@destination),
+          "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 25 do
-        expect(@booking.tour_group_product.duration).to eq(@duration)
+      add_assertion "出发日期正确（明天）", weight: 15 do
+        departure_date = @booking.travel_date
+        expect(departure_date).to eq(@departure_date),
+          "出发日期不正确。期望: #{@departure_date}（明天）, 实际: #{departure_date}"
       end
     
-      add_assertion "成人数量正确（#{@adult_count}人）", weight: 25 do
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 20 do
+        expect(@booking.tour_group_product.duration).to eq(@duration),
+          "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
+      end
+    
+      add_assertion "成人数量正确（#{@adult_count}人）", weight: 10 do
         expect(@booking.adult_count).to eq(@adult_count),
           "成人数量不正确。期望: #{@adult_count}人, 实际: #{@booking.adult_count}人"
+      end
+    
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 5 do
+        expect(@booking.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.contact_name}"
+        expect(@booking.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
+      end
+    
+      add_assertion "出行人信息正确（#{@adult_count}位成人）", weight: 10 do
+        travelers = @booking.booking_travelers.where(data_version: @data_version, traveler_type: 'adult')
+        expect(travelers.size).to eq(@adult_count),
+          "成人出行人数量错误。期望: #{@adult_count}人, 实际: #{travelers.size}人"
+        
+        # 验证所有出行人都来自 demo_user 的 passengers
+        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        valid_passenger_names = user.passengers.where(data_version: 0).pluck(:name)
+        
+        travelers.each do |traveler|
+          expect(valid_passenger_names).to include(traveler.traveler_name),
+            "出行人 #{traveler.traveler_name} 不在 demo_user passengers 列表中"
+          expect(traveler.id_number).not_to be_nil,
+            "出行人 #{traveler.traveler_name} 缺少身份证号"
+        end
       end
     end
   
@@ -93,6 +131,8 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      passengers = user.passengers.where(data_version: 0).limit(@adult_count).to_a
     
       target_tour = TourGroupProduct.where(
         destination: @destination,
@@ -106,19 +146,31 @@ module V001V050
       child_count = 0
       total_price = target_package.price * (@adult_count + child_count)
     
-      TourGroupBooking.create!(
+      booking = TourGroupBooking.create!(
         tour_group_product_id: target_tour.id,
         tour_package_id: target_package.id,
         user_id: user.id,
         travel_date: @departure_date,
         adult_count: @adult_count,
         child_count: child_count,
-        contact_name: '张三',
-        contact_phone: '13800138000',
+        contact_name: contact.name,
+        contact_phone: contact.phone,
         insurance_type: 'none',
         total_price: total_price,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
+    
+      # 创建出行人信息
+      passengers.each do |passenger|
+        BookingTraveler.create!(
+          tour_group_booking_id: booking.id,
+          traveler_name: passenger.name,
+          id_number: passenger.id_number,
+          traveler_type: 'adult',
+          data_version: @data_version
+        )
+      end
     
       { action: 'create_tour_booking', tour_name: target_tour.title, adults: @adult_count }
     end

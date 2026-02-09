@@ -22,7 +22,7 @@ module V151V200
   class V178BookNoonTrainAndEarlyCheckinHotelValidator < BaseValidator
     self.validator_id = 'v178_book_noon_train_and_early_checkin_hotel_validator'
     self.task_id = '86a07e7f-aa31-4d1d-a9c7-4d13777246bb'
-    self.title = '预订中午前到达火车和提前入住酒店'
+    self.title = '预订3天后中午前到达火车和提前入住酒店（1人）'
     self.description = '用户需要预订上午到达（12点前）的火车，并预订支持提前入住的酒店'
     self.timeout_seconds = 300
   
@@ -90,22 +90,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 300.0,
-          original_price: 400.0,
-          amenities: ['免费WiFi', '空调', '热水', '提前入住'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -167,10 +152,16 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为火车到达当天 (20%)
-      add_assertion "酒店入住日期正确（火车到达当天）", weight: 20 do
+      # 断言5: 酒店入住日期为火车到达当天 (15%)
+      add_assertion "酒店入住日期正确（火车到达当天）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@train_date),
           "入住日期错误。期望: #{@train_date}（火车到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

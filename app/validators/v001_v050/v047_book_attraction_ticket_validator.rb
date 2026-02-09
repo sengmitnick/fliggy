@@ -18,11 +18,13 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要先搜索景点→选择票种→对比供应商→预订
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
-#   - 景点正确（深圳欢乐港湾）(20分)
+#   - 订单已创建 (15分)
+#   - 订单属于张三（用户+联系电话） (15分)
+#   - 景点正确（深圳欢乐港湾）(15分)
 #   - 票种正确（成人票）(15分)
-#   - 游玩日期正确（明天）(15分)
-#   - 选择了最便宜的供应商 (25分)
+#   - 游玩日期正确（明天）(10分)
+#   - 数量正确（1张）(10分)
+#   - 选择了最便宜的供应商 (20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -36,8 +38,8 @@ module V001V050
   class V047BookAttractionTicketValidator < BaseValidator
     self.validator_id = 'v047_book_attraction_ticket_validator'
     self.task_id = '72f0aacf-7273-46bb-a334-35194205d1d1'
-    self.title = '预订明天深圳欢乐港湾成人票（1张，最便宜供应商）'
-    self.description = '需要搜索深圳欢乐港湾的门票，选择成人票中最便宜的供应商并成功创建订单'
+    self.title = '帮张三预订明天深圳欢乐港湾成人票1张（最便宜供应商）'
+    self.description = 'Agent 需要为张三预订明天深圳欢乐港湾的成人门票1张，在多个供应商中选择最便宜的'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -103,15 +105,35 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 25 do
-        @ticket_order = TicketOrder.order(created_at: :desc).first
-        expect(@ticket_order).not_to be_nil, "未找到任何门票订单记录"
+      add_assertion "订单已创建", weight: 15 do
+        all_ticket_orders = TicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_ticket_orders).not_to be_empty, "未找到任何TicketOrder记录"
+        @ticket_order = all_ticket_orders.first
+        # Replaced by expect(all_ticket_orders).not_to be_empty above, "未找到任何门票订单记录"
       end
     
       return unless @ticket_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 景点正确
-      add_assertion "景点正确", weight: 20 do
+      # 断言2: 订单属于张三（用户+联系电话）
+      add_assertion "订单属于张三（用户+联系电话）", weight: 15 do
+        expected_user = User.find_by(email: 'demo@travel01.com', data_version: 0)
+        expect(expected_user).not_to be_nil, "未找到用户张三（demo@travel01.com）"
+        
+        expected_contact = expected_user.contacts.find_by(name: '张三', data_version: 0)
+        expect(expected_contact).not_to be_nil, "未找到联系人张三在 demo_user.contacts 中"
+        
+        expect(@ticket_order.user_id).to eq(expected_user.id),
+          "订单用户错误。期望: 张三（#{expected_user.email}），实际: #{@ticket_order.user&.email || '无用户'}"
+        
+        expect(@ticket_order.contact_phone).to eq(expected_contact.phone),
+          "联系电话错误。期望: #{expected_contact.phone}（demo_user数据），实际: #{@ticket_order.contact_phone}"
+      end
+    
+      # 断言3: 景点正确
+      add_assertion "景点正确", weight: 15 do
         ticket = @ticket_order.ticket
         attraction = ticket.attraction
       
@@ -119,7 +141,7 @@ module V001V050
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     
-      # 断言3: 票种正确（成人票）
+      # 断言4: 票种正确（成人票）
       add_assertion "票种正确（成人票）", weight: 15 do
         ticket = @ticket_order.ticket
       
@@ -127,14 +149,20 @@ module V001V050
           "票种错误。期望: 成人票(adult), 实际: #{ticket.ticket_type}"
       end
     
-      # 断言4: 游玩日期正确
-      add_assertion "游玩日期正确", weight: 15 do
+      # 断言5: 游玩日期正确
+      add_assertion "游玩日期正确", weight: 10 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "游玩日期错误。期望: #{@visit_date}, 实际: #{@ticket_order.visit_date}"
       end
     
-      # 断言5: 选择了最便宜的供应商（核心评分项）
-      add_assertion "选择了最便宜的供应商", weight: 25 do
+      # 断言6: 数量正确（1张）
+      add_assertion "数量正确（1张）", weight: 10 do
+        expect(@ticket_order.quantity).to eq(@quantity),
+          "数量错误。期望: #{@quantity}张, 实际: #{@ticket_order.quantity}张"
+      end
+    
+      # 断言7: 选择了最便宜的供应商（核心评分项）
+      add_assertion "选择了最便宜的供应商", weight: 20 do
         # 判断游玩日期是否为周末
         is_weekend = [0, 6].include?(@visit_date.wday)
         date_type_keyword = is_weekend ? '周末' : '平日'
@@ -225,6 +253,9 @@ module V001V050
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 1.5 获取联系人信息
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
     
       # 2. 查找目标景点
       attraction = Attraction.find_by!(name: @attraction_name, data_version: 0)
@@ -262,7 +293,7 @@ module V001V050
         ticket_id: cheapest_supplier.ticket_id,
         supplier_id: cheapest_supplier.supplier_id,
         user_id: user.id,
-        contact_phone: '13800138000',
+        contact_phone: contact.phone,
         visit_date: @visit_date,
         quantity: @quantity,
         total_price: cheapest_supplier.current_price * @quantity,

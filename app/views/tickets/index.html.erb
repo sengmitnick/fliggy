@@ -156,12 +156,12 @@
     <% if @tickets.empty? %>
       <!-- 空状态 -->
       <div class="text-center py-12">
-        <div class="text-gray-400 text-sm mb-2">暂无门票数据</div>
+        <div class="text-gray-400 text-sm mb-2">暂无景点数据</div>
         <div class="text-gray-300 text-xs">请尝试切换其他城市</div>
       </div>
     <% else %>
       <% @tickets.each do |ticket| %>
-        <%= link_to ticket_path(ticket[:id]), class: "block mb-3" do %>
+        <%= link_to attraction_path(ticket[:slug] || ticket[:id]), class: "block mb-3" do %>
           <!-- 门票卡片 -->
           <div class="flex space-x-3">
             <!-- 左侧图片 -->
@@ -204,7 +204,11 @@
                     <span class="text-xs text-gray-400 ml-1"><%= ticket[:sales] %></span>
                   <% end %>
                 </div>
-                <% if ticket[:price].to_i > 0 %>
+                <% if ticket[:is_free] %>
+                  <div class="text-right">
+                    <span class="text-[#4CAF50] font-bold text-sm">免费景点</span>
+                  </div>
+                <% elsif ticket[:price].to_i > 0 %>
                   <div class="text-right">
                     <span class="text-[#FF5722] font-bold">
                       <span class="text-xs">门票 ¥</span><span class="text-lg"><%= ticket[:price] %></span><span class="text-xs"><%= ticket[:price_suffix] %></span>

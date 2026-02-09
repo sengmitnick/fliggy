@@ -17,7 +17,7 @@ module V151V200
   class V199BookCbdBusinessHotelAndAirportShuttleValidator < BaseValidator
     self.validator_id = 'v199_book_cbd_business_hotel_and_airport_shuttle_validator'
     self.task_id = '1b8f7359-8e4c-4e2f-a7c8-ff25c53c02a3'
-    self.title = '预订CBD商务酒店+机场快线接送'
+    self.title = '预订3天后CBD商务酒店+机场快线接送'
     self.description = '预订CBD商务酒店+机场快线接送服务'
     self.timeout_seconds = 300
     
@@ -97,22 +97,7 @@ module V151V200
       
       # 创建酒店订单（选择价格较高的酒店，表示商务型）
       hotel = @available_hotels.first
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '商务大床房',
-          bed_type: 'king',
-          price: hotel.price,
-          original_price: hotel.original_price,
-          area: 30.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'business',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

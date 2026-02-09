@@ -16,7 +16,7 @@ module V201V250
   class V235BookSpecificRoomTypeValidator < BaseValidator
     self.validator_id = 'v235_book_specific_room_type_validator'
     self.task_id = '1ff1d2ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '预订特定房型（如大床房）'
+    self.title = '预订特定房型（后天入住，如大床房）'
     self.description = '用户需要预订特定房型的酒店（如大床房、双床房、套房）'
     self.timeout_seconds = 300
     

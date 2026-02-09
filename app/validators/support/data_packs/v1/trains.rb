@@ -12,11 +12,11 @@
 puts "正在加载 trains_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来7天的火车票数据（从昨天开始，支持西时区用户）
+# 生成未来14天的火车票数据（从昨天开始，支持西时区用户）
 start_date = Date.today - 1.day
-end_date = start_date + 7.days
+end_date = start_date + 14.days
 
-puts "  火车票日期范围: #{start_date} 至 #{end_date} (共9天)"
+puts "  火车票日期范围: #{start_date} 至 #{end_date} (共16天)"
 
 # ==================== 火车票数据 ====================
 all_trains = []
@@ -1309,6 +1309,62 @@ end
 
 Train.insert_all(early_trains) if early_trains.any?
 puts "  ✓ 创建了 #{early_trains.size} 条早班车记录"
+
+# ==================== 成都→重庆多价位火车数据（支持 v231 增量升级验证器）====================
+puts "\n生成成都→重庆多价位火车数据..."
+chengdu_chongqing_trains = []
+
+# 成都→重庆路线（提供多种价位选择，确保 v231 能找到 +100 元升级组合）
+cd_cq_routes = [
+  # 便宜车次（D字头）
+  { num: 'D5101', time: '07:30', dur: 120, price: 96.0 },
+  { num: 'D5103', time: '09:00', dur: 115, price: 96.0 },
+  { num: 'D5105', time: '11:30', dur: 125, price: 96.0 },
+  { num: 'D5107', time: '14:00', dur: 120, price: 96.0 },
+  { num: 'D5109', time: '16:30', dur: 115, price: 96.0 },
+  { num: 'D5111', time: '18:00', dur: 120, price: 96.0 },
+  
+  # 中等价位（G字头标准）
+  { num: 'G8501', time: '08:00', dur: 95, price: 146.0 },
+  { num: 'G8503', time: '10:30', dur: 90, price: 146.0 },
+  { num: 'G8505', time: '13:00', dur: 95, price: 146.0 },
+  { num: 'G8507', time: '15:30', dur: 90, price: 146.0 },
+  { num: 'G8509', time: '17:30', dur: 95, price: 146.0 },
+  
+  # 高价位（G字头快速）
+  { num: 'G2201', time: '08:45', dur: 75, price: 196.0 },
+  { num: 'G2203', time: '12:15', dur: 75, price: 196.0 },
+  { num: 'G2205', time: '16:00', dur: 75, price: 196.0 }
+]
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  
+  cd_cq_routes.each do |route|
+    hour, min = route[:time].split(':').map(&:to_i)
+    chengdu_chongqing_trains << {
+      train_number: "#{route[:num]}_#{day_suffix}",
+      departure_city: '成都',
+      arrival_city: '重庆',
+      departure_station: '成都东站',
+      arrival_station: '重庆北站',
+      departure_time: base_datetime.change(hour: hour, min: min),
+      arrival_time: base_datetime.change(hour: hour, min: min) + route[:dur].minutes,
+      duration: route[:dur],
+      price_second_class: route[:price],
+      price_first_class: (route[:price] * 1.6).round(1),
+      price_business_class: (route[:price] * 3.0).round(1),
+      available_seats: 150,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Train.insert_all(chengdu_chongqing_trains) if chengdu_chongqing_trains.any?
+puts "  ✓ 创建了 #{chengdu_chongqing_trains.size} 条成都→重庆火车记录（覆盖#{(end_date - start_date + 1).to_i}天，共#{cd_cq_routes.size}个车次/天）"
 
 # ==================== 预算型火车数据 ====================
 puts "\n生成预算型火车数据..."

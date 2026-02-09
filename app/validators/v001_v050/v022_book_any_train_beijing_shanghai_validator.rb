@@ -31,7 +31,7 @@ module V001V050
   class V022BookAnyTrainBeijingShanghaiValidator < BaseValidator
     self.validator_id = 'v022_book_any_train_beijing_shanghai_validator'
     self.task_id = '832e7a7a-93f7-4014-8ee9-ed77b8139494'
-    self.title = '预订明天北京到上海任意高铁'
+    self.title = '给张三订明天北京到上海任意高铁'
     self.description = '搜索明天北京到上海的高铁，选择任意一班车次并完成预订'
     self.timeout_seconds = 240
   
@@ -50,7 +50,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}的任意高铁票",
+        task: "请给张三预订一张明天从#{@origin}到#{@destination}的任意高铁票",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -64,8 +64,13 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建
       add_assertion "订单已创建", weight: 30 do
-        @booking = TrainBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+        all_train_bookings = TrainBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_train_bookings).not_to be_empty, "未找到任何TrainBooking记录"
+        @booking = all_train_bookings.first
+        # Replaced by expect(all_train_bookings).not_to be_empty above, "未找到任何火车票订单记录"
       end
     
       return unless @booking
@@ -83,10 +88,18 @@ module V001V050
       end
     
       # 断言4: 出发日期正确
-      add_assertion "出发日期正确（明天）", weight: 30 do
+      add_assertion "出发日期正确（明天）", weight: 20 do
         booking_date = @booking.train.departure_time.in_time_zone.to_date
         expect(booking_date).to eq(@target_date),
           "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
+      end
+    
+      # 断言5: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

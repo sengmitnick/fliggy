@@ -2,13 +2,22 @@
 
 require_relative '../../../../../app/helpers/image_seed_helper'
 
-# 景点数据包 - 使用 insert_all 批量插入
-# 包含景点、门票、景点内项目、一日游等数据
+# 景点补充数据包 - chartered_tours.rb 的补充文件
+# 
+# 用途：
+# 1. 创建22个精选高质量景点（深圳、上海、北京等热门城市）
+# 2. 为精选景点添加详细门票、活动、一日游数据
+# 3. 为 chartered_tours.rb 创建的景点（华山、南山一棵树等）补充门票和活动
 #
-# ⚠️ 注意：景点没有 image_url 字段，所以无需迁移图片
-# 但其他模型（门票、一日游等）可能需要图片
+# ⚠️ 加载顺序依赖：
+# - chartered_tours.rb 先加载（批量创建74个城市的基础景点）
+# - 本文件后加载（通过字母顺序：chartered_tours < chartered_tours_attractions_supplement）
+# - 使用 find_by 查询 chartered_tours.rb 创建的景点，为其补充门票和活动
+#
+# 加载方式：
+# rake validator:reset_baseline
 
-puts "正在加载景点数据包..."
+puts "正在加载景点补充数据包（chartered_tours_attractions_supplement）..."
 
 timestamp = Time.current
 
@@ -1918,6 +1927,32 @@ attraction_activities_data << {
   updated_at: timestamp
 }
 
+# V310需要：人像跟拍服务
+attraction_activities_data << {
+  attraction_id: attraction.id,
+  name: "人像跟拍服务",
+  activity_type: "摄影服务",
+  current_price: 688,
+  description: "专业摄影师全程跟拍，提供40张精修照片。拍摄地点：观光层、空中走廊、外滩全景。拍摄后48小时内电子交付。",
+  duration: "2-3小时",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V310需要：服装租赁+化妆造型
+attraction_activities_data << {
+  attraction_id: attraction.id,
+  name: "服装租赁+化妆造型",
+  activity_type: "摄影服务",
+  current_price: 388,
+  description: "提供多套主题服装选择（旗袍、礼服、民国风等），包含专业化妆造型服务。服装租赁时长4小时。",
+  duration: "4小时",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
 # 批量插入景点内项目数据
 AttractionActivity.insert_all(attraction_activities_data)
 
@@ -2165,8 +2200,9 @@ if (huashan = Attraction.find_by(name: '华山', data_version: 0))
   puts "     ✓ 为华山添加2张门票（成人票、儿童票）"
 end
 
-# 华山景点内项目 (V311需要：登山向导+装备租赁)
+# 华山景点内项目 (V311需要：登山向导+装备租赁, V314需要：攀岩教学+安全装备+教练陪同)
 if (huashan = Attraction.find_by(name: '华山', data_version: 0))
+  # 活动1: 登山向导+装备租赁服务 (V311)
   huashan_activities_data << {
     attraction_id: huashan.id,
     name: "登山向导+装备租赁服务",
@@ -2179,9 +2215,22 @@ if (huashan = Attraction.find_by(name: '华山', data_version: 0))
     updated_at: timestamp
   }
   
-  puts "     ✓ 为华山添加1个活动（登山向导+装备租赁）"
+  # 活动2: 攀岩教学+安全装备+教练陪同 (V314)
+  huashan_activities_data << {
+    attraction_id: huashan.id,
+    name: "攀岩教学+安全装备+教练陪同",
+    activity_type: "运动体验",
+    current_price: 480,
+    description: "华山攀岩专业教练一对一指导，适合初学者和进阶者。包含攀岩装备租赁（安全绳、头盔、手套、攀岩鞋）、教学课程、教练全程陪同、运动保险，保障安全。每次限制最多4人。",
+    duration: "3-4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为华山添加2个活动（登山向导+装备租赁、攀岩教学+安全装备+教练）"
 else
-  puts "     ⚠ 警告：未找到华山景点，跳过登山活动创建"
+  puts "     ⚠ 警告：未找到华山景点，跳过登山和攀岩活动创建"
 end
 
 # 批量插入华山门票数据
@@ -2243,6 +2292,360 @@ end
 if dameisha_activities_data.any?
   AttractionActivity.insert_all(dameisha_activities_data)
   puts "✓ 创建了 #{dameisha_activities_data.size} 个深圳大梅沙活动"
+end
+
+# ==================== 南山一棵树攀岩活动数据 ====================
+# 为攀岩验证器v266/v310/v314/v315/v316提供数据支持
+
+nanshan = Attraction.find_by(name: "南山一棵树", data_version: 0)
+
+nanshan_activities_data = []
+
+if nanshan
+  puts "正在为南山一棵树添加攀岩相关活动..."
+  
+  # 活动1: 攀岩教学+安全装备+教练陪同
+  nanshan_activities_data << {
+    attraction_id: nanshan.id,
+    name: "攀岩教学+安全装备+教练陪同",
+    activity_type: "运动体验",
+    current_price: 380,
+    description: "专业攀岩教练一对一指导，适合初学者。包含攀岩装备租赁（安全绳、头盔、手套、攀岩鞋）、教学课程、教练全程陪同，保障安全。每次限制最多4人。",
+    duration: "2-3小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  # 活动2: 极限攀岩挑战
+  nanshan_activities_data << {
+    attraction_id: nanshan.id,
+    name: "极限攀岩挑战",
+    activity_type: "运动体验",
+    current_price: 580,
+    description: "适合有经验的攀岩爱好者，挑战高难度线路。包含专业装备、教练保护、运动伤害保险。难度系数5.10-5.12。",
+    duration: "3-4小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为南山一棵树添加2个活动（攀岩教学+极限攀岩）"
+else
+  puts "     ⚠ 警告：未找到南山一棵树景点，跳过攀岩活动创建"
+end
+
+# 批量插入南山攀岩活动数据
+if nanshan_activities_data.any?
+  AttractionActivity.insert_all(nanshan_activities_data)
+  puts "✓ 创建了 #{nanshan_activities_data.size} 个南山一棵树攀岩活动"
+end
+
+# ==================== 为 V315 添加漂流活动 ====================
+# V315需要：漂流探险+安全保障+装备提供
+# V315的查询逻辑：.where("name LIKE ? OR name LIKE ? OR name LIKE ?", '%江%', '%河%', '%峡%').first
+# 第一个匹配的景点是"长江索道"
+
+puts "\n为长江索道添加漂流活动..."
+
+changjiang_rafting_activities = []
+
+if (changjiang_cableway = Attraction.find_by(name: '长江索道', data_version: 0))
+  changjiang_rafting_activities << {
+    attraction_id: changjiang_cableway.id,
+    name: "长江观光漂流",
+    activity_type: "水上运动",
+    current_price: 480,
+    description: "长江观光漂流体验，包含全套安全装备（头盔、救生衣、漂流船）、专业教练全程陪同、运动保险。适合无经验者，沿途欣赏两江交汇美景。",
+    duration: "3-4小时",
+    image_url: ImageSeedHelper.random_image_from_category(:activities),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为长江索道添加漂流活动"
+else
+  puts "     ⚠ 警告：未找到长江索道景点，跳过漂流活动创建"
+end
+
+if changjiang_rafting_activities.any?
+  AttractionActivity.insert_all(changjiang_rafting_activities)
+  puts "✓ 创建了 #{changjiang_rafting_activities.size} 个长江索道漂流活动"
+end
+
+# ==================== 为 V316 添加马术活动 ====================
+# V316需要：马术体验+教练指导+马场服务
+# V316的查询逻辑：.where("name LIKE ? OR name LIKE ?", '%草原%', '%马场%').first
+# 创建专门的马场景点以支持马术活动
+
+puts "\n创建马场景点并添加马术活动..."
+
+# 创建马场景点
+equestrian_attractions_data = []
+equestrian_activities_data = []
+
+equestrian_attractions_data << {
+  name: "八达岭国际马场",
+  city: "北京",
+  province: "北京",
+  description: "位于长城脚下的专业马术训练基地，拥有国际标准马场和专业教练团队。提供从基础骑乘到高级马术的全方位培训服务，适合各年龄段马术爱好者。",
+  address: "北京市延庆区八达岭镇",
+  latitude: 40.3587,
+  longitude: 115.9870,
+  rating: 4.7,
+  cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+puts "     ✓ 准备创建八达岭国际马场"
+
+# 批量插入马场景点
+if equestrian_attractions_data.any?
+  Attraction.insert_all(equestrian_attractions_data)
+  puts "✓ 创建了 #{equestrian_attractions_data.size} 个马场景点"
+  
+  # 为马场添加马术体验活动
+  if (equestrian_center = Attraction.find_by(name: '八达岭国际马场', data_version: 0))
+    equestrian_activities_data << {
+      attraction_id: equestrian_center.id,
+      name: "马术体验课程",
+      activity_type: "运动体验",
+      current_price: 380,
+      description: "专业马术教练一对一指导，适合零基础学员。包含马场服务、全套骑马装备租赁（头盔、护具、骑马服、马靴）、基础骑乘技巧教学、运动保险。体验路线约2公里，包含平地和小坡练习。",
+      duration: "2-3小时",
+      image_url: ImageSeedHelper.random_image_from_category(:activities),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    equestrian_activities_data << {
+      attraction_id: equestrian_center.id,
+      name: "亲子马术体验",
+      activity_type: "运动体验",
+      current_price: 680,
+      description: "适合家庭参与的马术体验活动，一位教练带领一个家庭（最多3人）。包含马场服务、装备租赁、安全讲解、基础骑乘教学、合影服务。",
+      duration: "2小时",
+      image_url: ImageSeedHelper.random_image_from_category(:activities),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    puts "     ✓ 为八达岭国际马场添加马术活动"
+  end
+end
+
+if equestrian_activities_data.any?
+  AttractionActivity.insert_all(equestrian_activities_data)
+  puts "✓ 创建了 #{equestrian_activities_data.size} 个马术活动"
+end
+
+# ==================== 为杭州西湖添加门票和自行车租赁活动 ====================
+# 用于V313：预订杭州西湖3人自行车环湖骑行服务
+
+puts "\n为杭州西湖添加门票和自行车租赁活动..."
+
+xihu_tickets_data = []
+xihu_activities_data = []
+xihu_ticket_suppliers_data = []
+
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  # 添加西湖门票（免费景区，但游船、部分景点需门票）
+  xihu_tickets_data << {
+    attraction_id: xihu.id,
+    name: "西湖游船票",
+    ticket_type: "adult",
+    original_price: 55,
+    current_price: 45,
+    discount_info: "线上预订立减10元",
+    requirements: "身高1.2米以上游客",
+    booking_notice: "请至少提前1小时预订；凭订单短信至码头换票；1.2米以下儿童免票；门票当日有效。游船路线：断桥→三潭印月→岳庙码头，约45分钟。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 12800,
+    stock: 2000,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_tickets_data << {
+    attraction_id: xihu.id,
+    name: "西湖游船票（儿童票）",
+    ticket_type: "child",
+    original_price: 28,
+    current_price: 25,
+    discount_info: "儿童优惠票",
+    requirements: "身高1.2米以下儿童",
+    booking_notice: "请至少提前1小时预订；凭订单短信至码头换票；需成人陪同；门票当日有效。游船路线：断桥→三潭印月→岳庙码头。",
+    refund_policy: "未使用可随时退款，使用后不可退改。",
+    validity_days: 1,
+    sales_count: 4200,
+    stock: 1000,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为杭州西湖添加2张门票（游船成人票、游船儿童票）"
+end
+
+# 杭州西湖景点内项目 (V313需要：自行车租赁服务)
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "双人自行车租赁",
+    activity_type: "ride",
+    current_price: 80,
+    description: "环西湖骑行体验，双人自行车租赁。包含车辆、头盔、锁具。推荐路线：断桥→白堤→平湖秋月→苏堤→雷峰塔，全程约10公里。租赁时长4小时，押金200元。",
+    duration: "4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "单人自行车租赁",
+    activity_type: "ride",
+    current_price: 50,
+    description: "环西湖骑行体验，单人自行车租赁。包含车辆、头盔、锁具。推荐路线：沿湖骑行，自由探索西湖美景。租赁时长4小时，押金100元。",
+    duration: "4小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_activities_data << {
+    attraction_id: xihu.id,
+    name: "电动自行车租赁",
+    activity_type: "ride",
+    current_price: 120,
+    description: "环西湖电动自行车租赁，省力便捷。包含电动车、头盔、充电器、锁具。续航30公里，适合全天游览。租赁时长8小时，押金300元。",
+    duration: "8小时",
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  puts "     ✓ 为杭州西湖添加3个活动（双人自行车、单人自行车、电动自行车租赁）"
+else
+  puts "     ⚠ 警告：未找到杭州西湖景点，跳过自行车租赁活动创建"
+end
+
+# 批量插入西湖门票数据
+if xihu_tickets_data.any?
+  Ticket.insert_all(xihu_tickets_data)
+  puts "✓ 创建了 #{xihu_tickets_data.size} 张西湖门票"
+end
+
+# 为西湖门票添加供应商关联
+if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  boat_ticket = Ticket.find_by(attraction_id: xihu.id, name: '西湖游船票', data_version: 0)
+  child_ticket = Ticket.find_by(attraction_id: xihu.id, ticket_type: 'child', data_version: 0)
+  
+  if boat_ticket && child_ticket
+    # 游船成人票供应商
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 1,  # 携程旅行
+      current_price: 45,
+      original_price: 55,
+      stock: 800,
+      discount_info: '线上预订立减10元',
+      sales_count: 6400,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 2,  # 飞猪旅行
+      current_price: 42,
+      original_price: 55,
+      stock: 1000,
+      discount_info: '新用户立减13元',
+      sales_count: 4800,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: boat_ticket.id,
+      supplier_id: 4,  # 景区官方
+      current_price: 55,
+      original_price: 55,
+      stock: 2000,
+      discount_info: nil,
+      sales_count: 1600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    # 游船儿童票供应商
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 1,  # 携程旅行
+      current_price: 25,
+      original_price: 28,
+      stock: 500,
+      discount_info: '儿童优惠票',
+      sales_count: 2000,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 2,  # 飞猪旅行
+      current_price: 23,
+      original_price: 28,
+      stock: 600,
+      discount_info: '新用户立减5元',
+      sales_count: 1600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    xihu_ticket_suppliers_data << {
+      ticket_id: child_ticket.id,
+      supplier_id: 4,  # 景区官方
+      current_price: 28,
+      original_price: 28,
+      stock: 1000,
+      discount_info: nil,
+      sales_count: 600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+    
+    puts "     ✓ 为西湖门票添加供应商关联（6个）"
+  end
+end
+
+if xihu_ticket_suppliers_data.any?
+  TicketSupplier.insert_all(xihu_ticket_suppliers_data)
+  puts "✓ 创建了 #{xihu_ticket_suppliers_data.size} 个西湖门票供应商关联"
+end
+
+# 批量插入西湖活动数据
+if xihu_activities_data.any?
+  AttractionActivity.insert_all(xihu_activities_data)
+  puts "✓ 创建了 #{xihu_activities_data.size} 个西湖自行车租赁活动"
 end
 
 puts "✓ 景点数据包加载完成"

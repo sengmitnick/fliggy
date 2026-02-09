@@ -20,7 +20,7 @@ module V101V150
   class V114BookShanghaiJapanKoreaCruiseOceanviewValidator < BaseValidator
     self.validator_id = 'v114_book_shanghai_japan_korea_cruise_oceanview_validator'
     self.task_id = '3d116df7-1187-4679-bc00-816578f10a7b'
-    self.title = '预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，海景房）'
+    self.title = '预订巴塞罗那出发地中海邮轮（地中海辉煌号，7天6晚，4月出发，海景房）'
     self.description = '预订地中海邮轮航线，选择地中海辉煌号4月份最近一班7天6晚行程，预订海景房（观景之选），为2位成人'
     self.timeout_seconds = 240
 

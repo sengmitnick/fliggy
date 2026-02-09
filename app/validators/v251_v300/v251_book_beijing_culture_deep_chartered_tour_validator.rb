@@ -14,7 +14,7 @@ module V251V300
   class V251BookBeijingCultureDeepCharteredTourValidator < BaseValidator
     self.validator_id = 'v251_book_beijing_culture_deep_chartered_tour_validator'
     self.task_id = '61645ce7-e573-42d2-b80e-c5bfe1d863db'
-    self.title = '预订北京文化深度游（豪华5座）- 验证出发日期、包车时长6小时、订单完整性'
+    self.title = '预订北京文化深度游（5天后出发，豪华5座）- 验证出发日期、包车时长6小时、订单完整性'
     self.description = '预订北京文化深度游包车路线，选择豪华5座车型，6小时服务。验证出发日期（5天后）、包车时长（6小时）、车型档次、订单信息完整性。'
     self.timeout_seconds = 240
   

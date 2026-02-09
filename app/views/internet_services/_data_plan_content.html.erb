@@ -7,13 +7,18 @@
     <div class="flex items-center gap-2 mb-1">
       <% phone_number = current_user.passengers.first&.phone || current_user.addresses.first&.phone || '180 2712 8600' %>
       <input type="tel" 
-             class="text-2xl font-bold font-sans tracking-wide border-none outline-none focus:outline-none bg-transparent w-auto" 
+             class="text-xl font-bold font-sans tracking-wide border-none outline-none focus:outline-none bg-transparent min-w-0 flex-1" 
              value="<%= phone_number %>"
              placeholder="请输入手机号"
              maxlength="11"
              data-action="input->data-plan#detectCarrier"
              data-data-plan-target="phoneInput" />
-      <span class="text-xs text-gray-400 bg-gray-100 px-1 py-0.5 rounded" data-data-plan-target="carrierLabel">中国电信</span>
+      <button type="button" 
+              data-action="click->data-plan#openContactModal"
+              class="flex-shrink-0 p-1.5 hover:bg-gray-200 rounded border border-gray-300 bg-white">
+        <%= image_tag 'profile/常用信息.png', class: 'w-4 h-4', alt: '选择联系人' %>
+      </button>
+      
     </div>
   </div>
 
@@ -106,6 +111,53 @@
       <p>1. 符合实名登记或实名制认证要求的中国电信后付费用户，受理境外流量包需先开通国际/港澳台语音和数据漫游功能漫游权限；...</p>
       <p>2. 叠加规则：漫游流量包产品均可叠加订购。多个相同方向或范围的漫游流量产品叠加，根据优先级顺序依次激活，只允许存在...</p>
       <p>3. 使用提醒：境外流量包激活后即开始计时，不可退订；流量包有效期内未使用完的流量不可结转...</p>
+    </div>
+  </div>
+</div>
+
+<!-- 联系人选择器模态框 -->
+<div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" 
+     data-data-plan-target="contactModal">
+  <div class="bg-white rounded-t-2xl w-full max-w-[390px] mx-auto max-h-[70vh] flex flex-col">
+    <div class="flex justify-between items-center mb-4 p-4 pb-0 flex-shrink-0">
+      <h3 class="text-lg font-bold">选择联系人</h3>
+      <button data-action="click->data-plan#closeContactModal" class="text-gray-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- 联系人列表 -->
+    <div class="space-y-2 overflow-y-auto px-4 pb-4 flex-1">
+      <% if current_user.passengers.any? %>
+        <% current_user.passengers.order(is_self: :desc, created_at: :desc).each do |passenger| %>
+          <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if passenger.is_self %>"
+               data-action="click->data-plan#selectContact"
+               data-contact-name="<%= passenger.name %>"
+               data-contact-phone="<%= passenger.phone %>">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center mb-1">
+                  <span class="font-medium text-gray-900"><%= passenger.name %></span>
+                  <span class="ml-2 text-gray-600"><%= passenger.phone %></span>
+                  <% if passenger.is_self %>
+                    <span class="ml-2 text-xs bg-[#FFDD00] text-black px-2 py-0.5 rounded">本人</span>
+                  <% end %>
+                </div>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8 text-gray-500">
+          <p>暂无联系人</p>
+          <p class="text-sm mt-2">请手动输入联系人信息</p>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

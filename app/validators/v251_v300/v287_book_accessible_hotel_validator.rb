@@ -17,7 +17,7 @@ module V251V300
   class V287BookAccessibleHotelValidator < BaseValidator
     self.validator_id = 'v287_book_accessible_hotel_validator'
     self.task_id = 'd72a4ed6-b4c8-40f7-b9cc-c0424c05be6a'
-    self.title = '预订无障碍设施酒店'
+    self.title = '预订3天后无障碍设施酒店'
     self.description = '用户预订配备无障碍设施的酒店+轮椅租赁服务'
     self.timeout_seconds = 300
     

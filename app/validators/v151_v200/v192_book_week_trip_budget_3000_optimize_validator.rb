@@ -18,7 +18,7 @@ module V151V200
   class V192BookWeekTripBudget3000OptimizeValidator < BaseValidator
     self.validator_id = 'v192_book_week_trip_budget_3000_optimize_validator'
     self.task_id = 'a91aa487-9ae2-4ef6-83e2-44b428900100'
-    self.title = '预订7天行程，总预算≤3000元'
+    self.title = '预订4天后7天行程，总预算≤3000元（7晚）'
     self.description = '预订7天行程（往返+住宿），总预算≤3000元'
     self.timeout_seconds = 300
     
@@ -171,22 +171,7 @@ module V151V200
       
       # 找到最便宜的酒店
       cheapest_hotel = @available_hotels.first
-      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: cheapest_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: cheapest_hotel.price,
-          original_price: cheapest_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = go_train.arrival_time.to_date
       HotelBooking.create!(

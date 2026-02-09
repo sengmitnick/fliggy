@@ -22,7 +22,7 @@ module V151V200
   class V181BookNightTrainAndMorningPickupValidator < BaseValidator
     self.validator_id = 'v181_book_night_train_and_morning_pickup_validator'
     self.task_id = '20114593-e2f1-4fc7-9ded-aa5c49df72a3'
-    self.title = '预订夜间火车和清晨接站服务'
+    self.title = '预订明天夜间火车和清晨接站服务'
     self.description = '用户需要预订夜间火车（晚上8点后出发），并预订清晨接站服务'
     self.timeout_seconds = 300
   

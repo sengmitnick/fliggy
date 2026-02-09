@@ -16,7 +16,7 @@ module V201V250
   class V241BookSpecificAirlineValidator < BaseValidator
     self.validator_id = 'v241_book_specific_airline_validator'
     self.task_id = '7ff738ff-8f8f-8f0f-0f1f-9f2a3b4c5d6f'
-    self.title = '预订特定航空公司航班'
+    self.title = '预订后天特定航空公司航班'
     self.description = '用户需要预订特定航空公司的航班（如国航、东航）'
     self.timeout_seconds = 300
     

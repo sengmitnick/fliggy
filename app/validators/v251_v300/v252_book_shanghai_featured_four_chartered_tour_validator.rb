@@ -14,7 +14,7 @@ module V251V300
   class V252BookShanghaiFeaturedFourCharteredTourValidator < BaseValidator
     self.validator_id = 'v252_book_shanghai_featured_four_chartered_tour_validator'
     self.task_id = 'a692ca4a-a4a8-4060-b7d5-589e7c07a2b2'
-    self.title = '预订上海精华四景游（商务巴士）- 验证出发日期、包车时长8小时、订单完整性'
+    self.title = '预订上海精华四景游（7天后出发，商务巴士）- 验证出发日期、包车时长8小时、订单完整性'
     self.description = '预订上海精华四景包车路线，选择商务巴士车型，8小时服务。验证出发日期（7天后）、包车时长（8小时）、车型座位数、订单信息完整性。'
     self.timeout_seconds = 240
   

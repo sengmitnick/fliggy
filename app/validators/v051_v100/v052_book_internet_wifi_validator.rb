@@ -2,33 +2,24 @@
 
 require_relative '../base_validator'
 
-# 验证用例52: 预订境外随身WiFi（中国香港、租用1台、7天后取件、共租5天、选最便宜）
+# 验证用例52: 预订境外随身WiFi（帮张三订去中国香港的WiFi）
 # 
 # 任务描述:
-#   搜索WiFi → 对比价格 → 选最便宜的 → 填写信息 → 创建订单
-#   
-#   可选地区: 中国香港(13-37元/天)、欧洲5国通用(20元/天)、欧洲6国通用5G(35元/天)、欧洲8国通用(25元/天)、欧洲10国通用(30元/天)
-#   最便宜: 中国香港 4G网·500MB/天，13元/天
-#   租赁参数: 1台，5天，7天后取件
-#   取件地址: 北京市朝阳区建国路118号
-#   联系人: 张三 13800138000
-#   总价: 13×5×1+500=565元
-# 
-# 操作步骤:
-#   1. 浏览地区: 中国香港、欧洲5国、欧洲6国、欧洲8国、欧洲10国
-#   2. 对比价格: 13元(香港4G)、17元(香港4G无限)、20元(欧洲5国)、25元(欧洲8国)、30元(欧洲10国)、35元(香港5G/欧洲6国5G)
-#   3. 选最便宜: 13元/天（中国香港4G·500MB/天）
-#   4. 填写租赁: start_date=今天+7天、end_date=今天+12天、rental_days=5、unit_price=13.0
-#   5. 填写地址: address="北京市朝阳区建国路118号"、method="mail"
-#   6. 填写联系人: name="张三"、phone="13800138000"
-#   7. 计算总价: 13×5×1+500=565元
+#   张三下周要去中国香港出差5天，需要租一台随身WiFi。
+#   帮他从可用的WiFi产品中选最便宜的，7天后到北京朝阳区自取。
+#   联系人填张三。
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 订单类型=wifi (15分)
-#   - 选了具体WiFi产品 (15分)
-#   - 选了最便宜13元/天的香港4G·500MB (30分)
-#   - 总价=565元（含500元押金）、地址=北京市朝阳区建国路118号、租期=5天 (20分)
+#   - 订单已创建 (15分)
+#   - 订单类型=wifi (10分)
+#   - 选了具体WiFi产品 (10分)
+#   - 选了最便宜13元/天的香港4G·500MB (20分)
+#   - 租赁天数正确（5天）(5分)
+#   - 数量正确（1台）(5分)
+#   - 取件地址正确（北京市朝阳区建国路118号）(5分)
+#   - 取件方式正确（邮寄）(5分)
+#   - 联系人信息正确（张三 13800138000）(5分)
+#   - 总价=565元（含500元押金）(20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -42,8 +33,8 @@ module V051V100
   class V052BookInternetWifiValidator < BaseValidator
     self.validator_id = 'v052_book_internet_wifi_validator'
     self.task_id = '05db4166-de34-4d4b-9078-6e672b53bb21'
-    self.title = '预订境外随身WiFi（中国香港、1台、5天、选最便宜）'
-    self.description = '需要搜索境外WiFi租赁服务，选择日租金最低的产品并成功创建订单'
+    self.title = '帮张三订去中国香港的随身WiFi（租1台用5天，选最便宜的，北京朝阳区自取）'
+    self.description = '张三下周要去中国香港出差5天，帮他租一台随身WiFi，选最便宜的（日租金最低），7天后到北京朝阳区自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -51,16 +42,32 @@ module V051V100
       # 数据已通过 load_all_data_packs 自动加载（v1 目录下所有数据包）
       @rental_days = 5  # 租赁5天
       @quantity = 1     # 1台设备
+      @delivery_method = "pickup" # 取件方式：自取
+      @contact_name = "张三" # 联系人
+      
+      # 查找北京朝阳区的自取地点
+      @pickup_location = PickupLocation.find_by!(
+        city: '北京',
+        district: '朝阳区',
+        data_version: 0
+      )
     
       # 查找所有可用的WiFi产品（注意：查询基线数据 data_version=0）
       @available_wifis = InternetWifi.where(data_version: 0)
     
       # 返回给 Agent 的任务信息
       {
-        task: "预订WiFi: 1台、5天、选最便宜的、填地址和日期",
+        task: "帮张三订去中国香港的随身WiFi，租1台用5天，选最便宜的",
         rental_days: @rental_days,
         quantity: @quantity,
-        hint: "地区选项: 中国香港(13元起)、欧洲5国通用(20元)、欧洲6国通用5G(35元)、欧洲8国通用(25元)、欧洲10国通用(30元)。对比后选最便宜13元/天的。租赁: 1台×5天+押金500=565元。取件: 7天后、北京市朝阳区建国路118号、邮寄。联系人: 张三/13800138000",
+        delivery_method: "自取",
+        pickup_days_later: 7,
+        contact_name: @contact_name,
+        pickup_location: {
+          city: @pickup_location.city,
+          district: @pickup_location.district,
+          detail: @pickup_location.detail
+        },
         available_wifis_count: @available_wifis.count
       }
     end
@@ -68,7 +75,7 @@ module V051V100
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（使用data_version隔离会话）
-      add_assertion "订单已创建", weight: 20 do
+      add_assertion "订单已创建", weight: 15 do
         @internet_order = InternetOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -79,21 +86,21 @@ module V051V100
       return unless @internet_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 订单类型正确
-      add_assertion "订单类型正确（wifi）", weight: 15 do
+      add_assertion "订单类型正确（wifi）", weight: 10 do
         actual_type = @internet_order.order_type
         expect(actual_type).to eq('wifi'),
           "订单类型错误。期望: wifi, 实际: #{actual_type}"
       end
     
       # 断言3: 选择了具体的WiFi产品
-      add_assertion "选择了具体的WiFi产品", weight: 15 do
+      add_assertion "选择了具体的WiFi产品", weight: 10 do
         expect(@internet_order.orderable_type).to eq('InternetWifi'), "未选择WiFi产品（orderable_type错误）"
         expect(@internet_order.orderable_id).not_to be_nil, "未选择具体的WiFi产品（orderable_id为空）"
         expect(@internet_order.orderable).not_to be_nil, "WiFi产品记录不存在"
       end
     
       # 断言4: 选择了最便宜的WiFi（核心评分项）
-      add_assertion "选择了最便宜的WiFi（中国香港地区）", weight: 30 do
+      add_assertion "选择了最便宜的WiFi（中国香港地区）", weight: 20 do
         # 先筛选中国香港地区的WiFi
         hk_wifis = InternetWifi.where(data_version: 0, region: "中国香港")
       
@@ -108,7 +115,54 @@ module V051V100
           "实际选择: #{@internet_order.orderable.name}（#{actual_price}元/天，#{@internet_order.orderable.region}）"
       end
     
-      # 断言5: 订单价格正确
+      # 断言5: 租赁天数正确
+      add_assertion "租赁天数正确（5天）", weight: 5 do
+        actual_days = @internet_order.rental_info&.dig('rental_days') || @internet_order.rental_info&.dig(:rental_days)
+        expect(actual_days).to eq(@rental_days),
+          "租赁天数错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
+      end
+    
+      # 断言6: 数量正确
+      add_assertion "数量正确（1台）", weight: 5 do
+        expect(@internet_order.quantity).to eq(@quantity),
+          "数量错误。期望: #{@quantity}台, 实际: #{@internet_order.quantity}台"
+      end
+    
+      # 断言7: 取件地点正确（北京朝阳区）
+      add_assertion "取件地点正确（北京朝阳区）", weight: 5 do
+        # 检查 rental_info 中的 pickup_location 字段
+        rental_info = @internet_order.rental_info.is_a?(String) ? (JSON.parse(@internet_order.rental_info) rescue {}) : (@internet_order.rental_info || {})
+        actual_pickup_location = rental_info['pickup_location'] || rental_info[:pickup_location]
+        
+        expect(actual_pickup_location).to include('北京'),
+          "取件地点应该在北京。实际: #{actual_pickup_location}"
+        expect(actual_pickup_location).to include('朝阳区'),
+          "取件地点应该在朝阳区。实际: #{actual_pickup_location}"
+      end
+    
+      # 断言8: 取件方式正确
+      add_assertion "取件方式正确（自取）", weight: 5 do
+        # 可能存储在 delivery_method 中
+        actual_method = @internet_order.delivery_method
+        expect(actual_method).to eq(@delivery_method),
+          "取件方式错误。期望: #{@delivery_method}（自取）, 实际: #{actual_method}"
+      end
+    
+      # 断言9: 联系人信息来自demo_user（张三）
+      add_assertion "联系人信息来自demo_user（张三 13800138000）", weight: 5 do
+        actual_name = @internet_order.contact_info&.dig('name') || @internet_order.contact_info&.dig(:name)
+        actual_phone = @internet_order.contact_info&.dig('phone') || @internet_order.contact_info&.dig(:phone)
+        
+        # 验证联系人姓名来自demo_user的联系人
+        expect(actual_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（来自demo_user.contacts）, 实际: #{actual_name}"
+        
+        # 验证电话号码来自demo_user的联系人
+        expect(actual_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（来自demo_user.contacts），实际: #{actual_phone}"
+      end
+    
+      # 断言10: 订单价格正确
       add_assertion "订单价格正确", weight: 20 do
         wifi = @internet_order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
@@ -125,7 +179,10 @@ module V051V100
     def execution_state_data
       {
         rental_days: @rental_days,
-        quantity: @quantity
+        quantity: @quantity,
+        delivery_method: @delivery_method,
+        contact_name: @contact_name,
+        pickup_location_id: @pickup_location&.id
       }
     end
   
@@ -133,6 +190,13 @@ module V051V100
     def restore_from_state(data)
       @rental_days = data['rental_days']
       @quantity = data['quantity']
+      @delivery_method = data['delivery_method']
+      @contact_name = data['contact_name']
+      
+      # 恢复自取地点
+      if data['pickup_location_id']
+        @pickup_location = PickupLocation.find_by(id: data['pickup_location_id'], data_version: 0)
+      end
     
       # 重新加载可用WiFi列表
       @available_wifis = InternetWifi.where(data_version: 0)
@@ -148,11 +212,18 @@ module V051V100
       start_date = Date.current + 7.days
       end_date = start_date + (@rental_days - 1).days
     
-      # 创建测试用户（如果不存在）
-      user = User.find_or_create_by!(email: 'test@example.com') do |u|
-        u.password = 'password123'
-        u.data_version = 999
-      end
+      # 使用 demo_user (demo@travel01.com)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 从 demo_user 的联系人中获取张三
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      
+      # 获取北京朝阳区的自取地点
+      pickup_location = PickupLocation.find_by!(
+        city: '北京',
+        district: '朝阳区',
+        data_version: 0
+      )
     
       order = InternetOrder.create!(
         user: user,
@@ -162,19 +233,17 @@ module V051V100
         quantity: @quantity,
         total_price: cheapest_wifi.daily_price * @rental_days * @quantity + 500,
         status: 'pending',
+        delivery_method: 'pickup',
         rental_info: {
           start_date: start_date.to_s,
           end_date: end_date.to_s,
           rental_days: @rental_days,
-          unit_price: cheapest_wifi.daily_price
-        },
-        delivery_info: {
-          address: "北京市朝阳区建国路118号",
-          method: "mail"
+          unit_price: cheapest_wifi.daily_price,
+          pickup_location: pickup_location.full_info
         },
         contact_info: {
-          name: "张三",
-          phone: "13800138000"
+          name: contact.name,
+          phone: contact.phone
         },
         data_version: @data_version
       )

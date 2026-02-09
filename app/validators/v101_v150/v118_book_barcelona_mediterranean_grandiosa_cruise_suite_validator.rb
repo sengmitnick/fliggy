@@ -20,7 +20,7 @@ module V101V150
   class V118BookBarcelonaMediterraneanGrandiosaCruiseSuiteValidator < BaseValidator
     self.validator_id = 'v118_book_barcelona_mediterranean_grandiosa_cruise_suite_validator'
     self.task_id = '6382841f-d24d-4564-ad55-8414ccc4741c'
-    self.title = '预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
+    self.title = '预订巴塞罗那出发地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
     self.description = '预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
     self.timeout_seconds = 240
 

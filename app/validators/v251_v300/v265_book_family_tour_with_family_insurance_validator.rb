@@ -8,11 +8,12 @@ require_relative '../base_validator'
 #   用户需要预订三亚家庭跟团游（2成人+1儿童，7天后出发），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）
 #
 # 评分标准:
-#   - 创建了跟团游订单 (30%)
+#   - 创建了跟团游订单 (25%)
+#   - 出发日期正确（7天后）(10%)
 #   - 创建了保险订单 (25%)
 #   - 保险适合家庭出行 (20%)
 #   - 投保人数正确（3人）(15%)
-#   - 订单状态有效 (10%)
+#   - 订单状态有效 (5%)
 module V251V300
   class V265BookFamilyTourWithFamilyInsuranceValidator < BaseValidator
     self.validator_id = 'v265_book_family_tour_with_family_insurance_validator'
@@ -69,7 +70,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了跟团游订单", weight: 30 do
+      add_assertion "创建了跟团游订单", weight: 25 do
         all_bookings = TourGroupBooking
           .joins(:tour_group_product)
           .includes(:tour_group_product)
@@ -82,6 +83,11 @@ module V251V300
       end
       
       return if @tour_booking.nil?
+      
+      add_assertion "出发日期正确（7天后）", weight: 10 do
+        expect(@tour_booking.travel_date).to eq(@travel_date),
+          "出发日期错误。期望: #{@travel_date}（7天后），实际: #{@tour_booking.travel_date}"
+      end
       
       add_assertion "创建了保险订单", weight: 25 do
         @insurance_order = InsuranceOrder
@@ -110,7 +116,7 @@ module V251V300
           "投保人数错误。期望: #{@total_persons}人（2大1小），实际: #{quantity}人"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@tour_booking.status).to be_in(['pending', 'paid', 'confirmed'])
         expect(@insurance_order.status).to be_in(['pending', 'paid'])
       end
@@ -120,23 +126,20 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建跟团游订单
+      tour_package = @tour_product.tour_packages.where(data_version: 0).first!
+      base_price = (tour_package.price * @adult_count) + (tour_package.child_price * @child_count)
+      
       tour_booking = TourGroupBooking.create!(
         user: user,
         tour_group_product: @tour_product,
-        tour_package: @tour_product.tour_packages.where(data_version: 0).first || TourPackage.create!(
-          tour_group_product: @tour_product,
-          name: "#{@tour_product.title}标准套餐",
-          price: @tour_product.price,
-          child_price: @tour_product.price * 0.5,
-          data_version: 0
-        ),
+        tour_package: tour_package,
         travel_date: @travel_date,
         adult_count: @adult_count,
         child_count: @child_count,
         contact_name: user.name,
         contact_phone: '13800138000',
         insurance_type: 'none',
-        total_price: @tour_product.price * (@adult_count + @child_count * 0.5),
+        total_price: base_price,
         status: 'confirmed',
         data_version: @data_version
       )

@@ -17,7 +17,7 @@ module V151V200
   class V193BookPremiumUpgradeWithinBudgetValidator < BaseValidator
     self.validator_id = 'v193_book_premium_upgrade_within_budget_validator'
     self.task_id = '8cf29355-6c7f-458c-855e-c12a75be9643'
-    self.title = '预算内升级最高等级'
+    self.title = '预订明天预算内升级最高等级（1人）'
     self.description = '预订经济舱+标准房，预算内升级最高等级'
     self.timeout_seconds = 300
     
@@ -139,22 +139,7 @@ module V151V200
       
       # 创建酒店订单
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = best_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: best_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: best_hotel.price,
-          original_price: best_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = best_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = best_flight.arrival_time.to_date
       HotelBooking.create!(

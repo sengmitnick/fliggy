@@ -17,7 +17,7 @@ module V151V200
   class V190BookBestValueFlightHotelRatingPriceValidator < BaseValidator
     self.validator_id = 'v190_book_best_value_flight_hotel_rating_price_validator'
     self.task_id = '19700fc3-d99e-4691-bf05-a9d0b855d17a'
-    self.title = '预订性价比最高组合'
+    self.title = '预订明天性价比最高组合（1人）'
     self.description = '预订性价比最高组合（评分/价格比最优）'
     self.timeout_seconds = 300
     
@@ -137,22 +137,7 @@ module V151V200
       
       # 创建酒店订单
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = best_value_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: best_value_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: best_value_hotel.price,
-          original_price: best_value_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = best_value_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(

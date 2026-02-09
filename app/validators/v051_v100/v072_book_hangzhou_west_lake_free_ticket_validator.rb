@@ -7,11 +7,15 @@ module V051V100
   class V072BookHangzhouWestLakeFreeTicketValidator < BaseValidator
     self.validator_id = 'v072_book_hangzhou_west_lake_free_ticket_validator'
     self.task_id = 'ae944d4f-9005-4e54-bf95-adf32269ccdf'
-    self.title = '预订5天后上海迪士尼乐园儿童票（1张，最便宜）'
+    self.title = '给小明预订5天后上海迪士尼乐园儿童票（最便宜）'
     self.description = '预订上海迪士尼乐园儿童票，选择最便宜供应商'
     self.timeout_seconds = 240
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      # 查询儿童乘客小明
+      @child_passenger = user.passengers.find_by!(name: '小明', data_version: 0)
+      
       @attraction_name = '上海迪士尼乐园'
       @ticket_type = 'child'
       @visit_date = Date.current + 5.days
@@ -73,14 +77,19 @@ module V051V100
     end
   
     def verify
-      add_assertion "订单已创建", weight: 30 do
-        @ticket_order = TicketOrder.order(created_at: :desc).first
-        expect(@ticket_order).not_to be_nil, "未找到任何门票订单记录"
+      add_assertion "订单已创建", weight: 20 do
+        all_ticket_orders = TicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_ticket_orders).not_to be_empty, "未找到任何TicketOrder记录"
+        @ticket_order = all_ticket_orders.first
+        # Replaced by expect(all_ticket_orders).not_to be_empty above, "未找到任何门票订单记录"
       end
     
       return unless @ticket_order
     
-      add_assertion "景点正确（#{@attraction_name}）", weight: 20 do
+      add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
         ticket = @ticket_order.ticket
         attraction = ticket.attraction
       
@@ -88,19 +97,34 @@ module V051V100
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     
-      add_assertion "票种正确（儿童票）", weight: 30 do
+      add_assertion "票种正确（儿童票）", weight: 20 do
         ticket = @ticket_order.ticket
       
         expect(ticket.ticket_type).to eq(@ticket_type),
           "票种错误。期望: 儿童票(child), 实际: #{ticket.ticket_type}"
       end
     
-      add_assertion "游玩日期正确（5天后，#{@visit_date}）", weight: 10 do
+      add_assertion "游玩日期正确（5天后，#{@visit_date}）", weight: 5 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "游玩日期错误。期望: #{@visit_date}（5天后）, 实际: #{@ticket_order.visit_date}"
       end
     
-      add_assertion "选择了最便宜的供应商", weight: 10 do
+      add_assertion "联系电话正确（小明的电话）", weight: 10 do
+        expect(@ticket_order.contact_phone).to eq('13500135001'),
+          "联系电话错误。期望: 13500135001（小明），实际: #{@ticket_order.contact_phone}"
+      end
+    
+      add_assertion "乘客信息正确（小明）", weight: 10 do
+        expect(@ticket_order.passenger_ids).to be_present, "未填写乘客信息"
+        expect(@ticket_order.passenger_ids.size).to eq(1),
+          "乘客数量错误。期望: 1位，实际: #{@ticket_order.passenger_ids&.size || 0}位"
+        
+        passenger_name = Passenger.find_by(id: @ticket_order.passenger_ids.first, data_version: 0)&.name
+        expect(passenger_name).to eq('小明'),
+          "乘客信息错误。期望: 小明，实际: #{passenger_name}"
+      end
+    
+      add_assertion "选择了最便宜的供应商", weight: 20 do
         # 判断游玩日期是否为周末
         is_weekend = [0, 6].include?(@visit_date.wday)
         date_type_keyword = is_weekend ? '周末' : '平日'
@@ -210,16 +234,21 @@ module V051V100
     
       raise "未找到可用的儿童票供应商" unless cheapest_supplier
     
+      # 查询儿童乘客小明
+      child_passenger = user.passengers.find_by!(name: '小明', data_version: 0)
+      
       TicketOrder.create!(
         ticket_id: cheapest_supplier.ticket_id,
         supplier_id: cheapest_supplier.supplier_id,
         user_id: user.id,
-        contact_phone: '13800138000',
+        contact_phone: child_passenger.phone,
+        passenger_ids: [child_passenger.id],
         visit_date: @visit_date,
         quantity: @quantity,
         total_price: cheapest_supplier.current_price * @quantity,
         status: 'pending',
-        notes: '儿童票订单'
+        notes: '儿童票订单',
+        data_version: @data_version
       )
     end
     end

@@ -23,7 +23,7 @@ module V151V200
   class V185BookOffPeakTrainAndStationHotelValidator < BaseValidator
     self.validator_id = 'v185_book_off_peak_train_and_station_hotel_validator'
     self.task_id = '06619bd5-4bb7-44a3-8584-7b2aef743850'
-    self.title = '预订避开高峰时段火车和火车站附近酒店'
+    self.title = '预订明天避开高峰时段火车和火车站附近酒店（1人）'
     self.description = '用户需要预订非高峰时段（10-16点）的火车，并预订火车站附近酒店'
     self.timeout_seconds = 300
   
@@ -99,22 +99,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          area: 25.0,
-          max_guests: 2,
-          price: 280.0,
-          original_price: 350.0,
-          has_window: true,
-          available_rooms: 10,
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -178,8 +163,8 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店位置靠近火车站 (20%)
-      add_assertion "酒店位置靠近火车站", weight: 20 do
+      # 断言5: 酒店位置靠近火车站 (15%)
+      add_assertion "酒店位置靠近火车站", weight: 15 do
         hotel = @hotel_booking.hotel
         is_near_station = hotel.name.include?('火车站') || 
                           (hotel.address && hotel.address.include?('火车站'))
@@ -188,6 +173,12 @@ module V151V200
         # 否则只要在到达城市即可接受（因为数据包限制）
         expect(hotel.city).to include(@arrival_city),
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

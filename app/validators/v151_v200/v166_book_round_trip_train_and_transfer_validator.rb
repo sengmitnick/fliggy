@@ -9,7 +9,7 @@ module V151V200
   class V166BookRoundTripTrainAndTransferValidator < BaseValidator
     self.validator_id = 'v166_book_round_trip_train_and_transfer_validator'
     self.task_id = 'd6e7f8a9-0b1c-2d3e-4f5a-6b7c8d9e0f1a'
-    self.title = '预订往返火车并预订往返火车站接送（上海⇄杭州）'
+    self.title = '预订往返火车并预订往返火车站接送（上海⇄杭州，1人）'
     self.description = '预订明天上海到杭州的往返火车，并预订两次火车站接送服务（去程接站+返程送站）'
     self.timeout_seconds = 300
 

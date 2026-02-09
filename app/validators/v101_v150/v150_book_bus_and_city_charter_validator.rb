@@ -9,7 +9,7 @@ module V101V150
   class V150BookBusAndCityCharterValidator < BaseValidator
     self.validator_id = 'v150_book_bus_and_city_charter_validator'
     self.task_id = 'e0f1a2b3-4c5d-6e7f-8a9b-0c1d2e3f4a5b'
-    self.title = '预订汽车票并预订目的地火车站接站服务（北京-天津）'
+    self.title = '预订明天汽车票并预订目的地火车站接站服务（北京-天津）'
     self.description = '预订明天北京到天津的早班汽车票，并预订天津火车站接站服务'
     self.timeout_seconds = 300
 

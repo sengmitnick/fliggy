@@ -127,13 +127,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建冲浪活动订单
-      surfing_activity = @surfing_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '冲浪教学（含装备）',
-        description: '专业教练指导，提供全套冲浪装备',
-        current_price: 280,
-        data_version: 0
-      )
+      surfing_activity = @surfing_activity
       
       ActivityOrder.create!(
         user: user,
@@ -147,13 +141,7 @@ module V301V350
       )
       
       # 2. 创建海滩娱乐活动订单
-      entertainment_activity = @entertainment_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '海滩娱乐项目',
-        description: '沙滩排球、摩托艇、香蕉船等多项娱乐',
-        current_price: 150,
-        data_version: 0
-      )
+      entertainment_activity = @entertainment_activity
       
       ActivityOrder.create!(
         user: user,

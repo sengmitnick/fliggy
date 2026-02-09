@@ -4,7 +4,7 @@ module V251V300
   class V299BookPhotographyThemeTourValidator < BaseValidator
     self.validator_id = 'v299_book_photography_theme_tour_validator'
     self.task_id = 'feeaef15-74e2-4fb2-a7fa-1b6c5bc2273f'
-    self.title = '预订摄影主题游'
+    self.title = '预订7天后摄影主题游（1人）'
     self.description = '用户想要去云南进行摄影主题旅游，需要选择风景优美的跟团游产品（评分≥4.5），出发日期为7天后'
     self.timeout_seconds = 300
     

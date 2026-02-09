@@ -2,54 +2,56 @@
 
 require_relative '../base_validator'
 
-# V316: 预订马术体验+教练指导+马场服务
+# V316: 预订八达岭国际马场马术体验（2人，7天后，必须购买保险）
 #
 # 任务描述:
-#   用户需要预订马术体验服务，包含专业教练指导和马场服务
+#   用户需要预订八达岭国际马场的7天后的马术体验课程，2人参加，并且必须购买骑马运动保险以确保安全
 #
 # 评分标准:
-#   - 创建了马术活动订单 (40%)
-#   - 活动包含保险（安全保障）(30%)
-#   - 活动日期正确 (20%)
+#   - 创建了八达岭国际马场的马术体验订单 (40%)
+#   - 马术活动购买了保险（安全保障）(30%)
+#   - 活动日期正确（7天后）(20%)
 #   - 订单状态和价格有效 (10%)
 module V301V350
   class V316BookEquestrianExperienceCoachServicesValidator < BaseValidator
     self.validator_id = 'v316_book_equestrian_experience_coach_services_validator'
     self.task_id = '244a3782-51c5-4cc3-a3bd-393309099f3b'
-    self.title = '预订马术体验+教练指导+马场服务'
-    self.description = '用户需要预订马术体验服务，包含专业教练指导和马场服务'
+    self.title = '预订八达岭国际马场马术体验（2人，7天后，必须购买保险）'
+    self.description = '用户需要预订八达岭国际马场的7天后的马术体验课程，2人参加，并且必须购买骑马运动保险以确保安全'
     self.timeout_seconds = 300
     
     def prepare
       @activity_date = Date.current + 7.days
       @participant_count = 2
       
-      # 查找草原或郊区景点（马场）
-      @attraction = Attraction
-        .where("name LIKE ? OR name LIKE ?", '%草原%', '%马场%')
+      # 固定景点：八达岭国际马场
+      @attraction = Attraction.find_by!(
+        name: '八达岭国际马场',
+        data_version: 0
+      )
+      
+      # 查找马术体验课程
+      @equestrian_activity = @attraction.attraction_activities
+        .where("name LIKE ?", '%马术体验%')
         .where(data_version: 0)
-        .first
-      
-      @attraction ||= Attraction.where(data_version: 0).first
-      raise "未找到马场景点" unless @attraction
-      
-      # 查找马术相关活动
-      @equestrian_activity = @attraction.attraction_activities.where(data_version: 0).first
+        .first!
       
       {
-        task: "请预订#{@attraction.name}的马术体验服务（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含专业教练指导和马场服务。",
+        task: "请预订八达岭国际马场的马术体验课程（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人）。注意：骑马是高风险运动，必须购买保险以确保安全。",
         requirements: {
-          attraction: @attraction.name,
+          attraction: '八达岭国际马场',
+          activity_name: '马术体验课程',
           activity_date: @activity_date,
           participant_count: @participant_count,
-          services: ['马术体验', '教练指导', '马场服务', '安全保障']
+          insurance_required: true,
+          services: ['专业教练指导', '马场服务', '骑马装备租赁', '运动保险']
         },
-        hint: "需要预订马术活动，并购买保险确保安全。"
+        hint: "骑马活动存在风险，强烈建议购买保险。"
       }
     end
     
     def verify
-      add_assertion "创建了马术活动订单", weight: 40 do
+      add_assertion "创建了八达岭国际马场的马术体验订单", weight: 40 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -57,22 +59,22 @@ module V301V350
           .where(data_version: @data_version)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
+        expect(all_activity_orders).not_to be_empty, "未找到八达岭国际马场的活动订单"
         @equestrian_order = all_activity_orders.first
-        expect(@equestrian_order).not_to be_nil, "未找到马术活动订单"
+        expect(@equestrian_order).not_to be_nil, "未找到马术体验订单"
       end
       
       return if @equestrian_order.nil?
       
-      add_assertion "活动包含保险（安全保障）", weight: 30 do
+      add_assertion "马术活动购买了保险（安全保障）", weight: 30 do
         insurance_type = @equestrian_order.insurance_type
         expect(insurance_type).not_to eq('none'),
           "马术活动未购买保险。期望: basic或premium，实际: #{insurance_type}"
       end
       
-      add_assertion "活动日期正确", weight: 20 do
+      add_assertion "活动日期正确（7天后）", weight: 20 do
         expect(@equestrian_order.visit_date).to eq(@activity_date),
-          "马术活动日期错误。期望: #{@activity_date}，实际: #{@equestrian_order.visit_date}"
+          "马术活动日期错误。期望: #{@activity_date}（7天后），实际: #{@equestrian_order.visit_date}"
       end
       
       add_assertion "订单状态和价格有效", weight: 10 do
@@ -85,13 +87,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 创建马术活动订单（包含教练和马场服务）
-      equestrian_activity = @equestrian_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '马术体验（含教练+装备）',
-        description: '专业马术教练一对一指导，提供全套骑行装备和护具',
-        current_price: 280,
-        data_version: 0
-      )
+      equestrian_activity = @equestrian_activity
       
       ActivityOrder.create!(
         user: user,

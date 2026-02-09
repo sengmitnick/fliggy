@@ -8,11 +8,12 @@ require_relative '../base_validator'
 #   用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间
 #
 # 评分标准:
-#   - 创建了租车订单 (30%)
+#   - 创建了租车订单 (25%)
+#   - 取车日期正确（后天）(10%)
 #   - 创建了保险订单 (25%)
 #   - 保险类型正确（交通意外险）(20%)
 #   - 保险保障天数与租车天数匹配 (15%)
-#   - 订单状态有效 (10%)
+#   - 订单状态有效 (5%)
 module V251V300
   class V258BookCarWithFullInsuranceValidator < BaseValidator
     self.validator_id = 'v258_book_car_with_full_insurance_validator'
@@ -57,7 +58,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了租车订单", weight: 30 do
+      add_assertion "创建了租车订单", weight: 25 do
         all_orders = CarOrder
           .joins(:car)
           .includes(:car)
@@ -70,6 +71,12 @@ module V251V300
       end
       
       return if @car_order.nil?
+      
+      add_assertion "取车日期正确（后天）", weight: 10 do
+        actual_pickup_date = @car_order.pickup_datetime.to_date
+        expect(actual_pickup_date).to eq(@pickup_date),
+          "取车日期错误。期望: #{@pickup_date}（后天），实际: #{actual_pickup_date}"
+      end
       
       add_assertion "创建了保险订单", weight: 25 do
         @insurance_order = InsuranceOrder
@@ -98,7 +105,7 @@ module V251V300
           "保险天数不足。租车天数: #{rental_days}天，保险天数: #{insurance_days}天"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@car_order.status).to be_in(['pending', 'paid', 'confirmed'])
         expect(@insurance_order.status).to be_in(['pending', 'paid'])
       end

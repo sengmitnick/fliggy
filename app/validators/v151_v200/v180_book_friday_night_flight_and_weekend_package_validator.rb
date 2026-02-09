@@ -22,7 +22,7 @@ module V151V200
   class V180BookFridayNightFlightAndWeekendPackageValidator < BaseValidator
     self.validator_id = 'v180_book_friday_night_flight_and_weekend_package_validator'
     self.task_id = '9331db0e-0f5f-43ca-85b4-8f2d4b62380b'
-    self.title = '预订周五晚航班和周末度假酒店套餐'
+    self.title = '预订周五晚航班和周末度假酒店套餐（2晚）'
     self.description = '用户需要预订周五晚上的航班，并预订周末度假酒店套餐'
     self.timeout_seconds = 300
   
@@ -119,22 +119,7 @@ module V151V200
       else
         hotel = @available_hotels.first
         # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-        room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-        
-        unless room
-          room = HotelRoom.create!(
-            hotel_id: hotel.id,
-            room_type: '豪华海景房',
-            bed_type: 'king',
-            area: 45.0,
-            max_guests: 2,
-            price: 800.0,
-            original_price: 1200.0,
-            has_window: true,
-            available_rooms: 10,
-            data_version: 0
-          )
-        end
+        room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
         
         HotelBooking.create!(
           user: user,

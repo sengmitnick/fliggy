@@ -7,7 +7,7 @@ module V051V100
   class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
     self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
     self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
-    self.title = '预订浦东机场接机服务（舒适5座，要求可随时取消）'
+    self.title = '预订3天后浦东机场接机服务（最便宜，舒适5座，要求可随时取消）'
     self.description = '3天后从北京飞往上海，在浦东T2接机，需要舒适5座车型，并且要求出发前任何时间都可以免费取消订单（需先按起降城市搜索航班，系统会自动识别机场）'
     self.timeout_seconds = 240
   

@@ -18,7 +18,7 @@ module V201V250
   class V212BookHotelCheckInAfterMidnightValidator < BaseValidator
     self.validator_id = 'v212_book_hotel_check_in_after_midnight_validator'
     self.task_id = '1fc243f6-2f2f-4f5f-ff5f-6f8a9b0c1d2f'
-    self.title = '预订深夜航班+凌晨入住酒店'
+    self.title = '预订明天深夜航班+凌晨入住酒店'
     self.description = '用户需要预订明天深夜23:00后航班到上海+凌晨后入住酒店（24小时前台）'
     self.timeout_seconds = 300
     

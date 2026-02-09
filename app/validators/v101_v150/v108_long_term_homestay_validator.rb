@@ -17,7 +17,7 @@ module V101V150
   class V108LongTermHomestayValidator < BaseValidator
     self.validator_id = 'v108_long_term_homestay_validator'
     self.task_id = 'a8f4e3b7-9c2d-4e1f-b6a9-5d7c3e8f2a61'
-    self.title = '预订长租民宿（杭州西湖区，月租，性价比优先）'
+    self.title = '预订长租民宿（杭州西湖区，月租30天，1间房1成人，性价比优先）'
     self.description = '在杭州西湖区预订适合长租的民宿（30天以上），选择价格最低的月租房。注: 目前只有杭州有月租民宿'
     self.timeout_seconds = 300
   
@@ -115,14 +115,24 @@ module V101V150
       end
     
       # 断言5: 租期天数正确（权重10%）
-      add_assertion "租期天数正确（30天）", weight: 10 do
+      add_assertion "租期天数正确（30天）", weight: 5 do
         actual_nights = (@booking.check_out_date - @booking.check_in_date).to_i
         expect(actual_nights).to eq(@nights),
           "租期天数错误。期望: #{@nights}天，实际: #{actual_nights}天（入住#{@booking.check_in_date}，离店#{@booking.check_out_date}）"
       end
     
-      # 断言6: 选择了价格最低的月租房（权重20%）
-      add_assertion "选择了价格最低的月租房", weight: 20 do
+      # 断言6: 房间数和人数正确
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 10 do
+        expect(@booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间, 实际: #{@booking.rooms_count}间"
+        expect(@booking.adults_count).to eq(1),
+          "成人数错误。期望: 1人, 实际: #{@booking.adults_count}人"
+        expect(@booking.children_count).to eq(0),
+          "儿童数错误。期望: 0人, 实际: #{@booking.children_count}人"
+      end
+    
+      # 断言7: 选择了价格最低的月租房（权重20%）
+      add_assertion "选择了价格最低的月租房", weight: 15 do
         # 获取所有符合条件的月租房
         available_rooms = HotelRoom
           .joins(:hotel)

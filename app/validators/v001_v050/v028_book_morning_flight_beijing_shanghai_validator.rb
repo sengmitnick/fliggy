@@ -24,7 +24,7 @@ module V001V050
   class V028BookMorningFlightBeijingShanghaiValidator < BaseValidator
     self.validator_id = 'v028_book_morning_flight_beijing_shanghai_validator'
     self.task_id = '2d0d99a3-006c-4113-8ad1-6d9c37f7396f'
-    self.title = '预订后天北京到上海早班航班（12点前起飞）'
+    self.title = '给张三订后天北京到上海早班航班（12点前起飞）'
     self.description = '搜索后天北京到上海的航班，找到12点前起飞的早班航班并完成预订'
     self.timeout_seconds = 240
   
@@ -42,7 +42,7 @@ module V001V050
       ).where("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') < 12")
     
       {
-        task: "请预订一张后天从#{@origin}到#{@destination}的早班航班（12点前起飞）",
+        task: "请给张三预订一张后天从#{@origin}到#{@destination}的早班航班（12点前起飞）",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -55,8 +55,12 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = Booking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何订单记录"
+        all_bookings = Booking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_bookings).not_to be_empty, "未找到任何Booking记录"
+        @booking = all_bookings.first
       end
     
       return unless @booking
@@ -73,11 +77,19 @@ module V001V050
         expect(@booking.flight.flight_date).to eq(@target_date)
       end
     
-      add_assertion "起飞时间在12点前", weight: 40 do
+      add_assertion "起飞时间在12点前", weight: 30 do
         departure_time = @booking.flight.departure_time
         departure_hour = departure_time.is_a?(Time) ? departure_time.hour : Time.parse(departure_time).hour
         expect(departure_hour < 12).to be_truthy,
           "起飞时间不在早班时段。要求: 12:00之前, 实际: #{departure_time}"
+      end
+    
+      # 断言5: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

@@ -4,17 +4,13 @@ module V301V350
   class V318BookNationalDayAttractionHotelPackageValidator < BaseValidator
     self.validator_id = 'v318_book_national_day_attraction_hotel_package_validator'
     self.task_id = "2fa37623-24e7-46f7-a054-b2c98c7c7227"
-    self.title = "国庆黄金周热门景区门票+酒店套餐"
-    self.description = "用户需要预订国庆期间（10月1-3日）张家界景区门票+附近酒店套餐"
+    self.title = "预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，1间房，2人）"
+    self.description = "用户需要预订7天后的张家界国家森林公园成人门票（2张）和张家界武陵源度假酒店豪华双床房（入住2晚）"
     self.timeout_seconds = 180
 
     def prepare
-      # 国庆时间：10月1-3日
-      current_year = Date.today.year
-      @check_in_date = Date.new(current_year, 10, 1)
-      if @check_in_date < Date.today
-        @check_in_date = Date.new(current_year + 1, 10, 1)
-      end
+      # 7天后入住，住2晚
+      @check_in_date = Date.today + 7.days
       @check_out_date = @check_in_date + 2.days
       @visit_date = @check_in_date
       @attraction_name = "张家界国家森林公园"
@@ -55,12 +51,19 @@ module V301V350
       )
 
       {
-        check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s,
-        visit_date: @visit_date.to_s,
-        attraction_name: @attraction_name,
-        city_name: @city_name,
-        task_info: "用户预订国庆黄金周景区门票+酒店套餐"
+        task: "请预订#{@check_in_date.strftime('%Y年%m月%d日')}（7天后）的张家界国家森林公园成人门票2张，以及张家界武陵源度假酒店豪华双床房（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
+        requirements: {
+          attraction_name: @attraction_name,
+          city_name: @city_name,
+          visit_date: @visit_date,
+          check_in_date: @check_in_date,
+          check_out_date: @check_out_date,
+          ticket_quantity: 2,
+          nights: 2,
+          hotel_name: '张家界武陵源度假酒店',
+          room_type: '豪华双床房'
+        },
+        hint: "景区门票和酒店可以分别预订，注意日期要匹配。"
       }
     end
 
@@ -150,19 +153,30 @@ module V301V350
         end
       end
 
-      add_assertion "游玩日期正确（国庆期间：#{@visit_date}）", weight: 15 do
+      add_assertion "游玩日期正确（7天后：#{@visit_date}）", weight: 15 do
         @ticket_orders&.each do |order|
           expect(order.visit_date).to eq(@visit_date),
-            "游玩日期错误。期望: #{@visit_date}（国庆黄金周），实际: #{order.visit_date}"
+            "游玩日期错误。期望: #{@visit_date}（7天后），实际: #{order.visit_date}"
         end
       end
 
-      add_assertion "酒店入住退房日期正确（#{@check_in_date}至#{@check_out_date}）", weight: 20 do
+      add_assertion "酒店入住退房日期正确（7天后入住，住2晚：#{@check_in_date}至#{@check_out_date}）", weight: 15 do
         @hotel_bookings&.each do |booking|
           expect(booking.check_in_date).to eq(@check_in_date),
             "入住日期错误。期望: #{@check_in_date}, 实际: #{booking.check_in_date}"
           expect(booking.check_out_date).to eq(@check_out_date),
             "退房日期错误。期望: #{@check_out_date}, 实际: #{booking.check_out_date}"
+        end
+      end
+      
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
+        @hotel_bookings&.each do |booking|
+          expect(booking.rooms_count).to eq(1),
+            "房间数错误。期望: 1间房，实际: #{booking.rooms_count}间房"
+          expect(booking.adults_count).to eq(2),
+            "成人数错误。期望: 2成人，实际: #{booking.adults_count}成人"
+          expect(booking.children_count).to eq(0),
+            "儿童数错误。期望: 0儿童，实际: #{booking.children_count}儿童"
         end
       end
     end

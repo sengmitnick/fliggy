@@ -15,17 +15,20 @@ require_relative '../base_validator'
 #   ❌ 时间段筛选，无价格限制
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
-#   - 出发地正确（杭州） (20分)
-#   - 目的地正确（上海） (20分)
-#   - 发车时间在晚上（≥18:00） (35分)
+#   - 订单已创建 (20分)
+#   - 出发地正确（杭州） (15分)
+#   - 目的地正确（上海） (15分)
+#   - 发车日期正确（后天） (10分)
+#   - 发车时间在晚上（≥18:00） (30分)
+#   - 乘车人数正确（1人） (5分)
+#   - 乘客信息正确（来自demo_user） (5分)
 #
 module V001V050
   class V046BookBusHangzhouShanghaiValidator < BaseValidator
     self.validator_id = 'v046_book_bus_hangzhou_shanghai_validator'
     self.task_id = 'c8106cd5-941e-4b67-85f1-432f67d556a9'
-    self.title = '预订后天杭州到上海晚上汽车票（18:00后）'
-    self.description = '搜索杭州到上海的汽车票，找到发车时间在18:00后的班次'
+    self.title = '给张三预订后天杭州到上海晚上的汽车票（18:00后）'
+    self.description = 'Agent 需要为张三预订后天从杭州到上海的汽车票，找到发车时间在18:00后的班次'
     self.timeout_seconds = 240
   
     def prepare
@@ -54,26 +57,51 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 25 do
-        @order = BusTicketOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何汽车票订单记录"
+      add_assertion "订单已创建", weight: 20 do
+        all_bus_ticket_orders = BusTicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_bus_ticket_orders).not_to be_empty, "未找到任何BusTicketOrder记录"
+        @order = all_bus_ticket_orders.first
+        # Replaced by expect(all_bus_ticket_orders).not_to be_empty above, "未找到任何汽车票订单记录"
       end
     
       return unless @order
     
-      add_assertion "出发地正确（#{@origin}）", weight: 20 do
-        expect(@order.bus_ticket.origin).to eq(@origin)
+      add_assertion "出发地正确（#{@origin}）", weight: 15 do
+        expect(@order.bus_ticket.origin).to eq(@origin),
+          "出发地错误。期望: #{@origin}, 实际: #{@order.bus_ticket.origin}"
       end
     
-      add_assertion "目的地正确（#{@destination}）", weight: 20 do
-        expect(@order.bus_ticket.destination).to eq(@destination)
+      add_assertion "目的地正确（#{@destination}）", weight: 15 do
+        expect(@order.bus_ticket.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}, 实际: #{@order.bus_ticket.destination}"
       end
     
-      add_assertion "发车时间在晚上（≥18:00）", weight: 35 do
+      add_assertion "发车日期正确（后天）", weight: 10 do
+        expect(@order.bus_ticket.departure_date).to eq(@target_date),
+          "发车日期不正确。期望: #{@target_date}（后天）, 实际: #{@order.bus_ticket.departure_date}"
+      end
+    
+      add_assertion "发车时间在晚上（≥18:00）", weight: 30 do
         departure_time = @order.bus_ticket.departure_time
       
         expect(departure_time >= @evening_cutoff).to be_truthy,
           "发车时间不符合要求。要求: ≥18:00, 实际: #{departure_time}"
+      end
+    
+      add_assertion "乘车人数正确（1人）", weight: 5 do
+        expect(@order.passenger_count).to eq(1),
+          "乘车人数不正确。期望: 1人, 实际: #{@order.passenger_count}人"
+      end
+    
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 5 do
+        passenger = @order.passengers.first
+        expect(passenger&.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{passenger&.passenger_name}"
+        expect(passenger&.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{passenger&.passenger_id_number}"
       end
     end
   
@@ -92,6 +120,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       target_ticket = BusTicket.where(
         origin: @origin,
@@ -109,8 +138,8 @@ module V001V050
       )
     
       order.passengers.create!(
-        passenger_name: '张三',
-        passenger_id_number: '110101199001011234'
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number
       )
     
       { action: 'create_bus_order', departure_time: target_ticket.departure_time }

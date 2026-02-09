@@ -38,7 +38,7 @@ module V051V100
   class V081BuyFamilyTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v081_buy_family_travel_insurance_validator'
     self.task_id = 'ba8f8cf7-8220-4b08-8c2f-23b58edb3926'
-    self.title = '购买家庭旅游保险（三亚出行，3人，7天）'
+    self.title = '购买家庭旅游保险（三亚，7天后出行，3人，7天）'
     self.description = '为家庭（2成人+1儿童）购买三亚出行的旅游保险，选择适合亲子游场景的境内旅游保险产品'
     self.timeout_seconds = 240
   
@@ -84,8 +84,13 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @insurance_order = InsuranceOrder.order(created_at: :desc).first
-        expect(@insurance_order).not_to be_nil, "未找到任何保险订单记录"
+        all_insurance_orders = InsuranceOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_insurance_orders).not_to be_empty, "未找到任何InsuranceOrder记录"
+        @insurance_order = all_insurance_orders.first
+        # Replaced by expect(all_insurance_orders).not_to be_empty above, "未找到任何保险订单记录"
       end
     
       return unless @insurance_order # 如果没有订单，后续断言无法继续

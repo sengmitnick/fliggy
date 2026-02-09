@@ -2,19 +2,20 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订明天上海到杭州最早的高铁（二等座）
+# 验证用例: 给张三预订明天上海到杭州最早的高铁（选二等座）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天上海到杭州的所有高铁，
 #   找到发车时间最早的车次并成功创建订单。
-#   优先选择二等座（最常用的座位类型）。
+#   使用 demo_user 的出行人张三，优先选择二等座。
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 路线正确 (20分)
-#   - 出发日期正确 (20分)
+#   - 订单已创建 (25分)
+#   - 路线正确 (15分)
+#   - 出发日期正确 (15分)
 #   - 选择了最早的车次 (30分)
 #   - 选择了二等座 (10分)
+#   - 乘客信息正确 (5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -28,8 +29,8 @@ module V001V050
   class V002BookEarliestTrainValidator < BaseValidator
     self.validator_id = 'v002_book_earliest_train_validator'
     self.task_id = '336024a2-f7ac-4ddc-a917-381c76c52a5c'
-    self.title = '预订明天上海到杭州最早的高铁（二等座）'
-    self.description = '在明天的车次中找到发车时间最早的高铁并完成预订，优先选择二等座'
+    self.title = '给张三预订明天上海到杭州最早的高铁（选二等座）'
+    self.description = '在明天的车次中找到发车时间最早的高铁并为张三完成预订，选择二等座'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -53,12 +54,14 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}最早的高铁票（二等座）",
+        task: "给张三预订明天从#{@origin}到#{@destination}最早的高铁（选二等座）",
+        passenger: '张三',
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
         date_description: "明天（#{@target_date.strftime('%Y年%m月%d日')}）",
-        hint: "系统中有多个车次可选，请选择发车时间最早的，并选择二等座",
+        seat_type: '二等座',
+        requirement: '选择发车时间最早的车次',
         available_trains_count: Train.where(
           departure_city: @origin,
           arrival_city: @destination,
@@ -70,36 +73,51 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 20 do
-        @booking = TrainBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+      # 断言1: 查询订单并存储（第一条断言必须查询+过滤核心实体）
+      add_assertion "创建了火车票订单", weight: 25 do
+        # ✅ 查询时包含 data_version + 核心业务实体（路线）
+        # ❌ 不包含待验证属性（日期、座位类型、乘客信息）
+        all_bookings = TrainBooking
+          .joins(:train)
+          .includes(:train)
+          .where(trains: { 
+            departure_city: @origin, 
+            arrival_city: @destination 
+          })
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_bookings).not_to be_empty, 
+          "未找到任何#{@origin}到#{@destination}的火车票订单"
+        
+        @booking = all_bookings.first
       end
     
-      return unless @booking # 如果没有订单，后续断言无法继续
+      return unless @booking # Guard clause
     
-      # 断言2: 路线正确
-      add_assertion "出发城市正确", weight: 10 do
-        expect(@booking.train.departure_city).to eq(@origin)
-      end
-    
-      add_assertion "到达城市正确", weight: 10 do
-        expect(@booking.train.arrival_city).to eq(@destination)
+      # 断言2: 路线正确（核心实体验证）
+      add_assertion "路线正确（#{@origin} → #{@destination}）", weight: 15 do
+        expect(@booking.train.departure_city).to eq(@origin),
+          "出发城市错误。期望: #{@origin}, 实际: #{@booking.train.departure_city}"
+        expect(@booking.train.arrival_city).to eq(@destination),
+          "到达城市错误。期望: #{@destination}, 实际: #{@booking.train.arrival_city}"
       end
     
       # 断言3: 出发日期正确
-      add_assertion "出发日期正确", weight: 20 do
+      add_assertion "出发日期正确（明天）", weight: 15 do
         booking_date = @booking.train.departure_time.to_date
         expect(booking_date).to eq(@target_date),
-          "出发日期不正确。预期: #{@target_date}, 实际: #{booking_date}"
+          "出发日期错误。期望: #{@target_date}（明天）, 实际: #{booking_date}"
       end
     
-      # 断言4: 选择了最早的车次（核心评分项）
+      # 断言4: 选择了最早的车次（核心业务逻辑）
       add_assertion "选择了最早的车次", weight: 30 do
         # 查找该路线当天的所有车次
         all_trains = Train.where(
           departure_city: @origin,
-          arrival_city: @destination
+          arrival_city: @destination,
+          data_version: 0
         ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
         # 找出最早的发车时间
@@ -114,7 +132,13 @@ module V001V050
       # 断言5: 选择了二等座
       add_assertion "选择了二等座", weight: 10 do
         expect(@booking.seat_type).to eq('second_class'),
-          "应选择二等座，实际选择: #{@booking.seat_type_label}"
+          "座位类型错误。期望: 二等座(second_class), 实际: #{@booking.seat_type_label}"
+      end
+      
+      # 断言6: 乘客信息正确（数据规范验证）
+      add_assertion "乘客信息正确（张三）", weight: 5 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
       end
     end
   

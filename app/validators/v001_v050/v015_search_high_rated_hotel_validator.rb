@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 搜索后天入住两晚北京评分最高的高档酒店（4星级及以上，2人入1间）
+# 验证用例: 给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索北京的酒店，
@@ -17,13 +17,14 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要搜索→筛选星级→对比评分→确认最高分→预订
 # 
 # 评分标准:
-#   - 订单已创建 (15分)
+#   - 订单已创建 (20分)
 #   - 城市正确（北京市）(10分)
 #   - 星级符合（≥4星）(10分)
+#   - 入住人信息正确 (10分)
 #   - 选择了评分最高的酒店 (30分)
-#   - 订单信息准确（入住2晚，离店日期正确）(15分)
-#   - 入住人数正确（2人） (10分)
-#   - 房间数正确（1间） (10分)
+#   - 订单信息准确（入住2晚，离店日期正确）(10分)
+#   - 入住人数正确（2人） (5分)
+#   - 房间数正确（1间） (5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -37,8 +38,8 @@ module V001V050
   class V015SearchHighRatedHotelValidator < BaseValidator
     self.validator_id = 'v015_search_high_rated_hotel_validator'
     self.task_id = 'fc7fa502-3236-4832-a95c-a72859407f3d'
-    self.title = '搜索北京评分最高的高档酒店（4星级及以上，住2晚，2人入1间）'
-    self.description = '在后天入住北京，找到4星级及以上、评分最高的酒店（2人入1间）'
+    self.title = '给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）'
+    self.description = '给张三搜索后天入住北京的4星级及以上酒店，找到评分最高的并预订（4星级及以上，住2晚）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -79,28 +80,48 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 15 do
-        @hotel_booking = HotelBooking.order(created_at: :desc).first
-        expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
+      # 断言1: 必须有订单创建（包含核心实体过滤）
+      add_assertion "创建了酒店订单", weight: 20 do
+        all_hotel_bookings = HotelBooking
+          .joins(:hotel)
+          .where(
+            hotels: {
+              city: @city,
+              data_version: 0
+            },
+            data_version: @data_version
+          )
+          .where('hotels.star_level >= ?', @min_star_level)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_hotel_bookings).not_to be_empty, "未找到任何酒店订单记录"
+        @hotel_booking = all_hotel_bookings.first
       end
     
       return unless @hotel_booking # 如果没有订单，后续断言无法继续
     
       # 断言2: 城市正确
-      add_assertion "城市正确", weight: 10 do
+      add_assertion "城市正确（北京）", weight: 10 do
         expect(@hotel_booking.hotel.city).to eq(@city),
           "城市错误。期望: #{@city}, 实际: #{@hotel_booking.hotel.city}"
       end
     
       # 断言3: 星级符合要求
-      add_assertion "星级符合要求", weight: 10 do
+      add_assertion "星级符合要求（≥4星）", weight: 10 do
         hotel_star_level = @hotel_booking.hotel.star_level
         expect(hotel_star_level >= @min_star_level).to be_truthy,
-          "星级不符合要求。最低要求: #{@min_star_level}星, 实际: #{hotel_star_level}星"
+          "星级不符合要求。期望: ≥#{@min_star_level}星, 实际: #{hotel_star_level}星"
       end
     
-      # 断言4: 选择了评分最高的酒店（核心评分项）
+      # 断言4: 入住人信息正确（验证来自 demo_user，不是硬编码）
+      add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq('张三'),
+          "入住人姓名错误。期望: 张三（demo_user数据）, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@hotel_booking.guest_phone}"
+      end
+    
+      # 断言5: 选择了评分最高的酒店（核心评分项）
       add_assertion "选择了评分最高的酒店", weight: 30 do
         # 查找所有符合星级要求的酒店
         eligible_hotels = Hotel.where(
@@ -113,15 +134,15 @@ module V001V050
       
         # 验证是否选择了评分最高的酒店
         expect(@hotel_booking.hotel_id).to eq(best_hotel.id),
-          "未选择评分最高的酒店。应选: #{best_hotel.name}(#{best_hotel.star_level}星，评分#{best_hotel.rating}分), " \
-          "实际选择: #{@hotel_booking.hotel.name}(#{@hotel_booking.hotel.star_level}星，评分#{@hotel_booking.hotel.rating}分)"
+          "未选择评分最高的酒店。期望: #{best_hotel.name}(#{best_hotel.star_level}星，评分#{best_hotel.rating}分), " \
+          "实际: #{@hotel_booking.hotel.name}(#{@hotel_booking.hotel.star_level}星，评分#{@hotel_booking.hotel.rating}分)"
       end
     
-      # 断言5: 订单信息准确
-      add_assertion "订单信息准确", weight: 15 do
+      # 断言6: 订单信息准确
+      add_assertion "订单信息准确（后天入住，住2晚）", weight: 10 do
         # 检查入住日期
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
-          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+          "入住日期错误。期望: #{@check_in_date}（后天）, 实际: #{@hotel_booking.check_in_date}"
       
         # 检查入住天数（通过check_out_date计算）
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
@@ -129,16 +150,16 @@ module V001V050
           "入住天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
       end
     
-      # 断言6: 入住人数正确（2人）
-      add_assertion "入住人数正确（#{@adults_count}人）", weight: 10 do
+      # 断言7: 入住人数正确（2人）
+      add_assertion "入住人数正确（#{@adults_count}人）", weight: 5 do
         expect(@hotel_booking.adults_count).to eq(@adults_count),
-          "入住人数不正确。预期: #{@adults_count}人, 实际: #{@hotel_booking.adults_count}人"
+          "入住人数错误。期望: #{@adults_count}人, 实际: #{@hotel_booking.adults_count}人"
       end
     
-      # 断言7: 房间数正确（1间）
-      add_assertion "房间数正确（#{@rooms_count}间）", weight: 10 do
+      # 断言8: 房间数正确（1间）
+      add_assertion "房间数正确（#{@rooms_count}间）", weight: 5 do
         expect(@hotel_booking.rooms_count).to eq(@rooms_count),
-          "房间数不正确。预期: #{@rooms_count}间, 实际: #{@hotel_booking.rooms_count}间"
+          "房间数错误。期望: #{@rooms_count}间, 实际: #{@hotel_booking.rooms_count}间"
       end
     end
   
@@ -197,7 +218,10 @@ module V001V050
     
       raise "未找到可用房型" unless target_hotel_room
     
-      # 4. 创建酒店订单
+      # 4. 查找 demo_user 的联系人数据
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
+    
+      # 5. 创建酒店订单（使用 data_version 隔离）
       hotel_booking = HotelBooking.create!(
         hotel_id: target_hotel.id,
         hotel_room_id: target_hotel_room.id,
@@ -210,8 +234,9 @@ module V001V050
         total_price: target_hotel_room.price * @nights,
         payment_method: '花呗',
         status: 'pending',
-        guest_name: user.email.split('@').first,
-        guest_phone: '13800138000'
+        guest_name: contact.name,
+        guest_phone: contact.phone,
+        data_version: @data_version
       )
     
       # 返回操作信息

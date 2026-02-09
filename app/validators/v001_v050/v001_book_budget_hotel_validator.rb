@@ -35,7 +35,7 @@ module V001V050
   class V001BookBudgetHotelValidator < BaseValidator
     self.validator_id = 'v001_book_budget_hotel_validator'
     self.task_id = 'c0342467-8568-4bce-964c-4133c8367e7d'
-    self.title = '预订后天入住一晚深圳的经济型酒店'
+    self.title = '给张三预订后天入住一晚深圳的经济型酒店（预算≤500元，选性价比最高的）'
     self.description = '需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单'
     self.timeout_seconds = 300
   
@@ -85,28 +85,60 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
+      # 查询规则：只过滤核心实体（城市），不过滤待验证属性（日期、价格）
       add_assertion "订单已创建", weight: 20 do
-        @hotel_booking = HotelBooking.order(created_at: :desc).first
-        expect(@hotel_booking).not_to be_nil, "未找到任何酒店订单记录"
+        all_hotel_bookings = HotelBooking
+          .joins(:hotel)
+          .where(hotels: { city: @city })  # 核心实体过滤
+          .where(data_version: @data_version)  # 会话隔离（必须）
+          .order(created_at: :desc)
+          .to_a
+        expect(all_hotel_bookings).not_to be_empty, 
+          "未找到任何#{@city}的酒店订单记录"
+        @hotel_booking = all_hotel_bookings.first
       end
     
       return unless @hotel_booking # 如果没有订单，后续断言无法继续
     
-      # 断言2: 城市正确
-      add_assertion "城市正确", weight: 15 do
+      # 断言2: 城市正确（深圳）
+      add_assertion "城市正确（#{@city}）", weight: 15 do
         expect(@hotel_booking.hotel.city).to eq(@city),
           "城市错误。期望: #{@city}, 实际: #{@hotel_booking.hotel.city}"
       end
     
-      # 断言3: 入住日期正确
-      add_assertion "入住日期正确", weight: 15 do
+      # 断言3: 入住日期正确（后天）
+      add_assertion "入住日期正确（后天 #{@check_in_date}）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
-          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+          "入住日期错误。期望: #{@check_in_date}（后天），实际: #{@hotel_booking.check_in_date}"
       end
     
-      # 断言4: 价格符合预算（核心评分项）
+      # 断言4: 离店日期正确
+      add_assertion "离店日期正确（入住#{@nights}晚）", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "离店日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言5: 入住人信息正确（使用demo_user的数据）
+      add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq('张三'),
+          "入住人姓名错误。期望: 张三, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq('13800138000'),
+          "联系手机错误。期望: 13800138000, 实际: #{@hotel_booking.guest_phone}"
+      end
+    
+      # 断言6: 房间数和人数正确
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 5 do
+        expect(@hotel_booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间, 实际: #{@hotel_booking.rooms_count}间"
+        expect(@hotel_booking.adults_count).to eq(1),
+          "成人数错误。期望: 1人, 实际: #{@hotel_booking.adults_count}人"
+        expect(@hotel_booking.children_count).to eq(0),
+          "儿童数错误。期望: 0人, 实际: #{@hotel_booking.children_count}人"
+      end
+    
+      # 断言7: 价格符合预算（核心评分项 ≤500元）
       # CRITICAL FIX: 检查整晚房价而不是包含钟点房的hotel.price
-      add_assertion "价格符合预算", weight: 30 do
+      add_assertion "价格符合预算（≤#{@budget}元/晚）", weight: 20 do
         # 获取订单实际使用的房型价格（必须是过夜房型）
         hotel_room = @hotel_booking.hotel_room
         expect(hotel_room.room_category).to eq('overnight'),
@@ -114,12 +146,12 @@ module V001V050
       
         hotel_room_price = hotel_room.price
         expect(hotel_room_price <= @budget).to be_truthy,
-          "价格超出预算。预算: ≤#{@budget}元, 实际: #{hotel_room_price}元"
+          "价格超出预算。预算: ≤#{@budget}元/晚, 实际: #{hotel_room_price}元/晚"
       end
     
-      # 断言5: 选择了性价比最高的酒店（核心评分项）
+      # 断言8: 选择了性价比最高的酒店（核心评分项）
       # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
-      add_assertion "选择了性价比最高的酒店", weight: 20 do
+      add_assertion "选择了性价比最高的酒店", weight: 10 do
         # 查找所有符合预算的酒店（只考虑整晚房价）
         # 使用子查询方式获取最低整晚房价
         eligible_hotels_with_price = Hotel.where(
@@ -178,8 +210,11 @@ module V001V050
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 2. 获取用户联系人信息（从 demo_user 数据，不硬编码）
+      contact = user.contacts.find_by!(name: '张三', data_version: 0)
     
-      # 2. 查找符合预算的酒店，选择性价比最高的（评分/价格比值最大）
+      # 3. 查找符合预算的酒店，选择性价比最高的（评分/价格比值最大）
       # CRITICAL FIX: 必须过滤掉钟点房，只考虑整晚房价
       # 使用子查询方式获取最低整晚房价
       eligible_hotels = Hotel.where(
@@ -195,7 +230,7 @@ module V001V050
     
       raise "未找到符合预算的酒店" unless target_hotel
     
-      # 3. 查找该酒店的房型（HotelRoom，选择最便宜的标准房）
+      # 4. 查找该酒店的房型（HotelRoom，选择最便宜的标准房）
       target_hotel_room = HotelRoom.where(hotel_id: target_hotel.id)
                                    .where(room_category: 'overnight')
                                    .order(:price)
@@ -203,7 +238,7 @@ module V001V050
     
       raise "未找到可用房型" unless target_hotel_room
     
-      # 4. 创建酒店订单
+      # 5. 创建酒店订单（使用 demo_user 的联系人信息）
       hotel_booking = HotelBooking.create!(
         hotel_id: target_hotel.id,
         hotel_room_id: target_hotel_room.id,
@@ -216,8 +251,9 @@ module V001V050
         total_price: target_hotel_room.price * @nights,
         payment_method: '花呗',
         status: 'pending',
-        guest_name: user.email.split('@').first,
-        guest_phone: '13800138000'
+        guest_name: contact.name,  # 使用 demo_user 联系人姓名
+        guest_phone: contact.phone,  # 使用 demo_user 联系人电话
+        data_version: @data_version  # 会话隔离
       )
     
       # 返回操作信息

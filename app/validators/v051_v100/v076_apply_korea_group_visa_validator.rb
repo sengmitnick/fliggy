@@ -36,8 +36,8 @@ module V051V100
   class V076ApplyKoreaGroupVisaValidator < BaseValidator
     self.validator_id = 'v076_apply_korea_group_visa_validator'
     self.task_id = 'c8b9e386-8c54-40ca-a684-bcb5f833bb16'
-    self.title = '办理韩国团体签证（5人，成功率100%，最便宜）'
-    self.description = '为5人团队办理韩国团体签证，要求成功率100%且价格最便宜'
+    self.title = '给李四等5人办理韩国团体签证（成功率100%，最便宜）'
+    self.description = '帮李四、王芳、刘强、陈静、小明这5个人办理韩国团体签证，要求成功率100%且价格最便宜'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -80,8 +80,13 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @visa_order = VisaOrder.order(created_at: :desc).first
-        expect(@visa_order).not_to be_nil, "未找到任何签证订单记录"
+        all_visa_orders = VisaOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_visa_orders).not_to be_empty, "未找到任何VisaOrder记录"
+        @visa_order = all_visa_orders.first
+        # Replaced by expect(all_visa_orders).not_to be_empty above, "未找到任何签证订单记录"
       end
     
       return unless @visa_order # 如果没有订单，后续断言无法继续
@@ -94,7 +99,7 @@ module V051V100
       end
     
       # 断言3: 签证类型正确（团体签证）
-      add_assertion "签证类型正确（团体签证）", weight: 25 do
+      add_assertion "签证类型正确（团体签证）", weight: 20 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}。" \
@@ -108,7 +113,7 @@ module V051V100
       end
     
       # 断言5: 成功率100%
-      add_assertion "成功率100%", weight: 15 do
+      add_assertion "成功率100%", weight: 10 do
         success_rate = @visa_order.visa_product.success_rate
       
         expect(success_rate).to eq(@required_success_rate),
@@ -134,6 +139,47 @@ module V051V100
           "未选择价格最便宜的产品。" \
           "应选: #{cheapest_product.name}（#{cheapest_price}元/人，成功率#{cheapest_product.success_rate}%），" \
           "实际选择: #{@visa_order.visa_product.name}（#{actual_price}元/人，成功率#{@visa_order.visa_product.success_rate}%）"
+      end
+    
+      # 断言7: 联系人姓名正确（李四、王芳、刘强、陈静、小明任选其一）
+      add_assertion "联系人姓名正确（5人中任选其一）", weight: 3 do
+        valid_names = ['李四', '王芳', '刘强', '陈静', '小明']
+        expect(valid_names).to include(@visa_order.contact_name),
+          "联系人姓名错误。期望: #{valid_names.join('或')}（5人任选其一），实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言8: 联系电话与联系人匹配
+      add_assertion "联系电话与联系人匹配", weight: 3 do
+        # 李四: 13900139000, 王芳: 13700137001, 刘强: 13600136001, 陈静: 13300133001, 小明: 13500135001
+        valid_pairs = {
+          '李四' => '13900139000',
+          '王芳' => '13700137001',
+          '刘强' => '13600136001',
+          '陈静' => '13300133001',
+          '小明' => '13500135001'
+        }
+      
+        expected_phone = valid_pairs[@visa_order.contact_name]
+        expect(@visa_order.contact_phone).to eq(expected_phone),
+          "联系电话与联系人不匹配。联系人: #{@visa_order.contact_name}，期望电话: #{expected_phone}，实际电话: #{@visa_order.contact_phone}"
+      end
+    
+      # 断言9: 收货地址与联系人匹配
+      add_assertion "收货地址与联系人匹配", weight: 4 do
+        # 李四: 上海浦东, 王芳: 广州天河, 刘强: 深圳南山, 陈静: 杭州西湖, 小明: 成都高新
+        valid_addresses = {
+          '李四' => /上海.*浦东.*陆家嘴.*1000/,
+          '王芳' => /广东.*广州.*天河.*85/,
+          '刘强' => /广东.*深圳.*南山.*科技园/,
+          '陈静' => /杭州.*西湖.*文三路.*123/,
+          '小明' => /四川.*成都.*高新.*天府/
+        }
+      
+        expected_pattern = valid_addresses[@visa_order.contact_name]
+        actual_address = @visa_order.delivery_address || ''
+      
+        expect(actual_address).to match(expected_pattern),
+          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
       end
     end
   
@@ -172,13 +218,19 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理韩国团体签证（5人，成功率100%，最便宜）
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找韩国
+      # 2. 随机选择联系人（李四、王芳、刘强、陈静、小明任选其一）
+      contact_names = ['李四', '王芳', '刘强', '陈静', '小明']
+      selected_contact_name = contact_names.sample
+      contact_passenger = user.passengers.find_by!(name: selected_contact_name, data_version: 0)
+      contact_address = user.addresses.find_by!(name: selected_contact_name, data_version: 0)
+    
+      # 3. 查找韩国
       korea = Country.find_by!(name: @country_name, data_version: 0)
     
-      # 3. 查找成功率100%的韩国团体签证产品
+      # 4. 查找成功率100%的韩国团体签证产品
       visa_products = VisaProduct.where(
         country_id: korea.id,
         product_type: @product_type,
@@ -187,12 +239,15 @@ module V051V100
     
       raise "未找到符合条件的签证产品" if visa_products.empty?
     
-      # 4. 选择价格最低的
+      # 5. 选择价格最低的
       cheapest_product = visa_products.min_by { |p| p.price || Float::INFINITY }
     
       raise "未找到可用的签证产品" unless cheapest_product
     
-      # 5. 创建签证订单
+      # 6. 拼接完整地址
+      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+    
+      # 7. 创建签证订单
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: cheapest_product.id,
@@ -201,12 +256,13 @@ module V051V100
         total_price: cheapest_product.price * @traveler_count,
         expected_date: Date.current + 30.days,  # 预计出行日期30天后
         delivery_method: 'express',
-        delivery_address: '广州市天河区珠江新城花城大道5号',
-        contact_name: '陈伟',
-        contact_phone: '13700137000',
+        delivery_address: full_address,
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息

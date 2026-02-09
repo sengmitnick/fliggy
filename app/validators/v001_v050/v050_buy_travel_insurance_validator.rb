@@ -25,7 +25,9 @@ require_relative '../base_validator'
 #   - 出行开始时间正确（后天）(15分)
 #   - 保障天数正确（7天）(10分)
 #   - 根据成都差异化定价选择了最便宜的产品 (30分)
-#   - 订单总价计算正确（使用成都的城市价格）(15分)
+#   - 被保人信息填写正确（张三+身份证号）(5分)
+#   - 被保人数量正确（1人）(5分)
+#   - 订单总价计算正确（使用成都的城市价格）(5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -39,8 +41,8 @@ module V001V050
   class V050BuyTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v050_buy_travel_insurance_validator'
     self.task_id = '1eb4c6df-76fd-415c-bf02-08b4ce823dc5'
-    self.title = '购买成都出行的境内旅游保险（后天出发，7天，1人，该城市最便宜）'
-    self.description = '为成都出行购买境内旅游保险（后天出发），根据成都的差异化定价选择7天保障期最便宜的产品'
+    self.title = '给张三购买成都出行的境内旅游保险（后天出发，7天，该城市最便宜）'
+    self.description = 'Agent 需要为张三购买成都出行的境内旅游保险（后天出发，保隙7天），根据成都的差异化定价选择最便宜的产品'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -92,8 +94,13 @@ module V001V050
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 10 do
-        @insurance_order = InsuranceOrder.order(created_at: :desc).first
-        expect(@insurance_order).not_to be_nil, "未找到任何保险订单记录"
+        all_insurance_orders = InsuranceOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_insurance_orders).not_to be_empty, "未找到任何InsuranceOrder记录"
+        @insurance_order = all_insurance_orders.first
+        # Replaced by expect(all_insurance_orders).not_to be_empty above, "未找到任何保险订单记录"
       end
     
       return unless @insurance_order # 如果没有订单，后续断言无法继续
@@ -158,8 +165,29 @@ module V001V050
           "实际选择: #{@insurance_order.insurance_product.name}（#{@insurance_order.insurance_product.company}，在#{@destination_city}每天#{actual_city_price}元，#{@days}天共#{actual_total}元）"
       end
     
-      # 断言7: 订单总价计算正确（使用成都的城市价格）
-      add_assertion "订单总价计算正确（使用#{@destination_city}的城市价格）", weight: 15 do
+      # 断言7: 被保人信息填写正确（姓名和身份证号）
+      add_assertion "被保人信息填写正确（姓名和身份证号）", weight: 5 do
+        insured_persons = @insurance_order.insured_persons || []
+        expect(insured_persons).not_to be_empty, "未填写被保人信息"
+        
+        # 检查被保人是否包含张三
+        zhang_san = insured_persons.find { |p| p['name'] == '张三' }
+        expect(zhang_san).not_to be_nil, "未找到被保人'张三'。实际被保人: #{insured_persons.map { |p| p['name'] }.join(', ')}"
+        
+        # 检查张三是否填写了身份证号
+        expect(zhang_san['id_number']).not_to be_nil, "被保人'张三'未填写身份证号"
+        expect(zhang_san['id_number']).not_to be_empty, "被保人'张三'的身份证号为空"
+      end
+    
+      # 断言8: 被保人数量正确（1人）
+      add_assertion "被保人数量正确（#{@quantity}人）", weight: 5 do
+        insured_count = (@insurance_order.insured_persons || []).size
+        expect(insured_count).to eq(@quantity),
+          "被保人数量错误。期望: #{@quantity}人, 实际: #{insured_count}人"
+      end
+    
+      # 断言9: 订单总价计算正确（使用成都的城市价格）
+      add_assertion "订单总价计算正确（使用#{@destination_city}的城市价格）", weight: 5 do
         city_price_per_day = @insurance_order.insurance_product.price_for_city(@city.id)
         expected_unit_price = city_price_per_day * @insurance_order.days
         expected_total = expected_unit_price * @insurance_order.quantity
@@ -239,7 +267,7 @@ module V001V050
         days: @days,
         destination: @destination_city,
         destination_type: 'domestic',
-        insured_persons: ['张三'],
+        insured_persons: [{ name: '张三', id_number: '440300199001011234' }],
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,

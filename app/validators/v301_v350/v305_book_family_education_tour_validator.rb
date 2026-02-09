@@ -17,7 +17,7 @@ module V301V350
   class V305BookFamilyEducationTourValidator < BaseValidator
     self.validator_id = 'v305_book_family_education_tour_validator'
     self.task_id = '5134922f-5d41-431e-b1f0-36ea208edf7f'
-    self.title = '预订北京亲子教育游（2大1小，2天以上）'
+    self.title = '预订北京亲子教育游（12天后出发，2大1小，2天以上）'
     self.description = '用户预订北京的亲子教育跟团游，12天后出发，2成人1儿童家庭组合，行程至少2天，包含科技馆、博物馆等教育景点'
     self.timeout_seconds = 300
     

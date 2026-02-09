@@ -16,7 +16,7 @@ module V251V300
   class V291BookSeniorCarePackageValidator < BaseValidator
     self.validator_id = 'v291_book_senior_care_package_validator'
     self.task_id = '09a76fc5-3c70-446f-a35e-e52d8ed218f9'
-    self.title = '预订老年人关怀套餐'
+    self.title = '预订老年人关怀套餐（10天后出发）'
     self.description = '用户预订老年人关怀套餐（适老化服务+医疗保障）'
     self.timeout_seconds = 300
     

@@ -17,7 +17,7 @@ module V151V200
   class V197BookTrainAndStationVicinityHotelValidator < BaseValidator
     self.validator_id = 'v197_book_train_and_station_vicinity_hotel_validator'
     self.task_id = '23d8d144-0925-4316-8fec-88215475aef4'
-    self.title = '预订火车+火车站1公里内酒店'
+    self.title = '预订3天后火车+火车站1公里内酒店'
     self.description = '预订火车+火车站1公里内酒店（步行可达）'
     self.timeout_seconds = 300
     
@@ -142,22 +142,7 @@ module V151V200
       
       # 选择车站酒店
       station_hotel = @station_hotels.min_by(&:price)
-      room = station_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: station_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: station_hotel.price,
-          original_price: station_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = station_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = train.arrival_time.to_date
       HotelBooking.create!(

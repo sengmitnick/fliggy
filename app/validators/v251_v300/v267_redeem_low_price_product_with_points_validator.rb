@@ -8,7 +8,7 @@ module V251V300
   class V267RedeemLowPriceProductWithPointsValidator < BaseValidator
     self.validator_id = 'v267_redeem_low_price_product_with_points_validator'
     self.task_id = 'e02e9f3a-2b4c-4d1b-8a5f-6c7d8e9f0a1b'
-    self.title = '使用会员积分兑换低价商品'
+    self.title = '使用会员积分兑换低价商品（1个）'
     self.description = '用户使用少量积分+现金兑换热门低价商品（如咖啡券）'
     self.timeout_seconds = 300
     

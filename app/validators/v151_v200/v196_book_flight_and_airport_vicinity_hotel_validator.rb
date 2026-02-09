@@ -17,7 +17,7 @@ module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
     self.task_id = '98182723-1c20-486b-b2c2-ba4d2e48e1df'
-    self.title = '预订航班+机场3公里内酒店'
+    self.title = '预订3天后航班+机场3公里内酒店'
     self.description = '预订航班+机场3公里内酒店（便于转机）'
     self.timeout_seconds = 300
     
@@ -133,22 +133,7 @@ module V151V200
       
       # 选择机场酒店
       airport_hotel = @airport_hotels.min_by(&:price)
-      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: airport_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: airport_hotel.price,
-          original_price: airport_hotel.original_price,
-          area: 25.0,
-          max_guests: 2,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(

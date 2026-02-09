@@ -9,7 +9,7 @@ module V151V200
   class V162BookCruiseAndHotelValidator < BaseValidator
     self.validator_id = 'v162_book_cruise_and_hotel_validator'
     self.task_id = 'f2a3b4c5-6d7e-8f9a-0b1c-2d3e4f5a6b7c'
-    self.title = '预订邮轮并预订酒店住宿（上海日本航线+前一晚住宿）'
+    self.title = '预订明天邮轮并预订酒店住宿（上海日本航线+前一晚住宿）'
     self.description = '预订后天上海出发的日本邮轮航线，并预订邮轮出发前一晚的上海酒店住宿'
     self.timeout_seconds = 300
 
@@ -173,9 +173,16 @@ module V151V200
       end
       
       # 断言5: 入住日期正确（邮轮前一晚）
-      add_assertion "入住日期正确（邮轮前一晚）", weight: 20 do
+      add_assertion "入住日期正确（邮轮前一晚）", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（邮轮前一晚）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言6: 退房日期正确（住1晚）
+      add_assertion "退房日期正确（住1晚）", weight: 5 do
+        expected_checkout = @hotel_checkin_date + 1.day
+        expect(@hotel_booking.check_out_date).to eq(expected_checkout),
+          "退房日期错误。期望: #{expected_checkout}（入住次日）, 实际: #{@hotel_booking.check_out_date}"
       end
     end
   end

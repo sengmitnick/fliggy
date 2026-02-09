@@ -26,7 +26,7 @@ module V101V150
   class V111HomestayBookingValidator < BaseValidator
     self.validator_id = 'v111_homestay_booking_validator'
     self.task_id = '7874748d-a0b8-4725-a536-ff9141c0fed1'
-    self.title = '预订热门民宿（上海CBD核心区）'
+    self.title = '预订热门民宿（上海CBD核心区，2晚，1间房2成人）'
     self.description = '在上海CBD核心区预订评分最高的民宿，入住2晚'
     self.timeout_seconds = 300
   
@@ -99,13 +99,22 @@ module V101V150
           "住宿类型错误。期望: homestay（民宿），实际: #{@booking.hotel.hotel_type}（#{@booking.hotel.hotel_type == 'hotel' ? '酒店' : @booking.hotel.hotel_type}）"
       end
     
-      add_assertion "入住天数正确（#{@nights}晚）", weight: 15 do
+      add_assertion "入住天数正确（#{@nights}晚）", weight: 10 do
         actual_nights = (@booking.check_out_date - @booking.check_in_date).to_i
         expect(actual_nights).to eq(@nights),
           "入住天数错误。期望: #{@nights}晚，实际: #{actual_nights}晚（入住#{@booking.check_in_date}，离店#{@booking.check_out_date}）"
       end
     
-      add_assertion "选择了评分最高的民宿", weight: 25 do
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
+        expect(@booking.rooms_count).to eq(1),
+          "房间数错误。期望: 1间, 实际: #{@booking.rooms_count}间"
+        expect(@booking.adults_count).to eq(2),
+          "成人数错误。期望: 2人, 实际: #{@booking.adults_count}人"
+        expect(@booking.children_count).to eq(0),
+          "儿童数错误。期望: 0人, 实际: #{@booking.children_count}人"
+      end
+    
+      add_assertion "选择了评分最高的民宿", weight: 20 do
         # 获取所有符合条件的民宿
         qualified_homestays = Hotel.where(
           hotel_type: 'homestay',

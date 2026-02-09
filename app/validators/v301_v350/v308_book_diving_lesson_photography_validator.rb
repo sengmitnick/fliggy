@@ -153,13 +153,7 @@ module V301V350
       )
       
       # 2. 创建潜水活动订单（ActivityOrder）
-      diving_activity = @diving_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '潜水教学+体验',
-        description: '专业教练带领，适合初学者',
-        current_price: 380,
-        data_version: 0
-      )
+      diving_activity = @diving_activity
       
       ActivityOrder.create!(
         user: user,
@@ -174,13 +168,7 @@ module V301V350
       )
       
       # 3. 创建摄影服务订单（ActivityOrder）
-      photography_activity = @photography_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '水下摄影服务',
-        description: '专业摄影师全程跟拍，提供精修照片',
-        current_price: 200,
-        data_version: 0
-      )
+      photography_activity = @photography_activity
       
       ActivityOrder.create!(
         user: user,

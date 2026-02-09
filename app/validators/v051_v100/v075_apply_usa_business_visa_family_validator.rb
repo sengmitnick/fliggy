@@ -20,10 +20,13 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 国家正确（美国）(15分)
-#   - 签证类型正确（商务签证）(20分)
-#   - 人数正确（2人）(10分)
-#   - 产品支持家庭申请 (15分)
-#   - 选择了价格最低的商务签证 (20分)
+#   - 签证类型正确（商务签证）(15分)
+#   - 人数正确（2人）(5分)
+#   - 产品支持家庭申请 (10分)
+#   - 选择了价格最低的商务签证 (25分)
+#   - 联系人姓名正确（张三或李四）(3分)
+#   - 联系电话与联系人匹配 (3分)
+#   - 收货地址与联系人匹配 (4分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -37,7 +40,7 @@ module V051V100
   class V075ApplyUsaBusinessVisaFamilyValidator < BaseValidator
     self.validator_id = 'v075_apply_usa_business_visa_family_validator'
     self.task_id = '100fd8a9-ca4c-48ee-8139-1e599dc77b16'
-    self.title = '办理美国商务签证（家庭申请，2人，价格最低）'
+    self.title = '给张三和李四办理美国商务签证（家庭申请，2人，价格最低）'
     self.description = '为2位家庭成员办理美国商务签证，选择价格最低且支持家庭申请的产品'
     self.timeout_seconds = 240
   
@@ -80,8 +83,13 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @visa_order = VisaOrder.order(created_at: :desc).first
-        expect(@visa_order).not_to be_nil, "未找到任何签证订单记录"
+        all_visa_orders = VisaOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_visa_orders).not_to be_empty, "未找到任何VisaOrder记录"
+        @visa_order = all_visa_orders.first
+        # Replaced by expect(all_visa_orders).not_to be_empty above, "未找到任何签证订单记录"
       end
     
       return unless @visa_order # 如果没有订单，后续断言无法继续
@@ -94,20 +102,20 @@ module V051V100
       end
     
       # 断言3: 签证类型正确（商务签证）
-      add_assertion "签证类型正确（商务签证）", weight: 20 do
+      add_assertion "签证类型正确（商务签证）", weight: 15 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}"
       end
     
       # 断言4: 人数正确（2人）
-      add_assertion "人数正确（2人）", weight: 10 do
+      add_assertion "人数正确（2人）", weight: 5 do
         expect(@visa_order.traveler_count).to eq(@traveler_count),
           "旅行人数错误。期望: #{@traveler_count}人（家庭申请）, 实际: #{@visa_order.traveler_count}人"
       end
     
       # 断言5: 产品支持家庭申请
-      add_assertion "产品支持家庭申请", weight: 15 do
+      add_assertion "产品支持家庭申请", weight: 10 do
         supports_family = @visa_order.visa_product.supports_family
       
         expect(supports_family).to be_truthy,
@@ -115,7 +123,7 @@ module V051V100
       end
     
       # 断言6: 选择了价格最低的商务签证（核心评分项）
-      add_assertion "选择了价格最低的商务签证", weight: 20 do
+      add_assertion "选择了价格最低的商务签证", weight: 25 do
         # 获取所有支持家庭申请的美国商务签证产品
         usa = Country.find_by(name: @country_name, data_version: 0)
         all_products = VisaProduct.where(
@@ -134,6 +142,42 @@ module V051V100
           "未选择价格最低的商务签证。" \
           "应选: #{cheapest_product.name}（#{cheapest_price}元/人，#{cheapest_product.processing_days}个工作日），" \
           "实际选择: #{@visa_order.visa_product.name}（#{actual_price}元/人，#{@visa_order.visa_product.processing_days}个工作日）"
+      end
+    
+      # 断言7: 联系人姓名正确（张三或李四）
+      add_assertion "联系人姓名正确（张三或李四）", weight: 3 do
+        valid_names = ['张三', '李四']
+        expect(valid_names).to include(@visa_order.contact_name),
+          "联系人姓名错误。期望: #{valid_names.join('或')}（两人任选其一），实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言8: 联系电话与联系人匹配
+      add_assertion "联系电话与联系人匹配", weight: 3 do
+        # 张三: 13800138000, 李四: 13900139000
+        valid_pairs = {
+          '张三' => '13800138000',
+          '李四' => '13900139000'
+        }
+      
+        expected_phone = valid_pairs[@visa_order.contact_name]
+        expect(@visa_order.contact_phone).to eq(expected_phone),
+          "联系电话与联系人不匹配。联系人: #{@visa_order.contact_name}，期望电话: #{expected_phone}，实际电话: #{@visa_order.contact_phone}"
+      end
+    
+      # 断言9: 收货地址与联系人匹配
+      add_assertion "收货地址与联系人匹配", weight: 4 do
+        # 张三地址: 北京市朝阳区建国路88号SOHO现代城
+        # 李四地址: 上海市浦东新区陆家嘴环路1000号
+        valid_addresses = {
+          '张三' => /北京.*朝阳.*建国路.*SOHO/,
+          '李四' => /上海.*浦东.*陆家嘴.*1000/
+        }
+      
+        expected_pattern = valid_addresses[@visa_order.contact_name]
+        actual_address = @visa_order.delivery_address || ''
+      
+        expect(actual_address).to match(expected_pattern),
+          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
       end
     end
   
@@ -171,13 +215,19 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理美国商务签证（家庭申请，2人，最低价格）
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找美国
+      # 2. 随机选择联系人（张三或李四）
+      contact_names = ['张三', '李四']
+      selected_contact_name = contact_names.sample
+      contact_passenger = user.passengers.find_by!(name: selected_contact_name, data_version: 0)
+      contact_address = user.addresses.find_by!(name: selected_contact_name, data_version: 0)
+    
+      # 3. 查找美国
       usa = Country.find_by!(name: @country_name, data_version: 0)
     
-      # 3. 查找支持家庭申请的美国商务签证产品
+      # 4. 查找支持家庭申请的美国商务签证产品
       visa_products = VisaProduct.where(
         country_id: usa.id,
         product_type: @product_type,
@@ -187,12 +237,15 @@ module V051V100
     
       raise "未找到符合条件的签证产品" if visa_products.empty?
     
-      # 4. 选择价格最低的
+      # 5. 选择价格最低的
       cheapest_product = visa_products.min_by { |p| p.price || Float::INFINITY }
     
       raise "未找到可用的签证产品" unless cheapest_product
     
-      # 5. 创建签证订单
+      # 6. 拼接完整地址
+      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+    
+      # 7. 创建签证订单
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: cheapest_product.id,
@@ -201,12 +254,13 @@ module V051V100
         total_price: cheapest_product.price * @traveler_count,
         expected_date: Date.current + 90.days,  # 预计出行日期90天后
         delivery_method: 'express',
-        delivery_address: '上海市浦东新区陆家嘴环路1000号',
-        contact_name: '王强',
-        contact_phone: '13900139000',
+        delivery_address: full_address,
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息
@@ -221,6 +275,9 @@ module V051V100
         traveler_count: @traveler_count,
         total_price: visa_order.total_price,
         supports_family: cheapest_product.supports_family,
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
+        delivery_address: full_address,
         user_email: user.email
       }
     end

@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["totalPrice", "paymentButton", "typeTab", "planCard", "phoneInput", "carrierLabel"]
+  static targets = ["totalPrice", "paymentButton", "typeTab", "planCard", "phoneInput", "carrierLabel", "contactModal"]
   declare readonly totalPriceTarget: HTMLElement
   declare readonly hasTotalPriceTarget: boolean
   declare readonly paymentButtonTarget: HTMLAnchorElement
@@ -12,6 +12,8 @@ export default class extends Controller<HTMLElement> {
   declare readonly hasPhoneInputTarget: boolean
   declare readonly carrierLabelTarget: HTMLElement
   declare readonly hasCarrierLabelTarget: boolean
+  declare readonly contactModalTarget: HTMLElement
+  declare readonly hasContactModalTarget: boolean
 
   private selectedPlanId: string = ""
   private selectedPrice: number = 35
@@ -231,6 +233,35 @@ export default class extends Controller<HTMLElement> {
     if (typeof (window as any).showToast === 'function') {
       (window as any).showToast('精彩即将上线')
     }
+  }
+
+  openContactModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasContactModalTarget) {
+      this.contactModalTarget.classList.remove('hidden')
+    }
+  }
+
+  closeContactModal(event: Event): void {
+    event.preventDefault()
+    if (this.hasContactModalTarget) {
+      this.contactModalTarget.classList.add('hidden')
+    }
+  }
+
+  selectContact(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const phone = target.dataset.contactPhone || ''
+    
+    // Fill phone input
+    if (this.hasPhoneInputTarget && phone) {
+      this.phoneInputTarget.value = phone
+      // Trigger carrier detection
+      this.detectCarrier()
+    }
+    
+    // Close modal
+    this.closeContactModal(event)
   }
 
   checkout(event: Event): void {

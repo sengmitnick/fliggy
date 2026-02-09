@@ -6,7 +6,7 @@ module V101V150
   class V138BookCarAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v138_book_car_and_airport_pickup_validator'
     self.task_id = 'e8f9a0b1-2c3d-4e5f-6a7b-8c9d0e1f2a3b'
-    self.title = '预订租车+机场接机服务'
+    self.title = '预订明天租车+机场接机服务'
     self.description = '预订明天深圳机场自取的经济轿车3天，并预订机场接机服务'
     self.timeout_seconds = 300
 

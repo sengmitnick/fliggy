@@ -521,6 +521,13 @@ overnight_room_types = [
   { type: "家庭房", bed: "双床+沙发床", area: "45㎡", category: "overnight", factor: 1.5 }
 ]
 
+# 含早餐房型（支持v183验证器）
+breakfast_room_types = [
+  { type: "标准双床房（含早）", bed: "双床", area: "28㎡", category: "overnight", factor: 1.15 },
+  { type: "豪华大床房（含早）", bed: "大床", area: "35㎡", category: "overnight", factor: 1.45 },
+  { type: "行政套房（含早）", bed: "大床", area: "50㎡", category: "overnight", factor: 1.95 }
+]
+
 hourly_room_types = [
   { type: "2小时房", bed: "大床", area: "25㎡", category: "hourly", factor: 0.3 },
   { type: "3小时房", bed: "大床", area: "28㎡", category: "hourly", factor: 0.4 },
@@ -543,6 +550,11 @@ all_hotels.each do |hotel_info|
     selected_rooms = [overnight_room_types[0]]
     selected_rooms += overnight_room_types[1..-1].sample(rand(1..2))
     
+    # 星级酒店添加含早餐房型 (star >= 4)
+    if star_level >= 4
+      selected_rooms += breakfast_room_types.sample(rand(1..2))
+    end
+    
     # 部分酒店有钟点房 (30%概率)
     if rand < 0.3
       selected_rooms += hourly_room_types.sample(rand(1..2))
@@ -558,6 +570,7 @@ all_hotels.each do |hotel_info|
       room_category: room[:category],
       price: (base_price * room[:factor]).round(0),
       available_rooms: is_homestay ? rand(2..5) : rand(5..20),
+      data_version: 0,
       created_at: timestamp,
       updated_at: timestamp
     }
@@ -587,6 +600,7 @@ hangzhou_hotels.each do |hotel|
     room_category: "overnight",
     price: hotel.price + 50,
     available_rooms: 8,
+    data_version: 0,
     created_at: timestamp,
     updated_at: timestamp
   }

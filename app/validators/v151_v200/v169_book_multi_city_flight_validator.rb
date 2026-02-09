@@ -9,7 +9,7 @@ module V151V200
   class V169BookMultiCityFlightValidator < BaseValidator
     self.validator_id = 'v169_book_multi_city_flight_validator'
     self.task_id = 'a9b0c1d2-3e4f-5a6b-7c8d-9e0f1a2b3c4d'
-    self.title = '预订多城市联程航班（北京→上海→广州）'
+    self.title = '预订明天多城市联程航班（北京→上海→广州）'
     self.description = '预订明天北京到上海的航班，以及后天上海到广州的航班，完成多城市联程'
     self.timeout_seconds = 300
 

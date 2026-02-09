@@ -36,8 +36,8 @@ module V051V100
   class V078ApplyFranceSchengenVisaFamilyValidator < BaseValidator
     self.validator_id = 'v078_apply_france_schengen_visa_family_validator'
     self.task_id = '29391193-cb90-41b1-b5c7-152b6da0630b'
-    self.title = '办理法国申根签证（3人家庭，支持拒签重办）'
-    self.description = '为3人家庭办理法国申根签证，选择支持拒签后可重新办理的产品'
+    self.title = '给张三的3人办理法国申根签证（支持拒签重办）'
+    self.description = '帮张三、李四、王芳这3个人办理法国申根签证，选择支持拒签后可重新办理的产品'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -76,8 +76,13 @@ module V051V100
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
       add_assertion "订单已创建", weight: 20 do
-        @visa_order = VisaOrder.order(created_at: :desc).first
-        expect(@visa_order).not_to be_nil, "未找到任何签证订单记录"
+        all_visa_orders = VisaOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_visa_orders).not_to be_empty, "未找到任何VisaOrder记录"
+        @visa_order = all_visa_orders.first
+        # Replaced by expect(all_visa_orders).not_to be_empty above, "未找到任何签证订单记录"
       end
     
       return unless @visa_order # 如果没有订单，后续断言无法继续
@@ -113,12 +118,49 @@ module V051V100
       end
     
       # 断言6: 订单价格计算正确
-      add_assertion "订单价格计算正确", weight: 15 do
+      add_assertion "订单价格计算正确", weight: 5 do
         expected_total = @visa_order.visa_product.price * @visa_order.traveler_count
         actual_total = @visa_order.total_price
       
         expect(actual_total).to eq(expected_total),
           "订单总价错误。期望: #{expected_total}元（单价#{@visa_order.visa_product.price}元 × #{@visa_order.traveler_count}人），实际: #{actual_total}元"
+      end
+    
+      # 断言7: 联系人姓名正确（张三、李四、王芳任选其一）
+      add_assertion "联系人姓名正确（3人中任选其一）", weight: 3 do
+        valid_names = ['张三', '李四', '王芳']
+        expect(valid_names).to include(@visa_order.contact_name),
+          "联系人姓名错误。期望: #{valid_names.join('或')}（3人任选其一），实际: #{@visa_order.contact_name}"
+      end
+    
+      # 断言8: 联系电话与联系人匹配
+      add_assertion "联系电话与联系人匹配", weight: 3 do
+        # 张三: 13800138000, 李四: 13900139000, 王芳: 13700137001
+        valid_pairs = {
+          '张三' => '13800138000',
+          '李四' => '13900139000',
+          '王芳' => '13700137001'
+        }
+      
+        expected_phone = valid_pairs[@visa_order.contact_name]
+        expect(@visa_order.contact_phone).to eq(expected_phone),
+          "联系电话与联系人不匹配。联系人: #{@visa_order.contact_name}，期望电话: #{expected_phone}，实际电话: #{@visa_order.contact_phone}"
+      end
+    
+      # 断言9: 收货地址与联系人匹配
+      add_assertion "收货地址与联系人匹配", weight: 4 do
+        # 张三: 北京朝阳, 李四: 上海浦东, 王芳: 广州天河
+        valid_addresses = {
+          '张三' => /北京.*朝阳.*建国路.*SOHO/,
+          '李四' => /上海.*浦东.*陆家嘴.*1000/,
+          '王芳' => /广东.*广州.*天河.*85/
+        }
+      
+        expected_pattern = valid_addresses[@visa_order.contact_name]
+        actual_address = @visa_order.delivery_address || ''
+      
+        expect(actual_address).to match(expected_pattern),
+          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
       end
     end
   
@@ -152,13 +194,19 @@ module V051V100
   
     # 模拟 AI Agent 操作：办理法国申根签证（3人家庭，支持拒签重办）
     def simulate
-      # 1. 查找测试用户（数据包中已创建）
+      # 1. 查找测试用户
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找法国
+      # 2. 随机选择联系人（张三、李四、王芳任选其一）
+      contact_names = ['张三', '李四', '王芳']
+      selected_contact_name = contact_names.sample
+      contact_passenger = user.passengers.find_by!(name: selected_contact_name, data_version: 0)
+      contact_address = user.addresses.find_by!(name: selected_contact_name, data_version: 0)
+    
+      # 3. 查找法国
       france = Country.find_by!(name: @country_name, data_version: 0)
     
-      # 3. 查找支持拒签重办和家庭申请的法国签证产品
+      # 4. 查找支持拒签重办和家庭申请的法国签证产品
       visa_products = VisaProduct.where(
         country_id: france.id,
         refused_reapply: true,
@@ -168,12 +216,15 @@ module V051V100
     
       raise "未找到符合条件的签证产品" if visa_products.empty?
     
-      # 4. 选择第一个符合条件的产品
+      # 5. 选择第一个符合条件的产品
       selected_product = visa_products.first
     
       raise "未找到可用的签证产品" unless selected_product
     
-      # 5. 创建签证订单
+      # 6. 拼接完整地址
+      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+    
+      # 7. 创建签证订单
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: selected_product.id,
@@ -182,12 +233,13 @@ module V051V100
         total_price: selected_product.price * @traveler_count,
         expected_date: Date.current + 45.days,  # 预计出行日期45天后
         delivery_method: 'express',
-        delivery_address: '杭州市西湖区文三路123号',
-        contact_name: '刘芳',
-        contact_phone: '13500135000',
+        delivery_address: full_address,
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         status: 'pending',
         insurance_selected: false,
-        insurance_price: 0
+        insurance_price: 0,
+        data_version: @data_version
       )
     
       # 返回操作信息

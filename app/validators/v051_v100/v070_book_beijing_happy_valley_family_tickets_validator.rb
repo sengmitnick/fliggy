@@ -20,18 +20,20 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要先搜索→识别票种→对比价格→创建2个订单
 # 
 # 评分标准:
-#   - 创建了2个订单（成人票+儿童票）(25分)
+#   - 创建了2个订单（成人票+儿童票）(20分)
 #   - 景点正确（北京欢乐谷）(15分)
 #   - 成人票数量正确（2张）(10分)
 #   - 儿童票数量正确（1张）(10分)
-#   - 游玩日期正确（3天后）(10分)
-#   - 选择了最便宜的供应商组合 (30分)
+#   - 游玩日期正确（3天后）(5分)
+#   - 联系人信息正确（张三电话）(10分)
+#   - 游客信息正确（张三、王芳、小明）(10分)
+#   - 选择了最便宜的供应商组合 (20分)
 module V051V100
   class V070BookBeijingHappyValleyFamilyTicketsValidator < BaseValidator
     self.validator_id = 'v070_book_beijing_happy_valley_family_tickets_validator'
     self.task_id = '0c17b98c-3602-4e84-9115-984ead6ebda4'
-    self.title = '预订3天后北京欢乐谷家庭套餐（2成人+1儿童，最便宜）'
-    self.description = '为1个家庭预订欢乐谷门票（2成人+1儿童），通过2个订单实现，选择最便宜的供应商'
+    self.title = '给张三一家预订3天后北京欢乐谷门票（张三、王芳、小明，最便宜）'
+    self.description = '为张三一家（张三、王芳、小明）预订欢乐谷门票，通过2个订单实现，选择最便宜的供应商'
     self.timeout_seconds = 240
   
     def prepare
@@ -39,6 +41,15 @@ module V051V100
       @visit_date = Date.current + 3.days
       @adult_count = 2
       @child_count = 1
+    
+      # 查询家庭成员（张三一家）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+      
+      @expected_contact_phone = @zhangsan.phone
+      @expected_passenger_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
     
       @attraction = Attraction.find_by(name: @attraction_name, data_version: 0)
       raise "未找到景点: #{@attraction_name}" unless @attraction
@@ -69,13 +80,14 @@ module V051V100
       end
     
       {
-        task: "请为1个家庭（2成人+1儿童）预订#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的门票，选择最便宜的供应商组合",
+        task: "请为张三一家（张三、王芳、小明）预订#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的门票，选择最便宜的供应商组合",
         attraction_name: @attraction_name,
         visit_date: @visit_date.to_s,
         date_description: "#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）",
+        family_members: "张三、王芳、小明",
         adult_count: @adult_count,
         child_count: @child_count,
-        hint: "系统不支持家庭套票，需要分别购买：2张成人票和1张儿童票。请对比供应商价格后选择最优惠的组合方案",
+        hint: "系统不支持家庭套票，需要分别购买：2张成人票（张三、王芳）和1张儿童票（小明）。请对比供应商价格后选择最优惠的组合方案",
         available_adult_tickets: @adult_tickets.count,
         available_child_tickets: @child_tickets.count
       }
@@ -83,11 +95,11 @@ module V051V100
   
     def verify
       # 断言1: 创建了成人票和儿童票订单
-      add_assertion "创建了成人票和儿童票订单", weight: 25 do
+      add_assertion "创建了成人票和儿童票订单", weight: 20 do
         # 查询当前会话的订单（按景点和 data_version 筛选）
         all_orders = TicketOrder
           .joins(ticket: :attraction)
-          .includes(:ticket)
+          .includes(ticket: :attraction)
           .where(tickets: { attractions: { name: @attraction_name } })
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -121,7 +133,7 @@ module V051V100
       end
     
       # 断言3: 游玩日期正确（3天后）
-      add_assertion "游玩日期正确（3天后，#{@visit_date}）", weight: 10 do
+      add_assertion "游玩日期正确（3天后，#{@visit_date}）", weight: 5 do
         # 筛选出日期正确的订单
         @correct_date_orders = @all_ticket_orders.select { |o| o.visit_date == @visit_date }
       
@@ -157,8 +169,32 @@ module V051V100
           "（来自#{@child_orders.size}个订单: #{@child_orders.map { |o| "#{o.quantity}张" }.join(' + ')}）"
       end
     
-      # 断言6: 选择了最优惠的供应商组合（核心评分项）
-      add_assertion "选择了最优惠的供应商组合", weight: 30 do
+      # 断言6: 联系人信息正确（张三 13800138000）
+      add_assertion "联系人信息正确（#{@expected_contact_phone}）", weight: 10 do
+        [@adult_orders, @child_orders].flatten.each do |order|
+          expect(order.contact_phone).to eq(@expected_contact_phone),
+            "联系人电话错误。期望: #{@expected_contact_phone}（张三），实际: #{order.contact_phone}"
+        end
+      end
+    
+      # 断言7: 游客信息正确（张三、王芳、小明）
+      add_assertion "游客信息正确（张三、王芳、小明）", weight: 10 do
+        # 收集所有订单的 passenger_ids
+        all_passenger_ids = (@adult_orders + @child_orders).flat_map { |o| o.passenger_ids || [] }.compact.uniq
+        
+        expect(all_passenger_ids).not_to be_empty,
+          "订单中未关联任何游客信息（passenger_ids 为空）"
+        
+        # 查询关联的游客
+        actual_passengers = Passenger.where(id: all_passenger_ids, data_version: 0)
+        actual_names = actual_passengers.pluck(:name).sort
+        
+        expect(actual_names).to match_array(@expected_passenger_names.sort),
+          "游客名单错误。期望: #{@expected_passenger_names.sort.join('、')}，实际: #{actual_names.join('、')}"
+      end
+    
+      # 断言8: 选择了最优惠的供应商组合（核心评分项）
+      add_assertion "选择了最优惠的供应商组合", weight: 20 do
         # 计算实际总价（只计算日期正确的成人票和儿童票订单）
         actual_total = @adult_orders.sum(&:total_price) + @child_orders.sum(&:total_price)
       
@@ -217,7 +253,9 @@ module V051V100
         child_count: @child_count,
         attraction_id: @attraction&.id,
         best_adult_price: @best_adult_price,
-        best_child_price: @best_child_price
+        best_child_price: @best_child_price,
+        expected_contact_phone: @expected_contact_phone,
+        expected_passenger_names: @expected_passenger_names
       }
     end
   
@@ -229,6 +267,8 @@ module V051V100
       @child_count = data['child_count']
       @best_adult_price = data['best_adult_price']
       @best_child_price = data['best_child_price']
+      @expected_contact_phone = data['expected_contact_phone']
+      @expected_passenger_names = data['expected_passenger_names']
       @attraction = Attraction.find_by(id: data['attraction_id']) if data['attraction_id']
     
       # 重新加载票种列表
@@ -251,6 +291,9 @@ module V051V100
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 1.5 获取家庭成员游客信息（使用 prepare 中的实例变量）
+      # @zhangsan, @wangfang, @xiaoming 已在 prepare 中查询
     
       # 2. 查找目标景点
       attraction = Attraction.find_by!(name: @attraction_name, data_version: 0)
@@ -297,30 +340,34 @@ module V051V100
       raise "未找到可用的成人票供应商" unless best_adult_supplier
       raise "未找到可用的儿童票供应商" unless best_child_supplier
     
-      # 6. 创建成人票订单（2张）
+      # 6. 创建成人票订单（2张，关联张三和王芳）
       adult_order = TicketOrder.create!(
         ticket_id: best_adult_supplier.ticket_id,
         supplier_id: best_adult_supplier.supplier_id,
         user_id: user.id,
-        contact_phone: '13800138000',
+        contact_phone: @expected_contact_phone,
+        passenger_ids: [@zhangsan.id, @wangfang.id],
         visit_date: @visit_date,
         quantity: @adult_count,
         total_price: best_adult_supplier.current_price * @adult_count,
         status: 'pending',
-        notes: '家庭套餐-成人票'
+        notes: '家庭套餐-成人票',
+        data_version: @data_version
       )
     
-      # 7. 创建儿童票订单（1张）
+      # 7. 创建儿童票订单（1张，关联小明）
       child_order = TicketOrder.create!(
         ticket_id: best_child_supplier.ticket_id,
         supplier_id: best_child_supplier.supplier_id,
         user_id: user.id,
-        contact_phone: '13800138000',
+        contact_phone: @expected_contact_phone,
+        passenger_ids: [@xiaoming.id],
         visit_date: @visit_date,
         quantity: @child_count,
         total_price: best_child_supplier.current_price * @child_count,
         status: 'pending',
-        notes: '家庭套餐-儿童票'
+        notes: '家庭套餐-儿童票',
+        data_version: @data_version
       )
     
       # 返回操作信息

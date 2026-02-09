@@ -107,13 +107,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建摄影服务订单
-      photography_activity = @photography_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '专业人像跟拍',
-        description: '资深摄影师全程跟拍，提供精修照片50张',
-        current_price: 680,
-        data_version: 0
-      )
+      photography_activity = @photography_activity
       
       ActivityOrder.create!(
         user: user,
@@ -127,13 +121,7 @@ module V301V350
       )
       
       # 2. 创建服装租赁+化妆造型订单
-      costume_activity = @costume_activity || AttractionActivity.create!(
-        attraction: @attraction,
-        name: '服装租赁+化妆造型',
-        description: '提供多套服装选择，专业化妆师造型设计',
-        current_price: 380,
-        data_version: 0
-      )
+      costume_activity = @costume_activity
       
       ActivityOrder.create!(
         user: user,

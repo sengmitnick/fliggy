@@ -7,11 +7,17 @@ module V051V100
   class V073BookChengduHappyValleyNightTicketValidator < BaseValidator
     self.validator_id = 'v073_book_chengdu_happy_valley_night_ticket_validator'
     self.task_id = 'aa530ff5-edb9-4be1-866c-1ede13516233'
-    self.title = '预订7天后深圳欢乐谷成人票（2张，最便宜）'
+    self.title = '给张三和李四预订7天后深圳欢乐谷成人票（最便宜）'
     self.description = '预订深圳欢乐谷成人票并选择最便宜供应商'
     self.timeout_seconds = 240
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      # 查询乘客信息
+      @passengers = user.passengers.where(data_version: 0).where(name: ['张三', '李四']).to_a
+      raise "未找到足够的乘客信息" if @passengers.size < 2
+      @contact_passenger = @passengers.first
+      
       @attraction_name = '深圳欢乐谷'
       @ticket_type = 'adult'
       @visit_date = Date.current + 7.days
@@ -69,13 +75,18 @@ module V051V100
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @ticket_order = TicketOrder.order(created_at: :desc).first
-        expect(@ticket_order).not_to be_nil, "未找到任何门票订单记录"
+        all_ticket_orders = TicketOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_ticket_orders).not_to be_empty, "未找到任何TicketOrder记录"
+        @ticket_order = all_ticket_orders.first
+        # Replaced by expect(all_ticket_orders).not_to be_empty above, "未找到任何门票订单记录"
       end
     
       return unless @ticket_order
     
-      add_assertion "景点正确（#{@attraction_name}）", weight: 20 do
+      add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
         ticket = @ticket_order.ticket
         attraction = ticket.attraction
       
@@ -83,19 +94,35 @@ module V051V100
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     
-      add_assertion "票种正确（成人票）", weight: 25 do
+      add_assertion "票种正确（成人票）", weight: 20 do
         ticket = @ticket_order.ticket
       
         expect(ticket.ticket_type).to eq(@ticket_type),
           "票种错误。期望: 成人票(adult), 实际: #{ticket.ticket_type}"
       end
     
-      add_assertion "游玩日期正确（7天后，#{@visit_date}）", weight: 10 do
+      add_assertion "游玩日期正确（7天后，#{@visit_date}）", weight: 5 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "游玩日期错误。期望: #{@visit_date}（7天后）, 实际: #{@ticket_order.visit_date}"
       end
     
-      add_assertion "选择了最便宜的供应商", weight: 25 do
+      add_assertion "联系电话正确（张三的电话）", weight: 10 do
+        expect(@ticket_order.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（张三），实际: #{@ticket_order.contact_phone}"
+      end
+    
+      add_assertion "乘客信息正确（张三和李四）", weight: 10 do
+        expect(@ticket_order.passenger_ids).to be_present, "未填写乘客信息"
+        expect(@ticket_order.passenger_ids.size).to eq(2),
+          "乘客数量错误。期望: 2位，实际: #{@ticket_order.passenger_ids&.size || 0}位"
+        
+        passenger_names = Passenger.where(id: @ticket_order.passenger_ids, data_version: 0).pluck(:name)
+        expected_names = ['张三', '李四']
+        expect(passenger_names.sort).to eq(expected_names.sort),
+          "乘客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
+      end
+    
+      add_assertion "选择了最便宜的供应商", weight: 20 do
         # 判断游玩日期是否为周末
         is_weekend = [0, 6].include?(@visit_date.wday)
         date_type_keyword = is_weekend ? '周末' : '平日'
@@ -205,16 +232,23 @@ module V051V100
     
       raise "未找到可用的成人票供应商" unless cheapest_supplier
     
+      # 查询乘客信息
+      passengers = user.passengers.where(data_version: 0).where(name: ['张三', '李四']).to_a
+      raise "未找到足够的乘客信息" if passengers.size < 2
+      contact_passenger = passengers.first
+      
       TicketOrder.create!(
         ticket_id: cheapest_supplier.ticket_id,
         supplier_id: cheapest_supplier.supplier_id,
         user_id: user.id,
-        contact_phone: '13800138000',
+        contact_phone: contact_passenger.phone,
+        passenger_ids: passengers.map(&:id),
         visit_date: @visit_date,
         quantity: @quantity,
         total_price: cheapest_supplier.current_price * @quantity,
         status: 'pending',
-        notes: '成人票订单'
+        notes: '成人票订单',
+        data_version: @data_version
       )
     end
     end

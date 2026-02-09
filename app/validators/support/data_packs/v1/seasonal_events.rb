@@ -434,28 +434,22 @@ end
 HotelRoom.insert_all(hotel_rooms_data) if hotel_rooms_data.any?
 puts "    ✓ 创建了 #{hotel_rooms_data.size} 个房型"
 
-# ==================== 航班数据（暑期高峰）====================
-puts "  创建暑期高峰航班数据..."
+# ==================== 航班数据（亲子游）====================
+puts "  创建亲子游航班数据..."
 
-# 为特定日期（7月15日和7月20日）创建北京↔三亚航班（支持v319）
-current_year = Date.today.year
-july_15 = Date.new(current_year, 7, 15)
-july_20 = Date.new(current_year, 7, 20)
-
-if july_15 < Date.today
-  july_15 = Date.new(current_year + 1, 7, 15)
-  july_20 = Date.new(current_year + 1, 7, 20)
-end
+# 为相对日期（15天后出发，20天后返回）创建北京↔三亚航班（支持v319）
+departure_day_15 = Date.today + 15.days
+return_day_20 = Date.today + 20.days
 
 flights_data = []
 
-# 7月15日：北京→三亚 (去程)
-base_datetime = july_15.to_time.in_time_zone
+# 15天后：北京→三亚 (去程)
+base_datetime_15 = departure_day_15.to_time.in_time_zone
 flights_data << {
   departure_city: "北京",
   destination_city: "三亚",
-  departure_time: base_datetime.change(hour: 8, min: 0),
-  arrival_time: base_datetime.change(hour: 12, min: 0),
+  departure_time: base_datetime_15.change(hour: 8, min: 0),
+  arrival_time: base_datetime_15.change(hour: 12, min: 0),
   departure_airport: "首都T3",
   arrival_airport: "凤凰T2",
   airline: "中国国航",
@@ -465,19 +459,19 @@ flights_data << {
   discount_price: 200.0,
   seat_class: "economy",
   available_seats: 150,
-  flight_date: july_15,
+  flight_date: departure_day_15,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
 }
 
-# 7月20日：三亚→北京 (返程)
-base_datetime_return = july_20.to_time.in_time_zone
+# 20天后：三亚→北京 (返程)
+base_datetime_20 = return_day_20.to_time.in_time_zone
 flights_data << {
   departure_city: "三亚",
   destination_city: "北京",
-  departure_time: base_datetime_return.change(hour: 14, min: 0),
-  arrival_time: base_datetime_return.change(hour: 18, min: 0),
+  departure_time: base_datetime_20.change(hour: 14, min: 0),
+  arrival_time: base_datetime_20.change(hour: 18, min: 0),
   departure_airport: "凤凰T2",
   arrival_airport: "首都T3",
   airline: "中国国航",
@@ -487,14 +481,14 @@ flights_data << {
   discount_price: 150.0,
   seat_class: "economy",
   available_seats: 140,
-  flight_date: july_20,
+  flight_date: return_day_20,
   data_version: 0,
   created_at: timestamp,
   updated_at: timestamp
 }
 
 Flight.insert_all(flights_data)
-puts "    ✓ 创建了 #{flights_data.size} 个暑期航班"
+puts "    ✓ 创建了 #{flights_data.size} 个亲子游航班"
 
 # ==================== 门票供应商关联数据 ====================
 puts "  创建门票供应商关联数据..."

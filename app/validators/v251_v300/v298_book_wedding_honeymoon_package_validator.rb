@@ -17,7 +17,7 @@ module V251V300
   class V298BookWeddingHoneymoonPackageValidator < BaseValidator
     self.validator_id = 'v298_book_wedding_honeymoon_package_validator'
     self.task_id = '2202ed38-54cf-48f7-8fe6-190608cc46c7'
-    self.title = '预订婚礼蜜月套餐'
+    self.title = '预订10天后婚礼蜜月套餐（2人）'
     self.description = '用户预订婚礼蜜月套餐(浪漫酒店+蜜月游+婚拍服务)'
     self.timeout_seconds = 300
     

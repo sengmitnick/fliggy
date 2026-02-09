@@ -23,7 +23,7 @@ module V151V200
   class V186BookBudgetFlightAndHostelUnder500Validator < BaseValidator
     self.validator_id = 'v186_book_budget_flight_and_hostel_under_500_validator'
     self.task_id = '157ef268-c392-49fc-b869-c11412299bca'
-    self.title = '预订预算航班和青旅组合'
+    self.title = '预订明天预算航班和青旅组合（总预算≤500元，1人）'
     self.description = '学生出行，需要预订航班+青旅，总预算≤500元'
     self.timeout_seconds = 300
   
@@ -106,22 +106,7 @@ module V151V200
       # 创建酒店订单（选最便宜的房间）
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '经济单人间',
-          bed_type: 'single',
-          area: 12.0,
-          max_guests: 1,
-          price: 80.0,
-          original_price: 120.0,
-          has_window: true,
-          available_rooms: 10,
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -182,11 +167,17 @@ module V151V200
           "酒店价格过高。期望: ≤#{@max_hotel_price.to_i}元, 实际: #{hotel_price}元"
       end
       
-      # 断言5: 总价≤500元 (30%)
-      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 30 do
+      # 断言5: 总价≤500元 (25%)
+      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 25 do
         total_price = @flight_booking.total_price + @hotel_booking.total_price
         expect(total_price).to be <= @max_total_budget,
           "总价超出预算。期望: ≤#{@max_total_budget.to_i}元, 实际: #{total_price}元（航班#{@flight_booking.total_price}+酒店#{@hotel_booking.total_price}）"
+      end
+      
+      # 断言6: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     end
     

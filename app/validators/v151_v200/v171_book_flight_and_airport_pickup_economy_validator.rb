@@ -37,7 +37,7 @@ module V151V200
   class V171BookFlightAndAirportPickupEconomyValidator < BaseValidator
     self.validator_id = 'v171_book_flight_and_airport_pickup_economy_validator'
     self.task_id = 'a8f3d2e1-9b5c-4a7d-8e6f-1c2d3e4f5a6b'
-    self.title = '订购机票后预订接机服务（经济5座）'
+    self.title = '订觭3天后机票后预订接机服务（经济5座）'
     self.description = '订购北京到上海的机票，到达浦东T1后预订接机到外滩，选择经济5座'
     self.timeout_seconds = 300
   

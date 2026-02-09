@@ -26,11 +26,14 @@ require_relative '../base_validator'
 #   ❌ 不能一次性提供：需要先理解航班→确定机场→选地址→对比价格→预订
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 服务类型正确（airport_pickup）(15分)
-#   - 选择了车辆类型 (15分)
-#   - 选择了最便宜的套餐 (30分)
-#   - 订单价格正确 (20分)
+#   - 订单已创建 (15分)
+#   - 服务类型正确（airport_pickup）(10分)
+#   - 上车点正确（虹桥T2）(10分)
+#   - 下车点正确（上海站）(10分)
+#   - 选择了车辆类型 (10分)
+#   - 乘客信息正确（姓名、电话）(10分)
+#   - 选择了最便宜的套餐 (25分)
+#   - 订单价格正确 (10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -44,8 +47,8 @@ module V051V100
   class V051BookTransferServiceValidator < BaseValidator
     self.validator_id = 'v051_book_transfer_service_validator'
     self.task_id = 'fa751c19-28f4-4c7e-abdc-76fbef90ca1f'
-    self.title = '预订虹桥机场接机送到上海火车站（北京→上海）'
-    self.description = '后天北京飞上海，虹桥T2机场接机送到上海火车站，选择最便宜的套餐'
+    self.title = '帮张三预订后天北京飞上海的接机服务（虹桥T2到上海火车站，选最便宜的）'
+    self.description = '后天北京飞上海，在虹桥T2机场接机，送到上海火车站，选择最便宜的套餐'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -64,6 +67,11 @@ module V051V100
       @location_from = @arrival_airport # 上车点 = 虹桥T2
       @location_to = @destination_address # 下车点 = 上海站
       @pickup_datetime = Date.current + 2.days + 10.hours # 后天上午10点（预计落地时间）
+    
+      # 乘客信息（任务标题中明确指定：张三）
+      @passenger_name = '张三'
+      @expected_passenger = User.find_by!(email: 'demo@travel01.com', data_version: 0).passengers.find_by!(name: '张三', data_version: 0)
+      @expected_phone = @expected_passenger.phone
     
       # 查找所有可用的接送机套餐（注意：查询基线数据 data_version=0）
       @available_packages = TransferPackage.where(
@@ -91,29 +99,52 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 20 do
-        @transfer = Transfer.order(created_at: :desc).first
-        expect(@transfer).not_to be_nil, "未找到任何接送机订单记录"
+      # 断言1: 必须有订单创建（使用data_version隔离会话）
+      add_assertion "订单已创建", weight: 15 do
+        @transfer = Transfer
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
+        expect(@transfer).not_to be_nil, "未找到任何接送机订单记录（data_version: #{@data_version}）"
       end
     
       return unless @transfer # 如果没有订单，后续断言无法继续
     
       # 断言2: 服务类型正确
-      add_assertion "服务类型正确（airport_pickup）", weight: 15 do
+      add_assertion "服务类型正确（airport_pickup）", weight: 10 do
         actual_type = @transfer.transfer_type
         expect(actual_type).to eq(@transfer_type),
           "服务类型错误。期望: #{@transfer_type}, 实际: #{actual_type}"
       end
     
-      # 断言3: 选择了车辆类型
-      add_assertion "选择了车辆类型", weight: 15 do
+      # 断言3: 上车点正确
+      add_assertion "上车点正确（#{@location_from}）", weight: 10 do
+        expect(@transfer.location_from).to eq(@location_from),
+          "上车点错误。期望: #{@location_from}, 实际: #{@transfer.location_from}"
+      end
+    
+      # 断言4: 下车点正确
+      add_assertion "下车点正确（#{@location_to}）", weight: 10 do
+        expect(@transfer.location_to).to eq(@location_to),
+          "下车点错误。期望: #{@location_to}, 实际: #{@transfer.location_to}"
+      end
+    
+      # 断言5: 选择了车辆类型
+      add_assertion "选择了车辆类型", weight: 10 do
         expect(@transfer.transfer_package_id).not_to be_nil, "未选择车辆套餐"
         expect(@transfer.transfer_package).not_to be_nil, "车辆套餐记录不存在"
       end
     
-      # 断言4: 选择了最便宜的套餐（核心评分项）
-      add_assertion "选择了最便宜的套餐", weight: 30 do
+      # 断言6: 乘客信息正确（姓名、电话）
+      add_assertion "乘客信息正确（姓名、电话）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@passenger_name),
+          "乘客姓名错误。期望: #{@passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_phone),
+          "乘客电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
+      end
+    
+      # 断言7: 选择了最便宜的套餐（核心评分项）
+      add_assertion "选择了最便宜的套餐", weight: 25 do
         # 获取所有可用套餐
         all_packages = TransferPackage.where(
           is_active: true,
@@ -131,8 +162,8 @@ module V051V100
           "实际选择: #{@transfer.transfer_package.name} #{@transfer.transfer_package.category_name}（#{actual_price}元）"
       end
     
-      # 断言5: 订单价格正确
-      add_assertion "订单价格正确", weight: 20 do
+      # 断言8: 订单价格正确
+      add_assertion "订单价格正确", weight: 10 do
         expected_price = @transfer.transfer_package.price
         actual_price = @transfer.total_price
       
@@ -155,7 +186,9 @@ module V051V100
         flight_date: @flight_date,
         location_from: @location_from,
         location_to: @location_to,
-        pickup_datetime: @pickup_datetime.to_s
+        pickup_datetime: @pickup_datetime.to_s,
+        passenger_name: @passenger_name,
+        expected_phone: @expected_phone
       }
     end
   
@@ -171,6 +204,8 @@ module V051V100
       @location_from = data['location_from']
       @location_to = data['location_to']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
+      @passenger_name = data['passenger_name']
+      @expected_phone = data['expected_phone']
     
       # 重新加载可用套餐列表
       @available_packages = TransferPackage.where(
@@ -206,12 +241,13 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime,
-        passenger_name: '张三',
-        passenger_phone: '13800138000',
+        passenger_name: @passenger_name,
+        passenger_phone: @expected_phone,
         total_price: cheapest_package.price,
         discount_amount: 0,
         status: 'pending',
-        driver_status: 'pending'
+        driver_status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

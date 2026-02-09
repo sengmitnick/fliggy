@@ -10,11 +10,12 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (15分)
-#   - 订单类型正确（SIM卡） (15分)
-#   - 地区正确（日本） (15分)
-#   - 有效期正确（5天） (15分)
-#   - 流量正确（共10GB） (15分)
-#   - 购买数量正确（1张） (25分)
+#   - 订单类型正确（SIM卡） (10分)
+#   - 地区正确（日本） (10分)
+#   - 有效期正确（5天） (10分)
+#   - 流量正确（共10GB） (10分)
+#   - 购买数量正确（1张） (20分)
+#   - 收货地址正确（张三的北京地址） (25分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -28,8 +29,8 @@ module V051V100
   class V054BookJapanSim5dayValidator < BaseValidator
     self.validator_id = 'v054_book_japan_sim_5day_validator'
     self.task_id = 'f3339f0c-cc3f-45bf-9565-315994f07e25'
-    self.title = '购买日本5天共10GB流量SIM卡（数量1张）'
-    self.description = '搜索日本地区的SIM卡，找到5天有效期且总流量为共10GB的产品并购买1张'
+    self.title = '帮张三买日本5天共10GB流量SIM卡（买1张）'
+    self.description = '张三要去日本5天，帮他买一张5天有效期、共10GB流量的SIM卡'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -80,35 +81,51 @@ module V051V100
       return unless @order # 如果没有订单，后续断言无法继续
     
       # 断言2: 订单类型正确（SIM卡）
-      add_assertion "订单类型正确（SIM卡）", weight: 15 do
+      add_assertion "订单类型正确（SIM卡）", weight: 10 do
         expect(@order.order_type).to eq('sim_card'),
           "订单类型不正确。预期: sim_card, 实际: #{@order.order_type}"
       end
     
       # 断言3: 地区正确
-      add_assertion "地区正确（日本）", weight: 15 do
+      add_assertion "地区正确（日本）", weight: 10 do
         expect(@order.region).to eq(@region),
           "地区不正确。预期: #{@region}, 实际: #{@order.region}"
       end
     
       # 断言4: 有效期正确（5天）
-      add_assertion "有效期正确（5天）", weight: 15 do
+      add_assertion "有效期正确（5天）", weight: 10 do
         sim_card = @order.orderable
         expect(sim_card.validity_days).to eq(@validity_days),
           "有效期不正确。预期: #{@validity_days}天, 实际: #{sim_card.validity_days}天"
       end
     
       # 断言5: 流量正确（包含"共10GB"关键词）
-      add_assertion "流量正确（共10GB）", weight: 15 do
+      add_assertion "流量正确（共10GB）", weight: 10 do
         sim_card = @order.orderable
         expect(sim_card.data_limit).to include(@data_limit_keyword),
           "流量不符合要求。预期包含: #{@data_limit_keyword}, 实际: #{sim_card.data_limit}"
       end
     
       # 断言6: 购买数量正确（1张）
-      add_assertion "购买数量正确（1张）", weight: 25 do
+      add_assertion "购买数量正确（1张）", weight: 20 do
         expect(@order.quantity).to eq(@quantity),
           "购买数量不正确。预期: #{@quantity}张, 实际: #{@order.quantity}张"
+      end
+    
+      # 断言7: 收货地址正确（张三的北京地址）
+      add_assertion "收货地址正确（张三的北京地址）", weight: 25 do
+        expect(@order.delivery_method).to eq('mail'),
+          "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
+        
+        contact_info = JSON.parse(@order.contact_info)
+        expect(contact_info['name']).to eq('张三'),
+          "收货人姓名错误。期望: 张三, 实际: #{contact_info['name']}"
+        expect(contact_info['phone']).to eq('13800138000'),
+          "收货电话错误。期望: 13800138000, 实际: #{contact_info['phone']}"
+        expect(contact_info['address']).to include('北京'),
+          "收货地址错误。期望包含: 北京（张三的默认地址），实际: #{contact_info['address']}"
+        expect(contact_info['address']).to include('朝阳区'),
+          "收货地址错误。期望包含: 朝阳区（张三的默认地址），实际: #{contact_info['address']}"
       end
     end
   
@@ -139,7 +156,10 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找符合条件的SIM卡
+      # 2. 查找张三的默认收货地址（电话卡必须邮寄）
+      default_address = user.addresses.find_by!(is_default: true, data_version: 0)
+    
+      # 3. 查找符合条件的SIM卡
       matching_sim_cards = InternetSimCard.where(
         region: @region,
         validity_days: @validity_days,
@@ -149,7 +169,8 @@ module V051V100
       # 随机选择一个
       target_sim_card = matching_sim_cards.sample
     
-      # 3. 创建订单（固定参数）
+      # 4. 创建订单（使用张三的真实地址）
+      full_address = "#{default_address.province}#{default_address.city}#{default_address.district}#{default_address.detail}"
       order = InternetOrder.create!(
         orderable: target_sim_card,
         user_id: user.id,
@@ -159,12 +180,16 @@ module V051V100
         rental_info: { validity_days: @validity_days }.to_json,
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { name: '张三', phone: '13800138000', address: '测试地址' }.to_json,
+        contact_info: {
+          name: default_address.name,
+          phone: default_address.phone,
+          address: full_address
+        }.to_json,
         status: 'pending',
         data_version: @data_version
       )
     
-      # 返回操作信息
+      # 5. 返回操作信息
       {
         action: 'create_internet_order',
         order_id: order.id,
@@ -172,6 +197,8 @@ module V051V100
         validity_days: target_sim_card.validity_days,
         data_limit: target_sim_card.data_limit,
         price: target_sim_card.price,
+        delivery_address: full_address,
+        recipient: default_address.name,
         user_email: user.email
       }
     end

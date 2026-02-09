@@ -22,7 +22,7 @@ module V101V150
   class V110MembershipMallPurchaseValidator < BaseValidator
     self.validator_id = 'v110_membership_mall_purchase_validator'
     self.task_id = 'd00512b3-662a-4fb1-bd9f-30b245119d85'
-    self.title = '会员商城购买商品（限定50里程预算）'
+    self.title = '会员商城北京购买商品（限定50里程预算，1个）'
     self.description = '在会员商城自主选择热门商品，使用里程+现金混合支付，里程不超过50'
     self.timeout_seconds = 300
   

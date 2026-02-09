@@ -37,7 +37,7 @@ module V151V200
   class V172BookFlightAndAirportPickupComfortValidator < BaseValidator
     self.validator_id = 'v172_book_flight_and_airport_pickup_comfort_validator'
     self.task_id = '3c8e7f2a-4d1b-9a6c-5e8f-7b3d2a1c4e5f'
-    self.title = '订购机票后预订接机服务（舒适5座）'
+    self.title = '订觭3天后机票后预订接机服务（舒适5座）'
     self.description = '订购广州到北京的机票，到达首都T3后预订接机到国贸CBD，选择舒适5座'
     self.timeout_seconds = 300
   

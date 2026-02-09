@@ -33,7 +33,7 @@ module V151V200
   class V176BookEarlyMorningFlightAndAirportHotelValidator < BaseValidator
     self.validator_id = 'v176_book_early_morning_flight_and_airport_hotel_validator'
     self.task_id = '1bf22b0b-0ed2-4d40-a704-15a738206a48'
-    self.title = '预订凌晨航班和机场酒店'
+    self.title = '预订3天后凌晨航班和机场酒店'
     self.description = '用户需要预订凌晨5-7点的航班，并在前一晚入住机场附近酒店'
     self.timeout_seconds = 300
   
@@ -110,22 +110,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 300.0,
-          original_price: 400.0,
-          amenities: ['免费WiFi', '空调', '热水'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

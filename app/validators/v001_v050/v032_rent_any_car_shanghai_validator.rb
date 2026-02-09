@@ -24,7 +24,7 @@ module V001V050
   class V032RentAnyCarShanghaiValidator < BaseValidator
     self.validator_id = 'v032_rent_any_car_shanghai_validator'
     self.task_id = '1607085c-0377-4907-96a1-58b0b2a1791d'
-    self.title = '租赁明天上海任意车辆（1天）'
+    self.title = '帮张三租明天上海的车（1天）'
     self.description = '搜索上海的租车服务，选择任意一辆车并租赁1天'
     self.timeout_seconds = 240
   
@@ -36,7 +36,7 @@ module V001V050
       available_cars = Car.where(location: @location, data_version: 0)
     
       {
-        task: "请租赁一辆明天在#{@location}取车的任意车辆（租期1天）",
+        task: "帮张三租一辆明天在#{@location}取车的车（租期1天）",
         location: @location,
         rental_days: @rental_days,
         pickup_date: @pickup_date.to_s,
@@ -48,8 +48,13 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 30 do
-        @order = CarOrder.order(created_at: :desc).first
-        expect(@order).not_to be_nil, "未找到任何租车订单记录"
+        all_orders = CarOrder
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_orders).not_to be_empty, "未找到任何租车订单记录"
+        @order = all_orders.first
       end
     
       return unless @order
@@ -65,13 +70,22 @@ module V001V050
           "取车日期不正确。期望: #{@pickup_date}, 实际: #{pickup_date}"
       end
     
-      add_assertion "租赁天数正确（1天）", weight: 20 do
+      add_assertion "租赁天数正确（1天）", weight: 10 do
         return_date = @order.return_datetime.to_date
         pickup_date = @order.pickup_datetime.to_date
         actual_days = (return_date - pickup_date).to_i + 1
       
         expect(actual_days).to eq(@rental_days),
           "租赁天数不正确。期望: #{@rental_days}天, 实际: #{actual_days}天"
+      end
+    
+      add_assertion "驾驶人信息正确（张三 13800138000）", weight: 10 do
+        expect(@order.driver_name).to eq('张三'),
+          "驾驶人姓名错误。期望: 张三（demo_user数据）, 实际: #{@order.driver_name}"
+        expect(@order.contact_phone).to eq('13800138000'),
+          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@order.contact_phone}"
+        expect(@order.driver_id_number).to eq('110101199001011234'),
+          "身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{@order.driver_id_number}"
       end
     end
   
@@ -89,6 +103,7 @@ module V001V050
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       target_car = Car.where(location: @location, data_version: 0).sample
     
@@ -99,14 +114,15 @@ module V001V050
       CarOrder.create!(
         car_id: target_car.id,
         user_id: user.id,
-        driver_name: '张三',
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: passenger.name,
+        driver_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         pickup_datetime: pickup_datetime,
         return_datetime: return_datetime,
         pickup_location: target_car.pickup_location,
         status: 'pending',
-        total_price: total_price
+        total_price: total_price,
+        data_version: @data_version
       )
     
       { action: 'create_car_order', car_model: "#{target_car.brand} #{target_car.car_model}" }

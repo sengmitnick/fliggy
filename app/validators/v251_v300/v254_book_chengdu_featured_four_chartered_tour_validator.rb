@@ -14,7 +14,7 @@ module V251V300
   class V254BookChengduFeaturedFourCharteredTourValidator < BaseValidator
     self.validator_id = 'v254_book_chengdu_featured_four_chartered_tour_validator'
     self.task_id = 'e82f3b3f-68f5-4d9e-9f0f-e454fd93ad36'
-    self.title = '预订成都精华四景游（舒适7座）- 验证出发日期、包车时长6小时、订单完整性'
+    self.title = '预订成都精华四景游（10天后出发，舒适7座）- 验证出发日期、包车时长6小时、订单完整性'
     self.description = '预订成都精华四景包车路线，选择舒适7座车型，6小时服务。验证出发日期（10天后）、包车时长（6小时）、车型座位数、订单信息完整性。'
     self.timeout_seconds = 240
   

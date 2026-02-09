@@ -9,7 +9,7 @@ module V151V200
   class V167BookOutboundFlightReturnTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v167_book_outbound_flight_return_train_and_hotel_validator'
     self.task_id = 'e7f8a9b0-1c2d-3e4f-5a6b-7c8d9e0f1a2b'
-    self.title = '预订去程航班+返程火车+酒店（北京→上海→北京，2晚）'
+    self.title = '预订明天去程航班+返程火车+酒店（北京→上海→北京，2晚，1人）'
     self.description = '预订明天北京到上海的航班，预订第4天上海回北京的火车，并预订上海酒店2晚'
     self.timeout_seconds = 300
 
@@ -84,22 +84,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 400.0,
-          original_price: 500.0,
-          amenities: ['免费WiFi', '空调', '热水'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -196,9 +181,15 @@ module V151V200
       return if @hotel_booking.nil?
       
       # 断言6: 酒店入住日期正确
-      add_assertion "酒店入住日期正确（航班当天）", weight: 15 do
+      add_assertion "酒店入住日期正确（航班当天）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      # 断言7: 酒店退房日期正确
+      add_assertion "酒店退房日期正确（住#{@nights}晚）", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}（住#{@nights}晚）, 实际: #{@hotel_booking.check_out_date}"
       end
     end
   end

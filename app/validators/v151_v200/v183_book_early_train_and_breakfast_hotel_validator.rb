@@ -24,7 +24,7 @@ module V151V200
   class V183BookEarlyTrainAndBreakfastHotelValidator < BaseValidator
     self.validator_id = 'v183_book_early_train_and_breakfast_hotel_validator'
     self.task_id = '2f272b8e-e252-4a44-82fc-bb22b88361f7'
-    self.title = '预订早班火车和含早餐酒店'
+    self.title = '预订明天早班火车和含早餐酒店'
     self.description = '用户需要预订早班火车（6-8点出发），并预订前一晚含早餐的酒店'
     self.timeout_seconds = 300
   
@@ -41,14 +41,15 @@ module V151V200
       
       expect(@available_trains).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}早班火车（6-8点）"
       
-      # 查找北京的酒店
+      # 查找北京的4星级以上酒店（含早餐房型）
       @available_hotels = Hotel
         .where("city LIKE ?", "%#{@departure_city}%")
+        .where("star_level >= ?", 4)
         .where(data_version: 0)
         .limit(20)
         .to_a
       
-      expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
+      expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的4星级以上酒店"
       
       @hotel_checkin_date = @train_date - 1.day  # 前一晚入住
       @hotel_checkout_date = @train_date  # 火车当天退房
@@ -93,22 +94,7 @@ module V151V200
       # 创建酒店订单（含早餐）
       hotel = @available_hotels.first
       # 优先查找含早餐的房型
-      room = hotel.hotel_rooms.where(data_version: 0).where("room_type LIKE ?", "%早%").order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          room_type: '标准双人间（含早）',
-          bed_type: 'double',
-          area: 25.0,
-          max_guests: 2,
-          price: 350.0,
-          original_price: 450.0,
-          has_window: true,
-          available_rooms: 10,
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0).where("room_type LIKE ?", "%早%").order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,
@@ -172,13 +158,19 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住前一晚 (15%)
-      add_assertion "酒店入住前一晚", weight: 15 do
+      # 断言5: 酒店入住前一晚 (10%)
+      add_assertion "酒店入住前一晚", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车前一晚）, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      # 断言6: 酒店含早餐 (5%)
+      # 断言7: 酒店退房日期正确 (5%)
+      add_assertion "酒店退房日期正确", weight: 5 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}（火车当天早上）, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言8: 酒店含早餐 (5%)
       add_assertion "酒店含早餐", weight: 5 do
         room = @hotel_booking.hotel_room
         expect(room.room_type).to match(/早/),

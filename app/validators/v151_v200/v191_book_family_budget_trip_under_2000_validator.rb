@@ -18,7 +18,7 @@ module V151V200
   class V191BookFamilyBudgetTripUnder2000Validator < BaseValidator
     self.validator_id = 'v191_book_family_budget_trip_under_2000_validator'
     self.task_id = 'e9100569-2f92-49f6-9c56-2eaa58616ddc'
-    self.title = '预订2大1小家庭出行，总预算≤2000元'
+    self.title = '预订3天后2大1小家庭出行，总预算≤2000元（2个成人票+1个儿童票）'
     self.description = '预订2大1小家庭出行，总预算≤2000元'
     self.timeout_seconds = 300
     

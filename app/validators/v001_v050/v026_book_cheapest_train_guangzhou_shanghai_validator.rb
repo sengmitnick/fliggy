@@ -25,7 +25,7 @@ module V001V050
   class V026BookCheapestTrainGuangzhouShanghaiValidator < BaseValidator
     self.validator_id = 'v026_book_cheapest_train_guangzhou_shanghai_validator'
     self.task_id = '59234a60-b49c-4058-9813-7383c55efeb4'
-    self.title = '预订明天广州到上海最便宜的高铁（二等座）'
+    self.title = '给张三订明天广州到上海最便宜的高铁（二等座）'
     self.description = '在明天的车次中找到二等座价格最低的高铁并完成预订'
     self.timeout_seconds = 240
   
@@ -49,7 +49,7 @@ module V001V050
       @lowest_price = train_prices.map { |tp| tp[:price] }.min
     
       {
-        task: "请预订一张明天从#{@origin}到#{@destination}最便宜的高铁票（二等座）",
+        task: "请给张三预订一张明天从#{@origin}到#{@destination}最便宜的高铁票（二等座）",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,
@@ -62,8 +62,13 @@ module V001V050
   
     def verify
       add_assertion "订单已创建", weight: 20 do
-        @booking = TrainBooking.order(created_at: :desc).first
-        expect(@booking).not_to be_nil, "未找到任何火车票订单记录"
+        all_train_bookings = TrainBooking
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .to_a
+        expect(all_train_bookings).not_to be_empty, "未找到任何TrainBooking记录"
+        @booking = all_train_bookings.first
+        # Replaced by expect(all_train_bookings).not_to be_empty above, "未找到任何火车票订单记录"
       end
     
       return unless @booking
@@ -84,7 +89,8 @@ module V001V050
       add_assertion "选择了最便宜的车次", weight: 30 do
         all_trains = Train.where(
           departure_city: @origin,
-          arrival_city: @destination
+          arrival_city: @destination,
+          data_version: 0
         ).where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", @target_date)
       
         train_prices = all_trains.map do |train|
@@ -99,8 +105,16 @@ module V001V050
           "未选择最便宜车次。最低价: #{lowest_price}元, 实际选择: #{booked_seat.price}元"
       end
     
-      add_assertion "座位类型正确（二等座）", weight: 10 do
+      add_assertion "座位类型正确（二等座）", weight: 5 do
         expect(@booking.seat_type).to eq(@seat_type)
+      end
+    
+      # 断言6: 乘客信息正确（来自demo_user）
+      add_assertion "乘客信息正确（张三 110101199001011234）", weight: 5 do
+        expect(@booking.passenger_name).to eq('张三'),
+          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq('110101199001011234'),
+          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
       end
     end
   

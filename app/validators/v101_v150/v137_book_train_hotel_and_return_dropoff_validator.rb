@@ -6,7 +6,7 @@ module V101V150
   class V137BookTrainHotelAndReturnDropoffValidator < BaseValidator
     self.validator_id = 'v137_book_train_hotel_and_return_dropoff_validator'
     self.task_id = 'd7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f3a'
-    self.title = '预订火车票+酒店+返程送站服务'
+    self.title = '预订后天火车票+酒店+返程送站服务（1人）'
     self.description = '预订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
     self.timeout_seconds = 300
 

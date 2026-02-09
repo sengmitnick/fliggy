@@ -39,7 +39,7 @@ module V051V100
   class V098InstantBookHotelPackageWithDatesValidator < BaseValidator
     self.validator_id = 'v098_instant_book_hotel_package_with_dates_validator'
     self.task_id = '89f42d1c-3e8b-4a9f-b2c1-7d5e9a6f8c3a'
-    self.title = '立即预约上海地区酒店套餐（2晚，含早餐，指定入住日期）'
+    self.title = '立即预约明天上海地区酒店套餐（2晚，含早餐）'
     self.description = '需要搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
     self.timeout_seconds = 300
   

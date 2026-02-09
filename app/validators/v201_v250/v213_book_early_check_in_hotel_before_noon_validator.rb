@@ -18,7 +18,7 @@ module V201V250
   class V213BookEarlyCheckInHotelBeforeNoonValidator < BaseValidator
     self.validator_id = 'v213_book_early_check_in_hotel_before_noon_validator'
     self.task_id = '2fd354f7-3f3f-4f6f-ff6f-7f9a0b1c2d3f'
-    self.title = '预订航班+酒店早入住（12:00前）'
+    self.title = '预订明天航班+酒店早入住（12:00前）'
     self.description = '用户需要预订明天早上航班到杭州+酒店12:00前提前入住'
     self.timeout_seconds = 300
     

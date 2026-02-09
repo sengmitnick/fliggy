@@ -9,7 +9,7 @@ module V151V200
   class V163BookRoundTripFlightAndHotelValidator < BaseValidator
     self.validator_id = 'v163_book_round_trip_flight_and_hotel_validator'
     self.task_id = 'a3b4c5d6-7e8f-9a0b-1c2d-3e4f5a6b7c8d'
-    self.title = '预订往返航班并预订酒店住宿（北京⇄上海，3晚）'
+    self.title = '预订明天往返航班并预订酒店住宿（北京⇄上海，3晚）'
     self.description = '预订后天北京到上海的往返航班（去程后天，返程第5天），并预订上海酒店3晚住宿'
     self.timeout_seconds = 300
 
@@ -81,22 +81,7 @@ module V151V200
       # 创建酒店订单
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
-      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
-      
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: hotel.id,
-          name: '标准双人间',
-          size: 25.0,
-          bed_type: 'double',
-          price: 400.0,
-          original_price: 500.0,
-          amenities: ['免费WiFi', '空调', '热水'].to_json,
-          breakfast_included: true,
-          cancellation_policy: '免费取消',
-          data_version: 0
-        )
-      end
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       HotelBooking.create!(
         user: user,

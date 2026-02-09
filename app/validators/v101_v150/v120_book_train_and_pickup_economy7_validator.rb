@@ -37,7 +37,7 @@ module V101V150
   class V120BookTrainAndPickupEconomy7Validator < BaseValidator
     self.validator_id = 'v120_book_train_and_pickup_economy7_validator'
     self.task_id = '97534ade-23a0-4a65-aeeb-023d90721c96'
-    self.title = '订购火车票后预订接站服务（经济7座，多人出行）'
+    self.title = '订购3天后火车票后预订接站服务（经济7座，多人出行）'
     self.description = '家庭5人出游，订购重庆到成都东站的火车，到达后预订接站到春熙路，选择经济7座'
     self.timeout_seconds = 300
   
