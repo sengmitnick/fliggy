@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例119: 订购火车票后预订接站服务（高铁）
+# 验证用例119: 给李四订购火车票后预订接站服务（高铁，1人）
 #
 # 任务描述:
 #   用户订了上海到杭州的高铁，到达杭州东站（下午13:10到达），需要接站到西湖风景区。
@@ -20,11 +20,12 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了火车订单和接站订单 (20分)
 #   - 火车路线正确（上海→杭州）(10分)
+#   - 火车乘客信息正确（李四）(10分)
 #   - 接站起点正确（杭州东站）(20分)
 #   - 接站终点正确（西湖风景区）(10分)
 #   - 接送时间正确（下午，火车到达后15分钟）(10分)
-#   - 价格选择合理（20分)
-#   - 联系人信息正确（10分）
+#   - 接站联系人信息正确（李四）(10分)
+#   - 价格选择合理（10分)
 #
 # 使用方法:
 #   # 准备阶段
@@ -38,8 +39,8 @@ module V101V150
   class V119BookRegularTrainAndPickupValidator < BaseValidator
     self.validator_id = 'v119_book_regular_train_and_pickup_validator'
     self.task_id = '39a9127b-f7bc-49ff-9e39-a91cd0d9a2e0'
-    self.title = '给小明订购火车票后预订接站服务（高铁，1人）'
-    self.description = '帮小明订购上海到杭州的高铁，到达杭州东站后预订接站到西湖风景区'
+    self.title = '给李四订购火车票后预订接站服务（高铁，1人）'
+    self.description = '帮李四订购上海到杭州的高铁，到达杭州东站后预订接站到西湖风景区'
     self.timeout_seconds = 300
   
     def prepare
@@ -52,11 +53,12 @@ module V101V150
       @transfer_type = 'train_pickup'
       @service_type = 'from_station'
     
-      # 预查询小明的乘客信息（避免 simulate 中查询 data_version: 0）
+      # 预查询李四的乘客信息（避免 simulate 中查询 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
-      @expected_contact_name = @xiaoming.name
-      @expected_contact_phone = @xiaoming.phone
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @lisi.name
+      @expected_passenger_id_number = @lisi.id_number
+      @expected_passenger_phone = @lisi.phone
 
       # 查找下午到达的高铁（G7308: 12:00出发 -> 13:10到达）
       @available_trains = Train.where(
@@ -98,7 +100,7 @@ module V101V150
     
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的火车（到达#{@arrival_station}，下午13:10左右到达），" \
-              "并预订接站服务到#{@destination_location}（选择经济5座车型）",
+              "并预订接站服务到#{@destination_location}（选择经济5座车型），乘客是李四",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
@@ -108,9 +110,10 @@ module V101V150
           destination: @destination_location,
           train_type: '高铁（G字头）',
           vehicle_category: '经济5座',
-          service_description: '下午火车站接站服务'
+          service_description: '下午火车站接站服务',
+          passenger: '李四'
         },
-        hint: "先预订火车票，然后根据火车到达时间预订接站服务。接送时间应为火车到达后15分钟（约13:25）",
+        hint: "先预订火车票（乘客李四），然后根据火车到达时间预订接站服务。接送时间应为火车到达后15分钟（约13:25）",
         statistics: {
           available_trains: @available_trains.count,
           available_packages: @available_packages.count
@@ -144,8 +147,17 @@ module V101V150
     
       add_assertion "火车路线正确（#{@departure_city}→#{@arrival_city}）", weight: 10 do
         train = @train_booking.train
-        expect(train.departure_city).to eq(@departure_city)
-        expect(train.arrival_city).to eq(@arrival_city)
+        expect(train.departure_city).to eq(@departure_city),
+          "出发城市错误。期望: #{@departure_city}, 实际: #{train.departure_city}"
+        expect(train.arrival_city).to eq(@arrival_city),
+          "到达城市错误。期望: #{@arrival_city}, 实际: #{train.arrival_city}"
+      end
+      
+      add_assertion "火车乘客信息正确（李四 110101199002022345）", weight: 10 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车票乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id_number),
+          "火车票乘客身份证号错误。期望: #{@expected_passenger_id_number}, 实际: #{@train_booking.passenger_id_number}"
       end
     
       add_assertion "接站起点正确（#{@arrival_station}）", weight: 20 do
@@ -167,8 +179,15 @@ module V101V150
           "接送时间错误。期望: #{expected_pickup_time.strftime('%H:%M')}（火车到达#{train.arrival_time.strftime('%H:%M')}后15分钟），" \
           "实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
       end
+      
+      add_assertion "接站联系人信息正确（李四 13900139000）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "接站乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
+          "接站联系电话错误。期望: #{@expected_passenger_phone}, 实际: #{@transfer.passenger_phone}"
+      end
     
-      add_assertion "价格选择合理", weight: 20 do
+      add_assertion "价格选择合理", weight: 10 do
         cheapest_price = TransferPackage
           .where(vehicle_category: @vehicle_category, data_version: @data_version)
           .minimum(:price)
@@ -178,23 +197,10 @@ module V101V150
             "未选择最优价格。最低价: ¥#{cheapest_price}, 实际: ¥#{@transfer.total_price}"
         end
       end
-
-      add_assertion "联系人信息正确（小明 13700137000）", weight: 10 do
-        expect(@train_booking.passenger_name).to eq(@expected_contact_name),
-          "火车票乘客姓名错误。期望: #{@expected_contact_name}, 实际: #{@train_booking.passenger_name}"
-        expect(@train_booking.contact_phone).to eq(@expected_contact_phone),
-          "火车票联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@train_booking.contact_phone}"
-        
-        expect(@transfer.passenger_name).to eq(@expected_contact_name),
-          "接站乘客姓名错误。期望: #{@expected_contact_name}, 实际: #{@transfer.passenger_name}"
-        expect(@transfer.passenger_phone).to eq(@expected_contact_phone),
-          "接站联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@transfer.passenger_phone}"
-      end
     end
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
     
       # 选择下午到达的高铁（G7308: 12:00 -> 13:10）
       target_train = @available_trains.order(:arrival_time).first
@@ -203,9 +209,9 @@ module V101V150
       train_booking = TrainBooking.create!(
         user_id: user.id,
         train_id: target_train.id,
-        passenger_name: xiaoming.name,
-        passenger_id_number: xiaoming.id_number,
-        contact_phone: xiaoming.phone,
+        passenger_name: @lisi.name,
+        passenger_id_number: @lisi.id_number,
+        contact_phone: @lisi.phone,
         seat_type: 'second_class',
         total_price: target_train.price_second_class,
         accept_terms: true,
@@ -223,8 +229,8 @@ module V101V150
         location_from: @station_location.name,
         location_to: @destination.name,
         pickup_datetime: pickup_datetime,
-        passenger_name: xiaoming.name,
-        passenger_phone: xiaoming.phone,
+        passenger_name: @lisi.name,
+        passenger_phone: @lisi.phone,
         passenger_count: 1,
         luggage_count: 1,
         total_price: @best_package.price,
@@ -249,8 +255,9 @@ module V101V150
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
         service_type: @service_type,
-        expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id_number: @expected_passenger_id_number,
+        expected_passenger_phone: @expected_passenger_phone
       }
     end
   
@@ -263,8 +270,13 @@ module V101V150
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
-      @expected_contact_name = data['expected_contact_name'] || '小明'
-      @expected_contact_phone = data['expected_contact_phone'] || '13700137000'
+      @expected_passenger_name = data['expected_passenger_name'] || '李四'
+      @expected_passenger_id_number = data['expected_passenger_id_number'] || '110101199002022345'
+      @expected_passenger_phone = data['expected_passenger_phone'] || '13900139000'
+    
+      # 重新查询乘客信息用于验证
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
     
       @available_trains = Train.where(
         departure_city: @departure_city,

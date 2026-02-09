@@ -5,23 +5,24 @@ require_relative '../base_validator'
 # 验证用例121: 预订送机服务
 #
 # 任务描述:
-#   用户预订了从北京国贸CBD到首都国际机场T3航站楼的送机服务（明天上午08:00出发）。
-#   航班信息：CA1901 北京→上海 10:00起飞，从首都T3航站楼登机。
+#   用户预订了从上海陆家嘴到浦东国际机场T2航站楼的送机服务（明天上午06:00出发）。
+#   航班信息：MU5422 上海→成都 07:00起飞，从浦东T2航站楼登机。
 #   需要创建1个订单：
-#   - 1个送机订单（国贸CBD → 首都T3，出发时间08:00）
+#   - 1个送机订单（陆家嘴 → 浦东T2，出发时间06:00）
 #
 # 复杂度分析:
-#   1. 需要明确上车地点（国贸CBD）
-#   2. 需要明确目的地机场和航站楼（首都T3）
-#   3. 需要明确出发时间（08:00，航班10:00起飞，提前2小时）
+#   1. 需要明确上车地点（陆家嘴）
+#   2. 需要明确目的地机场和航站楼（浦东T2）
+#   3. 需要明确出发时间（06:00，航班07:00起飞，提前1小时）
 #   4. 选择经济5座并选择最优价格
 #
 # 评分标准:
 #   - 创建了送机订单 (25分)
-#   - 上车地点正确（国贸CBD）(20分)
-#   - 目的地正确（首都国际机场T3航站楼）(20分)
-#   - 出发时间正确（08:00）(15分)
-#   - 价格选择合理（20分)
+#   - 乘客信息正确（张三）(10分)
+#   - 上车地点正确（陆家嘴）(15分)
+#   - 目的地正确（浦东T2）(15分)
+#   - 出发时间正确（06:00）(10分)
+#   - 价格选择合理（25分)
 #
 # 使用方法:
 #   # 准备阶段
@@ -35,8 +36,8 @@ module V101V150
   class V121BookAirportDropoffValidator < BaseValidator
     self.validator_id = 'v121_book_airport_dropoff_validator'
     self.task_id = 'a8feeb5f-ef73-4817-919f-ee843937f5d8'
-    self.title = '预订明天送机服务（上海陆家嘴→浦东机场T2）'
-    self.description = '从上海陆家嘴金融区送机到浦东国际机场T2航站楼（明天上午06:00出发），搭乘07:00飞往成都的MU5422航班'
+    self.title = '给张三预订明天送机服务（上海陆家嘴→浦东机场T2，06:00出发）'
+    self.description = '帮张三预订明天上午06:00从陆家嘴金融区到浦东机场T2航站楼的送机服务，搭乘07:00的MU5422航班飞成都'
     self.timeout_seconds = 300
   
     def prepare
@@ -48,6 +49,12 @@ module V101V150
       @vehicle_category = 'economy_5'
       @transfer_type = 'airport_dropoff'
       @service_type = 'to_airport'
+
+      # 获取受益人信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_phone = @passenger.phone
     
       @departure_loc = TransferLocation.find_by(
         city: @city,
@@ -77,8 +84,9 @@ module V101V150
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}上午06:00从#{@departure_location}到#{@destination_airport}的送机服务（选择经济5座车型）。我要搭乘07:00飞往成都的MU5422航班，从浦东T2航站楼登机",
+        task: "请给张三预订#{@departure_date.strftime('%Y年%m月%d日')}上午06:00从#{@departure_location}到#{@destination_airport}的送机服务（选择经济5座车型）。张三要搭乘07:00飞往成都的MU5422航班，从浦东T2航站楼登机",
         requirements: {
+          beneficiary: '张三',
           city: @city,
           departure_location: @departure_location,
           destination_airport: @destination_airport,
@@ -112,20 +120,27 @@ module V101V150
       end
     
       return if @transfer.nil?
+
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
+          "乘客电话错误。期望: #{@expected_passenger_phone}, 实际: #{@transfer.passenger_phone}"
+      end
     
-      add_assertion "上车地点正确（#{@departure_location}）", weight: 20 do
+      add_assertion "上车地点正确（#{@departure_location}）", weight: 15 do
         expect(@transfer.location_from).to eq(@departure_location),
           "上车地点错误。期望: #{@departure_location}, 实际: #{@transfer.location_from}"
       end
     
-      add_assertion "目的地正确（#{@destination_airport}）", weight: 20 do
+      add_assertion "目的地正确（#{@destination_airport}）", weight: 15 do
         location_matches = @transfer.location_to.include?('浦东') && @transfer.location_to.include?('T2')
         
         expect(location_matches).to be_truthy,
           "目的地错误。期望: #{@destination_airport}（浦东T2），实际: #{@transfer.location_to}"
       end
     
-      add_assertion "出发时间正确（06:00）", weight: 15 do
+      add_assertion "出发时间正确（06:00）", weight: 10 do
         pickup_hour = @transfer.pickup_datetime.hour
         pickup_minute = @transfer.pickup_datetime.min
       
@@ -133,7 +148,7 @@ module V101V150
         expect(pickup_minute).to eq(0), "出发时间错误。期望: 06:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
       end
     
-      add_assertion "价格选择合理", weight: 20 do
+      add_assertion "价格选择合理（最便宜）", weight: 25 do
         cheapest_price = TransferPackage
           .where(vehicle_category: @vehicle_category, data_version: @data_version)
           .minimum(:price)
@@ -147,6 +162,7 @@ module V101V150
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       transfer = Transfer.create!(
         user_id: user.id,
@@ -156,8 +172,8 @@ module V101V150
         location_from: @departure_loc.name,
         location_to: @airport_location.name,
         pickup_datetime: @departure_time,
-        passenger_name: '郑十',
-        passenger_phone: '13200132000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         luggage_count: 2,
         total_price: @best_package.price,
@@ -181,7 +197,9 @@ module V101V150
         departure_time: @departure_time.to_s,
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
-        service_type: @service_type
+        service_type: @service_type,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_phone: @expected_passenger_phone
       }
     end
   
@@ -194,6 +212,8 @@ module V101V150
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_phone = data['expected_passenger_phone']
     
       @departure_loc = TransferLocation.find_by(
         city: @city,

@@ -17,10 +17,11 @@ require_relative '../base_validator'
 #
 # 评分标准:
 #   - 创建了送站订单 (25分)
-#   - 上车地点正确（外滩）(20分)
-#   - 目的地正确（上海虹桥站）(20分)
-#   - 出发时间正确（14:00）(15分)
-#   - 价格选择合理（20分)
+#   - 乘客信息正确（李四）(10分)
+#   - 上车地点正确（外滩）(15分)
+#   - 目的地正确（上海虹桥站）(15分)
+#   - 出发时间正确（14:00）(10分)
+#   - 价格选择合理（25分)
 #
 # 使用方法:
 #   # 准备阶段
@@ -34,8 +35,8 @@ module V101V150
   class V122BookStationDropoffValidator < BaseValidator
     self.validator_id = 'v122_book_station_dropoff_validator'
     self.task_id = 'b7afcc22-6dff-4fb6-a389-a675def90300'
-    self.title = '预订后天送站服务（上海外滩→上海虹桥站）'
-    self.description = '从上海外滩送站到上海虹桥火车站（后天下午14:00出发）'
+    self.title = '给李四预订后天送站服务（上海外滩→上海虹桥站，14:00出发）'
+    self.description = '帮李四预订后天下午14:00从外滩到上海虹桥火车站的送站服务'
     self.timeout_seconds = 300
   
     def prepare
@@ -47,6 +48,12 @@ module V101V150
       @vehicle_category = 'economy_5'
       @transfer_type = 'train_dropoff'
       @service_type = 'to_station'
+
+      # 获取受益人信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_phone = @passenger.phone
     
       @departure_loc = TransferLocation.find_by(
         city: @city,
@@ -76,8 +83,9 @@ module V101V150
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@departure_date.strftime('%Y年%m月%d日')}下午14:00从#{@departure_location}到#{@destination_station}的送站服务（选择经济5座车型）",
+        task: "请给李四预订#{@departure_date.strftime('%Y年%m月%d日')}下午14:00从#{@departure_location}到#{@destination_station}的送站服务（选择经济5座车型）",
         requirements: {
+          beneficiary: '李四',
           city: @city,
           departure_location: @departure_location,
           destination_station: @destination_station,
@@ -110,18 +118,25 @@ module V101V150
       end
     
       return if @transfer.nil?
+
+      add_assertion "乘客信息正确（李四）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
+          "乘客电话错误。期望: #{@expected_passenger_phone}, 实际: #{@transfer.passenger_phone}"
+      end
     
-      add_assertion "上车地点正确（#{@departure_location}）", weight: 20 do
+      add_assertion "上车地点正确（#{@departure_location}）", weight: 15 do
         expect(@transfer.location_from).to eq(@departure_location),
           "上车地点错误。期望: #{@departure_location}, 实际: #{@transfer.location_from}"
       end
     
-      add_assertion "目的地正确（#{@destination_station}）", weight: 20 do
+      add_assertion "目的地正确（#{@destination_station}）", weight: 15 do
         expect(@transfer.location_to).to eq(@destination_station),
           "目的地错误。期望: #{@destination_station}, 实际: #{@transfer.location_to}"
       end
     
-      add_assertion "出发时间正确（14:00）", weight: 15 do
+      add_assertion "出发时间正确（14:00）", weight: 10 do
         pickup_hour = @transfer.pickup_datetime.hour
         pickup_minute = @transfer.pickup_datetime.min
       
@@ -129,7 +144,7 @@ module V101V150
         expect(pickup_minute).to eq(0), "出发时间错误。期望: 14:00, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
       end
     
-      add_assertion "价格选择合理", weight: 20 do
+      add_assertion "价格选择合理（最便宜）", weight: 25 do
         cheapest_price = TransferPackage
           .where(vehicle_category: @vehicle_category, data_version: @data_version)
           .minimum(:price)
@@ -143,6 +158,7 @@ module V101V150
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '李四', data_version: 0)
     
       transfer = Transfer.create!(
         user_id: user.id,
@@ -152,8 +168,8 @@ module V101V150
         location_from: @departure_loc.name,
         location_to: @station_location.name,
         pickup_datetime: @departure_time,
-        passenger_name: '冯十一',
-        passenger_phone: '13100131000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         luggage_count: 1,
         total_price: @best_package.price,
@@ -177,7 +193,9 @@ module V101V150
         departure_time: @departure_time.to_s,
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
-        service_type: @service_type
+        service_type: @service_type,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_phone: @expected_passenger_phone
       }
     end
   
@@ -190,6 +208,8 @@ module V101V150
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_phone = data['expected_passenger_phone']
     
       @departure_loc = TransferLocation.find_by(
         city: @city,
