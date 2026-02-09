@@ -7,8 +7,8 @@ module V051V100
   class V094RedeemNaritaAirportDutyFreeShopCouponValidator < BaseValidator
     self.validator_id = 'v094_redeem_narita_airport_duty_free_shop_coupon_validator'
     self.task_id = 'ecf457a8-face-4e6a-9380-668b730c5fc2'
-    self.title = '兑换成田机场免税店优惠券（全日空免税，最高折扣）'
-    self.description = '兑换成田机场全日空免税店优惠券，选择折扣最高的券'
+    self.title = '给张三兑换成田机场免税店优惠券（全日空免税，最高折扣）'
+    self.description = '给张三兑换成田机场全日空免税店优惠券，选择折扣最高的券'
     self.timeout_seconds = 180
   
     def prepare
@@ -29,7 +29,7 @@ module V051V100
   
     def verify
       add_assertion "优惠券已兑换", weight: 20 do
-        @user_coupon = UserCoupon.order(created_at: :desc).first
+        @user_coupon = UserCoupon.where(data_version: @data_version).order(created_at: :desc).first
         expect(@user_coupon).not_to be_nil, "未找到任何优惠券兑换记录"
       end
     
@@ -88,7 +88,8 @@ module V051V100
         abroad_coupon_id: highest_discount.id,
         status: 'claimed',
         claimed_at: Time.current,
-        expires_at: Time.current + 1.year
+        expires_at: Time.current + 1.year,
+        data_version: @data_version
       )
     end
     end

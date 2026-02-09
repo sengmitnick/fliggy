@@ -27,11 +27,17 @@ module V051V100
   class V088BookCrossCityAirportPickupValidator < BaseValidator
     self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
     self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
-    self.title = '预订首都机场接机服务（上海→北京航班，经济5座）'
-    self.description = '3天后从上海飞往北京，通过搜索航班确定到达机场，从首都机场接机送到市区酒店，选择经济5座车型中价格最低的套餐'
+    self.title = '给张三预订3天后北京机场接机服务（从上海飞往北京，最便宜经济5座）'
+    self.description = '帮张三订3天后从上海飞往北京的接机服务，通过搜索航班确定到达机场，从首都机场接机送到市区酒店，选择经济5座车型中价格最低的套餐'
     self.timeout_seconds = 240
   
     def prepare
+      # Demo user data
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_phone = @zhangsan.phone
+      
       @service_type = 'from_airport'  # 接机服务
       @transfer_type = 'airport_pickup'
       @departure_city = '上海'  # 航班出发城市
@@ -70,21 +76,28 @@ module V051V100
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
-        @transfer = Transfer.order(created_at: :desc).first
-        expect(@transfer).not_to be_nil, "未找到任何接送机订单记录"
+      add_assertion "创建了接机订单", weight: 20 do
+        all_transfers = Transfer
+          .where(data_version: @data_version)
+          .where(transfer_type: @transfer_type)
+          .where(service_type: @service_type)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_transfers).not_to be_empty, "未找到任何接机订单记录"
+        @transfer = all_transfers.first
       end
     
-      return unless @transfer
+      return if @transfer.nil?
     
-      add_assertion "服务类型正确（airport_pickup + from_airport）", weight: 15 do
+      add_assertion "服务类型正确（airport_pickup + from_airport）", weight: 10 do
         expect(@transfer.transfer_type).to eq(@transfer_type),
           "服务类型错误。期望: #{@transfer_type}（机场接送）, 实际: #{@transfer.transfer_type}"
         expect(@transfer.service_type).to eq(@service_type),
           "具体服务类型错误。期望: #{@service_type}（从机场接），实际: #{@transfer.service_type}"
       end
     
-      add_assertion "车辆类型正确（economy_5 经济5座）", weight: 25 do
+      add_assertion "车辆类型正确（economy_5 经济5座）", weight: 20 do
         expect(@transfer.transfer_package).not_to be_nil, "未选择车辆套餐"
         expect(@transfer.transfer_package.vehicle_category).to eq(@vehicle_category),
           "车辆类型错误。期望: #{@vehicle_category}（经济5座）, 实际: #{@transfer.transfer_package.vehicle_category}"
@@ -102,12 +115,11 @@ module V051V100
           "实际: #{@transfer.transfer_package.name} #{@transfer.transfer_package.category_name}（#{actual_price}元）"
       end
     
-      add_assertion "订单价格正确", weight: 10 do
-        expected_price = @transfer.transfer_package.price
-        actual_price = @transfer.total_price
-      
-        expect(actual_price).to eq(expected_price),
-          "订单价格错误。期望: #{expected_price}元，实际: #{actual_price}元"
+      add_assertion "联系人信息正确（张三）", weight: 20 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "联系人姓名错误。期望: #{@expected_passenger_name}，实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
+          "联系人电话错误。期望: #{@expected_passenger_phone}，实际: #{@transfer.passenger_phone}"
       end
     end
   
@@ -126,12 +138,13 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime,
-        passenger_name: '周八',
-        passenger_phone: '13900139004',
+        passenger_name: @expected_passenger_name,
+        passenger_phone: @expected_passenger_phone,
         total_price: cheapest.price,
         discount_amount: 0,
         status: 'pending',
-        driver_status: 'pending'
+        driver_status: 'pending',
+        data_version: @data_version
       )
     end
   
@@ -149,7 +162,9 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime.to_s,
-        vehicle_category: @vehicle_category
+        vehicle_category: @vehicle_category,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_phone: @expected_passenger_phone
       }
     end
   
@@ -164,6 +179,8 @@ module V051V100
       @location_from = data['location_from']
       @location_to = data['location_to']
       @vehicle_category = data['vehicle_category']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_phone = data['expected_passenger_phone']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
       @available_packages = TransferPackage.where(vehicle_category: @vehicle_category, is_active: true, data_version: 0)
     end

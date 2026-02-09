@@ -15,8 +15,8 @@ module V101V150
   class V107CharteredTourBookingValidator < BaseValidator
     self.validator_id = 'v107_chartered_tour_booking_validator'
     self.task_id = 'e9d3f5a7-2c8b-4e1f-a6d9-8b4c1f7e3a52'
-    self.title = '预订明天定制游（上海经典路线，8小时包车）'
-    self.description = '预订上海定制游，选择经典路线，预订8小时包车服务，选择7座商务车，4位乘客，明天出发'
+    self.title = '给小明预订明天上海包车游（经典路线8小时，7座商务车）'
+    self.description = '帮小明预订上海定制游，选经典路线，8小时包车，7座商务车，4位乘客，明天出发'
     self.timeout_seconds = 240
   
     def prepare
@@ -27,6 +27,12 @@ module V101V150
       @vehicle_seats = 7            # 7座商务车
       @passengers_count = 4         # 4位乘客
       @departure_date = Date.tomorrow  # 明天出发
+    
+      # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+      @expected_contact_name = @xiaoming.name
+      @expected_contact_phone = @xiaoming.phone
     
       # 查询可用的定制游路线（上海+经典路线）
       @available_routes = CharterRoute
@@ -88,8 +94,16 @@ module V101V150
           "出发日期错误。期望: #{@departure_date}（明天）, 实际: #{@booking.departure_date}"
       end
     
-      # 断言6: 订单总价合理 (权重10%)
-      add_assertion "订单总价合理", weight: 10 do
+      # 断言6: 联系人信息正确（小明） (权重5%)
+      add_assertion "联系人信息正确（小明）", weight: 5 do
+        expect(@booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@booking.contact_name}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      end
+    
+      # 断言7: 订单总价合理 (权重5%)
+      add_assertion "订单总价合理", weight: 5 do
         base_price = @booking.vehicle_type.price_for_duration(@duration_hours)
         expect(@booking.total_price).to be > 0,
           "订单总价为0，应该根据车型和时长计算"
@@ -105,7 +119,9 @@ module V101V150
         duration_hours: @duration_hours,
         vehicle_seats: @vehicle_seats,
         passengers_count: @passengers_count,
-        departure_date: @departure_date.to_s
+        departure_date: @departure_date.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -116,6 +132,8 @@ module V101V150
       @vehicle_seats = data['vehicle_seats']
       @passengers_count = data['passengers_count']
       @departure_date = Date.parse(data['departure_date'])
+      @expected_contact_name = data['expected_contact_name'] || '小明'
+      @expected_contact_phone = data['expected_contact_phone'] || '13500135001'
       @available_routes = CharterRoute
         .joins(:city)
         .where(cities: { name: @city_name }, data_version: @data_version)
@@ -157,8 +175,8 @@ module V101V150
         duration_hours: @duration_hours,
         booking_mode: 'by_route',
         passengers_count: @passengers_count,
-        contact_name: '周八',
-        contact_phone: '13800138011',
+        contact_name: @xiaoming.name,
+        contact_phone: @xiaoming.phone,
         total_price: total_price,
         status: 'pending',
         data_version: @data_version

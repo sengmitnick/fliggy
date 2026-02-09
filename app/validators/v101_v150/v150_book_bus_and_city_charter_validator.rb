@@ -2,15 +2,15 @@
 
 require_relative '../base_validator'
 
-# V150: 预订北京到天津汽车票 + 火车站接站服务
+# V150: 预订汽车票 + 火车站接站服务
 # 验证用户能够完成汽车票预订+火车站接站服务的组合下单
 
 module V101V150
   class V150BookBusAndCityCharterValidator < BaseValidator
     self.validator_id = 'v150_book_bus_and_city_charter_validator'
     self.task_id = 'e0f1a2b3-4c5d-6e7f-8a9b-0c1d2e3f4a5b'
-    self.title = '预订明天汽车票并预订目的地火车站接站服务（北京-天津）'
-    self.description = '预订明天北京到天津的早班汽车票，并预订天津火车站接站服务'
+    self.title = '给张三预订明天汽车票并预订目的地火车站接站服务（北京-天津，从上海坐火车来）'
+    self.description = '帮张三预订明天北京到天津的早班汽车票，并预订天津火车站接站服务（接从上海坐火车来的人）'
     self.timeout_seconds = 300
 
     def prepare
@@ -19,6 +19,12 @@ module V101V150
       @destination = '天津'
       @preferred_time = '08:00' # 早班车
       @station_location = '天津站'
+      
+      # 预查询乘客信息（用于 simulate）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_id = @zhangsan.id_number
       
       # 查找可用的汽车票（上午班次）
       @available_tickets = BusTicket
@@ -33,6 +39,7 @@ module V101V150
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 选择最接近偏好时间的班次
       ticket = @available_tickets.min_by { |t| (Time.parse(t.departure_time) - Time.parse(@preferred_time)).abs }
@@ -48,8 +55,8 @@ module V101V150
       )
       
       order.passengers.create!(
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234'
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number
       )
       
       # 计算抵达时间，预订火车站接站服务
@@ -65,8 +72,8 @@ module V101V150
         location_to: "#{@destination}市区",
         pickup_datetime: pickup_datetime,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         total_price: 100.0,
         status: 'pending',
         data_version: @data_version
@@ -80,7 +87,7 @@ module V101V150
         origin: @origin,
         destination: @destination,
         preferred_time: @preferred_time,
-        charter_duration: @charter_duration
+        station_location: @station_location
       }
     end
 
@@ -90,12 +97,12 @@ module V101V150
       @origin = data['origin']
       @destination = data['destination']
       @preferred_time = data['preferred_time']
-      @charter_duration = data['charter_duration']
+      @station_location = data['station_location']
     end
 
     def verify
       # 断言1: 创建了汽车票订单
-      add_assertion "创建了汽车票订单", weight: 30 do
+      add_assertion "创建了汽车票订单", weight: 25 do
         all_orders = BusTicketOrder
           .joins(:bus_ticket)
           .includes(:bus_ticket)
@@ -128,7 +135,17 @@ module V101V150
           "发车日期错误。期望: #{@travel_date}（明天）, 实际: #{@bus_order.bus_ticket.departure_date}"
       end
       
-      # 断言5: 创建了火车站接站服务
+      # 断言5: 乘车人信息正确（张三）
+      add_assertion "乘车人信息正确（张三）", weight: 10 do
+        passenger = @bus_order.passengers.first
+        expect(passenger).not_to be_nil, "未找到乘车人信息"
+        expect(passenger.passenger_name).to eq(@expected_passenger_name),
+          "乘车人姓名错误。期望: #{@expected_passenger_name}，实际: #{passenger.passenger_name}"
+        expect(passenger.passenger_id_number).to eq(@expected_passenger_id),
+          "乘车人身份证错误。期望: #{@expected_passenger_id}，实际: #{passenger.passenger_id_number}"
+      end
+      
+      # 断言6: 创建了火车站接站服务
       add_assertion "创建了火车站接站服务", weight: 20 do
         @transfer = Transfer
           .where(transfer_type: 'train_pickup', data_version: @data_version)
@@ -140,7 +157,7 @@ module V101V150
       
       return if @transfer.nil?
       
-      # 断言6: 接站服务在目的地
+      # 断言7: 接站服务在目的地
       add_assertion "接站服务在目的地（#{@destination}）", weight: 10 do
         in_city = @transfer.location_from.include?(@destination) || @transfer.location_to.include?(@destination)
         expect(in_city).to be(true),

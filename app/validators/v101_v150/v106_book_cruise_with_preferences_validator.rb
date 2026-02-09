@@ -15,8 +15,8 @@ module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
     self.task_id = 'b2c4e7f9-1d6a-4b8e-9c3f-5a7e2d8f1b94'
-    self.title = '预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
-    self.description = '预订日韩邮轮行程，选择海洋光谱号最近一班6天5晚航次，在special_requests中备注冲绳岸上观光和主厨晚餐需求'
+    self.title = '给张建国、陈静预订日韩邮轮（海洋光谱号6天、上海出发，要岸上观光+主厨晚餐）'
+    self.description = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐'
     self.timeout_seconds = 240
   
     def prepare
@@ -27,6 +27,18 @@ module V101V150
       @cabin_category = 'interior'
       @adult_count = 2
       @special_requests_keywords = ['岸上观光', '冲绳', '主厨', '晚餐']
+    
+      # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_passenger_names = [@zhangjianguo.name, @chenjing.name]
+      
+      # 有效联系人电话映射
+      @valid_contact_phones = {
+        '张建国' => @zhangjianguo.phone,
+        '陈静' => @chenjing.phone
+      }
     
       # 查询可用船只
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
@@ -99,8 +111,19 @@ module V101V150
           "未在备注中说明餐饮需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
-      # 断言6: 选择了最近日期的班次（权重10%）
-      add_assertion "选择了最近日期的班次", weight: 10 do
+      # 断言6: 联系人信息正确（权重10%）
+      add_assertion "联系人信息正确（张建国或陈静）", weight: 10 do
+        valid_contacts = ['张建国', '陈静']
+        expect(valid_contacts).to include(@order.contact_name),
+          "联系人姓名错误。期望: 张建国或陈静, 实际: #{@order.contact_name}"
+        
+        expected_phone = @valid_contact_phones[@order.contact_name]
+        expect(@order.contact_phone).to eq(expected_phone),
+          "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
+      end
+    
+      # 断言7: 选择了最近日期的班次（权重0%）- 不计分，仅用于记录
+      add_assertion "选择了最近日期的班次", weight: 0 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       
@@ -127,7 +150,9 @@ module V101V150
         duration_nights: @duration_nights, 
         cabin_category: @cabin_category, 
         adult_count: @adult_count,
-        special_requests_keywords: @special_requests_keywords
+        special_requests_keywords: @special_requests_keywords,
+        expected_passenger_names: @expected_passenger_names,
+        valid_contact_phones: @valid_contact_phones
       }
     end
   
@@ -139,12 +164,29 @@ module V101V150
       @cabin_category = data['cabin_category']
       @adult_count = data['adult_count']
       @special_requests_keywords = data['special_requests_keywords'] || ['岸上观光', '冲绳', '主厨', '晚餐']
+      @expected_passenger_names = data['expected_passenger_names'] || ['张建国', '陈静']
+      @valid_contact_phones = data['valid_contact_phones'] || { '张建国' => '13800138001', '陈静' => '13100131009' }
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     end
   
     def simulate
       # 查找演示用户（使用基线 data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 查找乘客信息（已在 prepare 中预查询）
+      zhangjianguo = @zhangjianguo || user.passengers.find_by!(name: '张建国', data_version: 0)
+      chenjing = @chenjing || user.passengers.find_by!(name: '陈静', data_version: 0)
+      
+      # 随机选择联系人
+      contact_names = ['张建国', '陈静']
+      selected_contact_name = contact_names.sample
+      contact_passenger = selected_contact_name == '张建国' ? zhangjianguo : chenjing
+      
+      # 创建乘客信息数组
+      passenger_info = [
+        { name: zhangjianguo.name, id_number: zhangjianguo.id_number, phone: zhangjianguo.phone },
+        { name: chenjing.name, id_number: chenjing.id_number, phone: chenjing.phone }
+      ]
     
       # 查找船只（从基线数据中查找）
       ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
@@ -193,8 +235,9 @@ module V101V150
         user_id: user.id,
         cruise_product_id: cruise_product.id,
         quantity: @adult_count,
-        contact_name: '孙七',
-        contact_phone: '13800138010',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
+        passenger_info: passenger_info,
         total_price: total_price,
         remark: '需要预订冲绳岸上观光套餐（首里城+美丽海水族馆）和主厨特选晚餐套餐（铁板烧+意大利餐）',
         accept_terms: true,

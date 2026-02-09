@@ -7,11 +7,17 @@ module V051V100
   class V090BookShanghaiBundCultureTourValidator < BaseValidator
     self.validator_id = 'v090_book_shanghai_bund_culture_tour_validator'
     self.task_id = 'b0ae1fdc-ef74-465b-ade9-04b581d0eb17'
-    self.title = '预订上海外滩历史文化讲解（评分最高的特级导游）'
-    self.description = '预订3天后的上海外滩历史文化讲解，要求评分最高的特级导游'
+    self.title = '给李四预订3天后上海外滩历史文化讲解（评分最高的特级导游）'
+    self.description = '帮李四预订3天后的上海外滩历史文化讲解，要求评分最高的特级导游'
     self.timeout_seconds = 240
   
     def prepare
+      # Demo user data
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_contact_name = @lisi.name
+      @expected_contact_phone = @lisi.phone
+      
       @venue = '上海外滩'
       @location = '华东'
       @travel_date = Date.current + 3.days
@@ -43,7 +49,7 @@ module V051V100
     
       return unless @booking
     
-      add_assertion "向导景点正确（上海外滩）", weight: 25 do
+      add_assertion "向导景点正确（上海外滩）", weight: 20 do
         guide = @booking.deep_travel_guide
         expect(guide.venue).to eq(@venue),
           "向导景点不符合要求。期望: #{@venue}, 实际: #{guide.venue}"
@@ -55,16 +61,24 @@ module V051V100
           "产品地点不符合要求。期望: #{@location}, 实际: #{product.location}"
       end
     
-      add_assertion "选择了评分最高的外滩导游", weight: 30 do
+      add_assertion "选择了评分最高的外滩导游", weight: 25 do
         highest_rated = DeepTravelGuide.where(data_version: 0, venue: @venue)
                                        .order(rating: :desc, served_count: :desc).first
         expect(@booking.deep_travel_guide_id).to eq(highest_rated.id),
           "未选择评分最高的导游。应选: #{highest_rated.name}（评分#{highest_rated.rating}），实际: #{@booking.deep_travel_guide.name}（评分#{@booking.deep_travel_guide.rating}）"
       end
+      
+      add_assertion "联系人信息正确（李四）", weight: 10 do
+        expect(@booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}，实际: #{@booking.contact_name}"
+        expect(@booking.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}，实际: #{@booking.contact_phone}"
+      end
     end
   
     def execution_state_data
-      { venue: @venue, location: @location, travel_date: @travel_date.to_s, adult_count: @adult_count }
+      { venue: @venue, location: @location, travel_date: @travel_date.to_s, adult_count: @adult_count,
+        expected_contact_name: @expected_contact_name, expected_contact_phone: @expected_contact_phone }
     end
   
     def restore_from_state(data)
@@ -72,6 +86,8 @@ module V051V100
       @location = data['location']
       @travel_date = Date.parse(data['travel_date'])
       @adult_count = data['adult_count']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
       @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     end
   
@@ -95,11 +111,12 @@ module V051V100
         travel_date: @travel_date,
         adult_count: @adult_count,
         child_count: 0,
-        contact_name: '李四',
-        contact_phone: '13800138002',
+        contact_name: @expected_contact_name,
+        contact_phone: @expected_contact_phone,
         total_price: total_price,
         insurance_price: 0,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     end
     end

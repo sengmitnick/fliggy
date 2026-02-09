@@ -6,12 +6,12 @@ module V101V150
   class V137BookTrainHotelAndReturnDropoffValidator < BaseValidator
     self.validator_id = 'v137_book_train_hotel_and_return_dropoff_validator'
     self.task_id = 'd7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f3a'
-    self.title = '预订后天火车票+酒店+返程送站服务（1人）'
-    self.description = '预订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
+    self.title = '给张三预订后天火车票+酒店+返程送站服务（上海→杭州，二等座）'
+    self.description = '帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
     self.timeout_seconds = 300
 
     def task_description
-      "预订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务"
+      "帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务"
     end
 
     def prepare
@@ -22,6 +22,14 @@ module V101V150
       @check_in_date = @train_date
       @check_out_date = @train_date + 1.day
       @dropoff_date = @check_out_date
+
+      # 预查询乘客信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_phone = @passenger.phone
+
       @available_trains = Train.where(
         departure_city: @departure_city,
         arrival_city: @arrival_city,
@@ -75,6 +83,13 @@ module V101V150
         expect(@train_booking.seat_type).to eq('second_class')
       end
 
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证号错误。期望: #{@expected_passenger_id}, 实际: #{@train_booking.passenger_id_number}"
+      end
+
       add_assertion "酒店城市正确（#{@hotel_city}）", weight: 10 do
         expect(@hotel_booking.hotel.city).to eq(@hotel_city)
       end
@@ -83,14 +98,14 @@ module V101V150
         expect(@hotel_booking.check_in_date).to eq(@check_in_date)
       end
 
-      add_assertion "送站终点=火车站", weight: 15 do
+      add_assertion "送站终点=火车站", weight: 10 do
         destination = @transfer.location_to.to_s
         has_station = destination.include?("站") || destination.include?("火车站") || destination.include?("Railway")
         expect(has_station).to be(true),
           "送站终点不是火车站。实际: #{destination}"
       end
 
-      add_assertion "送站起点=酒店地址附近", weight: 15 do
+      add_assertion "送站起点=酒店地址附近", weight: 5 do
         origin = @transfer.location_from.to_s
         hotel_address = @hotel_booking.hotel.address.to_s
         hotel_name = @hotel_booking.hotel.name.to_s
@@ -98,25 +113,33 @@ module V101V150
         expect(origin).not_to be_empty, "送站起点为空"
       end
 
-      add_assertion "送站时间=退房后合理时间", weight: 10 do
+      add_assertion "送站时间=退房后合理时间", weight: 5 do
         transfer_time = @transfer.pickup_datetime
         checkout_date = @hotel_booking.check_out_date
         # 送站时间应该在退房日期当天
         expect(transfer_time.to_date).to eq(checkout_date),
           "送站时间不在退房日期。期望: #{checkout_date}, 实际: #{transfer_time.to_date}"
       end
+
+      add_assertion "入住人信息正确（张三）", weight: 5 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
 
       train = @available_trains.first
       TrainBooking.create!(
         user_id: user.id,
         train_id: train.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         seat_type: 'second_class',
         total_price: train.price_second_class,
         accept_terms: true,
@@ -133,8 +156,8 @@ module V101V150
         hotel_room_id: room.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: passenger.name,
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -149,8 +172,8 @@ module V101V150
         location_to: "杭州火车站",
         pickup_datetime: @dropoff_date.to_time + 10.hours,
         vehicle_type: 'economy_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         total_price: 50.0,
         status: 'pending',
         data_version: @data_version
@@ -167,7 +190,10 @@ module V101V150
         hotel_city: @hotel_city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        dropoff_date: @dropoff_date.to_s
+        dropoff_date: @dropoff_date.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_phone: @expected_phone
       }
     end
 
@@ -179,6 +205,9 @@ module V101V150
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
       @dropoff_date = Date.parse(data['dropoff_date'])
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_phone = data['expected_phone']
 
       @available_trains = Train.where(
         departure_city: @departure_city,

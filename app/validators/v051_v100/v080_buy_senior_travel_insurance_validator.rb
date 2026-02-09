@@ -58,6 +58,11 @@ module V051V100
       @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
       @expected_insured_name = @zhangjianguo.name
       @expected_insured_id_number = @zhangjianguo.id_number
+      
+      # 查询联系人信息（老人的联系人应该是儿子张三）
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @zhangsan.name
+      @expected_contact_phone = @zhangsan.phone
     
       # 查找境内旅游保险产品(注意:查询基线数据 data_version=0)
       # 只筛选官方精选产品(official_select: true,前端首页显示)
@@ -108,7 +113,7 @@ module V051V100
       return unless @insurance_order # 如果没有订单,后续断言无法继续
     
       # 断言2: 保险类型正确(核心实体)
-      add_assertion "保险类型正确(境内旅游)", weight: 20 do
+      add_assertion "保险类型正确(境内旅游)", weight: 18 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}(境内旅游),实际: #{actual_type}"
@@ -135,25 +140,49 @@ module V051V100
           "保障天数错误。期望: #{@days}天, 实际: #{actual_days}天"
       end
       
-      # 断言6: 被保险人信息正确(张三)
+      # 断言6: 被保险人信息正确(张建国)
       add_assertion "被保险人信息正确(#{@expected_insured_name})", weight: 5 do
         insured_persons = @insurance_order.insured_persons || []
         expect(insured_persons).not_to be_empty, "未找到投保人信息"
         
-        # 检查是否包含张三
-        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name }
-        expect(zhangsan_record).not_to be_nil,
+        # 检查是否包含张建国
+        zhangjianguo_record = insured_persons.find { |p| p['name'] == @expected_insured_name }
+        expect(zhangjianguo_record).not_to be_nil,
           "未找到被保险人#{@expected_insured_name}。实际投保人: #{insured_persons.map { |p| p['name'] }.join('、')}"
         
         # 验证身份证号
-        if zhangsan_record && @expected_insured_id_number
-          expect(zhangsan_record['id_number']).to eq(@expected_insured_id_number),
-            "被保险人#{@expected_insured_name}的身份证号错误。期望: #{@expected_insured_id_number}, 实际: #{zhangsan_record['id_number']}"
+        if zhangjianguo_record && @expected_insured_id_number
+          expect(zhangjianguo_record['id_number']).to eq(@expected_insured_id_number),
+            "被保险人#{@expected_insured_name}的身份证号错误。期望: #{@expected_insured_id_number}, 实际: #{zhangjianguo_record['id_number']}"
         end
       end
+      
+      # 断言7: 联系人信息正确（老人的联系人应该是儿子张三）
+      add_assertion "联系人信息正确（老人的联系人应该是儿子张三）", weight: 5 do
+        # 注意：InsuranceOrder 没有单独的 contact_name/contact_phone 字段
+        # 对于老人保险，联系人通常存储在 insured_persons 中或作为紧急联系人
+        # 这里验证被保险人列表中是否包含家属联系人信息
+        insured_persons = @insurance_order.insured_persons || []
+        
+        # 检查是否有张三作为联系人（老人保险通常需要家属联系人）
+        # 方式1: 检查是否在投保人列表中有张三的信息
+        has_zhangsan_contact = insured_persons.any? { |p| (p['name'] || p[:name]) == @expected_contact_name }
+        
+        # 方式2: 如果只有张建国，验证是否有紧急联系人字段（emergency_contact）
+        has_emergency_contact = insured_persons.any? do |p|
+          p['emergency_contact_name'] == @expected_contact_name ||
+          p['emergency_contact_phone'] == @expected_contact_phone
+        end
+        
+        has_valid_contact = has_zhangsan_contact || has_emergency_contact
+        
+        expect(has_valid_contact).to be_truthy,
+          "未找到有效的联系人信息。老人保险应包含家属联系人（#{@expected_contact_name}），" \
+          "实际被保险人: #{insured_persons.map { |p| p['name'] || p[:name] }.compact.join('、')}"
+      end
     
-      # 断言7: 选择了医疗保额最高的产品(核心评分项 - 业务逻辑)
-      add_assertion "选择了医疗保额最高的产品", weight: 30 do
+      # 断言8: 选择了医疗保额最高的产品(核心评分项 - 业务逻辑)
+      add_assertion "选择了医疗保额最高的产品", weight: 27 do
         # 获取所有官方精选的境内旅游保险产品(排除运动保险)
         all_domestic_products = InsuranceProduct.where(
           product_type: @product_type,
@@ -184,7 +213,7 @@ module V051V100
           "老年人旅游应选择医疗保额最高的产品"
       end
     
-      # 断言8: 订单价格计算正确
+      # 断言9: 订单价格计算正确
       add_assertion "订单价格计算正确", weight: 10 do
         # Get city_id from destination if available
         city = City.find_by(name: @insurance_order.destination, data_version: 0)
@@ -217,7 +246,9 @@ module V051V100
         end_date: @end_date&.to_s,
         highest_medical: @highest_medical,
         expected_insured_name: @expected_insured_name,
-        expected_insured_id_number: @expected_insured_id_number
+        expected_insured_id_number: @expected_insured_id_number,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -231,6 +262,8 @@ module V051V100
       @highest_medical = data['highest_medical']
       @expected_insured_name = data['expected_insured_name']
       @expected_insured_id_number = data['expected_insured_id_number']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
       @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
       @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
     
@@ -238,6 +271,7 @@ module V051V100
       user = User.find_by(email: 'demo@travel01.com', data_version: 0)
       if user
         @zhangjianguo = user.passengers.find_by(name: '张建国', data_version: 0)
+        @zhangsan = user.passengers.find_by(name: '张三', data_version: 0)
       end
       
       # 重新加载可用产品列表(只筛选官方精选,排除运动保险)
@@ -257,6 +291,7 @@ module V051V100
       # 1. 查找测试用户和出行人信息(数据包中已创建)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)  # 儿子作为紧急联系人
     
       # 2. 查找官方精选的境内旅游保险产品(排除运动保险)
       all_domestic_products = InsuranceProduct.where(
@@ -284,9 +319,14 @@ module V051V100
       city_id = city&.id
       unit_price = highest_medical_product.calculate_price(@days, city_id: city_id)
       
-      # 5. 准备投保人信息(张建国,65岁)
+      # 5. 准备投保人信息(张建国,65岁) + 紧急联系人(张三)
       insured_persons_data = [
-        { name: zhangjianguo.name, id_number: zhangjianguo.id_number }
+        { 
+          name: zhangjianguo.name, 
+          id_number: zhangjianguo.id_number,
+          emergency_contact_name: zhangsan.name,  # 添加紧急联系人
+          emergency_contact_phone: zhangsan.phone
+        }
       ]
     
       # 6. 创建保险订单
@@ -324,7 +364,8 @@ module V051V100
         destination: @destination,
         age: @age,
         start_date: @start_date.to_s,
-        user_email: user.email
+        user_email: user.email,
+        emergency_contact: { name: zhangsan.name, phone: zhangsan.phone }  # 返回联系人信息
       }
     end
     end

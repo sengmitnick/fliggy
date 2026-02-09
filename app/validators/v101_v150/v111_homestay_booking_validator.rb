@@ -26,8 +26,8 @@ module V101V150
   class V111HomestayBookingValidator < BaseValidator
     self.validator_id = 'v111_homestay_booking_validator'
     self.task_id = '7874748d-a0b8-4725-a536-ff9141c0fed1'
-    self.title = '预订热门民宿（上海CBD核心区，2晚，1间房2成人）'
-    self.description = '在上海CBD核心区预订评分最高的民宿，入住2晚'
+    self.title = '给张三预订上海CBD核心区民宿（评分最高，2晚）'
+    self.description = '帮张三在上海CBD核心区预订评分最高的民宿，入住2晚'
     self.timeout_seconds = 300
   
     def prepare
@@ -36,6 +36,12 @@ module V101V150
       @check_in_date = Date.current + 3.days  # 大后天入住
       @nights = 2
       @check_out_date = @check_in_date + @nights.days
+    
+      # 预查询张三的乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @zhangsan.name
+      @expected_guest_phone = @zhangsan.phone
     
       # 查找北京王府井地区的民宿（type='homestay'）
       @qualified_homestays = Hotel.where(
@@ -114,7 +120,14 @@ module V101V150
           "儿童数错误。期望: 0人, 实际: #{@booking.children_count}人"
       end
     
-      add_assertion "选择了评分最高的民宿", weight: 20 do
+      add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
+        expect(@booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@booking.guest_name}"
+        expect(@booking.guest_phone).to eq(@expected_guest_phone),
+          "联系手机错误。期望: #{@expected_guest_phone}, 实际: #{@booking.guest_phone}"
+      end
+    
+      add_assertion "选择了评分最高的民宿", weight: 10 do
         # 获取所有符合条件的民宿
         qualified_homestays = Hotel.where(
           hotel_type: 'homestay',
@@ -134,7 +147,7 @@ module V101V150
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 查找北京王府井地区评分最高的民宿
+      # 查找上海CBD核心区评分最高的民宿
       target_homestay = Hotel.where(
         hotel_type: 'homestay',
         data_version: 0
@@ -165,8 +178,8 @@ module V101V150
         total_price: target_room.price * @nights,
         payment_method: '花呗',
         status: 'pending',
-        guest_name: '张三',
-        guest_phone: '13800138000',
+        guest_name: @zhangsan.name,
+        guest_phone: @zhangsan.phone,
         data_version: @data_version
       )
     end
@@ -179,7 +192,9 @@ module V101V150
         area: @area,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        nights: @nights
+        nights: @nights,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone
       }
     end
   
@@ -189,6 +204,8 @@ module V101V150
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
       @nights = data['nights']
+      @expected_guest_name = data['expected_guest_name'] || '张三'
+      @expected_guest_phone = data['expected_guest_phone'] || '13800138000'
     
       @qualified_homestays = Hotel.where(
         hotel_type: 'homestay',

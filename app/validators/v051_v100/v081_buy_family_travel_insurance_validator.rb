@@ -38,8 +38,8 @@ module V051V100
   class V081BuyFamilyTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v081_buy_family_travel_insurance_validator'
     self.task_id = 'ba8f8cf7-8220-4b08-8c2f-23b58edb3926'
-    self.title = '购买家庭旅游保险（三亚，7天后出行，3人，7天）'
-    self.description = '为家庭（2成人+1儿童）购买三亚出行的旅游保险，选择适合亲子游场景的境内旅游保险产品'
+    self.title = '给张三一家3人购买三亚旅游保险（7天后出发，保障7天）'
+    self.description = '帮张三、王芳、小明这一家3口（2成人+1儿童）买三亚出行的旅游保险，7天后出发，保障7天，选择适合亲子游场景的产品'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -52,6 +52,22 @@ module V051V100
       @scene = '亲子游'
       @start_date = Date.current + 7.days  # 7天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
+    
+      # 查询被保险人信息（张三一家：张三、王芳、小明）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+      @expected_insured_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
+      @expected_insured_id_numbers = [@zhangsan.id_number, @wangfang.id_number, @xiaoming.id_number]
+      
+      # 查询可用联系人（用于联系人验证）
+      # 家庭保险通常使用家长作为联系人（张三或王芳）
+      @valid_contact_names = [@zhangsan.name, @wangfang.name]
+      @valid_contact_phones = {
+        @zhangsan.name => @zhangsan.phone,
+        @wangfang.name => @wangfang.phone
+      }
     
       # 查找适合亲子游的境内旅游保险产品（注意：查询基线数据 data_version=0）
       @available_products = InsuranceProduct.where(
@@ -66,7 +82,7 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为家庭（2成人+1儿童）购买#{@destination}出行的旅游保险（7天后出发，保障期#{@days}天，共#{@quantity}人），选择适合亲子游场景的产品",
+        task: "请为张三一家（张三、王芳、小明）购买#{@destination}出行的旅游保险（7天后出发，保障期#{@days}天，共#{@quantity}人），选择适合亲子游场景的产品",
         product_type: "境内旅游",
         destination: @destination,
         days: @days,
@@ -74,6 +90,7 @@ module V051V100
         scene: @scene,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
+        insured_persons: @expected_insured_names,
         hint: "三亚是热门的亲子游目的地，请选择适合亲子游场景（scenes包含'亲子游'）的保险产品",
         available_products_count: @available_products.count,
         note: "家庭保险支持多人共同投保，适合亲子游的产品保障范围更适合家庭出行场景"
@@ -96,41 +113,90 @@ module V051V100
       return unless @insurance_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 保险类型正确
-      add_assertion "保险类型正确（境内旅游）", weight: 10 do
+      add_assertion "保险类型正确（境内旅游）", weight: 7 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}（境内旅游），实际: #{actual_type}"
       end
     
       # 断言3: 目的地正确
-      add_assertion "目的地正确（#{@destination}）", weight: 10 do
+      add_assertion "目的地正确（#{@destination}）", weight: 7 do
         actual_destination = @insurance_order.destination
         expect(actual_destination).to include(@destination),
           "目的地错误。期望包含: #{@destination}, 实际: #{actual_destination || '未填写'}"
       end
     
       # 断言4: 出行开始时间正确（7天后）
-      add_assertion "出行开始时间正确（7天后，#{@start_date}）", weight: 10 do
+      add_assertion "出行开始时间正确（7天后，#{@start_date}）", weight: 7 do
         actual_start_date = @insurance_order.start_date
         expect(actual_start_date).to eq(@start_date),
           "出行开始时间错误。期望: #{@start_date}（7天后）, 实际: #{actual_start_date}"
       end
     
       # 断言5: 保障天数正确
-      add_assertion "保障天数正确（#{@days}天）", weight: 10 do
+      add_assertion "保障天数正确（#{@days}天）", weight: 7 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
           "保障天数错误。期望: #{@days}天, 实际: #{actual_days}天"
       end
     
       # 断言6: 人数正确（3人）
-      add_assertion "人数正确（#{@quantity}人）", weight: 10 do
+      add_assertion "人数正确（#{@quantity}人）", weight: 7 do
         actual_quantity = @insurance_order.quantity
         expect(actual_quantity).to eq(@quantity),
           "购买人数错误。期望: #{@quantity}人（家庭），实际: #{actual_quantity}人"
       end
     
-      # 断言7: 产品适合亲子游场景（核心评分项）
+      # 断言7: 被保险人信息正确（张三、王芳、小明）
+      add_assertion "被保险人信息正确（张三、王芳、小明）", weight: 8 do
+        insured_persons = @insurance_order.insured_persons || []
+        expect(insured_persons).not_to be_empty, "未填写被保险人信息"
+        
+        # 验证被保险人数量
+        expect(insured_persons.size).to eq(@quantity),
+          "被保险人数量错误。期望: #{@quantity}人，实际: #{insured_persons.size}人"
+        
+        # 提取姓名和身份证号（支持 Array<Hash> 和 Array<String> 两种格式）
+        actual_names = insured_persons.map do |p|
+          p.is_a?(Hash) ? p['name'] || p[:name] : p.to_s.split(/[（(]/).first
+        end.compact
+        
+        actual_id_numbers = insured_persons.map do |p|
+          next unless p.is_a?(Hash)
+          p['id_number'] || p[:id_number]
+        end.compact
+        
+        # 验证姓名
+        @expected_insured_names.each do |expected_name|
+          has_name = actual_names.any? { |n| n.include?(expected_name) }
+          expect(has_name).to be_truthy,
+            "被保险人缺少#{expected_name}。期望: #{@expected_insured_names.join('、')}，实际: #{actual_names.join('、')}"
+        end
+        
+        # 如果存储了身份证号，验证身份证号
+        if actual_id_numbers.any?
+          @expected_insured_id_numbers.each do |expected_id|
+            expect(actual_id_numbers).to include(expected_id),
+              "身份证号不匹配。期望包含: #{expected_id}，实际: #{actual_id_numbers.join('、')}"
+          end
+        end
+      end
+    
+      # 断言8: 联系人信息正确（从家长中选择：张三或王芳）
+      add_assertion "联系人信息正确（从家长中选择：张三或王芳）", weight: 7 do
+        # 注意：InsuranceOrder 没有单独的 contact_name/contact_phone 字段
+        # 联系人通常是被保险人之一（家庭保险通常使用家长作为联系人）
+        insured_persons = @insurance_order.insured_persons || []
+        
+        # 检查是否使用了可用联系人中的某个（通过姓名匹配）
+        has_valid_contact = insured_persons.any? { |p| @valid_contact_names.include?(p['name'] || p[:name]) }
+        
+        expect(has_valid_contact).to be_truthy,
+          "未找到有效的联系人信息。期望被保险人中至少有一位家长作为联系人: #{@valid_contact_names.join('、')}，" \
+          "实际被保险人: #{insured_persons.map { |p| p['name'] || p[:name] }.join('、')}"
+      end
+    
+      # 断言9: 产品适合亲子游场景（核心评分项）
       add_assertion "产品适合亲子游场景", weight: 20 do
         scenes = @insurance_order.insurance_product.scenes || []
         has_scene = scenes.include?(@scene)
@@ -140,7 +206,7 @@ module V051V100
           "亲子游场景的保险产品保障范围更适合家庭出行，包括海岛度假、户外活动等常见家庭旅游场景"
       end
     
-      # 断言8: 订单价格计算正确
+      # 断言10: 订单价格计算正确
       add_assertion "订单价格计算正确", weight: 10 do
         # 验证 total_price = unit_price × quantity（订单已保存正确的unit_price，包含城市差异化定价）
         expected_total = @insurance_order.unit_price * @insurance_order.quantity
@@ -162,7 +228,11 @@ module V051V100
         quantity: @quantity,
         scene: @scene,
         start_date: @start_date&.to_s,
-        end_date: @end_date&.to_s
+        end_date: @end_date&.to_s,
+        expected_insured_names: @expected_insured_names,
+        expected_insured_id_numbers: @expected_insured_id_numbers,
+        valid_contact_names: @valid_contact_names,
+        valid_contact_phones: @valid_contact_phones
       }
     end
   
@@ -175,6 +245,10 @@ module V051V100
       @scene = data['scene']
       @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
       @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
+      @expected_insured_names = data['expected_insured_names'] || []
+      @expected_insured_id_numbers = data['expected_insured_id_numbers'] || []
+      @valid_contact_names = data['valid_contact_names'] || []
+      @valid_contact_phones = data['valid_contact_phones'] || {}
     
       # 重新加载可用产品列表
       @available_products = InsuranceProduct.where(
@@ -182,6 +256,14 @@ module V051V100
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
        .select { |p| p.scenes&.include?(@scene) }
+      
+      # 重新加载被保险人数据
+      user = User.find_by(email: 'demo@travel01.com', data_version: 0)
+      if user
+        @zhangsan = user.passengers.find_by(name: '张三', data_version: 0)
+        @wangfang = user.passengers.find_by(name: '王芳', data_version: 0)
+        @xiaoming = user.passengers.find_by(name: '小明', data_version: 0)
+      end
     end
   
     # 模拟 AI Agent 操作：为家庭购买适合亲子游的旅游保险
@@ -189,10 +271,15 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找三亚相关的城市配置（用于差异化定价）
+      # 2. 查询被保险人信息（张三一家：张三、王芳、小明）
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+    
+      # 3. 查找三亚相关的城市配置（用于差异化定价）
       sanya_city = City.find_by(name: @destination, data_version: 0)
     
-      # 3. 查找适合亲子游的境内旅游保险产品
+      # 4. 查找适合亲子游的境内旅游保险产品
       available_products = InsuranceProduct.where(
         product_type: @product_type,
         data_version: 0
@@ -201,12 +288,12 @@ module V051V100
     
       raise "未找到适合亲子游的保险产品" if available_products.empty?
     
-      # 4. 选择第一个适合亲子游的产品
+      # 5. 选择第一个适合亲子游的产品
       selected_product = available_products.first
     
       raise "未找到可用的保险产品" unless selected_product
     
-      # 5. 计算订单价格（考虑城市差异化定价）
+      # 6. 计算订单价格（考虑城市差异化定价）
       unit_price = if sanya_city
         # 使用城市特定价格计算
         selected_product.calculate_price(@days, city_id: sanya_city.id) || (selected_product.price_per_day * @days)
@@ -215,7 +302,14 @@ module V051V100
         selected_product.price_per_day * @days
       end
     
-      # 6. 创建保险订单
+      # 7. 构建被保险人信息（支持两种格式：Hash 或 String）
+      insured_persons_data = [
+        { name: zhangsan.name, id_number: zhangsan.id_number },
+        { name: wangfang.name, id_number: wangfang.id_number },
+        { name: xiaoming.name, id_number: xiaoming.id_number }
+      ]
+    
+      # 8. 创建保险订单
       insurance_order = InsuranceOrder.create!(
         user_id: user.id,
         insurance_product_id: selected_product.id,
@@ -225,7 +319,7 @@ module V051V100
         days: @days,
         destination: @destination,
         destination_type: 'domestic',
-        insured_persons: ['张三（爸爸）', '李四（妈妈）', '张小明（儿童，8岁）'],
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,

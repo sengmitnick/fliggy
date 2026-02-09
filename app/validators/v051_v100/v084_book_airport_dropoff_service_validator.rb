@@ -27,8 +27,8 @@ module V051V100
   class V084BookAirportDropoffServiceValidator < BaseValidator
     self.validator_id = 'v084_book_airport_dropoff_service_validator'
     self.task_id = '31608ddd-05b6-48a6-8e8e-b9a0cf0759b4'
-    self.title = '预订浦东机场送机服务（上海→北京航班，舒适5座）'
-    self.description = '明天从上海飞往北京，通过搜索航班确定起飞机场，从市区送到机场，选择舒适5座车型中价格最低的套餐'
+    self.title = '给张三预订明天浦东机场送机服务（上海→北京航班，舒适5座，最便宜）'
+    self.description = '帮张三预订明天送机服务，他从上海飞北京，要从市区送到浦东机场，选舒适5座最便宜的'
     self.timeout_seconds = 240
   
     def prepare
@@ -44,6 +44,12 @@ module V051V100
     
       @location_from = @pickup_location  # 上车点 = 市区地址
       @location_to = @departure_airport  # 下车点 = 起飞机场（通过航班搜索确定）
+    
+      # 查询联系人信息（从 demo_user.passengers 获取）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @contact = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @contact.name
+      @expected_contact_phone = @contact.phone
     
       @available_packages = TransferPackage.where(
         vehicle_category: @vehicle_category,
@@ -70,8 +76,11 @@ module V051V100
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
-        @transfer = Transfer.order(created_at: :desc).first
+      add_assertion "创建了送机订单", weight: 20 do
+        @transfer = Transfer
+          .where(data_version: @data_version)
+          .order(created_at: :desc)
+          .first
         expect(@transfer).not_to be_nil, "未找到任何接送机订单记录"
       end
     
@@ -84,10 +93,17 @@ module V051V100
           "具体服务类型错误。期望: #{@service_type}（送到机场）, 实际: #{@transfer.service_type}"
       end
     
-      add_assertion "车辆类型正确（comfort_5 舒适5座）", weight: 25 do
+      add_assertion "车辆类型正确（comfort_5 舒适5座）", weight: 15 do
         expect(@transfer.transfer_package).not_to be_nil, "未选择车辆套餐"
         expect(@transfer.transfer_package.vehicle_category).to eq(@vehicle_category),
           "车辆类型错误。期望: #{@vehicle_category}（舒适5座）, 实际: #{@transfer.transfer_package.vehicle_category}"
+      end
+    
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@transfer.passenger_phone}"
       end
     
       add_assertion "选择了该车型中价格最低的套餐", weight: 30 do
@@ -126,12 +142,13 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime,
-        passenger_name: '李四',
-        passenger_phone: '13900139000',
+        passenger_name: @contact.name,
+        passenger_phone: @contact.phone,
         total_price: cheapest.price,
         discount_amount: 0,
         status: 'pending',
-        driver_status: 'pending'
+        driver_status: 'pending',
+        data_version: @data_version
       )
     end
   
@@ -149,7 +166,9 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime.to_s,
-        vehicle_category: @vehicle_category
+        vehicle_category: @vehicle_category,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -164,8 +183,14 @@ module V051V100
       @location_from = data['location_from']
       @location_to = data['location_to']
       @vehicle_category = data['vehicle_category']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
       @available_packages = TransferPackage.where(vehicle_category: @vehicle_category, is_active: true, data_version: 0)
+      
+      # 恢复 contact 对象（用于 simulate）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @contact = user.passengers.find_by!(name: @expected_contact_name, data_version: 0)
     end
     end
 end

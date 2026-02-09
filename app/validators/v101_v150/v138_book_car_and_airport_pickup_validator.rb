@@ -6,12 +6,12 @@ module V101V150
   class V138BookCarAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v138_book_car_and_airport_pickup_validator'
     self.task_id = 'e8f9a0b1-2c3d-4e5f-6a7b-8c9d0e1f2a3b'
-    self.title = '预订明天租车+机场接机服务'
-    self.description = '预订明天深圳机场自取的经济轿车3天，并预订机场接机服务'
+    self.title = '给张三预订明天租车+机场接机服务（深圳机场自取经济轿车3天）'
+    self.description = '帮张三订明天深圳机场自取的经济轿车3天，并预订机场接机服务'
     self.timeout_seconds = 300
 
     def task_description
-      "预订明天深圳机场自取的经济轿车3天，并预订机场接机服务"
+      "帮张三订明天深圳机场自取的经济轿车3天，并预订机场接机服务"
     end
 
     def prepare
@@ -21,6 +21,13 @@ module V101V150
       @rental_days = 3
       @return_date = @pickup_date + @rental_days.days
       @pickup_location = "深圳宝安国际机场"
+
+      # 预查询驾驶员信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_driver_name = @passenger.name
+      @expected_driver_id = @passenger.id_number
+      @expected_phone = @passenger.phone
 
       @available_cars = Car.where(
         location: @location,
@@ -32,7 +39,7 @@ module V101V150
     end
 
     def verify
-      add_assertion "创建了租车订单", weight: 25 do
+      add_assertion "创建了租车订单", weight: 20 do
         all_car_orders = CarOrder
           .joins(:car)
           .includes(:car)
@@ -64,7 +71,14 @@ module V101V150
         expect(@car_order.return_datetime.to_date).to eq(expected_return)
       end
 
-      add_assertion "创建了接机订单", weight: 20 do
+      add_assertion "驾驶员信息正确（张三）", weight: 10 do
+        expect(@car_order.driver_name).to eq(@expected_driver_name),
+          "驾驶员姓名错误。期望: #{@expected_driver_name}, 实际: #{@car_order.driver_name}"
+        expect(@car_order.driver_id_number).to eq(@expected_driver_id),
+          "驾驶员身份证号错误。期望: #{@expected_driver_id}, 实际: #{@car_order.driver_id_number}"
+      end
+
+      add_assertion "创建了接机订单", weight: 15 do
         all_transfers = Transfer
           .where(transfer_type: 'airport_pickup', data_version: @data_version)
           .order(created_at: :desc)
@@ -76,25 +90,33 @@ module V101V150
 
       return if @transfer.nil?
 
-      add_assertion "接机地点=深圳机场", weight: 10 do
+      add_assertion "接机地点=深圳机场", weight: 5 do
         location = @transfer.location_from.to_s
         has_airport = location.include?("机场") || location.include?("Airport") || location.include?("深圳")
         expect(has_airport).to be(true),
           "接机地点不是深圳机场。实际: #{location}"
       end
+
+      add_assertion "接机乘客信息正确（张三）", weight: 5 do
+        expect(@transfer.passenger_name).to eq(@expected_driver_name),
+          "接机乘客姓名错误。期望: #{@expected_driver_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_phone),
+          "接机乘客电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
+      end
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
 
       car = @available_cars.first
       
       CarOrder.create!(
         user: user,
         car: car,
-        driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: passenger.name,
+        driver_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         pickup_datetime: @pickup_date.in_time_zone + 10.hours,
         return_datetime: (@pickup_date + @rental_days.days).in_time_zone + 18.hours,
         pickup_location: @pickup_location,
@@ -112,8 +134,8 @@ module V101V150
         location_to: "深圳市区",
         pickup_datetime: @pickup_date.in_time_zone + 9.hours,
         vehicle_type: 'economy_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         total_price: 80.0,
         status: 'pending',
         data_version: @data_version
@@ -129,7 +151,10 @@ module V101V150
         pickup_date: @pickup_date.to_s,
         rental_days: @rental_days,
         return_date: @return_date.to_s,
-        pickup_location: @pickup_location
+        pickup_location: @pickup_location,
+        expected_driver_name: @expected_driver_name,
+        expected_driver_id: @expected_driver_id,
+        expected_phone: @expected_phone
       }
     end
 
@@ -140,6 +165,9 @@ module V101V150
       @rental_days = data['rental_days']
       @return_date = Date.parse(data['return_date'])
       @pickup_location = data['pickup_location']
+      @expected_driver_name = data['expected_driver_name']
+      @expected_driver_id = data['expected_driver_id']
+      @expected_phone = data['expected_phone']
 
       @available_cars = Car.where(
         location: @location,

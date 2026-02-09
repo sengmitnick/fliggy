@@ -25,7 +25,8 @@ require_relative '../base_validator'
 #   - 预约模式正确（instant而非stockup）(15分)
 #   - 选择了豪华套餐选项（包含早餐+晚餐）(20分)
 #   - 入住日期正确（下周六开始，连住2晚）(15分)
-#   - 订单价格和数量正确 (10分)
+#   - 联系人信息正确（张三）(5分)
+#   - 订单价格和数量正确 (5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -39,8 +40,8 @@ module V101V150
   class V102InstantBookChengduHotelThisWeekendValidator < BaseValidator
     self.validator_id = 'v102_instant_book_chengdu_hotel_this_weekend_validator'
     self.task_id = 'e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b'
-    self.title = '立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）'
-    self.description = '需要搜索成都地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择豪华套餐（包含早餐+晚餐），并指定下周六开始入住2晚'
+    self.title = '给张三立即预约成都酒店套餐（下周六入住2晚，豪华套餐）'
+    self.description = '帮张三预约成都的2晚酒店套餐，下周六入住，选豪华套餐（包含早餐+晚餐的那种），立即预约模式'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -50,11 +51,17 @@ module V101V150
       @night_count = 2
       @quantity = 1
     
-      # 计算下周六的日期（提前预订更符合酒店预订场景）
+      # 计算下周六的日期（标准算法）
       today = Date.current
-      days_until_saturday = (6 - today.wday) % 7
-      days_until_saturday = 7 if days_until_saturday == 0 # 如果今天是周六，则选择下周六
-      @check_in_date = today + days_until_saturday.days + 7.days # 加7天确保是下周六
+      
+      if today.saturday?
+        @check_in_date = today + 7.days  # 今天是周六，选择下一个周六
+      else
+        days_until_next_saturday = (6 - today.wday) % 7
+        days_until_next_saturday = 7 if days_until_next_saturday == 0  # 今天是周日
+        @check_in_date = today + days_until_next_saturday.days
+      end
+      
       @check_out_date = @check_in_date + @night_count.days
     
       # 查找成都地区的2晚套餐（注意：查询基线数据 data_version=0）
@@ -147,8 +154,14 @@ module V101V150
           "离店日期错误。期望: #{@check_out_date.strftime('%Y年%m月%d日')}（#{@night_count}晚后）, 实际: #{actual_check_out&.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言7: 订单价格和数量正确
-      add_assertion "订单价格和数量正确", weight: 10 do
+      # 断言7: 联系人信息正确（张三）
+      add_assertion "联系人信息正确（张三）", weight: 5 do
+        expect(@package_order.passenger&.name).to eq('张三'),
+          "联系人姓名错误。期望: 张三, 实际: #{@package_order.passenger&.name}"
+      end
+    
+      # 断言8: 订单价格和数量正确
+      add_assertion "订单价格和数量正确", weight: 5 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
       
@@ -194,8 +207,8 @@ module V101V150
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      # 2. 查找测试乘客张三（数据包中已创建）
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找成都地区的2晚套餐
       available_packages = HotelPackage.where(
@@ -236,15 +249,16 @@ module V101V150
         package_option_id: target_option.id,
         hotel_id: target_hotel.id,
         user_id: user.id,
-        passenger_id: passenger.id,
+        passenger_id: zhangsan.id,
         quantity: @quantity,
         total_price: target_option.price * @quantity,
         booking_type: 'instant',
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         status: 'pending',
-        contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_name: zhangsan.name,
+        contact_phone: zhangsan.phone,
+        data_version: @data_version
       )
     
       # 返回操作信息

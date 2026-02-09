@@ -2,15 +2,16 @@
 
 require_relative '../base_validator'
 
-# V143: 预订上海豪华酒店套餐2晚（含早餐）+ 机场接机服务
+# V143: 预订上海豪华酒店套餐 + 机场接机服务
 # 验证用户能够完成酒店套餐预订+机场接机服务的组合下单
+# 重要：需验证酒店联系人信息（contact_name + contact_phone）
 
 module V101V150
   class V143BookHotelPackageWithAirportPickupValidator < BaseValidator
     self.validator_id = 'v143_book_hotel_package_with_airport_pickup_validator'
     self.task_id = 'd3e4f5a6-7b8c-9d0e-1f2a-3b4c5d6e7f8a'
-    self.title = '预订后天酒店套餐后预订机场接机服务（上海豪华2晚）'
-    self.description = '预订后天上海豪华酒店套餐2晚（含早餐），并预订机场接机服务'
+    self.title = '给张三预订后天酒店套餐后预订机场接机服务（上海豪华2晚，含早餐）'
+    self.description = '帮张三预订后天上海豪华酒店套餐，住2晚，需要含早餐，并预订机场接机服务'
     self.timeout_seconds = 300
 
     def prepare
@@ -19,6 +20,12 @@ module V101V150
       @city = '上海'
       @brand_pattern = ['万豪', '希尔顿', '洲际', '凯悦']
       @pickup_location = '上海浦东国际机场'
+      
+      # 预查询联系人信息（用于 simulate 和 verify）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @zhangsan.name
+      @expected_contact_phone = @zhangsan.phone
       
       # 查找可用的豪华酒店套餐（含早餐）
       @available_packages = HotelPackage
@@ -34,7 +41,7 @@ module V101V150
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       package = @available_packages.first
       
       # 查找含早套餐选项
@@ -47,8 +54,8 @@ module V101V150
         hotel_id: package.hotel.id,
         package_option: breakfast_option,
         passenger_id: passenger.id,
-        contact_name: user.name,
-        contact_phone: '13800138000',
+        contact_name: passenger.name,
+        contact_phone: passenger.phone,
         check_in_date: @checkin_date,
         check_out_date: @checkin_date + @nights.days,
         total_price: breakfast_option.price,
@@ -65,8 +72,8 @@ module V101V150
         location_to: "#{@city}市区",
         pickup_datetime: @checkin_date.in_time_zone + 10.hours,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         total_price: 150.0,
         status: 'pending',
         data_version: @data_version
@@ -79,7 +86,9 @@ module V101V150
         checkin_date: @checkin_date.to_s,
         nights: @nights,
         city: @city,
-        pickup_location: @pickup_location
+        pickup_location: @pickup_location,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
 
@@ -89,11 +98,13 @@ module V101V150
       @nights = data['nights']
       @city = data['city']
       @pickup_location = data['pickup_location']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
 
     def verify
       # 断言1: 创建了酒店套餐订单
-      add_assertion "创建了酒店套餐订单", weight: 25 do
+      add_assertion "创建了酒店套餐订单", weight: 20 do
         all_orders = HotelPackageOrder
           .joins(:hotel_package)
           .includes(:hotel_package, :package_option)
@@ -129,15 +140,23 @@ module V101V150
       end
       
       # 断言5: 包含早餐选项
-      add_assertion "选择了含早餐套餐", weight: 15 do
+      add_assertion "选择了含早餐套餐", weight: 10 do
         option_name = @hotel_package_order.package_option&.name.to_s
         has_breakfast = option_name.include?("含早") || option_name.include?("早餐")
         expect(has_breakfast).to be(true),
           "未选择含早餐套餐。实际选项: #{option_name}"
       end
       
-      # 断言6: 创建了机场接机服务
-      add_assertion "创建了机场接机服务", weight: 15 do
+      # 断言6: 酒店订单联系人信息正确（张三）
+      add_assertion "酒店订单联系人信息正确（张三）", weight: 10 do
+        expect(@hotel_package_order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@hotel_package_order.contact_name}"
+        expect(@hotel_package_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@hotel_package_order.contact_phone}"
+      end
+      
+      # 断言7: 创建了机场接机服务
+      add_assertion "创建了机场接机服务", weight: 10 do
         @transfer = Transfer
           .where(transfer_type: 'airport_pickup', data_version: @data_version)
           .order(created_at: :desc)
@@ -148,8 +167,16 @@ module V101V150
       
       return if @transfer.nil?
       
-      # 断言7: 接机地点正确
-      add_assertion "接机地点正确（#{@pickup_location}）", weight: 10 do
+      # 断言8: 接机服务乘客信息正确（张三）
+      add_assertion "接机服务乘客信息正确（张三）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_contact_name),
+          "乘客姓名错误。期望: #{@expected_contact_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_contact_phone),
+          "乘客电话错误。期望: #{@expected_contact_phone}, 实际: #{@transfer.passenger_phone}"
+      end
+      
+      # 断言9: 接机地点正确
+      add_assertion "接机地点正确（#{@pickup_location}）", weight: 5 do
         expect(@transfer.location_from).to eq(@pickup_location),
           "接机地点错误。期望: #{@pickup_location}, 实际: #{@transfer.location_from}"
       end

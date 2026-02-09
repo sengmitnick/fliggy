@@ -24,7 +24,8 @@ require_relative '../base_validator'
 #   - 套餐晚数正确（2晚）(10分)
 #   - 选择了含早餐的套餐选项（含早或豪华套餐）(25分)
 #   - 购买数量正确（2份）(15分)
-#   - 订单总价正确（单价 × 2）(20分)
+#   - 联系人信息正确（张三 13800138000）(10分)
+#   - 订单总价正确（单价 × 2）(10分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -38,8 +39,8 @@ module V101V150
   class V101BookShenzhenHotelMultiplePackagesValidator < BaseValidator
     self.validator_id = 'v101_book_shenzhen_hotel_multiple_packages_validator'
     self.task_id = 'b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e'
-    self.title = '囤货深圳地区酒店套餐（2晚，2份，含早餐）'
-    self.description = '需要搜索深圳地区的2晚酒店套餐，囤货购买2份（先囤再约），从套餐选项中选择含早餐的选项'
+    self.title = '给张三囤货深圳酒店套餐（2晚2份，选含早餐的）'
+    self.description = '帮张三囤货深圳的2晚酒店套餐，要买2份（先囤后约的那种），选含早餐的选项，性价比高一点的'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -122,8 +123,16 @@ module V101V150
           "请在订单页面修改购买数量为#{@quantity}份。"
       end
     
-      # 断言6: 订单总价正确（单价 × 2份）
-      add_assertion "订单总价正确（单价 × #{@quantity}份）", weight: 20 do
+      # 断言6: 联系人信息正确
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
+        expect(@package_order.contact_name).to eq('张三'),
+          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq('13800138000'),
+          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@package_order.contact_phone}"
+      end
+    
+      # 断言7: 订单总价正确（单价 × 2份）
+      add_assertion "订单总价正确（单价 × #{@quantity}份）", weight: 10 do
         unit_price = @package_order.package_option.price
         expected_total = unit_price * @quantity
         actual_total = @package_order.total_price
@@ -163,8 +172,8 @@ module V101V150
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      # 2. 查找测试乘客张三（数据包中已创建）
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找深圳地区的2晚套餐
       available_packages = HotelPackage.where(
@@ -191,13 +200,14 @@ module V101V150
         hotel_package_id: target_package.id,
         package_option_id: target_option.id,
         user_id: user.id,
-        passenger_id: passenger.id,
+        passenger_id: zhangsan.id,
         quantity: @quantity,
         total_price: target_option.price * @quantity,
         booking_type: 'stockup',
         status: 'pending',
-        contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_name: zhangsan.name,
+        contact_phone: zhangsan.phone,
+        data_version: @data_version
       )
     
       # 返回操作信息

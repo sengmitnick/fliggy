@@ -22,7 +22,7 @@ require_relative '../base_validator'
 #   4. 需要对比不同供应商的价格（阳光出行、伙力专车等）
 #   5. 需要对比不同车型的价格（经济5座、舒适5座、经济7座）
 #   6. 需要选择最低价格的套餐
-#   7. 需要填写乘车信息（联系人、手机号）
+#   7. 需要填写联系人信息（姓名、手机号）
 #   ❌ 不能一次性提供：需要先理解航班→确定机场→选地址→对比价格→预订
 # 
 # 评分标准:
@@ -31,7 +31,7 @@ require_relative '../base_validator'
 #   - 上车点正确（虹桥T2）(10分)
 #   - 下车点正确（上海站）(10分)
 #   - 选择了车辆类型 (10分)
-#   - 乘客信息正确（姓名、电话）(10分)
+#   - 联系人信息正确（姓名、电话）(10分)
 #   - 选择了最便宜的套餐 (25分)
 #   - 订单价格正确 (10分)
 # 
@@ -68,7 +68,7 @@ module V051V100
       @location_to = @destination_address # 下车点 = 上海站
       @pickup_datetime = Date.current + 2.days + 10.hours # 后天上午10点（预计落地时间）
     
-      # 乘客信息（任务标题中明确指定：张三）
+      # 联系人信息（任务标题中明确指定：张三）
       @passenger_name = '张三'
       @expected_passenger = User.find_by!(email: 'demo@travel01.com', data_version: 0).passengers.find_by!(name: '张三', data_version: 0)
       @expected_phone = @expected_passenger.phone
@@ -135,12 +135,12 @@ module V051V100
         expect(@transfer.transfer_package).not_to be_nil, "车辆套餐记录不存在"
       end
     
-      # 断言6: 乘客信息正确（姓名、电话）
-      add_assertion "乘客信息正确（姓名、电话）", weight: 10 do
+      # 断言6: 联系人信息正确（姓名、电话）
+      add_assertion "联系人信息正确（姓名、电话）", weight: 10 do
         expect(@transfer.passenger_name).to eq(@passenger_name),
-          "乘客姓名错误。期望: #{@passenger_name}, 实际: #{@transfer.passenger_name}"
+          "联系人姓名错误。期望: #{@passenger_name}, 实际: #{@transfer.passenger_name}"
         expect(@transfer.passenger_phone).to eq(@expected_phone),
-          "乘客电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
+          "联系人电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
       end
     
       # 断言7: 选择了最便宜的套餐（核心评分项）

@@ -29,11 +29,22 @@ module V051V100
   class V085BookTrainStationPickupValidator < BaseValidator
     self.validator_id = 'v085_book_train_station_pickup_validator'
     self.task_id = '74f8237a-b1b5-4670-b135-2867748d0721'
-    self.title = '预订虹桥火车站接站服务（北京→上海火车，家庭出行，经济7座）'
-    self.description = '后天从北京坐火车到上海，通过搜索火车班次确定到达车站，接站送到酒店，一家5口人，选择经济7座车型中价格最低的套餐'
+    self.title = '给张建国等5人预订后天上海火车站接站服务（选最便宜的经济7座）'
+    self.description = '帮张建国（爷爷）、张三、王芳、小明、李四这5个人订后天从北京坐火车到上海的接站服务，到站后送到浦东酒店，要最便宜的经济7座'
     self.timeout_seconds = 240
   
     def prepare
+      # Demo user data - 5人中4个成人可选作为联系人（排除小明-儿童）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      # 小明（儿童）不应作为联系人
+      
+      @valid_passenger_names = [@zhangjianguo.name, @zhangsan.name, @wangfang.name, @lisi.name]
+      @valid_passenger_phones = [@zhangjianguo.phone, @zhangsan.phone, @wangfang.phone, @lisi.phone]
+      
       @service_type = 'from_station'  # 火车站接站服务
       @transfer_type = 'train_pickup'
       @departure_city = '北京'  # 火车出发城市
@@ -75,12 +86,19 @@ module V051V100
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
-        @transfer = Transfer.order(created_at: :desc).first
-        expect(@transfer).not_to be_nil, "未找到任何接送机订单记录"
+      add_assertion "创建了接站订单", weight: 20 do
+        all_transfers = Transfer
+          .where(data_version: @data_version)
+          .where(transfer_type: @transfer_type)
+          .where(service_type: @service_type)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_transfers).not_to be_empty, "未找到任何火车站接站订单记录"
+        @transfer = all_transfers.first
       end
     
-      return unless @transfer
+      return if @transfer.nil?
     
       add_assertion "服务类型正确（train_pickup + from_station）", weight: 15 do
         expect(@transfer.transfer_type).to eq(@transfer_type),
@@ -89,13 +107,13 @@ module V051V100
           "具体服务类型错误。期望: #{@service_type}（从车站接），实际: #{@transfer.service_type}"
       end
     
-      add_assertion "车辆类型正确（economy_7 经济7座）", weight: 25 do
+      add_assertion "车辆类型正确（economy_7 经济7座）", weight: 20 do
         expect(@transfer.transfer_package).not_to be_nil, "未选择车辆套餐"
         expect(@transfer.transfer_package.vehicle_category).to eq(@vehicle_category),
           "车辆类型错误。期望: #{@vehicle_category}（经济7座，适合#{@passenger_count}人家庭）, 实际: #{@transfer.transfer_package.vehicle_category}"
       end
     
-      add_assertion "选择了该车型中价格最低的套餐", weight: 30 do
+      add_assertion "选择了该车型中价格最低的套餐", weight: 25 do
         packages = TransferPackage.where(vehicle_category: @vehicle_category, is_active: true, data_version: 0)
         cheapest = packages.min_by(&:price)
         actual_price = @transfer.transfer_package.price
@@ -107,6 +125,13 @@ module V051V100
           "实际: #{@transfer.transfer_package.name} #{@transfer.transfer_package.category_name}（#{actual_price}元）"
       end
     
+      add_assertion "联系人信息正确（4个成人中任选1人）", weight: 10 do
+        expect(@valid_passenger_names).to include(@transfer.passenger_name),
+          "联系人姓名错误。应从4个成人中选择：#{@valid_passenger_names.join('、')}（小明是儿童不应作为联系人），实际: #{@transfer.passenger_name}"
+        expect(@valid_passenger_phones).to include(@transfer.passenger_phone),
+          "联系人电话错误。应从4个成人电话中选择，实际: #{@transfer.passenger_phone}"
+      end
+      
       add_assertion "订单价格正确", weight: 10 do
         expected_price = @transfer.transfer_package.price
         actual_price = @transfer.total_price
@@ -122,6 +147,9 @@ module V051V100
       raise "未找到#{@vehicle_category}车型" if packages.empty?
     
       cheapest = packages.min_by(&:price)
+      
+      # 从4个成人中随机选择一个作为联系人（排除小明-儿童）
+      selected_passenger = [@zhangjianguo, @zhangsan, @wangfang, @lisi].sample
     
       Transfer.create!(
         user_id: user.id,
@@ -131,12 +159,13 @@ module V051V100
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime,
-        passenger_name: '王五',
-        passenger_phone: '13900139001',
+        passenger_name: selected_passenger.name,
+        passenger_phone: selected_passenger.phone,
         total_price: cheapest.price,
         discount_amount: 0,
         status: 'pending',
-        driver_status: 'pending'
+        driver_status: 'pending',
+        data_version: @data_version
       )
     end
   
@@ -155,7 +184,9 @@ module V051V100
         location_to: @location_to,
         pickup_datetime: @pickup_datetime.to_s,
         vehicle_category: @vehicle_category,
-        passenger_count: @passenger_count
+        passenger_count: @passenger_count,
+        valid_passenger_names: @valid_passenger_names,
+        valid_passenger_phones: @valid_passenger_phones
       }
     end
   
@@ -171,6 +202,8 @@ module V051V100
       @location_to = data['location_to']
       @vehicle_category = data['vehicle_category']
       @passenger_count = data['passenger_count']
+      @valid_passenger_names = data['valid_passenger_names']
+      @valid_passenger_phones = data['valid_passenger_phones']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
       @available_packages = TransferPackage.where(vehicle_category: @vehicle_category, is_active: true, data_version: 0)
     end

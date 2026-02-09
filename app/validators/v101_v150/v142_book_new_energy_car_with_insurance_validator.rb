@@ -6,8 +6,8 @@ module V101V150
   class V142BookNewEnergyCarWithInsuranceValidator < BaseValidator
     self.validator_id = 'v142_book_new_energy_car_with_insurance_validator'
     self.task_id = 'c2d3e4f5-6a7b-8c9d-0e1f-2a3b4c5d6e7f'
-    self.title = '预订明天新能源车（全险+免费取消）'
-    self.description = '预订明天成都新能源车3天，包含全险和免费取消'
+    self.title = '给张三预订明天新能源车（成都，3天，全险+免费取消）'
+    self.description = '帮张三预订明天成都的新能源车，租3天，包含全险和免费取消'
     self.timeout_seconds = 300
 
     def task_description
@@ -20,6 +20,13 @@ module V101V150
       @pickup_date = Date.current + 1.day
       @rental_days = 3
       @return_date = @pickup_date + @rental_days.days
+
+      # 预查询乘客信息（用于 simulate 和 verify）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_driver_name = @zhangsan.name
+      @expected_driver_id = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone
 
       @available_cars = Car.where(
         location: @location,
@@ -79,18 +86,28 @@ module V101V150
         expect(is_new_energy).to be(true),
           "车辆不是新能源类型。实际燃料类型: #{fuel_type}"
       end
+
+      add_assertion "司机信息正确（张三）", weight: 10 do
+        expect(@car_order.driver_name).to eq(@expected_driver_name),
+          "司机姓名错误。期望: #{@expected_driver_name}, 实际: #{@car_order.driver_name}"
+        expect(@car_order.driver_id_number).to eq(@expected_driver_id),
+          "司机身份证号错误。期望: #{@expected_driver_id}, 实际: #{@car_order.driver_id_number}"
+        expect(@car_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@car_order.contact_phone}"
+      end
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
 
       car = @available_cars.first
       CarOrder.create!(
         user: user,
         car: car,
-        driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: passenger.name,
+        driver_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         pickup_datetime: @pickup_date.in_time_zone + 10.hours,
         return_datetime: (@pickup_date + @rental_days.days).in_time_zone + 18.hours,
         pickup_location: "成都双流国际机场",
@@ -108,7 +125,10 @@ module V101V150
         category: @category,
         pickup_date: @pickup_date.to_s,
         rental_days: @rental_days,
-        return_date: @return_date.to_s
+        return_date: @return_date.to_s,
+        expected_driver_name: @expected_driver_name,
+        expected_driver_id: @expected_driver_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
 
@@ -118,6 +138,9 @@ module V101V150
       @pickup_date = Date.parse(data['pickup_date'])
       @rental_days = data['rental_days']
       @return_date = Date.parse(data['return_date'])
+      @expected_driver_name = data['expected_driver_name']
+      @expected_driver_id = data['expected_driver_id']
+      @expected_contact_phone = data['expected_contact_phone']
 
       @available_cars = Car.where(
         location: @location,

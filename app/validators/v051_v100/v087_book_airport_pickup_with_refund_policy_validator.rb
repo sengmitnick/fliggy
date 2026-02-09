@@ -7,11 +7,17 @@ module V051V100
   class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
     self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
     self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
-    self.title = '预订3天后浦东机场接机服务（最便宜，舒适5座，要求可随时取消）'
-    self.description = '3天后从北京飞往上海，在浦东T2接机，需要舒适5座车型，并且要求出发前任何时间都可以免费取消订单（需先按起降城市搜索航班，系统会自动识别机场）'
+    self.title = '给张三预订3天后上海机场接机服务（最便宜舒适5座，要求可随时取消）'
+    self.description = '帮张三订3天后从北京飞往上海的接机服务，在浦东T2接机，要最便宜的舒适5座，并且要求出发前任何时间都可以免费取消订单'
     self.timeout_seconds = 240
   
     def prepare
+      # Demo user data
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_phone = @zhangsan.phone
+      
       @service_type = 'from_airport'  # 接机服务
       @transfer_type = 'airport_pickup'
       @pickup_location = '浦东国际机场T2航站楼'
@@ -40,19 +46,26 @@ module V051V100
     end
   
     def verify
-      add_assertion "订单已创建", weight: 15 do
-        @transfer = Transfer.order(created_at: :desc).first
-        expect(@transfer).not_to be_nil, "未找到任何接送机订单"
+      add_assertion "创建了接机订单", weight: 15 do
+        all_transfers = Transfer
+          .where(data_version: @data_version)
+          .where(transfer_type: @transfer_type)
+          .where(service_type: @service_type)
+          .order(created_at: :desc)
+          .to_a
+        
+        expect(all_transfers).not_to be_empty, "未找到任何接机订单"
+        @transfer = all_transfers.first
       end
     
-      return unless @transfer
+      return if @transfer.nil?
     
-      add_assertion "服务类型正确（airport_pickup）", weight: 15 do
+      add_assertion "服务类型正确（airport_pickup）", weight: 10 do
         expect(@transfer.transfer_type).to eq(@transfer_type),
           "服务类型错误。期望: #{@transfer_type}（接机）, 实际: #{@transfer.transfer_type}"
       end
     
-      add_assertion "车辆类型正确（comfort_5 舒适5座）", weight: 25 do
+      add_assertion "车辆类型正确（comfort_5 舒适5座）", weight: 20 do
         expect(@transfer.transfer_package.vehicle_category).to eq(@vehicle_category),
           "车辆类型错误。期望: #{@vehicle_category}（舒适5座）, 实际: #{@transfer.transfer_package.vehicle_category}"
       end
@@ -70,12 +83,27 @@ module V051V100
         expect(@transfer.transfer_package_id).to eq(cheapest.id),
           "未选择符合条件最便宜套餐。应选: #{cheapest.name}（#{cheapest.price}元），实际: #{@transfer.transfer_package.name}（#{@transfer.transfer_package.price}元）"
       end
+      
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "联系人姓名错误。期望: #{@expected_passenger_name}，实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_passenger_phone),
+          "联系人电话错误。期望: #{@expected_passenger_phone}，实际: #{@transfer.passenger_phone}"
+      end
     end
   
     def execution_state_data
-      { service_type: @service_type, transfer_type: @transfer_type, pickup_location: @pickup_location,
-        dropoff_location: @dropoff_location, pickup_datetime: @pickup_datetime.to_s, vehicle_category: @vehicle_category,
-        required_refund_policy: @required_refund_policy }
+      { 
+        service_type: @service_type, 
+        transfer_type: @transfer_type, 
+        pickup_location: @pickup_location,
+        dropoff_location: @dropoff_location, 
+        pickup_datetime: @pickup_datetime.to_s, 
+        vehicle_category: @vehicle_category,
+        required_refund_policy: @required_refund_policy,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_phone: @expected_passenger_phone
+      }
     end
   
     def restore_from_state(data)
@@ -85,6 +113,8 @@ module V051V100
       @dropoff_location = data['dropoff_location']
       @vehicle_category = data['vehicle_category']
       @required_refund_policy = data['required_refund_policy']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_phone = data['expected_passenger_phone']
       @pickup_datetime = DateTime.parse(data['pickup_datetime']) if data['pickup_datetime']
       @available_packages = TransferPackage.where(vehicle_category: @vehicle_category, is_active: true, data_version: 0)
                                           .select { |p| p.refund_policy.include?(@required_refund_policy) }
@@ -106,12 +136,13 @@ module V051V100
         location_from: @pickup_location,
         location_to: @dropoff_location,
         pickup_datetime: @pickup_datetime,
-        passenger_name: '孙七',
-        passenger_phone: '13900139003',
+        passenger_name: @expected_passenger_name,
+        passenger_phone: @expected_passenger_phone,
         total_price: cheapest.price,
         discount_amount: 0,
         status: 'pending',
-        driver_status: 'pending'
+        driver_status: 'pending',
+        data_version: @data_version
       )
     end
     end

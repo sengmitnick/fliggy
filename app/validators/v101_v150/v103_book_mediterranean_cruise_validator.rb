@@ -15,8 +15,8 @@ module V101V150
   class V103BookMediterraneanCruiseValidator < BaseValidator
     self.validator_id = 'v103_book_mediterranean_cruise_validator'
     self.task_id = 'c3f9e2a1-5b47-4d12-9a8e-7f1e3d4a6c89'
-    self.title = '预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）'
-    self.description = '预订地中海航线邮轮，选择地中海辉煌号7天6晚行程，巴塞罗那出发，选择最近可用的班次，预订阳台房（观景之选）'
+    self.title = '给张三、李四预订地中海邮轮（地中海辉煌号7天、巴塞罗那出发，阳台房）'
+    self.description = '帮张三和李四订地中海邮轮，要地中海辉煌号，7天6晚的行程，巴塞罗那出发，选最近的班次，阳台房（观景之选）'
     self.timeout_seconds = 240
   
     def prepare
@@ -26,6 +26,18 @@ module V101V150
       @duration_nights = 6
       @cabin_category = 'balcony'
       @adult_count = 2
+    
+      # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_names = [@zhangsan.name, @lisi.name]
+      
+      # 有效联系人电话映射
+      @valid_contact_phones = {
+        '张三' => @zhangsan.phone,
+        '李四' => @lisi.phone
+      }
     
       # 查询可用船只
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
@@ -90,8 +102,19 @@ module V101V150
           "舱房类型错误。期望: #{@cabin_category}（阳台房），实际: #{cabin.category}（#{cabin.name}）"
       end
     
-      # 断言6: 选择了最近日期的班次（权重15%）
-      add_assertion "选择了最近日期的班次", weight: 15 do
+      # 断言6: 联系人信息正确（权重10%）
+      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
+        valid_contacts = ['张三', '李四']
+        expect(valid_contacts).to include(@order.contact_name),
+          "联系人姓名错误。期望: 张三或李四, 实际: #{@order.contact_name}"
+        
+        expected_phone = @valid_contact_phones[@order.contact_name]
+        expect(@order.contact_phone).to eq(expected_phone),
+          "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
+      end
+    
+      # 断言7: 选择了最近日期的班次（权重5%）
+      add_assertion "选择了最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         mediterranean_route = CruiseRoute.where(data_version: 0).find_by(region: 'mediterranean')
       
@@ -119,7 +142,9 @@ module V101V150
         duration_days: @duration_days,
         duration_nights: @duration_nights, 
         cabin_category: @cabin_category, 
-        adult_count: @adult_count 
+        adult_count: @adult_count,
+        expected_passenger_names: @expected_passenger_names,
+        valid_contact_phones: @valid_contact_phones
       }
     end
   
@@ -130,12 +155,29 @@ module V101V150
       @duration_nights = data['duration_nights']
       @cabin_category = data['cabin_category']
       @adult_count = data['adult_count']
+      @expected_passenger_names = data['expected_passenger_names'] || ['张三', '李四']
+      @valid_contact_phones = data['valid_contact_phones'] || { '张三' => '13800138000', '李四' => '13900139000' }
       @available_ships = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%")
     end
   
     def simulate
       # 查找演示用户（使用基线 data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 查找乘客信息（已在 prepare 中预查询）
+      zhangsan = @zhangsan || user.passengers.find_by!(name: '张三', data_version: 0)
+      lisi = @lisi || user.passengers.find_by!(name: '李四', data_version: 0)
+      
+      # 随机选择联系人
+      contact_names = ['张三', '李四']
+      selected_contact_name = contact_names.sample
+      contact_passenger = selected_contact_name == '张三' ? zhangsan : lisi
+      
+      # 创建乘客信息数组
+      passenger_info = [
+        { name: zhangsan.name, id_number: zhangsan.id_number, phone: zhangsan.phone },
+        { name: lisi.name, id_number: lisi.id_number, phone: lisi.phone }
+      ]
     
       # 查找船只（从基线数据中查找）
       ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
@@ -186,8 +228,9 @@ module V101V150
         user_id: user.id,
         cruise_product_id: cruise_product.id,
         quantity: @adult_count,
-        contact_name: '李四',
-        contact_phone: '13800138007',
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
+        passenger_info: passenger_info,
         total_price: total_price,
         accept_terms: true,
         status: 'pending',

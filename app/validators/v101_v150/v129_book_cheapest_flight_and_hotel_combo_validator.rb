@@ -7,8 +7,8 @@ module V101V150
   class V129BookCheapestFlightAndHotelComboValidator < BaseValidator
   self.validator_id = 'v129_book_cheapest_flight_and_hotel_combo_validator'
   self.task_id = 'b74f2624-643d-4736-a48c-0aaf816eac67'
-  self.title = '预订后天最便宜的航班+酒店组合（总价最低）'
-  self.description = '预订后天从上海到深圳的航班和深圳酒店（1晚），要求航班+酒店总价最低'
+  self.title = '给王芳预订后天最便宜的航班+酒店组合（总价最低）'
+  self.description = '帮王芳订后天从上海到深圳的航班和深圳酒店（1晚），要求航班+酒店总价最低'
   self.timeout_seconds = 300
 
   def prepare
@@ -18,6 +18,13 @@ module V101V150
     @hotel_city = '深圳'
     @check_in_date = @flight_date
     @check_out_date = @check_in_date + 1.day
+
+    # 获取受益人信息
+    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+    @expected_passenger_name = @passenger.name
+    @expected_passenger_id_number = @passenger.id_number
+    @expected_phone = @passenger.phone
 
     @available_flights = Flight.where(
       departure_city: @departure_city,
@@ -43,8 +50,9 @@ module V101V150
     @min_total_price = @cheapest_flight.price + @cheapest_room.price
 
     {
-      task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@arrival_city}的航班和#{@hotel_city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住1晚），要求选择航班+酒店总价最低的组合。",
+      task: "请给王芳预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@arrival_city}的航班和#{@hotel_city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住1晚），要求选择航班+酒店总价最低的组合。",
       requirements: {
+        beneficiary: '王芳',
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         flight_date: @flight_date,
@@ -74,7 +82,14 @@ module V101V150
 
     return if @flight_booking.nil?
 
-    add_assertion "航班城市和日期正确", weight: 15 do
+    add_assertion "航班乘客信息正确（王芳）", weight: 10 do
+      expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+        "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+      expect(@flight_booking.passenger_id_number).to eq(@expected_passenger_id_number),
+        "身份证号错误。期望: #{@expected_passenger_id_number}, 实际: #{@flight_booking.passenger_id_number}"
+    end
+
+    add_assertion "航班城市和日期正确", weight: 10 do
       expect(@flight_booking.flight.departure_city).to eq(@departure_city)
       expect(@flight_booking.flight.destination_city).to eq(@arrival_city)
       expect(@flight_booking.flight.flight_date).to eq(@flight_date)
@@ -95,19 +110,26 @@ module V101V150
 
     return if @hotel_booking.nil?
 
-    add_assertion "酒店入住时间和时长正确", weight: 15 do
+    add_assertion "酒店入住人信息正确（王芳）", weight: 10 do
+      expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+        "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+      expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+        "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+    end
+
+    add_assertion "酒店入住时间和时长正确", weight: 10 do
       expect(@hotel_booking.check_in_date).to eq(@check_in_date)
       expect(@hotel_booking.check_out_date).to eq(@check_out_date)
     end
 
-    add_assertion "航班价格是最低价", weight: 15 do
+    add_assertion "航班价格是最低价", weight: 10 do
       flight_price = @flight_booking.total_price
       cheapest_price = @cheapest_flight.price
       expect(flight_price).to eq(cheapest_price),
         "航班价格不是最低。期望: ¥#{cheapest_price}, 实际: ¥#{flight_price}"
     end
 
-    add_assertion "总价优化正确（航班+酒店总价最低）", weight: 20 do
+    add_assertion "总价优化正确（航班+酒店总价最低）", weight: 15 do
       total_price = @flight_booking.total_price + @hotel_booking.total_price
       expect(total_price).to be <= @min_total_price * 1.1,
         "总价未优化。期望: ≤¥#{(@min_total_price * 1.1).round(2)}, 实际: ¥#{total_price}"
@@ -116,14 +138,15 @@ module V101V150
 
   def simulate
     user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
 
     flight = @cheapest_flight
     Booking.create!(
       user: user,
       flight: flight,
-      passenger_name: user.name,
-      passenger_id_number: '110101199001011234',
-      contact_phone: '13800138000',
+      passenger_name: passenger.name,
+      passenger_id_number: passenger.id_number,
+      contact_phone: passenger.phone,
       total_price: flight.price,
       accept_terms: true,
       status: 'paid',
@@ -139,8 +162,8 @@ module V101V150
       hotel_room_id: room.id,
       check_in_date: @check_in_date,
       check_out_date: @check_out_date,
-      guest_name: user.name,
-      guest_phone: '13800138000',
+      guest_name: passenger.name,
+      guest_phone: passenger.phone,
       payment_method: '花呗',
       total_price: room.price,
       data_version: @data_version
@@ -158,7 +181,10 @@ module V101V150
       check_in_date: @check_in_date.to_s,
       check_out_date: @check_out_date.to_s,
       min_total_price: @min_total_price,
-      cheapest_room_id: @cheapest_room&.id
+      cheapest_room_id: @cheapest_room&.id,
+      expected_passenger_name: @expected_passenger_name,
+      expected_passenger_id_number: @expected_passenger_id_number,
+      expected_phone: @expected_phone
     }
   end
 
@@ -170,6 +196,9 @@ module V101V150
     @check_in_date = Date.parse(data['check_in_date'])
     @check_out_date = Date.parse(data['check_out_date'])
     @min_total_price = data['min_total_price'].to_f
+    @expected_passenger_name = data['expected_passenger_name']
+    @expected_passenger_id_number = data['expected_passenger_id_number']
+    @expected_phone = data['expected_phone']
 
     @available_flights = Flight.where(
       departure_city: @departure_city,

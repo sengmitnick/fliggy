@@ -7,8 +7,8 @@ module V051V100
   class V092BookSuzhouGardenTourValidator < BaseValidator
     self.validator_id = 'v092_book_suzhou_garden_tour_validator'
     self.task_id = 'aca21330-8a40-44bc-873b-4f93472a424d'
-    self.title = '预订苏州园林讲解（粉丝数最多的导游）'
-    self.description = '预订10天后苏州园林讲解，选择粉丝数最多的导游'
+    self.title = '给张三和李四预订苏州园林讲解（粉丝数最多的导游）'
+    self.description = '给张三、李四这10天后的苏州园林讲解（2位成人），选择粉丝数最多的导游'
     self.timeout_seconds = 240
   
     def prepare
@@ -16,6 +16,18 @@ module V051V100
       @location = '华东'
       @travel_date = Date.current + 10.days
       @adult_count = 2
+    
+      # 预查询联系人信息（使用demo_user数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      @lisi_contact = user.contacts.find_by!(name: '李四', data_version: 0)
+
+      # 联系人可以是张三或李四（多选一）
+      @valid_contact_names = ['张三', '李四']
+      @valid_contact_phones = {
+        '张三' => @zhangsan_contact.phone,
+        '李四' => @lisi_contact.phone
+      }
     
       @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     
@@ -43,34 +55,41 @@ module V051V100
     
       return unless @booking
     
-      add_assertion "向导景点正确（苏州园林）", weight: 20 do
+      add_assertion "向导景点正确（苏州园林）", weight: 15 do
         guide = @booking.deep_travel_guide
         expect(guide.venue).to eq(@venue),
           "向导景点不符合要求。期望: #{@venue}, 实际: #{guide.venue}"
       end
     
-      add_assertion "产品地点正确（华东）", weight: 20 do
+      add_assertion "产品地点正确（华东）", weight: 15 do
         product = @booking.deep_travel_product
         expect(product.location).to eq(@location),
           "产品地点不符合要求。期望: #{@location}, 实际: #{product.location}"
       end
     
-      add_assertion "选择了粉丝数最多的导游", weight: 25 do
+      add_assertion "选择了粉丝数最多的导游", weight: 30 do
         most_followed = DeepTravelGuide.where(data_version: 0, venue: @venue)
                                        .order(follower_count: :desc, rating: :desc).first
         expect(@booking.deep_travel_guide_id).to eq(most_followed.id),
           "未选择粉丝数最多的导游。应选: #{most_followed.name}（粉丝#{most_followed.follower_count}人），实际: #{@booking.deep_travel_guide.name}（粉丝#{@booking.deep_travel_guide.follower_count}人）"
       end
     
-      add_assertion "人数信息正确（2成人）", weight: 15 do
+      add_assertion "人数信息正确（2成人）", weight: 10 do
         expect(@booking.adult_count).to eq(@adult_count),
           "成人数不符合。期望: #{@adult_count}, 实际: #{@booking.adult_count}"
+      end
+
+      add_assertion "联系人信息正确（从出行人中选择：张三或李四）", weight: 10 do
+        expect(@valid_contact_phones.values).to include(@booking.contact_phone),
+          "联系人电话错误。应从出行人中选择：#{@valid_contact_names.join('、')}，" \
+          "对应电话：#{@valid_contact_phones.values.join('、')}，实际: #{@booking.contact_phone}"
       end
     end
   
     def execution_state_data
       { venue: @venue, location: @location,
-        travel_date: @travel_date.to_s, adult_count: @adult_count }
+        travel_date: @travel_date.to_s, adult_count: @adult_count,
+        valid_contact_names: @valid_contact_names, valid_contact_phones: @valid_contact_phones }
     end
   
     def restore_from_state(data)
@@ -78,11 +97,14 @@ module V051V100
       @location = data['location']
       @travel_date = Date.parse(data['travel_date'])
       @adult_count = data['adult_count']
+      @valid_contact_names = data['valid_contact_names']
+      @valid_contact_phones = data['valid_contact_phones']
       @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     end
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
     
       target_guide = DeepTravelGuide.where(data_version: 0, venue: @venue)
                                     .order(follower_count: :desc, rating: :desc).first
@@ -101,11 +123,12 @@ module V051V100
         travel_date: @travel_date,
         adult_count: @adult_count,
         child_count: 0,
-        contact_name: '赵六',
-        contact_phone: '13800138004',
+        contact_name: zhangsan.name,
+        contact_phone: zhangsan.phone,
         total_price: total_price,
         insurance_price: 0,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     end
     end

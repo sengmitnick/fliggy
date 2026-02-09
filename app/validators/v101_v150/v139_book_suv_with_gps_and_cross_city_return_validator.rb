@@ -6,12 +6,12 @@ module V101V150
   class V139BookSuvWithGpsAndCrossCityReturnValidator < BaseValidator
     self.validator_id = 'v139_book_suv_with_gps_and_cross_city_return_validator'
     self.task_id = 'f9a0b1c2-3d4e-5f6a-7b8c-9d0e1f2a3b4c'
-    self.title = '预订后天SUV租车（含GPS，异地还车）'
-    self.description = '预订后天上海SUV租车5天（含GPS导航），异地还车到杭州'
+    self.title = '给张三预订后天SUV租车（上海取车，含GPS，异地还车到杭州5天）'
+    self.description = '帮张三订后天上海SUV租车5天（含GPS导航），异地还车到杭州'
     self.timeout_seconds = 300
 
     def task_description
-      "预订后天上海SUV租车5天（含GPS导航），异地还车到杭州"
+      "帮张三订后天上海SUV租车5天（含GPS导航），异地还车到杭州"
     end
 
     def prepare
@@ -22,6 +22,13 @@ module V101V150
       @rental_days = 5
       @return_date = @pickup_date + @rental_days.days
       @required_feature = "GPS导航"
+
+      # 预查询驾驶员信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_driver_name = @passenger.name
+      @expected_driver_id = @passenger.id_number
+      @expected_phone = @passenger.phone
 
       @available_cars = Car.where(
         location: @pickup_location,
@@ -66,14 +73,21 @@ module V101V150
           "租期错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
       end
 
-      add_assertion "异地还车到杭州", weight: 15 do
+      add_assertion "驾驶员信息正确（张三）", weight: 10 do
+        expect(@car_order.driver_name).to eq(@expected_driver_name),
+          "驾驶员姓名错误。期望: #{@expected_driver_name}, 实际: #{@car_order.driver_name}"
+        expect(@car_order.driver_id_number).to eq(@expected_driver_id),
+          "驾驶员身份证号错误。期望: #{@expected_driver_id}, 实际: #{@car_order.driver_id_number}"
+      end
+
+      add_assertion "异地还车到杭州", weight: 10 do
         # CarOrder model doesn't have return_location field, so we check pickup_location differs from expected return
         # In real scenario,异地还车 would be indicated differently
         # For this validator, we simply verify the order was created
         expect(@car_order).not_to be_nil
       end
 
-      add_assertion "包含GPS导航功能", weight: 15 do
+      add_assertion "包含GPS导航功能", weight: 10 do
         # For this test, GPS feature is optional - just verify the SUV was rented
         # The real-world scenario may select SUV without GPS if unavailable
         features = @car_order.car.features.to_s
@@ -85,6 +99,7 @@ module V101V150
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
 
       # Select a car with GPS feature
       car = @available_cars.find { |c| c.features.to_s.include?("GPS") || c.features.to_s.include?("导航") }
@@ -93,9 +108,9 @@ module V101V150
       CarOrder.create!(
         user: user,
         car: car,
-        driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: passenger.name,
+        driver_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         pickup_datetime: @pickup_date.in_time_zone + 10.hours,
         return_datetime: (@pickup_date + @rental_days.days).in_time_zone + 18.hours,
         pickup_location: "上海虹桥机场",
@@ -114,7 +129,10 @@ module V101V150
         category: @category,
         pickup_date: @pickup_date.to_s,
         rental_days: @rental_days,
-        return_date: @return_date.to_s
+        return_date: @return_date.to_s,
+        expected_driver_name: @expected_driver_name,
+        expected_driver_id: @expected_driver_id,
+        expected_phone: @expected_phone
       }
     end
 
@@ -125,6 +143,9 @@ module V101V150
       @pickup_date = Date.parse(data['pickup_date'])
       @rental_days = data['rental_days']
       @return_date = Date.parse(data['return_date'])
+      @expected_driver_name = data['expected_driver_name']
+      @expected_driver_id = data['expected_driver_id']
+      @expected_phone = data['expected_phone']
 
       @available_cars = Car.where(
         location: @pickup_location,
