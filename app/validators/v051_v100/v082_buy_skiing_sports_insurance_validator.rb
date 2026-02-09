@@ -37,8 +37,8 @@ module V051V100
   class V082BuySkiingSportsInsuranceValidator < BaseValidator
     self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
     self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
-    self.title = '购买滑雪运动保险（哈尔滨15天后出行，3天，运动医疗保额最高）'
-    self.description = '为哈尔滨滑雪之旅购买运动保险，选择运动医疗保额最高的专业滑雪保险'
+    self.title = '给张三购买滑雪运动保险（哈尔滨15天后出行，保障3天，运动医疗保额最高）'
+    self.description = '帮张三买个滑雪保险，15天后去哈尔滨滑雪，保障3天，要选运动医疗保额最高的那个'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -51,6 +51,13 @@ module V051V100
       @scene = '滑雪'
       @start_date = Date.current + 15.days  # 15天后开始
       @end_date = @start_date + @days - 1  # 保障结束日期
+    
+      # 查询被保险人信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_insured_name = @zhangsan.name
+      @expected_insured_id_number = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone  # 单人保险：被保险人就是联系人
     
       # 查找适合滑雪的境内旅游保险产品（注意：查询基线数据 data_version=0）
       @available_products = InsuranceProduct.where(
@@ -66,12 +73,13 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为哈尔滨滑雪之旅购买运动保险（15天后出发，保障期#{@days}天），滑雪属于高风险运动，请选择适合滑雪且运动医疗保额最高的产品",
+        task: "请为张三购买哈尔滨滑雪运动保险（15天后出发，保障期#{@days}天），滑雪属于高风险运动，请选择适合滑雪且运动医疗保额最高的产品",
         product_type: "境内旅游",
         destination: @destination,
         days: @days,
         quantity: @quantity,
         scene: @scene,
+        insured_person: @expected_insured_name,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
         hint: "滑雪属于高风险运动，需要购买专业的滑雪运动保险（scenes包含'滑雪'）。请对比运动医疗保额（coverage_details.sports_injury或medical）后选择最高的",
@@ -116,8 +124,35 @@ module V051V100
           "出行开始时间错误。期望: #{@start_date}（15天后）, 实际: #{actual_start_date}"
       end
     
-      # 断言5: 产品适合滑雪场景
-      add_assertion "产品适合滑雪场景", weight: 15 do
+      # 断言5: 被保险人信息正确（张三）
+      add_assertion "被保险人信息正确（#{@expected_insured_name}）", weight: 10 do
+        insured_persons = @insurance_order.insured_persons || []
+        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
+        expect(zhangsan_record).not_to be_nil,
+          "被保险人信息错误。期望: #{@expected_insured_name}，实际: #{insured_persons.inspect}"
+        
+        # 验证身份证号（如果是Hash结构）
+        if zhangsan_record.is_a?(Hash) && zhangsan_record['id_number']
+          expect(zhangsan_record['id_number']).to eq(@expected_insured_id_number),
+            "被保险人身份证号错误。期望: #{@expected_insured_id_number}，实际: #{zhangsan_record['id_number']}"
+        end
+      end
+    
+      # 断言6: 联系人电话正确（张三的电话）
+      add_assertion "联系人电话正确（#{@expected_contact_phone}）", weight: 5 do
+        insured_persons = @insurance_order.insured_persons || []
+        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
+        
+        # 单人保险：被保险人就是联系人，验证电话字段
+        if zhangsan_record.is_a?(Hash)
+          actual_phone = zhangsan_record['phone'] || zhangsan_record['contact_phone']
+          expect(actual_phone).to eq(@expected_contact_phone),
+            "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone}"
+        end
+      end
+    
+      # 断言7: 产品适合滑雪场景
+      add_assertion "产品适合滑雪场景", weight: 5 do
         scenes = @insurance_order.insurance_product.scenes || []
         has_scene = scenes.include?(@scene)
       
@@ -126,7 +161,7 @@ module V051V100
           "滑雪属于高风险运动，需要专业的滑雪运动保险"
       end
     
-      # 断言6: 选择了运动医疗保额最高的产品（核心评分项）
+      # 断言8: 选择了运动医疗保额最高的产品（核心评分项）
       add_assertion "选择了运动医疗保额最高的产品", weight: 25 do
         # 获取所有适合滑雪的产品
         all_products = InsuranceProduct.where(
@@ -152,8 +187,8 @@ module V051V100
           "滑雪运动应选择运动医疗保额最高的产品"
       end
     
-      # 断言7: 保障天数正确
-      add_assertion "保障天数正确（#{@days}天）", weight: 10 do
+      # 断言9: 保障天数正确
+      add_assertion "保障天数正确（#{@days}天）", weight: 5 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
           "保障天数错误。期望: #{@days}天, 实际: #{actual_days}天"
@@ -171,7 +206,10 @@ module V051V100
         quantity: @quantity,
         scene: @scene,
         start_date: @start_date&.to_s,
-        end_date: @end_date&.to_s
+        end_date: @end_date&.to_s,
+        expected_insured_name: @expected_insured_name,
+        expected_insured_id_number: @expected_insured_id_number,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -184,6 +222,15 @@ module V051V100
       @scene = data['scene']
       @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
       @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
+      @expected_insured_name = data['expected_insured_name']
+      @expected_insured_id_number = data['expected_insured_id_number']
+      @expected_contact_phone = data['expected_contact_phone']
+    
+      # 重新查询被保险人信息
+      if @expected_insured_name
+        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        @zhangsan = user.passengers.find_by!(name: @expected_insured_name, data_version: 0)
+      end
     
       # 重新加载可用产品列表
       @available_products = InsuranceProduct.where(
@@ -197,7 +244,7 @@ module V051V100
       end
     end
   
-    # 模拟 AI Agent 操作：为滑雪之旅购买运动医疗保额最高的保险
+    # 模拟 AI Agent 操作：为张三购买滑雪运动医疗保额最高的保险
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -218,7 +265,14 @@ module V051V100
     
       raise "未找到可用的保险产品" unless highest_sports_product
     
-      # 4. 创建保险订单
+      # 4. 构建被保险人信息（使用 prepare 中查询的张三信息）
+      insured_persons_data = [{
+        name: @zhangsan.name,
+        id_number: @zhangsan.id_number,
+        phone: @zhangsan.phone  # 联系电话
+      }]
+    
+      # 5. 创建保险订单
       unit_price = highest_sports_product.price_per_day * @days
     
       insurance_order = InsuranceOrder.create!(
@@ -230,11 +284,12 @@ module V051V100
         days: @days,
         destination: @destination,
         destination_type: 'domestic',
-        insured_persons: ['王勇'],
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息

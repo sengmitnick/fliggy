@@ -36,8 +36,8 @@ module V051V100
   class V083BuyAnnualTravelPlanValidator < BaseValidator
     self.validator_id = 'v083_buy_annual_travel_plan_validator'
     self.task_id = 'a4b9bf4f-8238-4401-8ff3-a58352e12aea'
-    self.title = '购买全年交通意外险（北京，365天，全年无限次保障）'
-    self.description = '为北京的商务人士购买全年交通意外险，支持全年无限次保障'
+    self.title = '给张三购买全年交通意外险（北京，365天，全年无限次保障）'
+    self.description = '帮张三买个全年交通意外险，在北京用，明天开始生效，保障365天到明年今天结束，支持全年无限次保障'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -48,8 +48,15 @@ module V051V100
       @quantity = 1
       @scene = '交通综合'
       @destination = '北京'  # 明确具体城市，交通意外险需要指定出发地
-      @start_date = Date.current + 3.days  # 3天后开始
-      @end_date = @start_date + @days - 1  # 保障结束日期
+      @start_date = Date.current + 1.day  # 明天开始生效
+      @end_date = @start_date + @days - 1  # 明年今天结束（365天后）
+    
+      # 查询被保险人信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_insured_name = @zhangsan.name
+      @expected_insured_id_number = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone  # 单人保险：被保险人就是联系人
     
       # 查找全年交通意外险产品（注意：查询基线数据 data_version=0）
       @available_products = InsuranceProduct.where(
@@ -59,13 +66,14 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为北京的商务人士购买全年交通意外险（3天后生效，保障期365天），支持全年无限次保障",
+        task: "请为张三购买全年交通意外险（在北京用，明天生效，保障期365天到明年今天结束），支持全年无限次保障",
         product_type: "交通意外",
         destination: @destination,
         plan_type: "全年计划",
         days: @days,
         quantity: @quantity,
         scene: @scene,
+        insured_person: @expected_insured_name,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
         hint: "全年交通意外险适合需要经常出差的商务人士，保障期365天，支持全年无限次保障。请选择max_days≥365且适合交通综合保障的产品",
@@ -90,7 +98,7 @@ module V051V100
       return unless @insurance_order # 如果没有订单，后续断言无法继续
     
       # 断言2: 保险类型正确（交通意外）
-      add_assertion "保险类型正确（交通意外transport）", weight: 15 do
+      add_assertion "保险类型正确（交通意外transport）", weight: 10 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}（交通意外），实际: #{actual_type}。" \
@@ -104,8 +112,35 @@ module V051V100
           "目的地错误。期望包含: #{@destination}, 实际: #{actual_destination || '未填写'}"
       end
     
-      # 断言4: 产品是全年计划（365天）（核心评分项）
-      add_assertion "产品是全年计划（365天）", weight: 30 do
+      # 断言4: 被保险人信息正确（张三）
+      add_assertion "被保险人信息正确（#{@expected_insured_name}）", weight: 10 do
+        insured_persons = @insurance_order.insured_persons || []
+        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
+        expect(zhangsan_record).not_to be_nil,
+          "被保险人信息错误。期望: #{@expected_insured_name}，实际: #{insured_persons.inspect}"
+        
+        # 验证身份证号（如果是Hash结构）
+        if zhangsan_record.is_a?(Hash) && zhangsan_record['id_number']
+          expect(zhangsan_record['id_number']).to eq(@expected_insured_id_number),
+            "被保险人身份证号错误。期望: #{@expected_insured_id_number}，实际: #{zhangsan_record['id_number']}"
+        end
+      end
+    
+      # 断言5: 联系人电话正确（张三的电话）
+      add_assertion "联系人电话正确（#{@expected_contact_phone}）", weight: 5 do
+        insured_persons = @insurance_order.insured_persons || []
+        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
+        
+        # 单人保险：被保险人就是联系人，验证电话字段
+        if zhangsan_record.is_a?(Hash)
+          actual_phone = zhangsan_record['phone'] || zhangsan_record['contact_phone']
+          expect(actual_phone).to eq(@expected_contact_phone),
+            "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone}"
+        end
+      end
+    
+      # 断言6: 产品是全年计划（365天）（核心评分项）
+      add_assertion "产品是全年计划（365天）", weight: 25 do
         product = @insurance_order.insurance_product
         max_days = product.max_days
       
@@ -116,8 +151,8 @@ module V051V100
           "全年交通意外险支持365天保障期，可以全年无限次保障"
       end
     
-      # 断言5: 适合交通综合保障场景
-      add_assertion "适合交通综合保障场景", weight: 15 do
+      # 断言7: 适合交通综合保障场景
+      add_assertion "适合交通综合保障场景", weight: 10 do
         scenes = @insurance_order.insurance_product.scenes || []
         has_scene = scenes.include?(@scene)
       
@@ -126,11 +161,26 @@ module V051V100
           "全年交通意外险通常适合经常出差的商务人士"
       end
     
-      # 断言6: 保障天数正确（365天）
-      add_assertion "保障天数正确（365天）", weight: 10 do
+      # 断言8: 保障天数和日期逻辑正确（365天，从明天到明年今天）
+      add_assertion "保障天数和日期逻辑正确（365天，从明天到明年今天）", weight: 10 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
           "保障天数错误。期望: #{@days}天（全年），实际: #{actual_days}天"
+        
+        # 验证日期逻辑：从明天开始
+        actual_start = @insurance_order.start_date
+        expect(actual_start).to eq(@start_date),
+          "开始日期错误。期望: #{@start_date}（明天），实际: #{actual_start}"
+        
+        # 验证日期逻辑：到明年今天结束（365天后）
+        actual_end = @insurance_order.end_date
+        expect(actual_end).to eq(@end_date),
+          "结束日期错误。期望: #{@end_date}（明年今天），实际: #{actual_end}"
+        
+        # 验证日期跨度确实是365天
+        actual_duration = (actual_end - actual_start).to_i + 1
+        expect(actual_duration).to eq(365),
+          "日期跨度错误。期望: 365天，实际: #{actual_duration}天（#{actual_start} 到 #{actual_end}）"
       end
     end
   
@@ -145,7 +195,10 @@ module V051V100
         quantity: @quantity,
         scene: @scene,
         start_date: @start_date&.to_s,
-        end_date: @end_date&.to_s
+        end_date: @end_date&.to_s,
+        expected_insured_name: @expected_insured_name,
+        expected_insured_id_number: @expected_insured_id_number,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -158,6 +211,15 @@ module V051V100
       @scene = data['scene']
       @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
       @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
+      @expected_insured_name = data['expected_insured_name']
+      @expected_insured_id_number = data['expected_insured_id_number']
+      @expected_contact_phone = data['expected_contact_phone']
+    
+      # 重新查询被保险人信息
+      if @expected_insured_name
+        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        @zhangsan = user.passengers.find_by!(name: @expected_insured_name, data_version: 0)
+      end
     
       # 重新加载可用产品列表
       @available_products = InsuranceProduct.where(
@@ -166,7 +228,7 @@ module V051V100
       ).where('max_days >= ?', 365)
     end
   
-    # 模拟 AI Agent 操作：为商务人士购买全年交通意外险
+    # 模拟 AI Agent 操作：为张三购买全年交通意外险
     def simulate
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -185,7 +247,14 @@ module V051V100
     
       raise "未找到可用的保险产品" unless selected_product
     
-      # 4. 创建保险订单
+      # 4. 构建被保险人信息（使用 prepare 中查询的张三信息）
+      insured_persons_data = [{
+        name: @zhangsan.name,
+        id_number: @zhangsan.id_number,
+        phone: @zhangsan.phone  # 联系电话
+      }]
+    
+      # 5. 创建保险订单
       unit_price = selected_product.price_per_day * @days
     
       insurance_order = InsuranceOrder.create!(
@@ -197,11 +266,12 @@ module V051V100
         days: @days,
         destination: @destination,
         destination_type: 'domestic',
-        insured_persons: ['李经理'],
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,
-        status: 'pending'
+        status: 'pending',
+        data_version: @data_version
       )
     
       # 返回操作信息
