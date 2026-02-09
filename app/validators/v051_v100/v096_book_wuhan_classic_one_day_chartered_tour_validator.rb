@@ -14,8 +14,8 @@ module V051V100
   class V096BookWuhanClassicOneDayCharteredTourValidator < BaseValidator
     self.validator_id = 'v096_book_wuhan_classic_one_day_chartered_tour_validator'
     self.task_id = 'eba7a78e-2541-4232-b0cf-427687f70264'
-    self.title = '预订3天后武汉经典一日包车游（经济7座，家庭5人，8小时）'
-    self.description = '预订武汉经典一日游包车路线，家庭5人出行，选择经济7座车型，8小时服务。验证出发日期（3天后）、包车时长（8小时）、车型座位数、订单信息完整性。'
+    self.title = '给张三家庭预订3天后武汉经典一日包车游（经济7座，家庭5人，8小时）'
+    self.description = '给张三家庭预订武汉经典一日游包车路线，家庭5人出行，选择经济7座车型，8小时服务。验证出发日期（3天后）、包车时长（8小时）、车型座位数、订单信息完整性。'
     self.timeout_seconds = 240
   
     def prepare
@@ -27,13 +27,13 @@ module V051V100
       @travel_date = Date.current + 3.days
     
       # 查询可用路线
-      @available_routes = CharterRoute.where(data_version: @data_version)
+      @available_routes = CharterRoute.where(data_version: 0)
                                       .joins(:city)
                                       .where('cities.name = ?', @city_name)
                                       .where('charter_routes.name LIKE ?', "%#{@route_keyword}%")
     
       # 查询可用车型
-      @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: @data_version)
+      @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: 0)
     
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，家庭#{@passenger_count}人出行，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务",
@@ -202,6 +202,7 @@ module V051V100
     def simulate
       # 查找演示用户（使用基线 data_version=0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: '0')
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 查找路线（从基线数据中查找）
       route = CharterRoute.where(data_version: '0')
@@ -238,8 +239,8 @@ module V051V100
         duration_hours: @duration_hours,
         booking_mode: 'by_route',
         passengers_count: @passenger_count,
-        contact_name: '吴九',
-        contact_phone: '13800138007',
+        contact_name: zhangsan.name,
+        contact_phone: zhangsan.phone,
         total_price: price,
         status: 'pending',
         data_version: @data_version

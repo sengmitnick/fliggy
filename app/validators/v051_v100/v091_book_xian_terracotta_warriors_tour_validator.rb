@@ -7,8 +7,8 @@ module V051V100
   class V091BookXianTerracottaWarriorsTourValidator < BaseValidator
     self.validator_id = 'v091_book_xian_terracotta_warriors_tour_validator'
     self.task_id = '5bc15e2f-a604-469a-99a1-ccce0e9eabed'
-    self.title = '预订西安秦始皇帝陵博物院讲解（服务人数最多的金牌导游）'
-    self.description = '预订下周末西安秦始皇帝陵博物院讲解，选择服务人数最多的金牌导游'
+    self.title = '给张三预订西安秦始皇帝陵博物院讲解（服务人数最多的金牌导游）'
+    self.description = '给张三、王芳和儿子小明预订下周末西安秦始皇帝陵博物院讲解，一家3口出行（2成人1儿童），选择服务人数最多的金牌导游'
     self.timeout_seconds = 240
 
     def prepare
@@ -17,6 +17,18 @@ module V051V100
       @travel_date = Date.current + 7.days
       @adult_count = 2
       @child_count = 1
+
+      # 预查询联系人信息（使用demo_user数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      @wangfang_contact = user.contacts.find_by!(name: '王芳', data_version: 0)
+
+      # 联系人可以是张三或王芳（多选一）
+      @valid_contact_names = ['张三', '王芳']
+      @valid_contact_phones = {
+        '张三' => @zhangsan_contact.phone,
+        '王芳' => @wangfang_contact.phone
+      }
 
       @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
 
@@ -40,13 +52,13 @@ module V051V100
 
       return unless @booking
 
-      add_assertion "向导景点正确（秦始皇帝陵博物院）", weight: 20 do
+      add_assertion "向导景点正确（秦始皇帝陵博物院）", weight: 15 do
         guide = @booking.deep_travel_guide
         expect(guide.venue).to eq(@venue),
           "向导景点不符合要求。期望: #{@venue}, 实际: #{guide.venue}"
       end
 
-      add_assertion "产品地点正确（陕西）", weight: 20 do
+      add_assertion "产品地点正确（陕西）", weight: 15 do
         product = @booking.deep_travel_product
         expect(product.location).to eq(@location),
           "产品地点不符合要求。期望: #{@location}, 实际: #{product.location}"
@@ -65,11 +77,18 @@ module V051V100
         expect(@booking.child_count).to eq(@child_count),
           "儿童数量错误。期望: #{@child_count}, 实际: #{@booking.child_count}"
       end
+
+      add_assertion "联系人信息正确（从家长中选择：张三或王芳）", weight: 10 do
+        expect(@valid_contact_phones.values).to include(@booking.contact_phone),
+          "联系人电话错误。应从家长中选择：#{@valid_contact_names.join('、')}，" \
+          "对应电话：#{@valid_contact_phones.values.join('、')}，实际: #{@booking.contact_phone}"
+      end
     end
 
     def execution_state_data
       { venue: @venue, location: @location,
-        travel_date: @travel_date.to_s, adult_count: @adult_count, child_count: @child_count }
+        travel_date: @travel_date.to_s, adult_count: @adult_count, child_count: @child_count,
+        valid_contact_names: @valid_contact_names, valid_contact_phones: @valid_contact_phones }
     end
 
     def restore_from_state(data)
@@ -78,11 +97,14 @@ module V051V100
       @travel_date = Date.parse(data['travel_date'])
       @adult_count = data['adult_count']
       @child_count = data['child_count']
+      @valid_contact_names = data['valid_contact_names']
+      @valid_contact_phones = data['valid_contact_phones']
       @qualified_guides = DeepTravelGuide.where(data_version: 0, venue: @venue)
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
 
       target_guide = DeepTravelGuide.where(data_version: 0, venue: @venue)
                                     .order(served_count: :desc, rating: :desc).first
@@ -101,8 +123,8 @@ module V051V100
         travel_date: @travel_date,
         adult_count: @adult_count,
         child_count: @child_count,
-        contact_name: '王五',
-        contact_phone: '13800138003',
+        contact_name: zhangsan.name,
+        contact_phone: zhangsan.phone,
         total_price: total_price,
         insurance_price: 0,
         status: 'pending',

@@ -36,8 +36,8 @@ module V051V100
   class V099BookGuangzhouHotelPackageLuxuryOptionValidator < BaseValidator
     self.validator_id = 'v099_book_guangzhou_hotel_package_luxury_option_validator'
     self.task_id = 'c7f3d8e2-4b9a-4c1f-8e5d-2a6b9f3c8d7e'
-    self.title = '囤货广州地区酒店套餐（1晚，1份，含早套餐选项）'
-    self.description = '需要搜索广州地区的1晚酒店套餐，囤货购买1份（先囤再约），从套餐选项中选择含早套餐（包含双人早餐）'
+    self.title = '给张三囤货广州地区酒店套餐（1晚，1份，含早套餐选项）'
+    self.description = '给张三搜索广州地区的1晚酒店套餐，囤货购买1份（先囤再约），从套餐选项中选择含早套餐（包含双人早餐）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -182,7 +182,7 @@ module V051V100
       raise "未找到可用的套餐选项" unless target_option
     
       # 6. 创建酒店套餐订单（囤货模式：不需要入住日期）
-      package_order = HotelPackageOrder.create!(
+      HotelPackageOrder.create!(
         hotel_package_id: target_package.id,
         package_option_id: target_option.id,
         user_id: user.id,
@@ -195,22 +195,6 @@ module V051V100
         contact_phone: passenger.phone,
         data_version: @data_version
       )
-    
-      # 返回操作信息
-      {
-        action: 'create_hotel_package_order',
-        order_id: package_order.id,
-        order_number: package_order.order_number,
-        package_title: target_package.title,
-        package_brand: target_package.brand_name,
-        option_name: target_option.name,
-        option_description: target_option.description,
-        price: target_option.price,
-        quantity: @quantity,
-        total_price: package_order.total_price,
-        booking_type: 'stockup',
-        user_email: user.email
-      }
     end
   end
 end

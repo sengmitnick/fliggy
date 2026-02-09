@@ -39,8 +39,8 @@ module V051V100
   class V098InstantBookHotelPackageWithDatesValidator < BaseValidator
     self.validator_id = 'v098_instant_book_hotel_package_with_dates_validator'
     self.task_id = '89f42d1c-3e8b-4a9f-b2c1-7d5e9a6f8c3a'
-    self.title = '立即预约明天上海地区酒店套餐（2晚，含早餐）'
-    self.description = '需要搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
+    self.title = '给张三立即预约明天上海地区酒店套餐（2晚，含早餐）'
+    self.description = '给张三搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -223,7 +223,7 @@ module V051V100
       target_hotel = available_hotels.first
     
       # 7. 创建酒店套餐订单（立即预约模式：需要入住日期和酒店）
-      package_order = HotelPackageOrder.create!(
+      HotelPackageOrder.create!(
         hotel_package_id: target_package.id,
         package_option_id: target_option.id,
         hotel_id: target_hotel.id,
@@ -236,28 +236,9 @@ module V051V100
         check_out_date: @check_out_date,
         status: 'pending',
         contact_name: passenger.name,
-        contact_phone: passenger.phone
+        contact_phone: passenger.phone,
+        data_version: @data_version
       )
-    
-      # 返回操作信息
-      {
-        action: 'create_hotel_package_order',
-        order_id: package_order.id,
-        order_number: package_order.order_number,
-        package_title: target_package.title,
-        package_brand: target_package.brand_name,
-        hotel_name: target_hotel.name,
-        hotel_city: target_hotel.city,
-        option_name: target_option.name,
-        option_description: target_option.description,
-        price: target_option.price,
-        quantity: @quantity,
-        total_price: package_order.total_price,
-        booking_type: 'instant',
-        check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s,
-        user_email: user.email
-      }
     end
   end
 end
