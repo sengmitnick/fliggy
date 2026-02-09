@@ -19,8 +19,8 @@ module V251V300
   class V263BookHotelWithPropertyLiabilityInsuranceValidator < BaseValidator
     self.validator_id = 'v263_book_hotel_with_property_liability_insurance_validator'
     self.task_id = '20880d56-4e35-423e-befa-c7df4897e258'
-    self.title = '预订明天深圳酒店+境内旅游保险（投保人与入住人一致，保险期限覆盖住宿期间）'
-    self.description = '用户需要预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消），要求投保人姓名与入住人一致，保险起止日期覆盖住宿期间'
+    self.title = '给张三预订明天深圳酒店（住3晚）+境内旅游保险（投保人与入住人一致）'
+    self.description = '帮张三预订深圳酒店（明天入住，住3晚），并购买境内旅游保险（保障意外、医疗和行程取消），要求投保人姓名与入住人一致，保险起止日期覆盖住宿期间'
     self.timeout_seconds = 300
     
     def prepare
@@ -28,6 +28,12 @@ module V251V300
       @check_in_date = Date.current + 1.day
       @check_out_date = @check_in_date + 3.days
       @nights = (@check_out_date - @check_in_date).to_i
+      
+      # 查询用户和乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @zhangsan.name
+      @expected_guest_phone = @zhangsan.phone
       
       # 查找酒店
       @hotel = Hotel
@@ -46,7 +52,7 @@ module V251V300
       raise "未找到适合#{@nights}天的保险产品" if @available_insurances.empty?
       
       {
-        task: "请预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，住#{@nights}晚），并购买境内旅游保险（保障意外、医疗和行程取消）。",
+        task: "请帮张三预订#{@city}酒店（#{@check_in_date.strftime('%Y年%m月%d日')}入住，明天入住，住#{@nights}晚），并购买境内旅游保险（保障意外、医疗和行程取消）。投保人姓名应与入住人一致，保险期限覆盖住宿期间。",
         requirements: {
           city: @city,
           check_in_date: @check_in_date,
@@ -99,7 +105,12 @@ module V251V300
           "保险类型错误。期望: domestic（境内旅游），实际: #{product_type}"
       end
       
-      add_assertion "投保人姓名与入住人一致", weight: 15 do
+      add_assertion "入住人信息正确（张三）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}，实际: #{@hotel_booking.guest_name}"
+      end
+      
+      add_assertion "投保人姓名与入住人一致", weight: 10 do
         guest_name = @hotel_booking.guest_name
         insured_persons = @insurance_order.insured_persons || []
         
@@ -108,7 +119,7 @@ module V251V300
           "投保人姓名与入住人不一致。入住人: #{guest_name}, 投保人: #{insured_persons.join(', ')}"
       end
       
-      add_assertion "保险起止日期覆盖住宿期间", weight: 15 do
+      add_assertion "保险起止日期覆盖住宿期间", weight: 10 do
         insurance_start = @insurance_order.start_date
         insurance_end = @insurance_order.end_date
         
@@ -128,7 +139,7 @@ module V251V300
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建酒店订单
+      # 1. 创建酒店订单（使用预查询的乘客信息）
       room = @hotel.hotel_rooms.where(data_version: 0).first
       
       hotel_booking = HotelBooking.create!(
@@ -137,8 +148,8 @@ module V251V300
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_guest_phone,
         room_count: 1,
         total_price: room.price * @nights,
         status: 'paid',
@@ -146,11 +157,16 @@ module V251V300
         data_version: @data_version
       )
       
-      # 2. 创建保险订单
+      # 2. 创建保险订单（使用预查询的乘客信息）
       insurance_product = @available_insurances.first
       start_date = @check_in_date
       end_date = @check_out_date - 1.day
       unit_price = insurance_product.price_per_day * @nights
+      
+      insured_persons_data = [{
+        name: @zhangsan.name,
+        id_number: @zhangsan.id_number
+      }]
       
       InsuranceOrder.create!(
         user: user,
@@ -163,7 +179,7 @@ module V251V300
         days: @nights,
         destination: @city,
         destination_type: 'domestic',
-        insured_persons: [user.name],
+        insured_persons: insured_persons_data,
         unit_price: unit_price,
         quantity: 1,
         total_price: unit_price,
@@ -180,7 +196,8 @@ module V251V300
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         nights: @nights,
-        hotel_id: @hotel&.id
+        hotel_id: @hotel&.id,
+        zhangsan_id: @zhangsan&.id
       }
     end
     
@@ -191,6 +208,13 @@ module V251V300
       @nights = data['nights']
       
       @hotel = Hotel.find(data['hotel_id']) if data['hotel_id']
+      
+      # 恢复乘客信息
+      if data['zhangsan_id']
+        @zhangsan = Passenger.find(data['zhangsan_id'])
+        @expected_guest_name = @zhangsan.name
+        @expected_guest_phone = @zhangsan.phone
+      end
       
       @available_insurances = InsuranceProduct
         .where(product_type: 'domestic', data_version: 0)

@@ -2,20 +2,21 @@
 
 require_relative '../base_validator'
 
-# 验证用例251: 预订北京文化深度游（豪华5座，情侣出行，5天后出发）
+# 验证用例251: 给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）
 #
 # 核心验证点:
 # 1. 路线选择: 北京文化深度游
-# 2. 车型选择: 豪华5座（座位数≥2人）
+# 2. 车型选择: 豪华5座
 # 3. 包车时长: 6小时（半日游标准时长）
 # 4. 出发日期: 5天后（Date.current + 5.days）
-# 5. 订单信息: 联系人、电话格式、乘客数量、预订模式
+# 5. 联系人信息: 张三、李四任选其一
+# 6. 订单信息完整性
 module V251V300
   class V251BookBeijingCultureDeepCharteredTourValidator < BaseValidator
     self.validator_id = 'v251_book_beijing_culture_deep_chartered_tour_validator'
     self.task_id = '61645ce7-e573-42d2-b80e-c5bfe1d863db'
-    self.title = '预订北京文化深度游（5天后出发，豪华5座）- 验证出发日期、包车时长6小时、订单完整性'
-    self.description = '预订北京文化深度游包车路线，选择豪华5座车型，6小时服务。验证出发日期（5天后）、包车时长（6小时）、车型档次、订单信息完整性。'
+    self.title = '给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）'
+    self.description = '帮张三、李四这2人订5天后的北京文化深度游包车，选豪华5座车型，6小时服务（半日游）'
     self.timeout_seconds = 240
   
     def prepare
@@ -25,6 +26,13 @@ module V251V300
       @duration_hours = 6
       @passenger_count = 2
       @travel_date = Date.current + 5.days
+    
+      # 查询 demo_user 和乘客信息（基线数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_contact_names = [@zhangsan.name, @lisi.name]
+      @expected_contact_phones = { '张三' => @zhangsan.phone, '李四' => @lisi.phone }
     
       # 查询可用路线
       @available_routes = CharterRoute.where(data_version: @data_version)
@@ -112,34 +120,36 @@ module V251V300
         end
       end
       
-      # 断言5: 订单信息完整（权重15%）
-      # 验证联系人信息、出发日期（5天后）、出发时间格式、预订模式
-      add_assertion "订单信息完整", weight: 15 do
+      # 断言5: 出发日期正确（权重10%）
+      add_assertion "出发日期正确（5天后#{@travel_date}）", weight: 10 do
         @charter_bookings.each do |booking|
-          # 联系人姓名
-          expect(booking.contact_name).to be_present,
-            "缺少联系人姓名"
-          
-          expect(booking.contact_name.length).to be >= 2,
-            "联系人姓名过短: #{booking.contact_name}"
-          
-          # 联系电话
-          expect(booking.contact_phone).to be_present,
-            "缺少联系电话"
-          
-          expect(booking.contact_phone).to match(/\A1[3-9]\d{9}\z/),
-            "联系电话格式错误: #{booking.contact_phone}。期望格式: 13800138000"
-          
-          # 出发日期
           expect(booking.departure_date).to be_present,
             "缺少出发日期"
           
           expect(booking.departure_date).to eq(@travel_date),
             "出发日期错误。期望: #{@travel_date}（5天后），实际: #{booking.departure_date}"
+        end
+      end
+      
+      # 断言6: 联系人信息正确（权重10%）
+      # 张三、李四任选其一，电话号码需匹配
+      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
+        @charter_bookings.each do |booking|
+          # 验证联系人姓名
+          expect(@expected_contact_names).to include(booking.contact_name),
+            "联系人姓名错误。期望: 张三或李四，实际: #{booking.contact_name}"
           
-          expect(booking.departure_date).to be >= Date.current,
-            "出发日期不能早于今天。实际: #{booking.departure_date}"
-          
+          # 验证电话号码与联系人匹配
+          expected_phone = @expected_contact_phones[booking.contact_name]
+          expect(booking.contact_phone).to eq(expected_phone),
+            "联系电话与联系人不匹配。联系人: #{booking.contact_name}，期望电话: #{expected_phone}，实际电话: #{booking.contact_phone}"
+        end
+      end
+      
+      # 断言7: 订单信息完整（权重5%）
+      # 验证出发时间格式、预订模式
+      add_assertion "订单信息完整", weight: 5 do
+        @charter_bookings.each do |booking|
           # 出发时间
           expect(booking.departure_time).to be_present,
             "缺少出发时间"
@@ -153,8 +163,8 @@ module V251V300
         end
       end
       
-      # 断言6: 价格计算正确（权重10%）
-      add_assertion "价格计算正确", weight: 10 do
+      # 断言8: 价格计算正确（权重5%）
+      add_assertion "价格计算正确", weight: 5 do
         @charter_bookings.each do |booking|
           # 使用服务重新计算价格
           expected_price = CharterPriceCalculatorService.call(
@@ -182,7 +192,9 @@ module V251V300
         vehicle_type_name: @vehicle_type_name,
         duration_hours: @duration_hours,
         passenger_count: @passenger_count,
-        travel_date: @travel_date.to_s
+        travel_date: @travel_date.to_s,
+        expected_contact_names: @expected_contact_names,
+        expected_contact_phones: @expected_contact_phones
       }
     end
   
@@ -193,6 +205,8 @@ module V251V300
       @duration_hours = data['duration_hours']
       @passenger_count = data['passenger_count']
       @travel_date = Date.parse(data['travel_date'])
+      @expected_contact_names = data['expected_contact_names']
+      @expected_contact_phones = data['expected_contact_phones']
     end
   
     def simulate
@@ -224,6 +238,9 @@ module V251V300
         departure_date: @travel_date
       )
     
+      # 随机选择联系人（张三或李四）
+      selected_contact = [@zhangsan, @lisi].sample
+    
       # 创建订单
       CharterBooking.create!(
         user_id: user.id,
@@ -234,8 +251,8 @@ module V251V300
         duration_hours: @duration_hours,
         booking_mode: 'by_route',
         passengers_count: @passenger_count,
-        contact_name: '李四',
-        contact_phone: '13800138002',
+        contact_name: selected_contact.name,
+        contact_phone: selected_contact.phone,
         total_price: price,
         status: 'pending',
         data_version: @data_version

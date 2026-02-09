@@ -2,23 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例287: 预订无障碍设施酒店
+# 验证用例287: 给张三预订无障碍设施酒店
 #
 # 任务描述:
-#   用户预订配备无障碍设施的酒店+轮椅租赁服务
+#   给张三预订上海配备无障碍设施的酒店
 #
 # 评分标准:
 #   - 创建酒店预订 (30%)
 #   - 酒店配备无障碍设施 (25%)
-#   - 创建轮椅租赁服务 (25%)
-#   - 入住日期正确 (10%)
+#   - 入住人信息正确（张三） (20%)
+#   - 入住日期正确 (15%)
 #   - 订单状态正确 (10%)
 module V251V300
   class V287BookAccessibleHotelValidator < BaseValidator
     self.validator_id = 'v287_book_accessible_hotel_validator'
     self.task_id = 'd72a4ed6-b4c8-40f7-b9cc-c0424c05be6a'
-    self.title = '预订3天后无障碍设施酒店'
-    self.description = '用户预订配备无障碍设施的酒店+轮椅租赁服务'
+    self.title = '给张三预订无障碍设施酒店'
+    self.description = '给张三预订上海配备无障碍设施的酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,17 +26,22 @@ module V251V300
       @check_in_date = Date.current + 3.days
       @check_out_date = @check_in_date + 2.days
       
+      # 预查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @zhangsan.name
+      @expected_guest_phone = @zhangsan.phone
+      
       if user.balance < 2000
         user.update!(balance: 3000)
       end
       
       {
-        task: "请预订#{@city}的无障碍设施酒店，需要配备轮椅通道和无障碍设施，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚，同时需要租赁轮椅服务",
+        task: "请给张三预订#{@city}的无障碍设施酒店，需要配备轮椅通道和无障碍设施，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚",
         city: @city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        hint: "选择配备无障碍设施的酒店，并预订轮椅租赁服务"
+        hint: "选择配备无障碍设施的酒店"
       }
     end
     
@@ -62,16 +67,14 @@ module V251V300
           "酒店未配备无障碍相关设施。当前设施: #{hotel.facilities}"
       end
       
-      add_assertion "创建了轮椅租赁服务订单", weight: 25 do
-        @car_order = CarOrder
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .first
-        # 使用用车订单模拟轮椅租赁服务
-        expect(@car_order).not_to be_nil, "未找到轮椅租赁服务订单"
+      add_assertion "入住人信息正确（张三）", weight: 20 do
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}（张三），实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
+          "入住人联系电话错误。期望: #{@expected_guest_phone}，实际: #{@hotel_booking.guest_phone}"
       end
       
-      add_assertion "入住日期正确", weight: 10 do
+      add_assertion "入住日期正确", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
@@ -85,6 +88,7 @@ module V251V300
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 1. 预订配备无障碍设施的酒店
       hotel = Hotel
@@ -101,27 +105,11 @@ module V251V300
         hotel_id: hotel.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name || '张三',
-        guest_phone: user.phone || '13800138000',
+        guest_name: zhangsan.name,
+        guest_phone: zhangsan.phone,
         payment_method: '花呗',
         total_price: hotel.price * (@check_out_date - @check_in_date).to_i,
         status: 'pending',
-        data_version: @data_version
-      )
-      
-      # 2. 租赁轮椅服务（使用CarOrder模拟）
-      car = Car.where(data_version: 0).first!
-      CarOrder.create!(
-        user_id: user.id,
-        car_id: car.id,
-        driver_name: user.name || '张三',
-        driver_id_number: '440300199001011234',
-        contact_phone: user.phone || '13800138000',
-        pickup_datetime: @check_in_date,
-        return_datetime: @check_out_date,
-        pickup_location: "#{@city}#{hotel.name}",
-        status: 'pending',
-        total_price: 100 * (@check_out_date - @check_in_date).to_i,
         data_version: @data_version
       )
     end
@@ -132,7 +120,9 @@ module V251V300
       {
         city: @city,
         check_in_date: @check_in_date&.to_s,
-        check_out_date: @check_out_date&.to_s
+        check_out_date: @check_out_date&.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -140,6 +130,8 @@ module V251V300
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_guest_phone = data['expected_guest_phone']
     end
   end
 end

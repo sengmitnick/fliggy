@@ -2,24 +2,26 @@
 
 require_relative '../base_validator'
 
-# V258: 预订成都租车3天（后天取车）并购买交通意外险（保障天数需覆盖租车期间）
+# V258: 给张三预订成都租车3天（后天取车）并购买交通意外险
 #
 # 任务描述:
-#   用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间
+#   帮张三在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间
 #
 # 评分标准:
-#   - 创建了租车订单 (25%)
+#   - 创建了租车订单 (20%)
 #   - 取车日期正确（后天）(10%)
-#   - 创建了保险订单 (25%)
-#   - 保险类型正确（交通意外险）(20%)
+#   - 创建了保险订单 (20%)
+#   - 保险类型正确（交通意外险）(15%)
 #   - 保险保障天数与租车天数匹配 (15%)
+#   - 驾驶人信息正确（张三） (10%)
+#   - 投保人信息正确（张三） (5%)
 #   - 订单状态有效 (5%)
 module V251V300
   class V258BookCarWithFullInsuranceValidator < BaseValidator
     self.validator_id = 'v258_book_car_with_full_insurance_validator'
     self.task_id = '7785f506-a374-4f39-b8f3-08cffdf278fb'
-    self.title = '预订成都租车3天（后天取车）并购买交通意外险（保障天数需覆盖租车期间）'
-    self.description = '用户需要在成都预订租车3天（后天取车），并购买交通意外险，保险保障天数必须覆盖整个租车期间（保险天数>=租车天数）'
+    self.title = '给张三预订成都租车3天（后天取车）并购买交通意外险'
+    self.description = '帮张三在成都租车3天（后天取车），并购买交通意外险（保障天数覆盖整个租车期间）'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,6 +29,14 @@ module V251V300
       @pickup_date = Date.current + 2.days
       @return_date = @pickup_date + 3.days
       @rental_days = (@return_date - @pickup_date).to_i
+      
+      # 查询 demo_user 和驾驶人信息（基线数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_driver_name = @zhangsan.name
+      @expected_driver_id = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone
+      @expected_insured_name = @zhangsan.name
       
       # 查找租车产品
       @car = Car
@@ -44,8 +54,9 @@ module V251V300
       raise "未找到适合#{@rental_days}天的交通意外险" if @available_insurances.empty?
       
       {
-        task: "请预订#{@city}租车（#{@pickup_date.strftime('%Y年%m月%d日')}取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买交通意外险（保障天数需覆盖整个租车期间）。",
+        task: "请为张三预订#{@city}租车（#{@pickup_date.strftime('%Y年%m月%d日')}取车，#{@return_date.strftime('%Y年%m月%d日')}还车，共#{@rental_days}天），并购买交通意外险（保障天数需覆盖整个租车期间）。",
         requirements: {
+          driver_name: '张三',
           city: @city,
           pickup_date: @pickup_date,
           return_date: @return_date,
@@ -58,7 +69,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了租车订单", weight: 25 do
+      add_assertion "创建了租车订单", weight: 20 do
         all_orders = CarOrder
           .joins(:car)
           .includes(:car)
@@ -78,7 +89,7 @@ module V251V300
           "取车日期错误。期望: #{@pickup_date}（后天），实际: #{actual_pickup_date}"
       end
       
-      add_assertion "创建了保险订单", weight: 25 do
+      add_assertion "创建了保险订单", weight: 20 do
         @insurance_order = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -89,7 +100,7 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险类型正确（交通意外险）", weight: 20 do
+      add_assertion "保险类型正确（交通意外险）", weight: 15 do
         product_type = @insurance_order.insurance_product.product_type
         expect(product_type).to eq('transport'),
           "保险类型错误。期望: transport（交通意外险），实际: #{product_type}"
@@ -103,6 +114,23 @@ module V251V300
         
         expect(insurance_days).to be >= rental_days,
           "保险天数不足。租车天数: #{rental_days}天，保险天数: #{insurance_days}天"
+      end
+      
+      add_assertion "驾驶人信息正确（张三）", weight: 10 do
+        expect(@car_order.driver_name).to eq(@expected_driver_name),
+          "驾驶人姓名错误。期望: #{@expected_driver_name}，实际: #{@car_order.driver_name}"
+        
+        expect(@car_order.driver_id_number).to eq(@expected_driver_id),
+          "驾驶人证件号错误。期望: #{@expected_driver_id}，实际: #{@car_order.driver_id_number}"
+        
+        expect(@car_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@car_order.contact_phone}"
+      end
+      
+      add_assertion "投保人信息正确（张三）", weight: 5 do
+        insured = @insurance_order.insured_persons || []
+        expect(insured).to include(@expected_insured_name),
+          "投保人列表中缺少#{@expected_insured_name}。期望: [#{@expected_insured_name}]，实际: #{insured.inspect}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -121,9 +149,9 @@ module V251V300
       car_order = CarOrder.create!(
         user: user,
         car: @car,
-        driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_name: @zhangsan.name,
+        driver_id_number: @zhangsan.id_number,
+        contact_phone: @zhangsan.phone,
         pickup_datetime: pickup_datetime,
         return_datetime: return_datetime,
         pickup_location: @car.pickup_location,
@@ -149,7 +177,7 @@ module V251V300
         days: @rental_days,
         destination: @city,
         destination_type: 'domestic',
-        insured_persons: [user.name],
+        insured_persons: [@zhangsan.name],
         unit_price: unit_price,
         quantity: 1,
         total_price: unit_price,
@@ -166,7 +194,11 @@ module V251V300
         pickup_date: @pickup_date.to_s,
         return_date: @return_date.to_s,
         rental_days: @rental_days,
-        car_id: @car&.id
+        car_id: @car&.id,
+        expected_driver_name: @expected_driver_name,
+        expected_driver_id: @expected_driver_id,
+        expected_contact_phone: @expected_contact_phone,
+        expected_insured_name: @expected_insured_name
       }
     end
     
@@ -175,6 +207,13 @@ module V251V300
       @pickup_date = Date.parse(data['pickup_date'])
       @return_date = Date.parse(data['return_date'])
       @rental_days = data['rental_days']
+      @expected_driver_name = data['expected_driver_name']
+      @expected_driver_id = data['expected_driver_id']
+      @expected_contact_phone = data['expected_contact_phone']
+      @expected_insured_name = data['expected_insured_name']
+      
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
       @car = Car.find(data['car_id']) if data['car_id']
       

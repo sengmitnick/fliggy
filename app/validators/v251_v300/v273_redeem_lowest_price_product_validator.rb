@@ -8,11 +8,13 @@ module V251V300
   class V273RedeemLowestPriceProductValidator < BaseValidator
     self.validator_id = 'v273_redeem_lowest_price_product_validator'
     self.task_id = '4df2344f-f74d-41e8-9bf7-0b2a2e16c295'
-    self.title = '按价格排序选择低价商品'
-    self.description = '用户按价格升序排序，选择价格最低的商品兑换'
+    self.title = '给张三兑换价格最低的商品（性价比最高）'
+    self.description = '帮张三在积分商城按价格升序排序，选择价格最低的商品兑换'
     self.timeout_seconds = 300
     
     def prepare
+      @expected_shipping_address = '武汉市江汉区解放大道688号'
+      
       # 查找价格最低的商品（现金+积分总价值）
       @low_price_products = MembershipProduct
         .where(data_version: 0)
@@ -32,11 +34,11 @@ module V251V300
       membership = user.membership
       
       if membership.points < @product.price_mileage
-        membership.update!(points: @product.price_mileage + 500)
+        raise "用户积分不足。需要: #{@product.price_mileage}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < @product.price_cash
-        user.update!(balance: @product.price_cash + 100)
+        raise "用户余额不足。需要: ¥#{@product.price_cash}，当前: ¥#{user.balance}"
       end
       
       {
@@ -51,7 +53,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了兑换订单", weight: 25 do
+      add_assertion "创建了兑换订单", weight: 20 do
         @all_orders = MembershipOrder
           .joins(:membership_product)
           .includes(:membership_product)
@@ -65,27 +67,29 @@ module V251V300
       
       return if @all_orders.nil? || @all_orders.empty?
       
-      add_assertion "兑换的是低价商品", weight: 35 do
+      add_assertion "兑换的是价格最低的5个商品之一", weight: 35 do
         product = @order.membership_product
-        total_price = product.price_cash + (product.price_mileage / 100.0)
-        max_limit = @max_price * 2
-        expect(total_price).to be <= max_limit,
-          "商品价格过高，不是低价商品。价格: #{product.price_display}, 最高限制: #{max_limit.round(2)}元等价"
+        low_price_names = @low_price_products.map(&:name)
+        
+        expect(low_price_names).to include(product.name),
+          "商品不在价格最低的5个商品中。已兑换: #{product.name}, 价格最低5个: #{low_price_names.join('、')}"
       end
       
-      add_assertion "商品有效", weight: 15 do
-        product = @order.membership_product
-        expect(product.name).not_to be_empty
-        expect(product.price_cash > 0 || product.price_mileage > 0).to be_truthy
+      add_assertion "订单金额正确", weight: 20 do
+        expect(@order.total_cash).to eq(@order.price_cash * @order.quantity),
+          "现金金额错误。期望: ¥#{@order.price_cash * @order.quantity}, 实际: ¥#{@order.total_cash}"
+        expect(@order.total_mileage).to eq(@order.price_mileage * @order.quantity),
+          "积分金额错误。期望: #{@order.price_mileage * @order.quantity}积分, 实际: #{@order.total_mileage}积分"
       end
       
-      add_assertion "订单金额正确", weight: 10 do
-        expect(@order.total_cash).to eq(@order.price_cash * @order.quantity)
-        expect(@order.total_mileage).to eq(@order.price_mileage * @order.quantity)
+      add_assertion "订单已支付", weight: 15 do
+        expect(@order.status).to eq('paid'),
+          "订单状态错误。期望: paid, 实际: #{@order.status}"
       end
       
-      add_assertion "订单状态有效", weight: 15 do
-        expect(@order.status).to be_in(['pending', 'paid', 'shipping', 'completed'])
+      add_assertion "收货地址正确", weight: 10 do
+        expect(@order.shipping_address).to eq(@expected_shipping_address),
+          "收货地址错误。期望: #{@expected_shipping_address}, 实际: #{@order.shipping_address}"
       end
     end
     

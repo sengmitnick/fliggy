@@ -16,13 +16,13 @@ module V251V300
   class V277RedeemFlightMultiPassPackageValidator < BaseValidator
     self.validator_id = 'v277_redeem_flight_multi_pass_package_validator'
     self.task_id = '8b0d78b3-b4ce-4e39-963d-aa0e5c455398'
-    self.title = '预订机票次卡'
-    self.description = '用户购买10次经济舱套餐，享受折扣价格和灵活使用'
+    self.title = '给张三兑换机票次卡（10次经济舱套餐）'
+    self.description = '帮张三购买10次经济舱套餐，享受折扣价格和灵活使用'
     self.timeout_seconds = 300
     
     def prepare
-      # 使用积分商城的商品来模拟机票次卡
-      @product_name = '瑞幸咖啡券 9.9元'
+      # 使用积分商城的机票次卡商品
+      @product_name = '机票次卡 10次经济舱套餐'
       @product = MembershipProduct.find_by!(name: @product_name, data_version: 0)
       
       # 确保用户有足够积分和余额
@@ -33,11 +33,11 @@ module V251V300
       required_cash = @product.price_cash
       
       if membership.points < required_points
-        membership.update!(points: required_points + 500)
+        raise "用户积分不足。需要: #{required_points}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < required_cash
-        user.update!(balance: required_cash + 100)
+        raise "用户余额不足。需要: ¥#{required_cash}，当前: ¥#{user.balance}"
       end
       
       {
@@ -50,7 +50,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了积分兑换订单", weight: 30 do
+      add_assertion "创建了积分兑换订单", weight: 25 do
         @order = MembershipOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -60,19 +60,19 @@ module V251V300
       
       return unless @order
       
-      add_assertion "兑换的是指定商品（#{@product_name}）", weight: 25 do
+      add_assertion "兑换的是指定商品（#{@product_name}）", weight: 40 do
         product = @order.membership_product
         expect(product).not_to be_nil, "订单没有关联商品"
         expect(product.name).to eq(@product_name),
           "商品不匹配。期望: #{@product_name}, 实际: #{product.name}"
       end
       
-      add_assertion "积分金额正确（#{@product.price_mileage}积分）", weight: 25 do
+      add_assertion "积分金额正确（#{@product.price_mileage}积分）", weight: 20 do
         expect(@order.price_mileage).to eq(@product.price_mileage),
           "积分金额错误。期望: #{@product.price_mileage}, 实际: #{@order.price_mileage}"
       end
       
-      add_assertion "订单状态为已完成", weight: 20 do
+      add_assertion "订单已支付", weight: 15 do
         expect(@order.status).to eq('completed').or(eq('paid')),
           "订单状态错误。期望: completed/paid, 实际: #{@order.status}"
       end

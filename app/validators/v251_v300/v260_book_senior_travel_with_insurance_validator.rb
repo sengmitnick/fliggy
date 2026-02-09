@@ -2,33 +2,42 @@
 
 require_relative '../base_validator'
 
-# V260: 预订桂林跟团游+为2位老年人购买境内高龄旅游保险
+# V260: 给张建国预订桂林跟团游+购买境内旅游保险（10天后出发）
 #
 # 任务描述:
-#   用户需要为2位老年人（65岁以上）预订桂林跟团游（10天后出发，行程≤5天），
+#   帮张建国这位老年人预订桂林跟团游（10天后出发，行程≤5天），
 #   并购买境内旅游保险，保额要求：意外身故≥50万元、意外医疗≥5万元
 #
 # 评分标准:
 #   - 创建了桂林跟团游订单 (20%)
-#   - 预订了2位老年人 (10%)
+#   - 预订了2位老年人 (5%)
 #   - 创建了保险订单 (15%)
 #   - 保险类型正确（境内旅游保险domestic）(15%)
 #   - 保险保额达标（意外身故≥50万、意外医疗≥5万）(15%)
-#   - 保险日期与跟团游匹配 (10%)
-#   - 保险天数与行程天数一致 (10%)
+#   - 保险日期与跟团游匹配 (5%)
+#   - 保险天数与行程天数一致 (5%)
+#   - 联系人信息正确（王大爷或李大妈） (10%)
+#   - 投保人信息正确（王大爷、李大妈） (5%)
 #   - 订单状态有效 (5%)
 module V251V300
   class V260BookSeniorTravelWithInsuranceValidator < BaseValidator
     self.validator_id = 'v260_book_senior_travel_with_insurance_validator'
     self.task_id = '442546c5-70c7-4519-80e7-513c856e9596'
-    self.title = '预订桂林跟团游（10天后出发）+为2位老年人购买境内高龄旅游保险'
-    self.description = '用户需要为2位老年人（65岁以上）预订桂林跟团游（10天后出发，行程≤5天），并购买境内旅游保险，保额要求：意外身故≥50万元、意外医疗≥5万元'
+    self.title = '给张建国预订桂林跟团游+购买境内旅游保险（10天后出发）'
+    self.description = '帮张建国（老年人）预订桂林跟团游（10天后出发，行程≤5天），并购买境内旅游保险（保额：意外身故≥50万、意外医疗≥5万）'
     self.timeout_seconds = 300
     
     def prepare
       @destination = '桂林'
       @travel_date = Date.current + 10.days
-      @senior_count = 2
+      @senior_count = 1
+      
+      # 查询 demo_user 和老年人乘客信息（基线数据）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
+      @expected_contact_name = @zhangjianguo.name
+      @expected_contact_phone = @zhangjianguo.phone
+      @expected_insured_name = @zhangjianguo.name
       
       # 查找适合老年人的跟团游
       @tour_product = TourGroupProduct
@@ -49,15 +58,16 @@ module V251V300
       raise "未找到适合#{@duration}天的保险产品" if @available_insurances.empty?
       
       {
-        task: "请为#{@senior_count}位老年人（65岁以上）预订#{@destination}跟团游（#{@travel_date.strftime('%Y年%m月%d日')}出发，#{@duration}天），并购买高龄旅游保险（保额要求：意外身故≥50万、意外医疗≥5万）。",
+        task: "请为张建国（老年人）预订#{@destination}跟团游（#{@travel_date.strftime('%Y年%m月%d日')}出发，#{@duration}天），并购买旅游保险（保额要求：意外身故≥50万、意外医疗≥5万）。",
         requirements: {
+          passengers: '张建国',
           destination: @destination,
           travel_date: @travel_date,
           duration: @duration,
           senior_count: @senior_count,
-          age_group: '65岁以上',
+          age_group: '老年人',
           insurance_type: '境内旅游保险',
-          insurance_coverage: '老年人专属'
+          insurance_coverage: '意外保障'
         },
         hint: "老年人出行需要购买境内旅游保险，保障应涵盖意外身故（≥50万）和意外医疗（≥5万）。"
       }
@@ -78,7 +88,7 @@ module V251V300
       
       return if @tour_booking.nil?
       
-      add_assertion "预订了2位老年人", weight: 10 do
+      add_assertion "预订了1位老年人", weight: 5 do
         adult_count = @tour_booking.adult_count
         expect(adult_count).to eq(@senior_count),
           "预订人数错误。期望: #{@senior_count}位老年人，实际: #{adult_count}位成人"
@@ -114,7 +124,7 @@ module V251V300
           "意外医疗保额不足。老年人建议至少5万元，实际: #{medical_coverage/10000}万元"
       end
       
-      add_assertion "保险日期与跟团游匹配", weight: 10 do
+      add_assertion "保险日期与跟团游匹配", weight: 5 do
         insurance_start = @insurance_order.start_date
         tour_start = @tour_booking.travel_date
         
@@ -124,7 +134,7 @@ module V251V300
           "保险起始: #{insurance_start.strftime('%Y年%m月%d日')}"
       end
       
-      add_assertion "保险天数与行程天数一致", weight: 10 do
+      add_assertion "保险天数与行程天数一致", weight: 5 do
         insurance_days = @insurance_order.days
         tour_duration = @tour_booking.tour_group_product.duration
         
@@ -132,6 +142,20 @@ module V251V300
           "保险天数与行程天数不一致。" \
           "行程: #{tour_duration}天，" \
           "保险: #{insurance_days}天"
+      end
+      
+      add_assertion "联系人信息正确（张建国）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}，实际: #{@tour_booking.contact_name}"
+        
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@tour_booking.contact_phone}"
+      end
+      
+      add_assertion "投保人信息正确（张建国）", weight: 5 do
+        insured = @insurance_order.insured_persons || []
+        expect(insured).to include(@expected_insured_name),
+          "投保人列表中缺少#{@expected_insured_name}。期望: [#{@expected_insured_name}]，实际: #{insured.inspect}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -153,8 +177,8 @@ module V251V300
         travel_date: @travel_date,
         adult_count: @senior_count,
         child_count: 0,
-        contact_name: user.name,
-        contact_phone: '13800138000',
+        contact_name: @zhangjianguo.name,
+        contact_phone: @zhangjianguo.phone,
         insurance_type: 'none',
         total_price: @tour_product.price * @senior_count,
         status: 'confirmed',
@@ -181,7 +205,7 @@ module V251V300
         days: @duration,
         destination: @destination,
         destination_type: 'domestic',
-        insured_persons: ['王大爷（68岁）', '李大妈（66岁）'],
+        insured_persons: [@zhangjianguo.name],
         unit_price: unit_price,
         quantity: @senior_count,
         total_price: unit_price * @senior_count,
@@ -198,7 +222,10 @@ module V251V300
         travel_date: @travel_date.to_s,
         senior_count: @senior_count,
         duration: @duration,
-        tour_product_id: @tour_product&.id
+        tour_product_id: @tour_product&.id,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone,
+        expected_insured_name: @expected_insured_name
       }
     end
     
@@ -207,6 +234,13 @@ module V251V300
       @travel_date = Date.parse(data['travel_date'])
       @senior_count = data['senior_count']
       @duration = data['duration']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
+      @expected_insured_name = data['expected_insured_name']
+      
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @wangdaye = user.passengers.where(name: '王大爷', data_version: 0).or(user.passengers.where(name: '王大爷（68岁）', data_version: 0)).first!
+      @lidama = user.passengers.where(name: '李大妈', data_version: 0).or(user.passengers.where(name: '李大妈（66岁）', data_version: 0)).first!
       
       @tour_product = TourGroupProduct.find(data['tour_product_id']) if data['tour_product_id']
       

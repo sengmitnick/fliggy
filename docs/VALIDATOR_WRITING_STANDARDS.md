@@ -53,6 +53,61 @@ start_date = Date.today - 1.day  # 支持西时区用户
 end_date = start_date + 14.days  # 至少 14 天
 ```
 
+### 2.4 数据包完整性验证（⚠️ CRITICAL）
+
+**问题场景（v261 案例）：**
+- 验证器 v261 测试"预订泰国5天境外游"
+- 数据包 `tour_groups.rb` 只有国内目的地，**没有泰国数据**
+- 验证器使用 fallback 逻辑找到任意境外游产品，表面通过但**测试无效**
+- 用户发现问题后要求："**绝对杜绝这种情况，没有就新增数据到数据包**"
+
+**强制规则：**
+
+1. **验证器需要什么数据，数据包必须提供精确数据**
+   - ❌ 依赖 fallback 逻辑：`@product ||= Product.where(...).first`
+   - ✅ 精确查询必须成功：`@product = Product.find_by!(...)`
+
+2. **创建验证器前，先检查数据包是否完整**
+   ```bash
+   # 检查是否存在所需数据
+   rails runner "puts TourGroupProduct.where(destination: '泰国', data_version: 0).count"
+   # 如果返回 0，必须先添加数据包
+   ```
+
+3. **新增数据必须合并到现有数据包文件**
+   - ✅ 编辑 `app/validators/support/data_packs/v1/tour_groups.rb` 添加泰国等境外目的地
+   - ❌ 创建新文件 `tour_groups_international.rb`（禁止拆分）
+
+4. **数据包更新后必须重新加载并验证**
+   ```bash
+   rake validator:reset_baseline  # 重新加载所有数据包
+   rails runner "puts TourGroupProduct.where('destination LIKE ?', '%泰国%').count"  # 验证数据
+   rake validator:simulate_single[v261_book_international_travel_with_insurance_validator]  # 测试
+   ```
+
+**v261 修复方案：**
+```ruby
+# tour_groups.rb - 添加境外目的地到现有配置
+destinations_config = [
+  # ... 原有国内目的地 ...
+  
+  # 境外游目的地（新增）
+  { name: '泰国', cities: ['曼谷', '普吉', '芭提雅', '清迈'], 
+    attractions: ['大皇宫', '玉佛寺', '四面佛', '水上市场', '芭提雅海滩', '皮皮岛'], 
+    departure_cities: ['上海', '北京', '广州', '深圳', '成都', '杭州'] },
+  { name: '日本', cities: ['东京', '大阪', '京都', '北海道'], 
+    attractions: ['富士山', '浅草寺', '清水寺', '奈良公园', '心斋桥'], 
+    departure_cities: ['上海', '北京', '广州', '深圳', '成都'] },
+  # ... 其他境外目的地 ...
+]
+```
+
+**经验教训：**
+- **预防 > 修复**：创建验证器前先审查数据包是否完整
+- **精确 > 兜底**：验证器不应依赖 fallback 逻辑来容忍数据缺失
+- **合并 > 拆分**：同模块数据必须在一个文件中管理
+- **验证 > 假设**：修改数据包后必须运行 `reset_baseline` 和验证命令
+
 ---
 
 ## 三、demo_user 数据使用

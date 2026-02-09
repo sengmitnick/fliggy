@@ -2,91 +2,123 @@
 
 require_relative '../base_validator'
 
-# 验证用例280: 预订包车套餐
+# 验证用例280: 预订包车游
 #
 # 任务描述:
-#   用户预订3天包车套餐，包含司导服务和油费
+#   用户预订深圳包车游（经典一日游路线）
 #
 # 评分标准:
-#   - 创建包车订单 (30%)
-#   - 租赁天数正确 (25%)
-#   - 价格合理 (25%)
-#   - 订单状态正确 (20%)
+#   - 创建包车游订单 (25%)
+#   - 路线正确（深圳） (20%)
+#   - 出发日期正确 (15%)
+#   - 人数正确 (10%)
+#   - 联系人信息正确 (15%)
+#   - 订单状态正确 (15%)
 module V251V300
   class V280BookCarRentalPackageValidator < BaseValidator
     self.validator_id = 'v280_book_car_rental_package_validator'
     self.task_id = 'f6d6a9af-de20-4b9c-85f2-f63ef9397045'
-    self.title = '预订包车套餐'
-    self.description = '用户预订3天包车套餐，包含司导服务和油费'
+    self.title = '给张三预订深圳包车游（经典一日游）'
+    self.description = '帮张三预订深圳包车游经典一日游路线'
     self.timeout_seconds = 300
     
     def prepare
-      @rental_days = 3
-      @pickup_city = '深圳'
-      @pickup_datetime = Date.current + 2.days
-      @return_datetime = @pickup_datetime + @rental_days.days
+      @city_name = '深圳'
+      @passengers_count = 3
+      @departure_date = Date.current + 2.days
+      
+      # 查找深圳的包车游路线
+      @route = CharterRoute.joins(:city)
+                           .where(cities: { name: @city_name }, data_version: 0)
+                           .where('charter_routes.name LIKE ?', '%经典%')
+                           .first!
       
       # 确保用户有足够余额
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      if user.balance < 2000
-        user.update!(balance: 3000)
+      if user.balance < 1000
+        raise "用户余额不足。需要: ¥1000，当前: ¥#{user.balance}"
       end
       
       {
-        task: "请预订#{@pickup_city}的包车服务，租期#{@rental_days}天，从#{@pickup_datetime.strftime('%Y年%-m月%-d日')}开始",
-        pickup_city: @pickup_city,
-        rental_days: @rental_days,
-        pickup_date: @pickup_datetime.to_s,
-        return_date: @return_datetime.to_s,
-        hint: "选择适合多天使用的车型，包含司机服务"
+        task: "请预订#{@city_name}的包车游，选择经典一日游路线，#{@passengers_count}人，#{@departure_date.strftime('%Y年%-m月%-d日')}出发",
+        city: @city_name,
+        route_name: @route.name,
+        passengers_count: @passengers_count,
+        departure_date: @departure_date.to_s,
+        hint: "包车游包含司机和导游服务，按路线预订"
       }
     end
     
     def verify
-      add_assertion "创建了包车订单", weight: 30 do
-        @order = CarOrder
+      add_assertion "创建了包车游订单", weight: 25 do
+        @order = CharterBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@order).not_to be_nil, "未找到包车订单"
+        expect(@order).not_to be_nil, "未找到包车游订单"
       end
       
       return unless @order
       
-      add_assertion "租赁天数正确（#{@rental_days}天）", weight: 25 do
-        actual_days = (@order.return_datetime.to_date - @order.pickup_datetime.to_date).to_i
-        expect(actual_days).to eq(@rental_days),
-          "租赁天数错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
+      add_assertion "路线正确（#{@city_name}）", weight: 20 do
+        route = @order.charter_route
+        expect(route).not_to be_nil, "订单没有关联路线"
+        expect(route.city.name).to eq(@city_name),
+          "城市不匹配。期望: #{@city_name}, 实际: #{route.city.name}"
       end
       
-      add_assertion "取车地点正确（#{@pickup_city}）", weight: 25 do
-        expect(@order.pickup_location).to include(@pickup_city),
-          "取车地点错误。期望包含: #{@pickup_city}, 实际: #{@order.pickup_location}"
+      add_assertion "出发日期正确（#{@departure_date}）", weight: 15 do
+        expect(@order.departure_date).to eq(@departure_date),
+          "出发日期错误。期望: #{@departure_date}, 实际: #{@order.departure_date}"
       end
       
-      add_assertion "订单状态正确", weight: 20 do
-        expect(@order.status).to eq('pending').or(eq('confirmed')),
-          "订单状态错误。期望: pending/confirmed, 实际: #{@order.status}"
+      add_assertion "人数正确（#{@passengers_count}人）", weight: 10 do
+        expect(@order.passengers_count).to eq(@passengers_count),
+          "人数错误。期望: #{@passengers_count}人, 实际: #{@order.passengers_count}人"
+      end
+      
+      add_assertion "联系人信息正确", weight: 15 do
+        expect(@order.contact_name).not_to be_nil, "未填写联系人姓名"
+        expect(@order.contact_phone).not_to be_nil, "未填写联系人电话"
+        expect(@order.contact_phone).to match(/^1[3-9]\d{9}$/),
+          "电话号码格式错误。实际: #{@order.contact_phone}"
+      end
+      
+      add_assertion "订单状态正确", weight: 15 do
+        expect(@order.status).to eq('pending').or(eq('paid')),
+          "订单状态错误。期望: pending/paid, 实际: #{@order.status}"
       end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 找一辆车
-      car = Car.where(data_version: 0).where('price_per_day < ?', 500).first!
+      # 查找深圳的经典一日游路线
+      route = CharterRoute.joins(:city)
+                          .where(cities: { name: @city_name }, data_version: 0)
+                          .where('charter_routes.name LIKE ?', '%经典%')
+                          .first!
       
-      CarOrder.create!(
+      # 查找合适的车型
+      vehicle_type = VehicleType.where(data_version: 0)
+                                .where('seats >= ?', @passengers_count)
+                                .order(:seats)
+                                .first!
+      
+      CharterBooking.create!(
         user_id: user.id,
-        car_id: car.id,
-        driver_name: user.name || '张三',
-        driver_id_number: '440300199001011234',
-        contact_phone: user.phone || '13800138000',
-        pickup_datetime: @pickup_datetime,
-        return_datetime: @return_datetime,
-        pickup_location: "#{@pickup_city}市中心",
-        status: 'confirmed',
-        total_price: car.price_per_day * @rental_days,
+        charter_route_id: route.id,
+        vehicle_type_id: vehicle_type.id,
+        departure_date: @departure_date,
+        departure_time: '09:00',
+        duration_hours: 8,
+        booking_mode: 'by_route',
+        contact_name: '张三',
+        contact_phone: '13800138000',
+        passengers_count: @passengers_count,
+        pickup_address: "#{@city_name}市中心",
+        total_price: vehicle_type.hourly_price_8h,
+        status: 'pending',
         data_version: @data_version
       )
     end
@@ -95,18 +127,18 @@ module V251V300
     
     def execution_state_data
       {
-        rental_days: @rental_days,
-        pickup_city: @pickup_city,
-        pickup_datetime: @pickup_datetime&.to_s,
-        return_datetime: @return_datetime&.to_s
+        city_name: @city_name,
+        passengers_count: @passengers_count,
+        departure_date: @departure_date&.to_s,
+        route_id: @route&.id
       }
     end
     
     def restore_from_state(data)
-      @rental_days = data['rental_days']
-      @pickup_city = data['pickup_city']
-      @pickup_datetime = Date.parse(data['pickup_datetime']) if data['pickup_datetime']
-      @return_datetime = Date.parse(data['return_datetime']) if data['return_datetime']
+      @city_name = data['city_name']
+      @passengers_count = data['passengers_count']
+      @departure_date = Date.parse(data['departure_date']) if data['departure_date']
+      @route = CharterRoute.find(data['route_id']) if data['route_id']
     end
   end
 end

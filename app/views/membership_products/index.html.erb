@@ -37,12 +37,47 @@
     <!-- Filter Bar -->
     <div class="bg-surface-elevated px-4 py-3 flex items-center justify-between border-b border-border">
       <!-- Sort Dropdown -->
-      <div class="flex items-center gap-3">
-        <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: nil), 
-            class: "text-sm #{params[:sort_by].blank? ? 'text-primary font-semibold' : 'text-secondary'}" do %>
-          综合排序 
-          <span class="ml-1">▼</span>
-        <% end %>
+      <div class="relative" data-controller="dropdown-sort">
+        <button type="button" 
+                data-action="click->dropdown-sort#toggle"
+                class="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-elevated transition-colors">
+          <span class="<%= params[:sort_by].present? ? 'text-primary font-semibold' : 'text-secondary' %>">
+            <% if params[:sort_by] == 'sales' %>
+              销量排序
+            <% elsif params[:sort_by] == 'mileage_asc' %>
+              积分升序
+            <% elsif params[:sort_by] == 'mileage_desc' %>
+              积分降序
+            <% else %>
+              综合排序
+            <% end %>
+          </span>
+          <span class="text-muted">▼</span>
+        </button>
+        
+        <!-- Dropdown Menu -->
+        <div data-dropdown-sort-target="menu" 
+             class="hidden absolute top-full left-0 mt-1 bg-surface rounded-lg shadow-lg border border-border z-50 min-w-[120px]">
+          <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: nil), 
+              class: "block px-4 py-2 text-sm hover:bg-surface-elevated transition-colors #{params[:sort_by].blank? ? 'text-primary font-semibold' : 'text-secondary'}" do %>
+            综合排序
+          <% end %>
+          
+          <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: 'sales'), 
+              class: "block px-4 py-2 text-sm hover:bg-surface-elevated transition-colors #{params[:sort_by] == 'sales' ? 'text-primary font-semibold' : 'text-secondary'}" do %>
+            销量排序
+          <% end %>
+          
+          <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: 'mileage_asc'), 
+              class: "block px-4 py-2 text-sm hover:bg-surface-elevated transition-colors #{params[:sort_by] == 'mileage_asc' ? 'text-primary font-semibold' : 'text-secondary'}" do %>
+            积分升序
+          <% end %>
+          
+          <%= link_to membership_products_path(category: params[:category], region: params[:region], sort_by: 'mileage_desc'), 
+              class: "block px-4 py-2 text-sm hover:bg-surface-elevated transition-colors #{params[:sort_by] == 'mileage_desc' ? 'text-primary font-semibold' : 'text-secondary'}" do %>
+            积分降序
+          <% end %>
+        </div>
       </div>
       
       <!-- Region Filter -->

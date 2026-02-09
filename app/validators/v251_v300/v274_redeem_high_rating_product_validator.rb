@@ -8,11 +8,13 @@ module V251V300
   class V274RedeemHighRatingProductValidator < BaseValidator
     self.validator_id = 'v274_redeem_high_rating_product_validator'
     self.task_id = 'fdc187fc-0997-427d-9d9f-7a3241a8e088'
-    self.title = '按评分排序选择高评分商品'
-    self.description = '用户按评分降序排序，选择评分最高的商品兑换'
+    self.title = '给张三兑换评分最高的优质商品'
+    self.description = '帮张三在积分商城按评分排序，选择评分最高的商品兑换（≥ 4.8分）'
     self.timeout_seconds = 300
     
     def prepare
+      @expected_shipping_address = '西安市雁塔区高新路88号'
+      
       # 查找评分最高的商品
       @high_rating_products = MembershipProduct
         .where(data_version: 0)
@@ -32,11 +34,11 @@ module V251V300
       membership = user.membership
       
       if membership.points < @product.price_mileage
-        membership.update!(points: @product.price_mileage + 1000)
+        raise "用户积分不足。需要: #{@product.price_mileage}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < @product.price_cash
-        user.update!(balance: @product.price_cash + 300)
+        raise "用户余额不足。需要: ¥#{@product.price_cash}，当前: ¥#{user.balance}"
       end
       
       {
@@ -52,7 +54,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了兑换订单", weight: 25 do
+      add_assertion "创建了兑换订单", weight: 20 do
         @all_orders = MembershipOrder
           .joins(:membership_product)
           .includes(:membership_product)
@@ -72,19 +74,21 @@ module V251V300
           "商品评分不足。期望: ≥#{@min_rating}分, 实际: #{product.rating}分"
       end
       
-      add_assertion "商品信息完整", weight: 15 do
-        product = @order.membership_product
-        expect(product.name).not_to be_empty
-        expect(product.rating).to be > 0
+      add_assertion "订单金额正确", weight: 20 do
+        expect(@order.total_cash).to eq(@order.price_cash * @order.quantity),
+          "现金金额错误。期望: ¥#{@order.price_cash * @order.quantity}, 实际: ¥#{@order.total_cash}"
+        expect(@order.total_mileage).to eq(@order.price_mileage * @order.quantity),
+          "积分金额错误。期望: #{@order.price_mileage * @order.quantity}积分, 实际: #{@order.total_mileage}积分"
       end
       
-      add_assertion "订单金额正确", weight: 10 do
-        expect(@order.total_cash).to eq(@order.price_cash * @order.quantity)
-        expect(@order.total_mileage).to eq(@order.price_mileage * @order.quantity)
+      add_assertion "订单已支付", weight: 15 do
+        expect(@order.status).to eq('paid'),
+          "订单状态错误。期望: paid, 实际: #{@order.status}"
       end
       
-      add_assertion "订单状态有效", weight: 15 do
-        expect(@order.status).to be_in(['pending', 'paid', 'shipping', 'completed'])
+      add_assertion "收货地址正确", weight: 10 do
+        expect(@order.shipping_address).to eq(@expected_shipping_address),
+          "收货地址错误。期望: #{@expected_shipping_address}, 实际: #{@order.shipping_address}"
       end
     end
     
