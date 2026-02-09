@@ -11,9 +11,10 @@ require_relative '../base_validator'
 #   - 创建了租车订单 (25%)
 #   - 创建了保险订单 (25%)
 #   - 保险类型适合自驾游 (15%)
-#   - 保险人数正确（3人） (15%)
-#   - 保险保障天数正确 (10%)
-#   - 保险时间与租车时间一致 (10%)
+#   - 联系人信息正确（张三/李四/王芳任一） (10%)
+#   - 保险人数正确（3人） (10%)
+#   - 被保险人信息正确（张三、李四、王芳） (5%)
+#   - 保险时间覆盖租车时间 (10%)
 module V251V300
   class V264BookSelfDriveWithComprehensiveInsuranceValidator < BaseValidator
     self.validator_id = 'v264_book_self_drive_with_comprehensive_insurance_validator'
@@ -34,9 +35,7 @@ module V251V300
       @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
       @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
-      @expected_driver_name = @zhangsan.name
-      @expected_driver_id_number = @zhangsan.id_number
-      @expected_contact_phone = @zhangsan.phone
+      @expected_contact_names = [@zhangsan.name, @lisi.name, @wangfang.name]
       @expected_insured_names = [@zhangsan.name, @lisi.name, @wangfang.name]
       
       # 查找租车产品
@@ -115,9 +114,10 @@ module V251V300
           "保险类型不适合自驾游。产品类型: #{product_type}，场景: #{scenes.inspect}"
       end
       
-      add_assertion "驾驶员信息正确（张三）", weight: 10 do
-        expect(@car_order.driver_name).to eq(@expected_driver_name),
-          "驾驶员姓名错误。期望: #{@expected_driver_name}，实际: #{@car_order.driver_name}"
+      add_assertion "联系人信息正确（张三/李四/王芳任一）", weight: 10 do
+        driver_name = @car_order.driver_name
+        expect(@expected_contact_names).to include(driver_name),
+          "驾驶员/联系人姓名错误。期望: #{@expected_contact_names.join('/')}中任一人，实际: #{driver_name}"
       end
       
       add_assertion "保险人数正确（#{@travelers_count}人）", weight: 10 do
@@ -127,33 +127,35 @@ module V251V300
           "保险人数错误。期望: #{@travelers_count}人，实际: #{insured_count}人"
       end
       
-      add_assertion "被保险人信息正确（张三、李四、王芳）", weight: 10 do
+      add_assertion "被保险人信息正确（张三、李四、王芳）", weight: 5 do
         insured_persons = @insurance_order.insured_persons || []
         actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
         expect(actual_names).to match_array(@expected_insured_names),
           "被保险人姓名错误。期望: #{@expected_insured_names.join('、')}，实际: #{actual_names.join('、')}"
       end
       
-      add_assertion "保险保障天数正确", weight: 5 do
-        insurance_days = @insurance_order.days
-        pickup = @car_order.pickup_datetime.to_date
-        return_dt = @car_order.return_datetime.to_date
-        rental_days = (return_dt - pickup).to_i
-        
-        expect(insurance_days).to be >= rental_days,
-          "保险天数不足。租车天数: #{rental_days}天，保险天数: #{insurance_days}天"
-      end
-      
-      add_assertion "保险时间与租车时间一致", weight: 5 do
-        insurance_start = @insurance_order.start_date
-        insurance_end = @insurance_order.end_date
+      add_assertion "保险时间覆盖租车时间", weight: 10 do
+        # 租车起止日期
         rental_start = @car_order.pickup_datetime.to_date
         rental_end = @car_order.return_datetime.to_date
+        rental_days = (rental_end - rental_start).to_i
         
-        expect(insurance_start).to eq(rental_start),
-          "保险开始日期不一致。租车: #{rental_start}，保险: #{insurance_start}"
-        expect(insurance_end).to eq(rental_end),
-          "保险结束日期不一致。租车: #{rental_end}，保险: #{insurance_end}"
+        # 保险起止日期
+        insurance_start = @insurance_order.start_date
+        insurance_end = @insurance_order.end_date
+        insurance_days = @insurance_order.days
+        
+        # 验证保险天数覆盖租车天数
+        expect(insurance_days).to be >= rental_days,
+          "保险天数不足。租车天数: #{rental_days}天，保险天数: #{insurance_days}天"
+        
+        # 验证保险起始日期不晚于取车日期
+        expect(insurance_start).to be <= rental_start,
+          "保险起始日期晚于取车日期。取车日期: #{rental_start}，保险起始日期: #{insurance_start}"
+        
+        # 验证保险结束日期不早于还车日期
+        expect(insurance_end).to be >= rental_end,
+          "保险结束日期早于还车日期。还车日期: #{rental_end}，保险结束日期: #{insurance_end}"
       end
     end
     
@@ -164,12 +166,13 @@ module V251V300
       pickup_datetime = @pickup_date.beginning_of_day + 9.hours
       return_datetime = @return_date.beginning_of_day + 18.hours
       
+      # 使用张三作为驾驶员/联系人（实际也可以是李四或王芳）
       car_order = CarOrder.create!(
         user: user,
         car: @car,
-        driver_name: @expected_driver_name,
-        driver_id_number: @expected_driver_id_number,
-        contact_phone: @expected_contact_phone,
+        driver_name: @zhangsan.name,
+        driver_id_number: @zhangsan.id_number,
+        contact_phone: @zhangsan.phone,
         pickup_datetime: pickup_datetime,
         return_datetime: return_datetime,
         pickup_location: @car.pickup_location,
@@ -224,7 +227,8 @@ module V251V300
         car_id: @car&.id,
         zhangsan_id: @zhangsan&.id,
         lisi_id: @lisi&.id,
-        wangfang_id: @wangfang&.id
+        wangfang_id: @wangfang&.id,
+        expected_contact_names: @expected_contact_names
       }
     end
     
@@ -242,9 +246,7 @@ module V251V300
         @zhangsan = Passenger.find(data['zhangsan_id'])
         @lisi = Passenger.find(data['lisi_id'])
         @wangfang = Passenger.find(data['wangfang_id'])
-        @expected_driver_name = @zhangsan.name
-        @expected_driver_id_number = @zhangsan.id_number
-        @expected_contact_phone = @zhangsan.phone
+        @expected_contact_names = data['expected_contact_names'] || [@zhangsan.name, @lisi.name, @wangfang.name]
         @expected_insured_names = [@zhangsan.name, @lisi.name, @wangfang.name]
       end
       

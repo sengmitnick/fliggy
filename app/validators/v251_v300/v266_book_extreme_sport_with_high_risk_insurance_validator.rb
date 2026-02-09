@@ -2,31 +2,33 @@
 
 require_relative '../base_validator'
 
-# V266: 给张三预订5天后山景景点攀岩活动+购买含运动伤害保障保险
+# V266: 给张三预订5天后华山攀岩活动（门票+活动+保险）
 #
 # 任务描述:
-#   帮张三在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，
-#   并购买包含运动伤害保障（滑雪/户外运动/潜水场景或运动伤害保额>0）的专项保险，
-#   确保订单状态有效
+#   帮张三预订5天后去华山的攀岩活动，需要完成：
+#   1. 购买华山景区门票
+#   2. 预订攀岩活动（攀岩教学+安全装备+教练陪同）
+#   3. 购买包含运动伤害保障的专项保险
+#   确保三个订单的时间一致，出行人信息一致
 #
 # 评分标准:
-#   - 创建了攀岩活动订单（山景景点，5天后） (25%)
-#   - 活动日期正确（5天后） (10%)
-#   - 创建了保险订单 (20%)
-#   - 联系人信息正确（张三）(10%)
-#   - 被保险人信息正确 (10%)
-#   - 保险包含高风险运动保障（滑雪/户外运动/潜水场景或运动伤害保额>0） (15%)
-#   - 订单状态有效（pending/paid/completed） (10%)
+#   - 创建了华山门票订单 (15%)
+#   - 创建了华山攀岩活动订单 (15%)
+#   - 创建了保险订单 (15%)
+#   - 门票和活动的游玩日期一致（5天后） (15%)
+#   - 保险时间覆盖活动日期 (10%)
+#   - 三个订单的出行人信息一致（张三） (15%)
+#   - 保险包含高风险运动保障（攀岩/滑雪/户外运动或运动伤害保额>0） (10%)
+#   - 订单状态有效（pending/paid/completed） (5%)
 module V251V300
   class V266BookExtremeSportWithHighRiskInsuranceValidator < BaseValidator
     self.validator_id = 'v266_book_extreme_sport_with_high_risk_insurance_validator'
     self.task_id = '97bbddca-e45e-43e7-814c-88eaf6396ea0'
-    self.title = '给张三预订5天后山景景点攀岩活动+购买含运动伤害保障保险'
-    self.description = '帮张三在山景景点（名称含"山"或"峰"）预订5天后的攀岩活动，并购买包含运动伤害保障（滑雪/户外运动/潜水场景或运动伤害保额>0）的专项保险，确保订单状态有效'
+    self.title = '给张三预订5天后华山攀岩活动（门票+活动+保险）'
+    self.description = '帮张三预订5天后去华山的攀岩活动，需要购买华山景区门票、预订攀岩活动（攀岩教学+安全装备+教练陪同）、购买包含运动伤害保障的专项保险，确保三个订单的时间一致，出行人信息一致'
     self.timeout_seconds = 300
     
     def prepare
-      @activity_type = '攀岩'
       @visit_date = Date.current + 5.days
       
       # 查询用户和乘客信息
@@ -34,22 +36,19 @@ module V251V300
       @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_contact_phone = @zhangsan.phone
       
-      # 查找适合攀岩的山景景点
-      @attraction = Attraction
-        .where("name LIKE ? OR name LIKE ?", '%山%', '%峰%')
-        .where(data_version: 0)
-        .first
+      # 查找华山景点
+      @attraction = Attraction.find_by!(name: '华山', data_version: 0)
       
-      # 如果没有山景景点，使用任意景点
-      @attraction ||= Attraction.where(data_version: 0).first
+      # 查找华山门票（成人票）
+      @ticket = @attraction.tickets
+        .where(ticket_type: 'adult', data_version: 0)
+        .first!
       
-      raise "未找到适合攀岩的景点" unless @attraction
-      
-      # 查找攀岩相关活动（如果存在）
+      # 查找华山攀岩活动
       @climbing_activity = @attraction.attraction_activities
-        .where("name LIKE ? OR description LIKE ?", "%#{@activity_type}%", "%极限%")
+        .where("name LIKE ?", "%攀岩%")
         .where(data_version: 0)
-        .first
+        .first!
       
       # 查找适合攀岩的保险产品
       @available_insurances = InsuranceProduct
@@ -74,39 +73,49 @@ module V251V300
       raise "未找到适合的保险产品" if @available_insurances.empty?
       
       {
-        task: "请帮张三在#{@attraction.name}预订攀岩活动（#{@visit_date.strftime('%Y年%m月%d日')}，5天后），并购买高风险专项保险（包含运动伤害保障）。",
+        task: "请帮张三预订#{@visit_date.strftime('%Y年%m月%d日')}（5天后）去华山的攀岩活动，需要：1. 购买华山景区门票 2. 预订攀岩活动（攀岩教学+安全装备+教练陪同） 3. 购买包含运动伤害保障的专项保险。",
         requirements: {
-          attraction: @attraction.name,
-          activity_type: '攀岩',
+          attraction: '华山',
           visit_date: @visit_date,
-          insurance_type: '高风险运动保险',
-          insurance_coverage: '运动伤害保障'
+          ticket: '华山景区成人票',
+          activity: '攀岩教学+安全装备+教练陪同',
+          insurance_type: '高风险运动保险（含运动伤害保障）',
+          traveler: '张三'
         },
-        hint: "攀岩属于高风险运动，需要购买包含运动伤害保障的专项保险（如极限运动保险或滑雪运动保险）。"
+        hint: "攀岩属于高风险运动，需要先购买景区门票，再预订攀岩活动，最后购买包含运动伤害保障的专项保险。"
       }
     end
     
     def verify
-      add_assertion "创建了攀岩活动订单（山景景点，5天后）", weight: 25 do
-        all_orders = ActivityOrder
+      add_assertion "创建了华山门票订单", weight: 15 do
+        all_ticket_orders = TicketOrder
+          .joins(ticket: :attraction)
+          .includes(:ticket)
+          .where(tickets: { attractions: { name: '华山' } })
+          .where(data_version: @data_version)
+          .to_a
+        
+        expect(all_ticket_orders).not_to be_empty, "未找到华山门票订单"
+        @ticket_order = all_ticket_orders.first
+      end
+      
+      return if @ticket_order.nil?
+      
+      add_assertion "创建了华山攀岩活动订单", weight: 15 do
+        all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(attraction_activity: :attraction)
           .where(attraction_activities: { attraction_id: @attraction.id })
           .where(data_version: @data_version)
           .to_a
         
-        expect(all_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
-        @activity_order = all_orders.first
+        expect(all_activity_orders).not_to be_empty, "未找到华山攀岩活动订单"
+        @activity_order = all_activity_orders.first
       end
       
       return if @activity_order.nil?
       
-      add_assertion "活动日期正确（5天后）", weight: 10 do
-        expect(@activity_order.visit_date).to eq(@visit_date),
-          "活动日期错误。期望: #{@visit_date}（5天后），实际: #{@activity_order.visit_date}"
-      end
-      
-      add_assertion "创建了保险订单", weight: 20 do
+      add_assertion "创建了保险订单", weight: 15 do
         @insurance_order = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -117,19 +126,37 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "联系人信息正确（张三）", weight: 10 do
-        expect(@activity_order.contact_phone).to eq(@expected_contact_phone),
-          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@activity_order.contact_phone}"
+      add_assertion "门票和活动的游玩日期一致（5天后）", weight: 15 do
+        expect(@ticket_order.visit_date).to eq(@visit_date),
+          "门票游玩日期错误。期望: #{@visit_date}（5天后），实际: #{@ticket_order.visit_date}"
+        expect(@activity_order.visit_date).to eq(@visit_date),
+          "活动游玩日期错误。期望: #{@visit_date}（5天后），实际: #{@activity_order.visit_date}"
       end
       
-      add_assertion "被保险人信息正确", weight: 10 do
+      add_assertion "保险时间覆盖活动日期", weight: 10 do
+        expect(@insurance_order.start_date).to be <= @visit_date,
+          "保险开始日期晚于活动日期。保险开始日期: #{@insurance_order.start_date}，活动日期: #{@visit_date}"
+        expect(@insurance_order.end_date).to be >= @visit_date,
+          "保险结束日期早于活动日期。保险结束日期: #{@insurance_order.end_date}，活动日期: #{@visit_date}"
+      end
+      
+      add_assertion "三个订单的出行人信息一致（张三）", weight: 15 do
+        # 门票订单联系人
+        expect(@ticket_order.contact_phone).to eq(@expected_contact_phone),
+          "门票订单联系电话错误。期望: #{@expected_contact_phone}（张三），实际: #{@ticket_order.contact_phone}"
+        
+        # 活动订单联系人
+        expect(@activity_order.contact_phone).to eq(@expected_contact_phone),
+          "活动订单联系电话错误。期望: #{@expected_contact_phone}（张三），实际: #{@activity_order.contact_phone}"
+        
+        # 保险订单被保险人
         insured_persons = @insurance_order.insured_persons || []
         actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
         expect(actual_names).to include(@zhangsan.name),
-          "被保险人信息错误。期望包含: #{@zhangsan.name}，实际: #{actual_names.join('、')}"
+          "保险订单被保险人错误。期望包含: #{@zhangsan.name}，实际: #{actual_names.join('、')}"
       end
       
-      add_assertion "保险包含高风险运动保障", weight: 15 do
+      add_assertion "保险包含高风险运动保障", weight: 10 do
         scenes = @insurance_order.insurance_product.scenes || []
         coverage = @insurance_order.insurance_product.coverage_details || {}
         
@@ -143,7 +170,9 @@ module V251V300
           "保险不包含高风险运动保障。保险场景: #{scenes.inspect}，运动伤害保额: #{coverage['sports_injury'] || 0}元"
       end
       
-      add_assertion "订单状态有效（pending/paid/completed）", weight: 10 do
+      add_assertion "订单状态有效（pending/paid/completed）", weight: 5 do
+        expect(@ticket_order.status).to be_in(['pending', 'paid', 'confirmed', 'completed']),
+          "门票订单状态无效。期望: pending/paid/confirmed/completed，实际: #{@ticket_order.status}"
         expect(@activity_order.status).to be_in(['pending', 'paid', 'confirmed', 'completed']),
           "活动订单状态无效。期望: pending/paid/confirmed/completed，实际: #{@activity_order.status}"
         expect(@insurance_order.status).to be_in(['pending', 'paid']),
@@ -154,22 +183,32 @@ module V251V300
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建攀岩活动订单
-      climbing_activity = @climbing_activity
-      
-      activity_order = ActivityOrder.create!(
+      # 1. 创建华山门票订单
+      ticket_order = TicketOrder.create!(
         user: user,
-        attraction_activity: climbing_activity,
+        ticket: @ticket,
         visit_date: @visit_date,
         quantity: 1,
         contact_phone: @expected_contact_phone,
-        total_price: climbing_activity.current_price,
+        total_price: @ticket.current_price,
+        status: 'paid',
+        data_version: @data_version
+      )
+      
+      # 2. 创建华山攀岩活动订单
+      activity_order = ActivityOrder.create!(
+        user: user,
+        attraction_activity: @climbing_activity,
+        visit_date: @visit_date,
+        quantity: 1,
+        contact_phone: @expected_contact_phone,
+        total_price: @climbing_activity.current_price,
         insurance_type: 'premium',  # 高风险活动建议购买保险
         status: 'paid',
         data_version: @data_version
       )
       
-      # 2. 创建保险订单（优先选择有攀岩场景的，其次运动伤害保额>0的，使用预查询的乘客信息）
+      # 3. 创建保险订单（优先选择有攀岩场景的，其次运动伤害保额>0的）
       insurance_product = @available_insurances
         .select { |p| (p.scenes || []).include?('攀岩') }
         .first
@@ -212,19 +251,19 @@ module V251V300
     
     def execution_state_data
       {
-        activity_type: @activity_type,
         visit_date: @visit_date.to_s,
         attraction_id: @attraction&.id,
+        ticket_id: @ticket&.id,
         climbing_activity_id: @climbing_activity&.id,
         zhangsan_id: @zhangsan&.id
       }
     end
     
     def restore_from_state(data)
-      @activity_type = data['activity_type']
       @visit_date = Date.parse(data['visit_date'])
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
+      @ticket = Ticket.find(data['ticket_id']) if data['ticket_id']
       @climbing_activity = AttractionActivity.find(data['climbing_activity_id']) if data['climbing_activity_id']
       
       # 恢复乘客信息

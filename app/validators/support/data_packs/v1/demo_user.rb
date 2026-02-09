@@ -47,18 +47,18 @@ if demo_user.persisted?
     puts "     ✓ 设置钱包余额: ¥10,000.00"
   end
   
-  # 设置会员里程
+  # 设置会员里程（足够支持高价商品兑换，Arc'teryx需要35000积分）
   if demo_user.membership.nil?
     demo_user.create_membership!(
       level: 'F1',
-      points: 50,
+      points: 40000,
       experience: 0,
       data_version: 0
     )
-    puts "     ✓ 设置会员里程: 50"
-  elsif demo_user.membership.points.zero?
-    demo_user.membership.update!(points: 50)
-    puts "     ✓ 更新会员里程: 50"
+    puts "     ✓ 设置会员里程: 40000"
+  elsif demo_user.membership.points < 40000
+    demo_user.membership.update!(points: 40000)
+    puts "     ✓ 更新会员里程: 40000"
   end
   
   # 添加默认乘机人
@@ -239,6 +239,6 @@ if demo_user.persisted?
     puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴, 广州天河, 深圳南山, 成都高新"
   end
   
-  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 50)"
+  puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 40000)"
 end
 

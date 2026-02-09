@@ -9,7 +9,7 @@ module V251V300
     self.validator_id = 'v267_redeem_low_price_product_with_points_validator'
     self.task_id = 'e02e9f3a-2b4c-4d1b-8a5f-6c7d8e9f0a1b'
     self.title = '给张三使用会员积分兑换低价商品（1个）'
-    self.description = '帮张三使用少量积分+现金兑换热门低价商品（如咖啡券）'
+    self.description = '帮张三使用少量积分+现金兑换热门低价商品（瑞幸咖啡券）'
     self.timeout_seconds = 300
     
     def prepare
@@ -34,16 +34,16 @@ module V251V300
       membership = user.membership
       raise "用户无会员记录" if membership.nil?
       
-      # 确保用户有足够的积分和余额
+      # 验证用户有足够的积分和余额
       required_points = @product.price_mileage
       required_cash = @product.price_cash
       
       if membership.points < required_points
-        membership.update!(points: required_points + 100)
+        raise "用户积分不足。需要: #{required_points}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < required_cash
-        user.update!(balance: required_cash + 100)
+        raise "用户余额不足。需要: ¥#{required_cash}，当前: ¥#{user.balance}"
       end
       
       {

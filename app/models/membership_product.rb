@@ -45,6 +45,10 @@ class MembershipProduct < ApplicationRecord
       order(Arel.sql('COALESCE(price_cash, 0) + COALESCE(price_mileage, 0) DESC'))
     when 'sales'
       order(sales_count: :desc)
+    when 'mileage_asc'
+      order(price_mileage: :asc)
+    when 'mileage_desc'
+      order(price_mileage: :desc)
     else
       order(created_at: :desc)
     end

@@ -34,11 +34,11 @@ module V251V300
       membership = user.membership
       
       if membership.points < @product.price_mileage
-        membership.update!(points: @product.price_mileage + 2000)
+        raise "用户积分不足。需要: #{@product.price_mileage}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < @product.price_cash
-        user.update!(balance: @product.price_cash + 500)
+        raise "用户余额不足。需要: ¥#{@product.price_cash}，当前: ¥#{user.balance}"
       end
       
       {

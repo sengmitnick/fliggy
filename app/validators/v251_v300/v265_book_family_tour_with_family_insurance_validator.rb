@@ -8,12 +8,13 @@ require_relative '../base_validator'
 #   帮张三、王芳和小明预订4天后三亚家庭跟团游（2成人+1儿童，共3人），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）
 #
 # 评分标准:
-#   - 创建了跟团游订单 (25%)
+#   - 创建了跟团游订单 (20%)
 #   - 出发日期正确（4天后）(10%)
-#   - 创建了保险订单 (20%)
-#   - 保险适合家庭出行 (15%)
-#   - 投保人数正确（3人）(10%)
-#   - 被保险人信息正确（张三、王芳、小明）(10%)
+#   - 创建了游客信息（张三、王芳、小明）(15%)
+#   - 联系人信息正确（张三/王芳二选一）(10%)
+#   - 创建了保险订单 (15%)
+#   - 保险适合家庭出行 (10%)
+#   - 被保险人与游客信息一致 (10%)
 #   - 订单状态有效 (10%)
 module V251V300
   class V265BookFamilyTourWithFamilyInsuranceValidator < BaseValidator
@@ -35,7 +36,8 @@ module V251V300
       @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
       @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
-      @expected_contact_phone = @zhangsan.phone
+      @expected_contact_names = [@zhangsan.name, @wangfang.name]  # 联系人二选一
+      @expected_traveler_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
       @expected_insured_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
       
       # 查找适合家庭的跟团游
@@ -79,10 +81,10 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了跟团游订单", weight: 25 do
+      add_assertion "创建了跟团游订单", weight: 20 do
         all_bookings = TourGroupBooking
           .joins(:tour_group_product)
-          .includes(:tour_group_product)
+          .includes(:tour_group_product, :booking_travelers)
           .where(tour_group_products: { destination: @destination })
           .where(data_version: @data_version)
           .to_a
@@ -98,7 +100,54 @@ module V251V300
           "出发日期错误。期望: #{@travel_date}（4天后），实际: #{@tour_booking.travel_date}"
       end
       
-      add_assertion "创建了保险订单", weight: 20 do
+      add_assertion "创建了游客信息（张三、王芳、小明）", weight: 15 do
+        @travelers = @tour_booking.booking_travelers.where(data_version: @data_version).to_a
+        
+        expect(@travelers.size).to eq(@total_persons),
+          "游客数量错误。期望: #{@total_persons}人（2大1小），实际: #{@travelers.size}人"
+        
+        # 验证游客姓名
+        traveler_names = @travelers.map(&:traveler_name).sort
+        expected_names = @expected_traveler_names.sort
+        
+        expect(traveler_names).to eq(expected_names),
+          "游客姓名错误。期望: #{expected_names.join('、')}，实际: #{traveler_names.join('、')}"
+        
+        # 验证游客类型（2个成人+1个儿童）
+        adult_travelers = @travelers.select { |t| t.traveler_type == 'adult' }
+        child_travelers = @travelers.select { |t| t.traveler_type == 'child' }
+        
+        expect(adult_travelers.size).to eq(@adult_count),
+          "成人游客数量错误。期望: #{@adult_count}人，实际: #{adult_travelers.size}人"
+        expect(child_travelers.size).to eq(@child_count),
+          "儿童游客数量错误。期望: #{@child_count}人，实际: #{child_travelers.size}人"
+        
+        # 验证儿童是小明
+        expect(child_travelers.map(&:traveler_name)).to include(@xiaoming.name),
+          "儿童游客应该是#{@xiaoming.name}"
+        
+        # 验证身份证号
+        @travelers.each do |traveler|
+          expect(traveler.id_number).not_to be_blank,
+            "#{traveler.traveler_name}的身份证号不能为空"
+        end
+      end
+      
+      return if @travelers.nil? || @travelers.empty?
+      
+      add_assertion "联系人信息正确（张三/王芳二选一）", weight: 10 do
+        contact_name = @tour_booking.contact_name
+        expect(@expected_contact_names).to include(contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_names.join('/')}中任一人，实际: #{contact_name}"
+        
+        # 验证联系电话属于联系人
+        contact_phone = @tour_booking.contact_phone
+        valid_phones = [@zhangsan.phone, @wangfang.phone]
+        expect(valid_phones).to include(contact_phone),
+          "联系电话错误。期望: 张三或王芳的电话，实际: #{contact_phone}"
+      end
+      
+      add_assertion "创建了保险订单", weight: 15 do
         @insurance_order = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -109,7 +158,7 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险适合家庭出行", weight: 15 do
+      add_assertion "保险适合家庭出行", weight: 10 do
         scenes = @insurance_order.insurance_product.scenes || []
         is_family_suitable = scenes.include?('亲子游') || 
                              scenes.include?('家庭保障') ||
@@ -119,22 +168,43 @@ module V251V300
           "保险不适合家庭出行。保险场景: #{scenes.inspect}"
       end
       
-      add_assertion "投保人数正确（3人）", weight: 10 do
-        quantity = @insurance_order.quantity
-        expect(quantity).to eq(@total_persons),
-          "投保人数错误。期望: #{@total_persons}人（2大1小），实际: #{quantity}人"
-      end
-      
-      add_assertion "被保险人信息正确（张三、王芳、小明）", weight: 10 do
+      add_assertion "被保险人与游客信息一致", weight: 10 do
         insured_persons = @insurance_order.insured_persons || []
-        actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
-        expect(actual_names).to match_array(@expected_insured_names),
-          "被保险人姓名错误。期望: #{@expected_insured_names.join('、')}，实际: #{actual_names.join('、')}"
+        expect(insured_persons.size).to eq(@total_persons),
+          "被保险人数量错误。期望: #{@total_persons}人（2大1小），实际: #{insured_persons.size}人"
+        
+        # 提取被保险人姓名
+        actual_insured_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact.sort
+        
+        # 提取游客姓名
+        traveler_names = @travelers.map(&:traveler_name).sort
+        
+        # 验证被保险人与游客一致
+        expect(actual_insured_names).to eq(traveler_names),
+          "被保险人与游客不一致。游客: #{traveler_names.join('、')}，被保险人: #{actual_insured_names.join('、')}"
+        
+        # 验证被保险人身份证号
+        insured_persons.each do |person|
+          name = person.is_a?(Hash) ? person['name'] : person
+          id_number = person.is_a?(Hash) ? person['id_number'] : nil
+          
+          # 找到对应的游客
+          traveler = @travelers.find { |t| t.traveler_name == name }
+          expect(traveler).not_to be_nil, "被保险人#{name}在游客列表中未找到"
+          
+          # 验证身份证号一致
+          if id_number.present?
+            expect(id_number).to eq(traveler.id_number),
+              "#{name}的身份证号不一致。游客: #{traveler.id_number}，被保险人: #{id_number}"
+          end
+        end
       end
       
       add_assertion "订单状态有效", weight: 10 do
-        expect(@tour_booking.status).to be_in(['pending', 'paid', 'confirmed'])
-        expect(@insurance_order.status).to be_in(['pending', 'paid'])
+        expect(@tour_booking.status).to be_in(['pending', 'paid', 'confirmed']),
+          "旅游订单状态无效: #{@tour_booking.status}"
+        expect(@insurance_order.status).to be_in(['pending', 'paid']),
+          "保险订单状态无效: #{@insurance_order.status}"
       end
     end
     
@@ -153,14 +223,39 @@ module V251V300
         adult_count: @adult_count,
         child_count: @child_count,
         contact_name: @zhangsan.name,
-        contact_phone: @expected_contact_phone,
+        contact_phone: @zhangsan.phone,
         insurance_type: 'none',
         total_price: base_price,
         status: 'confirmed',
         data_version: @data_version
       )
       
-      # 2. 创建保险订单（使用预查询的乘客信息）
+      # 2. 创建游客记录（2成人+1儿童）
+      BookingTraveler.create!(
+        tour_group_booking: tour_booking,
+        traveler_name: @zhangsan.name,
+        id_number: @zhangsan.id_number,
+        traveler_type: 'adult',
+        data_version: @data_version
+      )
+      
+      BookingTraveler.create!(
+        tour_group_booking: tour_booking,
+        traveler_name: @wangfang.name,
+        id_number: @wangfang.id_number,
+        traveler_type: 'adult',
+        data_version: @data_version
+      )
+      
+      BookingTraveler.create!(
+        tour_group_booking: tour_booking,
+        traveler_name: @xiaoming.name,
+        id_number: @xiaoming.id_number,
+        traveler_type: 'child',
+        data_version: @data_version
+      )
+      
+      # 3. 创建保险订单（使用与游客一致的被保险人信息）
       insurance_product = @available_insurances.first
       start_date = @travel_date
       end_date = start_date + @duration - 1
@@ -205,7 +300,8 @@ module V251V300
         tour_product_id: @tour_product&.id,
         zhangsan_id: @zhangsan&.id,
         wangfang_id: @wangfang&.id,
-        xiaoming_id: @xiaoming&.id
+        xiaoming_id: @xiaoming&.id,
+        expected_contact_names: @expected_contact_names
       }
     end
     
@@ -224,7 +320,8 @@ module V251V300
         @zhangsan = Passenger.find(data['zhangsan_id'])
         @wangfang = Passenger.find(data['wangfang_id'])
         @xiaoming = Passenger.find(data['xiaoming_id'])
-        @expected_contact_phone = @zhangsan.phone
+        @expected_contact_names = data['expected_contact_names'] || [@zhangsan.name, @wangfang.name]
+        @expected_traveler_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
         @expected_insured_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
       end
       

@@ -9,7 +9,7 @@ module V251V300
     self.validator_id = 'v268_redeem_high_price_product_with_mileage_validator'
     self.task_id = '5cbb17c4-ca76-4bca-b9ef-e5b0253e6d97'
     self.title = '给李四使用大量积分兑换高价商品'
-    self.description = '帮李四使用大量积分+现金兑换高价商品（如京东E卡）'
+    self.description = '帮李四使用大量积分+现金兑换高价商品（京东E卡）'
     self.timeout_seconds = 300
     
     def prepare
@@ -19,7 +19,7 @@ module V251V300
       @product = MembershipProduct.find_by(name: @product_name, data_version: 0)
       raise "未找到商品: #{@product_name}" if @product.nil?
       
-      # 确保用户有足够的积分和余额
+      # 验证用户有足够的积分和余额
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 查询李四的地址信息
@@ -34,12 +34,13 @@ module V251V300
       required_points = @product.price_mileage
       required_cash = @product.price_cash
       
+      # 验证积分和余额是否足够
       if membership.points < required_points
-        membership.update!(points: required_points + 500)
+        raise "用户积分不足。需要: #{required_points}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < required_cash
-        user.update!(balance: required_cash + 200)
+        raise "用户余额不足。需要: ¥#{required_cash}，当前: ¥#{user.balance}"
       end
       
       {

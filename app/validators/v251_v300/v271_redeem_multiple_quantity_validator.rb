@@ -28,11 +28,11 @@ module V251V300
       required_cash = @product.price_cash * @quantity
       
       if membership.points < required_points
-        membership.update!(points: required_points + 500)
+        raise "用户积分不足。需要: #{required_points}积分，当前: #{membership.points}积分"
       end
       
       if user.balance < required_cash
-        user.update!(balance: required_cash + 100)
+        raise "用户余额不足。需要: ¥#{required_cash}，当前: ¥#{user.balance}"
       end
       
       {
