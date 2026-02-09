@@ -39,8 +39,8 @@ module V051V100
   class V100InstantBookBeijingHotelNextWeekValidator < BaseValidator
     self.validator_id = 'v100_instant_book_beijing_hotel_next_week_validator'
     self.task_id = 'a9b8c7d6-5e4f-3a2b-1c9d-8e7f6a5b4c3d'
-    self.title = '给张三立即预约北京地区酒店套餐（下周一入住，2晚，含早餐）'
-    self.description = '给张三搜索北京地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定下周一开始入住2晚'
+    self.title = '给张三预订北京酒店套餐（下周一入住2晚，含早）'
+    self.description = '帮张三订北京的2晚酒店套餐，下周一入住，要含早餐的那种'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -49,6 +49,12 @@ module V051V100
       @city = '北京'
       @night_count = 2
       @quantity = 1
+    
+      # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
     
       # 计算下周一的日期
       @check_in_date = Date.current.next_occurring(:monday)
@@ -105,14 +111,22 @@ module V051V100
       end
     
       # 断言4: 预约模式正确（instant而非stockup）
-      add_assertion "预约模式正确（立即预约）", weight: 15 do
+      add_assertion "预约模式正确（立即预约）", weight: 10 do
         actual_booking_type = @package_order.booking_type
         expect(actual_booking_type).to eq('instant'),
           "预约模式错误。期望: instant（立即预约）, 实际: #{actual_booking_type}（#{actual_booking_type == 'stockup' ? '囤货模式' : '未知'}）。立即预约需要指定入住日期和酒店。"
       end
     
-      # 断言5: 选择了含早餐的选项
-      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 20 do
+      # 断言5: 联系人信息正确
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@package_order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@package_order.contact_phone}"
+      end
+    
+      # 断言6: 选择了含早餐的选项
+      add_assertion "选择了含早餐的套餐选项（含早或豪华套餐）", weight: 15 do
         selected_option = @package_order.package_option
         option_name = selected_option.name
         option_description = selected_option.description
@@ -128,7 +142,7 @@ module V051V100
           "实际选择: #{option_name}（#{option_description}）"
       end
     
-      # 断言6: 入住日期正确（下周一）
+      # 断言7: 入住日期正确（下周一）
       add_assertion "入住日期正确（下周一开始，连住#{@night_count}晚）", weight: 15 do
         actual_check_in = @package_order.check_in_date
         actual_check_out = @package_order.check_out_date
@@ -145,7 +159,7 @@ module V051V100
           "离店日期错误。期望: #{@check_out_date.strftime('%Y年%m月%d日')}（#{@night_count}晚后）, 实际: #{actual_check_out&.strftime('%Y年%m月%d日')}"
       end
     
-      # 断言7: 订单价格和数量正确
+      # 断言8: 订单价格和数量正确
       add_assertion "订单价格和数量正确", weight: 10 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
@@ -167,7 +181,9 @@ module V051V100
         night_count: @night_count,
         quantity: @quantity,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -178,6 +194,8 @@ module V051V100
       @quantity = data['quantity']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     
       # 重新加载可用套餐列表
       @available_packages = HotelPackage.where(
@@ -192,8 +210,8 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      # 2. 查找测试乘客（使用 user.passengers，避免硬编码电话号码）
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找北京地区的2晚套餐
       available_packages = HotelPackage.where(

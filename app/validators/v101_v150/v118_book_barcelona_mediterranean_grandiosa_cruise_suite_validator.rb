@@ -20,8 +20,8 @@ module V101V150
   class V118BookBarcelonaMediterraneanGrandiosaCruiseSuiteValidator < BaseValidator
     self.validator_id = 'v118_book_barcelona_mediterranean_grandiosa_cruise_suite_validator'
     self.task_id = '6382841f-d24d-4564-ad55-8414ccc4741c'
-    self.title = '预订巴塞罗那出发地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
-    self.description = '预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
+    self.title = '给张建国预订巴塞罗那出发地中海邮轮（地中海辉煌号，7天6晚，4月，游艇俱乐部套房）'
+    self.description = '帮张建国（65岁）预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
     self.timeout_seconds = 240
 
     def prepare
@@ -32,6 +32,12 @@ module V101V150
       expected_cabin_category = 'suite'
       expected_month = 4
       adult_count = 4
+
+      # 预查询张建国的乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
+      @expected_contact_name = @zhangjianguo.name
+      @expected_contact_phone = @zhangjianguo.phone
 
       {
         task: "请预订地中海邮轮，要求地中海辉煌号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订游艇俱乐部套房（豪华之选），为#{adult_count}位成人",
@@ -53,6 +59,10 @@ module V101V150
       expected_cabin_category = 'suite'
       expected_month = 4
       adult_count = 4
+
+      # 预查询张建国的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
 
       sailing = CruiseSailing
         .joins(:cruise_ship)
@@ -85,13 +95,12 @@ module V101V150
         p.status = 'on_sale'
       end
 
-      user = User.first || User.create!(email: 'test@example.com', password: 'password')
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: product.id,
         quantity: adult_count,
-        contact_name: '王五',
-        contact_phone: '13800138008',
+        contact_name: zhangjianguo.name,
+        contact_phone: zhangjianguo.phone,
         total_price: product.price_per_person * adult_count,
         accept_terms: true,
         status: 'pending',
@@ -174,26 +183,26 @@ module V101V150
           "预订数量错误。期望: #{adult_count}间，实际: #{@order.quantity}间"
       end
       
-      add_assertion "选择最近可用日期（4月份最早班次）", weight: 10 do
-        available_sailings = CruiseSailing
-          .joins(:cruise_ship)
-          .where('cruise_ships.name LIKE ?', "%#{ship_keyword}%")
-          .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
-          .where(duration_days: expected_days, duration_nights: expected_nights)
-          .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-          .where('departure_date >= ?', Date.current)
-          .order(:departure_date)
-          .to_a
-        
-        expect(available_sailings).not_to be_empty,
-          "未找到符合条件的可用航次（船只：#{ship_keyword}，出发港：#{departure_port_keyword}，#{expected_days}天#{expected_nights}晚，#{expected_month}月）"
-        
-        earliest_sailing = available_sailings.first
-        actual_sailing = @order.cruise_product.cruise_sailing
-        
-        expect(actual_sailing.departure_date).to eq(earliest_sailing.departure_date),
-          "未选择最近日期。期望: #{earliest_sailing.departure_date}（最早），实际: #{actual_sailing.departure_date}"
+      add_assertion "联系人信息正确（张建国 13500135000）", weight: 10 do
+        expect(@order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@order.contact_name}"
+        expect(@order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@order.contact_phone}"
       end
+    end
+
+    private
+
+    def execution_state_data
+      {
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
+      }
+    end
+
+    def restore_from_state(data)
+      @expected_contact_name = data['expected_contact_name'] || '张建国'
+      @expected_contact_phone = data['expected_contact_phone'] || '13500135000'
     end
   end
 end

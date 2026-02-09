@@ -36,8 +36,8 @@ module V051V100
   class V099BookGuangzhouHotelPackageLuxuryOptionValidator < BaseValidator
     self.validator_id = 'v099_book_guangzhou_hotel_package_luxury_option_validator'
     self.task_id = 'c7f3d8e2-4b9a-4c1f-8e5d-2a6b9f3c8d7e'
-    self.title = '给张三囤货广州地区酒店套餐（1晚，1份，含早套餐选项）'
-    self.description = '给张三搜索广州地区的1晚酒店套餐，囤货购买1份（先囤再约），从套餐选项中选择含早套餐（包含双人早餐）'
+    self.title = '给张三预订广州酒店套餐（1晚，含早）'
+    self.description = '帮张三订广州的1晚酒店套餐，要含早餐的那种'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -46,6 +46,12 @@ module V051V100
       @city = '广州'
       @night_count = 1
       @quantity = 1
+    
+      # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
     
       # 查找广州地区的1晚套餐（注意：查询基线数据 data_version=0）
       @available_packages = HotelPackage.where(
@@ -95,8 +101,16 @@ module V051V100
           "套餐晚数错误。期望: #{@night_count}晚, 实际: #{actual_nights}晚"
       end
     
-      # 断言4: 选择了含早套餐选项（核心评分项）
-      add_assertion "选择了含早套餐选项（包含双人早餐）", weight: 30 do
+      # 断言4: 联系人信息正确
+      add_assertion "联系人信息正确（张三）", weight: 10 do
+        expect(@package_order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@package_order.contact_name}"
+        expect(@package_order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@package_order.contact_phone}"
+      end
+    
+      # 断言5: 选择了含早套餐选项（核心评分项）
+      add_assertion "选择了含早套餐选项（包含双人早餐）", weight: 25 do
         selected_option = @package_order.package_option
         option_name = selected_option.name
         option_description = selected_option.description
@@ -111,8 +125,8 @@ module V051V100
           "建议选择名称中包含'含早'的套餐选项。"
       end
     
-      # 断言5: 订单价格和数量正确
-      add_assertion "订单价格和数量正确", weight: 20 do
+      # 断言6: 订单价格和数量正确
+      add_assertion "订单价格和数量正确", weight: 15 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
       
@@ -131,7 +145,9 @@ module V051V100
       {
         city: @city,
         night_count: @night_count,
-        quantity: @quantity
+        quantity: @quantity,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
   
@@ -140,6 +156,8 @@ module V051V100
       @city = data['city']
       @night_count = data['night_count']
       @quantity = data['quantity']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     
       # 重新加载可用套餐列表
       @available_packages = HotelPackage.where(
@@ -154,8 +172,8 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找测试乘客（数据包中已创建）
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      # 2. 查找测试乘客（使用 user.passengers，避免硬编码电话号码）
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
       # 3. 查找广州地区的1晚套餐
       available_packages = HotelPackage.where(

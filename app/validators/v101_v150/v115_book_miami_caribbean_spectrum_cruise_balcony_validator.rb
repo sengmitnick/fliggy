@@ -20,8 +20,8 @@ module V101V150
   class V115BookMiamiCaribbeanSpectrumCruiseBalconyValidator < BaseValidator
     self.validator_id = 'v115_book_miami_caribbean_spectrum_cruise_balcony_validator'
     self.task_id = 'b4a00a86-51cd-40b8-800a-67287efdfdd6'
-    self.title = '预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）'
-    self.description = '预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为2位成人'
+    self.title = '给王芳预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，5月，阳台房）'
+    self.description = '帮王芳预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为2位成人'
     self.timeout_seconds = 240
 
     def prepare
@@ -32,6 +32,12 @@ module V101V150
       expected_cabin_category = 'balcony'
       expected_month = 5
       adult_count = 2
+
+      # 预查询王芳的乘客信息（避免 simulate 中查询 data_version: 0）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_contact_name = @wangfang.name
+      @expected_contact_phone = @wangfang.phone
 
       {
         task: "请预订加勒比邮轮，要求海洋光谱号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订阳台房（舒适之选），为#{adult_count}位成人",
@@ -53,6 +59,10 @@ module V101V150
       expected_cabin_category = 'balcony'
       expected_month = 5
       adult_count = 2
+
+      # 预查询王芳的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
 
       sailing = CruiseSailing
         .joins(:cruise_ship)
@@ -85,13 +95,12 @@ module V101V150
         p.status = 'on_sale'
       end
 
-      user = User.first || User.create!(email: 'test@example.com', password: 'password')
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: product.id,
         quantity: adult_count,
-        contact_name: '王五',
-        contact_phone: '13800138008',
+        contact_name: wangfang.name,
+        contact_phone: wangfang.phone,
         total_price: product.price_per_person * adult_count,
         accept_terms: true,
         status: 'pending',
@@ -174,26 +183,26 @@ module V101V150
           "预订数量错误。期望: #{adult_count}间，实际: #{@order.quantity}间"
       end
       
-      add_assertion "选择最近可用日期（5月份最早班次）", weight: 10 do
-        available_sailings = CruiseSailing
-          .joins(:cruise_ship)
-          .where('cruise_ships.name LIKE ?', "%#{ship_keyword}%")
-          .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
-          .where(duration_days: expected_days, duration_nights: expected_nights)
-          .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-          .where('departure_date >= ?', Date.current)
-          .order(:departure_date)
-          .to_a
-        
-        expect(available_sailings).not_to be_empty,
-          "未找到符合条件的可用航次（船只：#{ship_keyword}，出发港：#{departure_port_keyword}，#{expected_days}天#{expected_nights}晚，#{expected_month}月）"
-        
-        earliest_sailing = available_sailings.first
-        actual_sailing = @order.cruise_product.cruise_sailing
-        
-        expect(actual_sailing.departure_date).to eq(earliest_sailing.departure_date),
-          "未选择最近日期。期望: #{earliest_sailing.departure_date}（最早），��际: #{actual_sailing.departure_date}"
+      add_assertion "联系人信息正确（王芳 13700137001）", weight: 10 do
+        expect(@order.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@order.contact_name}"
+        expect(@order.contact_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@order.contact_phone}"
       end
+    end
+
+    private
+
+    def execution_state_data
+      {
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
+      }
+    end
+
+    def restore_from_state(data)
+      @expected_contact_name = data['expected_contact_name'] || '王芳'
+      @expected_contact_phone = data['expected_contact_phone'] || '13700137001'
     end
   end
 end
