@@ -81,7 +81,13 @@
       </div>
       
       <!-- Region Filter -->
-      
+      <div class="flex items-center gap-2">
+        <%= link_to membership_products_path(category: params[:category], region: 'all', sort_by: params[:sort_by]), 
+            class: "text-sm px-3 py-1 rounded-full #{params[:region].blank? || params[:region] == 'all' ? 'bg-primary text-text-inverse' : 'bg-surface text-secondary'}" do %>
+          里程区间
+          <span class="ml-1">▼</span>
+        <% end %>
+      </div>
     </div>
 
     <!-- Products Grid -->

@@ -5,19 +5,19 @@ require_relative '../base_validator'
 # 验证用例293: 预订残障人士无障碍出行
 #
 # 任务描述:
-#   用户预订残障人士无障碍出行方案
+#   用户预订残障人士无障碍出行方案（航班+无障碍酒店）
 #
 # 评分标准:
-#   - 创建航班预订 (30%)
-#   - 创建无障碍酒店预订 (30%)
-#   - 创建轮椅租赁服务 (25%)
-#   - 订单状态正确 (15%)
+#   - 创建航班预订 (35%)
+#   - 创建无障碍酒店预订 (40%)
+#   - 航班和酒店城市匹配 (15%)
+#   - 订单状态正确 (10%)
 module V251V300
   class V293BookDisabledAccessibleTravelValidator < BaseValidator
     self.validator_id = 'v293_book_disabled_accessible_travel_validator'
     self.task_id = '5a979b48-b8b5-425a-ae5d-8f4b27ee1d4d'
     self.title = '预订残障人士无障碍出行'
-    self.description = '用户预订残障人士无障碍出行方案'
+    self.description = '用户预订残障人士无障碍出行方案（航班+无障碍酒店）'
     self.timeout_seconds = 300
     
     def prepare
@@ -31,16 +31,16 @@ module V251V300
       end
       
       {
-        task: "请为残障人士预订从#{@departure_city}到#{@destination_city}的无障碍出行方案，#{@departure_date.strftime('%Y年%-m月%-d日')}出发，需要航班、无障碍酒店和轮椅租赁服务",
+        task: "请为残障人士预订从#{@departure_city}到#{@destination_city}的无障碍出行方案，#{@departure_date.strftime('%Y年%-m月%-d日')}出发，需要航班和无障碍酒店",
         departure_city: @departure_city,
         destination_city: @destination_city,
         departure_date: @departure_date.to_s,
-        hint: "预订航班、无障碍酒店和轮椅租赁服务"
+        hint: "预订航班和无障碍酒店"
       }
     end
     
     def verify
-      add_assertion "创建了航班预订", weight: 30 do
+      add_assertion "创建了航班预订", weight: 35 do
         @booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @destination_city })
@@ -50,7 +50,7 @@ module V251V300
         expect(@booking).not_to be_nil, "未找到从#{@departure_city}到#{@destination_city}的航班预订"
       end
       
-      add_assertion "创建了无障碍酒店预订", weight: 30 do
+      add_assertion "创建了无障碍酒店预订", weight: 40 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
@@ -60,15 +60,16 @@ module V251V300
         expect(@hotel_booking).not_to be_nil, "未找到#{@destination_city}的无障碍酒店预订"
       end
       
-      add_assertion "创建了轮椅租赁服务", weight: 25 do
-        @service = CarOrder
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .first
-        expect(@service).not_to be_nil, "未找到轮椅租赁服务"
+      return unless @booking && @hotel_booking
+      
+      add_assertion "航班和酒店城市匹配", weight: 15 do
+        flight = @booking.flight
+        hotel = @hotel_booking.hotel
+        expect(flight.destination_city).to eq(hotel.city),
+          "航班目的地与酒店城市不匹配。航班: #{flight.destination_city}, 酒店: #{hotel.city}"
       end
       
-      add_assertion "订单状态正确", weight: 15 do
+      add_assertion "订单状态正确", weight: 10 do
         valid_statuses = ['pending', 'paid']
         if @booking
           expect(valid_statuses).to include(@booking.status),
@@ -120,22 +121,6 @@ module V251V300
         payment_method: '花呗',
         total_price: hotel.price * 2,
         status: 'pending',
-        data_version: @data_version
-      )
-      
-      # 3. 租赁轮椅服务
-      car = Car.where(data_version: 0).first!
-      CarOrder.create!(
-        user_id: user.id,
-        car_id: car.id,
-        driver_name: user.name || '张三',
-        driver_id_number: '440300199001011234',
-        contact_phone: user.phone || '13800138000',
-        pickup_datetime: @departure_date,
-        return_datetime: @departure_date + 2.days,
-        pickup_location: "#{@destination_city}机场",
-        status: 'pending',
-        total_price: 200,
         data_version: @data_version
       )
     end
