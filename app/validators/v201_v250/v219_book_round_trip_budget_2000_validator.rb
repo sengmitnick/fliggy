@@ -17,8 +17,8 @@ module V201V250
   class V219BookRoundTripBudget2000Validator < BaseValidator
     self.validator_id = 'v219_book_round_trip_budget_2000_validator'
     self.task_id = '6fb687fa-7f7f-7f9f-9f0f-8f1a2b3c4d5e'
-    self.title = '预订往返航班+酒店3晚（总预算≤2000元）（2个航班）'
-    self.description = '用户需要预订往返航班+酒店3晚，总预算≤2000元'
+    self.title = '给张三预订后天深圳→上海往返航班+酒店3晚（总预算≤2000元）（2个航班）'
+    self.description = '帮张三订后天从深圳到上海的往返航班+酒店3晚，总预算不超过2000元'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,6 +26,13 @@ module V201V250
       @destination_city = '上海'
       @nights = 3
       @max_budget = 2000
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_id_number = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       # 查找往返航班（不限定日期）
       @outbound_flights = Flight.where(
@@ -109,7 +116,22 @@ module V201V250
           "住宿天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
       end
       
-      add_assertion "总价格≤#{@max_budget}元", weight: 35 do
+      add_assertion "去程航班日期正确（#{@outbound_date.strftime('%m月%d日')}）", weight: 10 do
+        expect(@outbound_booking.flight.flight_date).to eq(@outbound_date),
+          "去程航班日期错误。期望: #{@outbound_date}, 实际: #{@outbound_booking.flight.flight_date}"
+      end
+      
+      add_assertion "返程航班日期正确（#{@return_date.strftime('%m月%d日')}）", weight: 10 do
+        expect(@return_booking.flight.flight_date).to eq(@return_date),
+          "返程航班日期错误。期望: #{@return_date}, 实际: #{@return_booking.flight.flight_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（#{@check_in_date.strftime('%m月%d日')}）", weight: 5 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}（去程当天）, 实际: #{@hotel_booking.check_in_date}"
+      end
+      
+      add_assertion "总价格≤#{@max_budget}元", weight: 10 do
         outbound_price = @outbound_booking.total_price
         return_price = @return_booking.total_price
         hotel_price = @hotel_booking.total_price
@@ -119,7 +141,16 @@ module V201V250
           "总价格超出预算。去程: #{outbound_price}元, 返程: #{return_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客/入住人信息正确（张三）", weight: 10 do
+        expect(@outbound_booking.passenger_name).to eq(@expected_guest_name),
+          "去程航班乘客姓名错误。期望: #{@expected_guest_name}, 实际: #{@outbound_booking.passenger_name}"
+        expect(@return_booking.passenger_name).to eq(@expected_guest_name),
+          "返程航班乘客姓名错误。期望: #{@expected_guest_name}, 实际: #{@return_booking.passenger_name}"
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@outbound_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@return_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
@@ -157,9 +188,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:outbound],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_guest_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: best_combo[:outbound].price,
         accept_terms: true,
         status: 'paid',
@@ -170,9 +201,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:return],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @expected_guest_name,
+        passenger_id_number: @expected_id_number,
+        contact_phone: @expected_phone,
         total_price: best_combo[:return].price,
         accept_terms: true,
         status: 'paid',
@@ -186,8 +217,8 @@ module V201V250
         hotel_room: best_combo[:room],
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: best_combo[:room].price * @nights,
         status: 'paid',
@@ -207,7 +238,10 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         nights: @nights,
-        max_budget: @max_budget
+        max_budget: @max_budget,
+        expected_guest_name: @expected_guest_name,
+        expected_id_number: @expected_id_number,
+        expected_phone: @expected_phone
       }
     end
     
@@ -220,6 +254,9 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @nights = data['nights']
       @max_budget = data['max_budget']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_id_number = data['expected_id_number']
+      @expected_phone = data['expected_phone']
       
       @outbound_flights = Flight.where(
         departure_city: @origin_city,

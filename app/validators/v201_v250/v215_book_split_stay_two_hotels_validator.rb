@@ -18,8 +18,8 @@ module V201V250
   class V215BookSplitStayTwoHotelsValidator < BaseValidator
     self.validator_id = 'v215_book_split_stay_two_hotels_validator'
     self.task_id = '4ff576f9-5f5f-4f8f-ff8f-9f1a2b3c4d5f'
-    self.title = '预订明天分住两家酒店（5天分段）（2个）'
-    self.description = '用户需要预订北京5天行程，分住2家酒店（前2晚A酒店+后3晚B酒店）'
+    self.title = '给张三预订明天北京5天分住两家酒店（前2晚+后3晚）（2个）'
+    self.description = '帮张三订明天入住的北京5天行程，分住2家不同酒店：前2晚住一家，后3晚住另一家'
     self.timeout_seconds = 300
     
     def prepare
@@ -29,6 +29,12 @@ module V201V250
       @second_hotel_nights = 3
       @switch_date = @start_date + @first_hotel_nights.days
       @end_date = @start_date + (@first_hotel_nights + @second_hotel_nights).days
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_phone = @passenger.phone
       
       # 查找北京的酒店
       @available_hotels = Hotel.where(
@@ -95,7 +101,14 @@ module V201V250
           "酒店时间衔接错误。第一家退房日: #{@first_booking.check_out_date}, 第二家入住日: #{@second_booking.check_in_date}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "入住人信息正确（张三）", weight: 10 do
+        expect(@first_booking.guest_name).to eq(@expected_guest_name),
+          "第一家酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@first_booking.guest_name}"
+        expect(@second_booking.guest_name).to eq(@expected_guest_name),
+          "第二家酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@second_booking.guest_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@first_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@second_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -125,8 +138,8 @@ module V201V250
         hotel_room_id: first_room.id,
         check_in_date: @start_date,
         check_out_date: @switch_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: first_room.price * @first_hotel_nights,
         status: 'paid',
@@ -141,8 +154,8 @@ module V201V250
         hotel_room_id: second_room.id,
         check_in_date: @switch_date,
         check_out_date: @end_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: second_room.price * @second_hotel_nights,
         status: 'paid',
@@ -160,7 +173,9 @@ module V201V250
         first_hotel_nights: @first_hotel_nights,
         second_hotel_nights: @second_hotel_nights,
         switch_date: @switch_date.to_s,
-        end_date: @end_date.to_s
+        end_date: @end_date.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_phone: @expected_phone
       }
     end
     
@@ -171,6 +186,8 @@ module V201V250
       @second_hotel_nights = data['second_hotel_nights']
       @switch_date = Date.parse(data['switch_date'])
       @end_date = Date.parse(data['end_date'])
+      @expected_guest_name = data['expected_guest_name']
+      @expected_phone = data['expected_phone']
       
       @available_hotels = Hotel.where(
         city: @city,

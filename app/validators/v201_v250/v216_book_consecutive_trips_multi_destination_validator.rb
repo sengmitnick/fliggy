@@ -18,8 +18,8 @@ module V201V250
   class V216BookConsecutiveTripsMultiDestinationValidator < BaseValidator
     self.validator_id = 'v216_book_consecutive_trips_multi_destination_validator'
     self.task_id = '5ff687f0-6f6f-4f9f-ff9f-0f2a3b4c5d6f'
-    self.title = '预订明天连续多段行程（4城4天）'
-    self.description = '用户需要预订连续多段行程：北京→上海→杭州→深圳（4天）'
+    self.title = '给张三预订明天北京→上海→杭州→深圳4天连续行程（只能用飞机/火车）'
+    self.description = '帮张三订明天开始的连续多段行程：北京→上海→杭州→深圳（4天），只能使用飞机或火车，各段时间要衔接好'
     self.timeout_seconds = 300
     
     def prepare
@@ -28,6 +28,13 @@ module V201V250
       @city3 = '杭州'
       @city4 = '深圳'
       @start_date = Date.current + 1.day
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_id_number = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       # 查找各段可用交通
       @leg1_options = find_transport_options(@city1, @city2, @start_date)
@@ -39,14 +46,15 @@ module V201V250
       raise "未找到#{@city3}→#{@city4}的交通" if @leg3_options.empty?
       
       {
-        task: "请预订#{@start_date.strftime('%Y年%m月%d日')}（明天）开始的连续多段行程：#{@city1}→#{@city2}→#{@city3}→#{@city4}（4天），各段时间要衔接好。",
+        task: "请预订#{@start_date.strftime('%Y年%m月%d日')}（明天）开始的连续多段行程：#{@city1}→#{@city2}→#{@city3}→#{@city4}（4天），只能使用飞机或火车，各段时间要衔接好。",
         requirements: {
           cities: "#{@city1}→#{@city2}→#{@city3}→#{@city4}",
           start_date: @start_date,
           days: 4,
+          transport_types: '只能使用飞机或火车',
           purpose: '多城市连续游览'
         },
-        hint: "依次预订三段交通，确保时间衔接合理（同一天或次日）。"
+        hint: "依次预订三段交通（飞机或火车），确保时间衔接合理（同一天或次日）。"
       }
     end
     
@@ -113,7 +121,16 @@ module V201V250
         expect(gap2_hours).to be <= 48, "第2-3段间隔过长。实际间隔: #{gap2_hours.round(1)}小时"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（张三）", weight: 15 do
+        expect(@leg1.passenger_name).to eq(@expected_passenger_name),
+          "第一段乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@leg1.passenger_name}"
+        expect(@leg2.passenger_name).to eq(@expected_passenger_name),
+          "第二段乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@leg2.passenger_name}"
+        expect(@leg3.passenger_name).to eq(@expected_passenger_name),
+          "第三段乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@leg3.passenger_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 5 do
         expect(@leg1.status).to be_in(['pending', 'paid', 'completed'])
         expect(@leg2.status).to be_in(['pending', 'paid', 'completed'])
         expect(@leg3.status).to be_in(['pending', 'paid', 'completed'])
@@ -193,9 +210,9 @@ module V201V250
         Booking.create!(
           user: user,
           flight: option[:transport],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @expected_passenger_name,
+          passenger_id_number: @expected_id_number,
+          contact_phone: @expected_phone,
           total_price: option[:price],
           accept_terms: true,
           status: 'paid',
@@ -205,9 +222,9 @@ module V201V250
         TrainBooking.create!(
           user: user,
           train: option[:transport],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @expected_passenger_name,
+          passenger_id_number: @expected_id_number,
+          contact_phone: @expected_phone,
           seat_type: 'second_class',
           ticket_count: 1,
           total_price: option[:price],
@@ -248,7 +265,10 @@ module V201V250
         city2: @city2,
         city3: @city3,
         city4: @city4,
-        start_date: @start_date.to_s
+        start_date: @start_date.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_id_number: @expected_id_number,
+        expected_phone: @expected_phone
       }
     end
     
@@ -258,6 +278,9 @@ module V201V250
       @city3 = data['city3']
       @city4 = data['city4']
       @start_date = Date.parse(data['start_date'])
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_id_number = data['expected_id_number']
+      @expected_phone = data['expected_phone']
       
       @leg1_options = find_transport_options(@city1, @city2, @start_date)
       @leg2_options = find_transport_options(@city2, @city3, @start_date, @start_date + 2.days)

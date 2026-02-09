@@ -17,8 +17,8 @@ module V201V250
   class V214BookLateCheckOutHotelAfter2pmValidator < BaseValidator
     self.validator_id = 'v214_book_late_check_out_hotel_after_2pm_validator'
     self.task_id = '3fe465f8-4f4f-4f7f-ff7f-8f0a1b2c3d4f'
-    self.title = '预订明天酒店延迟退房（14:00后）'
-    self.description = '用户需要预订深圳酒店2晚，配合晚班航班要求14:00后延迟退房'
+    self.title = '给张三预订明天深圳2晚酒店（14:00后延迟退房）'
+    self.description = '帮张三订明天入住深圳2晚的酒店，配合晚班航班需要在退房时支持14:00后延迟退房'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,6 +26,12 @@ module V201V250
       @check_in_date = Date.current + 1.day
       @nights = 2
       @check_out_date = @check_in_date + @nights.days
+      
+      # 预查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @passenger.name
+      @expected_phone = @passenger.phone
       
       # 查找深圳的酒店
       @available_hotels = Hotel.where(
@@ -78,7 +84,12 @@ module V201V250
           "退房日期错误。期望: #{expected_check_out}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "入住人信息正确（张三）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@hotel_booking.status}"
       end
@@ -102,8 +113,8 @@ module V201V250
         hotel_room_id: room.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: room.price * @nights,
         status: 'paid',
@@ -119,7 +130,9 @@ module V201V250
         city: @city,
         check_in_date: @check_in_date.to_s,
         nights: @nights,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_phone: @expected_phone
       }
     end
     
@@ -128,6 +141,8 @@ module V201V250
       @check_in_date = Date.parse(data['check_in_date'])
       @nights = data['nights']
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_guest_name = data['expected_guest_name']
+      @expected_phone = data['expected_phone']
       
       @available_hotels = Hotel.where(
         city: @city,
