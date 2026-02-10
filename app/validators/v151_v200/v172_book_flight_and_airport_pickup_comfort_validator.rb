@@ -37,8 +37,8 @@ module V151V200
   class V172BookFlightAndAirportPickupComfortValidator < BaseValidator
     self.validator_id = 'v172_book_flight_and_airport_pickup_comfort_validator'
     self.task_id = '3c8e7f2a-4d1b-9a6c-5e8f-7b3d2a1c4e5f'
-    self.title = '订觭3天后机票后预订接机服务（舒适5座）'
-    self.description = '订购广州到北京的机票，到达首都T3后预订接机到国贸CBD，选择舒适5座'
+    self.title = '给李四预订后天广州到北京的机票，并预订首都机场接机到国贸CBD（舒适5座）'
+    self.description = '帮李四订后天从广州到北京的航班，到达首都机场T3后接机到国贸CBD，车子选舒适5座'
     self.timeout_seconds = 300
   
     def prepare
@@ -46,10 +46,16 @@ module V151V200
       @arrival_city = '北京'
       @arrival_airport = '首都国际机场T3航站楼'  # 期望到达的机场
       @destination_location = '国贸CBD'  # 接机目的地
-      @flight_date = Date.current + 3.days  # 3天后出发
+      @flight_date = Date.current + 2.days  # 后天出发
       @vehicle_category = 'comfort_5'  # 舒适5座
       @transfer_type = 'airport_pickup'
       @service_type = 'from_airport'
+    
+      # 预查询乘客信息（李四）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       # 查找可用航班（到达首都T3的航班）
       @available_flights = Flight.where(
@@ -92,9 +98,10 @@ module V151V200
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班（到达首都国际机场T3航站楼），" \
+        task: "请为李四预订#{@flight_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班（到达首都国际机场T3航站楼），" \
               "并预订接机服务到#{@destination_location}（选择舒适5座车型）",
         requirements: {
+          passenger: @expected_passenger_name,
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           arrival_airport: @arrival_airport,
@@ -206,6 +213,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '李四', data_version: 0)
     
       # 步骤1: 预订航班
       target_flight = @available_flights.order(:departure_time).first
@@ -218,9 +226,9 @@ module V151V200
         user_id: user.id,
         flight_id: target_flight.id,
         flight_offer_id: flight_offer.id,
-        passenger_name: '李四',
-        passenger_id_number: '440101198501011234',
-        contact_phone: '13900139000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight_offer.price,
         accept_terms: true,
         status: 'paid',
@@ -238,8 +246,8 @@ module V151V200
         location_from: @airport_location.name,
         location_to: @destination.name,
         pickup_datetime: pickup_datetime,
-        passenger_name: '李四',
-        passenger_phone: '13900139000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         luggage_count: 1,
         total_price: @best_package.price,
@@ -276,6 +284,12 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+    
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_flights = Flight.where(
         departure_city: @departure_city,

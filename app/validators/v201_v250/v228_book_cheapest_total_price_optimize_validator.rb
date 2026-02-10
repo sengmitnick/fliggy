@@ -17,8 +17,8 @@ module V201V250
   class V228BookCheapestTotalPriceOptimizeValidator < BaseValidator
     self.validator_id = 'v228_book_cheapest_total_price_optimize_validator'
     self.task_id = 'b2c3d4e5-6f7a-8b9c-0d1e-2f3a4b5c6d7e'
-    self.title = '预订往返交通+酒店（总价最低组合）'
-    self.description = '用户需要预订往返交通+酒店，选择总价最低的组合'
+    self.title = '给张三预订总价最低组合（3天后往返交通+酒店住2晚）'
+    self.description = '张三3天后要从上海去北京出差2天，需要预订往返交通（可以是航班或火车）和酒店住2晚，希望总价最低'
     self.timeout_seconds = 300
     
     def prepare
@@ -28,6 +28,14 @@ module V201V250
       @return_date = @outbound_date + 2.days
       @check_in_date = @outbound_date
       @check_out_date = @return_date
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找去程航班（可以选择火车或航班）
       @outbound_flights = Flight.where(
@@ -216,9 +224,9 @@ module V201V250
         Booking.create!(
           user: user,
           flight: best_combo[:outbound][:item],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @passenger.name,
+          passenger_id_number: @passenger.id_number,
+          contact_phone: @passenger.phone,
           total_price: best_combo[:outbound][:item].price,
           accept_terms: true,
           status: 'paid',
@@ -228,9 +236,9 @@ module V201V250
         TrainBooking.create!(
           user: user,
           train: best_combo[:outbound][:item],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @passenger.name,
+          passenger_id_number: @passenger.id_number,
+          contact_phone: @passenger.phone,
           seat_type: 'second_class',
           ticket_count: 1,
           total_price: best_combo[:outbound][:item].price_second_class,
@@ -245,9 +253,9 @@ module V201V250
         Booking.create!(
           user: user,
           flight: best_combo[:return][:item],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @passenger.name,
+          passenger_id_number: @passenger.id_number,
+          contact_phone: @passenger.phone,
           total_price: best_combo[:return][:item].price,
           accept_terms: true,
           status: 'paid',
@@ -257,9 +265,9 @@ module V201V250
         TrainBooking.create!(
           user: user,
           train: best_combo[:return][:item],
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: @passenger.name,
+          passenger_id_number: @passenger.id_number,
+          contact_phone: @passenger.phone,
           seat_type: 'second_class',
           ticket_count: 1,
           total_price: best_combo[:return][:item].price_second_class,
@@ -277,7 +285,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: best_combo[:hotel][:room].price * 2,
         status: 'paid',

@@ -25,6 +25,14 @@ module V201V250
       @check_in_date = Date.current + 1.day
       @check_out_date = @check_in_date + 2.days
       
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
+      
       # 查找提供早餐的酒店（通过facilities或name包含"早餐"）
       @available_hotels = Hotel.where(city: @city, data_version: 0)
         .where("facilities LIKE ? OR name LIKE ?", 
@@ -96,7 +104,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: room.price * 2,
         status: 'paid',

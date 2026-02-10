@@ -15,13 +15,21 @@ module V201V250
   class V247BookRebookableFlightValidator < BaseValidator
     self.validator_id = 'v247_book_rebookable_flight_validator'
     self.task_id = 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
-    self.title = '预订可改签航班'
-    self.description = '用户需要预订可改签的航班（行程灵活）'
+    self.title = '给张三预订可改签航班（去广州，行程可能变动）'
+    self.description = '张三要从上海去广州，但行程还没最终确定，需要预订支持改签的航班方便调整时间'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '上海'
       @destination_city = '广州'
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找航班（所有航班都可能允许改签，使用refund_policy判断）
       @available_flights = Flight.where(
@@ -83,9 +91,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',

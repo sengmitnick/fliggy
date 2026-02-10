@@ -9,17 +9,23 @@ module V151V200
   class V162BookCruiseAndHotelValidator < BaseValidator
     self.validator_id = 'v162_book_cruise_and_hotel_validator'
     self.task_id = 'f2a3b4c5-6d7e-8f9a-0b1c-2d3e4f5a6b7c'
-    self.title = '预订明天邮轮并预订酒店住宿（上海日本航线+前一晚住宿）'
+    self.title = '给张三预订后天上海出发日本邮轮6天5晚 + 前一晚酒店住宿'
     self.description = '预订后天上海出发的日本邮轮航线，并预订邮轮出发前一晚的上海酒店住宿'
     self.timeout_seconds = 300
 
     def prepare
-      @departure_date = Date.tomorrow + 1.day  # 后天出发
-      @hotel_checkin_date = Date.tomorrow      # 明天入住酒店（邮轮前一晚）
+      @departure_date = Date.current + 1.day  # 明天 + 1.day  # 后天出发
+      @hotel_checkin_date = Date.current + 1.day  # 明天      # 明天入住酒店（邮轮前一晚）
       @departure_port = '上海'
       @duration_days = 6
       @duration_nights = 5
       @adult_count = 2
+      
+      # 预查询demo_user的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
       
       # 查找可用的上海邮轮班次
       @available_sailings = CruiseSailing
@@ -70,8 +76,8 @@ module V151V200
         user_id: user.id,
         cruise_product_id: cruise_product.id,
         quantity: @adult_count,
-        contact_name: user.name,
-        contact_phone: '13800138000',
+        contact_name: @passenger.name,
+        contact_phone: @passenger.phone,
         total_price: total_price,
         accept_terms: true,
         status: 'pending',
@@ -105,7 +111,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkin_date + 1.day,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version

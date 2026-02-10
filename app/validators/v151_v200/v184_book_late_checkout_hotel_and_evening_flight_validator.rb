@@ -23,14 +23,19 @@ module V151V200
   class V184BookLateCheckoutHotelAndEveningFlightValidator < BaseValidator
     self.validator_id = 'v184_book_late_checkout_hotel_and_evening_flight_validator'
     self.task_id = '2fc00235-eef6-4b3e-ab69-d838b5038fd8'
-    self.title = '预订明天延迟退房酒店和晚班航班'
-    self.description = '用户需要预订支持延迟退房（下午2点后）的酒店，并预订晚上的航班'
+    self.title = '给吴勇预订今晚上海延迟退房酒店，并预订明天晚上到北京的航班'
+    self.description = '帮吴勇在上海预订支持延迟退房（下午2点后）的酒店，入住今晚，明天退房，并订明天晚上从上海到北京的航班'
     self.timeout_seconds = 300
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '上海'
       @arrival_city = '北京'
-      @flight_date = Date.tomorrow + 2.days
+      @flight_date = Date.current + 1.day  # 明天
       
       # 查找晚上的航班（18:00后）
       @available_flights = Flight
@@ -52,7 +57,7 @@ module V151V200
       @hotel_checkout_date = @flight_date  # 航班当天退房
       
       {
-        task: "请在#{@departure_city}预订支持延迟退房（下午2点后）的酒店，入住#{@hotel_checkin_date.strftime('%Y年%m月%d日')}，" \
+        task: "请为#{@passenger.name}在#{@departure_city}预订支持延迟退房（下午2点后）的酒店，入住#{@hotel_checkin_date.strftime('%Y年%m月%d日')}，" \
               "退房#{@hotel_checkout_date.strftime('%Y年%m月%d日')}，并预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）晚上从#{@departure_city}到#{@arrival_city}的航班",
         requirements: {
           departure_city: @departure_city,
@@ -74,6 +79,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
       
       # 创建酒店订单
       hotel = @available_hotels.first
@@ -87,7 +93,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -98,9 +104,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -182,6 +188,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @flight_date = Date.parse(data['flight_date']) if data['flight_date']

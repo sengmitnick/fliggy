@@ -22,16 +22,21 @@ module V151V200
   class V180BookFridayNightFlightAndWeekendPackageValidator < BaseValidator
     self.validator_id = 'v180_book_friday_night_flight_and_weekend_package_validator'
     self.task_id = '9331db0e-0f5f-43ca-85b4-8f2d4b62380b'
-    self.title = '预订周五晚航班和周末度假酒店套餐（2晚）'
-    self.description = '用户需要预订周五晚上的航班，并预订周末度假酒店套餐'
+    self.title = '给王芳预订周五晚北京到三亚的航班，并预订周末度假酒店套餐（2晚）'
+    self.description = '帮王芳订周五晚上从北京到三亚的航班（18:00后），并预订周末度假酒店套餐（周五到周日，2晚）'
     self.timeout_seconds = 300
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '三亚'
       
       # 查找最近的周五
-      @friday_date = Date.tomorrow
+      @friday_date = Date.current + 1.day  # 明天
       until @friday_date.friday?
         @friday_date += 1.day
       end
@@ -63,7 +68,7 @@ module V151V200
       @hotel_checkout_date = @friday_date + 2.days  # 周日退房
       
       {
-        task: "请预订#{@friday_date.strftime('%Y年%m月%d日')}（#{(@friday_date - Date.current).to_i}天后，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
+        task: "请为#{@passenger.name}预订#{@friday_date.strftime('%Y年%m月%d日')}（#{(@friday_date - Date.current).to_i}天后，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
               "并预订周末度假酒店套餐（周五到周日，2晚）",
         requirements: {
           departure_city: @departure_city,
@@ -87,15 +92,16 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       
       # 创建航班订单
       flight = @available_flights.first
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -109,7 +115,7 @@ module V151V200
           user: user,
           hotel_package: package,
           guest_name: user.name,
-          guest_phone: '13800138000',
+          guest_phone: passenger.phone,
           check_in_date: @hotel_checkin_date,
           check_out_date: @hotel_checkout_date,
           guest_count: 2,
@@ -128,7 +134,7 @@ module V151V200
           check_in_date: @hotel_checkin_date,
           check_out_date: @hotel_checkout_date,
           guest_name: user.name,
-          guest_phone: '13800138000',
+          guest_phone: passenger.phone,
           payment_method: '花呗',
           total_price: room.price * 2,  # 2晚
           data_version: @data_version
@@ -226,6 +232,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @friday_date = Date.parse(data['friday_date']) if data['friday_date']

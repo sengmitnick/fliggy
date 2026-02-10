@@ -23,14 +23,20 @@ module V151V200
   class V177BookLateNightFlightAnd24hHotelValidator < BaseValidator
     self.validator_id = 'v177_book_late_night_flight_and_24h_hotel_validator'
     self.task_id = '5d7b3426-da2e-4269-acb8-185afdd1fc1a'
-    self.title = '预订3天后红眼航班和24小时前台酒店'
-    self.description = '用户需要预订深夜23点到凌晨2点之间的红眼航班，并预订有24小时前台服务的酒店'
+    self.title = '给吴勇预订明天深夜北京到上海的红眼航班，并在上海预订24小时酒店'
+    self.description = '帮吴勇订明天深夜23:00-次日02:00的红眼航班从北京到上海，到了上海后找个有24小时前台的酒店'
     self.timeout_seconds = 300
   
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @flight_date = Date.tomorrow + 2.days  # 3天后出发
+      @flight_date = Date.current + 1.day  # 明天 + 2.days  # 3天后出发
+      
+      # 预查询乘客信息（吴勇）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
       
       # 查找红眼航班（23:00-02:00）
       # 23:00-23:59 is today, 00:00-02:00 is next day
@@ -58,9 +64,10 @@ module V151V200
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的红眼航班（23:00-02:00），" \
+        task: "请为吴勇预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的红眼航班（23:00-02:00），" \
               "并在#{@arrival_city}预订有24小时前台服务的酒店",
         requirements: {
+          passenger: @expected_passenger_name,
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           flight_date: @flight_date.to_s,
@@ -84,9 +91,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -105,7 +112,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -191,6 +198,12 @@ module V151V200
       @flight_date = Date.parse(data['flight_date']) if data['flight_date']
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     end
   end
 end

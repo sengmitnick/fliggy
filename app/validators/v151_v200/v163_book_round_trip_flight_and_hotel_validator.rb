@@ -9,18 +9,25 @@ module V151V200
   class V163BookRoundTripFlightAndHotelValidator < BaseValidator
     self.validator_id = 'v163_book_round_trip_flight_and_hotel_validator'
     self.task_id = 'a3b4c5d6-7e8f-9a0b-1c2d-3e4f5a6b7c8d'
-    self.title = '预订明天往返航班并预订酒店住宿（北京⇄上海，3晚）'
+    self.title = '给张三预订后天北京⇄上海往返航班 + 上海酒店住宿3晚'
     self.description = '预订后天北京到上海的往返航班（去程后天，返程第5天），并预订上海酒店3晚住宿'
     self.timeout_seconds = 300
 
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @outbound_date = Date.tomorrow + 1.day  # 后天出发
+      @outbound_date = Date.current + 1.day  # 明天 + 1.day  # 后天出发
       @return_date = @outbound_date + 4.days  # 第5天返回
       @hotel_checkin_date = @outbound_date
       @hotel_checkout_date = @hotel_checkin_date + 3.days
       @nights = 3
+      
+      # 预查询demo_user的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_name = @passenger.name
+      @expected_phone = @passenger.phone
+      @expected_id_number = @passenger.id_number
       
       # 查找去程航班
       @available_outbound_flights = Flight
@@ -55,9 +62,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: outbound_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: outbound_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -69,9 +76,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: return_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: return_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -90,7 +97,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price * @nights,
         data_version: @data_version
@@ -191,11 +198,12 @@ module V151V200
           "住宿天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
       end
       
-      # 断言7: 退房日期与返程航班关联正确
-      add_assertion "退房日期与返程航班关联正确", weight: 5 do
-        return_flight_date = @return_booking.flight.flight_date
-        expect(@hotel_booking.check_out_date).to be <= return_flight_date,
-          "退房日期与返程航班不匹配。退房: #{@hotel_booking.check_out_date}, 返程航班: #{return_flight_date}"
+      # 断言7: 乘客信息正确（张三）
+      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+        expect(@outbound_booking.passenger_name).to eq(@expected_name),
+          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_booking.passenger_name}"
+        expect(@outbound_booking.passenger_id_number).to eq(@expected_id_number),
+          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_booking.passenger_id_number}"
       end
     end
   end

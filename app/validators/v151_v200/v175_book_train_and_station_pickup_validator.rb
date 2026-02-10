@@ -37,8 +37,8 @@ module V151V200
   class V175BookTrainAndStationPickupValidator < BaseValidator
     self.validator_id = 'v175_book_train_and_station_pickup_validator'
     self.task_id = '77ad42cd-6c18-4752-b8e4-f7ec1532fee0'
-    self.title = '订觭后天火车票后预订接站服务（高铁）'
-    self.description = '订购北京到南京的高铁，到达南京南站后预订接站到新街口商圈'
+    self.title = '给陈静预订后天北京到南京的高铁票，并预订南京南站接站到新街口商圈'
+    self.description = '帮陈静订后天从北京到南京的高铁，到达南京南站后接站到新街口商圈'
     self.timeout_seconds = 300
   
     def prepare
@@ -50,6 +50,12 @@ module V151V200
       @vehicle_category = 'economy_5'
       @transfer_type = 'train_pickup'
       @service_type = 'from_station'
+    
+      # 预查询乘客信息（陈静）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_trains = Train.where(
         departure_city: @departure_city,
@@ -88,9 +94,10 @@ module V151V200
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的高铁（到达#{@arrival_station}），" \
+        task: "请为陈静预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的高铁（到达#{@arrival_station}），" \
               "并预订接站服务到#{@destination_location}（选择经济5座车型）",
         requirements: {
+          passenger: @expected_passenger_name,
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           arrival_station: @arrival_station,
@@ -177,6 +184,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
     
       target_train = @available_trains.order(:departure_time).first
       raise "未找到可用高铁" unless target_train
@@ -184,9 +192,9 @@ module V151V200
       train_booking = TrainBooking.create!(
         user_id: user.id,
         train_id: target_train.id,
-        passenger_name: '孙七',
-        passenger_id_number: '320101199301011234',
-        contact_phone: '13500135000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         seat_type: 'second_class',
         total_price: target_train.price_second_class,
         accept_terms: true,
@@ -204,8 +212,8 @@ module V151V200
         location_from: @station_location.name,
         location_to: @destination.name,
         pickup_datetime: pickup_datetime,
-        passenger_name: '孙七',
-        passenger_phone: '13500135000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         luggage_count: 1,
         total_price: @best_package.price,
@@ -242,6 +250,12 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+    
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_trains = Train.where(
         departure_city: @departure_city,

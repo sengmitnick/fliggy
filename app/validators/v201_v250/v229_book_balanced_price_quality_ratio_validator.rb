@@ -16,8 +16,8 @@ module V201V250
   class V229BookBalancedPriceQualityRatioValidator < BaseValidator
     self.validator_id = 'v229_book_balanced_price_quality_ratio_validator'
     self.task_id = '4ff465ff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '预订价格质量平衡最佳组合'
-    self.description = '用户需要预订火车票+酒店，价格/质量平衡最佳（性价比）'
+    self.title = '给张三预订价格质量平衡最佳组合（后天火车+酒店）'
+    self.description = '张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,6 +26,14 @@ module V201V250
       @travel_date = Date.current + 2.days
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)
@@ -141,9 +149,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: best_train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: best_train.price_second_class,
@@ -159,7 +167,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: best_hotel.price,
         status: 'paid',

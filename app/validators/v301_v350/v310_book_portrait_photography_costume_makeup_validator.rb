@@ -17,11 +17,16 @@ module V301V350
   class V310BookPortraitPhotographyCostumeMakeupValidator < BaseValidator
     self.validator_id = 'v310_book_portrait_photography_costume_makeup_validator'
     self.task_id = '7230b4f9-7181-49ba-9478-979b313bdbca'
-    self.title = '预订上海东方明珠7天后的人像跟拍+服装化妆套餐（1人，需创建2个活动订单）'
-    self.description = '用户需要为7天后在上海东方明珠预订专业摄影服务套餐（1人），包含人像跟拍服务和服装租赁+化妆造型服务，需要分别创建2个活动订单'
+    self.title = '给王芳预订东方明珠人像摄影（7天后，含跟拍+服装+化妆）'
+    self.description = '王芳想7天后去上海东方明珠拍人像照，需1人，要人像跟拍、服装租赁和化妆造型'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passenger from demo_user (solo photography)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      
       @service_date = Date.current + 7.days
       @participant_count = 1
       @attraction_name = '上海东方明珠广播电视塔'

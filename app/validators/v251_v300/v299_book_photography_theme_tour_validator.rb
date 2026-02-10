@@ -1,17 +1,37 @@
 # frozen_string_literal: true
 
+require_relative '../base_validator'
+
+# 验证用例299: 给王芳预订云南摄影主题游
+#
+# 任务描述:
+#   王芳想去云南进行摄影主题旅游，需要选择风景优美的跟团游产品（评分≥4.5）
+#
+# 评分标准:
+#   - 创建跟团游预订 (45%)
+#   - 选择风景优美目的地 (25%)
+#   - 预订日期正确 (10%)
+#   - 联系人信息正确 (10%)
+#   - 预订人数正确(1人) (10%)
 module V251V300
   class V299BookPhotographyThemeTourValidator < BaseValidator
     self.validator_id = 'v299_book_photography_theme_tour_validator'
     self.task_id = 'feeaef15-74e2-4fb2-a7fa-1b6c5bc2273f'
-    self.title = '预订7天后摄影主题游（1人）'
-    self.description = '用户想要去云南进行摄影主题旅游，需要选择风景优美的跟团游产品（评分≥4.5），出发日期为7天后'
+    self.title = '给王芳预订云南摄影主题游（7天后，1人）'
+    self.description = '王芳想去云南进行摄影主题旅游，要选风景优美的跟团游（评分≥4.5）'
     self.timeout_seconds = 300
     
     def prepare
       @destination = '云南'
       @travel_date = Date.today + 7.days
       @visit_date = Date.today + 8.days
+      
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query passenger info
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_contact_name = @wangfang.name
+      @expected_contact_phone = @wangfang.phone
       
       # 检查是否有摄影主题跟团游产品
       tour_count = TourGroupProduct.where(destination: @destination, data_version: 0).count
@@ -25,7 +45,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了跟团游预订(摄影主题)", weight: 50 do
+      add_assertion "创建了跟团游预订(摄影主题)", weight: 45 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -46,9 +66,16 @@ module V251V300
           "未选择风景优美的目的地。当前评分: #{tour.rating}"
       end
       
-      add_assertion "预订日期正确", weight: 15 do
+      add_assertion "预订日期正确", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
           "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
+      end
+      
+      add_assertion "联系人信息正确（王芳）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
       end
       
       add_assertion "预订人数正确(1人)", weight: 10 do
@@ -84,16 +111,7 @@ module V251V300
       
       tour_package = tour_product.tour_packages.first!
       
-      passenger = Passenger.find_or_create_by!(
-        user_id: user.id,
-        id_number: '440300199001011234',
-        data_version: @data_version
-      ) do |p|
-        p.name = '张小姐'
-        p.id_type = 'id_card'
-        p.phone = '13800138000'
-      end
-      
+      # Use existing passenger from demo_user
       TourGroupBooking.create!(
         user_id: user.id,
         tour_group_product_id: tour_product.id,
@@ -101,8 +119,8 @@ module V251V300
         travel_date: @travel_date,
         adult_count: 1,
         child_count: 0,
-        contact_name: passenger.name,
-        contact_phone: passenger.phone,
+        contact_name: @wangfang.name,
+        contact_phone: @wangfang.phone,
         total_price: tour_package.price,
         status: 'pending',
         insurance_type: 'standard',
@@ -125,7 +143,7 @@ module V251V300
             attraction_activity_id: activity.id,
             visit_date: @visit_date,
             quantity: 1,
-            passenger_ids: [passenger.id],
+            passenger_ids: [@wangfang.id],
             total_price: activity.current_price,
             status: 'pending',
             insurance_type: 'none',
@@ -141,7 +159,9 @@ module V251V300
       {
         destination: @destination,
         travel_date: @travel_date&.to_s,
-        visit_date: @visit_date&.to_s
+        visit_date: @visit_date&.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -149,6 +169,8 @@ module V251V300
       @destination = data['destination']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @visit_date = Date.parse(data['visit_date']) if data['visit_date']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
   end
 end

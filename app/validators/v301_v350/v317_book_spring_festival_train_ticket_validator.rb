@@ -1,7 +1,7 @@
-# V317: 预订60天后从北京到成都的一等座火车票
+# V317: 给张三预订60天后从北京到成都的一等座火车票
 #
 # 任务描述:
-#   用户需要预订60天后从北京到成都的一等座火车票
+#   张三需要60天后从北京到成都，要订一等座火车票
 #
 # 评分标准:
 #   - 创建了北京到成都的火车票订单 (30%)
@@ -14,11 +14,16 @@ module V301V350
   class V317BookSpringFestivalTrainTicketValidator < BaseValidator
     self.validator_id = 'v317_book_spring_festival_train_ticket_validator'
     self.task_id = "fa4b7ee9-b151-4421-bdf0-30338b7de3f6"
-    self.title = "预订60天后从北京到成都的一等座火车票"
-    self.description = "用户需要预订60天后从北京到成都的一等座火车票"
+    self.title = "给张三预订60天后从北京到成都的一等座火车票"
+    self.description = "张三需要60天后从北京到成都，要订一等座火车票"
     self.timeout_seconds = 180
 
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passenger from demo_user
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      
       # 出发日期：60天后
       @departure_date = Date.today + 60.days
       @departure_city = "北京"

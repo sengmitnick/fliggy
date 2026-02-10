@@ -2,23 +2,25 @@
 
 require_relative '../base_validator'
 
-# 验证用例304: 预订养生度假游
+# 验证用例304: 给刘强和陈静预订杭州养生度假酒店
 #
 # 任务描述:
-#   用户预订养生度假游(温泉+SPA+健康检查)
+#   刘强和陈静想预订杭州的养生度假，需要温泉、SPA服务和高端养生酒店
 #
 # 评分标准:
-#   - 创建酒店预订(温泉度假村) (40%)
-#   - 选择高评分养生酒店 (25%)
-#   - 创建SPA/温泉活动订单 (20%)
-#   - 入住日期正确 (10%)
+#   - 创建酒店预订(温泉度假村) (35%)
+#   - 选择高评分养生酒店 (20%)
+#   - 创建SPA/温泉活动订单 (15%)
+#   - 住客信息正确 (10%)
+#   - 入住日期正确 (5%)
 #   - 住宿天数≥3晚 (5%)
+#   - 房间数和人数正确 (10%)
 module V301V350
   class V304BookWellnessResortTourValidator < BaseValidator
     self.validator_id = 'v304_book_wellness_resort_tour_validator'
     self.task_id = 'd4804253-c7b6-42bc-a79b-2035d534f476'
-    self.title = '预订8天后杭州高评分养生度假酒店（≥3晚含温泉SPA）（1间房，2成人，0儿童）'
-    self.description = '用户需要预订杭州的养生度假酒店，8天后入住，住宿≥3晚，要求选择高评分养生酒店（评分≥4.5或价格≥600元），并预订温泉或SPA体验活动'
+    self.title = '给刘强和陈静预订杭州养生度假酒店（8天后，≥3晚，含温泉SPA）'
+    self.description = '刘强和陈静想订杭州的养生度假，要温泉、SPA服务和高端养生酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -31,6 +33,12 @@ module V301V350
       if user.balance < 6000
         user.update!(balance: 9000)
       end
+      
+      # Pre-query passenger info - couple
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_guest_name = @liuqiang.name  # Primary guest
+      @expected_guest_phone = @liuqiang.phone
       
       {
         task: "请预订#{@city}的养生度假，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚，需要温泉、SPA服务和高端养生酒店",
@@ -81,13 +89,20 @@ module V301V350
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
       
+      add_assertion "住客信息正确（刘强）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "住客姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
+          "联系电话错误。期望: #{@expected_guest_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
       add_assertion "住宿天数≥3晚", weight: 5 do
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
         expect(actual_nights).to be >= 3,
           "住宿天数不足。期望≥3晚，实际: #{actual_nights}晚"
       end
       
-      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 20 do
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
         expect(@hotel_booking.rooms_count).to eq(1),
           "房间数错误。期望: 1间房，实际: #{@hotel_booking.rooms_count}间房"
         expect(@hotel_booking.adults_count).to eq(2),
@@ -107,6 +122,7 @@ module V301V350
         .order(rating: :desc, price: :desc)
         .first!
       
+      # Use existing passenger from demo_user
       HotelBooking.create!(
         hotel_room_id: hotel.hotel_rooms.first!.id,
         user_id: user.id,
@@ -116,8 +132,8 @@ module V301V350
         hotel_id: hotel.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name || '周女士',
-        guest_phone: user.phone || '13800138000',
+        guest_name: @liuqiang.name,
+        guest_phone: @liuqiang.phone,
         payment_method: '花呗',
         total_price: hotel.price * (@check_out_date - @check_in_date).to_i,
         status: 'pending',
@@ -132,22 +148,13 @@ module V301V350
           .first
         
         if activity
-          passenger = Passenger.find_or_create_by!(
-            user_id: user.id,
-            id_number: '440300199001011234',
-            data_version: @data_version
-          ) do |p|
-            p.name = '周女士'
-            p.id_type = 'id_card'
-            p.phone = '13800138000'
-          end
-          
+          # Use existing passengers for couple
           ActivityOrder.create!(
             user_id: user.id,
             attraction_activity_id: activity.id,
             visit_date: @visit_date,
             quantity: 2,  # 双人SPA
-            passenger_ids: [passenger.id],
+            passenger_ids: [@liuqiang.id, @chenjing.id],
             total_price: activity.current_price * 2,
             status: 'pending',
             insurance_type: 'none',
@@ -164,7 +171,9 @@ module V301V350
         city: @city,
         check_in_date: @check_in_date&.to_s,
         check_out_date: @check_out_date&.to_s,
-        visit_date: @visit_date&.to_s
+        visit_date: @visit_date&.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -173,6 +182,8 @@ module V301V350
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
       @visit_date = Date.parse(data['visit_date']) if data['visit_date']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_guest_phone = data['expected_guest_phone']
     end
   end
 end

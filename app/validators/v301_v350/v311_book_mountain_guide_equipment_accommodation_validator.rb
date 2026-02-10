@@ -16,11 +16,22 @@ module V301V350
   class V311BookMountainGuideEquipmentAccommodationValidator < BaseValidator
     self.validator_id = 'v311_book_mountain_guide_equipment_accommodation_validator'
     self.task_id = 'd31ed871-6c15-42f0-8fd0-3dfbeddca35e'
-    self.title = '预订6天后2人华山登山套餐（门票+向导装备活动+山顶住宿1晚）'
-    self.description = '用户需要6天后去华山，2人参与，预订登山服务套餐，包含景点门票、登山向导+装备租赁活动、山顶住宿1晚，需创建景点门票订单、景点活动订单、酒店订单，订单状态和价格有效'
+    self.title = '给刘强和陈静预订华山登山套餐（6天后，2人，含门票+向导+住宿）'
+    self.description = '刘强和陈静想6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for mountain climbing)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
+      # Expected contact info (use one of the couple as contact)
+      @expected_contact_phone = @liuqiang.phone
+      @expected_guest_name = @liuqiang.name
+      @expected_guest_phone = @liuqiang.phone
+      
       @travel_date = Date.current + 6.days
       @participant_count = 2
       @nights = 1
@@ -83,6 +94,11 @@ module V301V350
       
       return if @ticket_order.nil?
       
+      add_assertion "联系电话正确（刘强）", weight: 10 do
+        expect(@ticket_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@ticket_order.contact_phone}"
+      end
+      
       add_assertion "创建了景点活动订单（登山向导+装备租赁）", weight: 20 do
         @activity_order = ActivityOrder
           .joins(attraction_activity: :attraction)
@@ -94,13 +110,22 @@ module V301V350
         expect(@activity_order).not_to be_nil, "未找到景点活动订单（登山向导+装备）"
       end
       
-      add_assertion "创建了酒店订单（山顶住宿）", weight: 20 do
+      add_assertion "创建了酒店订单（山顶住宿）", weight: 15 do
         @hotel_booking = HotelBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
         
         expect(@hotel_booking).not_to be_nil, "未找到酒店订单（山顶住宿）"
+      end
+      
+      add_assertion "住客信息正确（刘强）", weight: 10 do
+        if @hotel_booking
+          expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+            "住客姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+          expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
+            "联系电话错误。期望: #{@expected_guest_phone}, 实际: #{@hotel_booking.guest_phone}"
+        end
       end
       
       add_assertion "门票和活动订单时间正确（#{@travel_date}）", weight: 15 do
@@ -158,13 +183,13 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建景点门票订单（登山门票）
+      # 1. 创建景点门票订单（登山门票） - Use existing passenger phone
       TicketOrder.create!(
         user: user,
         ticket: @ticket,
         visit_date: @travel_date,
         quantity: @participant_count,
-        contact_phone: '13800138000',
+        contact_phone: @liuqiang.phone,
         total_price: @ticket.current_price * @participant_count,
         insurance_price: 0,
         status: 'paid',
@@ -183,7 +208,7 @@ module V301V350
         data_version: @data_version
       )
       
-      # 3. 创建酒店订单（山顶住宿）
+      # 3. 创建酒店订单（山顶住宿） - Use existing passenger info
       check_in_date = @travel_date
       check_out_date = check_in_date + @nights
       
@@ -196,8 +221,8 @@ module V301V350
         rooms_count: 1,
         adults_count: @participant_count,
         children_count: 0,
-        guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_name: @liuqiang.name,
+        guest_phone: @liuqiang.phone,
         total_price: @hotel_room.price * @nights,
         payment_method: '花呗',
         status: 'paid',
@@ -216,7 +241,10 @@ module V301V350
         ticket_id: @ticket&.id,
         climbing_activity_id: @climbing_activity&.id,
         hotel_id: @hotel&.id,
-        hotel_room_id: @hotel_room&.id
+        hotel_room_id: @hotel_room&.id,
+        expected_contact_phone: @expected_contact_phone,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -224,6 +252,9 @@ module V301V350
       @travel_date = Date.parse(data['travel_date'])
       @participant_count = data['participant_count']
       @nights = data['nights']
+      @expected_contact_phone = data['expected_contact_phone']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_guest_phone = data['expected_guest_phone']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @ticket = Ticket.find(data['ticket_id']) if data['ticket_id']

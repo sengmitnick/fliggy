@@ -16,8 +16,8 @@ module V201V250
   class V235BookSpecificRoomTypeValidator < BaseValidator
     self.validator_id = 'v235_book_specific_room_type_validator'
     self.task_id = '1ff1d2ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '预订特定房型（后天入住，如大床房）'
-    self.description = '用户需要预订特定房型的酒店（如大床房、双床房、套房）'
+    self.title = '给张三预订大床房（后天入住成都）'
+    self.description = '张三后天要去成都出差，需要预订大床房住2晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +25,14 @@ module V201V250
       @room_type = '大床房'
       @check_in_date = Date.current + 2.days
       @check_out_date = @check_in_date + 2.days
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找有指定房型的酒店
       @available_rooms = HotelRoom.joins(:hotel)
@@ -98,7 +106,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: room.price * 2,
         status: 'paid',

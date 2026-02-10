@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V315: 预订5天后4人长江索道漂流体验活动（含安全保障和装备）
+# V315: 给张三、李四、刘强、王芳预订长江索道漂流（5天后，4人，含安全保障+装备）
 #
 # 任务描述:
-#   用户需要5天后去长江索道，4人参加漂流体验活动，包含安全保障和装备提供
+#   张三、李四、刘强、王芳想5天后去长江索道漂流，需4人，要安全保障和装备提供
 #
 # 评分标准:
 #   - 创建了漂流活动订单 (40%)
@@ -16,11 +16,19 @@ module V301V350
   class V315BookRaftingAdventureSafetyEquipmentValidator < BaseValidator
     self.validator_id = 'v315_book_rafting_adventure_safety_equipment_validator'
     self.task_id = 'aa4e64f9-e897-40dd-9c3e-c0c7fbcf8a58'
-    self.title = '预订5天后4人长江索道漂流体验活动（含安全保障和装备）'
-    self.description = '用户需要5天后去长江索道，4人参加漂流体验活动，需创建漂流活动订单（包含安全保障和装备），订单必须购买保险，活动日期正确，订单状态和价格有效'
+    self.title = '给张三、李四、刘强、王芳预订长江索道漂流（5天后，4人，含安全保障+装备）'
+    self.description = '张三、李四、刘强、王芳想5天后去长江索道漂流，需4人，要安全保障和装备提供'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (4 adults for rafting)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      
       @activity_date = Date.current + 5.days
       @participant_count = 4
       

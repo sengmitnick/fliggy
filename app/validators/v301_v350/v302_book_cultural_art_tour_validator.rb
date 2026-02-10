@@ -2,22 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例302: 预订文化艺术游
+# 验证用例302: 给王芳预订西安文化艺术游
 #
 # 任务描述:
-#   用户预订文化艺术游(博物馆+演出+艺术体验)
+#   王芳对历史文化感兴趣，想预订西安的文化艺术游，参观博物馆和文化遗产
 #
 # 评分标准:
-#   - 创建了西安跟团游预订 (50%)
+#   - 创建了西安跟团游预订 (40%)
 #   - 目的地为西安 (25%)
 #   - 出行日期正确 (15%)
+#   - 联系人信息正确 (10%)
 #   - 行程时长≥3天 (10%)
 module V301V350
   class V302BookCulturalArtTourValidator < BaseValidator
     self.validator_id = 'v302_book_cultural_art_tour_validator'
     self.task_id = 'f24660cb-1708-4a34-a89f-6108f9775035'
-    self.title = '预订西安跟团游（9天后出发，3天以上行程）'
-    self.description = '预订西安的跟团游产品，9天后出发，行程至少3天'
+    self.title = '给王芳预订西安文化艺术游（9天后，3天以上）'
+    self.description = '王芳对历史文化感兴趣，想订西安的文化艺术游，要博物馆和文化遗产'
     self.timeout_seconds = 300
     
     def prepare
@@ -30,6 +31,11 @@ module V301V350
         user.update!(balance: 6000)
       end
       
+      # Pre-query passenger info
+      @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_contact_name = @wangfang.name
+      @expected_contact_phone = @wangfang.phone
+      
       {
         task: "请预订#{@destination}的文化艺术游，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，需要参观博物馆、文化遗产和艺术展览，行程至少3天",
         destination: @destination,
@@ -39,7 +45,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了西安跟团游预订", weight: 50 do
+      add_assertion "创建了西安跟团游预订", weight: 40 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -61,6 +67,13 @@ module V301V350
           "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
       end
       
+      add_assertion "联系人信息正确（王芳）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
+      end
+      
       add_assertion "行程时长≥3天", weight: 10 do
         tour = @tour_booking.tour_group_product
         expect(tour.duration).to be >= 3,
@@ -80,16 +93,7 @@ module V301V350
       
       tour_package = tour_product.tour_packages.first!
       
-      passenger = Passenger.find_or_create_by!(
-        user_id: user.id,
-        id_number: '440300199001011234',
-        data_version: @data_version
-      ) do |p|
-        p.name = '王先生'
-        p.id_type = 'id_card'
-        p.phone = '13800138000'
-      end
-      
+      # Use existing passenger from demo_user
       TourGroupBooking.create!(
         user_id: user.id,
         tour_group_product_id: tour_product.id,
@@ -97,8 +101,8 @@ module V301V350
         travel_date: @travel_date,
         adult_count: 1,
         child_count: 0,
-        contact_name: passenger.name,
-        contact_phone: passenger.phone,
+        contact_name: @wangfang.name,
+        contact_phone: @wangfang.phone,
         total_price: tour_package.price,
         status: 'pending',
         insurance_type: 'standard',
@@ -114,7 +118,9 @@ module V301V350
       {
         destination: @destination,
         travel_date: @travel_date&.to_s,
-        visit_date: @visit_date&.to_s
+        visit_date: @visit_date&.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -122,6 +128,8 @@ module V301V350
       @destination = data['destination']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @visit_date = Date.parse(data['visit_date']) if data['visit_date']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
   end
 end

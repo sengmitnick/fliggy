@@ -17,14 +17,19 @@ module V151V200
   class V198BookHotelNearAttractionAndTicketsValidator < BaseValidator
     self.validator_id = 'v198_book_hotel_near_attraction_and_tickets_validator'
     self.task_id = 'f5b7ea8b-d7b9-4ea6-9563-805862ebaa67'
-    self.title = '预订3天后景区附近酒店+景区门票'
-    self.description = '预订景区附近酒店+景区门票'
+    self.title = '给张三预订明天北京欢乐谷附近的酒店+景区门票'
+    self.description = '帮张三订明天北京欢乐谷附近的酒店+景区门票'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @attraction_name = '北京欢乐谷'
       @city = '北京'
-      @visit_date = Date.tomorrow + 2.days
+      @visit_date = Date.current + 1.day  # 明天
       
       # 查找景点
       @attraction = Attraction.find_by(name: @attraction_name, data_version: 0)
@@ -43,7 +48,7 @@ module V151V200
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@city}的酒店"
       
       {
-        task: "请预订#{@visit_date.strftime('%m月%d日')}#{@attraction_name}的门票，并预订#{@city}的酒店",
+        task: "请为#{@passenger.name}预订#{@visit_date.strftime('%m月%d日')}#{@attraction_name}的门票，并预订#{@city}的酒店",
         attraction: @attraction_name,
         city: @city,
         visit_date: @visit_date.strftime('%Y-%m-%d'),
@@ -107,13 +112,14 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 创建门票订单
       ticket = @available_tickets.first
       TicketOrder.create!(
         user: user,
         ticket: ticket,
-        contact_phone: '13800138000',
+        contact_phone: passenger.phone,
         visit_date: @visit_date,
         quantity: 1,
         total_price: ticket.current_price,
@@ -133,7 +139,7 @@ module V151V200
         check_in_date: @visit_date - 1.day,
         check_out_date: @visit_date + 1.day,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price * 2,
         data_version: @data_version
@@ -151,6 +157,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @attraction_name = data['attraction_name']
       @city = data['city']
       @visit_date = Date.parse(data['visit_date']) if data['visit_date']

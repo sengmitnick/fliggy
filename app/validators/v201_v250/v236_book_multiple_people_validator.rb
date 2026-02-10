@@ -17,8 +17,8 @@ module V201V250
   class V236BookMultiplePeopleValidator < BaseValidator
     self.validator_id = 'v236_book_multiple_people_validator'
     self.task_id = '2ff2e3ff-3f3f-3f5f-5f6f-4f7a8b9c0d1f'
-    self.title = '预订多人出行（多张票+多个房间）'
-    self.description = '用户需要为多人预订（如家庭出行，订2张机票+2个房间）'
+    self.title = '给张三家庭预订4人出行（5天后航班+酒店）'
+    self.description = '张三家庭4口5天后要从北京去三亚度假，需要预认4张航班机票和2个房间，住3晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -29,6 +29,14 @@ module V201V250
       @check_out_date = @check_in_date + 3.days
       @passenger_count = 4  # 4人家庭
       @room_count = 2  # 2个房间
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,
@@ -126,7 +134,7 @@ module V201V250
           flight: flight,
           passenger_name: "乘客#{i + 1}",
           passenger_id_number: "11010119900101#{1234 + i}",
-          contact_phone: '13800138000',
+          contact_phone: @passenger.phone,
           total_price: flight.price,
           accept_terms: true,
           status: 'paid',
@@ -145,7 +153,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: @room_count,
         total_price: room.price * @room_count * 3,
         status: 'paid',

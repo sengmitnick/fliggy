@@ -15,13 +15,21 @@ module V201V250
   class V245BookWidebodyAircraftValidator < BaseValidator
     self.validator_id = 'v245_book_widebody_aircraft_validator'
     self.task_id = '0ff06bff-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '预订宽体机航班（长途舒适）'
-    self.description = '用户需要预订宽体机航班（长途飞行更舒适）'
+    self.title = '给张三预订宽体机航班（去洛杉矶，长途舒适）'
+    self.description = '张三要从北京飞洛杉矶长途飞行，需要预订宽体机航班（如波音777、787）保证舒适度'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '北京'
       @destination_city = '洛杉矶'
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找宽体机航班（aircraft_type包含"宽体"或常见宽体机型）
       widebody_types = ['波音777', '波音787', '空客A330', '空客A350', '空客A380', '宽体']
@@ -88,9 +96,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',

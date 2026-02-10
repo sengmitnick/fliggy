@@ -37,8 +37,8 @@ module V151V200
   class V174BookInternationalFlightAndPickupValidator < BaseValidator
     self.validator_id = 'v174_book_international_flight_and_pickup_validator'
     self.task_id = '6c54e97f-e56a-441b-adcb-a0be3cb045e2'
-    self.title = '国际航班3天后到达后预订接机服务'
-    self.description = '订购国际航班到达上海浦东T2（深夜），预订接机到陆家嘴金融区'
+    self.title = '给刘强预订3天后到达上海浦东T2的国际航班，并预订深夜接机到陆家嘴金融区'
+    self.description = '帮刘强订3天后到达上海浦东机场T2的国际航班（深夜22点左右到达），然后接机到陆家嘴金融区'
     self.timeout_seconds = 300
   
     def prepare
@@ -50,6 +50,12 @@ module V151V200
       @vehicle_category = 'economy_5'
       @transfer_type = 'airport_pickup'
       @service_type = 'from_airport'
+    
+      # 预查询乘客信息（刘强）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_flights = Flight.where(
         destination_city: @arrival_city,
@@ -88,9 +94,10 @@ module V151V200
       @best_package = @available_packages.first
     
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}到达#{@arrival_city}浦东国际机场T2航站楼的国际航班（深夜22:00左右到达），" \
+        task: "请为刘强预订#{@flight_date.strftime('%Y年%m月%d日')}到达#{@arrival_city}浦东国际机场T2航站楼的国际航班（深夜22:00左右到达），" \
               "并预订接机服务到#{@destination_location}（经济5座）",
         requirements: {
+          passenger: @expected_passenger_name,
           arrival_city: @arrival_city,
           arrival_airport: @arrival_airport,
           flight_date: @flight_date.to_s,
@@ -174,6 +181,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
     
       target_flight = @available_flights.sort_by(&:arrival_time).last
       raise "未找到可用航班" unless target_flight
@@ -185,9 +193,9 @@ module V151V200
         user_id: user.id,
         flight_id: target_flight.id,
         flight_offer_id: flight_offer.id,
-        passenger_name: '赵六',
-        passenger_id_number: '310101199201011234',
-        contact_phone: '13600136000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight_offer.price,
         accept_terms: true,
         status: 'paid',
@@ -204,8 +212,8 @@ module V151V200
         location_from: @airport_location.name,
         location_to: @destination.name,
         pickup_datetime: pickup_datetime,
-        passenger_name: '赵六',
-        passenger_phone: '13600136000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         luggage_count: 2,
         total_price: @best_package.price,
@@ -242,6 +250,12 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+    
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_flights = Flight.where(
         destination_city: @arrival_city,

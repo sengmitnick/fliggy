@@ -16,8 +16,8 @@ module V201V250
   class V241BookSpecificAirlineValidator < BaseValidator
     self.validator_id = 'v241_book_specific_airline_validator'
     self.task_id = '7ff738ff-8f8f-8f0f-0f1f-9f2a3b4c5d6f'
-    self.title = '预订后天特定航空公司航班'
-    self.description = '用户需要预订特定航空公司的航班（如国航、东航）'
+    self.title = '给张三预订东方航空航班（后天去上海）'
+    self.description = '张三后天要从北京去上海出差，公司有协议价，需要预订东方航空的航班'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +25,14 @@ module V201V250
       @destination_city = '上海'
       @flight_date = Date.current + 2.days
       @airline = '东方航空'  # 指定航空公司
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找指定航空公司的航班（airline包含关键词）
       @available_flights = Flight.where(
@@ -92,9 +100,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',

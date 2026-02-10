@@ -9,7 +9,7 @@ module V151V200
   class V170BookMultiSegmentTrainValidator < BaseValidator
     self.validator_id = 'v170_book_multi_segment_train_validator'
     self.task_id = 'b0c1d2e3-4f5a-6b7c-8d9e-0f1a2b3c4d5e'
-    self.title = '预订明天多段联程火车（北京→天津→上海，1人）'
+    self.title = '给张三预订明天多段联程火车（北京→天津→上海）'
     self.description = '预订明天北京到天津的火车，以及后天天津到上海的火车，完成多城市联程'
     self.timeout_seconds = 300
 
@@ -17,8 +17,15 @@ module V151V200
       @city1 = '北京'
       @city2 = '天津'
       @city3 = '上海'
-      @train1_date = Date.tomorrow
+      @train1_date = Date.current + 1.day  # 明天
       @train2_date = @train1_date + 1.day
+      
+      # 预查询demo_user的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_name = @passenger.name
+      @expected_phone = @passenger.phone
+      @expected_id_number = @passenger.id_number
       
       # 查找第一段火车
       @available_train1 = Train
@@ -41,16 +48,16 @@ module V151V200
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      passenger = Passenger.find_by!(phone: @passenger.phone, data_version: 0)
       
       # 创建第一段火车订单
       train1 = @available_train1.first
       TrainBooking.create!(
         user_id: user.id,
         train_id: train1.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         total_price: train1.price_second_class,
         accept_terms: true,
@@ -63,9 +70,9 @@ module V151V200
       TrainBooking.create!(
         user_id: user.id,
         train_id: train2.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         total_price: train2.price_second_class,
         accept_terms: true,
@@ -140,7 +147,7 @@ module V151V200
       end
       
       # 断言5: 形成联程路线（北京→天津→上海）
-      add_assertion "形成联程路线（#{@city1}→#{@city2}→#{@city3}）", weight: 20 do
+      add_assertion "形成联程路线（#{@city1}→#{@city2}→#{@city3}）", weight: 15 do
         # 第一段终点是第二段起点
         expect(@ticket1.train.arrival_city).to eq(@ticket2.train.departure_city),
           "联程路线错误。第一段终点: #{@ticket1.train.arrival_city}, 第二段起点: #{@ticket2.train.departure_city}"
@@ -150,6 +157,14 @@ module V151V200
         train2_date = @ticket2.train.departure_time.to_date
         expect(train2_date).to be > train1_date,
           "第二段火车应该在第一段火车之后"
+      end
+      
+      # 断言6: 乘客信息正确（张三）
+      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+        expect(@ticket1.passenger_name).to eq(@expected_name),
+          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@ticket1.passenger_name}"
+        expect(@ticket1.passenger_id_number).to eq(@expected_id_number),
+          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@ticket1.passenger_id_number}"
       end
     end
   end

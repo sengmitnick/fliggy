@@ -9,16 +9,23 @@ module V151V200
   class V165BookRoundTripFlightAndTransferValidator < BaseValidator
     self.validator_id = 'v165_book_round_trip_flight_and_transfer_validator'
     self.task_id = 'c5d6e7f8-9a0b-1c2d-3e4f-5a6b7c8d9e1f'
-    self.title = '预订往返航班并预订往返机场接送（北京⇄上海）'
+    self.title = '给张三预订明天北京⇄上海往返航班 + 往返机场接送服务'
     self.description = '预订明天北京到上海的往返航班，并预订两次机场接送服务（去程接机+返程送机）'
     self.timeout_seconds = 300
 
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @outbound_date = Date.tomorrow
+      @outbound_date = Date.current + 1.day  # 明天
       @return_date = @outbound_date + 3.days
       @airport_location = '上海浦东国际机场'
+      
+      # 预查询demo_user的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_name = @passenger.name
+      @expected_phone = @passenger.phone
+      @expected_id_number = @passenger.id_number
       
       # 查找去程航班
       @available_outbound_flights = Flight
@@ -45,9 +52,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: outbound_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: outbound_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -59,9 +66,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: return_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: return_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -80,8 +87,8 @@ module V151V200
         location_to: "#{@arrival_city}市区",
         pickup_datetime: pickup_datetime,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_phone: @passenger.phone,
         total_price: 150.0,
         status: 'pending',
         data_version: @data_version
@@ -99,8 +106,8 @@ module V151V200
         location_to: @airport_location,
         pickup_datetime: dropoff_datetime,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_phone: @passenger.phone,
         total_price: 150.0,
         status: 'pending',
         data_version: @data_version
@@ -175,12 +182,20 @@ module V151V200
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
       # 断言4: 接送地点都在上海
-      add_assertion "接送地点都在上海", weight: 20 do
+      add_assertion "接送地点都在上海", weight: 15 do
         pickup_in_city = @pickup_transfer.location_from.include?(@arrival_city) || @pickup_transfer.location_to.include?(@arrival_city)
         dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
         
         expect(pickup_in_city).to be(true), "接机地点错误，期望包含: #{@arrival_city}"
         expect(dropoff_in_city).to be(true), "送机地点错误，期望包含: #{@arrival_city}"
+      end
+      
+      # 断言5: 乘客信息正确（张三）
+      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+        expect(@outbound_booking.passenger_name).to eq(@expected_name),
+          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_booking.passenger_name}"
+        expect(@outbound_booking.passenger_id_number).to eq(@expected_id_number),
+          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_booking.passenger_id_number}"
       end
     end
   end

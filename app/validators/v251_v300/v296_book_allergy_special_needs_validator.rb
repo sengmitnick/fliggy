@@ -2,22 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例296: 预订过敏体质特殊需求
+# 验证用例296: 给张三预订深圳酒店（含过敏防护）
 #
 # 任务描述:
-#   用户预订过敏体质特殊需求服务
+#   张三对花粉过敏，需要预订深圳的酒店，要求有空气净化器，并购买医疗保险
 #
 # 评分标准:
-#   - 创建酒店预订 (40%)
-#   - 创建医疗保险 (35%)
+#   - 创建酒店预订 (35%)
+#   - 创建医疗保险 (30%)
 #   - 入住日期正确 (15%)
+#   - 被保险人信息正确 (10%)
 #   - 订单状态正确 (10%)
 module V251V300
   class V296BookAllergySpecialNeedsValidator < BaseValidator
     self.validator_id = 'v296_book_allergy_special_needs_validator'
     self.task_id = 'af3f1d29-bc35-4308-9368-1d4c82e27868'
-    self.title = '预订过敏体质特殊需求（4天后入住）'
-    self.description = '用户预订过敏体质特殊需求服务'
+    self.title = '给张三预订深圳酒店（4天后，含空气净化器和医疗保险）'
+    self.description = '张三对花粉过敏，需要订深圳的酒店，要有空气净化器，再买个医疗保险'
     self.timeout_seconds = 300
     
     def prepare
@@ -30,6 +31,13 @@ module V251V300
         user.update!(balance: 3000)
       end
       
+      # Pre-query passenger info
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = @zhangsan.name
+      @expected_guest_phone = @zhangsan.phone
+      @expected_insured_name = @zhangsan.name
+      @expected_insured_id_number = @zhangsan.id_number
+      
       {
         task: "请预订#{@city}的酒店，我对花粉过敏，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚，需要空气净化器和医疗保险",
         city: @city,
@@ -40,7 +48,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了酒店预订", weight: 40 do
+      add_assertion "创建了酒店预订", weight: 35 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @city })
@@ -50,7 +58,7 @@ module V251V300
         expect(@hotel_booking).not_to be_nil, "未找到#{@city}的酒店预订"
       end
       
-      add_assertion "创建了医疗保险", weight: 35 do
+      add_assertion "创建了医疗保险", weight: 30 do
         @insurance = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -65,6 +73,15 @@ module V251V300
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
         expect(@hotel_booking.check_out_date).to eq(@check_out_date),
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "被保险人信息正确（张三）", weight: 10 do
+        return unless @insurance
+        insured = @insurance.insured_persons.first
+        expect(insured['name']).to eq(@expected_insured_name),
+          "被保险人姓名错误。期望: #{@expected_insured_name}, 实际: #{insured['name']}"
+        expect(insured['id_number']).to eq(@expected_insured_id_number),
+          "被保险人身份证错误。期望: #{@expected_insured_id_number}, 实际: #{insured['id_number']}"
       end
       
       add_assertion "订单状态正确", weight: 10 do
@@ -91,8 +108,8 @@ module V251V300
         hotel_id: hotel.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name || '张三',
-        guest_phone: user.phone || '13800138000',
+        guest_name: @zhangsan.name,
+        guest_phone: @zhangsan.phone,
         payment_method: '花呗',
         total_price: hotel.price * (@check_out_date - @check_in_date).to_i,
         status: 'pending',
@@ -107,7 +124,7 @@ module V251V300
         start_date: @check_in_date,
         end_date: @check_out_date,
         days: (@check_out_date - @check_in_date).to_i,
-        insured_persons: [{ name: user.name || '张三', id_number: '440300199001011234' }],
+        insured_persons: [{ name: @zhangsan.name, id_number: @zhangsan.id_number }],
         unit_price: insurance_product.price_per_day,
         quantity: 1,
         total_price: insurance_product.price_per_day * (@check_out_date - @check_in_date).to_i,
@@ -123,7 +140,11 @@ module V251V300
       {
         city: @city,
         check_in_date: @check_in_date&.to_s,
-        check_out_date: @check_out_date&.to_s
+        check_out_date: @check_out_date&.to_s,
+        expected_guest_name: @expected_guest_name,
+        expected_guest_phone: @expected_guest_phone,
+        expected_insured_name: @expected_insured_name,
+        expected_insured_id_number: @expected_insured_id_number
       }
     end
     
@@ -131,6 +152,10 @@ module V251V300
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
+      @expected_guest_name = data['expected_guest_name']
+      @expected_guest_phone = data['expected_guest_phone']
+      @expected_insured_name = data['expected_insured_name']
+      @expected_insured_id_number = data['expected_insured_id_number']
     end
   end
 end

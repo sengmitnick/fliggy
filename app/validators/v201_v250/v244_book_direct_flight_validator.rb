@@ -16,14 +16,22 @@ module V201V250
   class V244BookDirectFlightValidator < BaseValidator
     self.validator_id = 'v244_book_direct_flight_validator'
     self.task_id = '9ff95aff-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '预订后天直飞航班（不转机）'
-    self.description = '用户需要预订直飞航班（不转机）'
+    self.title = '给张三预订直飞航班（后天去北京，不转机）'
+    self.description = '张三后天要从深圳去北京参加重要会议，时间紧张，需要预订直飞航班避免转机延误'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '深圳'
       @destination_city = '北京'
       @flight_date = Date.current + 2.days
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找直飞航班（is_direct=true或stops=0）
       @available_flights = Flight.where(
@@ -91,9 +99,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',

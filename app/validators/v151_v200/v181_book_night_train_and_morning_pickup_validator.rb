@@ -22,14 +22,19 @@ module V151V200
   class V181BookNightTrainAndMorningPickupValidator < BaseValidator
     self.validator_id = 'v181_book_night_train_and_morning_pickup_validator'
     self.task_id = '20114593-e2f1-4fc7-9ded-aa5c49df72a3'
-    self.title = '预订明天夜间火车和清晨接站服务'
-    self.description = '用户需要预订夜间火车（晚上8点后出发），并预订清晨接站服务'
+    self.title = '给刘强预订明天北京到上海的夜间火车，并预订清晨接站服务'
+    self.description = '帮刘强订明天晚上从北京到上海的夜间火车（20:00后出发），并预订清晨接站服务'
     self.timeout_seconds = 300
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '上海'
-      @train_date = Date.tomorrow + 2.days
+      @train_date = Date.current + 1.day  # 明天
       
       # 查找夜间火车（20:00后出发）
       @available_trains = Train
@@ -52,7 +57,7 @@ module V151V200
       @arrival_datetime = @sample_train.arrival_time
       
       {
-        task: "请预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的夜间火车（20:00后出发），" \
+        task: "请为#{@passenger.name}预订#{@train_date.strftime('%Y年%m月%d日')}（#{(@train_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的夜间火车（20:00后出发），" \
               "并预订清晨接站服务",
         requirements: {
           departure_city: @departure_city,
@@ -72,15 +77,16 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
       
       # 创建火车订单
       train = @available_trains.first
       TrainBooking.create!(
         user: user,
         train: train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         seat_type: 'business_class',
         accept_terms: true,
         total_price: train.price_business_class,
@@ -97,8 +103,8 @@ module V151V200
         location_from: "#{@arrival_city}火车站",
         location_to: "#{@arrival_city}市区",
         pickup_datetime: train.arrival_time,
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: 1,
         total_price: transfer_package.price,
         status: 'paid',
@@ -180,6 +186,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @train_date = Date.parse(data['train_date']) if data['train_date']

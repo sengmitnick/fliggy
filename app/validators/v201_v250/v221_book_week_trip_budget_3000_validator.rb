@@ -17,8 +17,8 @@ module V201V250
   class V221BookWeekTripBudget3000Validator < BaseValidator
     self.validator_id = 'v221_book_week_trip_budget_3000_validator'
     self.task_id = '8fd809fc-9f9f-9f1f-1f2f-0f3a4b5c6d7f'
-    self.title = '预订7天自由行（≤3000元）'
-    self.description = '用户需要预订7天自由行（往返交通+酒店），总预算≤3000元'
+    self.title = '给张三预订7天自由行（往返交通+酒店，总预算≤3000元）'
+    self.description = '张三打算2天后从广州到成都玩7天，需要预订往返交通和酒店住宿，总预算控制在3000元以内'
     self.timeout_seconds = 300
     
     def prepare
@@ -30,6 +30,14 @@ module V201V250
       @check_out_date = @return_date
       @nights = 7
       @max_budget = 3000
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找往返交通（火车为主，价格便宜）
       @outbound_trains = Train.by_route(@origin_city, @destination_city)
@@ -149,9 +157,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: best_combo[:outbound],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: best_combo[:outbound].price_second_class,
@@ -164,9 +172,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: best_combo[:return],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: best_combo[:return].price_second_class,
@@ -183,7 +191,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: best_combo[:room].price * @nights,
         status: 'paid',

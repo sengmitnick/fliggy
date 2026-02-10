@@ -16,8 +16,8 @@ module V201V250
   class V223BookPremiumFlightBusinessClassValidator < BaseValidator
     self.validator_id = 'v223_book_premium_flight_business_class_validator'
     self.task_id = '0ff021fe-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '预订商务舱航班（≥2000元）'
-    self.description = '用户需要预订商务舱航班，价格≥2000元（高端出行）'
+    self.title = '给张三预订商务舱航班（价格≥2000元）'
+    self.description = '张三需要7天后从上海飞往纽约进行商务洽谈，希望预订商务舱航班，预算至少2000元起'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +25,14 @@ module V201V250
       @arrival_city = '纽约'
       @flight_date = Date.current + 7.days
       @min_price = 2000
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找商务舱/高价航班
       @available_flights = Flight.where(
@@ -87,9 +95,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',

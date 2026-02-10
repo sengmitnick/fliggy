@@ -2,23 +2,24 @@
 
 require_relative '../base_validator'
 
-# 验证用例297: 预订商务会议套餐
+# 验证用例297: 给李四预订北京商务会议套餐
 #
 # 任务描述:
-#   用户预订商务会议套餐(会议室+住宿+餐饮)
+#   李四需要在北京举办企业会议，预订商务酒店含会议室和商务设施，住3晚
 #
 # 评分标准:
-#   - 创建酒店预订 (40%)
+#   - 创建酒店预订 (35%)
 #   - 选择商务型酒店(含会议设施) (25%)
 #   - 入住日期与会议时间匹配 (15%)
-#   - 住宿天数≥2晚(多日会议) (10%)
+#   - 联系人信息正确 (10%)
+#   - 住宿天数≥2晚(多日会议) (5%)
 #   - 订单状态正确 (10%)
 module V251V300
   class V297BookBusinessConferencePackageValidator < BaseValidator
     self.validator_id = 'v297_book_business_conference_package_validator'
     self.task_id = 'e83b5fa7-c5d9-41e8-a0cd-f1435c06ce7b'
-    self.title = '预订5天后商务会议套餐（3晚）'
-    self.description = '用户预订商务会议套餐(会议室+住宿+餐饮)'
+    self.title = '给李四预订北京商务会议套餐（5天后，含会议室）'
+    self.description = '李四要在北京办企业会议，订个商务型酒店，要有会议室和商务设施，住3晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -32,6 +33,11 @@ module V251V300
         user.update!(balance: 8000)
       end
       
+      # Pre-query passenger info
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_contact_name = @lisi.name
+      @expected_contact_phone = @lisi.phone
+      
       {
         task: "请预订#{@city}的商务会议套餐，需要在#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{@nights}晚，需要配备会议室和商务设施的酒店，用于举办企业会议",
         city: @city,
@@ -42,7 +48,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了酒店预订", weight: 40 do
+      add_assertion "创建了酒店预订", weight: 35 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @city })
@@ -67,7 +73,14 @@ module V251V300
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      add_assertion "住宿天数≥2晚(多日会议)", weight: 10 do
+      add_assertion "联系人信息正确（李四）", weight: 10 do
+        expect(@hotel_booking.guest_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "住宿天数≥2晚(多日会议)", weight: 5 do
         actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
         expect(actual_nights).to be >= 2,
           "住宿天数不足。期望≥2晚，实际: #{actual_nights}晚"
@@ -99,8 +112,8 @@ module V251V300
         hotel_id: hotel.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name || '王经理',
-        guest_phone: user.phone || '13800138000',
+        guest_name: @lisi.name,
+        guest_phone: @lisi.phone,
         payment_method: '花呗',
         total_price: hotel.price * @nights * 2,
         status: 'pending',
@@ -115,7 +128,9 @@ module V251V300
         city: @city,
         check_in_date: @check_in_date&.to_s,
         check_out_date: @check_out_date&.to_s,
-        nights: @nights
+        nights: @nights,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -124,6 +139,8 @@ module V251V300
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
       @nights = data['nights']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
   end
 end

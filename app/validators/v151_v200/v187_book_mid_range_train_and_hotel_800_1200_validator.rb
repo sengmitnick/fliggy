@@ -45,7 +45,7 @@ module V151V200
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @travel_date = Date.tomorrow + 1.day
+      @travel_date = Date.current + 1.day  # 明天 + 1.day
       @min_budget = 800
       @max_budget = 1200
       
@@ -208,10 +208,10 @@ module V151V200
       TrainBooking.create!(
         user: user,
         train: train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
         seat_type: 'second_class',
-        contact_phone: '13800138000',
+        contact_phone: @passenger.phone,
         total_price: train.price_second_class,
         accept_terms: true,
         data_version: @data_version
@@ -228,7 +228,7 @@ module V151V200
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -256,6 +256,11 @@ module V151V200
     #
     # 从持久化数据恢复实例变量
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
