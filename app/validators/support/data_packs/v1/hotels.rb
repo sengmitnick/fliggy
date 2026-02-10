@@ -753,6 +753,8 @@ hotels.each_slice(100) do |batch|
     has_breakfast = hotel.rating.to_f >= 4.0
     # 成都的某些酒店支持宠物友好
     is_chengdu_pet_friendly = hotel.city == '成都' && ['华住', '万豪', '希尔顿'].include?(hotel.brand) && hotel.rating.to_f >= 4.0
+    # 杭州的酒店提供无烟客房
+    is_hangzhou_non_smoking = hotel.city == '杭州' && hotel.rating.to_f >= 4.0
     
     facilities_list = ['WiFi', '停车场']
     facilities_list << '游泳池' if has_pool
@@ -760,6 +762,7 @@ hotels.each_slice(100) do |batch|
     facilities_list << '早餐' if has_breakfast
     facilities_list << '餐厅' if is_premium
     facilities_list << '宠物友好' if is_chengdu_pet_friendly
+    facilities_list << '无烟客房' if is_hangzhou_non_smoking
     
     cancellation = if is_premium
       '任何时间免费取消'

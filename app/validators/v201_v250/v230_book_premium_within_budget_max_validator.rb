@@ -8,11 +8,15 @@ require_relative '../base_validator'
 #   用户有固定预算（如2000元），需要在预算内选择服务档次最高的组合（优先评分、设施）
 #
 # 评分标准:
-#   - 创建了航班/火车订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 总价格≤预算上限 (20%)
-#   - 在预算内选择了评分/档次最高的组合 (30%)
-#   - 订单状态有效 (10%)
+#   - 创建了交通订单（航班或火车） (15%)
+#   - 创建了酒店订单 (15%)
+#   - 出行日期正确 (10%)
+#   - 酒店入住日期正确 (10%)
+#   - 乘客信息正确 (5%)
+#   - 入住人信息正确 (5%)
+#   - 总价格≤预算上限 (15%)
+#   - 在预算内选择了评分/档次最高的组合 (20%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V230BookPremiumWithinBudgetMaxValidator < BaseValidator
     self.validator_id = 'v230_book_premium_within_budget_max_validator'
@@ -28,10 +32,11 @@ module V201V250
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       @available_flights = Flight.where(
@@ -92,7 +97,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了交通订单（航班或火车）", weight: 20 do
+      add_assertion "创建了交通订单（航班或火车）", weight: 15 do
         @flight_booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @destination_city })
@@ -106,12 +111,13 @@ module V201V250
           .first
         
         @transport_booking = @flight_booking || @train_booking
+        @transport_type = @flight_booking ? 'flight' : 'train'
         expect(@transport_booking).not_to be_nil, "未找到交通订单"
       end
       
       return if @transport_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
@@ -123,7 +129,42 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "总价格≤#{@max_budget}元", weight: 20 do
+      add_assertion "出行日期正确（#{@travel_date}）", weight: 10 do
+        if @transport_type == 'flight'
+          expect(@transport_booking.flight.flight_date).to eq(@travel_date),
+            "航班日期错误。期望: #{@travel_date}, 实际: #{@transport_booking.flight.flight_date}"
+        else
+          train_date = @transport_booking.train.departure_time.to_date
+          expect(train_date).to eq(@travel_date),
+            "火车日期错误。期望: #{@travel_date}, 实际: #{train_date}"
+        end
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 5 do
+        expect(@transport_booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@transport_booking.passenger_name}"
+        expect(@transport_booking.passenger_id_number).to eq(@passenger.id_number),
+          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@transport_booking.passenger_id_number}"
+        expect(@transport_booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@transport_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "总价格≤#{@max_budget}元", weight: 15 do
         transport_price = @transport_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = transport_price + hotel_price
@@ -132,7 +173,7 @@ module V201V250
           "总价格超出预算。交通: #{transport_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
-      add_assertion "在预算内选择了评分最高或接近最高的组合", weight: 30 do
+      add_assertion "在预算内选择了评分最高或接近最高的组合", weight: 20 do
         hotel = @hotel_booking.hotel
         actual_quality = hotel.rating
         
@@ -141,7 +182,7 @@ module V201V250
           "未选择预算内最高档次。预算内最高评分: #{@reference_quality}星, 实际选择: #{actual_quality}星"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@transport_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -246,7 +287,10 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         max_budget: @max_budget,
-        reference_quality: @reference_quality
+        reference_quality: @reference_quality,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -258,6 +302,12 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @max_budget = data['max_budget'].to_i
       @reference_quality = data['reference_quality'].to_f
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

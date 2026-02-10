@@ -8,11 +8,13 @@ require_relative '../base_validator'
 #   用户需要预订7天自由行（往返交通+酒店），总预算≤3000元
 #
 # 评分标准:
-#   - 创建了往返交通订单 (20%)
+#   - 创建了往返交通订单（火车票或机票） (20%)
 #   - 创建了酒店订单 (15%)
 #   - 酒店住7晚 (10%)
-#   - 总价格≤3000元 (35%)
-#   - 订单状态有效 (20%)
+#   - 总价格≤3000元 (30%)
+#   - 乘客信息正确（姓名、身份证、手机号） (10%)
+#   - 入住人信息正确（姓名、手机号） (5%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V221BookWeekTripBudget3000Validator < BaseValidator
     self.validator_id = 'v221_book_week_trip_budget_3000_validator'
@@ -31,12 +33,13 @@ module V201V250
       @nights = 7
       @max_budget = 3000
       
-      # 查询demo_user乘客信息
+      # 查询demo_user和乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       # 查找往返交通（火车为主，价格便宜）
@@ -72,21 +75,41 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了往返交通订单", weight: 20 do
-        @outbound_booking = TrainBooking
+      add_assertion "创建了往返交通订单（火车票或机票）", weight: 20 do
+        # 查找去程交通订单（火车票或机票）
+        outbound_train = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @origin_city, arrival_city: @destination_city })
           .where(data_version: @data_version)
           .first
         
-        @return_booking = TrainBooking
+        outbound_flight = Booking
+          .joins(:flight)
+          .where(flights: { departure_city: @origin_city, destination_city: @destination_city })
+          .where(data_version: @data_version)
+          .first
+        
+        @outbound_booking = outbound_train || outbound_flight
+        @outbound_type = outbound_train ? 'train' : 'flight'
+        
+        # 查找返程交通订单（火车票或机票）
+        return_train = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @destination_city, arrival_city: @origin_city })
           .where(data_version: @data_version)
           .first
         
-        expect(@outbound_booking).not_to be_nil, "未找到去程交通订单"
-        expect(@return_booking).not_to be_nil, "未找到返程交通订单"
+        return_flight = Booking
+          .joins(:flight)
+          .where(flights: { departure_city: @destination_city, destination_city: @origin_city })
+          .where(data_version: @data_version)
+          .first
+        
+        @return_booking = return_train || return_flight
+        @return_type = return_train ? 'train' : 'flight'
+        
+        expect(@outbound_booking).not_to be_nil, "未找到去程交通订单（火车票或机票）"
+        expect(@return_booking).not_to be_nil, "未找到返程交通订单（火车票或机票）"
       end
       
       return if @outbound_booking.nil? || @return_booking.nil?
@@ -109,7 +132,7 @@ module V201V250
           "住宿天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
       end
       
-      add_assertion "总价格≤#{@max_budget}元", weight: 35 do
+      add_assertion "总价格≤#{@max_budget}元", weight: 30 do
         outbound_price = @outbound_booking.total_price
         return_price = @return_booking.total_price
         hotel_price = @hotel_booking.total_price
@@ -119,7 +142,52 @@ module V201V250
           "总价格超出预算。去程: #{outbound_price}元, 返程: #{return_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 10 do
+        # 验证去程乘客信息
+        if @outbound_type == 'train'
+          expect(@outbound_booking.passenger_name).to eq(@passenger.name),
+            "去程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@outbound_booking.passenger_name}"
+          expect(@outbound_booking.passenger_id_number).to eq(@passenger.id_number),
+            "去程乘客身份证错误。期望: #{@passenger.id_number}, 实际: #{@outbound_booking.passenger_id_number}"
+          expect(@outbound_booking.contact_phone).to eq(@passenger.phone),
+            "去程联系电话错误。期望: #{@passenger.phone}, 实际: #{@outbound_booking.contact_phone}"
+        else
+          # Booking 使用 passenger_name, passenger_id_number, contact_phone
+          expect(@outbound_booking.passenger_name).to eq(@passenger.name),
+            "去程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@outbound_booking.passenger_name}"
+          expect(@outbound_booking.passenger_id_number).to eq(@passenger.id_number),
+            "去程乘客身份证错误。期望: #{@passenger.id_number}, 实际: #{@outbound_booking.passenger_id_number}"
+          expect(@outbound_booking.contact_phone).to eq(@passenger.phone),
+            "去程联系电话错误。期望: #{@passenger.phone}, 实际: #{@outbound_booking.contact_phone}"
+        end
+        
+        # 验证返程乘客信息
+        if @return_type == 'train'
+          expect(@return_booking.passenger_name).to eq(@passenger.name),
+            "返程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@return_booking.passenger_name}"
+          expect(@return_booking.passenger_id_number).to eq(@passenger.id_number),
+            "返程乘客身份证错误。期望: #{@passenger.id_number}, 实际: #{@return_booking.passenger_id_number}"
+          expect(@return_booking.contact_phone).to eq(@passenger.phone),
+            "返程联系电话错误。期望: #{@passenger.phone}, 实际: #{@return_booking.contact_phone}"
+        else
+          expect(@return_booking.passenger_name).to eq(@passenger.name),
+            "返程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@return_booking.passenger_name}"
+          expect(@return_booking.passenger_id_number).to eq(@passenger.id_number),
+            "返程乘客身份证错误。期望: #{@passenger.id_number}, 实际: #{@return_booking.passenger_id_number}"
+          expect(@return_booking.contact_phone).to eq(@passenger.phone),
+            "返程联系电话错误。期望: #{@passenger.phone}, 实际: #{@return_booking.contact_phone}"
+        end
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@outbound_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@return_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
@@ -211,7 +279,10 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         nights: @nights,
-        max_budget: @max_budget
+        max_budget: @max_budget,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -224,6 +295,13 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @nights = data['nights']
       @max_budget = data['max_budget']
+      
+      # Restore passenger data from flattened fields
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @outbound_trains = Train.by_route(@origin_city, @destination_city)
         .by_date(@outbound_date)

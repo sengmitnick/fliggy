@@ -8,9 +8,11 @@ require_relative '../base_validator'
 #   用户需要预订商务舱航班，价格≥2000元（高端出行）
 #
 # 评分标准:
-#   - 创建了航班订单 (25%)
-#   - 航班价格≥2000元 (55%)
+#   - 创建了航班订单 (20%)
+#   - 航班价格≥2000元 (30%)
 #   - 航班路线正确 (15%)
+#   - 航班日期正确 (15%)
+#   - 乘客信息正确（姓名、身份证、手机号） (15%)
 #   - 订单状态有效 (5%)
 module V201V250
   class V223BookPremiumFlightBusinessClassValidator < BaseValidator
@@ -23,21 +25,23 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @arrival_city = '纽约'
-      @flight_date = Date.current + 7.days
+      @flight_date = Date.today + 7.days  # 使用 Date.today 与数据包一致
       @min_price = 2000
       
-      # 查询demo_user乘客信息
+      # 查询demo_user和乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
-      # 查找商务舱/高价航班
+      # 查找商务舱/高价航班（按日期过滤）
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @arrival_city,
+        flight_date: @flight_date,
         data_version: 0
       ).to_a.select { |f| f.price >= @min_price }
       
@@ -57,7 +61,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 25 do
+      add_assertion "创建了航班订单", weight: 20 do
         @booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @arrival_city })
@@ -69,15 +73,31 @@ module V201V250
       
       return if @booking.nil?
       
-      add_assertion "航班价格≥#{@min_price}元", weight: 55 do
+      add_assertion "航班价格≥#{@min_price}元", weight: 30 do
         price = @booking.flight.price
         expect(price).to be >= @min_price,
           "航班价格过低。期望: ≥#{@min_price}元, 实际: #{price}元"
       end
       
       add_assertion "航班路线正确（#{@departure_city}→#{@arrival_city}）", weight: 15 do
-        expect(@booking.flight.departure_city).to eq(@departure_city)
-        expect(@booking.flight.destination_city).to eq(@arrival_city)
+        expect(@booking.flight.departure_city).to eq(@departure_city),
+          "出发城市错误。期望: #{@departure_city}, 实际: #{@booking.flight.departure_city}"
+        expect(@booking.flight.destination_city).to eq(@arrival_city),
+          "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.flight.destination_city}"
+      end
+      
+      add_assertion "航班日期正确（#{@flight_date}）", weight: 15 do
+        expect(@booking.flight.flight_date).to eq(@flight_date),
+          "航班日期错误。期望: #{@flight_date}, 实际: #{@booking.flight.flight_date}"
+      end
+      
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 15 do
+        expect(@booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@booking.passenger_name}"
+        expect(@booking.passenger_id_number).to eq(@passenger.id_number),
+          "乘客身份证错误。期望: #{@passenger.id_number}, 实际: #{@booking.passenger_id_number}"
+        expect(@booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@booking.contact_phone}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -112,7 +132,10 @@ module V201V250
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         flight_date: @flight_date.to_s,
-        min_price: @min_price
+        min_price: @min_price,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -121,6 +144,13 @@ module V201V250
       @arrival_city = data['arrival_city']
       @flight_date = Date.parse(data['flight_date'])
       @min_price = data['min_price']
+      
+      # Restore passenger data from flattened fields
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

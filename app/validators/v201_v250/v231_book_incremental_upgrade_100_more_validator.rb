@@ -8,11 +8,15 @@ require_relative '../base_validator'
 #   用户先查找基础方案，然后加100元升级到更好服务（如从经济舱升商务舱、经济型酒店升高星酒店）
 #
 # 评分标准:
-#   - 创建了交通订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 总价比基础方案多约100元（±50元） (30%)
+#   - 创建了火车订单 (15%)
+#   - 创建了酒店订单 (15%)
+#   - 出行日期正确 (5%)
+#   - 酒店入住日期正确 (5%)
+#   - 乘车人信息正确 (5%)
+#   - 入住人信息正确 (5%)
+#   - 总价比基础方案多约100元（±50元） (25%)
 #   - 服务档次有明显提升（评分提高或舱位升级） (20%)
-#   - 订单状态有效 (10%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V231BookIncrementalUpgrade100MoreValidator < BaseValidator
     self.validator_id = 'v231_book_incremental_upgrade_100_more_validator'
@@ -28,13 +32,21 @@ module V201V250
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
+      # 设置出行日期为后天
+      @travel_date = Date.current + 2.days
+      @check_in_date = @travel_date
+      @check_out_date = @check_in_date + 1.day
+      
+      # 筛选指定日期的火车
       @available_trains = Train.by_route(@departure_city, @destination_city)
+        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
         .to_a
@@ -44,10 +56,6 @@ module V201V250
         .to_a
       
       raise "未找到交通或酒店" if @available_trains.empty? || @available_hotels.empty?
-      
-      @travel_date = @available_trains.first.departure_time.to_date
-      @check_in_date = @travel_date
-      @check_out_date = @check_in_date + 1.day
       
       # 计算基础方案价格（最便宜的组合：火车+酒店）
       min_transport_price = @available_trains.first.price_second_class
@@ -74,7 +82,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了火车订单", weight: 20 do
+      add_assertion "创建了火车订单", weight: 15 do
         @train_booking = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @departure_city, arrival_city: @destination_city })
@@ -86,7 +94,7 @@ module V201V250
       
       return if @train_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
@@ -98,7 +106,37 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "总价比基础方案多约#{@upgrade_budget}元（允许±50元）", weight: 30 do
+      add_assertion "出行日期正确（#{@travel_date}）", weight: 5 do
+        train_date = @train_booking.train.departure_time.to_date
+        expect(train_date).to eq(@travel_date),
+          "出行日期错误。期望: #{@travel_date}, 实际: #{train_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 5 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘车人信息正确（姓名、身份证、手机号）", weight: 5 do
+        expect(@train_booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@passenger.id_number),
+          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@train_booking.passenger_id_number}"
+        expect(@train_booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@train_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "总价比基础方案多约#{@upgrade_budget}元（允许±50元）", weight: 25 do
         train_price = @train_booking.total_price
         hotel_price = @hotel_booking.total_price
         actual_total = train_price + hotel_price
@@ -121,7 +159,7 @@ module V201V250
           "酒店档次提升不明显。基础酒店: #{min_hotel.name}（#{min_hotel.rating}星）, 实际选择: #{hotel.name}（#{hotel.rating}星）, 提升: #{rating_upgrade}星"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@train_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -201,7 +239,10 @@ module V201V250
         check_out_date: @check_out_date.to_s,
         base_price: @base_price,
         target_price: @target_price,
-        upgrade_budget: @upgrade_budget
+        upgrade_budget: @upgrade_budget,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -215,7 +256,14 @@ module V201V250
       @target_price = data['target_price'].to_f
       @upgrade_budget = data['upgrade_budget'].to_i
       
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
+      
       @available_trains = Train.by_route(@departure_city, @destination_city)
+        .by_date(@travel_date)
         .where(data_version: 0)
         .order(price_second_class: :asc)
         .to_a

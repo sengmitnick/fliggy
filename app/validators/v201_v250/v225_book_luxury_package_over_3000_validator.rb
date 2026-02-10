@@ -8,10 +8,14 @@ require_relative '../base_validator'
 #   用户需要预订豪华套餐（高端航班+高星酒店），总价≥3000元
 #
 # 评分标准:
-#   - 创建了航班订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 总价格≥3000元 (40%)
-#   - 订单状态有效 (20%)
+#   - 创建了航班订单 (15%)
+#   - 创建了酒店订单 (15%)
+#   - 航班日期正确 (10%)
+#   - 酒店入住日期正确 (10%)
+#   - 乘客信息正确 (10%)
+#   - 入住人信息正确 (5%)
+#   - 总价格≥3000元 (30%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V225BookLuxuryPackageOver3000Validator < BaseValidator
     self.validator_id = 'v225_book_luxury_package_over_3000_validator'
@@ -23,17 +27,18 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @arrival_city = '三亚'
-      @flight_date = Date.current + 5.days
+      @flight_date = Date.today + 5.days
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 2.days
       @min_total_price = 3000
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       # 查找高端航班（价格较高的）
@@ -64,7 +69,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 20 do
+      add_assertion "创建了航班订单", weight: 15 do
         @flight_booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @arrival_city })
@@ -76,7 +81,7 @@ module V201V250
       
       return if @flight_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @arrival_city })
@@ -88,7 +93,36 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "总价格≥#{@min_total_price}元", weight: 40 do
+      add_assertion "航班日期正确（#{@flight_date}）", weight: 10 do
+        expect(@flight_booking.flight.flight_date).to eq(@flight_date),
+          "航班日期错误。期望: #{@flight_date}, 实际: #{@flight_booking.flight.flight_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 10 do
+        expect(@flight_booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.passenger_id_number).to eq(@passenger.id_number),
+          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@flight_booking.passenger_id_number}"
+        expect(@flight_booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "总价格≥#{@min_total_price}元", weight: 30 do
         flight_price = @flight_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = flight_price + hotel_price
@@ -97,7 +131,7 @@ module V201V250
           "总价格未达到豪华标准。航班: #{flight_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 要求: ≥#{@min_total_price}元"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -165,7 +199,10 @@ module V201V250
         flight_date: @flight_date.to_s,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        min_total_price: @min_total_price
+        min_total_price: @min_total_price,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -176,6 +213,12 @@ module V201V250
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
       @min_total_price = data['min_total_price']
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

@@ -16,8 +16,8 @@ module V201V250
   class V239BookPetFriendlyHotelValidator < BaseValidator
     self.validator_id = 'v239_book_pet_friendly_hotel_validator'
     self.task_id = '5ff516ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '预订宠物友好酒店（后天入住）'
-    self.description = '用户需要预订允许携带宠物的酒店'
+    self.title = '给张三预订后天成都宠物友好酒店（住2晚）'
+    self.description = '帮张三订后天在成都的酒店，要允许携带宠物的，住2晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,11 +27,8 @@ module V201V250
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
-      )
+      @zhangsan = demo_user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_phone = @zhangsan.phone
       
       # 查找宠物友好酒店（facilities包含"宠物"或"pet"）
       @available_hotels = Hotel.where(city: @city, data_version: 0)
@@ -92,6 +89,7 @@ module V201V250
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 选择第一家宠物友好酒店
       hotel = @available_hotels.first
@@ -103,8 +101,8 @@ module V201V250
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_name: zhangsan.name,
+        guest_phone: zhangsan.phone,
         room_count: 1,
         total_price: room.price * 2,
         status: 'paid',
@@ -119,7 +117,8 @@ module V201V250
       {
         city: @city,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -127,6 +126,7 @@ module V201V250
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_guest_phone = data['expected_guest_phone']
       
       @available_hotels = Hotel.where(city: @city, data_version: 0)
         .where("facilities LIKE ? OR facilities LIKE ?", 

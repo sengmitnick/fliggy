@@ -8,16 +8,17 @@ require_relative '../base_validator'
 #   用户需要预订支持免费取消的酒店
 #
 # 评分标准:
-#   - 创建了酒店订单 (30%)
-#   - 酒店支持免费取消 (40%)
+#   - 创建了酒店订单 (25%)
+#   - 酒店支持免费取消 (35%)
 #   - 入住日期和时长正确 (20%)
-#   - 订单状态有效 (10%)
+#   - 入住人信息正确 (15%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V238BookHotelWithFreeCancellationValidator < BaseValidator
     self.validator_id = 'v238_book_hotel_with_free_cancellation_validator'
     self.task_id = '4ff405ff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '预订可免费取消的酒店（4天后入住）'
-    self.description = '用户需要预订支持免费取消的酒店'
+    self.title = '给张三预订4天后深圳可免费取消的酒店（住1晚）'
+    self.description = '帮张三订4天后在深圳的酒店，要可以免费取消的，住1晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,11 +28,8 @@ module V201V250
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
-      )
+      @zhangsan = demo_user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_phone = @zhangsan.phone
       
       # 查找支持免费取消的酒店（cancellation_policy包含"免费"或"free"）
       @available_hotels = Hotel.where(city: @city, data_version: 0)
@@ -55,7 +53,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了酒店订单", weight: 30 do
+      add_assertion "创建了酒店订单", weight: 25 do
         all_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -69,7 +67,7 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "酒店支持免费取消", weight: 40 do
+      add_assertion "酒店支持免费取消", weight: 35 do
         hotel = @hotel_booking.hotel
         has_free_cancellation = hotel.cancellation_policy&.include?('免费') || 
                                 hotel.cancellation_policy&.downcase&.include?('free')
@@ -85,13 +83,19 @@ module V201V250
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "入住人电话正确", weight: 15 do
+        expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
+          "入住人电话错误。期望: #{@expected_guest_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 5 do
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 选择第一家支持免费取消的酒店
       hotel = @available_hotels.first
@@ -103,8 +107,8 @@ module V201V250
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_name: zhangsan.name,
+        guest_phone: zhangsan.phone,
         room_count: 1,
         total_price: room.price,
         status: 'paid',
@@ -119,7 +123,8 @@ module V201V250
       {
         city: @city,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        expected_guest_phone: @expected_guest_phone
       }
     end
     
@@ -127,6 +132,7 @@ module V201V250
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      @expected_guest_phone = data['expected_guest_phone']
       
       @available_hotels = Hotel.where(city: @city, data_version: 0)
         .where("cancellation_policy LIKE ? OR cancellation_policy LIKE ?", 
