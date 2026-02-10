@@ -76,8 +76,8 @@ module V151V200
       )
       
       # 创建去程机场接机服务
-      arrival_time = outbound_flight.arrival_time.in_time_zone
-      pickup_datetime = @outbound_date.in_time_zone + arrival_time.hour.hours + arrival_time.min.minutes + 30.minutes
+      arrival_time = outbound_flight.arrival_time
+      pickup_datetime = arrival_time + 30.minutes
       
       Transfer.create!(
         user: user,
@@ -95,8 +95,8 @@ module V151V200
       )
       
       # 创建返程机场送机服务
-      departure_time = return_flight.departure_time.in_time_zone
-      dropoff_datetime = @return_date.in_time_zone + departure_time.hour.hours + departure_time.min.minutes - 2.hours
+      departure_time = return_flight.departure_time
+      dropoff_datetime = departure_time - 2.hours
       
       Transfer.create!(
         user: user,
@@ -121,7 +121,10 @@ module V151V200
         arrival_city: @arrival_city,
         outbound_date: @outbound_date.to_s,
         return_date: @return_date.to_s,
-        airport_location: @airport_location
+        airport_location: @airport_location,
+        expected_name: @expected_name,
+        expected_phone: @expected_phone,
+        expected_id_number: @expected_id_number
       }
     end
 
@@ -132,11 +135,14 @@ module V151V200
       @outbound_date = Date.parse(data['outbound_date']) if data['outbound_date']
       @return_date = Date.parse(data['return_date']) if data['return_date']
       @airport_location = data['airport_location']
+      @expected_name = data['expected_name']
+      @expected_phone = data['expected_phone']
+      @expected_id_number = data['expected_id_number']
     end
 
     def verify
       # 断言1: 创建了去程航班订单
-      add_assertion "创建了去程航班订单", weight: 20 do
+      add_assertion "创建了去程航班订单", weight: 18 do
         @outbound_booking = Booking
           .joins(:flight)
           .includes(:flight)
@@ -151,7 +157,7 @@ module V151V200
       return if @outbound_booking.nil?
       
       # 断言2: 创建了返程航班订单
-      add_assertion "创建了返程航班订单", weight: 20 do
+      add_assertion "创建了返程航班订单", weight: 18 do
         @return_booking = Booking
           .joins(:flight)
           .includes(:flight)
@@ -164,7 +170,7 @@ module V151V200
       end
       
       # 断言3: 创建了往返机场接送服务
-      add_assertion "创建了往返机场接送服务（接机+送机）", weight: 40 do
+      add_assertion "创建了往返机场接送服务（接机+送机）", weight: 20 do
         @transfers = Transfer
           .where(transfer_type: ['airport_pickup', 'airport_dropoff'], data_version: @data_version)
           .order(created_at: :desc)
@@ -182,7 +188,7 @@ module V151V200
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
       # 断言4: 接送地点都在上海
-      add_assertion "接送地点都在上海", weight: 15 do
+      add_assertion "接送地点都在上海", weight: 8 do
         pickup_in_city = @pickup_transfer.location_from.include?(@arrival_city) || @pickup_transfer.location_to.include?(@arrival_city)
         dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
         
@@ -190,12 +196,43 @@ module V151V200
         expect(dropoff_in_city).to be(true), "送机地点错误，期望包含: #{@arrival_city}"
       end
       
-      # 断言5: 乘客信息正确（张三）
-      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+      # 断言5: 接机时间合理（航班到达后20-40分钟）
+      add_assertion "接机时间合理（航班到达后20-40分钟）", weight: 12 do
+        outbound_flight = @outbound_booking.flight
+        time_after_arrival = ((@pickup_transfer.pickup_datetime - outbound_flight.arrival_time) / 60.0).round
+        
+        expect(time_after_arrival >= 20 && time_after_arrival <= 40).to be(true),
+          "接机时间不合理。航班到达: #{outbound_flight.arrival_time.strftime('%H:%M')}, 接机时间: #{@pickup_transfer.pickup_datetime.strftime('%H:%M')}, 间隔: #{time_after_arrival}分钟（期望20-40分钟）"
+      end
+      
+      # 断言6: 送机时间合理（航班起飞前1.5-2.5小时）
+      add_assertion "送机时间合理（航班起飞前1.5-2.5小时）", weight: 12 do
+        return_flight = @return_booking.flight
+        time_before_departure = ((return_flight.departure_time - @dropoff_transfer.pickup_datetime) / 3600.0).round(1)
+        
+        expect(time_before_departure >= 1.5 && time_before_departure <= 2.5).to be(true),
+          "送机时间不合理。航班起飞: #{return_flight.departure_time.strftime('%H:%M')}, 送机时间: #{@dropoff_transfer.pickup_datetime.strftime('%H:%M')}, 提前: #{time_before_departure}小时（期望1.5-2.5小时）"
+      end
+      
+      # 断言7: 乘客信息正确（张三）
+      add_assertion "乘客信息正确（#{@expected_name}）", weight: 3 do
         expect(@outbound_booking.passenger_name).to eq(@expected_name),
           "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_booking.passenger_name}"
         expect(@outbound_booking.passenger_id_number).to eq(@expected_id_number),
           "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_booking.passenger_id_number}"
+      end
+      
+      # 断言8: 接送机联系人信息正确（#{@expected_name}）
+      add_assertion "接送机联系人信息正确（#{@expected_name}）", weight: 9 do
+        expect(@pickup_transfer.passenger_name).to eq(@expected_name),
+          "接机联系人姓名错误。期望: #{@expected_name}, 实际: #{@pickup_transfer.passenger_name}"
+        expect(@pickup_transfer.passenger_phone).to eq(@expected_phone),
+          "接机联系人电话错误。期望: #{@expected_phone}, 实际: #{@pickup_transfer.passenger_phone}"
+        
+        expect(@dropoff_transfer.passenger_name).to eq(@expected_name),
+          "送机联系人姓名错误。期望: #{@expected_name}, 实际: #{@dropoff_transfer.passenger_name}"
+        expect(@dropoff_transfer.passenger_phone).to eq(@expected_phone),
+          "送机联系人电话错误。期望: #{@expected_phone}, 实际: #{@dropoff_transfer.passenger_phone}"
       end
     end
   end

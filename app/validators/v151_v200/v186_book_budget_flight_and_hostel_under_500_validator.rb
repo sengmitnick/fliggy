@@ -120,7 +120,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -129,8 +129,8 @@ module V151V200
     end
   
     def verify
-      # 断言1: 创建了航班订单 (20%)
-      add_assertion "创建了航班订单", weight: 20 do
+      # 断言1: 创建了航班订单 (18%)
+      add_assertion "创建了航班订单", weight: 18 do
         @flight_booking = Booking
           .joins(:flight)
           .includes(:flight)
@@ -144,8 +144,8 @@ module V151V200
       
       return if @flight_booking.nil?
       
-      # 断言2: 创建了酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言2: 创建了酒店订单 (18%)
+      add_assertion "创建了酒店订单", weight: 18 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel, :hotel_room)
@@ -159,31 +159,47 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 航班价格合理（≤300元） (15%)
-      add_assertion "航班价格合理（≤#{@max_flight_price.to_i}元）", weight: 15 do
+      # 断言3: 航班价格合理（≤300元） (14%)
+      add_assertion "航班价格合理（≤#{@max_flight_price.to_i}元）", weight: 14 do
         flight_price = @flight_booking.total_price
         expect(flight_price).to be <= @max_flight_price,
           "航班价格过高。期望: ≤#{@max_flight_price.to_i}元, 实际: #{flight_price}元"
       end
       
-      # 断言4: 酒店价格合理（≤200元） (15%)
-      add_assertion "酒店价格合理（≤#{@max_hotel_price.to_i}元）", weight: 15 do
+      # 断言4: 酒店价格合理（≤200元） (14%)
+      add_assertion "酒店价格合理（≤#{@max_hotel_price.to_i}元）", weight: 14 do
         hotel_price = @hotel_booking.total_price
         expect(hotel_price).to be <= @max_hotel_price,
           "酒店价格过高。期望: ≤#{@max_hotel_price.to_i}元, 实际: #{hotel_price}元"
       end
       
-      # 断言5: 总价≤500元 (25%)
-      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 25 do
+      # 断言5: 总价≤500元 (18%)
+      add_assertion "总价≤#{@max_total_budget.to_i}元", weight: 18 do
         total_price = @flight_booking.total_price + @hotel_booking.total_price
         expect(total_price).to be <= @max_total_budget,
           "总价超出预算。期望: ≤#{@max_total_budget.to_i}元, 实际: #{total_price}元（航班#{@flight_booking.total_price}+酒店#{@hotel_booking.total_price}）"
       end
       
-      # 断言6: 酒店退房日期正确 (5%)
-      add_assertion "酒店退房日期正确", weight: 5 do
+      # 断言6: 酒店退房日期正确 (3%)
+      add_assertion "酒店退房日期正确", weight: 3 do
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言7: 航班乘客信息正确 (7%)
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+      
+      # 断言8: 酒店入住人信息正确 (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
     
@@ -198,15 +214,18 @@ module V151V200
         hotel_checkout_date: @hotel_checkout_date&.to_s,
         max_total_budget: @max_total_budget,
         max_flight_price: @max_flight_price,
-        max_hotel_price: @max_hotel_price
+        max_hotel_price: @max_hotel_price,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
+      passenger_name = data['expected_passenger_name'] || '王芳'
+      @passenger = user.passengers.find_by!(name: passenger_name, data_version: 0)
+      @expected_passenger_name = data['expected_passenger_name'] || @passenger.name
+      @expected_phone = data['expected_phone'] || @passenger.phone
       
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
@@ -216,6 +235,23 @@ module V151V200
       @max_total_budget = data['max_total_budget']
       @max_flight_price = data['max_flight_price']
       @max_hotel_price = data['max_hotel_price']
+      
+      # 重建可用航班列表
+      @available_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @arrival_city, flight_date: @flight_date, data_version: 0)
+        .select { |f| f.price <= @max_flight_price }
+        .sort_by(&:price)
+      
+      # 重建可用酒店列表
+      @available_hotels = Hotel
+        .joins(:hotel_rooms)
+        .where("hotels.city LIKE ?", "%#{@arrival_city}%")
+        .where("hotel_rooms.price <= ?", @max_hotel_price)
+        .where("hotel_rooms.room_category = ?", 'overnight')
+        .where(hotels: { data_version: 0 })
+        .where(hotel_rooms: { data_version: 0 })
+        .distinct
+        .to_a
     end
   end
 end

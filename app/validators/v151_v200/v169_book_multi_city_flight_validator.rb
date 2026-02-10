@@ -83,7 +83,10 @@ module V151V200
         city2: @city2,
         city3: @city3,
         flight1_date: @flight1_date.to_s,
-        flight2_date: @flight2_date.to_s
+        flight2_date: @flight2_date.to_s,
+        expected_name: @expected_name,
+        expected_phone: @expected_phone,
+        expected_id_number: @expected_id_number
       }
     end
 
@@ -94,6 +97,9 @@ module V151V200
       @city3 = data['city3']
       @flight1_date = Date.parse(data['flight1_date']) if data['flight1_date']
       @flight2_date = Date.parse(data['flight2_date']) if data['flight2_date']
+      @expected_name = data['expected_name']
+      @expected_phone = data['expected_phone']
+      @expected_id_number = data['expected_id_number']
     end
 
     def verify
@@ -151,11 +157,18 @@ module V151V200
       end
       
       # 断言6: 乘客信息正确（张三）
-      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+      add_assertion "两段航班乘客信息一致（#{@expected_name}）", weight: 5 do
+        # 验证第一段
         expect(@booking1.passenger_name).to eq(@expected_name),
-          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@booking1.passenger_name}"
+          "第一段航班乘客姓名错误。期望: #{@expected_name}, 实际: #{@booking1.passenger_name}"
         expect(@booking1.passenger_id_number).to eq(@expected_id_number),
-          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@booking1.passenger_id_number}"
+          "第一段航班乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@booking1.passenger_id_number}"
+        
+        # 验证第二段
+        expect(@booking2.passenger_name).to eq(@expected_name),
+          "第二段航班乘客姓名错误。期望: #{@expected_name}, 实际: #{@booking2.passenger_name}"
+        expect(@booking2.passenger_id_number).to eq(@expected_id_number),
+          "第二段航班乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@booking2.passenger_id_number}"
       end
     end
   end

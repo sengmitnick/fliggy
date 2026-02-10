@@ -146,19 +146,19 @@ module V151V200
           "航班到达机场错误。期望: 浦东T2, 实际: #{flight.arrival_airport}"
       end
     
-      add_assertion "接机起点正确（浦东T2，不是T1）", weight: 20 do
+      add_assertion "接机起点正确（浦东T2，不是T1）", weight: 15 do
         location_matches = @transfer.location_from.include?('浦东') && @transfer.location_from.include?('T2')
         
         expect(location_matches).to be_truthy,
           "接机起点错误。期望: #{@arrival_airport}（浦东T2，不是T1），实际: #{@transfer.location_from}"
       end
     
-      add_assertion "接机终点正确（#{@destination_location}）", weight: 15 do
+      add_assertion "接机终点正确（#{@destination_location}）", weight: 10 do
         expect(@transfer.location_to).to eq(@destination_location),
           "接机终点错误。期望: #{@destination_location}, 实际: #{@transfer.location_to}"
       end
     
-      add_assertion "接送时间正确（深夜，航班到达后30分钟）", weight: 15 do
+      add_assertion "接送时间正确（深夜，航班到达后30分钟）", weight: 10 do
         flight = @flight_booking.flight
         expected_pickup_time = flight.arrival_time + 30.minutes
         time_diff = (@transfer.pickup_datetime - expected_pickup_time).abs
@@ -176,6 +176,20 @@ module V151V200
           expect(@transfer.total_price).to be <= (cheapest_price * 1.05),
             "未选择最优价格。最低价: ¥#{cheapest_price}, 实际: ¥#{@transfer.total_price}"
         end
+      end
+    
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+    
+      add_assertion "接机联系人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "接机联系人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_phone),
+          "接机联系电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
       end
     end
   
@@ -237,7 +251,9 @@ module V151V200
         arrival_hour: @arrival_hour,
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
-        service_type: @service_type
+        service_type: @service_type,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
   
@@ -250,6 +266,8 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
     
       # 重新查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

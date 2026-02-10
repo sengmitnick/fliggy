@@ -104,7 +104,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -129,15 +129,15 @@ module V151V200
       
       return if @train_booking.nil?
       
-      # 断言2: 火车到达时间正确（12点前） (20%)
-      add_assertion "火车到达时间正确（12点前）", weight: 20 do
+      # 断言2: 火车到达时间正确（12点前） (18%)
+      add_assertion "火车到达时间正确（12点前）", weight: 18 do
         arrival_hour = @train_booking.train.arrival_time.hour
         expect(arrival_hour).to be < 12, 
           "到达时间过晚。期望: 12:00前, 实际: #{@train_booking.train.arrival_time.strftime('%H:%M')}"
       end
       
-      # 断言3: 创建了酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言3: 创建了酒店订单 (15%)
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -151,23 +151,37 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言4: 酒店在到达城市 (20%)
-      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 20 do
+      # 断言4: 酒店在到达城市 (15%)
+      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 15 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@arrival_city),
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为火车到达当天 (15%)
-      add_assertion "酒店入住日期正确（火车到达当天）", weight: 15 do
+      # 断言5: 酒店入住日期为火车到达当天 (17%)
+      add_assertion "酒店入住日期正确（火车到达当天）", weight: 17 do
         expect(@hotel_booking.check_in_date).to eq(@train_date),
           "入住日期错误。期望: #{@train_date}（火车到达当天）, 实际: #{@hotel_booking.check_in_date}"
-      end
-      
-      # 断言6: 酒店退房日期正确 (5%)
-      add_assertion "酒店退房日期正确", weight: 5 do
+        
+        # 验证退房日期
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言6: 火车乘客信息正确（张三） (7%)
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "火车联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+    
+      # 断言7: 酒店入住人信息正确（张三） (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
     
@@ -179,21 +193,36 @@ module V151V200
         arrival_city: @arrival_city,
         train_date: @train_date&.to_s,
         hotel_checkin_date: @hotel_checkin_date&.to_s,
-        hotel_checkout_date: @hotel_checkout_date&.to_s
+        hotel_checkout_date: @hotel_checkout_date&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
-      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @train_date = Date.parse(data['train_date']) if data['train_date']
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
+      
+      # 重新查询乘客信息（用于simulate阶段）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用火车和酒店（用于simulate阶段）
+      @available_trains = Train
+        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
+        .by_date(@train_date)
+        .select { |t| t.arrival_time.hour < 12 }
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@arrival_city}%")
+        .where(data_version: 0)
+        .limit(20)
+        .to_a
     end
   end
 end

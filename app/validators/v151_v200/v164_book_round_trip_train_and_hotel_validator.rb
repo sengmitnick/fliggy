@@ -101,7 +101,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price * @nights,
@@ -118,7 +118,10 @@ module V151V200
         return_date: @return_date.to_s,
         hotel_checkin_date: @hotel_checkin_date.to_s,
         hotel_checkout_date: @hotel_checkout_date.to_s,
-        nights: @nights
+        nights: @nights,
+        expected_name: @expected_name,
+        expected_phone: @expected_phone,
+        expected_id_number: @expected_id_number
       }
     end
 
@@ -131,6 +134,9 @@ module V151V200
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
       @nights = data['nights']
+      @expected_name = data['expected_name']
+      @expected_phone = data['expected_phone']
+      @expected_id_number = data['expected_id_number']
     end
 
     def verify
@@ -181,7 +187,7 @@ module V151V200
       end
       
       # 断言5: 创建了酒店订单
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -196,7 +202,7 @@ module V151V200
       return if @hotel_booking.nil?
       
       # 断言6: 酒店入住日期和时长正确
-      add_assertion "酒店入住日期和时长正确（2晚）", weight: 15 do
+      add_assertion "酒店入住日期和时长正确（2晚）", weight: 12 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车当天）, 实际: #{@hotel_booking.check_in_date}"
         
@@ -211,6 +217,14 @@ module V151V200
           "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_ticket.passenger_name}"
         expect(@outbound_ticket.passenger_id_number).to eq(@expected_id_number),
           "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_ticket.passenger_id_number}"
+      end
+      
+      # 断言8: 酒店入住人信息正确（#{@expected_name}）
+      add_assertion "酒店入住人信息正确（#{@expected_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_name),
+          "酒店入住人姓名错误。期望: #{@expected_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
   end

@@ -130,15 +130,15 @@ module V151V200
       
       return if @train_booking.nil?
       
-      # 断言2: 火车出发时间正确（20:00后） (20%)
-      add_assertion "火车出发时间正确（20:00后）", weight: 20 do
+      # 断言2: 火车出发时间正确（20:00后） (18%)
+      add_assertion "火车出发时间正确（20:00后）", weight: 18 do
         departure_hour = @train_booking.train.departure_time.hour
         expect(departure_hour).to be >= 20, 
           "出发时间过早。期望: 20:00后, 实际: #{@train_booking.train.departure_time.strftime('%H:%M')}"
       end
       
-      # 断言3: 创建了接站订单 (20%)
-      add_assertion "创建了接站订单", weight: 20 do
+      # 断言3: 创建了接站订单 (15%)
+      add_assertion "创建了接站订单", weight: 15 do
         @transfer_order = Transfer
           .where("location_from LIKE ? OR location_to LIKE ?", "%#{@arrival_city}%", "%#{@arrival_city}%")
           .where(data_version: @data_version)
@@ -150,8 +150,8 @@ module V151V200
       
       return if @transfer_order.nil?
       
-      # 断言4: 接站地点正确（到达城市） (20%)
-      add_assertion "接站地点正确（#{@arrival_city}）", weight: 20 do
+      # 断言4: 接站地点正确（到达城市） (15%)
+      add_assertion "接站地点正确（#{@arrival_city}）", weight: 15 do
         location_correct = @transfer_order.location_from&.include?(@arrival_city) || 
                           @transfer_order.location_to&.include?(@arrival_city)
         
@@ -159,8 +159,8 @@ module V151V200
           "接站地点错误。期望: #{@arrival_city}, 实际: #{@transfer_order.location_from} → #{@transfer_order.location_to}"
       end
       
-      # 断言5: 接站时间与火车到达时间匹配 (20%)
-      add_assertion "接站时间与火车到达时间匹配", weight: 20 do
+      # 断言5: 接站时间与火车到达时间匹配 (17%)
+      add_assertion "接站时间与火车到达时间匹配", weight: 17 do
         train_arrival = @train_booking.train.arrival_time
         pickup_datetime = @transfer_order.pickup_datetime
         
@@ -172,6 +172,22 @@ module V151V200
         expect(time_diff).to be <= 2,
           "接站时间过晚。期望: 火车到达后2小时内, 实际: 晚#{time_diff.round(1)}小时"
       end
+    
+      # 断言6: 火车乘客信息正确（刘强） (7%)
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "火车联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+    
+      # 断言7: 接站联系人信息正确（刘强） (8%)
+      add_assertion "接站联系人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@transfer_order.passenger_name).to eq(@expected_passenger_name),
+          "接站联系人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer_order.passenger_name}"
+        expect(@transfer_order.passenger_phone).to eq(@expected_phone),
+          "接站联系电话错误。期望: #{@expected_phone}, 实际: #{@transfer_order.passenger_phone}"
+      end
     end
     
     private
@@ -181,20 +197,36 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         train_date: @train_date&.to_s,
-        arrival_datetime: @arrival_datetime&.to_s
+        arrival_datetime: @arrival_datetime&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
-      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @train_date = Date.parse(data['train_date']) if data['train_date']
       @arrival_datetime = DateTime.parse(data['arrival_datetime']) if data['arrival_datetime']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
+      
+      # 重新查询乘客信息（用于simulate阶段）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用火车和接站服务（用于simulate阶段）
+      @available_trains = Train
+        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
+        .by_date(@train_date)
+        .select { |t| t.departure_time.hour >= 20 }
+      
+      @available_transfers = TransferPackage
+        .where(data_version: 0)
+        .limit(20)
+        .to_a
+      
+      @sample_train = @available_trains.first if @available_trains.any?
     end
   end
 end
