@@ -17,14 +17,19 @@ module V151V200
   class V194BookLastMinuteDealDiscountComboValidator < BaseValidator
     self.validator_id = 'v194_book_last_minute_deal_discount_combo_validator'
     self.task_id = 'e5dc7f50-cb89-4ef1-baa8-81e296f08452'
-    self.title = '预订明天出发的特价组合'
-    self.description = '预订明天出发的特价组合（航班+酒店）'
+    self.title = '给刘强预订明天从北京到上海的特价组合（明天出发）'
+    self.description = '帮刘强订明天出发的特价组合（航班+酒店）'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '上海'
-      @tomorrow = Date.tomorrow
+      @tomorrow = Date.current + 1.day  # 明天
       
       # 查找明天的航班
       @available_flights = Flight
@@ -44,7 +49,7 @@ module V151V200
       @discount_threshold = avg_flight_price * 0.8
       
       {
-        task: "请预订明天（#{@tomorrow.strftime('%m月%d日')}）从#{@departure_city}到#{@arrival_city}的特价组合（航班+酒店）",
+        task: "请为#{@passenger.name}预订明天（#{@tomorrow.strftime('%m月%d日')}）从#{@departure_city}到#{@arrival_city}的特价组合（航班+酒店）",
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @tomorrow.strftime('%Y-%m-%d'),
@@ -116,6 +121,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
       
       # 选择最便宜的航班（特价）
       cheapest_flight = @available_flights.min_by(&:price)
@@ -124,9 +130,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight_id: cheapest_flight.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: cheapest_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -145,7 +151,7 @@ module V151V200
         check_in_date: arrival_date,
         check_out_date: arrival_date + 1.day,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -164,6 +170,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @tomorrow = Date.parse(data['tomorrow']) if data['tomorrow']

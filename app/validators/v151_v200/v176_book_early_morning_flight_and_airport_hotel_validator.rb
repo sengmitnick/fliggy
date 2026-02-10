@@ -33,18 +33,24 @@ module V151V200
   class V176BookEarlyMorningFlightAndAirportHotelValidator < BaseValidator
     self.validator_id = 'v176_book_early_morning_flight_and_airport_hotel_validator'
     self.task_id = '1bf22b0b-0ed2-4d40-a704-15a738206a48'
-    self.title = '预订3天后凌晨航班和机场酒店'
-    self.description = '用户需要预订凌晨5-7点的航班，并在前一晚入住机场附近酒店'
+    self.title = '给周敏预订明天凌晨北京到上海的航班，并预订今晚机场附近酒店'
+    self.description = '帮周敏订明天凌晨5-7点北京到上海的航班，因为是早班机，今晚先住机场附近酒店'
     self.timeout_seconds = 300
   
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @flight_date = Date.tomorrow + 2.days  # 3天后出发
+      @flight_date = Date.current + 1.day  # 明天 + 2.days  # 3天后出发
       @hotel_checkin_date = @flight_date - 1.day  # 前一晚入住
       @hotel_checkout_date = @flight_date  # 航班当天退房
       @min_departure_hour = 5
       @max_departure_hour = 7
+      
+      # 预查询乘客信息（周敏）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
       
       # 查找凌晨5-7点的航班
       @available_flights = Flight
@@ -72,9 +78,10 @@ module V151V200
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
+        task: "请为周敏预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
               "并在#{@hotel_checkin_date.strftime('%Y年%m月%d日')}（航班前一晚）预订#{@departure_city}机场附近的酒店",
         requirements: {
+          passenger: @expected_passenger_name,
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           flight_date: @flight_date.to_s,
@@ -98,9 +105,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -119,7 +126,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -212,6 +219,12 @@ module V151V200
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
       @min_departure_hour = data['min_departure_hour']
       @max_departure_hour = data['max_departure_hour']
+      
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     end
   end
 end

@@ -2,22 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例292: 预订学生特惠套餐
+# 验证用例292: 给张三预订学生特惠套餐（北京-西安）
 #
 # 任务描述:
-#   用户预订学生特惠套餐（学生票+青旅+优惠）
+#   给张三预订5天后从北京到西安的学生特惠套餐，预算500元内，包括火车票和青旅
 #
 # 评分标准:
-#   - 创建火车票预订 (30%)
-#   - 创建青旅酒店预订 (30%)
-#   - 总价格符合学生预算 (25%)
+#   - 创建火车票预订 (25%)
+#   - 创建青旅酒店预订 (25%)
+#   - 乘客信息正确（张三）(15%)
+#   - 总价格符合学生预算 (20%)
 #   - 订单状态正确 (15%)
 module V251V300
   class V292BookStudentBudgetPackageValidator < BaseValidator
     self.validator_id = 'v292_book_student_budget_package_validator'
     self.task_id = 'fd50ec27-3219-4bab-9a00-659b10b5aeb0'
-    self.title = '预订5天后学生特惠套餐（≤500元）'
-    self.description = '用户预订学生特惠套餐（学生票+青旅+优惠）'
+    self.title = '给张三预订学生特惠套餐（5天后北京-西安，预算≤500元）'
+    self.description = '帮张三订5天后从北京到西安的学生套餐，他预算只有500块，需要火车票和青旅住宿'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,23 +27,29 @@ module V251V300
       @travel_date = Date.current + 5.days
       @budget = 500
       
+      # 预查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @zhangsan.name
+      @expected_passenger_id_number = @zhangsan.id_number
+      @expected_contact_phone = @zhangsan.phone
+      
       if user.balance < 1000
         user.update!(balance: 2000)
       end
       
       {
-        task: "请为学生预订从#{@departure_city}到#{@destination_city}的经济型出行套餐，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，预算#{@budget}元以内，包括火车票和青旅住宿",
+        task: "请为张三预订从#{@departure_city}到#{@destination_city}的学生特惠套餐，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，预算#{@budget}元以内，包括火车票和青旅住宿",
         departure_city: @departure_city,
         destination_city: @destination_city,
         travel_date: @travel_date.to_s,
         budget: @budget,
-        hint: "选择经济实惠的火车票和青年旅社"
+        hint: "选择最便宜的火车票和青年旅社，确保总价在预算内"
       }
     end
     
     def verify
-      add_assertion "创建了火车票预订", weight: 30 do
+      add_assertion "创建了火车票预订", weight: 25 do
         @train_booking = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @departure_city, arrival_city: @destination_city })
@@ -52,7 +59,9 @@ module V251V300
         expect(@train_booking).not_to be_nil, "未找到从#{@departure_city}到#{@destination_city}的火车票预订"
       end
       
-      add_assertion "创建了青旅酒店预订", weight: 30 do
+      return unless @train_booking
+      
+      add_assertion "创建了青旅酒店预订", weight: 25 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
@@ -62,25 +71,37 @@ module V251V300
         expect(@hotel_booking).not_to be_nil, "未找到#{@destination_city}的青旅预订"
       end
       
-      return unless @train_booking && @hotel_booking
+      add_assertion "乘客信息正确（张三）", weight: 15 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车票乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id_number),
+          "火车票乘客身份证号错误。期望: #{@expected_passenger_id_number}, 实际: #{@train_booking.passenger_id_number}"
+        expect(@train_booking.contact_phone).to eq(@expected_contact_phone),
+          "火车票联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@train_booking.contact_phone}"
+      end
       
-      add_assertion "总价格符合学生预算", weight: 25 do
+      return unless @hotel_booking
+      
+      add_assertion "总价格符合学生预算（≤#{@budget}元）", weight: 20 do
         total_price = @train_booking.total_price + @hotel_booking.total_price
         expect(total_price).to be <= @budget,
-          "总价格超出预算。预算: #{@budget}元, 实际: #{total_price}元"
+          "总价格超出预算。预算: #{@budget}元, 实际: #{total_price}元（火车票#{@train_booking.total_price}元 + 酒店#{@hotel_booking.total_price}元）"
       end
       
       add_assertion "订单状态正确", weight: 15 do
-        valid_statuses = ['pending', 'paid']
-        expect(valid_statuses).to include(@train_booking.status),
+        valid_train_statuses = ['pending', 'paid', 'confirmed']
+        valid_hotel_statuses = ['pending', 'paid', 'confirmed']
+        
+        expect(valid_train_statuses).to include(@train_booking.status),
           "火车票订单状态错误: #{@train_booking.status}"
-        expect(valid_statuses).to include(@hotel_booking.status),
+        expect(valid_hotel_statuses).to include(@hotel_booking.status),
           "酒店订单状态错误: #{@hotel_booking.status}"
       end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 1. 预订火车票（二等座，价格低）
       train = Train.where(
@@ -106,9 +127,9 @@ module V251V300
       TrainBooking.create!(
         user_id: user.id,
         train_id: train.id,
-        passenger_name: user.name || '李学生',
-        passenger_id_number: '440300200201011234',
-        contact_phone: user.phone || '13800138000',
+        passenger_name: zhangsan.name,
+        passenger_id_number: zhangsan.id_number,
+        contact_phone: zhangsan.phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: train_price,
@@ -127,8 +148,8 @@ module V251V300
         hotel_id: hotel.id,
         check_in_date: @travel_date,
         check_out_date: check_out_date,
-        guest_name: user.name || '李学生',
-        guest_phone: user.phone || '13800138000',
+        guest_name: zhangsan.name,
+        guest_phone: zhangsan.phone,
         payment_method: '花呗',
         total_price: total_hotel_price,
         status: 'pending',
@@ -143,7 +164,10 @@ module V251V300
         departure_city: @departure_city,
         destination_city: @destination_city,
         travel_date: @travel_date&.to_s,
-        budget: @budget
+        budget: @budget,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id_number: @expected_passenger_id_number,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -152,6 +176,9 @@ module V251V300
       @destination_city = data['destination_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @budget = data['budget'].to_i if data['budget']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id_number = data['expected_passenger_id_number']
+      @expected_contact_phone = data['expected_contact_phone']
     end
   end
 end

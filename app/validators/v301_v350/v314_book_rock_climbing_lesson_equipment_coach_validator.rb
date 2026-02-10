@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V314: 预订6天后2人华山攀岩教学+安全装备+教练陪同（含保险）
+# V314: 给刘强和陈静预订华山攀岩（6天后，2人，含教学+装备+教练+保险）
 #
 # 任务描述:
-#   用户需要6天后去华山，2人参加攀岩活动，包含专业教学、安全装备、教练陪同和保险保障
+#   刘强和陈静想6天后去华山攀岩，需2人，要专业教学、安全装备、教练陪同和保险保障
 #
 # 评分标准:
 #   - 创建了攀岩活动订单 (40%)
@@ -16,11 +16,17 @@ module V301V350
   class V314BookRockClimbingLessonEquipmentCoachValidator < BaseValidator
     self.validator_id = 'v314_book_rock_climbing_lesson_equipment_coach_validator'
     self.task_id = '58118f22-f2ac-492b-bf85-a73a4786c8aa'
-    self.title = '预订6天后2人华山攀岩教学+安全装备+教练陪同（含保险）'
-    self.description = '用户需要6天后去华山，2人参加攀岩活动，需创建攀岩活动订单（包含教学、装备、教练），订单必须购买保险（安全保障），活动日期正确，订单状态和价格有效'
+    self.title = '给刘强和陈静预订华山攀岩（6天后，2人，含教学+装备+教练+保险）'
+    self.description = '刘强和陈静想6天后去华山攀岩，需2人，要专业教学、安全装备、教练陪同和保险保障'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for rock climbing)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
       @activity_date = Date.current + 6.days
       @participant_count = 2
       

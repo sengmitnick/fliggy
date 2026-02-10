@@ -17,14 +17,19 @@ module V151V200
   class V189BookCheapestComboOptimizeTotalPriceValidator < BaseValidator
     self.validator_id = 'v189_book_cheapest_combo_optimize_total_price_validator'
     self.task_id = 'bba54fa4-35b4-4a29-942d-dd4d80abcd6d'
-    self.title = '预订明天总价最低的交通+酒店组合（1人）'
-    self.description = '预订总价最低的往返交通+酒店组合'
+    self.title = '给周敏预订明天总价最低的交通+酒店组合'
+    self.description = '帮周敏预订明天从北京到上海的往返交通+酒店，总价要最低'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '上海'
-      @travel_date = Date.tomorrow + 1.day
+      @travel_date = Date.current + 1.day  # 明天
       @stay_nights = 2
       
       # 查找所有交通选项（航班+火车）
@@ -58,7 +63,7 @@ module V151V200
       @min_combo_price = calculate_min_combo_price
       
       {
-        task: "请预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的往返交通+住宿#{@stay_nights}晚，要求总价最低",
+        task: "请为#{@passenger.name}预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的往返交通+住宿#{@stay_nights}晚，要求总价最低",
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @travel_date.strftime('%Y-%m-%d'),
@@ -152,6 +157,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
       
       # 找到最低价的交通工具
       cheapest_transport = find_cheapest_transportation
@@ -165,9 +171,9 @@ module V151V200
         Booking.create!(
           user: user,
           flight_id: flight.id,
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
-          contact_phone: '13800138000',
+          passenger_name: passenger.name,
+          passenger_id_number: passenger.id_number,
+          contact_phone: passenger.phone,
           total_price: flight.price,
           accept_terms: true,
           status: 'paid',
@@ -179,10 +185,10 @@ module V151V200
         TrainBooking.create!(
           user: user,
           train: train,
-          passenger_name: user.name,
-          passenger_id_number: '110101199001011234',
+          passenger_name: passenger.name,
+          passenger_id_number: passenger.id_number,
           seat_type: 'second_class',
-          contact_phone: '13800138000',
+          contact_phone: passenger.phone,
           total_price: train.price_second_class,
           accept_terms: true,
           data_version: @data_version
@@ -221,7 +227,7 @@ module V151V200
         check_in_date: arrival_date,
         check_out_date: arrival_date + @stay_nights.days,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price * @stay_nights,
         data_version: @data_version
@@ -265,6 +271,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']

@@ -2,10 +2,10 @@
 
 require_relative '../base_validator'
 
-# V316: 预订八达岭国际马场马术体验（2人，7天后，必须购买保险）
+# V316: 给刘强和陈静预订八达岭国际马场骑马（7天后，2人，必须保险）
 #
 # 任务描述:
-#   用户需要预订八达岭国际马场的7天后的马术体验课程，2人参加，并且必须购买骑马运动保险以确保安全
+#   刘强和陈静想7天后去八达岭国际马场骑马，需2人，必须购买骑马运动保险以确保安全
 #
 # 评分标准:
 #   - 创建了八达岭国际马场的马术体验订单 (40%)
@@ -16,11 +16,17 @@ module V301V350
   class V316BookEquestrianExperienceCoachServicesValidator < BaseValidator
     self.validator_id = 'v316_book_equestrian_experience_coach_services_validator'
     self.task_id = '244a3782-51c5-4cc3-a3bd-393309099f3b'
-    self.title = '预订八达岭国际马场马术体验（2人，7天后，必须购买保险）'
-    self.description = '用户需要预订八达岭国际马场的7天后的马术体验课程，2人参加，并且必须购买骑马运动保险以确保安全'
+    self.title = '给刘强和陈静预订八达岭国际马场骑马（7天后，2人，必须保险）'
+    self.description = '刘强和陈静想7天后去八达岭国际马场骑马，需2人，必须购买骑马运动保险以确保安全'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for equestrian)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
       @activity_date = Date.current + 7.days
       @participant_count = 2
       

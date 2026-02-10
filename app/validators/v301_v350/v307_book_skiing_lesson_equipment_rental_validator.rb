@@ -19,11 +19,20 @@ module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
     self.task_id = '72e6f61b-18de-4434-a053-2297fd7be1b9'
-    self.title = '预订3天后张家口崇礼万龙滑雪场门票+装备租赁（2人）'
-    self.description = '用户需要在3天后为2人预订张家口崇礼万龙滑雪场的滑雪服务，包含：1) 滑雪场门票订单 2) 滑雪装备租赁活动订单，确保景点、日期和人数正确'
+    self.title = '给刘强和陈静预订崇礼万龙滑雪场（3天后，2人，含门票+装备）'
+    self.description = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要门票和装备租赁'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for skiing)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
+      # Expected contact info (use one of the couple as contact)
+      @expected_contact_phone = @liuqiang.phone
+      
       @visit_date = Date.current + 3.days
       @participant_count = 2
       @attraction_name = '崇礼万龙滑雪场'
@@ -59,7 +68,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了#{@attraction_name}的门票订单", weight: 40 do
+      add_assertion "创建了#{@attraction_name}的门票订单", weight: 35 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(ticket: :attraction)
@@ -74,7 +83,14 @@ module V301V350
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      add_assertion "创建了滑雪装备租赁活动订单", weight: 40 do
+      add_assertion "联系电话正确（刘强）", weight: 10 do
+        @ticket_orders.each do |order|
+          expect(order.contact_phone).to eq(@expected_contact_phone),
+            "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{order.contact_phone}"
+        end
+      end
+      
+      add_assertion "创建了滑雪装备租赁活动订单", weight: 35 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -118,11 +134,11 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建门票订单
+      # 1. 创建门票订单 - Use existing passenger phone
       TicketOrder.create!(
         user: user,
         ticket: @ticket,
-        contact_phone: '13800138000',
+        contact_phone: @liuqiang.phone,
         visit_date: @visit_date,
         quantity: @participant_count,
         total_price: @ticket.current_price * @participant_count,
@@ -155,7 +171,8 @@ module V301V350
         activity_name: @activity_name,
         attraction_id: @attraction&.id,
         ticket_id: @ticket&.id,
-        equipment_activity_id: @equipment_activity&.id
+        equipment_activity_id: @equipment_activity&.id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -165,6 +182,7 @@ module V301V350
       @attraction_name = data['attraction_name']
       @city = data['city']
       @activity_name = data['activity_name']
+      @expected_contact_phone = data['expected_contact_phone']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @ticket = Ticket.find(data['ticket_id']) if data['ticket_id']

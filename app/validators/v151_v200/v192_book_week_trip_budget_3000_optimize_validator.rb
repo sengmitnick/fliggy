@@ -18,14 +18,19 @@ module V151V200
   class V192BookWeekTripBudget3000OptimizeValidator < BaseValidator
     self.validator_id = 'v192_book_week_trip_budget_3000_optimize_validator'
     self.task_id = 'a91aa487-9ae2-4ef6-83e2-44b428900100'
-    self.title = '预订4天后7天行程，总预算≤3000元（7晚）'
-    self.description = '预订7天行程（往返+住宿），总预算≤3000元'
+    self.title = '给李四预订4天后7天行程，总预算≤3000元（7晚）'
+    self.description = '帮李四订4天后从北京到上海的7天行程（往返+住宿7晚），总预算不超过3000元'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '上海'
-      @go_date = Date.tomorrow + 3.days
+      @go_date = Date.current + 1.day  # 明天
       @return_date = @go_date + 7.days
       @max_budget = 3000
       @stay_nights = 7
@@ -53,7 +58,7 @@ module V151V200
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
       
       {
-        task: "请预订#{@go_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的7天行程（往返交通+住宿7晚），总预算≤#{@max_budget}元",
+        task: "请为#{@passenger.name}预订#{@go_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的7天行程（往返交通+住宿7晚），总预算≤#{@max_budget}元",
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         go_date: @go_date.strftime('%Y-%m-%d'),
@@ -140,16 +145,17 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '李四', data_version: 0)
       
       # 选择最便宜的去程火车
       go_train = @available_go_trains.min_by(&:price_second_class)
       TrainBooking.create!(
         user: user,
         train: go_train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
         seat_type: 'second_class',
-        contact_phone: '13800138000',
+        contact_phone: passenger.phone,
         total_price: go_train.price_second_class,
         accept_terms: true,
         data_version: @data_version
@@ -160,10 +166,10 @@ module V151V200
       TrainBooking.create!(
         user: user,
         train: return_train,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
         seat_type: 'second_class',
-        contact_phone: '13800138000',
+        contact_phone: passenger.phone,
         total_price: return_train.price_second_class,
         accept_terms: true,
         data_version: @data_version
@@ -181,7 +187,7 @@ module V151V200
         check_in_date: arrival_date,
         check_out_date: arrival_date + @stay_nights.days,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price * @stay_nights,
         data_version: @data_version
@@ -202,6 +208,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @go_date = Date.parse(data['go_date']) if data['go_date']

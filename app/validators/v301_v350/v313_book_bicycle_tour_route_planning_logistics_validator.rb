@@ -2,26 +2,34 @@
 
 require_relative '../base_validator'
 
-# V313: 预订杭州西湖5天后3人自行车环湖骑行服务
+# V313: 给张三、李四和刘强预订西湖自行车环湖骑行（5天后，3人，含门票+自行车）
 #
 # 任务描述:
-#   用户需要预订杭州西湖自行车环湖骑行服务（5天后，3人参加），
-#   包含景区门票和自行车租赁（双人车+单人车），涉及门票订单和景点活动订单
+#   张三、李四和刘强想5天后去杭州西湖骑自行车环湖，需3人，
+#   要景区门票和自行车租赁（1辆双人车+1辆单人车）
 #
 # 评分标准:
-#   - 创建了景点门票订单（40%)
-#   - 创建了自行车租赁订单（35%)
+#   - 创建了景点门票订单（35%)
+#   - 创建了自行车租赁订单（30%)
 #   - 景点和日期正确 (15%)
+#   - 联系人信息正确 (10%)
 #   - 订单状态和价格有效 (10%)
 module V301V350
   class V313BookBicycleTourRoutePlanningLogisticsValidator < BaseValidator
     self.validator_id = 'v313_book_bicycle_tour_route_planning_logistics_validator'
     self.task_id = '808b3eb8-c5d7-43e8-b730-d9d6c79ab5cb'
-    self.title = '预订杭州西湖5天后3人自行车环湖骑行服务'
-    self.description = '用户需要预订杭州西湖自行车环湖骑行服务（5天后，3人参加），包含景区门票和自行车租赁（双人车+单人车）'
+    self.title = '给张三、李四和刘强预订西湖自行车环湖骑行（5天后，3人，含门票+自行车）'
+    self.description = '张三、李四和刘强想5天后去杭州西湖骑自行车环湖，需3人，要景区门票和自行车租赁（1辆双人车+1辆单人车）'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (3 adults for bicycle tour)
+      @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      
       @visit_date = Date.current + 5.days
       @participant_count = 3
       @city = '杭州'
@@ -63,7 +71,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了景区门票订单（西湖游船票）", weight: 40 do
+      add_assertion "创建了景区门票订单（西湖游船票）", weight: 35 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
@@ -81,7 +89,7 @@ module V301V350
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      add_assertion "创建了自行车租赁订单", weight: 35 do
+      add_assertion "创建了自行车租赁订单", weight: 30 do
         all_activity_orders = ActivityOrder
           .joins(attraction_activity: :attraction)
           .includes(:attraction_activity)
@@ -120,6 +128,25 @@ module V301V350
         end
       end
       
+      add_assertion "联系人信息正确（张三/李四/刘强）", weight: 10 do
+        expected_phones = [@zhangsan.phone, @lisi.phone, @liuqiang.phone]
+        expected_names = [@zhangsan.name, @lisi.name, @liuqiang.name]
+        
+        @ticket_orders.each do |order|
+          expect(order.contact_phone).to be_in(expected_phones),
+            "门票订单联系电话错误。期望: #{expected_phones.join('/')}，实际: #{order.contact_phone}"
+        end
+        
+        if @bicycle_orders
+          @bicycle_orders.each do |order|
+            expect(order.contact_phone).to be_in(expected_phones),
+              "自行车订单联系电话错误。期望: #{expected_phones.join('/')}，实际: #{order.contact_phone}"
+            expect(order.passenger_name).to be_in(expected_names),
+              "乘客姓名错误。期望: #{expected_names.join('/')}，实际: #{order.passenger_name}"
+          end
+        end
+      end
+      
       add_assertion "订单状态和价格有效", weight: 10 do
         @ticket_orders.each do |order|
           expect(order.status).to be_in(['pending', 'paid', 'confirmed']),
@@ -143,6 +170,7 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 1. 创建门票订单（3张成人票）
+      contact_passenger = [@zhangsan, @lisi, @liuqiang].sample
       @participant_count.times do
         TicketOrder.create!(
           user: user,
@@ -150,7 +178,7 @@ module V301V350
           visit_date: @visit_date,
           quantity: 1,
           total_price: @boat_ticket.current_price,
-          contact_phone: '13800138000',
+          contact_phone: contact_passenger.phone,
           passenger_id: user.id,
           passenger_ids: [user.id],
           status: 'paid',
@@ -165,8 +193,8 @@ module V301V350
         visit_date: @visit_date,
         quantity: 1,  # 1辆双人车
         total_price: @bicycle_activity_double.current_price,
-        passenger_name: user.name,
-        contact_phone: '13800138000',
+        passenger_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         passenger_ids: [user.id],
         status: 'paid',
         notes: '双人自行车租赁，2人使用',
@@ -180,8 +208,8 @@ module V301V350
         visit_date: @visit_date,
         quantity: 1,  # 1辆单人车
         total_price: @bicycle_activity_single.current_price,
-        passenger_name: user.name,
-        contact_phone: '13800138000',
+        passenger_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
         passenger_ids: [user.id],
         status: 'paid',
         notes: '单人自行车租赁，1人使用',
@@ -200,7 +228,13 @@ module V301V350
         attraction_id: @attraction&.id,
         boat_ticket_id: @boat_ticket&.id,
         bicycle_activity_double_id: @bicycle_activity_double&.id,
-        bicycle_activity_single_id: @bicycle_activity_single&.id
+        bicycle_activity_single_id: @bicycle_activity_single&.id,
+        zhangsan_name: @zhangsan&.name,
+        zhangsan_phone: @zhangsan&.phone,
+        lisi_name: @lisi&.name,
+        lisi_phone: @lisi&.phone,
+        liuqiang_name: @liuqiang&.name,
+        liuqiang_phone: @liuqiang&.phone
       }
     end
     
@@ -214,6 +248,16 @@ module V301V350
       @boat_ticket = Ticket.find(data['boat_ticket_id']) if data['boat_ticket_id']
       @bicycle_activity_double = AttractionActivity.find(data['bicycle_activity_double_id']) if data['bicycle_activity_double_id']
       @bicycle_activity_single = AttractionActivity.find(data['bicycle_activity_single_id']) if data['bicycle_activity_single_id']
+      
+      if data['zhangsan_name']
+        @zhangsan = OpenStruct.new(name: data['zhangsan_name'], phone: data['zhangsan_phone'])
+      end
+      if data['lisi_name']
+        @lisi = OpenStruct.new(name: data['lisi_name'], phone: data['lisi_phone'])
+      end
+      if data['liuqiang_name']
+        @liuqiang = OpenStruct.new(name: data['liuqiang_name'], phone: data['liuqiang_phone'])
+      end
     end
   end
 end

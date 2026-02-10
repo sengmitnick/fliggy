@@ -4,11 +4,17 @@ module V301V350
   class V318BookNationalDayAttractionHotelPackageValidator < BaseValidator
     self.validator_id = 'v318_book_national_day_attraction_hotel_package_validator'
     self.task_id = "2fa37623-24e7-46f7-a054-b2c98c7c7227"
-    self.title = "预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，1间房，2人）"
-    self.description = "用户需要预订7天后的张家界国家森林公园成人门票（2张）和张家界武陵源度假酒店豪华双床房（入住2晚）"
+    self.title = "给刘强和陈静预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，1间房，2人）"
+    self.description = "刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张）和武陵源度假酒店豪华双床房（2晚）"
     self.timeout_seconds = 180
 
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for travel)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
       # 7天后入住，住2晚
       @check_in_date = Date.today + 7.days
       @check_out_date = @check_in_date + 2.days
@@ -72,12 +78,13 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # 2. 创建门票订单
+      contact_passenger = [@liuqiang, @chenjing].sample
       ticket_order = TicketOrder.create!(
         user_id: user.id,
         ticket_id: @ticket.id,
         visit_date: @visit_date,
         quantity: 2,
-        contact_phone: '13800138000',
+        contact_phone: contact_passenger.phone,
         total_price: @ticket.current_price * 2,
         status: 'pending',
         data_version: @data_version
@@ -92,8 +99,8 @@ module V301V350
         user_id: user.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: '张三',
-        guest_phone: '13800138000',
+        guest_name: contact_passenger.name,
+        guest_phone: contact_passenger.phone,
         rooms_count: 1,
         adults_count: 2,
         children_count: 0,
@@ -111,7 +118,7 @@ module V301V350
     end
 
     def verify
-      add_assertion "创建了门票订单", weight: 25 do
+      add_assertion "创建了门票订单", weight: 20 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
@@ -126,7 +133,7 @@ module V301V350
         expect(@ticket_orders.size).to be >= 1, "未找到符合日期的门票订单"
       end
 
-      add_assertion "创建了酒店订单", weight: 25 do
+      add_assertion "创建了酒店订单", weight: 20 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -179,6 +186,23 @@ module V301V350
             "儿童数错误。期望: 0儿童，实际: #{booking.children_count}儿童"
         end
       end
+      
+      add_assertion "联系人信息正确（刘强/陈静）", weight: 10 do
+        expected_phones = [@liuqiang.phone, @chenjing.phone]
+        expected_names = [@liuqiang.name, @chenjing.name]
+        
+        @ticket_orders&.each do |order|
+          expect(order.contact_phone).to be_in(expected_phones),
+            "门票联系电话错误。期望: #{expected_phones.join('/')}，实际: #{order.contact_phone}"
+        end
+        
+        @hotel_bookings&.each do |booking|
+          expect(booking.guest_phone).to be_in(expected_phones),
+            "酒店联系电话错误。期望: #{expected_phones.join('/')}，实际: #{booking.guest_phone}"
+          expect(booking.guest_name).to be_in(expected_names),
+            "住客姓名错误。期望: #{expected_names.join('/')}，实际: #{booking.guest_name}"
+        end
+      end
     end
 
     def execution_state_data
@@ -189,7 +213,11 @@ module V301V350
         attraction_name: @attraction_name,
         city_name: @city_name,
         attraction_id: @attraction&.id,
-        hotel_id: @hotel&.id
+        hotel_id: @hotel&.id,
+        liuqiang_name: @liuqiang&.name,
+        liuqiang_phone: @liuqiang&.phone,
+        chenjing_name: @chenjing&.name,
+        chenjing_phone: @chenjing&.phone
       }
     end
 
@@ -201,6 +229,13 @@ module V301V350
       @city_name = state['city_name']
       @attraction = Attraction.find_by(id: state['attraction_id']) if state['attraction_id']
       @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      
+      if state['liuqiang_name']
+        @liuqiang = OpenStruct.new(name: state['liuqiang_name'], phone: state['liuqiang_phone'])
+      end
+      if state['chenjing_name']
+        @chenjing = OpenStruct.new(name: state['chenjing_name'], phone: state['chenjing_phone'])
+      end
     end
   end
 end

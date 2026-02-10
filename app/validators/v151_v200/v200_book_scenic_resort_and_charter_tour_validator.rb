@@ -17,13 +17,18 @@ module V151V200
   class V200BookScenicResortAndCharterTourValidator < BaseValidator
     self.validator_id = 'v200_book_scenic_resort_and_charter_tour_validator'
     self.task_id = '1c8e72f9-d895-4e13-9e5d-912749a6b8c5'
-    self.title = '预订4天后景区内酒店+包车游览'
-    self.description = '预订景区内酒店+包车游览服务'
+    self.title = '给王芳预订明天上海景区内酒店+包车游览'
+    self.description = '帮王芳订明天上海景区内的酒店+包车游览服务'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @city = '上海'
-      @check_in_date = Date.tomorrow + 3.days
+      @check_in_date = Date.current + 1.day  # 明天
       @rental_days = 1
       
       # 查找酒店（不限制景区型）
@@ -45,7 +50,7 @@ module V151V200
         "数据包缺少包车/租车服务"
       
       {
-        task: "请预订#{@check_in_date.strftime('%m月%d日')}#{@city}景区内的酒店，并预订包车游览服务（#{@rental_days}天）",
+        task: "请为#{@passenger.name}预订#{@check_in_date.strftime('%m月%d日')}#{@city}景区内的酒店，并预订包车游览服务（#{@rental_days}天）",
         city: @city,
         check_in_date: @check_in_date.strftime('%Y-%m-%d'),
         rental_days: @rental_days,
@@ -118,6 +123,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       
       # 创建酒店订单（选择价格较高的酒店，表示度假型）
       hotel = @available_hotels.first
@@ -130,7 +136,7 @@ module V151V200
         check_in_date: @check_in_date,
         check_out_date: @check_in_date + 2.days,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price * 2,
         data_version: @data_version
@@ -145,8 +151,8 @@ module V151V200
         user: user,
         car_id: car.id,
         driver_name: user.name,
-        driver_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        driver_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         pickup_datetime: pickup_datetime,
         return_datetime: return_datetime,
         pickup_location: hotel.address || "#{@city}景区",
@@ -180,6 +186,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @rental_days = data['rental_days']

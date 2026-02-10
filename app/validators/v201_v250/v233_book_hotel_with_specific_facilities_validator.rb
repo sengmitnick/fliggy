@@ -16,8 +16,8 @@ module V201V250
   class V233BookHotelWithSpecificFacilitiesValidator < BaseValidator
     self.validator_id = 'v233_book_hotel_with_specific_facilities_validator'
     self.task_id = '9ff9b0ff-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '预订明天带特定设施的酒店'
-    self.description = '用户需要预订带有特定设施的酒店（如游泳池、健身房、停车场）'
+    self.title = '给张三预订带游泳池的酒店（明天入住）'
+    self.description = '张三明天要去上海出差，喜欢运动健身，需要预订带游泳池的酒店住1晚'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +25,14 @@ module V201V250
       @required_facility = '游泳池'
       @check_in_date = Date.current + 1.day
       @check_out_date = @check_in_date + 1.day
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找包含指定设施的酒店
       @available_hotels = Hotel.where(city: @city, data_version: 0)
@@ -95,7 +103,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: room.price,
         status: 'paid',

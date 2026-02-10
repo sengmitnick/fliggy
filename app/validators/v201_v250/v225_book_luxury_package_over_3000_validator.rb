@@ -16,8 +16,8 @@ module V201V250
   class V225BookLuxuryPackageOver3000Validator < BaseValidator
     self.validator_id = 'v225_book_luxury_package_over_3000_validator'
     self.task_id = '2ff243ff-3f3f-3f5f-5f6f-4f7a8b9c0d1f'
-    self.title = '预订豪华套餐（≥3000元）'
-    self.description = '用户需要预订豪华套餐（高端航班+高星酒店），总价≥3000元'
+    self.title = '给张三预订豪华套餐（航班+酒店，总价≥3000元）'
+    self.description = '张三5天后想从北京去三亚度假，希望预订高端航班和高星酒店住2晚，总预算至少3000元'
     self.timeout_seconds = 300
     
     def prepare
@@ -27,6 +27,14 @@ module V201V250
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 2.days
       @min_total_price = 3000
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找高端航班（价格较高的）
       @available_flights = Flight.where(
@@ -123,9 +131,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_combo[:flight],
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: best_combo[:flight].price,
         accept_terms: true,
         status: 'paid',
@@ -139,7 +147,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: best_combo[:room].price * 2,
         status: 'paid',

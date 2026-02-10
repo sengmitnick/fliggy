@@ -23,15 +23,20 @@ module V151V200
   class V182BookTransferFlightAndTransitHotelValidator < BaseValidator
     self.validator_id = 'v182_book_transfer_flight_and_transit_hotel_validator'
     self.task_id = '9aedf66b-ff40-41d2-9ff5-3e63982462a1'
-    self.title = '预订明天中转航班和中转城市酒店休息（2个航班）'
-    self.description = '用户需要预订中转航班（间隔>6小时），并在中转城市预订酒店休息'
+    self.title = '给陈静预订明天北京经上海中转到深圳的航班，并预订上海中转酒店休息'
+    self.description = '帮陈静订明天从北京经上海中转到深圳的航班（中转时间>6小时），并在上海预订酒店休息'
     self.timeout_seconds = 300
   
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @transit_city = '上海'
       @final_city = '深圳'
-      @travel_date = Date.tomorrow + 2.days
+      @travel_date = Date.current + 1.day  # 明天
       
       # 查找第一段航班（北京->上海）
       @first_flights = Flight
@@ -73,7 +78,7 @@ module V151V200
       @hotel_checkout_date = @selected_combo[:second].departure_time.to_date
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）从#{@departure_city}经#{@transit_city}中转到#{@final_city}的航班，" \
+        task: "请为#{@passenger.name}预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）从#{@departure_city}经#{@transit_city}中转到#{@final_city}的航班，" \
               "要求中转时间超过6小时，并在#{@transit_city}预订酒店休息",
         requirements: {
           departure_city: @departure_city,
@@ -93,15 +98,16 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
       
       # 创建第一段航班订单
       first_flight = @selected_combo[:first]
       Booking.create!(
         user: user,
         flight: first_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: first_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -113,9 +119,9 @@ module V151V200
       Booking.create!(
         user: user,
         flight: second_flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: second_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -133,7 +139,7 @@ module V151V200
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date == @hotel_checkin_date ? @hotel_checkout_date + 1.day : @hotel_checkout_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         data_version: @data_version
@@ -221,6 +227,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = data['departure_city']
       @transit_city = data['transit_city']
       @final_city = data['final_city']

@@ -16,14 +16,22 @@ module V201V250
   class V250BookMileageAccrualFlightValidator < BaseValidator
     self.validator_id = 'v250_book_mileage_accrual_flight_validator'
     self.task_id = '5ff5b0ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '预订3天后里程累积航班（常旅客计划）'
-    self.description = '用户需要预订可累积里程的航班（参与常旅客计划）'
+    self.title = '给张三预订里程累积航班（3天后去广州）'
+    self.description = '张三3天后要从北京去广州，是航空公司常旅客会员，需要预订可累积里程的航班积攒积分'
     self.timeout_seconds = 300
     
     def prepare
       @departure_city = '北京'
       @destination_city = '广州'
       @flight_date = Date.current + 3.days
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       # 查找支持里程累积的航班（mileage_accrual不为空或航空公司为主流航司）
       major_airlines = ['国航', '东航', '南航', '海航', 'Air China', 'China Eastern', 'China Southern']
@@ -100,9 +108,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         frequent_flyer_number: 'FF123456789',  # 常旅客号码
         accept_terms: true,

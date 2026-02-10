@@ -2,22 +2,23 @@
 
 require_relative '../base_validator'
 
-# 验证用例303: 预订户外探险游
+# 验证用例303: 给刘强预订张家界户外探险游
 #
 # 任务描述:
-#   用户预订户外探险游(徒步+露营+装备租赁)
+#   刘强热爱户外运动，想预订张家界的户外探险游，包含徒步、露营和专业装备
 #
 # 评分标准:
-#   - 创建了张家界跟团游预订 (50%)
+#   - 创建了张家界跟团游预订 (40%)
 #   - 目的地为张家界 (30%)
 #   - 出行日期正确 (15%)
+#   - 联系人信息正确 (10%)
 #   - 购买了旅游保险 (5%)
 module V301V350
   class V303BookOutdoorAdventureTourValidator < BaseValidator
     self.validator_id = 'v303_book_outdoor_adventure_tour_validator'
     self.task_id = 'd11ffc15-c4d4-478c-a93f-67e8662ba77f'
-    self.title = '预订张家界跟团游（10天后出发）'
-    self.description = '预订张家界的跟团游产品，10天后出发，需要购买旅游保险'
+    self.title = '给刘强预订张家界户外探险游（10天后）'
+    self.description = '刘强热爱户外运动，想订张家界的户外探险游，要徒步露营和专业装备'
     self.timeout_seconds = 300
     
     def prepare
@@ -29,6 +30,11 @@ module V301V350
         user.update!(balance: 8000)
       end
       
+      # Pre-query passenger info
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @expected_contact_name = @liuqiang.name
+      @expected_contact_phone = @liuqiang.phone
+      
       {
         task: "请预订#{@destination}的户外探险游，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，需要徒步登山、露营体验和专业装备，适合户外探险爱好者",
         destination: @destination,
@@ -38,7 +44,7 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了张家界跟团游预订", weight: 50 do
+      add_assertion "创建了张家界跟团游预订", weight: 40 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -60,6 +66,13 @@ module V301V350
           "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
       end
       
+      add_assertion "联系人信息正确（刘强）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
+      end
+      
       add_assertion "购买了旅游保险", weight: 5 do
         insurance_type = @tour_booking.insurance_type
         has_insurance = ['standard', 'premium'].include?(insurance_type)
@@ -79,16 +92,7 @@ module V301V350
       
       tour_package = tour_product.tour_packages.first!
       
-      passenger = Passenger.find_or_create_by!(
-        user_id: user.id,
-        id_number: '440300199001011234',
-        data_version: @data_version
-      ) do |p|
-        p.name = '刘先生'
-        p.id_type = 'id_card'
-        p.phone = '13800138000'
-      end
-      
+      # Use existing passenger from demo_user
       TourGroupBooking.create!(
         user_id: user.id,
         tour_group_product_id: tour_product.id,
@@ -96,8 +100,8 @@ module V301V350
         travel_date: @travel_date,
         adult_count: 1,
         child_count: 0,
-        contact_name: passenger.name,
-        contact_phone: passenger.phone,
+        contact_name: @liuqiang.name,
+        contact_phone: @liuqiang.phone,
         total_price: tour_package.price,
         status: 'pending',
         insurance_type: 'premium',  # 高风险保险
@@ -112,13 +116,17 @@ module V301V350
     def execution_state_data
       {
         destination: @destination,
-        travel_date: @travel_date&.to_s
+        travel_date: @travel_date&.to_s,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
     def restore_from_state(data)
       @destination = data['destination']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
   end
 end

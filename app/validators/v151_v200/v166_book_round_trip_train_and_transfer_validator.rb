@@ -9,17 +9,24 @@ module V151V200
   class V166BookRoundTripTrainAndTransferValidator < BaseValidator
     self.validator_id = 'v166_book_round_trip_train_and_transfer_validator'
     self.task_id = 'd6e7f8a9-0b1c-2d3e-4f5a-6b7c8d9e0f1a'
-    self.title = '预订往返火车并预订往返火车站接送（上海⇄杭州，1人）'
+    self.title = '给张三预订明天上海⇄杭州往返火车 + 往返火车站接送服务'
     self.description = '预订明天上海到杭州的往返火车，并预订两次火车站接送服务（去程接站+返程送站）'
     self.timeout_seconds = 300
 
     def prepare
       @departure_city = '上海'
       @arrival_city = '杭州'
-      @outbound_date = Date.tomorrow
+      @outbound_date = Date.current + 1.day  # 明天
       @return_date = @outbound_date + 2.days
       @arrival_station = '杭州东站'
       @departure_station = '上海虹桥站'
+      
+      # 预查询demo_user的乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_name = @passenger.name
+      @expected_phone = @passenger.phone
+      @expected_id_number = @passenger.id_number
       
       # 查找去程火车
       @available_outbound_trains = Train
@@ -42,16 +49,16 @@ module V151V200
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = Passenger.find_by!(phone: '13800138000', data_version: 0)
+      passenger = Passenger.find_by!(phone: @passenger.phone, data_version: 0)
       
       # 创建去程火车订单
       outbound_train = @available_outbound_trains.first
       TrainBooking.create!(
         user_id: user.id,
         train_id: outbound_train.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         total_price: outbound_train.price_second_class,
         accept_terms: true,
@@ -64,9 +71,9 @@ module V151V200
       TrainBooking.create!(
         user_id: user.id,
         train_id: return_train.id,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         seat_type: 'second_class',
         total_price: return_train.price_second_class,
         accept_terms: true,
@@ -86,8 +93,8 @@ module V151V200
         location_to: "#{@arrival_city}市区",
         pickup_datetime: pickup_datetime,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_phone: @passenger.phone,
         total_price: 100.0,
         status: 'pending',
         data_version: @data_version
@@ -105,8 +112,8 @@ module V151V200
         location_to: @arrival_station,
         pickup_datetime: dropoff_datetime,
         vehicle_type: 'business_5',
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_phone: @passenger.phone,
         total_price: 100.0,
         status: 'pending',
         data_version: @data_version
@@ -183,12 +190,20 @@ module V151V200
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
       # 断言4: 接送地点都在杭州
-      add_assertion "接送地点都在杭州", weight: 20 do
+      add_assertion "接送地点都在杭州", weight: 15 do
         pickup_in_city = @pickup_transfer.location_from.include?(@arrival_city) || @pickup_transfer.location_to.include?(@arrival_city)
         dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
         
         expect(pickup_in_city).to be(true), "接站地点错误，期望包含: #{@arrival_city}"
         expect(dropoff_in_city).to be(true), "送站地点错误，期望包含: #{@arrival_city}"
+      end
+      
+      # 断言5: 乘客信息正确（张三）
+      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+        expect(@outbound_ticket.passenger_name).to eq(@expected_name),
+          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_ticket.passenger_name}"
+        expect(@outbound_ticket.passenger_id_number).to eq(@expected_id_number),
+          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_ticket.passenger_id_number}"
       end
     end
   end

@@ -17,11 +17,20 @@ module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
     self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
-    self.title = '预订蜈支洲岛潜水服务（4天后，2人）'
-    self.description = '用户需要预订蜈支洲岛的潜水服务（4天后，2人），包含景区门票、潜水教学+体验和水下摄影服务'
+    self.title = '给刘强和陈静预订蜈支洲岛潜水（4天后，2人，含门票+潜水+摄影）'
+    self.description = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for diving)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
+      # Expected contact info
+      @expected_contact_phone = @liuqiang.phone
+      
       @visit_date = Date.current + 4.days
       @participant_count = 2
       
@@ -48,7 +57,7 @@ module V301V350
     
     def verify
       # 断言1: 购买了景区门票
-      add_assertion "购买了景区门票（#{@attraction.name}）", weight: 25 do
+      add_assertion "购买了景区门票（#{@attraction.name}）", weight: 20 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
@@ -65,6 +74,11 @@ module V301V350
       end
       
       return if @ticket_order.nil?
+      
+      add_assertion "联系电话正确（刘强）", weight: 10 do
+        expect(@ticket_order.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@ticket_order.contact_phone}"
+      end
       
       # 断言2: 预订了潜水活动
       add_assertion "预订了潜水活动（潜水教学+体验）", weight: 30 do
@@ -146,7 +160,7 @@ module V301V350
         ticket: adult_ticket,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: '13800138000',
+        contact_phone: @liuqiang.phone,
         total_price: adult_ticket.current_price * @participant_count,
         status: 'paid',
         data_version: @data_version
@@ -160,7 +174,7 @@ module V301V350
         attraction_activity: diving_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: '13800138000',
+        contact_phone: @liuqiang.phone,
         total_price: diving_activity.current_price * @participant_count,
         insurance_type: 'premium',
         status: 'paid',
@@ -175,7 +189,7 @@ module V301V350
         attraction_activity: photography_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: '13800138000',
+        contact_phone: @liuqiang.phone,
         total_price: photography_activity.current_price * @participant_count,
         insurance_type: 'none',
         status: 'paid',
@@ -192,13 +206,15 @@ module V301V350
         attraction_id: @attraction&.id,
         adult_ticket_id: @adult_ticket&.id,
         diving_activity_id: @diving_activity&.id,
-        photography_activity_id: @photography_activity&.id
+        photography_activity_id: @photography_activity&.id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
     def restore_from_state(data)
       @visit_date = Date.parse(data['visit_date'])
       @participant_count = data['participant_count']
+      @expected_contact_phone = data['expected_contact_phone']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @adult_ticket = Ticket.find(data['adult_ticket_id']) if data['adult_ticket_id']

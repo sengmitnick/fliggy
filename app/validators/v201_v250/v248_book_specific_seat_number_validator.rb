@@ -16,8 +16,8 @@ module V201V250
   class V248BookSpecificSeatNumberValidator < BaseValidator
     self.validator_id = 'v248_book_specific_seat_number_validator'
     self.task_id = '3ff39eff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '预订后天特定座位号（如过道座）'
-    self.description = '用户需要预订特定座位号或座位位置（如过道座、紧急出口排）'
+    self.title = '给张三预订过道座位（后天去上海）'
+    self.description = '张三后天要从北京去上海，需要经常起身活动，希望预订过道座位方便进出'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,6 +25,14 @@ module V201V250
       @destination_city = '上海'
       @flight_date = Date.current + 2.days
       @seat_type = '过道'  # 或具体座位号
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,
@@ -91,9 +99,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: user.name,
-        passenger_id_number: '110101199001011234',
-        contact_phone: '13800138000',
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        contact_phone: @passenger.phone,
         total_price: flight.price,
         seat_preference: @seat_type,
         seat_number: '12C',  # C通常是过道座

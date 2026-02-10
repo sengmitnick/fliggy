@@ -128,7 +128,7 @@ module V301V350
     end
 
     def verify
-      add_assertion "创建了往返机票订单", weight: 25 do
+      add_assertion "创建了往返机票订单", weight: 20 do
         all_bookings = Booking
           .joins(:flight)
           .includes(:flight, :return_flight)
@@ -151,7 +151,7 @@ module V301V350
         expect(@flight_bookings.size).to be >= 1, "未找到符合条件的往返机票"
       end
 
-      add_assertion "创建了亲子酒店订单", weight: 25 do
+      add_assertion "创建了亲子酒店订单", weight: 20 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel, :hotel_room)
@@ -210,6 +210,25 @@ module V301V350
             "儿童数错误。期望: 1儿童，实际: #{booking.children_count}儿童"
         end
       end
+      
+      add_assertion "联系人信息正确（刘强/陈静/小明）", weight: 10 do
+        expected_phones = [@liuqiang.phone, @chenjing.phone, @xiaoming.phone]
+        expected_names = [@liuqiang.name, @chenjing.name, @xiaoming.name]
+        
+        @flight_bookings&.each do |booking|
+          expect(booking.contact_phone).to be_in(expected_phones),
+            "机票联系电话错误。期望: #{expected_phones.join('/')}，实际: #{booking.contact_phone}"
+          expect(booking.passenger_name).to be_in(expected_names),
+            "乘客姓名错误。期望: #{expected_names.join('/')}，实际: #{booking.passenger_name}"
+        end
+        
+        @hotel_bookings&.each do |booking|
+          expect(booking.guest_phone).to be_in(expected_phones),
+            "酒店联系电话错误。期望: #{expected_phones.join('/')}，实际: #{booking.guest_phone}"
+          expect(booking.guest_name).to be_in(expected_names),
+            "住客姓名错误。期望: #{expected_names.join('/')}，实际: #{booking.guest_name}"
+        end
+      end
 
       add_assertion "选择了适合家庭的酒店或活动", weight: 5 do
         family_keywords = ['亲子', '家庭', '儿童']
@@ -237,7 +256,13 @@ module V301V350
         destination_city: @destination_city,
         outbound_flight_id: @outbound_flight&.id,
         return_flight_id: @return_flight&.id,
-        hotel_id: @hotel&.id
+        hotel_id: @hotel&.id,
+        liuqiang_name: @liuqiang&.name,
+        liuqiang_phone: @liuqiang&.phone,
+        chenjing_name: @chenjing&.name,
+        chenjing_phone: @chenjing&.phone,
+        xiaoming_name: @xiaoming&.name,
+        xiaoming_phone: @xiaoming&.phone
       }
     end
 
@@ -249,6 +274,16 @@ module V301V350
       @outbound_flight = Flight.find_by(id: state['outbound_flight_id']) if state['outbound_flight_id']
       @return_flight = Flight.find_by(id: state['return_flight_id']) if state['return_flight_id']
       @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      
+      if state['liuqiang_name']
+        @liuqiang = OpenStruct.new(name: state['liuqiang_name'], phone: state['liuqiang_phone'])
+      end
+      if state['chenjing_name']
+        @chenjing = OpenStruct.new(name: state['chenjing_name'], phone: state['chenjing_phone'])
+      end
+      if state['xiaoming_name']
+        @xiaoming = OpenStruct.new(name: state['xiaoming_name'], phone: state['xiaoming_phone'])
+      end
     end
   end
 end

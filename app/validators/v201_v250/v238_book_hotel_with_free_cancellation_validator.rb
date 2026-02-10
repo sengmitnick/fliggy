@@ -25,6 +25,14 @@ module V201V250
       @check_in_date = Date.current + 4.days
       @check_out_date = @check_in_date + 1.day
       
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
+      
       # 查找支持免费取消的酒店（cancellation_policy包含"免费"或"free"）
       @available_hotels = Hotel.where(city: @city, data_version: 0)
         .where("cancellation_policy LIKE ? OR cancellation_policy LIKE ?", 
@@ -96,7 +104,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: room.price,
         status: 'paid',

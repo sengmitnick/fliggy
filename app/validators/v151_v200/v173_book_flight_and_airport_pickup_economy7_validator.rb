@@ -37,8 +37,8 @@ module V151V200
   class V173BookFlightAndAirportPickupEconomy7Validator < BaseValidator
     self.validator_id = 'v173_book_flight_and_airport_pickup_economy7_validator'
     self.task_id = 'c85d1c59-9430-4f34-9f74-9064baa17824'
-    self.title = '订觭4天后机票后预订接机服务（经济7座，多人出行）'
-    self.description = '家庭6人出游，订购成都到杭州的机票，到达萧山机场后预订接机到西湖，选择经济7座'
+    self.title = '给王芳等6人预订3天后成都到杭州的机票，并预订萧山机场接机到西湖（经济7座）'
+    self.description = '帮王芳一家6个人订3天后从成都到杭州的航班，到达萧山机场后接机到西湖风景区，6人出行需要7座车'
     self.timeout_seconds = 300
   
     def prepare
@@ -46,11 +46,17 @@ module V151V200
       @arrival_city = '杭州'
       @arrival_airport = '萧山国际机场'
       @destination_location = '西湖风景区'
-      @flight_date = Date.current + 4.days
+      @flight_date = Date.current + 3.days  # 3天后出发
       @passenger_count = 6  # 6人出行
       @vehicle_category = 'economy_7'  # 经济7座
       @transfer_type = 'airport_pickup'
       @service_type = 'from_airport'
+    
+      # 预查询乘客信息（王芳作为代表）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_flights = Flight.where(
         departure_city: @departure_city,
@@ -89,9 +95,10 @@ module V151V200
       @best_package = @available_packages.first
     
       {
-        task: "请为家庭6人预订#{@flight_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班（到达萧山国际机场），" \
+        task: "请为王芳等6人预订#{@flight_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班（到达萧山国际机场），" \
               "并预订接机服务到#{@destination_location}（注意：6人出行需要选择7座车）",
         requirements: {
+          passenger: "#{@expected_passenger_name}等6人",
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           arrival_airport: @arrival_airport,
@@ -183,6 +190,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
     
       target_flight = @available_flights.order(:departure_time).first
       raise "未找到可用航班" unless target_flight
@@ -194,9 +202,9 @@ module V151V200
         user_id: user.id,
         flight_id: target_flight.id,
         flight_offer_id: flight_offer.id,
-        passenger_name: '王五',
-        passenger_id_number: '510101199001011234',
-        contact_phone: '13700137000',
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight_offer.price,
         accept_terms: true,
         status: 'paid',
@@ -213,8 +221,8 @@ module V151V200
         location_from: @airport_location.name,
         location_to: @destination.name,
         pickup_datetime: pickup_datetime,
-        passenger_name: '王五',
-        passenger_phone: '13700137000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         passenger_count: @passenger_count,
         luggage_count: 4,
         total_price: @best_package.price,
@@ -253,6 +261,12 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+    
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
     
       @available_flights = Flight.where(
         departure_city: @departure_city,

@@ -16,8 +16,8 @@ module V201V250
   class V222BookMidRangeHotel500800Validator < BaseValidator
     self.validator_id = 'v222_book_mid_range_hotel_500_800_validator'
     self.task_id = '9fe910fd-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '预订中档酒店（500-800元/晚）'
-    self.description = '用户需要预订酒店，价格区间500-800元/晚（中档舒适）'
+    self.title = '给张三预订中档酒店（500-800元/晚）'
+    self.description = '张三打算2天后去杭州出差，想选一家中档舒适的酒店，预算是每晚500-800元'
     self.timeout_seconds = 300
     
     def prepare
@@ -26,6 +26,14 @@ module V201V250
       @check_out_date = @check_in_date + 1.day
       @min_price = 500
       @max_price = 800
+      
+      # 查询demo_user乘客信息
+      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = OpenStruct.new(
+        name: demo_user.passenger_name,
+        id_number: demo_user.passenger_id_number,
+        phone: demo_user.passenger_phone
+      )
       
       @available_hotels = Hotel.where(city: @city, data_version: 0).to_a.select do |h|
         h.price >= @min_price && h.price <= @max_price
@@ -91,7 +99,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: @passenger.phone,
         room_count: 1,
         total_price: hotel.price,
         status: 'paid',

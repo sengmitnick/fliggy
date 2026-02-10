@@ -17,13 +17,18 @@ module V151V200
   class V199BookCbdBusinessHotelAndAirportShuttleValidator < BaseValidator
     self.validator_id = 'v199_book_cbd_business_hotel_and_airport_shuttle_validator'
     self.task_id = '1b8f7359-8e4c-4e2f-a7c8-ff25c53c02a3'
-    self.title = '预订3天后CBD商务酒店+机场快线接送'
-    self.description = '预订CBD商务酒店+机场快线接送服务'
+    self.title = '给李四预订明天上海CBD商务酒店+机场快线接送'
+    self.description = '帮李四订明天上海CBD的商务酒店+机场快线接送服务'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @city = '上海'
-      @check_in_date = Date.tomorrow + 2.days
+      @check_in_date = Date.current + 1.day  # 明天
       
       # 查找酒店（不限制商务型）
       @available_hotels = Hotel
@@ -35,7 +40,7 @@ module V151V200
         "数据包缺少#{@city}的酒店"
       
       {
-        task: "请预订#{@check_in_date.strftime('%m月%d日')}#{@city}CBD的商务酒店，并预订机场接送服务",
+        task: "请为#{@passenger.name}预订#{@check_in_date.strftime('%m月%d日')}#{@city}CBD的商务酒店，并预订机场接送服务",
         city: @city,
         check_in_date: @check_in_date.strftime('%Y-%m-%d'),
         hint: "选择商务区的酒店，提供机场接送服务"
@@ -94,6 +99,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '李四', data_version: 0)
       
       # 创建酒店订单（选择价格较高的酒店，表示商务型）
       hotel = @available_hotels.first
@@ -106,7 +112,7 @@ module V151V200
         check_in_date: @check_in_date,
         check_out_date: @check_in_date + 2.days,
         guest_name: user.name,
-        guest_phone: '13800138000',
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price * 2,
         data_version: @data_version
@@ -120,8 +126,8 @@ module V151V200
         location_from: "#{@city}浦东国际机场",
         location_to: hotel.address || "#{@city}CBD",
         pickup_datetime: @check_in_date.to_time + 10.hours,
-        passenger_name: user.name,
-        passenger_phone: '13800138000',
+        passenger_name: passenger.name,
+        passenger_phone: passenger.phone,
         vehicle_type: '舒适型',
         provider_name: '快车服务',
         total_price: 120.0,
@@ -155,6 +161,11 @@ module V151V200
     end
     
     def restore_from_state(data)
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @city = data['city']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
     end

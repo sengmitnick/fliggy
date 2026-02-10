@@ -18,11 +18,17 @@ module V301V350
   class V312BookSurfingLessonBeachEquipmentValidator < BaseValidator
     self.validator_id = 'v312_book_surfing_lesson_beach_equipment_validator'
     self.task_id = 'c132957d-cbea-4e0b-8190-acd5d2d2ce30'
-    self.title = '预订4天后2人深圳大梅沙冲浪服务套餐（教学+海滩娱乐+装备）'
-    self.description = '用户需要4天后去深圳大梅沙海滨公园预订冲浪服务套餐，2人参与，包含冲浪教学、海滩娱乐和装备提供，需创建冲浪活动订单和海滩娱乐活动订单，活动日期和人数正确，订单状态和价格有效'
+    self.title = '给刘强和陈静预订大梅沙冲浪（4天后，2人，含教学+装备+娱乐）'
+    self.description = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
     self.timeout_seconds = 300
     
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # Pre-query existing passengers from demo_user (couple for surfing)
+      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+      
       @activity_date = Date.current + 4.days
       @participant_count = 2
       
