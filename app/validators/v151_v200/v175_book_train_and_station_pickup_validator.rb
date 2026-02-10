@@ -145,17 +145,17 @@ module V151V200
         expect(train.arrival_city).to eq(@arrival_city)
       end
     
-      add_assertion "接站起点正确（#{@arrival_station}）", weight: 20 do
+      add_assertion "接站起点正确（#{@arrival_station}）", weight: 15 do
         expect(@transfer.location_from).to eq(@arrival_station),
           "接站起点错误。期望: #{@arrival_station}（火车到达站），实际: #{@transfer.location_from}"
       end
     
-      add_assertion "接站终点正确（#{@destination_location}）", weight: 15 do
+      add_assertion "接站终点正确（#{@destination_location}）", weight: 10 do
         expect(@transfer.location_to).to eq(@destination_location),
           "接站终点错误。期望: #{@destination_location}, 实际: #{@transfer.location_to}"
       end
     
-      add_assertion "接送时间正确（火车到达后15分钟）", weight: 15 do
+      add_assertion "接送时间正确（火车到达后15分钟）", weight: 10 do
         train = @train_booking.train
         expected_pickup_time = train.arrival_time + 15.minutes
         time_diff = (@transfer.pickup_datetime - expected_pickup_time).abs
@@ -179,6 +179,20 @@ module V151V200
           expect(@transfer.total_price).to be <= (cheapest_price * 1.05),
             "未选择最优价格。最低价: ¥#{cheapest_price}, 实际: ¥#{@transfer.total_price}"
         end
+      end
+    
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "火车联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+    
+      add_assertion "接站联系人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "接站联系人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_phone),
+          "接站联系电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
       end
     end
   
@@ -237,7 +251,9 @@ module V151V200
         travel_date: @travel_date.to_s,
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
-        service_type: @service_type
+        service_type: @service_type,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
   
@@ -250,6 +266,8 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
     
       # 重新查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

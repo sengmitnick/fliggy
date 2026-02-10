@@ -8,18 +8,20 @@ require_relative '../base_validator'
 #   预订2大1小家庭出行，总预算≤2000元
 #
 # 评分标准:
-#   - 创建了交通订单（2个成人票+1个儿童票） (20%)
-#   - 创建了酒店订单 (15%)
+#   - 创建了交通订单（2个成人票+1个儿童票） (15%)
+#   - 创建了酒店订单 (10%)
 #   - 出发/到达城市正确 (10%)
 #   - 酒店城市正确 (10%)
-#   - 总预算在2000元以内 (30%)
-#   - 日期合理 (15%)
+#   - 乘客信息正确（张三、王芳、小明） (15%)
+#   - 联系人和入住人信息正确 (10%)
+#   - 总预算在2000元以内 (20%)
+#   - 日期合理 (10%)
 module V151V200
   class V191BookFamilyBudgetTripUnder2000Validator < BaseValidator
     self.validator_id = 'v191_book_family_budget_trip_under_2000_validator'
     self.task_id = 'e9100569-2f92-49f6-9c56-2eaa58616ddc'
-    self.title = '给张三一家2大1小家庭预订3天后北京到上海的行程（总预算≤2000元）'
-    self.description = '帮张三一家订后天从北京到上海的2大1小家庭行程，总预算不超过2000元'
+    self.title = '给张三一家2大1小预订后天北京到上海的行程（总预算≤2000元）'
+    self.description = '帮张三、王芳、小明订后天从北京到上海的行程（2成人+1儿童），总预算不超过2000元'
     self.timeout_seconds = 300
     
     def prepare
@@ -30,10 +32,11 @@ module V151V200
       
       @departure_city = '北京'
       @arrival_city = '上海'
-      @travel_date = Date.current + 1.day  # 明天
+      @travel_date = Date.current + 2.days  # 后天
       @max_budget = 2000
       @adult_count = 2
       @child_count = 1
+      @expected_passengers = ['张三', '王芳', '小明']  # 家庭成员
       
       # 查找低价交通
       @available_trains = Train
@@ -60,8 +63,8 @@ module V151V200
     end
     
     def verify
-      # 断言1: 创建了交通订单（2个成人票+1个儿童票） (20%)
-      add_assertion "创建了交通订单（2个成人票+1个儿童票）", weight: 20 do
+      # 断言1: 创建了交通订单（2个成人票+1个儿童票） (15%)
+      add_assertion "创建了交通订单（2个成人票+1个儿童票）", weight: 15 do
         all_train_bookings = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -79,8 +82,8 @@ module V151V200
       
       return if @train_bookings.nil? || @train_bookings.empty?
       
-      # 断言2: 创建了酒店订单 (15%)
-      add_assertion "创建了酒店订单", weight: 15 do
+      # 断言2: 创建了酒店订单 (10%)
+      add_assertion "创建了酒店订单", weight: 10 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -107,8 +110,33 @@ module V151V200
         expect(hotel.city).to eq(@arrival_city)
       end
       
-      # 断言5: 总预算在2000元以内 (30%)
-      add_assertion "总预算在#{@max_budget}元以内", weight: 30 do
+      # 断言5: 乘客信息正确（张三、王芳、小明） (15%)
+      add_assertion "乘客信息正确（#{@expected_passengers.join('、')}）", weight: 15 do
+        passenger_names = @train_bookings.map(&:passenger_name).uniq.sort
+        expect(passenger_names.size).to be >= 2,
+          "乘客数量不足。期望: 至少2人（家庭成员），实际: #{passenger_names.size}人（#{passenger_names.join('、')}）"
+        
+        # 检查是否包含主要家庭成员（至少张三或王芳）
+        has_family_member = @expected_passengers.any? { |name| passenger_names.include?(name) }
+        expect(has_family_member).to be true,
+          "乘客信息错误。期望包含: #{@expected_passengers.join('、')}，实际: #{passenger_names.join('、')}"
+      end
+      
+      # 断言6: 联系人和入住人信息正确 (10%)
+      add_assertion "联系人和入住人信息正确（#{@expected_passenger_name}）", weight: 10 do
+        # 检查火车票联系人
+        @train_bookings.each do |booking|
+          expect(booking.contact_phone).to eq(@expected_phone),
+            "火车票联系人电话错误。期望: #{@expected_phone}, 实际: #{booking.contact_phone}"
+        end
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言7: 总预算在2000元以内 (20%)
+      add_assertion "总预算在#{@max_budget}元以内", weight: 20 do
         train_total = @train_bookings.sum(&:total_price)
         hotel_total = @hotel_booking.total_price
         actual_total = train_total + hotel_total
@@ -117,8 +145,8 @@ module V151V200
           "总价超预算。期望: ≤#{@max_budget}元, 实际: #{actual_total}元（火车#{train_total}+酒店#{hotel_total}）"
       end
       
-      # 断言6: 日期合理 (15%)
-      add_assertion "日期合理", weight: 15 do
+      # 断言8: 日期合理 (10%)
+      add_assertion "日期合理", weight: 10 do
         arrival_date = @train_bookings.first.train.arrival_time.to_date
         checkin_date = @hotel_booking.check_in_date
         expect([arrival_date, arrival_date + 1.day]).to include(checkin_date)
@@ -162,22 +190,7 @@ module V151V200
       
       # 找到最便宜的酒店
       cheapest_hotel = @available_hotels.first
-      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
-      unless room
-        room = HotelRoom.create!(
-          hotel_id: cheapest_hotel.id,
-          room_type: '标准双人间',
-          bed_type: 'double',
-          price: cheapest_hotel.price,
-          original_price: cheapest_hotel.original_price,
-          area: 25.0,
-          max_guests: 3,
-          has_window: true,
-          available_rooms: 10,
-          room_category: 'standard',
-          data_version: 0
-        )
-      end
+      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
       
       arrival_date = cheapest_train.arrival_time.to_date
       HotelBooking.create!(
@@ -203,7 +216,8 @@ module V151V200
         travel_date: @travel_date&.to_s,
         max_budget: @max_budget,
         adult_count: @adult_count,
-        child_count: @child_count
+        child_count: @child_count,
+        expected_passengers: @expected_passengers
       }
     end
     
@@ -219,6 +233,7 @@ module V151V200
       @max_budget = data['max_budget']
       @adult_count = data['adult_count']
       @child_count = data['child_count']
+      @expected_passengers = data['expected_passengers'] || ['张三', '王芳', '小明']
     end
   end
 end

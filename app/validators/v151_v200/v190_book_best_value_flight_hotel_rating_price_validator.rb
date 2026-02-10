@@ -17,13 +17,13 @@ module V151V200
   class V190BookBestValueFlightHotelRatingPriceValidator < BaseValidator
     self.validator_id = 'v190_book_best_value_flight_hotel_rating_price_validator'
     self.task_id = '19700fc3-d99e-4691-bf05-a9d0b855d17a'
-    self.title = '给吴勇预订明天性价比最高的航班+酒店组合'
-    self.description = '帮吴勇预订明天从北京到上海的航班+酒店，要求性价比最高（评分/价格比最优）'
+    self.title = '给刘强预订明天性价比最高的航班+酒店组合'
+    self.description = '帮刘强预订明天从北京到上海的航班+酒店，要求性价比最高（评分/价格比最优）'
     self.timeout_seconds = 300
     
     def prepare
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
@@ -62,8 +62,8 @@ module V151V200
     end
     
     def verify
-      # 断言1: 创建了航班订单和酒店订单 (25%)
-      add_assertion "创建了航班订单和酒店订单", weight: 25 do
+      # 断言1: 创建了航班订单和酒店订单 (20%)
+      add_assertion "创建了航班订单和酒店订单", weight: 20 do
         @flight_booking = Booking
           .joins(:flight)
           .includes(:flight)
@@ -87,28 +87,28 @@ module V151V200
       
       return if @flight_booking.nil? || @hotel_booking.nil?
       
-      # 断言2: 出发/到达城市正确 (15%)
-      add_assertion "出发/到达城市正确（#{@departure_city}→#{@arrival_city}）", weight: 15 do
+      # 断言2: 出发/到达城市正确 (13%)
+      add_assertion "出发/到达城市正确（#{@departure_city}→#{@arrival_city}）", weight: 13 do
         flight = @flight_booking.flight
         expect(flight.departure_city).to eq(@departure_city)
         expect(flight.destination_city).to eq(@arrival_city)
       end
       
-      # 断言3: 酒店城市正确 (10%)
-      add_assertion "酒店城市正确（#{@arrival_city}）", weight: 10 do
+      # 断言3: 酒店城市正确 (8%)
+      add_assertion "酒店城市正确（#{@arrival_city}）", weight: 8 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to eq(@arrival_city)
       end
       
-      # 断言4: 日期合理 (10%)
-      add_assertion "日期合理", weight: 10 do
+      # 断言4: 日期合理 (8%)
+      add_assertion "日期合理", weight: 8 do
         arrival_date = @flight_booking.flight.arrival_time.to_date
         checkin_date = @hotel_booking.check_in_date
         expect([arrival_date, arrival_date + 1.day]).to include(checkin_date)
       end
       
-      # 断言5: 性价比最高（评分/价格比最优，允许10%误差） (40%)
-      add_assertion "性价比最高（评分/价格比最优，允许10%误差）", weight: 40 do
+      # 断言5: 性价比最高（评分/价格比最优，允许10%误差） (30%)
+      add_assertion "性价比最高（评分/价格比最优，允许10%误差）", weight: 30 do
         hotel = @hotel_booking.hotel
         actual_value_ratio = hotel.rating.to_f / hotel.price.to_f
         
@@ -116,11 +116,38 @@ module V151V200
         expect(actual_value_ratio).to be >= min_acceptable_ratio,
           "性价比不是最优。期望: ≥#{min_acceptable_ratio.round(4)}（最佳性价比#{@best_value_ratio.round(4)}-10%误差）, 实际: #{actual_value_ratio.round(4)}（酒店评分#{hotel.rating}/价格#{hotel.price}）"
       end
+      
+      # 断言6: 航班乘客信息正确 (3%)
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 3 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+      end
+      
+      # 断言7: 航班联系电话正确 (7%)
+      add_assertion "航班联系电话正确（#{@expected_phone}）", weight: 7 do
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+      
+      # 断言8: 酒店入住人信息正确 (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言9: 航班出发日期正确 (3%)
+      add_assertion "航班出发日期正确（#{@travel_date}）", weight: 3 do
+        actual_date = @flight_booking.flight.departure_time.to_date
+        expect(actual_date).to eq(@travel_date),
+          "出发日期错误。期望: #{@travel_date}, 实际: #{actual_date}"
+      end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
       
       # 选择任意航班（性价比主要看酒店）
       flight = @available_flights.min_by(&:price)
@@ -152,7 +179,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: arrival_date,
         check_out_date: arrival_date + 1.day,
-        guest_name: user.name,
+        guest_name: passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -171,20 +198,34 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @travel_date&.to_s,
-        best_value_ratio: @best_value_ratio
+        best_value_ratio: @best_value_ratio,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
+      passenger_name = data['expected_passenger_name'] || '刘强'
+      @passenger = user.passengers.find_by!(name: passenger_name, data_version: 0)
+      @expected_passenger_name = data['expected_passenger_name'] || @passenger.name
+      @expected_phone = data['expected_phone'] || @passenger.phone
       
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @best_value_ratio = data['best_value_ratio']
+      
+      # 重建 available 数据
+      @available_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @arrival_city, data_version: 0)
+        .select { |f| f.departure_time.to_date == @travel_date }
+        .to_a
+      
+      @available_hotels = Hotel
+        .where(city: @arrival_city, data_version: 0)
+        .where.not(rating: nil)
+        .to_a
     end
   end
 end

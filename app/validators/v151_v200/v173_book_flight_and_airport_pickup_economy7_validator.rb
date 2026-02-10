@@ -150,7 +150,7 @@ module V151V200
         expect(flight.destination_city).to eq(@arrival_city)
       end
     
-      add_assertion "接机起点正确（#{@arrival_airport}）", weight: 20 do
+      add_assertion "接机起点正确（#{@arrival_airport}）", weight: 15 do
         location_matches = @transfer.location_from.include?('萧山') || @transfer.location_from == @arrival_airport
         
         expect(location_matches).to be_truthy,
@@ -162,7 +162,7 @@ module V151V200
           "接机终点错误。期望: #{@destination_location}, 实际: #{@transfer.location_to}"
       end
     
-      add_assertion "接送时间正确（航班到达后30分钟）", weight: 10 do
+      add_assertion "接送时间正确（航班到达后30分钟）", weight: 7 do
         flight = @flight_booking.flight
         expected_pickup_time = flight.arrival_time + 30.minutes
         time_diff = (@transfer.pickup_datetime - expected_pickup_time).abs
@@ -171,7 +171,7 @@ module V151V200
           "接送时间错误。期望: #{expected_pickup_time.strftime('%H:%M')}, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
       end
     
-      add_assertion "车型选择正确（经济7座，适合6人出行）", weight: 25 do
+      add_assertion "车型选择正确（经济7座，适合6人出行）", weight: 18 do
         if @transfer.transfer_package.present?
           expect(@transfer.transfer_package.vehicle_category).to eq(@vehicle_category),
             "车型选择错误。期望: #{@vehicle_category}（经济7座，6人出行必须7座车），实际: #{@transfer.transfer_package.vehicle_category}"
@@ -185,6 +185,20 @@ module V151V200
           expect(@transfer.total_price).to be <= (cheapest_price * 1.05),
             "未选择最优价格。最低价: ¥#{cheapest_price}, 实际: ¥#{@transfer.total_price}"
         end
+      end
+    
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+    
+      add_assertion "接机联系人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@transfer.passenger_name).to eq(@expected_passenger_name),
+          "接机联系人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@transfer.passenger_name}"
+        expect(@transfer.passenger_phone).to eq(@expected_phone),
+          "接机联系电话错误。期望: #{@expected_phone}, 实际: #{@transfer.passenger_phone}"
       end
     end
   
@@ -247,7 +261,9 @@ module V151V200
         passenger_count: @passenger_count,
         vehicle_category: @vehicle_category,
         transfer_type: @transfer_type,
-        service_type: @service_type
+        service_type: @service_type,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
   
@@ -261,6 +277,8 @@ module V151V200
       @vehicle_category = data['vehicle_category']
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
     
       # 重新查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)

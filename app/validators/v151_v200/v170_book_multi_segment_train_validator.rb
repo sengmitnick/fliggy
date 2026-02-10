@@ -88,7 +88,10 @@ module V151V200
         city2: @city2,
         city3: @city3,
         train1_date: @train1_date.to_s,
-        train2_date: @train2_date.to_s
+        train2_date: @train2_date.to_s,
+        expected_name: @expected_name,
+        expected_phone: @expected_phone,
+        expected_id_number: @expected_id_number
       }
     end
 
@@ -99,6 +102,9 @@ module V151V200
       @city3 = data['city3']
       @train1_date = Date.parse(data['train1_date']) if data['train1_date']
       @train2_date = Date.parse(data['train2_date']) if data['train2_date']
+      @expected_name = data['expected_name']
+      @expected_phone = data['expected_phone']
+      @expected_id_number = data['expected_id_number']
     end
 
     def verify
@@ -160,11 +166,18 @@ module V151V200
       end
       
       # 断言6: 乘客信息正确（张三）
-      add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
+      add_assertion "两段火车乘客信息一致（#{@expected_name}）", weight: 5 do
+        # 验证第一段
         expect(@ticket1.passenger_name).to eq(@expected_name),
-          "乘客姓名错误。期望: #{@expected_name}, 实际: #{@ticket1.passenger_name}"
+          "第一段火车乘客姓名错误。期望: #{@expected_name}, 实际: #{@ticket1.passenger_name}"
         expect(@ticket1.passenger_id_number).to eq(@expected_id_number),
-          "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@ticket1.passenger_id_number}"
+          "第一段火车乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@ticket1.passenger_id_number}"
+        
+        # 验证第二段
+        expect(@ticket2.passenger_name).to eq(@expected_name),
+          "第二段火车乘客姓名错误。期望: #{@expected_name}, 实际: #{@ticket2.passenger_name}"
+        expect(@ticket2.passenger_id_number).to eq(@expected_id_number),
+          "第二段火车乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@ticket2.passenger_id_number}"
       end
     end
   end

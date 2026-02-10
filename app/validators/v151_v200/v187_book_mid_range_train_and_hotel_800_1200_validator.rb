@@ -43,6 +43,11 @@ module V151V200
     #     }
     #   end
     def prepare
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_phone = @passenger.phone
+      
       @departure_city = '北京'
       @arrival_city = '上海'
       @travel_date = Date.current + 1.day  # 明天 + 1.day
@@ -117,8 +122,8 @@ module V151V200
     #
     # 使用 add_assertion 添加断言（必须指定 weight 权重，总和为 100）
     def verify
-      # 断言1: 创建了火车订单和酒店订单 (25%)
-      add_assertion "创建了火车订单和酒店订单", weight: 25 do
+      # 断言1: 创建了火车订单和酒店订单 (20%)
+      add_assertion "创建了火车订单和酒店订单", weight: 20 do
         all_train_bookings = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -144,22 +149,22 @@ module V151V200
       
       return if @train_booking.nil? || @hotel_booking.nil?
       
-      # 断言2: 火车目的地正确 (15%)
-      add_assertion "火车到达#{@arrival_city}", weight: 15 do
+      # 断言2: 火车目的地正确 (13%)
+      add_assertion "火车到达#{@arrival_city}", weight: 13 do
         train = @train_booking.train
         expect(train.arrival_city).to eq(@arrival_city),
           "火车到达城市错误。期望: #{@arrival_city}, 实际: #{train.arrival_city}"
       end
       
-      # 断言3: 酒店位置正确 (15%)
-      add_assertion "酒店位于#{@arrival_city}", weight: 15 do
+      # 断言3: 酒店位置正确 (13%)
+      add_assertion "酒店位于#{@arrival_city}", weight: 13 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@arrival_city),
           "酒店城市错误。期望包含: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言4: 酒店入住日期合理（火车到达当天或次日） (15%)
-      add_assertion "酒店入住日期合理（火车到达当天或次日）", weight: 15 do
+      # 断言4: 酒店入住日期合理（火车到达当天或次日） (13%)
+      add_assertion "酒店入住日期合理（火车到达当天或次日）", weight: 13 do
         arrival_date = @train_booking.train.arrival_time.to_date
         expect(@hotel_booking.check_in_date).to be >= arrival_date,
           "入住日期早于火车到达日期。火车到达: #{arrival_date}, 入住日期: #{@hotel_booking.check_in_date}"
@@ -167,8 +172,8 @@ module V151V200
           "入住日期过晚。火车到达: #{arrival_date}, 入住日期: #{@hotel_booking.check_in_date}"
       end
       
-      # 断言5: 总价在预算范围内（800-1200元） (30%)
-      add_assertion "总价在预算范围内（#{@min_budget}-#{@max_budget}元）", weight: 30 do
+      # 断言5: 总价在预算范围内（800-1200元） (20%)
+      add_assertion "总价在预算范围内（#{@min_budget}-#{@max_budget}元）", weight: 20 do
         train_price = @train_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = train_price + hotel_price
@@ -177,6 +182,33 @@ module V151V200
           "总价低于预算下限。期望: ≥#{@min_budget}元, 实际: #{total_price}元（火车#{train_price}元+酒店#{hotel_price}元）"
         expect(total_price).to be <= @max_budget,
           "总价超出预算上限。期望: ≤#{@max_budget}元, 实际: #{total_price}元（火车#{train_price}元+酒店#{hotel_price}元）"
+      end
+      
+      # 断言6: 火车乘客信息正确 (3%)
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 3 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+      end
+      
+      # 断言7: 火车联系电话正确 (7%)
+      add_assertion "火车联系电话正确（#{@expected_phone}）", weight: 7 do
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+      
+      # 断言8: 酒店入住人信息正确 (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言9: 火车出发日期正确 (3%)
+      add_assertion "火车出发日期正确（#{@travel_date}）", weight: 3 do
+        actual_date = @train_booking.train.departure_time.to_date
+        expect(actual_date).to eq(@travel_date),
+          "出发日期错误。期望: #{@travel_date}, 实际: #{actual_date}"
       end
     end
     
@@ -227,7 +259,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -248,7 +280,9 @@ module V151V200
         min_budget: @min_budget,
         max_budget: @max_budget,
         check_in_date: @check_in_date&.to_s,
-        check_out_date: @check_out_date&.to_s
+        check_out_date: @check_out_date&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
@@ -257,9 +291,10 @@ module V151V200
     # 从持久化数据恢复实例变量
     def restore_from_state(data)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
+      passenger_name = data['expected_passenger_name'] || '张三'
+      @passenger = user.passengers.find_by!(name: passenger_name, data_version: 0)
+      @expected_passenger_name = data['expected_passenger_name'] || @passenger.name
+      @expected_phone = data['expected_phone'] || @passenger.phone
       
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
@@ -268,6 +303,39 @@ module V151V200
       @max_budget = data['max_budget']
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
+      
+      # 重建 available 数据
+      @available_trains = Train
+        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
+        .select { |t| t.departure_time.to_date == @travel_date }
+        .to_a
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@arrival_city}%")
+        .where(data_version: 0)
+        .to_a
+      
+      @valid_combinations = []
+      @available_trains.each do |train|
+        @available_hotels.each do |hotel|
+          rooms = hotel.hotel_rooms.where(data_version: 0).to_a
+          next if rooms.empty?
+          
+          cheapest_room = rooms.min_by(&:price)
+          total = train.price_second_class + cheapest_room.price
+          
+          if total >= @min_budget && total <= @max_budget
+            @valid_combinations << {
+              train: train,
+              hotel: hotel,
+              room: cheapest_room,
+              total_price: total
+            }
+          end
+        end
+      end
+      
+      @selected_combo = @valid_combinations.max_by { |c| c[:total_price] } if @valid_combinations.any?
     end
   end
 end

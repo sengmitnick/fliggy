@@ -10,16 +10,17 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了去程交通订单 (15%)
 #   - 创建了返程交通订单 (15%)
-#   - 创建了酒店订单（7晚） (20%)
+#   - 创建了酒店订单（7晚） (15%)
 #   - 出发/到达城市正确 (10%)
-#   - 总预算在3000元以内 (30%)
+#   - 乘客和入住人信息正确（李四） (15%)
+#   - 总预算在3000元以内 (20%)
 #   - 日期合理 (10%)
 module V151V200
   class V192BookWeekTripBudget3000OptimizeValidator < BaseValidator
     self.validator_id = 'v192_book_week_trip_budget_3000_optimize_validator'
     self.task_id = 'a91aa487-9ae2-4ef6-83e2-44b428900100'
-    self.title = '给李四预订4天后7天行程，总预算≤3000元（7晚）'
-    self.description = '帮李四订4天后从北京到上海的7天行程（往返+住宿7晚），总预算不超过3000元'
+    self.title = '给李四预订4天后从北京到上海的往还+7晚住宿（总预算≤3000元）'
+    self.description = '帮李四订4天后从北京到上海的7天行程（往返交通+住宿7晚），总预算不超过3000元'
     self.timeout_seconds = 300
     
     def prepare
@@ -30,7 +31,7 @@ module V151V200
       
       @departure_city = '北京'
       @arrival_city = '上海'
-      @go_date = Date.current + 1.day  # 明天
+      @go_date = Date.current + 4.days  # 4天后
       @return_date = @go_date + 7.days
       @max_budget = 3000
       @stay_nights = 7
@@ -98,8 +99,8 @@ module V151V200
         expect(@return_booking).not_to be_nil, "未找到返程交通订单"
       end
       
-      # 断言3: 创建了酒店订单（7晚） (20%)
-      add_assertion "创建了酒店订单（7晚）", weight: 20 do
+      # 断言3: 创建了酒店订单（7晚） (15%)
+      add_assertion "创建了酒店订单（7晚）", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -124,8 +125,28 @@ module V151V200
         expect(go_train.arrival_city).to eq(@arrival_city)
       end
       
-      # 断言5: 总预算在3000元以内 (30%)
-      add_assertion "总预算在#{@max_budget}元以内", weight: 30 do
+      # 断言5: 乘客和入住人信息正确（李四） (15%)
+      add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查火车票乘客姓名
+        expect(@go_booking.passenger_name).to eq(@expected_passenger_name),
+          "去程乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@go_booking.passenger_name}"
+        
+        if @return_booking
+          expect(@return_booking.passenger_name).to eq(@expected_passenger_name),
+            "返程乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@return_booking.passenger_name}"
+        end
+        
+        # 检查火车票联系人
+        expect(@go_booking.contact_phone).to eq(@expected_phone),
+          "火车票联系人电话错误。期望: #{@expected_phone}, 实际: #{@go_booking.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言6: 总预算在3000元以内 (20%)
+      add_assertion "总预算在#{@max_budget}元以内", weight: 20 do
         go_price = @go_booking.total_price
         return_price = @return_booking ? @return_booking.total_price : 0
         hotel_price = @hotel_booking.total_price
@@ -135,7 +156,7 @@ module V151V200
           "总价超预算。期望: ≤#{@max_budget}元, 实际: #{actual_total}元（去程#{go_price}+返程#{return_price}+酒店#{hotel_price}）"
       end
       
-      # 断言6: 日期合理 (10%)
+      # 断言7: 日期合理 (10%)
       add_assertion "日期合理", weight: 10 do
         arrival_date = @go_booking.train.arrival_time.to_date
         checkin_date = @hotel_booking.check_in_date

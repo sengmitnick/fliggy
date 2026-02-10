@@ -30,7 +30,7 @@ module V151V200
   
     def prepare
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
@@ -81,7 +81,7 @@ module V151V200
   
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       
       # 创建火车订单
       train = @available_trains.sort_by(&:departure_time).first
@@ -108,7 +108,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -117,8 +117,8 @@ module V151V200
     end
   
     def verify
-      # 断言1: 创建了火车订单 (20%)
-      add_assertion "创建了火车订单（#{@departure_city}→#{@arrival_city}）", weight: 20 do
+      # 断言1: 创建了火车订单 (18%)
+      add_assertion "创建了火车订单（#{@departure_city}→#{@arrival_city}）", weight: 18 do
         all_bookings = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -133,8 +133,8 @@ module V151V200
       
       return if @train_booking.nil?
       
-      # 断言2: 火车出发时间正确（6-8点） (20%)
-      add_assertion "火车出发时间正确（6-8点）", weight: 20 do
+      # 断言2: 火车出发时间正确（6-8点） (15%)
+      add_assertion "火车出发时间正确（6-8点）", weight: 15 do
         departure_hour = @train_booking.train.departure_time.hour
         expect(departure_hour).to be >= 6, 
           "出发时间过早。期望: 6:00-8:00, 实际: #{@train_booking.train.departure_time.strftime('%H:%M')}"
@@ -142,8 +142,8 @@ module V151V200
           "出发时间过晚。期望: 6:00-8:00, 实际: #{@train_booking.train.departure_time.strftime('%H:%M')}"
       end
       
-      # 断言3: 创建了酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言3: 创建了酒店订单 (15%)
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel, :hotel_room)
@@ -157,30 +157,42 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言4: 酒店在出发城市 (20%)
-      add_assertion "酒店位置正确（#{@departure_city}）", weight: 20 do
+      # 断言4: 酒店在出发城市 (15%)
+      add_assertion "酒店位置正确（#{@departure_city}）", weight: 15 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@departure_city),
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住前一晚 (10%)
-      add_assertion "酒店入住前一晚", weight: 10 do
+      # 断言5: 酒店入住前一晚和退房日期正确 (15%)
+      add_assertion "酒店入住前一晚", weight: 15 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（火车前一晚）, 实际: #{@hotel_booking.check_in_date}"
-      end
-      
-      # 断言7: 酒店退房日期正确 (5%)
-      add_assertion "酒店退房日期正确", weight: 5 do
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}（火车当天早上）, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      # 断言8: 酒店含早餐 (5%)
-      add_assertion "酒店含早餐", weight: 5 do
+      # 断言6: 酒店含早餐 (7%)
+      add_assertion "酒店含早餐", weight: 7 do
         room = @hotel_booking.hotel_room
         expect(room.room_type).to match(/早/),
           "房型未包含早餐。期望: 含早餐房型, 实际: #{room.room_type}"
+      end
+    
+      # 断言7: 火车乘客信息正确（周敏） (7%)
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "火车乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "火车联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
+      end
+    
+      # 断言8: 酒店入住人信息正确（周敏） (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
     
@@ -192,21 +204,37 @@ module V151V200
         arrival_city: @arrival_city,
         train_date: @train_date&.to_s,
         hotel_checkin_date: @hotel_checkin_date&.to_s,
-        hotel_checkout_date: @hotel_checkout_date&.to_s
+        hotel_checkout_date: @hotel_checkout_date&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
-      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @train_date = Date.parse(data['train_date']) if data['train_date']
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
+      
+      # 重新查询乘客信息（用于simulate阶段）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用火车和酒店（用于simulate阶段）
+      @available_trains = Train
+        .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
+        .by_date(@train_date)
+        .select { |t| t.departure_time.hour >= 6 && t.departure_time.hour < 8 }
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@departure_city}%")
+        .where("star_level >= ?", 4)
+        .where(data_version: 0)
+        .limit(20)
+        .to_a
     end
   end
 end

@@ -10,9 +10,10 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了酒店订单 (30%)
 #   - 创建了门票订单 (30%)
-#   - 酒店在景区所在城市 (15%)
-#   - 游玩日期合理 (15%)
-#   - 景点正确 (10%)
+#   - 酒店在景区所在城市 (10%)
+#   - 游客和入住人信息正确（张三） (15%)
+#   - 游玩日期合理 (10%)
+#   - 景点正确 (5%)
 module V151V200
   class V198BookHotelNearAttractionAndTicketsValidator < BaseValidator
     self.validator_id = 'v198_book_hotel_near_attraction_and_tickets_validator'
@@ -85,14 +86,27 @@ module V151V200
       
       return if @hotel_booking.nil? || @ticket_orders.empty?
       
-      # 断言3: 酒店在景区所在城市 (15%)
-      add_assertion "酒店在景区所在城市（#{@city}）", weight: 15 do
+      # 断言3: 酒店在景区所在城市 (10%)
+      add_assertion "酒店在景区所在城市（#{@city}）", weight: 10 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to eq(@city)
       end
       
-      # 断言4: 游玩日期合理 (15%)
-      add_assertion "游玩日期合理", weight: 15 do
+      # 断言4: 游客和入住人信息正确（张三） (15%)
+      add_assertion "游客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        ticket_order = @ticket_orders.first
+        
+        # 检查门票订单联系人
+        expect(ticket_order.contact_phone).to eq(@expected_phone),
+          "门票订单联系人电话错误。期望: #{@expected_phone}, 实际: #{ticket_order.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言5: 游玩日期合理 (10%)
+      add_assertion "游玩日期合理", weight: 10 do
         ticket_order = @ticket_orders.first
         visit_date = ticket_order.visit_date
         checkin_date = @hotel_booking.check_in_date
@@ -102,8 +116,8 @@ module V151V200
           "入住日期不合理。游玩日期: #{visit_date}, 入住日期: #{checkin_date}（应为游玩前一天或当天）"
       end
       
-      # 断言5: 景点正确 (10%)
-      add_assertion "景点正确（#{@attraction_name}）", weight: 10 do
+      # 断言6: 景点正确 (5%)
+      add_assertion "景点正确（#{@attraction_name}）", weight: 5 do
         ticket_order = @ticket_orders.first
         attraction = ticket_order.ticket.attraction
         expect(attraction.name).to eq(@attraction_name)

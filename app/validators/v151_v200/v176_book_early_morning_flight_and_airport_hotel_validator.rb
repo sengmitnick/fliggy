@@ -33,8 +33,8 @@ module V151V200
   class V176BookEarlyMorningFlightAndAirportHotelValidator < BaseValidator
     self.validator_id = 'v176_book_early_morning_flight_and_airport_hotel_validator'
     self.task_id = '1bf22b0b-0ed2-4d40-a704-15a738206a48'
-    self.title = '给周敏预订明天凌晨北京到上海的航班，并预订今晚机场附近酒店'
-    self.description = '帮周敏订明天凌晨5-7点北京到上海的航班，因为是早班机，今晚先住机场附近酒店'
+    self.title = '给陈静预订明天凌晨北京到上海的航班，并预订今晚机场附近酒店'
+    self.description = '帮陈静订明天凌晨5-7点北京到上海的航班，因为是早班机，今晚先住机场附近酒店'
     self.timeout_seconds = 300
   
     def prepare
@@ -46,9 +46,9 @@ module V151V200
       @min_departure_hour = 5
       @max_departure_hour = 7
       
-      # 预查询乘客信息（周敏）
+      # 预查询乘客信息（陈静）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
@@ -78,7 +78,7 @@ module V151V200
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
       
       {
-        task: "请为周敏预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
+        task: "请为陈静预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的凌晨5-7点航班，" \
               "并在#{@hotel_checkin_date.strftime('%Y年%m月%d日')}（航班前一晚）预订#{@departure_city}机场附近的酒店",
         requirements: {
           passenger: @expected_passenger_name,
@@ -125,7 +125,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -150,8 +150,8 @@ module V151V200
       
       return if @flight_booking.nil?
       
-      # 断言2: 航班起飞时间正确（凌晨5-7点） (20%)
-      add_assertion "航班起飞时间正确（凌晨5-7点）", weight: 20 do
+      # 断言2: 航班起飞时间正确（凌晨5-7点） (18%)
+      add_assertion "航班起飞时间正确（凌晨5-7点）", weight: 18 do
         departure_hour = @flight_booking.flight.departure_time.hour
         expect(departure_hour).to be >= @min_departure_hour, 
           "起飞时间过早。期望: #{@min_departure_hour}:00-#{@max_departure_hour}:00, 实际: #{@flight_booking.flight.departure_time.strftime('%H:%M')}"
@@ -159,8 +159,8 @@ module V151V200
           "起飞时间过晚。期望: #{@min_departure_hour}:00-#{@max_departure_hour}:00, 实际: #{@flight_booking.flight.departure_time.strftime('%H:%M')}"
       end
       
-      # 断言3: 创建了酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言3: 创建了酒店订单 (15%)
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -174,8 +174,8 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言4: 酒店位置靠近机场 (20%)
-      add_assertion "酒店位置靠近机场", weight: 20 do
+      # 断言4: 酒店位置靠近机场 (15%)
+      add_assertion "酒店位置靠近机场", weight: 15 do
         hotel = @hotel_booking.hotel
         is_near_airport = hotel.name.include?('机场') || 
                           (hotel.address && hotel.address.include?('机场'))
@@ -186,14 +186,30 @@ module V151V200
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为航班前一晚 (20%)
-      add_assertion "酒店入住日期为航班前一晚（#{@hotel_checkin_date}）", weight: 20 do
+      # 断言5: 酒店入住日期为航班前一晚 (17%)
+      add_assertion "酒店入住日期为航班前一晚（#{@hotel_checkin_date}）", weight: 17 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（航班前一晚）, 实际: #{@hotel_booking.check_in_date}"
         
         # 验证退房日期为航班当天
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}（航班当天）, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言6: 航班乘客信息正确（陈静） (7%)
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+    
+      # 断言7: 酒店入住人信息正确（陈静） (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
     
@@ -207,7 +223,9 @@ module V151V200
         hotel_checkin_date: @hotel_checkin_date&.to_s,
         hotel_checkout_date: @hotel_checkout_date&.to_s,
         min_departure_hour: @min_departure_hour,
-        max_departure_hour: @max_departure_hour
+        max_departure_hour: @max_departure_hour,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
@@ -219,12 +237,31 @@ module V151V200
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
       @min_departure_hour = data['min_departure_hour']
       @max_departure_hour = data['max_departure_hour']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
       
-      # 重新查询乘客信息
+      # 重新查询乘客信息（用于simulate阶段）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用航班和酒店（用于simulate阶段）
+      @available_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @arrival_city, flight_date: @flight_date, data_version: 0)
+        .select { |f| f.departure_time.hour >= @min_departure_hour && f.departure_time.hour < @max_departure_hour }
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@departure_city}%")
+        .where("name LIKE ? OR address LIKE ?", "%机场%", "%机场%")
+        .where(data_version: 0)
+        .to_a
+      
+      if @available_hotels.empty?
+        @available_hotels = Hotel
+          .where("city LIKE ?", "%#{@departure_city}%")
+          .where(data_version: 0)
+          .limit(20)
+          .to_a
+      end
     end
   end
 end

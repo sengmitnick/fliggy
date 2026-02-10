@@ -82,8 +82,8 @@ module V151V200
       )
       
       # 创建去程火车站接站服务
-      arrival_time = outbound_train.arrival_time.in_time_zone
-      pickup_datetime = @outbound_date.in_time_zone + arrival_time.hour.hours + arrival_time.min.minutes + 15.minutes
+      arrival_time = outbound_train.arrival_time
+      pickup_datetime = arrival_time + 15.minutes
       
       Transfer.create!(
         user: user,
@@ -101,8 +101,8 @@ module V151V200
       )
       
       # 创建返程火车站送站服务
-      departure_time = return_train.departure_time.in_time_zone
-      dropoff_datetime = @return_date.in_time_zone + departure_time.hour.hours + departure_time.min.minutes - 1.hour
+      departure_time = return_train.departure_time
+      dropoff_datetime = departure_time - 30.minutes
       
       Transfer.create!(
         user: user,
@@ -128,7 +128,10 @@ module V151V200
         outbound_date: @outbound_date.to_s,
         return_date: @return_date.to_s,
         arrival_station: @arrival_station,
-        departure_station: @departure_station
+        departure_station: @departure_station,
+        expected_name: @expected_name,
+        expected_phone: @expected_phone,
+        expected_id_number: @expected_id_number
       }
     end
 
@@ -140,11 +143,14 @@ module V151V200
       @return_date = Date.parse(data['return_date']) if data['return_date']
       @arrival_station = data['arrival_station']
       @departure_station = data['departure_station']
+      @expected_name = data['expected_name']
+      @expected_phone = data['expected_phone']
+      @expected_id_number = data['expected_id_number']
     end
 
     def verify
       # 断言1: 创建了去程火车订单
-      add_assertion "创建了去程火车订单", weight: 20 do
+      add_assertion "创建了去程火车订单", weight: 18 do
         @outbound_ticket = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -159,7 +165,7 @@ module V151V200
       return if @outbound_ticket.nil?
       
       # 断言2: 创建了返程火车订单
-      add_assertion "创建了返程火车订单", weight: 20 do
+      add_assertion "创建了返程火车订单", weight: 18 do
         @return_ticket = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -172,7 +178,7 @@ module V151V200
       end
       
       # 断言3: 创建了往返火车站接送服务
-      add_assertion "创建了往返火车站接送服务（接站+送站）", weight: 40 do
+      add_assertion "创建了往返火车站接送服务（接站+送站）", weight: 22 do
         @transfers = Transfer
           .where(transfer_type: ['train_pickup', 'train_dropoff'], data_version: @data_version)
           .order(created_at: :desc)
@@ -190,7 +196,7 @@ module V151V200
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
       # 断言4: 接送地点都在杭州
-      add_assertion "接送地点都在杭州", weight: 15 do
+      add_assertion "接送地点都在杭州", weight: 6 do
         pickup_in_city = @pickup_transfer.location_from.include?(@arrival_city) || @pickup_transfer.location_to.include?(@arrival_city)
         dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
         
@@ -204,6 +210,44 @@ module V151V200
           "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_ticket.passenger_name}"
         expect(@outbound_ticket.passenger_id_number).to eq(@expected_id_number),
           "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_ticket.passenger_id_number}"
+      end
+
+      # 需要查询去程和返程火车以验证时间
+      @outbound_train = @outbound_ticket.train
+      @return_train = @return_ticket.train
+
+      # 断言6: 接站时间合理（火车到达后10-30分钟）
+      add_assertion "接站时间合理（火车到达后10-30分钟）", weight: 10 do
+        train_arrival = @outbound_train.arrival_time
+        pickup_time = @pickup_transfer.pickup_datetime
+
+        time_diff_minutes = ((pickup_time - train_arrival) / 60).round
+        expect(time_diff_minutes).to be >= 10,
+          "接站时间过早。火车到达: #{train_arrival.strftime('%H:%M')}, 接站时间: #{pickup_time.strftime('%H:%M')}, 间隔: #{time_diff_minutes}分钟（应至少10分钟）"
+        expect(time_diff_minutes).to be <= 30,
+          "接站时间过晚。火车到达: #{train_arrival.strftime('%H:%M')}, 接站时间: #{pickup_time.strftime('%H:%M')}, 间隔: #{time_diff_minutes}分钟（应不超过30分钟）"
+      end
+
+      # 断言7: 送站时间合理（火车发车前20-40分钟）
+      add_assertion "送站时间合理（火车发车前20-40分钟）", weight: 10 do
+        train_departure = @return_train.departure_time
+        dropoff_time = @dropoff_transfer.pickup_datetime
+
+        time_diff_minutes = ((train_departure - dropoff_time) / 60).round
+        expect(time_diff_minutes).to be >= 20,
+          "送站时间过晚。送站时间: #{dropoff_time.strftime('%H:%M')}, 火车发车: #{train_departure.strftime('%H:%M')}, 提前: #{time_diff_minutes}分钟（应至少提前20分钟）"
+        expect(time_diff_minutes).to be <= 40,
+          "送站时间过早。送站时间: #{dropoff_time.strftime('%H:%M')}, 火车发车: #{train_departure.strftime('%H:%M')}, 提前: #{time_diff_minutes}分钟（应不超过提前40分钟）"
+      end
+
+      # 断言8: 接送站联系人信息正确
+      add_assertion "接送站联系人信息正确", weight: 11 do
+        @transfers.each do |transfer|
+          expect(transfer.passenger_name).to eq(@expected_name),
+            "#{transfer.service_type == 'from_station' ? '接站' : '送站'}订单联系人姓名错误。期望: #{@expected_name}, 实际: #{transfer.passenger_name}"
+          expect(transfer.passenger_phone).to eq(@expected_phone),
+            "#{transfer.service_type == 'from_station' ? '接站' : '送站'}订单联系人电话错误。期望: #{@expected_phone}, 实际: #{transfer.passenger_phone}"
+        end
       end
     end
   end

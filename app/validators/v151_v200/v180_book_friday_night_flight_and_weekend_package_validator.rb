@@ -114,7 +114,7 @@ module V151V200
         HotelPackageOrder.create!(
           user: user,
           hotel_package: package,
-          guest_name: user.name,
+          guest_name: @passenger.name,
           guest_phone: passenger.phone,
           check_in_date: @hotel_checkin_date,
           check_out_date: @hotel_checkout_date,
@@ -133,7 +133,7 @@ module V151V200
           hotel_room_id: room.id,
           check_in_date: @hotel_checkin_date,
           check_out_date: @hotel_checkout_date,
-          guest_name: user.name,
+          guest_name: @passenger.name,
           guest_phone: passenger.phone,
           payment_method: '花呗',
           total_price: room.price * 2,  # 2晚
@@ -159,8 +159,8 @@ module V151V200
       
       return if @flight_booking.nil?
       
-      # 断言2: 航班是周五晚上出发 (20%)
-      add_assertion "航班是周五晚上出发", weight: 20 do
+      # 断言2: 航班是周五晚上出发 (18%)
+      add_assertion "航班是周五晚上出发", weight: 18 do
         flight_date = @flight_booking.flight.flight_date
         departure_hour = @flight_booking.flight.departure_time.hour
         
@@ -172,8 +172,8 @@ module V151V200
         expect(departure_hour).to be >= 18
       end
       
-      # 断言3: 创建了酒店套餐或酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言3: 创建了酒店套餐或酒店订单 (15%)
+      add_assertion "创建了酒店订单", weight: 15 do
         @package_order = HotelPackageOrder
           .joins(hotel_package: :hotel)
           .where(hotels: { city: @arrival_city })
@@ -193,8 +193,8 @@ module V151V200
       
       return if @package_order.nil? && @hotel_booking.nil?
       
-      # 断言4: 酒店在到达城市 (20%)
-      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 20 do
+      # 断言4: 酒店在到达城市 (15%)
+      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 15 do
         if @package_order
           hotel = @package_order.hotel_package.hotel
           expect(hotel.city).to include(@arrival_city),
@@ -206,8 +206,8 @@ module V151V200
         end
       end
       
-      # 断言5: 酒店入住周期为周末（至少2晚） (20%)
-      add_assertion "酒店入住周期为周末（至少2晚）", weight: 20 do
+      # 断言5: 酒店入住周期为周末（至少2晚） (17%)
+      add_assertion "酒店入住周期为周末（至少2晚）", weight: 17 do
         checkin = @package_order ? @package_order.check_in_date : @hotel_booking.check_in_date
         checkout = @package_order ? @package_order.check_out_date : @hotel_booking.check_out_date
         nights = (checkout - checkin).to_i
@@ -216,6 +216,29 @@ module V151V200
           "入住日期错误。期望: #{@friday_date}（周五）, 实际: #{checkin}"
         expect(nights).to be >= 2,
           "住宿天数不足。期望: 至少2晚, 实际: #{nights}晚"
+      end
+    
+      # 断言6: 航班乘客信息正确（王芳） (7%)
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+    
+      # 断言7: 酒店入住人信息正确（王芳） (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        if @package_order
+          expect(@package_order.guest_name).to eq(@expected_passenger_name),
+            "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@package_order.guest_name}"
+          expect(@package_order.guest_phone).to eq(@expected_phone),
+            "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@package_order.guest_phone}"
+        else
+          expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+            "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+          expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+            "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+        end
       end
     end
     
@@ -227,21 +250,42 @@ module V151V200
         arrival_city: @arrival_city,
         friday_date: @friday_date&.to_s,
         hotel_checkin_date: @hotel_checkin_date&.to_s,
-        hotel_checkout_date: @hotel_checkout_date&.to_s
+        hotel_checkout_date: @hotel_checkout_date&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
-      
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
       @friday_date = Date.parse(data['friday_date']) if data['friday_date']
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
+      
+      # 重新查询乘客信息（用于simulate阶段）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用航班、酒店和套餐（用于simulate阶段）
+      @available_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @arrival_city, flight_date: @friday_date, data_version: 0)
+        .select { |f| f.departure_time.hour >= 18 }
+      
+      @available_packages = HotelPackage
+        .joins(:hotel)
+        .where(hotels: { city: @arrival_city })
+        .where(data_version: 0)
+        .limit(10)
+        .to_a
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@arrival_city}%")
+        .where(data_version: 0)
+        .limit(20)
+        .to_a
     end
   end
 end

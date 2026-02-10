@@ -110,7 +110,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkin_date + 1.day,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: @passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -126,7 +126,9 @@ module V151V200
         departure_port: @departure_port,
         duration_days: @duration_days,
         duration_nights: @duration_nights,
-        adult_count: @adult_count
+        adult_count: @adult_count,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
 
@@ -138,11 +140,13 @@ module V151V200
       @duration_days = data['duration_days']
       @duration_nights = data['duration_nights']
       @adult_count = data['adult_count']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
 
     def verify
       # 断言1: 创建了邮轮订单
-      add_assertion "创建了邮轮订单", weight: 25 do
+      add_assertion "创建了邮轮订单", weight: 20 do
         @cruise_order = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -161,7 +165,7 @@ module V151V200
       end
       
       # 断言3: 创建了酒店订单
-      add_assertion "创建了酒店订单", weight: 30 do
+      add_assertion "创建了酒店订单", weight: 25 do
         @hotel_booking = HotelBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -179,7 +183,7 @@ module V151V200
       end
       
       # 断言5: 入住日期正确（邮轮前一晚）
-      add_assertion "入住日期正确（邮轮前一晚）", weight: 15 do
+      add_assertion "入住日期正确（邮轮前一晚）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
           "入住日期错误。期望: #{@hotel_checkin_date}（邮轮前一晚）, 实际: #{@hotel_booking.check_in_date}"
       end
@@ -189,6 +193,22 @@ module V151V200
         expected_checkout = @hotel_checkin_date + 1.day
         expect(@hotel_booking.check_out_date).to eq(expected_checkout),
           "退房日期错误。期望: #{expected_checkout}（入住次日）, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言7: 邮轮联系人信息正确（#{@expected_contact_name}）
+      add_assertion "邮轮联系人信息正确（#{@expected_contact_name}）", weight: 8 do
+        expect(@cruise_order.contact_name).to eq(@expected_contact_name),
+          "邮轮联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@cruise_order.contact_name}"
+        expect(@cruise_order.contact_phone).to eq(@expected_contact_phone),
+          "邮轮联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@cruise_order.contact_phone}"
+      end
+      
+      # 断言8: 酒店入住人信息正确（#{@expected_contact_name}）
+      add_assertion "酒店入住人信息正确（#{@expected_contact_name}）", weight: 7 do
+        expect(@hotel_booking.guest_name).to eq(@expected_contact_name),
+          "酒店入住人姓名错误。期望: #{@expected_contact_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_contact_phone),
+          "酒店入住人电话错误。期望: #{@expected_contact_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
   end

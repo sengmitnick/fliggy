@@ -138,7 +138,7 @@ module V151V200
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
         check_out_date: @hotel_checkout_date == @hotel_checkin_date ? @hotel_checkout_date + 1.day : @hotel_checkout_date,
-        guest_name: user.name,
+        guest_name: @passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
@@ -165,15 +165,15 @@ module V151V200
       
       return if @first_booking.nil? || @second_booking.nil?
       
-      # 断言2: 中转间隔超过6小时 (20%)
-      add_assertion "中转间隔超过6小时", weight: 20 do
+      # 断言2: 中转间隔超过6小时 (18%)
+      add_assertion "中转间隔超过6小时", weight: 18 do
         interval_hours = (@second_booking.flight.departure_time - @first_booking.flight.arrival_time) / 3600.0
         expect(interval_hours).to be > 6,
           "中转间隔不足。期望: >6小时, 实际: #{interval_hours.round(1)}小时"
       end
       
-      # 断言3: 创建了中转城市酒店订单 (20%)
-      add_assertion "创建了中转城市酒店订单", weight: 20 do
+      # 断言3: 创建了中转城市酒店订单 (15%)
+      add_assertion "创建了中转城市酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -187,15 +187,15 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言4: 酒店在中转城市 (20%)
-      add_assertion "酒店位置正确（#{@transit_city}）", weight: 20 do
+      # 断言4: 酒店在中转城市 (15%)
+      add_assertion "酒店位置正确（#{@transit_city}）", weight: 15 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@transit_city),
           "酒店城市错误。期望: #{@transit_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住时间在中转间隔内 (15%)
-      add_assertion "酒店入住时间在中转间隔内", weight: 15 do
+      # 断言5: 酒店入住时间在中转间隔内 (17%)
+      add_assertion "酒店入住时间在中转间隔内", weight: 17 do
         arrival_date = @first_booking.flight.arrival_time.to_date
         departure_date = @second_booking.flight.departure_time.to_date
         
@@ -204,12 +204,33 @@ module V151V200
           "入住日期过早。期望: >= #{arrival_date}, 实际: #{@hotel_booking.check_in_date}"
         expect(@hotel_booking.check_in_date).to be <= departure_date,
           "入住日期过晚。期望: <= #{departure_date}, 实际: #{@hotel_booking.check_in_date}"
-      end
-      
-      # 断言6: 酒店退房日期正确 (5%)
-      add_assertion "酒店退房日期正确", weight: 5 do
+        
+        # 验证退房日期
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+    
+      # 断言6: 航班乘客信息正确（陈静） (7%)
+      add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+        # 验证第一段航班
+        expect(@first_booking.passenger_name).to eq(@expected_passenger_name),
+          "第一段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@first_booking.passenger_name}"
+        expect(@first_booking.contact_phone).to eq(@expected_phone),
+          "第一段航班联系电话错误。期望: #{@expected_phone}, 实际: #{@first_booking.contact_phone}"
+        
+        # 验证第二段航班
+        expect(@second_booking.passenger_name).to eq(@expected_passenger_name),
+          "第二段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@second_booking.passenger_name}"
+        expect(@second_booking.contact_phone).to eq(@expected_phone),
+          "第二段航班联系电话错误。期望: #{@expected_phone}, 实际: #{@second_booking.contact_phone}"
+      end
+    
+      # 断言7: 酒店入住人信息正确（陈静） (8%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
     end
     
@@ -222,22 +243,52 @@ module V151V200
         final_city: @final_city,
         travel_date: @travel_date&.to_s,
         hotel_checkin_date: @hotel_checkin_date&.to_s,
-        hotel_checkout_date: @hotel_checkout_date&.to_s
+        hotel_checkout_date: @hotel_checkout_date&.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_phone: @expected_phone
       }
     end
     
     def restore_from_state(data)
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
-      @expected_passenger_name = @passenger.name
-      @expected_phone = @passenger.phone
-      
       @departure_city = data['departure_city']
       @transit_city = data['transit_city']
       @final_city = data['final_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @hotel_checkin_date = Date.parse(data['hotel_checkin_date']) if data['hotel_checkin_date']
       @hotel_checkout_date = Date.parse(data['hotel_checkout_date']) if data['hotel_checkout_date']
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_phone = data['expected_phone']
+      
+      # 重新查询乘客信息（用于simulate阶段）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: @expected_passenger_name, data_version: 0)
+      
+      # 重新查询可用航班和酒店（用于simulate阶段）
+      @first_flights = Flight
+        .where(departure_city: @departure_city, destination_city: @transit_city, flight_date: @travel_date, data_version: 0)
+        .to_a
+      
+      @transit_combinations = []
+      @first_flights.each do |first_flight|
+        Flight.where(departure_city: @transit_city, destination_city: @final_city, data_version: 0).each do |second_flight|
+          interval_hours = (second_flight.departure_time - first_flight.arrival_time) / 3600.0
+          if interval_hours > 6 && interval_hours < 24
+            @transit_combinations << {
+              first: first_flight,
+              second: second_flight,
+              interval_hours: interval_hours
+            }
+          end
+        end
+      end
+      
+      @available_hotels = Hotel
+        .where("city LIKE ?", "%#{@transit_city}%")
+        .where(data_version: 0)
+        .limit(20)
+        .to_a
+      
+      @selected_combo = @transit_combinations.first if @transit_combinations.any?
     end
   end
 end
