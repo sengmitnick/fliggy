@@ -2,22 +2,24 @@
 
 require_relative '../base_validator'
 
-# V249: 预订含餐食服务的航班
+# V249: 预订指定日期航班（4天后）
 #
 # 任务描述:
-#   用户需要预订包含餐食服务的航班
+#   用户需要预订指定日期的航班
 #
 # 评分标准:
-#   - 创建了航班订单 (40%)
-#   - 航班提供餐食服务 (40%)
-#   - 出发日期正确 (15%)
-#   - 订单状态有效 (5%)
+#   - 创建了航班订单 (20%)
+#   - 航线正确（上海→深圳） (15%)
+#   - 出发日期正确（4天后） (30%)
+#   - 机票价格合理 (15%)
+#   - 乘客信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V249BookFlightWithMealValidator < BaseValidator
     self.validator_id = 'v249_book_flight_with_meal_validator'
     self.task_id = '4ff4afff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '给张三预订含餐食的航班（4天后去深圳）'
-    self.description = '张三4天后要从上海去深圳，中午起飞正好饭点，需要预订提供餐食服务的航班'
+    self.title = '给张三预订航班（4天后去深圳）'
+    self.description = '张三4天后要从上海去深圳，需要预订合适的航班'
     self.timeout_seconds = 300
     
     def prepare
@@ -25,84 +27,98 @@ module V201V250
       @destination_city = '深圳'
       @flight_date = Date.current + 4.days
       
-      # 查询demo_user乘客信息
-      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
-      )
+      # 查询demo_user乘客信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_contact_phone = @passenger.phone
       
-      # 查找提供餐食的航班（meal_service不为空或包含"餐食"/"meal"）
+      # 查找可用航班
       @available_flights = Flight.where(
         departure_city: @departure_city,
         destination_city: @destination_city,
         flight_date: @flight_date,
         data_version: 0
-      ).where("meal_service IS NOT NULL AND meal_service != '' OR meal_service LIKE ?", "%餐%").to_a
+      ).to_a
       
-      raise "未找到提供餐食的航班" if @available_flights.empty?
+      raise "未找到航班" if @available_flights.empty?
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（4天后）从#{@departure_city}到#{@destination_city}的航班，要求提供餐食服务。",
+        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（4天后）从#{@departure_city}到#{@destination_city}的航班。",
         requirements: {
           departure_city: @departure_city,
           destination_city: @destination_city,
           flight_date: @flight_date,
-          meal_service: '必须提供餐食',
-          purpose: '用餐需求'
+          passenger_name: '张三'
         },
-        hint: "选择提供餐食服务的航班。"
+        hint: "选择4天后的航班即可。"
       }
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 40 do
+      add_assertion "创建了航班订单", weight: 20 do
         all_bookings = Booking
           .joins(:flight)
           .includes(:flight)
-          .where(flights: { departure_city: @departure_city, destination_city: @destination_city })
           .where(data_version: @data_version)
+          .order(created_at: :desc)
           .to_a
         
+        expect(all_bookings).not_to be_empty, "未找到航班订单"
         @flight_booking = all_bookings.first
-        expect(@flight_booking).not_to be_nil, "未找到航班订单"
       end
       
       return if @flight_booking.nil?
       
-      add_assertion "航班提供餐食服务", weight: 40 do
+      add_assertion "航线正确（#{@departure_city}→#{@destination_city}）", weight: 15 do
         flight = @flight_booking.flight
-        has_meal = flight.meal_service.present? && flight.meal_service != '无' &&
-                   (flight.meal_service.include?('餐') || flight.meal_service.downcase.include?('meal'))
-        
-        expect(has_meal).to eq(true),
-          "航班不提供餐食服务。航班号: #{flight.flight_number}, 餐食服务: #{flight.meal_service}"
+        expect(flight.departure_city).to eq(@departure_city),
+          "出发城市错误。期望: #{@departure_city}, 实际: #{flight.departure_city}"
+        expect(flight.destination_city).to eq(@destination_city),
+          "目的地城市错误。期望: #{@destination_city}, 实际: #{flight.destination_city}"
       end
       
-      add_assertion "出发日期正确", weight: 15 do
+      add_assertion "出发日期正确（#{@flight_date}，4天后）", weight: 30 do
         flight = @flight_booking.flight
         expect(flight.flight_date).to eq(@flight_date),
-          "出发日期错误。期望: #{@flight_date}, 实际: #{flight.flight_date}"
+          "出发日期错误。期望: #{@flight_date}（4天后）, 实际: #{flight.flight_date}（航班号: #{flight.flight_number}）"
       end
       
-      add_assertion "订单状态有效", weight: 5 do
-        expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
+      add_assertion "机票价格合理", weight: 15 do
+        flight = @flight_booking.flight
+        expect(@flight_booking.total_price).to be > 0,
+          "订单总价异常。实际总价: #{@flight_booking.total_price}"
+        expect(@flight_booking.total_price).to eq(flight.price),
+          "订单总价与航班票价不符。期望: #{flight.price}, 实际: #{@flight_booking.total_price}（航班号: #{flight.flight_number}）"
+      end
+      
+      add_assertion "乘客信息正确（张三）", weight: 10 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘客身份证号错误。期望: #{@expected_passenger_id}, 实际: #{@flight_booking.passenger_id_number}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
+        expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed']),
+          "订单状态异常。实际状态: #{@flight_booking.status}"
       end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       
-      # 选择第一个提供餐食的航班
+      # 选择第一个可用航班
       flight = @available_flights.first
       
       Booking.create!(
         user: user,
         flight: flight,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        contact_phone: @passenger.phone,
+        passenger_name: passenger.name,
+        passenger_id_number: passenger.id_number,
+        contact_phone: passenger.phone,
         total_price: flight.price,
         accept_terms: true,
         status: 'paid',
@@ -130,7 +146,7 @@ module V201V250
         destination_city: @destination_city,
         flight_date: @flight_date,
         data_version: 0
-      ).where("meal_service IS NOT NULL AND meal_service != '' OR meal_service LIKE ?", "%餐%").to_a
+      ).to_a
     end
   end
 end

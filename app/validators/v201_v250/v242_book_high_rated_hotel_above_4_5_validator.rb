@@ -8,9 +8,12 @@ require_relative '../base_validator'
 #   用户需要预订评分≥4.5分的酒店
 #
 # 评分标准:
-#   - 创建了酒店订单 (30%)
-#   - 酒店评分≥4.5分 (50%)
-#   - 订单状态有效 (20%)
+#   - 创建了酒店订单 (20%)
+#   - 城市正确（上海） (10%)
+#   - 酒店评分≥4.5分 (35%)
+#   - 入住日期正确（后天） (15%)
+#   - 入住人信息正确 (10%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V242BookHighRatedHotelAbove45Validator < BaseValidator
     self.validator_id = 'v242_book_high_rated_hotel_above_4_5_validator'
@@ -25,13 +28,11 @@ module V201V250
       @check_out_date = @check_in_date + 1.day
       @min_rating = 4.5
       
-      # 查询demo_user乘客信息
-      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
-      )
+      # 查询demo_user乘客信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_guest_name = user.name
+      @expected_guest_phone = @passenger.phone
       
       # 查找高评分酒店
       @available_hotels = Hotel.where(city: @city, data_version: 0)
@@ -53,28 +54,46 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了酒店订单", weight: 30 do
+      add_assertion "创建了酒店订单", weight: 20 do
         all_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
-          .where(hotels: { city: @city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
         
+        expect(all_bookings).not_to be_empty, "未找到酒店订单"
         @booking = all_bookings.first
-        expect(@booking).not_to be_nil, "未找到#{@city}的酒店订单"
       end
       
       return if @booking.nil?
       
-      add_assertion "酒店评分≥#{@min_rating}分", weight: 50 do
+      add_assertion "城市正确（#{@city}）", weight: 10 do
+        expect(@booking.hotel.city).to eq(@city),
+          "城市错误。期望: #{@city}, 实际: #{@booking.hotel.city}"
+      end
+      
+      add_assertion "酒店评分≥#{@min_rating}分", weight: 35 do
         rating = @booking.hotel.rating
         expect(rating).to be >= @min_rating,
           "酒店评分不符合要求。期望: ≥#{@min_rating}分, 实际: #{rating}分, 酒店名称: #{@booking.hotel.name}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "入住日期正确（#{@check_in_date}，后天）", weight: 15 do
+        expect(@booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}（后天）, 实际: #{@booking.check_in_date}"
+        expect(@booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@booking.check_out_date}"
+      end
+      
+      add_assertion "入住人信息正确", weight: 10 do
+        expect(@booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@booking.guest_name}"
+        expect(@booking.guest_phone).to eq(@expected_guest_phone),
+          "联系电话错误。期望: #{@expected_guest_phone}, 实际: #{@booking.guest_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 10 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
       end
@@ -82,6 +101,7 @@ module V201V250
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       
       # 选择评分最高且价格合理的酒店
       hotel = @available_hotels.first
@@ -95,7 +115,7 @@ module V201V250
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
         guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_phone: passenger.phone,
         payment_method: '花呗',
         total_price: room.price,
         status: 'paid',

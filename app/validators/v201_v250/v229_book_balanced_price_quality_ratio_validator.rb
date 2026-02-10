@@ -8,10 +8,14 @@ require_relative '../base_validator'
 #   用户需要预订火车票+酒店，价格/质量平衡最佳（性价比）
 #
 # 评分标准:
-#   - 创建了火车票订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 组合性价比较优（价格合理且质量好） (40%)
-#   - 订单状态有效 (20%)
+#   - 创建了火车票订单 (15%)
+#   - 创建了酒店订单 (15%)
+#   - 出行日期正确 (10%)
+#   - 酒店入住日期正确 (10%)
+#   - 乘车人信息正确 (5%)
+#   - 入住人信息正确 (5%)
+#   - 组合性价比较优 (35%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V229BookBalancedPriceQualityRatioValidator < BaseValidator
     self.validator_id = 'v229_book_balanced_price_quality_ratio_validator'
@@ -23,16 +27,17 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @arrival_city = '杭州'
-      @travel_date = Date.current + 2.days
+      @travel_date = Date.today + 2.days
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
@@ -74,7 +79,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了火车票订单", weight: 20 do
+      add_assertion "创建了火车票订单", weight: 15 do
         @train_booking = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @departure_city, arrival_city: @arrival_city })
@@ -86,7 +91,7 @@ module V201V250
       
       return if @train_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @arrival_city })
@@ -98,7 +103,37 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "组合性价比较优", weight: 40 do
+      add_assertion "出行日期正确（#{@travel_date}）", weight: 10 do
+        train_date = @train_booking.train.departure_time.to_date
+        expect(train_date).to eq(@travel_date),
+          "出行日期错误。期望: #{@travel_date}, 实际: #{train_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘车人信息正确（姓名、身份证、手机号）", weight: 5 do
+        expect(@train_booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@passenger.id_number),
+          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@train_booking.passenger_id_number}"
+        expect(@train_booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@train_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "组合性价比较优", weight: 35 do
         train = @train_booking.train
         hotel = @hotel_booking.hotel
         
@@ -118,7 +153,7 @@ module V201V250
           "酒店性价比不佳。参考最佳: #{@reference_hotel_score.round(1)}, 实际: #{actual_hotel_score.round(1)}"
       end
       
-      add_assertion "订单状态有效", weight: 20 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@train_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -186,7 +221,10 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         reference_train_score: @reference_train_score,
-        reference_hotel_score: @reference_hotel_score
+        reference_hotel_score: @reference_hotel_score,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -198,6 +236,12 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @reference_train_score = data['reference_train_score'].to_f
       @reference_hotel_score = data['reference_hotel_score'].to_f
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)

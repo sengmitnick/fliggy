@@ -8,11 +8,16 @@ require_relative '../base_validator'
 #   用户需要预订往返交通+酒店，选择总价最低的组合
 #
 # 评分标准:
-#   - 创建了去程交通订单 (15%)
-#   - 创建了返程交通订单 (15%)
-#   - 创建了酒店订单 (15%)
-#   - 选择了总价最低或接近最低的组合 (40%)
-#   - 订单状态有效 (15%)
+#   - 创建了去程交通订单 (10%)
+#   - 创建了返程交通订单 (10%)
+#   - 创建了酒店订单 (10%)
+#   - 去程日期正确 (5%)
+#   - 返程日期正确 (5%)
+#   - 酒店入住日期正确 (5%)
+#   - 乘客信息正确 (5%)
+#   - 入住人信息正确 (5%)
+#   - 选择了总价最低或接近最低的组合 (35%)
+#   - 订单状态有效 (10%)
 module V201V250
   class V228BookCheapestTotalPriceOptimizeValidator < BaseValidator
     self.validator_id = 'v228_book_cheapest_total_price_optimize_validator'
@@ -24,17 +29,18 @@ module V201V250
     def prepare
       @departure_city = '上海'
       @destination_city = '北京'
-      @outbound_date = Date.current + 3.days
+      @outbound_date = Date.today + 3.days
       @return_date = @outbound_date + 2.days
       @check_in_date = @outbound_date
       @check_out_date = @return_date
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       # 查找去程航班（可以选择火车或航班）
@@ -89,7 +95,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了去程交通订单", weight: 15 do
+      add_assertion "创建了去程交通订单", weight: 10 do
         # 查找航班或火车订单
         @outbound_flight_booking = Booking
           .joins(:flight)
@@ -106,12 +112,13 @@ module V201V250
           .first
         
         @outbound_booking = @outbound_flight_booking || @outbound_train_booking
+        @outbound_type = @outbound_flight_booking ? 'flight' : 'train'
         expect(@outbound_booking).not_to be_nil, "未找到从#{@departure_city}到#{@destination_city}的去程交通订单"
       end
       
       return if @outbound_booking.nil?
       
-      add_assertion "创建了返程交通订单", weight: 15 do
+      add_assertion "创建了返程交通订单", weight: 10 do
         @return_flight_booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @destination_city, destination_city: @departure_city })
@@ -127,12 +134,13 @@ module V201V250
           .first
         
         @return_booking = @return_flight_booking || @return_train_booking
+        @return_type = @return_flight_booking ? 'flight' : 'train'
         expect(@return_booking).not_to be_nil, "未找到从#{@destination_city}到#{@departure_city}的返程交通订单"
       end
       
       return if @return_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 15 do
+      add_assertion "创建了酒店订单", weight: 10 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -147,7 +155,62 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "选择了总价最低或接近最低的组合（前20%）", weight: 40 do
+      add_assertion "去程日期正确（#{@outbound_date}）", weight: 5 do
+        if @outbound_type == 'flight'
+          expect(@outbound_booking.flight.flight_date).to eq(@outbound_date),
+            "去程航班日期错误。期望: #{@outbound_date}, 实际: #{@outbound_booking.flight.flight_date}"
+        else
+          outbound_train_date = @outbound_booking.train.departure_time.to_date
+          expect(outbound_train_date).to eq(@outbound_date),
+            "去程火车日期错误。期望: #{@outbound_date}, 实际: #{outbound_train_date}"
+        end
+      end
+      
+      add_assertion "返程日期正确（#{@return_date}）", weight: 5 do
+        if @return_type == 'flight'
+          expect(@return_booking.flight.flight_date).to eq(@return_date),
+            "返程航班日期错误。期望: #{@return_date}, 实际: #{@return_booking.flight.flight_date}"
+        else
+          return_train_date = @return_booking.train.departure_time.to_date
+          expect(return_train_date).to eq(@return_date),
+            "返程火车日期错误。期望: #{@return_date}, 实际: #{return_train_date}"
+        end
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 5 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 5 do
+        # 检查去程乘客信息
+        expect(@outbound_booking.passenger_name).to eq(@passenger.name),
+          "去程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@outbound_booking.passenger_name}"
+        expect(@outbound_booking.passenger_id_number).to eq(@passenger.id_number),
+          "去程身份证号错误。期望: #{@passenger.id_number}, 实际: #{@outbound_booking.passenger_id_number}"
+        expect(@outbound_booking.contact_phone).to eq(@passenger.phone),
+          "去程联系电话错误。期望: #{@passenger.phone}, 实际: #{@outbound_booking.contact_phone}"
+        
+        # 检查返程乘客信息
+        expect(@return_booking.passenger_name).to eq(@passenger.name),
+          "返程乘客姓名错误。期望: #{@passenger.name}, 实际: #{@return_booking.passenger_name}"
+        expect(@return_booking.passenger_id_number).to eq(@passenger.id_number),
+          "返程身份证号错误。期望: #{@passenger.id_number}, 实际: #{@return_booking.passenger_id_number}"
+        expect(@return_booking.contact_phone).to eq(@passenger.phone),
+          "返程联系电话错误。期望: #{@passenger.phone}, 实际: #{@return_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "选择了总价最低或接近最低的组合（前20%）", weight: 35 do
         outbound_price = @outbound_booking.total_price
         return_price = @return_booking.total_price
         hotel_price = @hotel_booking.total_price
@@ -170,7 +233,7 @@ module V201V250
           "总价未达到最优。实际总价: #{actual_total}元（去程#{outbound_price}+返程#{return_price}+酒店#{hotel_price}）, 理论最低: #{theoretical_min}元, 可接受上限: #{acceptable_max}元"
       end
       
-      add_assertion "订单状态有效", weight: 15 do
+      add_assertion "订单状态有效", weight: 10 do
         expect(@outbound_booking.status).to be_in(['pending', 'paid', 'completed']),
           "去程订单状态异常。实际状态: #{@outbound_booking.status}"
         expect(@return_booking.status).to be_in(['pending', 'paid', 'completed']),
@@ -302,7 +365,10 @@ module V201V250
         outbound_date: @outbound_date.to_s,
         return_date: @return_date.to_s,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -313,6 +379,12 @@ module V201V250
       @return_date = Date.parse(data['return_date'])
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @outbound_flights = Flight.where(
         departure_city: @departure_city,

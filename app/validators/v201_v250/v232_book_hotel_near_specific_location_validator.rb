@@ -8,10 +8,11 @@ require_relative '../base_validator'
 #   用户需要预订特定地点附近的酒店（如市中心、火车站附近、景点附近）
 #
 # 评分标准:
-#   - 创建了酒店订单 (30%)
-#   - 酒店位置符合要求（在指定地点附近） (40%)
+#   - 创建了酒店订单 (25%)
+#   - 酒店位置符合要求（在指定地点附近） (35%)
 #   - 入住日期和时长正确 (20%)
-#   - 订单状态有效 (10%)
+#   - 入住人信息正确 (15%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V232BookHotelNearSpecificLocationValidator < BaseValidator
     self.validator_id = 'v232_book_hotel_near_specific_location_validator'
@@ -28,10 +29,11 @@ module V201V250
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       # 查找包含位置关键词的酒店
@@ -55,7 +57,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了酒店订单", weight: 30 do
+      add_assertion "创建了酒店订单", weight: 25 do
         all_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -69,7 +71,7 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "酒店位置符合要求（#{@location_keyword}附近）", weight: 40 do
+      add_assertion "酒店位置符合要求（#{@location_keyword}附近）", weight: 35 do
         hotel = @hotel_booking.hotel
         name_match = hotel.name.include?(@location_keyword)
         address_match = hotel.address&.include?(@location_keyword)
@@ -85,7 +87,15 @@ module V201V250
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 15 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "订单状态有效", weight: 5 do
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
     end
@@ -120,7 +130,10 @@ module V201V250
         city: @city,
         location_keyword: @location_keyword,
         check_in_date: @check_in_date.to_s,
-        check_out_date: @check_out_date.to_s
+        check_out_date: @check_out_date.to_s,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -129,6 +142,12 @@ module V201V250
       @location_keyword = data['location_keyword']
       @check_in_date = Date.parse(data['check_in_date'])
       @check_out_date = Date.parse(data['check_out_date'])
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_hotels = Hotel.where(city: @city, data_version: 0)
         .where("name LIKE ? OR address LIKE ?", "%#{@location_keyword}%", "%#{@location_keyword}%")

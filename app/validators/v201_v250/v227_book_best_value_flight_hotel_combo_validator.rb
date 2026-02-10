@@ -8,11 +8,15 @@ require_relative '../base_validator'
 #   用户需要预订航班+酒店，综合考虑价格、时长、评分等因素，选择综合性价比最高的组合
 #
 # 评分标准:
-#   - 创建了航班订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 航班性价比较优（时长短、价格合理） (25%)
-#   - 酒店性价比较优（评分高、价格合理） (25%)
-#   - 订单状态有效 (10%)
+#   - 创建了航班订单 (15%)
+#   - 创建了酒店订单 (15%)
+#   - 航班日期正确 (10%)
+#   - 酒店入住日期正确 (10%)
+#   - 乘客信息正确 (5%)
+#   - 入住人信息正确 (5%)
+#   - 航班性价比较优 (20%)
+#   - 酒店性价比较优 (15%)
+#   - 订单状态有效 (5%)
 module V201V250
   class V227BookBestValueFlightHotelComboValidator < BaseValidator
     self.validator_id = 'v227_book_best_value_flight_hotel_combo_validator'
@@ -24,16 +28,17 @@ module V201V250
     def prepare
       @departure_city = '深圳'
       @destination_city = '上海'
-      @flight_date = Date.current + 1.day
+      @flight_date = Date.today + 1.day
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 2.days
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
       @passenger = OpenStruct.new(
-        name: demo_user.passenger_name,
-        id_number: demo_user.passenger_id_number,
-        phone: demo_user.passenger_phone
+        name: demo_passenger.name,
+        id_number: demo_passenger.id_number,
+        phone: demo_passenger.phone
       )
       
       @available_flights = Flight.where(
@@ -79,7 +84,7 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 20 do
+      add_assertion "创建了航班订单", weight: 15 do
         @flight_booking = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @destination_city })
@@ -91,7 +96,7 @@ module V201V250
       
       return if @flight_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
@@ -103,7 +108,36 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "航班性价比较优", weight: 25 do
+      add_assertion "航班日期正确（#{@flight_date}）", weight: 10 do
+        expect(@flight_booking.flight.flight_date).to eq(@flight_date),
+          "航班日期错误。期望: #{@flight_date}, 实际: #{@flight_booking.flight.flight_date}"
+      end
+      
+      add_assertion "酒店入住日期正确（入住#{@check_in_date}，退房#{@check_out_date}）", weight: 10 do
+        expect(@hotel_booking.check_in_date).to eq(@check_in_date),
+          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+        expect(@hotel_booking.check_out_date).to eq(@check_out_date),
+          "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 5 do
+        expect(@flight_booking.passenger_name).to eq(@passenger.name),
+          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.passenger_id_number).to eq(@passenger.id_number),
+          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@flight_booking.passenger_id_number}"
+        expect(@flight_booking.contact_phone).to eq(@passenger.phone),
+          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@flight_booking.contact_phone}"
+      end
+      
+      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
+        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        expect(@hotel_booking.guest_name).to eq(demo_user.name),
+          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
+          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      add_assertion "航班性价比较优", weight: 20 do
         flight = @flight_booking.flight
         duration_minutes = (flight.arrival_time - flight.departure_time) / 60
         duration_score = 100.0 / (duration_minutes / 60.0 + 1)
@@ -115,7 +149,7 @@ module V201V250
           "航班综合性价比不佳。参考最佳分数: #{@reference_flight_score.round(1)}, 实际分数: #{actual_flight_score.round(1)} (时长#{(duration_minutes/60.0).round(1)}h, 价格#{flight.price}元)"
       end
       
-      add_assertion "酒店性价比较优", weight: 25 do
+      add_assertion "酒店性价比较优", weight: 15 do
         hotel = @hotel_booking.hotel
         rating_score = hotel.rating * 20
         price_score = 100.0 / (hotel.price + 1)
@@ -126,7 +160,7 @@ module V201V250
           "酒店综合性价比不佳。参考最佳分数: #{@reference_hotel_score.round(1)}, 实际分数: #{actual_hotel_score.round(1)} (评分#{hotel.rating}星, 价格#{hotel.price}元/晚)"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -193,7 +227,10 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         reference_flight_score: @reference_flight_score,
-        reference_hotel_score: @reference_hotel_score
+        reference_hotel_score: @reference_hotel_score,
+        passenger_name: @passenger.name,
+        passenger_id_number: @passenger.id_number,
+        passenger_phone: @passenger.phone
       }
     end
     
@@ -205,6 +242,12 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @reference_flight_score = data['reference_flight_score'].to_f
       @reference_hotel_score = data['reference_hotel_score'].to_f
+      
+      @passenger = OpenStruct.new(
+        name: data['passenger_name'],
+        id_number: data['passenger_id_number'],
+        phone: data['passenger_phone']
+      )
       
       @available_flights = Flight.where(
         departure_city: @departure_city,
