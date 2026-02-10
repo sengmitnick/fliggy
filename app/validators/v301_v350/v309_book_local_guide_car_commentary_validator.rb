@@ -9,11 +9,13 @@ require_relative '../base_validator'
 #   需要创建2个订单：深度旅行订单和包车订单，两个订单的服务日期需一致，且状态和价格有效。
 #
 # 评分标准:
-#   - 创建了深度旅行订单（导游讲解）(35%)
+#   - 创建了深度旅行订单 (20%)
+#   - 地点正确（北京） (10%)
 #   - 创建了包车订单 (25%)
-#   - 两个订单的服务日期正确（5天后）且一致 (15%)
-#   - 参与人数正确（4人成人） (15%)
-#   - 两个订单的状态和价格有效 (10%)
+#   - 服务日期正确（5天后） (15%)
+#   - 联系人信息正确（张三） (10%)
+#   - 参与人数正确（4人成人） (10%)
+#   - 订单状态和价格有效 (10%)
 module V301V350
   class V309BookLocalGuideCarCommentaryValidator < BaseValidator
     self.validator_id = 'v309_book_local_guide_car_commentary_validator'
@@ -31,10 +33,20 @@ module V301V350
       @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
       @wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
       
-      # Expected contact info (use first person as contact)
-      @expected_contact_name = @zhangsan.name
-      @expected_contact_phone = @zhangsan.phone
-      @expected_driver_id_number = @zhangsan.id_number
+      # Expected contact info (any of the 4 travelers can be contact)
+      @expected_contact_names = [@zhangsan.name, @lisi.name, @liuqiang.name, @wangfang.name]
+      @expected_contact_phones = {
+        @zhangsan.name => @zhangsan.phone,
+        @lisi.name => @lisi.phone,
+        @liuqiang.name => @liuqiang.phone,
+        @wangfang.name => @wangfang.phone
+      }
+      @expected_id_numbers = {
+        @zhangsan.name => @zhangsan.id_number,
+        @lisi.name => @lisi.id_number,
+        @liuqiang.name => @liuqiang.id_number,
+        @wangfang.name => @wangfang.id_number
+      }
       
       @travel_date = Date.current + 5.days
       @participant_count = 4
@@ -74,23 +86,20 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了深度旅行订单（导游讲解）", weight: 30 do
+      add_assertion "创建了深度旅行订单", weight: 20 do
         @deep_travel_booking = DeepTravelBooking
           .joins(:deep_travel_product)
-          .where(deep_travel_products: { location: @location })
           .where(data_version: @data_version)
           .first
         
-        expect(@deep_travel_booking).not_to be_nil, "未找到#{@location}的深度旅行订单"
+        expect(@deep_travel_booking).not_to be_nil, "未找到深度旅行订单"
       end
       
       return if @deep_travel_booking.nil?
       
-      add_assertion "联系人信息正确（张三）", weight: 10 do
-        expect(@deep_travel_booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@deep_travel_booking.contact_name}"
-        expect(@deep_travel_booking.contact_phone).to eq(@expected_contact_phone),
-          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@deep_travel_booking.contact_phone}"
+      add_assertion "地点正确（#{@location}）", weight: 10 do
+        expect(@deep_travel_booking.deep_travel_product.location).to eq(@location),
+          "地点错误。期望: #{@location}，实际: #{@deep_travel_booking.deep_travel_product.location}"
       end
       
       add_assertion "创建了包车订单", weight: 25 do
@@ -104,15 +113,23 @@ module V301V350
       
       add_assertion "服务日期正确", weight: 15 do
         expect(@deep_travel_booking.travel_date).to eq(@travel_date),
-          "深度旅行日期错误。期望: #{@travel_date}，实际: #{@deep_travel_booking.travel_date}"
+          "深度旅行日期错误。期望: #{@travel_date}（5天后），实际: #{@deep_travel_booking.travel_date}"
         
         if @car_order
           expect(@car_order.pickup_datetime.to_date).to eq(@travel_date),
-            "包车取车日期错误。期望: #{@travel_date}，实际: #{@car_order.pickup_datetime.to_date}"
+            "包车取车日期错误。期望: #{@travel_date}（5天后），实际: #{@car_order.pickup_datetime.to_date}"
         end
       end
       
-      add_assertion "参与人数正确（4人成人）", weight: 15 do
+      add_assertion "联系人信息正确（张三、李四、刘强或王芳）", weight: 10 do
+        expect(@expected_contact_names).to include(@deep_travel_booking.contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_names.join('、')}中的一个, 实际: #{@deep_travel_booking.contact_name}"
+        expected_phone = @expected_contact_phones[@deep_travel_booking.contact_name]
+        expect(@deep_travel_booking.contact_phone).to eq(expected_phone),
+          "联系电话错误。期望: #{expected_phone}（#{@deep_travel_booking.contact_name}）, 实际: #{@deep_travel_booking.contact_phone}"
+      end
+      
+      add_assertion "参与人数正确（4人成人）", weight: 10 do
         expect(@deep_travel_booking.adult_count).to eq(@participant_count),
           "成人数量错误。期望: #{@participant_count}人，实际: #{@deep_travel_booking.adult_count}人"
         expect(@deep_travel_booking.child_count).to eq(0),
@@ -133,7 +150,10 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建深度旅行订单 - Use existing passenger info
+      # 随机选择一位作为联系人
+      contact_person = [@zhangsan, @lisi, @liuqiang, @wangfang].sample
+      
+      # 1. 创建深度旅行订单 - Use randomly selected contact
       DeepTravelBooking.create!(
         user: user,
         deep_travel_guide: @guide,
@@ -141,15 +161,15 @@ module V301V350
         travel_date: @travel_date,
         adult_count: @participant_count,
         child_count: 0,
-        contact_name: @zhangsan.name,
-        contact_phone: @zhangsan.phone,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         total_price: @deep_travel_product.price,
         insurance_price: 0,
         status: 'paid',
         data_version: @data_version
       )
       
-      # 2. 创建包车订单 - Use existing passenger info
+      # 2. 创建包车订单 - Use randomly selected contact
       pickup_datetime = @travel_date.to_time + 9.hours
       return_datetime = @travel_date.to_time + 18.hours
       
@@ -160,9 +180,9 @@ module V301V350
         return_datetime: return_datetime,
         total_price: @car.price_per_day,
         pickup_location: @location,
-        driver_name: @zhangsan.name,
-        driver_id_number: @zhangsan.id_number,
-        contact_phone: @zhangsan.phone,
+        driver_name: contact_person.name,
+        driver_id_number: contact_person.id_number,
+        contact_phone: contact_person.phone,
         status: 'paid',
         data_version: @data_version
       )
@@ -178,9 +198,9 @@ module V301V350
         deep_travel_product_id: @deep_travel_product&.id,
         guide_id: @guide&.id,
         car_id: @car&.id,
-        expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone,
-        expected_driver_id_number: @expected_driver_id_number
+        expected_contact_names: @expected_contact_names,
+        expected_contact_phones: @expected_contact_phones,
+        expected_id_numbers: @expected_id_numbers
       }
     end
     
@@ -188,9 +208,9 @@ module V301V350
       @travel_date = Date.parse(data['travel_date'])
       @participant_count = data['participant_count']
       @location = data['location']
-      @expected_contact_name = data['expected_contact_name']
-      @expected_contact_phone = data['expected_contact_phone']
-      @expected_driver_id_number = data['expected_driver_id_number']
+      @expected_contact_names = data['expected_contact_names']
+      @expected_contact_phones = data['expected_contact_phones']
+      @expected_id_numbers = data['expected_id_numbers']
       
       @deep_travel_product = DeepTravelProduct.find(data['deep_travel_product_id']) if data['deep_travel_product_id']
       @guide = DeepTravelGuide.find(data['guide_id']) if data['guide_id']

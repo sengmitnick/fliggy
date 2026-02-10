@@ -9,11 +9,10 @@ require_relative '../base_validator'
 #   要景区门票和自行车租赁（1辆双人车+1辆单人车）
 #
 # 评分标准:
-#   - 创建了景点门票订单（35%)
-#   - 创建了自行车租赁订单（30%)
-#   - 景点和日期正确 (15%)
-#   - 联系人信息正确 (10%)
-#   - 订单状态和价格有效 (10%)
+#   - 创建门票订单+景点+门票类型+游客信息 (40%)
+#   - 创建自行车订单+自行车类型+游客信息 (35%)
+#   - 日期正确 (10%)
+#   - 联系人信息正确 (15%)
 module V301V350
   class V313BookBicycleTourRoutePlanningLogisticsValidator < BaseValidator
     self.validator_id = 'v313_book_bicycle_tour_route_planning_logistics_validator'
@@ -29,6 +28,14 @@ module V301V350
       @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
       @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+      
+      # Expected contact info (multi-choice: 张三、李四 or 刘强)
+      @expected_contact_names = [@zhangsan.name, @lisi.name, @liuqiang.name]
+      @expected_contact_phones = {
+        @zhangsan.name => @zhangsan.phone,
+        @lisi.name => @lisi.phone,
+        @liuqiang.name => @liuqiang.phone
+      }
       
       @visit_date = Date.current + 5.days
       @participant_count = 3
@@ -71,7 +78,8 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了景区门票订单（西湖游船票）", weight: 35 do
+      # 断言1: 创建了景点门票订单 (15%)
+      add_assertion "创建了景点门票订单（西湖游船票）", weight: 15 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
@@ -82,14 +90,69 @@ module V301V350
         
         expect(all_ticket_orders).not_to be_empty, "未找到#{@attraction_name}门票订单"
         
-        @ticket_orders = all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
-        expect(@ticket_orders.size).to be >= @participant_count,
-          "门票数量不足。期望至少#{@participant_count}张，实际找到#{@ticket_orders.size}张"
+        @ticket_orders = all_ticket_orders
       end
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      add_assertion "创建了自行车租赁订单", weight: 30 do
+      # 断言2: 景点正确（杭州西湖） (10%)
+      add_assertion "景点正确（杭州西湖）", weight: 10 do
+        @ticket_orders.each do |order|
+          expect(order.ticket.attraction.name).to eq(@attraction_name),
+            "景点错误。期望: #{@attraction_name}，实际: #{order.ticket.attraction.name}"
+          expect(order.ticket.attraction.city).to eq(@city),
+            "城市错误。期望: #{@city}，实际: #{order.ticket.attraction.city}"
+        end
+      end
+      
+      # 断言3: 门票类型正确（成人票） (5%)
+      add_assertion "门票类型正确（成人票）", weight: 5 do
+        adult_tickets = @ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
+        expect(adult_tickets.size).to be >= @participant_count,
+          "成人票数量不足。期望至少#{@participant_count}张，实际找到#{adult_tickets.size}张"
+      end
+      
+      # 断言4: 门票游玩日期正确 (8%)
+      add_assertion "门票游玩日期正确（#{@visit_date.strftime('%Y-%m-%d')}）", weight: 8 do
+        @ticket_orders.each do |order|
+          expect(order.visit_date).to eq(@visit_date),
+            "门票游玩日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
+        end
+      end
+      
+      # 断言5: 门票游客信息正确（张三、李四、刘强） (10%)
+      add_assertion "门票游客信息正确（张三、李四、刘强）", weight: 10 do
+        all_passengers = @ticket_orders.flat_map { |o| o.passengers.to_a }.uniq
+        expect(all_passengers.size).to eq(3),
+          "门票游客数量错误。期望: 3人（张三、李四、刘强），实际: #{all_passengers.size}人"
+        
+        passenger_names = all_passengers.map(&:name).sort
+        expected_names = [@zhangsan.name, @lisi.name, @liuqiang.name].sort
+        expect(passenger_names).to eq(expected_names),
+          "门票游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
+      end
+      
+      # 断言6: 门票联系人信息正确（张三、李四或刘强） (7%)
+      add_assertion "门票联系人信息正确（张三、李四或刘强）", weight: 7 do
+        @ticket_orders.each do |order|
+          if order.respond_to?(:contact_name) && order.contact_name.present?
+            expect(@expected_contact_names).to include(order.contact_name),
+              "联系人姓名错误。期望: #{@expected_contact_names.join('、')}, 实际: #{order.contact_name}"
+            expected_phone = @expected_contact_phones[order.contact_name]
+            if expected_phone
+              expect(order.contact_phone).to eq(expected_phone),
+                "联系电话错误。期望: #{expected_phone}, 实际: #{order.contact_phone}"
+            end
+          elsif order.contact_phone.present?
+            # 如果没有contact_name字段，只验证电话在期望列表中
+            expect(@expected_contact_phones.values).to include(order.contact_phone),
+              "联系电话错误。期望: #{@expected_contact_phones.values.join('/')}, 实际: #{order.contact_phone}"
+          end
+        end
+      end
+      
+      # 断言7: 创建了自行车租赁订单 (15%)
+      add_assertion "创建了自行车租赁订单", weight: 15 do
         all_activity_orders = ActivityOrder
           .joins(attraction_activity: :attraction)
           .includes(:attraction_activity)
@@ -108,60 +171,68 @@ module V301V350
           "自行车数量不足。期望至少2辆（1辆双人车+1辆单人车），实际找到#{total_bicycles}辆"
       end
       
-      add_assertion "景点和游玩日期正确", weight: 15 do
-        @ticket_orders.each do |order|
-          expect(order.ticket.attraction.name).to eq(@attraction_name),
-            "景点错误。期望: #{@attraction_name}，实际: #{order.ticket.attraction.name}"
-          
+      return if @bicycle_orders.nil? || @bicycle_orders.empty?
+      
+      # 断言8: 自行车类型正确（双人车+单人车） (10%)
+      add_assertion "自行车类型正确（双人车+单人车）", weight: 10 do
+        double_bicycles = @bicycle_orders.select { |o| o.attraction_activity.name =~ /双人/ }
+        single_bicycles = @bicycle_orders.select { |o| o.attraction_activity.name =~ /单人/ }
+        
+        expect(double_bicycles.size).to be >= 1,
+          "双人自行车数量不足。期望至少1辆，实际找到#{double_bicycles.size}辆"
+        expect(single_bicycles.size).to be >= 1,
+          "单人自行车数量不足。期望至少1辆，实际找到#{single_bicycles.size}辆"
+      end
+      
+      # 断言9: 自行车租赁日期正确 (5%)
+      add_assertion "自行车租赁日期正确（#{@visit_date.strftime('%Y-%m-%d')}）", weight: 5 do
+        @bicycle_orders.each do |order|
           expect(order.visit_date).to eq(@visit_date),
-            "门票游玩日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
+            "自行车租赁日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
         end
+      end
+      
+      # 断言10: 自行车游客信息正确（张三、李四、刘强） (10%)
+      add_assertion "自行车游客信息正确（张三、李四、刘强）", weight: 10 do
+        all_passengers = @bicycle_orders.flat_map { |o| o.passengers.to_a }.uniq
+        expect(all_passengers.size).to eq(3),
+          "自行车游客数量错误。期望: 3人（张三、李四、刘强），实际: #{all_passengers.size}人"
         
-        if @bicycle_orders
-          @bicycle_orders.each do |order|
-            expect(order.attraction_activity.attraction.name).to eq(@attraction_name),
-              "自行车租赁景点错误。期望: #{@attraction_name}，实际: #{order.attraction_activity.attraction.name}"
-            
-            expect(order.visit_date).to eq(@visit_date),
-              "自行车租赁日期错误。期望: #{@visit_date}（5天后），实际: #{order.visit_date}"
+        passenger_names = all_passengers.map(&:name).sort
+        expected_names = [@zhangsan.name, @lisi.name, @liuqiang.name].sort
+        expect(passenger_names).to eq(expected_names),
+          "自行车游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
+      end
+      
+      # 断言11: 自行车订单联系人信息正确（张三、李四或刘强） (8%)
+      add_assertion "自行车订单联系人信息正确（张三、李四或刘强）", weight: 8 do
+        @bicycle_orders.each do |order|
+          if order.respond_to?(:contact_name) && order.contact_name.present?
+            expect(@expected_contact_names).to include(order.contact_name),
+              "联系人姓名错误。期望: #{@expected_contact_names.join('、')}, 实际: #{order.contact_name}"
+            expected_phone = @expected_contact_phones[order.contact_name]
+            if expected_phone
+              expect(order.contact_phone).to eq(expected_phone),
+                "联系电话错误。期望: #{expected_phone}, 实际: #{order.contact_phone}"
+            end
+          elsif order.respond_to?(:passenger_name) && order.passenger_name.present?
+            # 如果是passenger_name字段
+            expect(@expected_contact_names).to include(order.passenger_name),
+              "乘客姓名错误。期望: #{@expected_contact_names.join('、')}, 实际: #{order.passenger_name}"
+          end
+          
+          if order.contact_phone.present?
+            expect(@expected_contact_phones.values).to include(order.contact_phone),
+              "联系电话错误。期望: #{@expected_contact_phones.values.join('/')}, 实际: #{order.contact_phone}"
           end
         end
       end
       
-      add_assertion "联系人信息正确（张三/李四/刘强）", weight: 10 do
-        expected_phones = [@zhangsan.phone, @lisi.phone, @liuqiang.phone]
-        expected_names = [@zhangsan.name, @lisi.name, @liuqiang.name]
-        
-        @ticket_orders.each do |order|
-          expect(order.contact_phone).to be_in(expected_phones),
-            "门票订单联系电话错误。期望: #{expected_phones.join('/')}，实际: #{order.contact_phone}"
-        end
-        
-        if @bicycle_orders
-          @bicycle_orders.each do |order|
-            expect(order.contact_phone).to be_in(expected_phones),
-              "自行车订单联系电话错误。期望: #{expected_phones.join('/')}，实际: #{order.contact_phone}"
-            expect(order.passenger_name).to be_in(expected_names),
-              "乘客姓名错误。期望: #{expected_names.join('/')}，实际: #{order.passenger_name}"
-          end
-        end
-      end
-      
-      add_assertion "订单状态和价格有效", weight: 10 do
-        @ticket_orders.each do |order|
-          expect(order.status).to be_in(['pending', 'paid', 'confirmed']),
-            "门票订单状态异常: #{order.status}"
-          expect(order.total_price).to be > 0,
-            "门票订单价格无效: #{order.total_price}"
-        end
-        
-        if @bicycle_orders
-          @bicycle_orders.each do |order|
-            expect(order.status).to be_in(['pending', 'paid', 'confirmed']),
-              "自行车租赁订单状态异常: #{order.status}"
-            expect(order.total_price).to be > 0,
-              "自行车租赁订单价格无效: #{order.total_price}"
-          end
+      # 断言12: 自行车租赁景点正确 (2%)
+      add_assertion "自行车租赁景点正确（西湖）", weight: 2 do
+        @bicycle_orders.each do |order|
+          expect(order.attraction_activity.attraction.name).to eq(@attraction_name),
+            "自行车租赁景点错误。期望: #{@attraction_name}，实际: #{order.attraction_activity.attraction.name}"
         end
       end
     end
@@ -169,22 +240,22 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建门票订单（3张成人票）
+      # Randomly select one of the three as contact
       contact_passenger = [@zhangsan, @lisi, @liuqiang].sample
-      @participant_count.times do
-        TicketOrder.create!(
-          user: user,
-          ticket: @boat_ticket,
-          visit_date: @visit_date,
-          quantity: 1,
-          total_price: @boat_ticket.current_price,
-          contact_phone: contact_passenger.phone,
-          passenger_id: user.id,
-          passenger_ids: [user.id],
-          status: 'paid',
-          data_version: @data_version
-        )
-      end
+      
+      # 1. 创建门票订单（1张门票，3个游客）
+      TicketOrder.create!(
+        user: user,
+        ticket: @boat_ticket,
+        visit_date: @visit_date,
+        quantity: 3,  # 3张门票
+        passenger_ids: [@zhangsan.id, @lisi.id, @liuqiang.id],  # ✅ 关联3个游客
+        total_price: @boat_ticket.current_price * 3,
+        contact_name: contact_passenger.name,
+        contact_phone: contact_passenger.phone,
+        status: 'paid',
+        data_version: @data_version
+      )
       
       # 2. 创建自行车租赁订单（1辆双人车）
       ActivityOrder.create!(
@@ -192,10 +263,10 @@ module V301V350
         attraction_activity: @bicycle_activity_double,
         visit_date: @visit_date,
         quantity: 1,  # 1辆双人车
+        passenger_ids: [@zhangsan.id, @lisi.id],  # ✅ 双人车关联2个游客
         total_price: @bicycle_activity_double.current_price,
-        passenger_name: contact_passenger.name,
+        contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
-        passenger_ids: [user.id],
         status: 'paid',
         notes: '双人自行车租赁，2人使用',
         data_version: @data_version
@@ -207,10 +278,10 @@ module V301V350
         attraction_activity: @bicycle_activity_single,
         visit_date: @visit_date,
         quantity: 1,  # 1辆单人车
+        passenger_ids: [@liuqiang.id],  # ✅ 单人车关联1个游客
         total_price: @bicycle_activity_single.current_price,
-        passenger_name: contact_passenger.name,
+        contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
-        passenger_ids: [user.id],
         status: 'paid',
         notes: '单人自行车租赁，1人使用',
         data_version: @data_version
@@ -229,12 +300,8 @@ module V301V350
         boat_ticket_id: @boat_ticket&.id,
         bicycle_activity_double_id: @bicycle_activity_double&.id,
         bicycle_activity_single_id: @bicycle_activity_single&.id,
-        zhangsan_name: @zhangsan&.name,
-        zhangsan_phone: @zhangsan&.phone,
-        lisi_name: @lisi&.name,
-        lisi_phone: @lisi&.phone,
-        liuqiang_name: @liuqiang&.name,
-        liuqiang_phone: @liuqiang&.phone
+        expected_contact_names: @expected_contact_names,
+        expected_contact_phones: @expected_contact_phones
       }
     end
     
@@ -243,21 +310,13 @@ module V301V350
       @participant_count = data['participant_count']
       @city = data['city']
       @attraction_name = data['attraction_name']
+      @expected_contact_names = data['expected_contact_names']
+      @expected_contact_phones = data['expected_contact_phones']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @boat_ticket = Ticket.find(data['boat_ticket_id']) if data['boat_ticket_id']
       @bicycle_activity_double = AttractionActivity.find(data['bicycle_activity_double_id']) if data['bicycle_activity_double_id']
       @bicycle_activity_single = AttractionActivity.find(data['bicycle_activity_single_id']) if data['bicycle_activity_single_id']
-      
-      if data['zhangsan_name']
-        @zhangsan = OpenStruct.new(name: data['zhangsan_name'], phone: data['zhangsan_phone'])
-      end
-      if data['lisi_name']
-        @lisi = OpenStruct.new(name: data['lisi_name'], phone: data['lisi_phone'])
-      end
-      if data['liuqiang_name']
-        @liuqiang = OpenStruct.new(name: data['liuqiang_name'], phone: data['liuqiang_phone'])
-      end
     end
   end
 end

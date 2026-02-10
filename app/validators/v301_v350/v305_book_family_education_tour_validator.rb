@@ -8,11 +8,13 @@ require_relative '../base_validator'
 #   用户预订亲子教育游(科技馆+动物园+互动课程)
 #
 # 评分标准:
-#   - 创建跟团游预订(亲子主题) (40%)
+#   - 创建了跟团游预订 (20%)
+#   - 目的地正确（北京） (10%)
 #   - 选择亲子友好行程 (25%)
-#   - 预订2大1小组合 (20%)
+#   - 预订2大1小组合 (15%)
 #   - 出行日期正确 (10%)
-#   - 行程时长≥2天 (5%)
+#   - 联系人信息正确（刘强） (10%)
+#   - 行程时长≥2天 (10%)
 module V301V350
   class V305BookFamilyEducationTourValidator < BaseValidator
     self.validator_id = 'v305_book_family_education_tour_validator'
@@ -49,26 +51,23 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了跟团游预订(亲子主题)", weight: 35 do
+      add_assertion "创建了跟团游预订", weight: 20 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
-          .where(tour_group_products: { destination: @destination })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@tour_booking).not_to be_nil, "未找到#{@destination}的跟团游预订"
+        expect(@tour_booking).not_to be_nil, "未找到跟团游预订"
       end
       
       return unless @tour_booking
       
-      add_assertion "联系人信息正确（刘强）", weight: 15 do
-        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
-        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
-          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
+      add_assertion "目的地正确（#{@destination}）", weight: 10 do
+        expect(@tour_booking.tour_group_product.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}，实际: #{@tour_booking.tour_group_product.destination}"
       end
       
-      add_assertion "选择亲子友好行程", weight: 20 do
+      add_assertion "选择亲子友好行程", weight: 25 do
         tour = @tour_booking.tour_group_product
         # 亲子行程通常评分高、适合家庭
         is_family_tour = tour.rating >= 4.5 || tour.duration >= 2
@@ -85,10 +84,17 @@ module V301V350
       
       add_assertion "出行日期正确", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
-          "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
+          "出行日期错误。期望: #{@travel_date}（12天后），实际: #{@tour_booking.travel_date}"
       end
       
-      add_assertion "行程时长≥2天", weight: 5 do
+      add_assertion "联系人信息正确（刘强）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}（刘强），实际: #{@tour_booking.contact_name}"
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@tour_booking.contact_phone}"
+      end
+      
+      add_assertion "行程时长≥2天", weight: 10 do
         tour = @tour_booking.tour_group_product
         expect(tour.duration).to be >= 2,
           "行程天数不足。期望≥2天，实际: #{tour.duration}天"

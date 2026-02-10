@@ -8,10 +8,12 @@ require_relative '../base_validator'
 #   用户预订禅修静心游(寺庙+冥想+素食体验)
 #
 # 评分标准:
-#   - 创建跟团游预订(禅修主题) (40%)
+#   - 创建了跟团游预订 (20%)
+#   - 目的地正确（杭州） (10%)
 #   - 选择禅修/文化主题行程 (30%)
-#   - 出行日期正确 (15%)
-#   - 行程时长≥3天(深度体验) (10%)
+#   - 出行日期正确 (10%)
+#   - 联系人信息正确（王芳） (10%)
+#   - 行程时长≥3天(深度体验) (15%)
 #   - 订单状态正确 (5%)
 module V301V350
   class V306BookMeditationRetreatTourValidator < BaseValidator
@@ -47,26 +49,23 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了跟团游预订(禅修主题)", weight: 35 do
+      add_assertion "创建了跟团游预订", weight: 20 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
-          .where(tour_group_products: { destination: @destination })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@tour_booking).not_to be_nil, "未找到#{@destination}的跟团游预订"
+        expect(@tour_booking).not_to be_nil, "未找到跟团游预订"
       end
       
       return unless @tour_booking
       
-      add_assertion "联系人信息正确（王芳）", weight: 15 do
-        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
-        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
-          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
+      add_assertion "目的地正确（#{@destination}）", weight: 10 do
+        expect(@tour_booking.tour_group_product.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}，实际: #{@tour_booking.tour_group_product.destination}"
       end
       
-      add_assertion "选择禅修/文化主题行程", weight: 25 do
+      add_assertion "选择禅修/文化主题行程", weight: 30 do
         tour = @tour_booking.tour_group_product
         # 禅修主题必须包含相关关键词：禅修/寺庙/冥想/素食
         is_meditation_tour = tour.title.match?(/(禅修|灵隐寺|法喜寺|径山寺|冥想|素食|禅茶|抄经|养生|静心)/)
@@ -74,12 +73,19 @@ module V301V350
           "未选择禅修主题行程。当前行程: #{tour.title}, 评分: #{tour.rating}, 天数: #{tour.duration}天"
       end
       
-      add_assertion "出行日期正确", weight: 15 do
+      add_assertion "出行日期正确", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
-          "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
+          "出行日期错误。期望: #{@travel_date}（14天后），实际: #{@tour_booking.travel_date}"
       end
       
-      add_assertion "行程时长≥3天(深度体验)", weight: 10 do
+      add_assertion "联系人信息正确（王芳）", weight: 10 do
+        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_name}（王芳），实际: #{@tour_booking.contact_name}"
+        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
+          "联系电话错误。期望: #{@expected_contact_phone}，实际: #{@tour_booking.contact_phone}"
+      end
+      
+      add_assertion "行程时长≥3天(深度体验)", weight: 15 do
         tour = @tour_booking.tour_group_product
         expect(tour.duration).to be >= 3,
           "行程天数不足。期望≥3天(深度禅修体验)，实际: #{tour.duration}天"
@@ -103,7 +109,7 @@ module V301V350
         .order(rating: :desc)
         .first
       
-      # 如果没有禅修主题，降低要求（只需行程≥30天、评分高4.5）
+      # 如果没有禅修主题，降低要求（只需行程≥3天、评分高≥4.5）
       tour_product ||= TourGroupProduct
         .where(destination: @destination, data_version: 0)
         .where("duration >= ? AND rating >= ?", 3, 4.5)

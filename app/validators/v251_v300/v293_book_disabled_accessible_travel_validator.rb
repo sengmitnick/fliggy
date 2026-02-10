@@ -2,14 +2,14 @@
 
 require_relative '../base_validator'
 
-# 验证用例293: 给王芳预订无障碍出行（广州-上海）
+# 验证用例293: 给王芳预订健康养生出行（广州-上海）
 #
 # 任务描述:
-#   给王芳预订6天后从广州到上海的无障碍出行方案（航班+无障碍酒店）
+#   给王芳预订6天后从广州到上海的健康养生出行方案（航班+水疗养生酒店）
 #
 # 评分标准:
 #   - 创建航班预订 (30%)
-#   - 创建无障碍酒店预订 (30%)
+#   - 创建水疗养生酒店预订 (30%)
 #   - 乘客信息正确（王芳）(15%)
 #   - 航班和酒店城市匹配 (15%)
 #   - 订单状态正确 (10%)
@@ -17,8 +17,8 @@ module V251V300
   class V293BookDisabledAccessibleTravelValidator < BaseValidator
     self.validator_id = 'v293_book_disabled_accessible_travel_validator'
     self.task_id = '5a979b48-b8b5-425a-ae5d-8f4b27ee1d4d'
-    self.title = '给王芳预订无障碍出行（6天后广州-上海，含无障碍酒店）'
-    self.description = '帮王芳订6天后从广州到上海的无障碍出行，她行动不便，需要无障碍航班和无障碍酒店'
+    self.title = '给王芳预订健康养生出行（6天后广州-上海，含水疗养生酒店）'
+    self.description = '帮王芳订6天后从广州到上海的健康养生出行，她想放松身心，需要水疗养生酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -38,11 +38,11 @@ module V251V300
       end
       
       {
-        task: "请为王芳预订从#{@departure_city}到#{@destination_city}的无障碍出行方案，#{@departure_date.strftime('%Y年%-m月%-d日')}出发，需要无障碍航班和无障碍酒店",
+        task: "请为王芳预订从#{@departure_city}到#{@destination_city}的健康养生出行方案，#{@departure_date.strftime('%Y年%-m月%-d日')}出发，需要航班和水疗养生酒店",
         departure_city: @departure_city,
         destination_city: @destination_city,
         departure_date: @departure_date.to_s,
-        hint: "预订航班和无障碍酒店，确保适合残障人士出行"
+        hint: "预订航班和水疗养生酒店，让身心得到放松"
       }
     end
     
@@ -59,14 +59,14 @@ module V251V300
       
       return unless @booking
       
-      add_assertion "创建了无障碍酒店预订", weight: 30 do
+      add_assertion "创建了水疗养生酒店预订", weight: 30 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @destination_city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@hotel_booking).not_to be_nil, "未找到#{@destination_city}的无障碍酒店预订"
+        expect(@hotel_booking).not_to be_nil, "未找到#{@destination_city}的水疗养生酒店预订"
       end
       
       add_assertion "乘客信息正确（王芳）", weight: 15 do
@@ -121,7 +121,7 @@ module V251V300
         data_version: @data_version
       )
       
-      # 2. 预订无障碍酒店
+      # 2. 预订水疗养生酒店
       hotel = Hotel.where(city: @destination_city, data_version: 0).order(price: :desc).first!
       
       HotelBooking.create!(

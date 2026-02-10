@@ -8,10 +8,11 @@ require_relative '../base_validator'
 #   李四是健身爱好者，想预订深圳的运动健身度假，需要配备健身房、游泳池等运动设施
 #
 # 评分标准:
-#   - 创建酒店预订(含健身设施) (35%) - 必须在深圳
+#   - 创建了酒店预订 (20%)
+#   - 酒店城市正确（深圳） (15%)
 #   - 选择配备健身房的酒店 (35%) - facilities字段包含健身/泳池/运动关键词
 #   - 入住日期正确 (10%) - 必须是今天+6天
-#   - 住客信息正确 (10%) - guest_name和guest_phone必须是李四
+#   - 住客信息正确（李四） (10%) - guest_name和guest_phone必须是李四
 #   - 住宿天数≥3晚 (5%) - 实际要求4晚
 #   - 房间数和人数正确 (5%) - 1间房，1成人，0儿童
 module V301V350
@@ -47,36 +48,40 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了酒店预订(含健身设施)", weight: 35 do
+      add_assertion "创建了酒店预订", weight: 20 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
-          .where(hotels: { city: @city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@hotel_booking).not_to be_nil, "未找到#{@city}的酒店预订"
+        expect(@hotel_booking).not_to be_nil, "未找到酒店预订"
       end
       
       return unless @hotel_booking
+      
+      add_assertion "酒店城市正确（#{@city}）", weight: 15 do
+        expect(@hotel_booking.hotel.city).to eq(@city),
+          "酒店城市错误。期望: #{@city}，实际: #{@hotel_booking.hotel.city}"
+      end
       
       add_assertion "选择配备健身房的酒店", weight: 35 do
         hotel = @hotel_booking.hotel
         # 健身设施：健身房、游泳池等
         has_fitness = hotel.facilities.to_s.match?(/健身|游泳池|泳池|运动/i)
         expect(has_fitness).to be(true),
-          "酒店未配备健身设施。当前设施: #{hotel.facilities}"
+          "酒店未配备健身设施。当前酒店: #{hotel.name}, 设施: #{hotel.facilities}"
       end
       
       add_assertion "入住日期正确", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
-          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+          "入住日期错误。期望: #{@check_in_date}（6天后），实际: #{@hotel_booking.check_in_date}"
       end
       
       add_assertion "住客信息正确（李四）", weight: 10 do
         expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
-          "住客姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+          "住客姓名错误。期望: #{@expected_guest_name}（李四），实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
-          "联系电话错误。期望: #{@expected_guest_phone}, 实际: #{@hotel_booking.guest_phone}"
+          "联系电话错误。期望: #{@expected_guest_phone}，实际: #{@hotel_booking.guest_phone}"
       end
       
       add_assertion "住宿天数≥3晚", weight: 5 do

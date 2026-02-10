@@ -8,13 +8,13 @@ require_relative '../base_validator'
 #   刘强和陈静想预订杭州的养生度假，需要温泉、SPA服务和高端养生酒店
 #
 # 评分标准:
-#   - 创建酒店预订(温泉度假村) (35%)
-#   - 选择高评分养生酒店 (20%)
-#   - 创建SPA/温泉活动订单 (15%)
-#   - 住客信息正确 (10%)
-#   - 入住日期正确 (5%)
+#   - 创建了酒店预订 (25%)
+#   - 酒店城市正确（杭州） (10%)
+#   - 选择高评分养生酒店 (25%)
+#   - 入住日期正确 (10%)
+#   - 住客信息正确（刘强） (10%)
 #   - 住宿天数≥3晚 (5%)
-#   - 房间数和人数正确 (10%)
+#   - 房间数和人数正确 (15%)
 module V301V350
   class V304BookWellnessResortTourValidator < BaseValidator
     self.validator_id = 'v304_book_wellness_resort_tour_validator'
@@ -41,28 +41,33 @@ module V301V350
       @expected_guest_phone = @liuqiang.phone
       
       {
-        task: "请预订#{@city}的养生度假，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚，需要温泉、SPA服务和高端养生酒店",
+        task: "请为刘强和陈静预订#{@city}的养生度假，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚，需要高端养生酒店",
         city: @city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        hint: "选择高评分的养生度假酒店，预订温泉或SPA体验"
+        passengers: '刘强、陈静',
+        hint: "选择高评分的养生度假酒店（评分≥4.5或价格≥600），2成人入住，联系人使用demo_user的出行人刘强"
       }
     end
     
     def verify
-      add_assertion "创建了酒店预订(温泉度假村)", weight: 35 do
+      add_assertion "创建了酒店预订", weight: 25 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
-          .where(hotels: { city: @city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
-        expect(@hotel_booking).not_to be_nil, "未找到#{@city}的酒店预订"
+        expect(@hotel_booking).not_to be_nil, "未找到酒店预订"
       end
       
       return unless @hotel_booking
       
-      add_assertion "选择高评分养生酒店", weight: 20 do
+      add_assertion "酒店城市正确（#{@city}）", weight: 10 do
+        expect(@hotel_booking.hotel.city).to eq(@city),
+          "酒店城市错误。期望: #{@city}，实际: #{@hotel_booking.hotel.city}"
+      end
+      
+      add_assertion "选择高评分养生酒店", weight: 25 do
         hotel = @hotel_booking.hotel
         # 养生酒店通常评分高、价格适中
         is_wellness_hotel = hotel.rating >= 4.5 || hotel.price >= 600
@@ -70,30 +75,16 @@ module V301V350
           "未选择高评分养生酒店。当前酒店: #{hotel.name}, 评分: #{hotel.rating}, 价格: ¥#{hotel.price}"
       end
       
-      add_assertion "创建了SPA/温泉活动订单", weight: 15 do
-        @activity_order = ActivityOrder
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .first
-        
-        # SPA/温泉活动可能已包含在酒店套餐中
-        if @activity_order
-          expect(@activity_order).not_to be_nil
-        else
-          expect(true).to be(true)
-        end
-      end
-      
-      add_assertion "入住日期正确", weight: 5 do
+      add_assertion "入住日期正确", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
-          "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
+          "入住日期错误。期望: #{@check_in_date}（8天后），实际: #{@hotel_booking.check_in_date}"
       end
       
       add_assertion "住客信息正确（刘强）", weight: 10 do
         expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
-          "住客姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+          "住客姓名错误。期望: #{@expected_guest_name}（刘强），实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq(@expected_guest_phone),
-          "联系电话错误。期望: #{@expected_guest_phone}, 实际: #{@hotel_booking.guest_phone}"
+          "联系电话错误。期望: #{@expected_guest_phone}，实际: #{@hotel_booking.guest_phone}"
       end
       
       add_assertion "住宿天数≥3晚", weight: 5 do
@@ -102,7 +93,7 @@ module V301V350
           "住宿天数不足。期望≥3晚，实际: #{actual_nights}晚"
       end
       
-      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
+      add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 15 do
         expect(@hotel_booking.rooms_count).to eq(1),
           "房间数错误。期望: 1间房，实际: #{@hotel_booking.rooms_count}间房"
         expect(@hotel_booking.adults_count).to eq(2),
@@ -139,29 +130,6 @@ module V301V350
         status: 'pending',
         data_version: @data_version
       )
-      
-      # 可选：预订SPA/温泉体验活动
-      attraction = Attraction.where(city: @city, data_version: 0).first
-      if attraction
-        activity = attraction.attraction_activities
-          .where(activity_type: 'experience', data_version: 0)
-          .first
-        
-        if activity
-          # Use existing passengers for couple
-          ActivityOrder.create!(
-            user_id: user.id,
-            attraction_activity_id: activity.id,
-            visit_date: @visit_date,
-            quantity: 2,  # 双人SPA
-            passenger_ids: [@liuqiang.id, @chenjing.id],
-            total_price: activity.current_price * 2,
-            status: 'pending',
-            insurance_type: 'none',
-            data_version: @data_version
-          )
-        end
-      end
     end
     
     private

@@ -9,9 +9,11 @@ require_relative '../base_validator'
 #   包含人像跟拍服务和服装租赁+化妆造型服务，需要分别创建2个活动订单
 #
 # 评分标准:
-#   - 创建了摄影服务订单（活动订单）(40%)
-#   - 创建了服装租赁订单（额外活动）(30%)
-#   - 服务日期正确 (20%)
+#   - 创建了摄影服务订单 (20%)
+#   - 景点正确（东方明珠） (10%)
+#   - 创建了服装租赁订单 (30%)
+#   - 服务日期正确（7天后） (20%)
+#   - 人数正确（1人） (10%)
 #   - 订单状态和价格有效 (10%)
 module V301V350
   class V310BookPortraitPhotographyCostumeMakeupValidator < BaseValidator
@@ -55,21 +57,25 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了摄影服务订单（活动订单）", weight: 40 do
+      add_assertion "创建了摄影服务订单", weight: 20 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
-          .where(attraction_activities: { attraction_id: @attraction.id })
           .where(data_version: @data_version)
           .order(created_at: :asc)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction_name}的活动订单"
+        expect(all_activity_orders).not_to be_empty, "未找到活动订单"
         @photography_order = all_activity_orders.first
         expect(@photography_order).not_to be_nil, "未找到摄影服务订单"
       end
       
       return if @photography_order.nil?
+      
+      add_assertion "景点正确（#{@attraction_name}）", weight: 10 do
+        expect(@photography_order.attraction_activity.attraction.name).to eq(@attraction_name),
+          "景点错误。期望: #{@attraction_name}，实际: #{@photography_order.attraction_activity.attraction.name}"
+      end
       
       add_assertion "创建了服装租赁订单（额外活动）", weight: 30 do
         all_activity_orders = ActivityOrder
@@ -89,11 +95,21 @@ module V301V350
       
       add_assertion "服务日期正确", weight: 20 do
         expect(@photography_order.visit_date).to eq(@service_date),
-          "摄影服务日期错误。期望: #{@service_date}，实际: #{@photography_order.visit_date}"
+          "摄影服务日期错误。期望: #{@service_date}（7天后），实际: #{@photography_order.visit_date}"
         
         if @costume_order
           expect(@costume_order.visit_date).to eq(@service_date),
-            "服装租赁日期错误。期望: #{@service_date}，实际: #{@costume_order.visit_date}"
+            "服装租赁日期错误。期望: #{@service_date}（7天后），实际: #{@costume_order.visit_date}"
+        end
+      end
+      
+      add_assertion "人数正确（1人）", weight: 10 do
+        expect(@photography_order.quantity).to eq(@participant_count),
+          "摄影服务人数错误。期望: #{@participant_count}人，实际: #{@photography_order.quantity}人"
+        
+        if @costume_order
+          expect(@costume_order.quantity).to eq(@participant_count),
+            "服装租赁人数错误。期望: #{@participant_count}人，实际: #{@costume_order.quantity}人"
         end
       end
       

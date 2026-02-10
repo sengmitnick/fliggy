@@ -8,10 +8,12 @@ require_relative '../base_validator'
 #   用户需要预订蜈支洲岛的潜水服务（4天后，2人），包含景区门票、潜水教学+体验和水下摄影服务
 #
 # 评分标准:
-#   - 购买了景区门票(25%)
-#   - 预订了潜水活动(30%)
-#   - 预订了摄影服务(25%)
-#   - 活动日期正确（4天后）(15%)
+#   - 购买了景区门票 (20%)
+#   - 景点正确（蜈支洲岛） (10%)
+#   - 预订了潜水活动 (25%)
+#   - 预订了摄影服务 (20%)
+#   - 活动日期正确（4天后） (10%)
+#   - 联系电话正确（刘强） (10%)
 #   - 订单状态和价格有效 (5%)
 module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
@@ -28,8 +30,12 @@ module V301V350
       @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
       @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
       
-      # Expected contact info
-      @expected_contact_phone = @liuqiang.phone
+      # Expected contact info (one of the couple can be contact)
+      @expected_contact_names = [@liuqiang.name, @chenjing.name]
+      @expected_contact_phones = {
+        @liuqiang.name => @liuqiang.phone,
+        @chenjing.name => @chenjing.phone
+      }
       
       @visit_date = Date.current + 4.days
       @participant_count = 2
@@ -57,16 +63,15 @@ module V301V350
     
     def verify
       # 断言1: 购买了景区门票
-      add_assertion "购买了景区门票（#{@attraction.name}）", weight: 20 do
+      add_assertion "购买了景区门票", weight: 20 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(:ticket)
-          .where(tickets: { attraction_id: @attraction.id })
           .where(data_version: @data_version)
           .order(created_at: :asc)
           .to_a
         
-        expect(all_ticket_orders).not_to be_empty, "未找到#{@attraction.name}的门票订单"
+        expect(all_ticket_orders).not_to be_empty, "未找到门票订单"
         @ticket_order = all_ticket_orders.first
         expect(@ticket_order).not_to be_nil, "未购买景区门票"
         expect(@ticket_order.quantity).to eq(@participant_count),
@@ -75,13 +80,13 @@ module V301V350
       
       return if @ticket_order.nil?
       
-      add_assertion "联系电话正确（刘强）", weight: 10 do
-        expect(@ticket_order.contact_phone).to eq(@expected_contact_phone),
-          "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@ticket_order.contact_phone}"
+      add_assertion "景点正确（#{@attraction.name}）", weight: 10 do
+        expect(@ticket_order.ticket.attraction.name).to eq(@attraction.name),
+          "景点错误。期望: #{@attraction.name}，实际: #{@ticket_order.ticket.attraction.name}"
       end
       
       # 断言2: 预订了潜水活动
-      add_assertion "预订了潜水活动（潜水教学+体验）", weight: 30 do
+      add_assertion "预订了潜水活动（潜水教学+体验）", weight: 25 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -98,7 +103,7 @@ module V301V350
       return if @diving_order.nil?
       
       # 断言3: 预订了摄影服务
-      add_assertion "预订了摄影服务（水下摄影服务）", weight: 25 do
+      add_assertion "预订了摄影服务（水下摄影服务）", weight: 20 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -115,7 +120,7 @@ module V301V350
       end
       
       # 断言4: 游玩日期正确（4天后）
-      add_assertion "游玩日期正确（#{@visit_date}）", weight: 15 do
+      add_assertion "活动日期正确", weight: 10 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "门票游玩日期错误。期望: #{@visit_date}（4天后），实际: #{@ticket_order.visit_date}"
         
@@ -126,6 +131,14 @@ module V301V350
           expect(@photography_order.visit_date).to eq(@visit_date),
             "摄影服务日期错误。期望: #{@visit_date}（4天后），实际: #{@photography_order.visit_date}"
         end
+      end
+      
+      add_assertion "联系电话正确（刘强或陈静）", weight: 10 do
+        expect(@expected_contact_names).to include(@ticket_order.contact_name),
+          "联系人姓名错误。期望: #{@expected_contact_names.join('或')}中的一个, 实际: #{@ticket_order.contact_name}"
+        expected_phone = @expected_contact_phones[@ticket_order.contact_name]
+        expect(@ticket_order.contact_phone).to eq(expected_phone),
+          "联系电话错误。期望: #{expected_phone}（#{@ticket_order.contact_name}）, 实际: #{@ticket_order.contact_phone}"
       end
       
       # 断言5: 订单状态和价格有效
@@ -152,6 +165,9 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
+      # 随机选择一位作为联系人
+      contact_person = [@liuqiang, @chenjing].sample
+      
       # 1. 创建门票订单（TicketOrder）
       adult_ticket = @adult_ticket || @attraction.tickets.find_by!(ticket_type: 'adult')
       
@@ -160,7 +176,8 @@ module V301V350
         ticket: adult_ticket,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: @liuqiang.phone,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         total_price: adult_ticket.current_price * @participant_count,
         status: 'paid',
         data_version: @data_version
@@ -174,7 +191,8 @@ module V301V350
         attraction_activity: diving_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: @liuqiang.phone,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         total_price: diving_activity.current_price * @participant_count,
         insurance_type: 'premium',
         status: 'paid',
@@ -189,7 +207,8 @@ module V301V350
         attraction_activity: photography_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_phone: @liuqiang.phone,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         total_price: photography_activity.current_price * @participant_count,
         insurance_type: 'none',
         status: 'paid',
@@ -207,14 +226,16 @@ module V301V350
         adult_ticket_id: @adult_ticket&.id,
         diving_activity_id: @diving_activity&.id,
         photography_activity_id: @photography_activity&.id,
-        expected_contact_phone: @expected_contact_phone
+        expected_contact_names: @expected_contact_names,
+        expected_contact_phones: @expected_contact_phones
       }
     end
     
     def restore_from_state(data)
       @visit_date = Date.parse(data['visit_date'])
       @participant_count = data['participant_count']
-      @expected_contact_phone = data['expected_contact_phone']
+      @expected_contact_names = data['expected_contact_names']
+      @expected_contact_phones = data['expected_contact_phones']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @adult_ticket = Ticket.find(data['adult_ticket_id']) if data['adult_ticket_id']
