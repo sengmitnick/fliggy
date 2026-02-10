@@ -10,15 +10,16 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了航班订单 (25%)
 #   - 创建了酒店订单 (25%)
-#   - 出发日期为明天 (20%)
-#   - 价格较低（属于特价） (20%)
+#   - 出发日期为明天 (10%)
+#   - 乘客和入住人信息正确（刘强） (15%)
+#   - 价格较低（属于特价） (15%)
 #   - 城市正确 (10%)
 module V151V200
   class V194BookLastMinuteDealDiscountComboValidator < BaseValidator
     self.validator_id = 'v194_book_last_minute_deal_discount_combo_validator'
     self.task_id = 'e5dc7f50-cb89-4ef1-baa8-81e296f08452'
     self.title = '给刘强预订明天从北京到上海的特价组合（明天出发）'
-    self.description = '帮刘强订明天出发的特价组合（航班+酒店）'
+    self.description = '帮刘强订明天从北京到上海的特价组合（航班+酒店）'
     self.timeout_seconds = 300
     
     def prepare
@@ -88,15 +89,30 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 出发日期为明天 (20%)
-      add_assertion "出发日期为明天（#{@tomorrow}）", weight: 20 do
+      # 断言3: 出发日期为明天 (10%)
+      add_assertion "出发日期为明天（#{@tomorrow}）", weight: 10 do
         flight_date = @flight_booking.flight.departure_time.to_date
         expect(flight_date).to eq(@tomorrow),
           "出发日期错误。期望: #{@tomorrow}（明天）, 实际: #{flight_date}"
       end
       
-      # 断言4: 价格较低（属于特价） (20%)
-      add_assertion "价格较低（属于特价）", weight: 20 do
+      # 断言4: 乘客和入住人信息正确（刘强） (15%)
+      add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查航班乘客姓名
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        
+        # 检查航班联系人
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系人电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言5: 价格较低（属于特价） (15%)
+      add_assertion "价格较低（属于特价）", weight: 15 do
         flight_price = @flight_booking.total_price.to_f
         hotel_price = @hotel_booking.total_price.to_f
         total_price = flight_price + hotel_price
@@ -109,7 +125,7 @@ module V151V200
           "价格不够优惠。期望: ≤#{price_threshold.round(2)}元（特价标准）, 实际: #{total_price.round(2)}元"
       end
       
-      # 断言5: 城市正确 (10%)
+      # 断言6: 城市正确 (10%)
       add_assertion "城市正确", weight: 10 do
         flight = @flight_booking.flight
         hotel = @hotel_booking.hotel

@@ -10,15 +10,16 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了航班订单 (20%)
 #   - 创建了酒店订单 (20%)
-#   - 在预算内升级到最高可能等级 (40%)
+#   - 在预算内升级到最高可能等级 (25%)
 #   - 出发/到达城市正确 (10%)
+#   - 乘客和入住人信息正确（王芳） (15%)
 #   - 日期合理 (10%)
 module V151V200
   class V193BookPremiumUpgradeWithinBudgetValidator < BaseValidator
     self.validator_id = 'v193_book_premium_upgrade_within_budget_validator'
     self.task_id = '8cf29355-6c7f-458c-855e-c12a75be9643'
     self.title = '给王芳预订明天北京到上海的预算内最高等级的航班+酒店'
-    self.description = '帮王芳订明天从北京到上海的经济舱+标准房，在预算2000元内升级到最高可能的等级'
+    self.description = '帮王芳订明天从北京到上海的航班+酒店，在预算2000元内尽量升级到最高等级（商务舱或头等舱、高星级酒店）'
     self.timeout_seconds = 300
     
     def prepare
@@ -89,8 +90,8 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 在预算内升级到最高可能等级 (40%)
-      add_assertion "在预算内升级到最高可能等级", weight: 40 do
+      # 断言3: 在预算内升级到最高可能等级 (25%)
+      add_assertion "在预算内升级到最高可能等级", weight: 25 do
         flight = @flight_booking.flight
         hotel = @hotel_booking.hotel
         
@@ -114,7 +115,22 @@ module V151V200
         expect(flight.destination_city).to eq(@arrival_city)
       end
       
-      # 断言5: 日期合理 (10%)
+      # 断言5: 乘客和入住人信息正确（王芳） (15%)
+      add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查航班乘客姓名
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        
+        # 检查航班联系人
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系人电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言6: 日期合理 (10%)
       add_assertion "日期合理", weight: 10 do
         arrival_date = @flight_booking.flight.arrival_time.to_date
         checkin_date = @hotel_booking.check_in_date

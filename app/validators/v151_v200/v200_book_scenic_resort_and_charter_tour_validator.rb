@@ -10,8 +10,9 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了酒店订单 (30%)
 #   - 创建了包车订单 (30%)
-#   - 酒店类型正确（景区/度假村） (20%)
-#   - 包车时间合理（游览期间） (15%)
+#   - 酒店类型正确（景区/度假村） (15%)
+#   - 驾驶人和入住人信息正确（王芳） (15%)
+#   - 包车时间合理（游览期间） (5%)
 #   - 价格合理 (5%)
 module V151V200
   class V200BookScenicResortAndCharterTourValidator < BaseValidator
@@ -84,8 +85,8 @@ module V151V200
       
       return if @hotel_booking.nil? || @car_order.nil?
       
-      # 断言3: 酒店类型正确（景区/度假村） (20%)
-      add_assertion "酒店类型正确（景区/度假村）", weight: 20 do
+      # 断言3: 酒店类型正确（景区/度假村） (15%)
+      add_assertion "酒店类型正确（景区/度假村）", weight: 15 do
         hotel = @hotel_booking.hotel
         # 高星级酒店认为是度假型
         is_scenic = hotel.star_level.to_i >= 4
@@ -94,8 +95,23 @@ module V151V200
           "酒店不是景区型。酒店: #{hotel.name}（星级: #{hotel.star_level}）"
       end
       
-      # 断言4: 包车时间合理（游览期间） (15%)
-      add_assertion "包车时间合理（游览期间）", weight: 15 do
+      # 断言4: 驾驶人和入住人信息正确（王芳） (15%)
+      add_assertion "驾驶人和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查包车订单驾驶人姓名
+        expect(@car_order.driver_name).to eq(@expected_passenger_name),
+          "包车订单驾驶人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@car_order.driver_name}"
+        
+        # 检查包车订单联系人
+        expect(@car_order.contact_phone).to eq(@expected_phone),
+          "包车订单联系人电话错误。期望: #{@expected_phone}, 实际: #{@car_order.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言5: 包车时间合理（游览期间） (5%)
+      add_assertion "包车时间合理（游览期间）", weight: 5 do
         checkin_date = @hotel_booking.check_in_date
         checkout_date = @hotel_booking.check_out_date
         pickup_date = @car_order.pickup_datetime.to_date
@@ -109,7 +125,7 @@ module V151V200
         expect(return_date).to be <= checkout_date
       end
       
-      # 断言5: 价格合理 (5%)
+      # 断言6: 价格合理 (5%)
       add_assertion "价格合理", weight: 5 do
         rental_days = (@car_order.return_datetime.to_date - @car_order.pickup_datetime.to_date).to_i
         car = @car_order.car
@@ -150,7 +166,7 @@ module V151V200
       CarOrder.create!(
         user: user,
         car_id: car.id,
-        driver_name: user.name,
+        driver_name: passenger.name,
         driver_id_number: passenger.id_number,
         contact_phone: passenger.phone,
         pickup_datetime: pickup_datetime,

@@ -10,8 +10,9 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了航班订单 (25%)
 #   - 创建了酒店订单 (25%)
-#   - 酒店在机场附近（≤3公里） (30%)
+#   - 酒店在机场附近（≤3公里） (15%)
 #   - 出发/到达城市正确 (10%)
+#   - 乘客和入住人信息正确（周敏） (15%)
 #   - 日期合理 (10%)
 module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
@@ -91,8 +92,8 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 酒店在机场附近（≤3公里） (30%)
-      add_assertion "酒店在机场附近（≤#{@max_distance}公里）", weight: 30 do
+      # 断言3: 酒店在机场附近（≤3公里） (15%)
+      add_assertion "酒店在机场附近（≤#{@max_distance}公里）", weight: 15 do
         hotel = @hotel_booking.hotel
         is_airport_hotel = is_near_airport?(hotel)
         
@@ -109,7 +110,22 @@ module V151V200
         expect(hotel.city).to eq(@arrival_city)
       end
       
-      # 断言5: 日期合理 (10%)
+      # 断言5: 乘客和入住人信息正确（周敏） (15%)
+      add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查航班乘客姓名
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        
+        # 检查航班联系人
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系人电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言6: 日期合理 (10%)
       add_assertion "日期合理", weight: 10 do
         arrival_date = @flight_booking.flight.arrival_time.to_date
         checkin_date = @hotel_booking.check_in_date

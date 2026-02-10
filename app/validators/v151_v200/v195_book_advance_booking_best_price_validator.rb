@@ -10,15 +10,16 @@ require_relative '../base_validator'
 # 评分标准:
 #   - 创建了航班订单 (25%)
 #   - 创建了酒店订单 (25%)
-#   - 出发日期为15天后 (15%)
-#   - 价格最优（最低价或接近） (25%)
+#   - 出发日期为15天后 (10%)
+#   - 乘客和入住人信息正确（陈静） (15%)
+#   - 价格最优（最低价或接近） (15%)
 #   - 城市正确 (10%)
 module V151V200
   class V195BookAdvanceBookingBestPriceValidator < BaseValidator
     self.validator_id = 'v195_book_advance_booking_best_price_validator'
     self.task_id = '6f3a5eb6-ae1b-45cc-ae14-ecec290c6cba'
     self.title = '给陈静预订15天后从北京到上海的最优价格组合'
-    self.description = '帮陈静预订15天后出发的最优价格组合（提前预订价格更优）'
+    self.description = '帮陈静预订15天后从北京到上海的最优价格组合（提前预订价格更优）'
     self.timeout_seconds = 300
     
     def prepare
@@ -87,15 +88,30 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言3: 出发日期为15天后 (15%)
-      add_assertion "出发日期为15天后（#{@future_date}）", weight: 15 do
+      # 断言3: 出发日期为15天后 (10%)
+      add_assertion "出发日期为15天后（#{@future_date}）", weight: 10 do
         flight_date = @flight_booking.flight.departure_time.to_date
         expect(flight_date).to eq(@future_date),
           "出发日期错误。期望: #{@future_date}（15天后）, 实际: #{flight_date}"
       end
       
-      # 断言4: 价格最优（最低价或接近，允许5%误差） (25%)
-      add_assertion "价格最优（最低价或接近，允许5%误差）", weight: 25 do
+      # 断言4: 乘客和入住人信息正确（陈静） (15%)
+      add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
+        # 检查航班乘客姓名
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        
+        # 检查航班联系人
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "航班联系人电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
+        
+        # 检查酒店入住人
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "酒店入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言5: 价格最优（最低价或接近，允许5%误差） (15%)
+      add_assertion "价格最优（最低价或接近，允许5%误差）", weight: 15 do
         flight_price = @flight_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = flight_price + hotel_price
@@ -105,7 +121,7 @@ module V151V200
           "价格不是最优。期望: ≤#{allowed_max.round(2)}元（最低价#{@min_price}+5%误差）, 实际: #{total_price}元"
       end
       
-      # 断言5: 城市正确 (10%)
+      # 断言6: 城市正确 (10%)
       add_assertion "城市正确", weight: 10 do
         flight = @flight_booking.flight
         hotel = @hotel_booking.hotel
