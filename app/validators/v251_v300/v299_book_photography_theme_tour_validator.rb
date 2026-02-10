@@ -8,8 +8,9 @@ require_relative '../base_validator'
 #   王芳想去云南进行摄影主题旅游，需要选择风景优美的跟团游产品（评分≥4.5）
 #
 # 评分标准:
-#   - 创建跟团游预订 (45%)
+#   - 创建跟团游预订 (30%)
 #   - 选择风景优美目的地 (25%)
+#   - 游客信息正确（王芳） (15%)
 #   - 预订日期正确 (10%)
 #   - 联系人信息正确 (10%)
 #   - 预订人数正确(1人) (10%)
@@ -18,7 +19,7 @@ module V251V300
     self.validator_id = 'v299_book_photography_theme_tour_validator'
     self.task_id = 'feeaef15-74e2-4fb2-a7fa-1b6c5bc2273f'
     self.title = '给王芳预订云南摄影主题游（7天后，1人）'
-    self.description = '王芳想去云南进行摄影主题旅游，要选风景优美的跟团游（评分≥4.5）'
+    self.description = '王芳想去云南进行摄影主题旅游，选风景优美的跟团游（评分≥4.5）'
     self.timeout_seconds = 300
     
     def prepare
@@ -45,7 +46,7 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了跟团游预订(摄影主题)", weight: 45 do
+      add_assertion "创建了跟团游预订", weight: 30 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -66,6 +67,18 @@ module V251V300
           "未选择风景优美的目的地。当前评分: #{tour.rating}"
       end
       
+      add_assertion "游客信息正确（王芳）", weight: 15 do
+        travelers = @tour_booking.booking_travelers
+        expect(travelers).not_to be_empty, "未找到游客信息"
+        
+        wangfang_traveler = travelers.find { |t| t.traveler_name == @expected_contact_name }
+        expect(wangfang_traveler).not_to be_nil,
+          "游客信息中缺少王芳。实际游客: #{travelers.map(&:traveler_name).join(', ')}"
+        
+        expect(wangfang_traveler.id_number).to eq(@wangfang.id_number),
+          "身份证号码错误。期望: #{@wangfang.id_number}, 实际: #{wangfang_traveler.id_number}"
+      end
+      
       add_assertion "预订日期正确", weight: 10 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
           "出行日期错误。期望: #{@travel_date}, 实际: #{@tour_booking.travel_date}"
@@ -83,27 +96,12 @@ module V251V300
         expect(total_passengers).to eq(1),
           "预订人数错误。期望: 1人，实际: #{total_passengers}人"
       end
-      
-      # 可选项:景区活动订单(摄影服务)
-      @activity_order = ActivityOrder
-        .joins(attraction_activity: :attraction)
-        .where(attractions: { city: @destination })
-        .where(data_version: @data_version)
-        .order(created_at: :desc)
-        .first
-      
-      if @activity_order
-        # 如果创建了活动订单,则额外加分(不影响基础分数)
-        add_assertion "额外预订了景区摄影服务活动(加分项)", weight: 0 do
-          expect(@activity_order).not_to be_nil
-        end
-      end
     end
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 预订摄影主题跟团游
+      # 选择风景优美的跟团游（高评分）
       tour_product = TourGroupProduct
         .where(destination: @destination, data_version: 0)
         .order(rating: :desc)
@@ -111,8 +109,8 @@ module V251V300
       
       tour_package = tour_product.tour_packages.first!
       
-      # Use existing passenger from demo_user
-      TourGroupBooking.create!(
+      # 创建跟团游预订
+      tour_booking = TourGroupBooking.create!(
         user_id: user.id,
         tour_group_product_id: tour_product.id,
         tour_package_id: tour_package.id,
@@ -127,30 +125,14 @@ module V251V300
         data_version: @data_version
       )
       
-      # 2. 预订景区摄影服务活动(可选)
-      attraction = Attraction.where(city: @destination, data_version: 0).first
-      if attraction
-        activity = attraction.attraction_activities
-          .where(activity_type: 'photo_service', data_version: 0)
-          .first
-        
-        # 如果没有摄影服务，选择其他体验活动
-        activity ||= attraction.attraction_activities.where(data_version: 0).first
-        
-        if activity
-          ActivityOrder.create!(
-            user_id: user.id,
-            attraction_activity_id: activity.id,
-            visit_date: @visit_date,
-            quantity: 1,
-            passenger_ids: [@wangfang.id],
-            total_price: activity.current_price,
-            status: 'pending',
-            insurance_type: 'none',
-            data_version: @data_version
-          )
-        end
-      end
+      # 添加游客信息
+      BookingTraveler.create!(
+        tour_group_booking_id: tour_booking.id,
+        traveler_name: @wangfang.name,
+        id_number: @wangfang.id_number,
+        traveler_type: 'adult',
+        data_version: @data_version
+      )
     end
     
     private

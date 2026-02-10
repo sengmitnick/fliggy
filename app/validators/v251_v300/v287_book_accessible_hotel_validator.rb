@@ -2,14 +2,14 @@
 
 require_relative '../base_validator'
 
-# 验证用例287: 给张三预订无障碍设施酒店
+# 验证用例287: 给张三预订健身养生酒店
 #
 # 任务描述:
-#   给张三预订上海配备无障碍设施的酒店
+#   给张三预订上海配备健身养生设施的酒店
 #
 # 评分标准:
 #   - 创建酒店预订 (30%)
-#   - 酒店配备无障碍设施 (25%)
+#   - 酒店配备健身养生设施 (25%)
 #   - 入住人信息正确（张三） (20%)
 #   - 入住日期正确 (15%)
 #   - 订单状态正确 (10%)
@@ -17,8 +17,8 @@ module V251V300
   class V287BookAccessibleHotelValidator < BaseValidator
     self.validator_id = 'v287_book_accessible_hotel_validator'
     self.task_id = 'd72a4ed6-b4c8-40f7-b9cc-c0424c05be6a'
-    self.title = '给张三预订无障碍设施酒店'
-    self.description = '给张三预订上海配备无障碍设施的酒店'
+    self.title = '给张三预订健身养生酒店'
+    self.description = '给张三预订上海配备健身养生设施的酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -37,11 +37,11 @@ module V251V300
       end
       
       {
-        task: "请给张三预订#{@city}的无障碍设施酒店，需要配备轮椅通道和无障碍设施，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚",
+        task: "请给张三预订#{@city}的健身养生酒店，需要配备健身房、游泳池等养生设施，#{@check_in_date.strftime('%Y年%-m月%-d日')}入住，住#{(@check_out_date - @check_in_date).to_i}晚",
         city: @city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
-        hint: "选择配备无障碍设施的酒店"
+        hint: "选择配备健身养生设施的酒店"
       }
     end
     
@@ -58,13 +58,13 @@ module V251V300
       
       return unless @hotel_booking
       
-      add_assertion "酒店配备无障碍设施", weight: 25 do
+      add_assertion "酒店配备健身养生设施", weight: 25 do
         hotel = @hotel_booking.hotel
         expect(hotel.facilities).to be_present, "酒店未配置设施信息"
-        # 检查是否有无障碍相关设施（停车、电梯等可作为无障碍设施的标志）
-        has_accessible_features = hotel.facilities.to_s.match?(/停车|电梯|无障碍/i)
-        expect(has_accessible_features).to be(true), 
-          "酒店未配备无障碍相关设施。当前设施: #{hotel.facilities}"
+        # 检查是否有健身养生相关设施（健身房、游泳池、水疗等）
+        has_fitness_features = hotel.facilities.to_s.match?(/健身|游泳|水疗|桑拿|按摩|养生|美容/i)
+        expect(has_fitness_features).to be(true), 
+          "酒店未配备健身养生设施。当前设施: #{hotel.facilities}"
       end
       
       add_assertion "入住人信息正确（张三）", weight: 20 do
@@ -90,11 +90,14 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
-      # 1. 预订配备无障碍设施的酒店
-      hotel = Hotel
+      # 1. 预订配备健身养生设施的酒店
+      # 筛选出带有健身养生相关设施的酒店
+      hotels_with_fitness = Hotel
         .where(city: @city, data_version: 0)
-        .order(price: :desc)
-        .first!
+        .select { |h| h.facilities.to_s.match?(/健身|游泳|水疗|桑拿|按摩|养生|美容/i) }
+      
+      hotel = hotels_with_fitness.max_by(&:price)
+      raise "未找到配备健身养生设施的酒店" if hotel.nil?
       
       HotelBooking.create!(
         hotel_room_id: hotel.hotel_rooms.first!.id,

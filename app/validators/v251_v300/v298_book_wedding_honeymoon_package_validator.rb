@@ -5,11 +5,11 @@ require_relative '../base_validator'
 # 验证用例298: 给刘强和陈静预订三亚蜜月套餐
 #
 # 任务描述:
-#   刘强和陈静新婚要去三亚度蜜月，需要浪漫主题的跟团游和高评分酒店
+#   刘强和陈静新婚要去三亚度蜜月，需要高端豪华的跟团游和高评分酒店
 #
 # 评分标准:
 #   - 创建跟团游预订 (30%)
-#   - 选择蜜月/浪漫主题行程 (25%)
+#   - 选择高端豪华行程 (25%)
 #   - 创建高评分酒店预订 (20%)
 #   - 出行日期正确 (10%)
 #   - 联系人信息正确 (10%)
@@ -19,7 +19,7 @@ module V251V300
     self.validator_id = 'v298_book_wedding_honeymoon_package_validator'
     self.task_id = '2202ed38-54cf-48f7-8fe6-190608cc46c7'
     self.title = '给刘强和陈静预订三亚蜜月套餐（10天后，2人）'
-    self.description = '刘强和陈静新婚要去三亚度蜜月，订个浪漫主题的跟团游和高评分酒店'
+    self.description = '刘强和陈静新婚要去三亚度蜜月，订个高端豪华的跟团游和高评分酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -43,11 +43,11 @@ module V251V300
       }
       
       {
-        task: "请预订#{@destination}的蜜月旅游套餐，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，需要浪漫主题的行程和高评分酒店，适合新婚夫妇度蜜月",
+        task: "请预订#{@destination}的蜜月旅游套餐，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，需要高端豪华的行程和高评分酒店，适合新婚夫妇度蜜月",
         destination: @destination,
         travel_date: @travel_date.to_s,
         check_in_date: @check_in_date.to_s,
-        hint: "选择浪漫/情侣/蜜月主题的旅游产品和高评分酒店"
+        hint: "选择高价格高评分的豪华旅游产品和高评分酒店"
       }
     end
     
@@ -64,12 +64,12 @@ module V251V300
       
       return unless @tour_booking
       
-      add_assertion "选择蜜月/浪漫主题行程", weight: 25 do
+      add_assertion "选择高端豪华行程（高价格或高评分）", weight: 25 do
         tour = @tour_booking.tour_group_product
-        # 高价格、高评分的行程适合蜜月
-        is_honeymoon_tour = tour.price >= 3000 || tour.rating >= 4.7
-        expect(is_honeymoon_tour).to be(true),
-          "未选择蜜月主题行程。当前行程: #{tour.title}, 价格: ¥#{tour.price}, 评分: #{tour.rating}"
+        # 高价格或高评分的行程适合蜜月
+        is_luxury_tour = tour.price >= 3000 || tour.rating >= 4.7
+        expect(is_luxury_tour).to be(true),
+          "未选择高端豪华行程。当前行程: #{tour.title}, 价格: ¥#{tour.price}, 评分: #{tour.rating}"
       end
       
       add_assertion "创建了高评分酒店预订", weight: 20 do

@@ -11,10 +11,12 @@ require_relative '../base_validator'
 #   确保景点、日期和人数正确
 #
 # 评分标准:
-#   - 创建了崇礼万龙滑雪场的门票订单 (40%)
-#   - 创建了滑雪装备租赁活动订单 (40%)
-#   - 两个订单的日期均正确（3天后） (10%)
-#   - 两个订单的人数均正确（2人） (10%)
+#   - 创建了门票订单 (20%)
+#   - 景点正确（崇礼万龙滑雪场） (15%)
+#   - 创建了滑雪装备租赁活动订单 (25%)
+#   - 两个订单的日期均正确（3天后） (15%)
+#   - 联系电话正确（刘强） (10%)
+#   - 两个订单的人数均正确（2人） (15%)
 module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
@@ -30,8 +32,12 @@ module V301V350
       @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
       @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
       
-      # Expected contact info (use one of the couple as contact)
-      @expected_contact_phone = @liuqiang.phone
+      # Expected contact info (one of the couple can be contact)
+      @expected_contact_names = [@liuqiang.name, @chenjing.name]
+      @expected_contact_phones = {
+        @liuqiang.name => @liuqiang.phone,
+        @chenjing.name => @chenjing.phone
+      }
       
       @visit_date = Date.current + 3.days
       @participant_count = 2
@@ -68,29 +74,28 @@ module V301V350
     end
     
     def verify
-      add_assertion "创建了#{@attraction_name}的门票订单", weight: 35 do
+      add_assertion "创建了门票订单", weight: 20 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(ticket: :attraction)
-          .where(tickets: { attractions: { name: @attraction_name } })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
         
         @ticket_orders = all_ticket_orders
-        expect(@ticket_orders).not_to be_empty, "未找到#{@attraction_name}的门票订单"
+        expect(@ticket_orders).not_to be_empty, "未找到门票订单"
       end
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      add_assertion "联系电话正确（刘强）", weight: 10 do
+      add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
         @ticket_orders.each do |order|
-          expect(order.contact_phone).to eq(@expected_contact_phone),
-            "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{order.contact_phone}"
+          expect(order.ticket.attraction.name).to eq(@attraction_name),
+            "景点错误。期望: #{@attraction_name}，实际: #{order.ticket.attraction.name}"
         end
       end
       
-      add_assertion "创建了滑雪装备租赁活动订单", weight: 35 do
+      add_assertion "创建了滑雪装备租赁活动订单", weight: 25 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
           .includes(:attraction_activity)
@@ -106,7 +111,7 @@ module V301V350
         expect(@equipment_orders).not_to be_empty, "未找到#{@attraction_name}的滑雪装备租赁活动订单"
       end
       
-      add_assertion "两个订单的日期均正确（3天后）", weight: 10 do
+      add_assertion "两个订单的日期均正确（3天后）", weight: 15 do
         @ticket_orders.each do |order|
           expect(order.visit_date).to eq(@visit_date), 
             "门票订单日期错误。期望: #{@visit_date}（3天后）, 实际: #{order.visit_date}"
@@ -118,7 +123,17 @@ module V301V350
         end
       end
       
-      add_assertion "两个订单的人数均正确（2人）", weight: 10 do
+      add_assertion "联系电话正确（刘强或陈静）", weight: 10 do
+        @ticket_orders.each do |order|
+          expect(@expected_contact_names).to include(order.contact_name),
+            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}中的一个, 实际: #{order.contact_name}"
+          expected_phone = @expected_contact_phones[order.contact_name]
+          expect(order.contact_phone).to eq(expected_phone),
+            "联系电话错误。期望: #{expected_phone}（#{order.contact_name}）, 实际: #{order.contact_phone}"
+        end
+      end
+      
+      add_assertion "两个订单的人数均正确（2人）", weight: 15 do
         @ticket_orders.each do |order|
           expect(order.quantity).to eq(@participant_count),
             "门票订单人数错误。期望: #{@participant_count}人, 实际: #{order.quantity}人"
@@ -134,11 +149,15 @@ module V301V350
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 1. 创建门票订单 - Use existing passenger phone
+      # 随机选择一位作为联系人
+      contact_person = [@liuqiang, @chenjing].sample
+      
+      # 1. 创建门票订单 - Use randomly selected contact
       TicketOrder.create!(
         user: user,
         ticket: @ticket,
-        contact_phone: @liuqiang.phone,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         visit_date: @visit_date,
         quantity: @participant_count,
         total_price: @ticket.current_price * @participant_count,
@@ -151,6 +170,8 @@ module V301V350
       ActivityOrder.create!(
         user: user,
         attraction_activity: @equipment_activity,
+        contact_name: contact_person.name,
+        contact_phone: contact_person.phone,
         visit_date: @visit_date,
         quantity: @participant_count,
         total_price: @equipment_activity.current_price * @participant_count,
@@ -172,7 +193,8 @@ module V301V350
         attraction_id: @attraction&.id,
         ticket_id: @ticket&.id,
         equipment_activity_id: @equipment_activity&.id,
-        expected_contact_phone: @expected_contact_phone
+        expected_contact_names: @expected_contact_names,
+        expected_contact_phones: @expected_contact_phones
       }
     end
     
@@ -182,7 +204,8 @@ module V301V350
       @attraction_name = data['attraction_name']
       @city = data['city']
       @activity_name = data['activity_name']
-      @expected_contact_phone = data['expected_contact_phone']
+      @expected_contact_names = data['expected_contact_names']
+      @expected_contact_phones = data['expected_contact_phones']
       
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @ticket = Ticket.find(data['ticket_id']) if data['ticket_id']
