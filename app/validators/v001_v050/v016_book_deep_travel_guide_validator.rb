@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订高评分深度旅行向导服务
+# 验证用例: 需要搜索华东地区（上海/苏州）评分≥4.8分、服务客户≥1000人的深度旅行向导，为1位成人预订7天后的向导服务，并选择经验最丰富（服务客户数最多）的向导
 # 
 # 任务描述:
 #   Agent 需要在深度旅行服务中搜索专业向导，
@@ -66,7 +66,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为1位成人预订#{(@travel_date - Date.current).to_i}天后（#{@travel_date.strftime('%Y年%m月%d日')}）华东地区（上海/苏州）的深度旅行向导服务，要求向导评分≥#{@min_rating}分、服务客户≥#{@min_served_count}人，并选择经验最丰富（服务客户数最多）的向导",
+        task: "给张三7天后订华东深度旅行向导服务（选评分≥4.8且经验最丰富的）",
         requirements: {
           location: @location,
           location_description: "地区：华东（上海外滩、苏州园林等）",

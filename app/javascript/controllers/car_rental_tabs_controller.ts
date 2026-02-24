@@ -364,13 +364,20 @@ export default class extends Controller {
   }
 
   // Update duration display
+  // Formula: (end_date - start_date).days (date difference)
+  // Example: 2月26日 00:00 to 3月1日 00:00 = 3天 (26, 27, 28三个日历日)
   private updateDuration(): void {
     if (!this.pickupDateValue || !this.returnDateValue) return
     
+    // Extract date-only parts (ignore time)
     const pickupDate = new Date(this.pickupDateValue)
+    pickupDate.setHours(0, 0, 0, 0)
     const returnDate = new Date(this.returnDateValue)
-    const diffTime = Math.abs(returnDate.getTime() - pickupDate.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    returnDate.setHours(0, 0, 0, 0)
+    
+    // Calculate difference in milliseconds and convert to days
+    const diffTime = returnDate.getTime() - pickupDate.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))  // Date difference only, no +1
     
     this.durationDisplayTarget.textContent = `${diffDays}天`
   }

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订后天去深圳的大巴票（选最快的）
+# 验证用例: 给张三搜索后天杭州到深圳的大巴班次，找出行程时间最短的并预订
 # 
 # 任务描述:
 #   Agent 需要搜索后天杭州到深圳的所有大巴班次，
@@ -67,7 +67,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请搜索后天从#{@origin}到#{@destination}的所有大巴班次，找出行程时间最短的并预订（#{@passenger_count}人乘车）",
+        task: "给张三订后天去深圳的大巴票（选最快的）",
         origin: @origin,
         destination: @destination,
         date: @target_date.to_s,

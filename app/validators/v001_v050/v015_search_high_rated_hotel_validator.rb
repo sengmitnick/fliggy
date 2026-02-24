@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）
+# 验证用例: 给张三搜索后天入住北京的4星级及以上酒店，找到评分最高的并预订（4星级及以上，住2晚）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索北京的酒店，
@@ -64,7 +64,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订后天入住#{@city}的高档酒店（4星级及以上，评分最高，#{@adults_count}人入住#{@rooms_count}间）",
+        task: "给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）",
         city: @city,
         min_star_level: @min_star_level,
         check_in_date: @check_in_date.to_s,

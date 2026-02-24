@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三预订后天东京到京都的新干线列车票（上午12:00之前）
+# 验证用例: 搜索后天东京到京都的新干线车票，选择上午（12:00之前）的班次并预订
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索后天东京到京都的新干线车票，
@@ -55,7 +55,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三预订一张后天上午从#{@origin}到#{@destination}的新干线车票",
+        task: "给张三预订后天东京到京都的上午新干线车票",
         region: @region,
         origin: @origin,
         destination: @destination,

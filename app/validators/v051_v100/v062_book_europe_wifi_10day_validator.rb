@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订英国WiFi（英国5G高速WiFi、租用1台、10天后取件、共租10天）
+# 验证用例: 搜索英国WiFi租赁服务，选择英国随身WiFi·5G高速并成功创建10天租赁订单
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索英国地区的WiFi设备，

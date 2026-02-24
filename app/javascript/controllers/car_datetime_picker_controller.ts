@@ -179,6 +179,10 @@ export default class extends Controller<HTMLElement> {
     const daysInMonth = lastDay.getDate()
     const startingDayOfWeek = firstDay.getDay()
     
+    // Get today's date for comparison
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
     const days: CalendarDay[] = []
     
     // Previous month days
@@ -186,19 +190,19 @@ export default class extends Controller<HTMLElement> {
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       const day = prevMonthLastDay - i
       const date = new Date(year, month - 1, day)
+      date.setHours(0, 0, 0, 0)
+      const isDisabled = date < today  // Check if before today
       days.push({
         date,
         dayOfMonth: day,
         isCurrentMonth: false,
         isToday: false,
         isSelected: false,
-        isDisabled: true
+        isDisabled
       })
     }
     
     // Current month days
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
     
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day)
@@ -224,13 +228,15 @@ export default class extends Controller<HTMLElement> {
     const remainingDays = 42 - days.length
     for (let day = 1; day <= remainingDays; day++) {
       const date = new Date(year, month + 1, day)
+      date.setHours(0, 0, 0, 0)
+      const isDisabled = date < today  // Check if before today
       days.push({
         date,
         dayOfMonth: day,
         isCurrentMonth: false,
         isToday: false,
         isSelected: false,
-        isDisabled: true
+        isDisabled
       })
     }
     
@@ -246,10 +252,17 @@ export default class extends Controller<HTMLElement> {
         'transition-colors'
       ]
       
-      if (!day.isCurrentMonth || day.isDisabled) {
+      // Only disable if the date is before today (isDisabled flag)
+      // Allow selecting dates from adjacent months as long as they're not disabled
+      if (day.isDisabled) {
         classes.push('text-gray-300', 'cursor-not-allowed')
       } else {
         classes.push('hover:bg-blue-50', 'cursor-pointer')
+        
+        // Dim text for adjacent month dates (but still clickable)
+        if (!day.isCurrentMonth) {
+          classes.push('text-gray-500')
+        }
         
         if (day.isToday) {
           classes.push('font-bold', 'text-blue-600')
@@ -260,7 +273,7 @@ export default class extends Controller<HTMLElement> {
         }
       }
       
-      const disabled = !day.isCurrentMonth || day.isDisabled
+      const disabled = day.isDisabled  // Only check isDisabled flag
       
       html += `
         <button

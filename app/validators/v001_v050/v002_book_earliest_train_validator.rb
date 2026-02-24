@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三预订明天上海到杭州最早的高铁（选二等座）
+# 验证用例: 在明天的车次中找到发车时间最早的高铁并为张三完成预订，选择二等座
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天上海到杭州的所有高铁，
@@ -54,7 +54,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "给张三预订明天从#{@origin}到#{@destination}最早的高铁（选二等座）",
+        task: "给张三预订明天#{@origin}到#{@destination}最早的高铁（选二等座）",
         passenger: '张三',
         departure_city: @origin,
         destination_city: @destination,

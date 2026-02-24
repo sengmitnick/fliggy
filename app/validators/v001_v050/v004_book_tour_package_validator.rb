@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三和李四预订三亚5天4晚跟团游（预算≤5000元/人，小团）
+# 验证用例: 搜索三亚的跟团游产品，找到价格合适（预算≤5000元/人）的5天4晚产品并为张三和李四预订（小团：<15人）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索三亚的跟团游产品，
@@ -13,11 +13,11 @@ require_relative '../base_validator'
 #   - 订单已创建 (20分) - 系统中存在跟团游订单记录
 #   - 目的地正确（三亚） (10分) - 订单的目的地必须是三亚
 #   - 天数正确（5天4晚） (10分) - 订单的行程天数必须是5天
-#   - 价格符合预算（≤5000元/人，总价≤10000元） (25分) - 成人单价不超过5000元
+#   - 价格符合预算（≤5000元/人，总价≤10000元） (20分) - 成人单价不超过5000元
 #   - 预订人数正确（2个成人，0个儿童） (10分) - 成人数量为2，儿童数量为0
 #   - 联系人信息正确 (10分) - 联系人姓名和电话来自 demo_user 的 passengers（张三）
 #   - 小团要求（<15人） (10分) - 所选套餐的总人数少于15人
-#   - 旅客列表正确（张三、李四） (15分) - 必须选择张三和李四作为出行人
+#   - 旅客列表正确（张三、李四） (10分) - 必须选择张三和李四作为出行人
 # 
 # 使用方法:
 #   # 准备阶段
@@ -59,7 +59,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三和李四预订一个#{@destination}#{@duration}天#{@duration - 1}晚跟团游产品（预算≤#{@budget_per_person}元/人，小团）",
+        task: "给张三和李四预订#{@destination}#{@duration}天#{@duration - 1}晚跟团游（预算≤#{@budget_per_person}元/人，小团）",
         destination: @destination,
         duration: @duration,
         budget_per_person: @budget_per_person,
@@ -71,7 +71,7 @@ module V001V050
         hint: "系统中有多个符合条件的产品可选，请选择价格在预算内且为小团的产品",
         suitable_products_count: @suitable_count,
         price_range: @price_range,
-        scoring_note: "价格符合预算占25%，小团要求占10%，联系人信息正确占10%，旅客列表正确占15%，请务必使用 demo_user 的出行人数据（张三和李四）"
+        scoring_note: "价格符合预算占20%，小团要求占10%，联系人信息正确占10%，旅客列表正确占10%，请务必使用 demo_user 的出行人数据（张三和李四）"
       }
     end
   
@@ -102,7 +102,7 @@ module V001V050
       end
     
       # 断言4: 价格符合预算（核心评分项）
-      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 25 do
+      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 20 do
         # 获取成人单价（不含保险）
         expect(@booking.tour_package).not_to be_nil, "未找到套餐信息"
         adult_unit_price = @booking.tour_package.price
@@ -143,7 +143,7 @@ module V001V050
       end
     
       # 断言8: 旅客列表正确（张三和李四）
-      add_assertion "旅客列表正确（张三、李四）", weight: 15 do
+      add_assertion "旅客列表正确（张三、李四）", weight: 10 do
         travelers = @booking.booking_travelers.where(data_version: @data_version).to_a
         
         expect(travelers.size).to eq(2),

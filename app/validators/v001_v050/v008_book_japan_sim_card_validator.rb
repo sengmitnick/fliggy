@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三购买日本7天无限量流量SIM卡（邮寄到默认地址）
+# 验证用例: 搜索日本地区的SIM卡，找到7天有效期且流量为“无限量”的产品并购买1张，邮寄到张三的默认收货地址
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索日本地区的SIM卡，
@@ -54,7 +54,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三购买一张日本7天无限量流量的SIM卡，邮寄到默认地址",
+        task: "给张三购买日本7天无限量流量SIM卡（邮寄到默认地址）",
         region: @region,
         validity_days: @validity_days,
         data_requirement: "无限量",

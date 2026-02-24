@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例17: 预订明天上海任意酒店（入住1晚）
+# 验证用例: 在上海搜索酒店，选择任意一家并完成明天入住1晚的预订
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索上海的酒店，
@@ -47,7 +47,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订明天入住#{@city}的任意酒店（入住1晚）",
+        task: "给张三订明天入住上海的任意酒店（住1晚）",
         city: @city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 帮张三订去昆明的跟团游（预算5000元以内，选最受欢迎的）
+# 验证用例: 在跟团游搜索页选择“昆明”目的地，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）
 # 
 # 任务描述:
 #   Agent 需要在跟团游搜索页面中选择"昆明"作为目的地，
@@ -60,7 +60,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请访问跟团游搜索页面，选择'#{@destination}'作为目的地城市，找出预算#{@budget}元以内最受欢迎的产品并预订（#{@adult_count}人出行，联系人：#{@contact_passenger.name}）",
+        task: "帮张三订去昆明的跟团游（预算5000元以内，选最受欢迎的）",
         destination: @destination,
         budget: @budget,
         adult_count: @adult_count,

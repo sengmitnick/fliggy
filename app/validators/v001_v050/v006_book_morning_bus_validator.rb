@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三预订明天上午广州到深圳的大巴票
+# 验证用例: 搜索明天广州到深圳的大巴票，找到上午（12点前）出发的班次并预订
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天广州到深圳的大巴票，
@@ -52,7 +52,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三预订一张明天上午从#{@origin}到#{@destination}的大巴票",
+        task: "给张三预订明天上午广州到深圳的大巴票",
         origin: @origin,
         destination: @destination,
         date: @target_date.to_s,

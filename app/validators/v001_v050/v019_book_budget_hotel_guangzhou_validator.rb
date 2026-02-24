@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例19: 预订大后天广州便宜酒店（价格≤300元）
+# 验证用例: 搜索广州的酒店，找到价格≤300元/晚的酒店并完成大后天入住1晚的预订
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索广州的酒店，
@@ -51,7 +51,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订大后天入住#{@city}的便宜酒店（预算≤#{@budget}元/晚，入住1晚）",
+        task: "给张三3天后订广州的便宜酒店（预算≤300元，住1晚）",
         city: @city,
         budget: @budget,
         check_in_date: @check_in_date.to_s,
