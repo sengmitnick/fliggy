@@ -21,7 +21,7 @@ module V301V350
   class V320BookWinterSkiResortPackageValidator < BaseValidator
     self.validator_id = 'v320_book_winter_ski_resort_package_validator'
     self.task_id = "fb78ecc4-1181-49ba-9b77-09a5c4368c42"
-    self.title = "预订45天后崇礼万龙滑雪场门票+崇礼万龙度假酒店（2晚，1间房，2人）"
+    self.title = '给张三用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）'
     self.description = "用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）"
     self.timeout_seconds = 180
 

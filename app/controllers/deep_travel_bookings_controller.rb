@@ -41,6 +41,21 @@ class DeepTravelBookingsController < ApplicationController
     @booking = DeepTravelBooking.new(booking_params)
     @booking.user = current_user
     
+    # Sync first booking_traveler info to booking's single traveler fields
+    if @booking.booking_travelers.present?
+      first_traveler = @booking.booking_travelers.first
+      @booking.traveler_name = first_traveler.traveler_name
+      @booking.traveler_id_number = first_traveler.id_number
+      
+      # Get the passenger's phone from Passenger model based on name match
+      if first_traveler.traveler_name.present?
+        passenger = current_user.passengers.find_by(name: first_traveler.traveler_name)
+        @booking.traveler_phone = passenger&.phone || current_user.phone
+      else
+        @booking.traveler_phone = current_user.phone
+      end
+    end
+    
     if @booking.save
       redirect_to deep_travel_booking_path(@booking), notice: '预订成功,请完成支付'
     else

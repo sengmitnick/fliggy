@@ -29,7 +29,7 @@ module V051V100
   class V054BookJapanSim5dayValidator < BaseValidator
     self.validator_id = 'v054_book_japan_sim_5day_validator'
     self.task_id = 'f3339f0c-cc3f-45bf-9565-315994f07e25'
-    self.title = '帮张三买日本5天共10GB流量SIM卡（买1张）'
+    self.title = '张三要去日本5天，帮他买一张5天有效期、共10GB流量的SIM卡'
     self.description = '张三要去日本5天，帮他买一张5天有效期、共10GB流量的SIM卡'
     self.timeout_seconds = 300
   
@@ -117,15 +117,15 @@ module V051V100
         expect(@order.delivery_method).to eq('mail'),
           "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
         
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq('张三'),
-          "收货人姓名错误。期望: 张三, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq('13800138000'),
-          "收货电话错误。期望: 13800138000, 实际: #{contact_info['phone']}"
-        expect(contact_info['address']).to include('北京'),
-          "收货地址错误。期望包含: 北京（张三的默认地址），实际: #{contact_info['address']}"
-        expect(contact_info['address']).to include('朝阳区'),
-          "收货地址错误。期望包含: 朝阳区（张三的默认地址），实际: #{contact_info['address']}"
+        delivery_info = @order.delivery_info  # jsonb字段，已经是Hash对象
+        expect(delivery_info['name']).to eq('张三'),
+          "收货人姓名错误。期望: 张三, 实际: #{delivery_info['name']}"
+        expect(delivery_info['phone']).to eq('13800138000'),
+          "收货电话错误。期望: 13800138000, 实际: #{delivery_info['phone']}"
+        expect(delivery_info['full_address']).to include('北京'),
+          "收货地址错误。期望包含: 北京（张三的默认地址），实际: #{delivery_info['full_address']}"
+        expect(delivery_info['full_address']).to include('朝阳区'),
+          "收货地址错误。期望包含: 朝阳区（张三的默认地址），实际: #{delivery_info['full_address']}"
       end
     end
   
@@ -170,21 +170,26 @@ module V051V100
       target_sim_card = matching_sim_cards.sample
     
       # 4. 创建订单（使用张三的真实地址）
-      full_address = "#{default_address.province}#{default_address.city}#{default_address.district}#{default_address.detail}"
+      full_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
       order = InternetOrder.create!(
         orderable: target_sim_card,
         user_id: user.id,
         order_type: 'sim_card',
         region: @region,
         quantity: 1,
-        rental_info: { validity_days: @validity_days }.to_json,
+        rental_info: { validity_days: @validity_days },  # jsonb字段不需要to_json
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: {
+        delivery_info: {  # jsonb字段不需要to_json
+          address_id: default_address.id,
           name: default_address.name,
           phone: default_address.phone,
-          address: full_address
-        }.to_json,
+          full_address: full_address
+        },
+        contact_info: {  # jsonb字段不需要to_json
+          name: default_address.name,
+          phone: default_address.phone
+        },
         status: 'pending',
         data_version: @data_version
       )

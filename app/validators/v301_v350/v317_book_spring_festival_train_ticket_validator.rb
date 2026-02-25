@@ -20,7 +20,7 @@ module V301V350
   class V317BookSpringFestivalTrainTicketValidator < BaseValidator
     self.validator_id = 'v317_book_spring_festival_train_ticket_validator'
     self.task_id = "fa4b7ee9-b151-4421-bdf0-30338b7de3f6"
-    self.title = "给张三预订60天后从北京到成都的一等座火车票"
+    self.title = '张三需要60天后从北京到成都，要订一等座火车票'
     self.description = "张三需要60天后从北京到成都，要订一等座火车票"
     self.timeout_seconds = 180
 

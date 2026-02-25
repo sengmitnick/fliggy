@@ -21,7 +21,7 @@ module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
     self.task_id = '72e6f61b-18de-4434-a053-2297fd7be1b9'
-    self.title = '给刘强和陈静预订崇礼万龙滑雪场（3天后，2人，含门票+装备）'
+    self.title = '给张三刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要门票和装备租赁'
     self.description = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要门票和装备租赁'
     self.timeout_seconds = 300
     

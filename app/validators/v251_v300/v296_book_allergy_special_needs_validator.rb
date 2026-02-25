@@ -19,8 +19,8 @@ module V251V300
   class V296BookAllergySpecialNeedsValidator < BaseValidator
     self.validator_id = 'v296_book_allergy_special_needs_validator'
     self.task_id = 'af3f1d29-bc35-4308-9368-1d4c82e27868'
-    self.title = '给张三预订深圳酒店（4天后，需要健身房和医疗保险）'
-    self.description = '张三需要订深圳的酒店，想锻炼身体，需要健身房，再买个医疗保险'
+    self.title = '给张三预订深圳酒店（含健身房和医疗保险）'
+    self.description = '给张三预订深圳酒店（含健身房和医疗保险）'
     self.timeout_seconds = 300
     
     def prepare

@@ -35,7 +35,7 @@ module V051V100
   class V060BookJapanWifi7dayValidator < BaseValidator
     self.validator_id = 'v060_book_japan_wifi_7day_validator'
     self.task_id = '68b99d80-bc33-4659-9f14-7c4f80578a72'
-    self.title = '帮王五租日本随身WiFi（2台、7天、选4G无限量北京朝阳自取）'
+    self.title = '王五全家要去日本7天，帮他租2台随身WiFi，选4G无限量版，5天后北京朝阳自取'
     self.description = '王五全家要去日本7天，帮他租2台随身WiFi，选4G无限量版，5天后北京朝阳自取'
     self.timeout_seconds = 240
   
@@ -53,7 +53,7 @@ module V051V100
       @expected_contact_phone = @contact.phone
       # 使用默认地址作为自取地址
       default_address = user.addresses.find_by!(is_default: true, data_version: 0)
-      @pickup_address = "#{default_address.province}#{default_address.city}#{default_address.district}#{default_address.detail}"
+      @pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 查找符合条件的WiFi设备（注意：查询基线数据 data_version=0）
       matching_wifis = InternetWifi.where(
@@ -196,7 +196,7 @@ module V051V100
       # 4. 查找联系人（从 prepare 预查询的数据）
       contact = user.contacts.find_by!(name: '王五', data_version: 0)
       default_address = user.addresses.find_by!(is_default: true, data_version: 0)
-      pickup_address = "#{default_address.province}#{default_address.city}#{default_address.district}#{default_address.detail}"
+      pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 5. 创建订单
       order = InternetOrder.create!(

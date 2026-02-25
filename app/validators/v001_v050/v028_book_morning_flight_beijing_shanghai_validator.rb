@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例28: 预订后天北京到上海早班航班（12点前起飞）
+# 验证用例28: 给张三预订后天北京到上海早班航班（12点前起飞）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索后天北京到上海的航班，
@@ -24,8 +24,8 @@ module V001V050
   class V028BookMorningFlightBeijingShanghaiValidator < BaseValidator
     self.validator_id = 'v028_book_morning_flight_beijing_shanghai_validator'
     self.task_id = '2d0d99a3-006c-4113-8ad1-6d9c37f7396f'
-    self.title = '给张三订后天北京到上海早班航班（12点前起飞）'
-    self.description = '搜索后天北京到上海的航班，找到12点前起飞的早班航班并完成预订'
+    self.title = '给张三预订后天北京到上海早班航班（12点前起飞）'
+    self.description = '预订后天北京到上海早班航班（12点前起飞）'
     self.timeout_seconds = 240
   
     def prepare

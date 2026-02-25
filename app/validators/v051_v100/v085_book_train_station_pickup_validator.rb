@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例85: 预订虹桥火车站接站服务（经济7座，家庭出行）
+# 验证用例85: 给张三预订虹桥火车站接站服务（经济7座，家庭出行）
 # 
 # 任务描述:
 #   用户后天从北京坐火车到上海，一家5口人需要在虹桥火车站接站送到酒店。
@@ -29,8 +29,8 @@ module V051V100
   class V085BookTrainStationPickupValidator < BaseValidator
     self.validator_id = 'v085_book_train_station_pickup_validator'
     self.task_id = '74f8237a-b1b5-4670-b135-2867748d0721'
-    self.title = '给张建国等5人预订后天上海火车站接站服务（选最便宜的经济7座）'
-    self.description = '帮张建国（爷爷）、张三、王芳、小明、李四这5个人订后天从北京坐火车到上海的接站服务，到站后送到浦东酒店，要最便宜的经济7座'
+    self.title = '给张三预订虹桥火车站接站服务（经济7座，家庭出行）'
+    self.description = '预订虹桥火车站接站服务（经济7座，家庭出行）'
     self.timeout_seconds = 240
   
     def prepare

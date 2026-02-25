@@ -184,6 +184,42 @@ end
 
 BusTicket.insert_all(night_buses_data) if night_buses_data.any?
 
+# ==================== 专门为验证器添加杭州→深圳快速班次 ====================
+fast_buses_hz_sz_data = []
+
+# 为未来77天生成杭州→深圳快速班次（2.0小时）
+(0..6).each do |day_offset|
+  date = Date.today + day_offset.days
+  
+  # 固定2.0小时的快速班次
+  fast_times = [
+    { dep: "08:00", arr: "10:00" },
+    { dep: "10:00", arr: "12:00" },
+    { dep: "14:00", arr: "16:00" }
+  ]
+  
+  fast_times.each do |time_pair|
+    fast_buses_hz_sz_data << {
+      origin: "杭州",
+      destination: "深圳",
+      departure_date: date,
+      departure_time: time_pair[:dep],
+      arrival_time: time_pair[:arr],
+      price: 320,
+      status: "available",
+      seat_type: "豪华座",
+      departure_station: "杭州东站",
+      arrival_station: "深圳北站汽车站",
+      route_description: "高速直达",
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+BusTicket.insert_all(fast_buses_hz_sz_data) if fast_buses_hz_sz_data.any?
+
 # ==================== 补充: 杭州→上海晚班车 (bus_tickets_supplement) ====================
 puts "\n[补充] 杭州→上海晚班车..."
 

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例88: 预订首都机场接机服务（上海→北京航班，经济5座）
+# 验证用例88: 给张三预订首都机场接机服务（上海→北京航班，经济5座）
 # 
 # 任务描述:
 #   用户3天后从上海飞往北京，需要在首都机场接机送到市区酒店。
@@ -27,8 +27,8 @@ module V051V100
   class V088BookCrossCityAirportPickupValidator < BaseValidator
     self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
     self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
-    self.title = '给张三预订3天后北京机场接机服务（从上海飞往北京，最便宜经济5座）'
-    self.description = '帮张三订3天后从上海飞往北京的接机服务，通过搜索航班确定到达机场，从首都机场接机送到市区酒店，选择经济5座车型中价格最低的套餐'
+    self.title = '给张三预订首都机场接机服务（上海→北京航班，经济5座）'
+    self.description = '预订首都机场接机服务（上海→北京航班，经济5座）'
     self.timeout_seconds = 240
   
     def prepare

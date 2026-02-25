@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例86: 预订虹桥火车站送站服务（经济5座，赶高铁）
+# 验证用例86: 给张三预订虹桥火车站送站服务（经济5座，赶高铁）
 module V051V100
   class V086BookTrainStationDropoffValidator < BaseValidator
     self.validator_id = 'v086_book_train_station_dropoff_validator'
     self.task_id = '65b5c1be-7cd5-40d9-86b1-5b716ba64420'
-    self.title = '给张三预订明天早上上海火车站送站服务（选最便宜的经济5座）'
-    self.description = '帮张三订明天一早从酒店送到虹桥火车站赶高铁，要最便宜的经济5座'
+    self.title = '给张三预订虹桥火车站送站服务（经济5座，赶高铁）'
+    self.description = '预订虹桥火车站送站服务（经济5座，赶高铁）'
     self.timeout_seconds = 240
   
     def prepare

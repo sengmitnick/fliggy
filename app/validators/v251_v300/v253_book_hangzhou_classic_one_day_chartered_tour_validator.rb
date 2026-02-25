@@ -16,7 +16,7 @@ module V251V300
     self.validator_id = 'v253_book_hangzhou_classic_one_day_chartered_tour_validator'
     self.task_id = '7e2b48e7-d591-4752-b3d8-405b73a258f5'
     self.title = '给刘强等3人预订杭州经典一日游包车（明天出发，舒适5座，8小时）'
-    self.description = '帮刘强等3人订明天的杭州经典一日游包车，选舒适5座，8小时服务（一日游）'
+    self.description = '给刘强等3人预订杭州经典一日游包车（明天出发，舒适5座，8小时）'
     self.timeout_seconds = 240
   
     def prepare

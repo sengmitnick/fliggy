@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单
+# 验证用例: 给张三预订后天入住深圳的酒店（入住1晚，1间房1成人0儿童，预算≤500元/晚，选性价比最高的）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳的酒店，
@@ -38,8 +38,8 @@ module V001V050
   class V001BookBudgetHotelValidator < BaseValidator
     self.validator_id = 'v001_book_budget_hotel_validator'
     self.task_id = 'c0342467-8568-4bce-964c-4133c8367e7d'
-    self.title = '给张三预订后天入住一晚深圳的经济型酒店（预算≤500元，选性价比最高的）'
-    self.description = '需要在系统中搜索深圳的酒店，找到预算≤500元且性价比最高的酒店并成功创建订单'
+    self.title = '给张三预订后天入住深圳的酒店（入住1晚，1间房1成人0儿童，预算≤500元/晚，选性价比最高的）'
+    self.description = '给张三预订后天入住深圳的酒店（入住1晚，1间房1成人0儿童，预算≤500元/晚，选性价比最高的）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

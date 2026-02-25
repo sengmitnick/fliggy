@@ -18,7 +18,7 @@ module V251V300
     self.validator_id = 'v282_book_couple_honeymoon_package_validator'
     self.task_id = '34788f50-b5af-484d-b9ee-e8fe13d134bf'
     self.title = '给张三和王芳预订蜜月酒店套餐'
-    self.description = '给张三和王芳（夫妻）预订高端浪漫酒店套餐，适合蜜月旅行'
+    self.description = '给张三和王芳预订蜜月酒店套餐'
     self.timeout_seconds = 300
     
     def prepare

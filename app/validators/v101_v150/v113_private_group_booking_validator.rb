@@ -29,7 +29,7 @@ module V101V150
     self.validator_id = 'v113_private_group_booking_validator'
     self.task_id = '6835d498-1040-44bb-bedf-2d628e59de70'
     self.title = '给刘强预订杭州私家团（4天3晚，2成人1儿童）'
-    self.description = '帮刘强预订杭州私家团，4天3晚，2成人（刘强、陈静）1儿童（小红），独立成团'
+    self.description = '给刘强预订杭州私家团（4天3晚，2成人1儿童）'
     self.timeout_seconds = 300
   
     def prepare

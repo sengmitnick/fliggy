@@ -17,7 +17,7 @@ module V201V250
   class V219BookRoundTripBudget2000Validator < BaseValidator
     self.validator_id = 'v219_book_round_trip_budget_2000_validator'
     self.task_id = '6fb687fa-7f7f-7f9f-9f0f-8f1a2b3c4d5e'
-    self.title = '给张三预订后天深圳→上海往返航班+酒店3晚（总预算≤2000元）（2个航班）'
+    self.title = '帮张三订后天从深圳到上海的往返航班+酒店3晚，总预算不超过2000元'
     self.description = '帮张三订后天从深圳到上海的往返航班+酒店3晚，总预算不超过2000元'
     self.timeout_seconds = 300
     

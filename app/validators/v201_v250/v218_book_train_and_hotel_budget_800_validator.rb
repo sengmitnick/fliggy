@@ -16,7 +16,7 @@ module V201V250
   class V218BookTrainAndHotelBudget800Validator < BaseValidator
     self.validator_id = 'v218_book_train_and_hotel_budget_800_validator'
     self.task_id = 'c3d4e5f6-7a8b-9c0d-1e2f-3a4b5c6d7e8f'
-    self.title = '给张三预订后天上海→杭州火车票+酒店（总预算≤800元）'
+    self.title = '帮张三订后天从上海到杭州的火车票+酒店（当晚入住1晚），总预算不超过800元'
     self.description = '帮张三订后天从上海到杭州的火车票+酒店（当晚入住1晚），总预算不超过800元'
     self.timeout_seconds = 300
     

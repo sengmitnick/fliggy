@@ -21,7 +21,7 @@ module V201V250
   class V231BookIncrementalUpgrade100MoreValidator < BaseValidator
     self.validator_id = 'v231_book_incremental_upgrade_100_more_validator'
     self.task_id = '7ff798ff-8f8f-8f0f-0f1f-9f2a3b4c5d6f'
-    self.title = '给张三预订增量升级组合（基础方案+100元升级）'
+    self.title = '张三想从成都去重庆，先查到最便宜的基础方案（火车+酒店），现在想加100元升级到更好服务，比如更高星级酒店或一等座'
     self.description = '张三想从成都去重庆，先查到最便宜的基础方案（火车+酒店），现在想加100元升级到更好服务，比如更高星级酒店或一等座'
     self.timeout_seconds = 300
     

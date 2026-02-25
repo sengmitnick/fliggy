@@ -10,7 +10,7 @@ module V101V150
   class V143BookHotelPackageWithAirportPickupValidator < BaseValidator
     self.validator_id = 'v143_book_hotel_package_with_airport_pickup_validator'
     self.task_id = 'd3e4f5a6-7b8c-9d0e-1f2a-3b4c5d6e7f8a'
-    self.title = '给张三预订后天酒店套餐后预订机场接机服务（上海豪华2晚，含早餐）'
+    self.title = '帮张三预订后天上海豪华酒店套餐，住2晚，需要含早餐，并预订机场接机服务'
     self.description = '帮张三预订后天上海豪华酒店套餐，住2晚，需要含早餐，并预订机场接机服务'
     self.timeout_seconds = 300
 

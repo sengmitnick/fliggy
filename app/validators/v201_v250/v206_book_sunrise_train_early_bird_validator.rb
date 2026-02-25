@@ -17,7 +17,7 @@ module V201V250
   class V206BookSunriseTrainEarlyBirdValidator < BaseValidator
     self.validator_id = 'v206_book_sunrise_train_early_bird_validator'
     self.task_id = '5e6687f0-6f6f-4f9c-cf9f-0f2a3b4c5d6e'
-    self.title = '给张三预订明天清晨早班火车（时间窗口05:00-07:00，上海→南京）'
+    self.title = '张三需要预订明天05:00-07:00从上海到南京的最早班次高铁'
     self.description = '张三需要预订明天05:00-07:00从上海到南京的最早班次高铁'
     self.timeout_seconds = 300
     

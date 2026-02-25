@@ -9,7 +9,7 @@ module V151V200
   class V152BookLongDistanceBusAndStationTransferValidator < BaseValidator
     self.validator_id = 'v152_book_long_distance_bus_and_station_transfer_validator'
     self.task_id = 'a2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c7d'
-    self.title = '给张三预订明天杭州到深圳长途汽车票，并预订深圳北站接站（接后天从上海坐火车来的朋友）'
+    self.title = '给张三订明天杭州到深圳的长途汽车票，到达后订深圳北站接站服务（接后天从上海坐火车来的朋友）'
     self.description = '给张三订明天杭州到深圳的长途汽车票，到达后订深圳北站接站服务（接后天从上海坐火车来的朋友）'
     self.timeout_seconds = 300
 

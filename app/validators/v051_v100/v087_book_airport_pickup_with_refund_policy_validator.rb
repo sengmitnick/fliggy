@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例87: 预订浦东机场接机服务（舒适5座，要求随时退）
+# 验证用例87: 给张三预订浦东机场接机服务（舒适5座，要求随时退）
 module V051V100
   class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
     self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
     self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
-    self.title = '给张三预订3天后上海机场接机服务（最便宜舒适5座，要求可随时取消）'
-    self.description = '帮张三订3天后从北京飞往上海的接机服务，在浦东T2接机，要最便宜的舒适5座，并且要求出发前任何时间都可以免费取消订单'
+    self.title = '给张三预订浦东机场接机服务（舒适5座，要求随时退）'
+    self.description = '预订浦东机场接机服务（舒适5座，要求随时退）'
     self.timeout_seconds = 240
   
     def prepare

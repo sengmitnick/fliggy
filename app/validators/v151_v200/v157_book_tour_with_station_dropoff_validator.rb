@@ -9,7 +9,7 @@ module V151V200
   class V157BookTourWithStationDropoffValidator < BaseValidator
     self.validator_id = 'v157_book_tour_with_station_dropoff_validator'
     self.task_id = 'a2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c8d'
-    self.title = '给张三预订明天深圳2日跟团游，并预订火车站送站（送第3天从深圳到广州的火车）'
+    self.title = '给张三订明天深圳2日跟团游，并订火车站送站服务（送第3天从深圳北站到广州的火车）'
     self.description = '给张三订明天深圳2日跟团游，并订火车站送站服务（送第3天从深圳北站到广州的火车）'
     self.timeout_seconds = 300
 

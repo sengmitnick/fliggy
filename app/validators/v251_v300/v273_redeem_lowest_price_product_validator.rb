@@ -8,7 +8,7 @@ module V251V300
   class V273RedeemLowestPriceProductValidator < BaseValidator
     self.validator_id = 'v273_redeem_lowest_price_product_validator'
     self.task_id = '4df2344f-f74d-41e8-9bf7-0b2a2e16c295'
-    self.title = '给张三兑换价格最低的商品（性价比最高）'
+    self.title = '帮张三在积分商城按价格升序排序，选择价格最低的商品兑换'
     self.description = '帮张三在积分商城按价格升序排序，选择价格最低的商品兑换'
     self.timeout_seconds = 300
     

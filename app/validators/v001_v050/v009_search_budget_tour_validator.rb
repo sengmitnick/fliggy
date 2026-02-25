@@ -2,12 +2,12 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 在跟团游搜索页选择“昆明”目的地，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）
+# 验证用例: 在跟团游搜索页选择"昆明"目的地，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）
 # 
 # 任务描述:
-#   Agent 需要在跟团游搜索页面中选择"昆明"作为目的地，
-#   筛选出符合预算（≤5000元/人）的产品（任意天数、任意旅游类型），
-#   并选择其中最受欢迎的（销量最高）完成预订（1人出行，联系人张三）
+#   Agent 需要在综合搜索页面（或跟团游页面切换到综合tab）中选择"昆明"作为目的地，
+#   使用"销量优先"排序，筛选出符合预算（≤5000元/人）的产品（任意天数、任意旅游类型），
+#   并选择其中销量最高的产品完成预订（1人出行，联系人张三）
 # 
 # 评分标准:
 #   - 成功创建订单 (20分)
@@ -34,8 +34,8 @@ module V001V050
   class V009SearchBudgetTourValidator < BaseValidator
     self.validator_id = 'v009_search_budget_tour_validator'
     self.task_id = '1d9a9d05-c081-476c-b60f-307fa723a85c'
-    self.title = '帮张三订去昆明的跟团游（预算5000元以内，选最受欢迎的）'
-    self.description = '在跟团游搜索页选择"昆明"目的地，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）'
+    self.title = '在综合搜索页选择"昆明"目的地，使用销量优先排序，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）'
+    self.description = '在综合搜索页选择"昆明"目的地，使用销量优先排序，筛选预算内（≤5000元/人）最受欢迎的产品并预订（1人出行，联系人张三）'
     self.timeout_seconds = 300
   
     # 准备阶段：插入测试数据
@@ -60,7 +60,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "帮张三订去昆明的跟团游（预算5000元以内，选最受欢迎的）",
+        task: "帮张三订去昆明的旅游产品（预算5000元以内，选销量最高的）",
         destination: @destination,
         budget: @budget,
         adult_count: @adult_count,
@@ -68,14 +68,15 @@ module V001V050
         contact_phone: @contact_passenger.phone,
         tour_types: "任意类型（跟团游、独立成团、自由出行均可）",
         duration: "任意天数",
-        hint: "使用城市选择器选择'昆明'作为目的地，然后筛选价格≤#{@budget}元的产品，对比销量找出最受欢迎的产品",
+        hint: "IMPORTANT: 在综合tab页面（不要选择跟团游/独立成团/自由出行等单一类型tab），选择'昆明'目的地，点击'销量优先'排序，查看预算≤#{@budget}元的产品，选择销量最高的产品预订",
         total_products: all_products.count,
         budget_products_count: @budget_products.count,
         price_range: {
           min: @budget_products.map(&:price).min,
           max: @budget_products.map(&:price).max
         },
-        most_popular_sales: @most_popular&.sales_count
+        most_popular_sales: @most_popular&.sales_count,
+        note: "必须在综合tab（显示所有类型产品），使用销量优先排序才能看到真正销量最高的产品"
       }
     end
   

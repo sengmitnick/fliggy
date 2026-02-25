@@ -20,7 +20,7 @@ module V201V250
   class V229BookBalancedPriceQualityRatioValidator < BaseValidator
     self.validator_id = 'v229_book_balanced_price_quality_ratio_validator'
     self.task_id = '4ff465ff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '给张三预订价格质量平衡最佳组合（后天火车+酒店）'
+    self.title = '张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合'
     self.description = '张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合'
     self.timeout_seconds = 300
     

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例76: 办理韩国团体签证（5人以上，成功率100%，最便宜）
+# 验证用例76: 给张三办理韩国团体签证（5人以上，成功率100%，最便宜）
 # 
 # 任务描述:
 #   Agent 需要为5人团队办理韩国签证，
@@ -36,8 +36,8 @@ module V051V100
   class V076ApplyKoreaGroupVisaValidator < BaseValidator
     self.validator_id = 'v076_apply_korea_group_visa_validator'
     self.task_id = 'c8b9e386-8c54-40ca-a684-bcb5f833bb16'
-    self.title = '给李四等5人办理韩国团体签证（成功率100%，最便宜）'
-    self.description = '帮李四、王芳、刘强、陈静、小明这5个人办理韩国团体签证，要求成功率100%且价格最便宜'
+    self.title = '给张三办理韩国团体签证（5人以上，成功率100%，最便宜）'
+    self.description = '办理韩国团体签证（5人以上，成功率100%，最便宜）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -245,7 +245,7 @@ module V051V100
       raise "未找到可用的签证产品" unless cheapest_product
     
       # 6. 拼接完整地址
-      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+      full_address = [contact_address.province, contact_address.city, contact_address.district, contact_address.detail].compact.join
     
       # 7. 创建签证订单
       visa_order = VisaOrder.create!(

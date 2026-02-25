@@ -18,7 +18,7 @@ module V301V350
   class V315BookRaftingAdventureSafetyEquipmentValidator < BaseValidator
     self.validator_id = 'v315_book_rafting_adventure_safety_equipment_validator'
     self.task_id = 'aa4e64f9-e897-40dd-9c3e-c0c7fbcf8a58'
-    self.title = '给张三、李四、刘强、王芳预订长江索道漂流（5天后，4人，含安全保障+装备）'
+    self.title = '张三、李四、刘强、王芳想5天后去长江索道漂流，需4人，要安全保障和装备提供'
     self.description = '张三、李四、刘强、王芳想5天后去长江索道漂流，需4人，要安全保障和装备提供'
     self.timeout_seconds = 300
     

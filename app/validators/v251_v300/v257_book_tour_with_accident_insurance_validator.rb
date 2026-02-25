@@ -22,7 +22,7 @@ module V251V300
   class V257BookTourWithAccidentInsuranceValidator < BaseValidator
     self.validator_id = 'v257_book_tour_with_accident_insurance_validator'
     self.task_id = '685c598f-4c18-4710-ac08-c68f515ff29e'
-    self.title = '给张三和李四预订黄山跟团游并购买境内旅游保险（5天后出发，2天）'
+    self.title = '帮张三和李四预订9ec4山跟团游（5天后出发，2天行程，2人），并购买境内旅游保险（意外伤害保障，保险天数至少2天）'
     self.description = '帮张三和李四预订9ec4山跟团游（5天后出发，2天行程，2人），并购买境内旅游保险（意外伤害保障，保险天数至少2天）'
     self.timeout_seconds = 300
     

@@ -17,7 +17,7 @@ module V201V250
   class V214BookLateCheckOutHotelAfter2pmValidator < BaseValidator
     self.validator_id = 'v214_book_late_check_out_hotel_after_2pm_validator'
     self.task_id = '3fe465f8-4f4f-4f7f-ff7f-8f0a1b2c3d4f'
-    self.title = '给张三预订明天深圳2晚酒店（14:00后延迟退房）'
+    self.title = '帮张三订明天入住深圳2晚的酒店，配合晚班航班需要在退房时支持14:00后延迟退房'
     self.description = '帮张三订明天入住深圳2晚的酒店，配合晚班航班需要在退房时支持14:00后延迟退房'
     self.timeout_seconds = 300
     

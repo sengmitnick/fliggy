@@ -17,7 +17,7 @@ module V201V250
   class V238BookHotelWithFreeCancellationValidator < BaseValidator
     self.validator_id = 'v238_book_hotel_with_free_cancellation_validator'
     self.task_id = '4ff405ff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '给张三预订4天后深圳可免费取消的酒店（住1晚）'
+    self.title = '帮张三订4天后在深圳的酒店，要可以免费取消的，住1晚'
     self.description = '帮张三订4天后在深圳的酒店，要可以免费取消的，住1晚'
     self.timeout_seconds = 300
     

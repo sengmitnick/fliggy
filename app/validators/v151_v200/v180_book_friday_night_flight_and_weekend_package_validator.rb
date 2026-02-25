@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例180: 预订周五晚航班和周末度假酒店套餐
+# 验证用例180: 给张三预订周五晚航班和周末度假酒店套餐
 #
 # 任务描述:
 #   用户需要预订周五晚上的航班，并预订周末度假酒店套餐
@@ -22,8 +22,8 @@ module V151V200
   class V180BookFridayNightFlightAndWeekendPackageValidator < BaseValidator
     self.validator_id = 'v180_book_friday_night_flight_and_weekend_package_validator'
     self.task_id = '9331db0e-0f5f-43ca-85b4-8f2d4b62380b'
-    self.title = '给王芳预订周五晚北京到三亚的航班，并预订周末度假酒店套餐（2晚）'
-    self.description = '帮王芳订周五晚上从北京到三亚的航班（18:00后），并预订周末度假酒店套餐（周五到周日，2晚）'
+    self.title = '给张三预订周五晚航班和周末度假酒店套餐'
+    self.description = '预订周五晚航班和周末度假酒店套餐'
     self.timeout_seconds = 300
   
     def prepare

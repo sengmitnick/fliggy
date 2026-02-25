@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例111: 预订热门民宿（上海CBD核心区）
+# 验证用例111: 给张三预订热门民宿（上海CBD核心区）
 #
 # 任务描述:
 #   在上海CBD核心区预订评分最高的民宿，入住2晚
@@ -26,8 +26,8 @@ module V101V150
   class V111HomestayBookingValidator < BaseValidator
     self.validator_id = 'v111_homestay_booking_validator'
     self.task_id = '7874748d-a0b8-4725-a536-ff9141c0fed1'
-    self.title = '给张三预订上海CBD核心区民宿（评分最高，2晚）'
-    self.description = '帮张三在上海CBD核心区预订评分最高的民宿，入住2晚'
+    self.title = '给张三预订热门民宿（上海CBD核心区）'
+    self.description = '预订热门民宿（上海CBD核心区）'
     self.timeout_seconds = 300
   
     def prepare

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例37: 预订大后天上海周边3天2晚跟团游
+# 验证用例37: 给张三预订大后天上海周边3天2晚跟团游
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索上海周边的跟团游产品，
@@ -25,8 +25,8 @@ module V001V050
   class V037BookTourShanghaiValidator < BaseValidator
     self.validator_id = 'v037_book_tour_shanghai_validator'
     self.task_id = '1bd41d87-7ea1-4d1b-850e-bccde2ac43b1'
-    self.title = '给张三预订3天后上海周边3天2晚跟团游（1成人）'
-    self.description = '搜索上海周边的跟团游产品，找到3天2晚的产品并完成预订'
+    self.title = '给张三预订大后天上海周边3天2晚跟团游'
+    self.description = '预订大后天上海周边3天2晚跟团游'
     self.timeout_seconds = 240
   
     def prepare

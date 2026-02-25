@@ -16,7 +16,7 @@ module V301V350
   class V312BookSurfingLessonBeachEquipmentValidator < BaseValidator
     self.validator_id = 'v312_book_surfing_lesson_beach_equipment_validator'
     self.task_id = 'c132957d-cbea-4e0b-8190-acd5d2d2ce30'
-    self.title = '给刘强和陈静预订大梅沙冲浪（4天后，2人，含教学+装备+娱乐）'
+    self.title = '给张三刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
     self.description = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
     self.timeout_seconds = 300
     

@@ -21,7 +21,7 @@ module V201V250
   class V236BookMultiplePeopleValidator < BaseValidator
     self.validator_id = 'v236_book_multiple_people_validator'
     self.task_id = '2ff2e3ff-3f3f-3f5f-5f6f-4f7a8b9c0d1f'
-    self.title = '给张三等4人预订5天后北京到三亚的航班和酒店（4张机票+2间房）'
+    self.title = '帮张三、王芳、小明、李四这4个人订5天后从北京到三亚的机票和酒店，要4张机票和2个房间，住3晚'
     self.description = '帮张三、王芳、小明、李四这4个人订5天后从北京到三亚的机票和酒店，要4张机票和2个房间，住3晚'
     self.timeout_seconds = 300
     

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例40: 预订大后天广州4天3晚跟团游（1成人1儿童）
+# 验证用例40: 给张三预订大后天广州4天3晚跟团游（1成人1儿童）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索广州的跟团游产品，
@@ -26,8 +26,8 @@ module V001V050
   class V040BookTourGuangzhouValidator < BaseValidator
     self.validator_id = 'v040_book_tour_guangzhou_validator'
     self.task_id = 'ad551c7d-fd66-466b-b84b-f041af95feaf'
-    self.title = '给张三和小明预订3天后广州4天3晚跟团游（1成人1儿童）'
-    self.description = '搜索广州的跟团游产品，找到4天3晚的产品并为张三（成人）和小明（儿童）预订'
+    self.title = '给张三预订大后天广州4天3晚跟团游（1成人1儿童）'
+    self.description = '预订大后天广州4天3晚跟团游（1成人1儿童）'
     self.timeout_seconds = 240
   
     def prepare

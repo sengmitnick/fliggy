@@ -6,7 +6,7 @@ module V101V150
   class V142BookNewEnergyCarWithInsuranceValidator < BaseValidator
     self.validator_id = 'v142_book_new_energy_car_with_insurance_validator'
     self.task_id = 'c2d3e4f5-6a7b-8c9d-0e1f-2a3b4c5d6e7f'
-    self.title = '给张三预订明天新能源车（成都，3天，全险+免费取消）'
+    self.title = '帮张三预订明天成都的新能源车，租3天，包含全险和免费取消'
     self.description = '帮张三预订明天成都的新能源车，租3天，包含全险和免费取消'
     self.timeout_seconds = 300
 

@@ -20,7 +20,7 @@ module V251V300
   class V262BookFlightWithDelayAndLuggageInsuranceValidator < BaseValidator
     self.validator_id = 'v262_book_flight_with_delay_and_luggage_insurance_validator'
     self.task_id = '440e142a-b196-4ea2-a3db-3a7da7eb9633'
-    self.title = '给张三预订3天后北京到上海航班+含延误保障的交通意外险'
+    self.title = '帮张三预订3天后从北京到上海的航班，并购买交通意外险（必须包含航班延误保障）'
     self.description = '帮张三预订3天后从北京到上海的航班，并购买交通意外险（必须包含航班延误保障）'
     self.timeout_seconds = 300
     

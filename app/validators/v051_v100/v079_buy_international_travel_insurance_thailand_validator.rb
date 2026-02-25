@@ -43,7 +43,7 @@ module V051V100
     self.validator_id = 'v079_buy_international_travel_insurance_thailand_validator'
     self.task_id = 'cf2c9d61-fcb6-4467-8b45-4ab03e553a23'
     self.title = '给张三和李四购买泰国旅游保险（10天后出行，保障10天，最便宜）'
-    self.description = '帮张三、李四这2人买泰国旅游保险，10天后出发，保障期10天，选择最便宜的亚洲版境外保险'
+    self.description = '给张三和李四购买泰国旅游保险（10天后出行，保障10天，最便宜）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

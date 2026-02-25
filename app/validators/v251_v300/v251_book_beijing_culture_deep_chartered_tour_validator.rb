@@ -16,7 +16,7 @@ module V251V300
     self.validator_id = 'v251_book_beijing_culture_deep_chartered_tour_validator'
     self.task_id = '61645ce7-e573-42d2-b80e-c5bfe1d863db'
     self.title = '给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）'
-    self.description = '帮张三、李四这2人订5天后的北京文化深度游包车，选豪华5座车型，6小时服务（半日游）'
+    self.description = '给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）'
     self.timeout_seconds = 240
   
     def prepare

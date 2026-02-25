@@ -18,7 +18,7 @@ module V201V250
   class V249BookFlightWithMealValidator < BaseValidator
     self.validator_id = 'v249_book_flight_with_meal_validator'
     self.task_id = '4ff4afff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '给张三预订航班（4天后去深圳）'
+    self.title = '张三4天后要从上海去深圳，需要预订合适的航班'
     self.description = '张三4天后要从上海去深圳，需要预订合适的航班'
     self.timeout_seconds = 300
     

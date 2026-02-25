@@ -6,7 +6,7 @@ module V101V150
   class V141BookBusinessVanWithFeaturesValidator < BaseValidator
     self.validator_id = 'v141_book_business_van_with_features_validator'
     self.task_id = 'b1c2d3e4-5f6a-7b8c-9d0e-1f2a3b4c5d6e'
-    self.title = '给张三预订后天商务车（广州，2天，自动挡）'
+    self.title = '帮张三预订后天广州的商务车，租2天，要求自动挡'
     self.description = '帮张三预订后天广州的商务车，租2天，要求自动挡'
     self.timeout_seconds = 300
 

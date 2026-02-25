@@ -9,7 +9,7 @@ module V151V200
   class V164BookRoundTripTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v164_book_round_trip_train_and_hotel_validator'
     self.task_id = 'b4c5d6e7-8f9a-0b1c-2d3e-4f5a6b7c8d9e'
-    self.title = '给张三预订明天上海⇄杭州往返火车 + 杭州酒店住宿2晚'
+    self.title = '给张三预订明天上海到杭州的往返火车（去程明天，返程第4天），并预订杭州酒店2晚住宿'
     self.description = '预订明天上海到杭州的往返火车（去程明天，返程第4天），并预订杭州酒店2晚住宿'
     self.timeout_seconds = 300
 

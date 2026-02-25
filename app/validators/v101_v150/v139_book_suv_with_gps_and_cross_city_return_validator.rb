@@ -6,7 +6,7 @@ module V101V150
   class V139BookSuvWithGpsAndCrossCityReturnValidator < BaseValidator
     self.validator_id = 'v139_book_suv_with_gps_and_cross_city_return_validator'
     self.task_id = 'f9a0b1c2-3d4e-5f6a-7b8c-9d0e1f2a3b4c'
-    self.title = '给张三预订后天SUV租车（上海取车，含GPS，异地还车到杭州5天）'
+    self.title = '帮张三订后天上海SUV租车5天（含GPS导航），异地还车到杭州'
     self.description = '帮张三订后天上海SUV租车5天（含GPS导航），异地还车到杭州'
     self.timeout_seconds = 300
 

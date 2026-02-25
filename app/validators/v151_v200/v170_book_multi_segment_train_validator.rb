@@ -9,7 +9,7 @@ module V151V200
   class V170BookMultiSegmentTrainValidator < BaseValidator
     self.validator_id = 'v170_book_multi_segment_train_validator'
     self.task_id = 'b0c1d2e3-4f5a-6b7c-8d9e-0f1a2b3c4d5e'
-    self.title = '给张三预订明天多段联程火车（北京→天津→上海）'
+    self.title = '给张三预订明天北京到天津的火车，以及后天天津到上海的火车，完成多城市联程'
     self.description = '预订明天北京到天津的火车，以及后天天津到上海的火车，完成多城市联程'
     self.timeout_seconds = 300
 

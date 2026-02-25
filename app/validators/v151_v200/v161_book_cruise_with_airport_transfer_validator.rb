@@ -9,7 +9,7 @@ module V151V200
   class V161BookCruiseWithAirportTransferValidator < BaseValidator
     self.validator_id = 'v161_book_cruise_with_airport_transfer_validator'
     self.task_id = 'e1f2a3b4-5c6d-7e8f-9a0b-1c2d3e4f5a6b'
-    self.title = '给张三预订明天上海出发日本邮轮6天5晚，并预订机场往返接送（接今天从北京飞来的航班，送第7天飞北京的航班）'
+    self.title = '给张三订明天上海出发的日本邮轮6天5晚，并订机场往返接送服务（接今天从北京飞上海浦东的航班，送第7天从上海浦东飞北京的航班）'
     self.description = '给张三订明天上海出发的日本邮轮6天5晚，并订机场往返接送服务（接今天从北京飞上海浦东的航班，送第7天从上海浦东飞北京的航班）'
     self.timeout_seconds = 300
 

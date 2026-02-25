@@ -39,7 +39,7 @@ module V051V100
     self.validator_id = 'v080_buy_senior_travel_insurance_validator'
     self.task_id = 'b0be2515-74d7-4a7d-823d-cac17397ff55'
     self.title = '给张建国购买境内旅游保险(65岁老人,北京出行5天,选医疗保额最高的)'
-    self.description = '张建国65岁(张三的爸爸),5天后要去北京玩5天,帮他买个境内旅游保险,老人家要医疗保额最高的那种'
+    self.description = '给张建国购买境内旅游保险(65岁老人,北京出行5天,选医疗保额最高的)'
     self.timeout_seconds = 240
   
     # 准备阶段:设置任务参数

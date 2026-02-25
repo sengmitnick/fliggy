@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例41: 预订明天杭州3天2晚跟团游
+# 验证用例41: 给张三预订明天杭州3天2晚跟团游
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索杭州的跟团游产品，
@@ -27,7 +27,7 @@ module V001V050
     self.validator_id = 'v041_book_tour_hangzhou_validator'
     self.task_id = '919fcf7b-af3e-484c-a6a1-e8d86fbf4ee7'
     self.title = '给张三预订明天杭州3天2晚跟团游'
-    self.description = 'Agent 需要为张三预订明天出发的杭州3天2晚跟团游，选择合适的产品并完成预订'
+    self.description = '预订明天杭州3天2晚跟团游'
     self.timeout_seconds = 240
   
     def prepare

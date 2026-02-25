@@ -18,7 +18,7 @@ module V201V250
   class V243BookWindowSeatFlightValidator < BaseValidator
     self.validator_id = 'v243_book_window_seat_flight_validator'
     self.task_id = '8ff849ff-9f9f-9f1f-1f2f-0f3a4b5c6d7f'
-    self.title = '给张三预订靠窗座位航班（3天后去广州）'
+    self.title = '张三3天后要从上海去广州，喜欢看窗外风景，需要预订靠窗座位的航班'
     self.description = '张三3天后要从上海去广州，喜欢看窗外风景，需要预订靠窗座位的航班'
     self.timeout_seconds = 300
     

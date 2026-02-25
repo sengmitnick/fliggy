@@ -17,7 +17,7 @@ module V201V250
   class V204BookEveningBusTimeWindowValidator < BaseValidator
     self.validator_id = 'v204_book_evening_bus_time_window_validator'
     self.task_id = '3c4465e8-4f4f-4d9a-af7f-8f0a1b2c3d4e'
-    self.title = '给张三预订明天晚间大巴（时间窗口18:00-20:00，广州→深圳）'
+    self.title = '张三需要预订明天18:00-20:00从广州到深圳的大巴，适合下班后出行'
     self.description = '张三需要预订明天18:00-20:00从广州到深圳的大巴，适合下班后出行'
     self.timeout_seconds = 300
     

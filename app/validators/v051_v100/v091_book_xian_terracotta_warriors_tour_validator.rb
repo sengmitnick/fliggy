@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例91: 预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）
+# 验证用例91: 给张三预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）
 module V051V100
   class V091BookXianTerracottaWarriorsTourValidator < BaseValidator
     self.validator_id = 'v091_book_xian_terracotta_warriors_tour_validator'
     self.task_id = '5bc15e2f-a604-469a-99a1-ccce0e9eabed'
-    self.title = '给张三预订西安秦始皇帝陵博物院讲解（服务人数最多的金牌导游）'
-    self.description = '给张三、王芳和儿子小明预订下周末西安秦始皇帝陵博物院讲解，一家3口出行（2成人1儿童），选择服务人数最多的金牌导游'
+    self.title = '给张三预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）'
+    self.description = '预订西安秦始皇帝陵博物院讲解（服务最多的金牌导游）'
     self.timeout_seconds = 240
 
     def prepare

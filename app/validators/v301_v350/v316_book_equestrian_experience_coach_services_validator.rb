@@ -21,7 +21,7 @@ module V301V350
   class V316BookEquestrianExperienceCoachServicesValidator < BaseValidator
     self.validator_id = 'v316_book_equestrian_experience_coach_services_validator'
     self.task_id = '244a3782-51c5-4cc3-a3bd-393309099f3b'
-    self.title = '给刘强和陈静预订八达岭国际马场骑马（7天后，2人，必须保险）'
+    self.title = '给张三刘强和陈静想7天后去八达岭国际马场骑马，需2人，必须购买骑马运动保险以确保安全'
     self.description = '刘强和陈静想7天后去八达岭国际马场骑马，需2人，必须购买骑马运动保险以确保安全'
     self.timeout_seconds = 300
     

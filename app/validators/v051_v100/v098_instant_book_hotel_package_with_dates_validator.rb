@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例98: 立即预约上海地区酒店套餐（2晚，含早餐，指定入住日期）
+# 验证用例98: 给张三立即预约上海地区酒店套餐（2晚，含早餐，指定入住日期）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索上海地区的酒店套餐，
@@ -39,8 +39,8 @@ module V051V100
   class V098InstantBookHotelPackageWithDatesValidator < BaseValidator
     self.validator_id = 'v098_instant_book_hotel_package_with_dates_validator'
     self.task_id = '89f42d1c-3e8b-4a9f-b2c1-7d5e9a6f8c3a'
-    self.title = '给张三立即预约明天上海地区酒店套餐（2晚，含早餐）'
-    self.description = '给张三搜索上海地区的2晚酒店套餐，选择立即预约模式，从套餐选项中选择含早餐的选项，并指定明天开始入住2晚'
+    self.title = '给张三立即预约上海地区酒店套餐（2晚，含早餐，指定入住日期）'
+    self.description = '立即预约上海地区酒店套餐（2晚，含早餐，指定入住日期）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

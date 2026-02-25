@@ -9,7 +9,7 @@ module V101V150
   class V148BookBusAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v148_book_bus_and_airport_pickup_validator'
     self.task_id = 'c8d9e0f1-2a3b-4c5d-6e7f-8a9b0c1d2e3f'
-    self.title = '给张三预订明天汽车票后预订机场接机服务（深圳-广州，从北京飞来）'
+    self.title = '帮张三预订明天早上深圳到广州的汽车票，并预订广州白云机场接机服务（接从北京飞来的人）'
     self.description = '帮张三预订明天早上深圳到广州的汽车票，并预订广州白云机场接机服务（接从北京飞来的人）'
     self.timeout_seconds = 300
 

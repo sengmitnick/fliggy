@@ -32,7 +32,7 @@ module V001V050
   class V012SearchCheapestEuropeTrainValidator < BaseValidator
     self.validator_id = 'v012_search_cheapest_europe_train_validator'
     self.task_id = '4d893f09-9fc7-4b28-a51a-a3b529160719'
-    self.title = '给张三订明天去阿姆斯特丹的火车票（选最便宜的）'
+    self.title = '给张三预订明天从巴黎北站到阿姆斯特丹中央车站的火车票，找出价格最便宜的班次并预订'
     self.description = '给张三预订明天从巴黎北站到阿姆斯特丹中央车站的火车票，找出价格最便宜的班次并预订'
     self.timeout_seconds = 300
   

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例191: 预订2大1小家庭出行，总预算≤2000元
+# 验证用例191: 给张三预订2大1小家庭出行，总预算≤2000元
 #
 # 任务描述:
 #   预订2大1小家庭出行，总预算≤2000元
@@ -20,8 +20,8 @@ module V151V200
   class V191BookFamilyBudgetTripUnder2000Validator < BaseValidator
     self.validator_id = 'v191_book_family_budget_trip_under_2000_validator'
     self.task_id = 'e9100569-2f92-49f6-9c56-2eaa58616ddc'
-    self.title = '给张三一家2大1小预订后天北京到上海的行程（总预算≤2000元）'
-    self.description = '帮张三、王芳、小明订后天从北京到上海的行程（2成人+1儿童），总预算不超过2000元'
+    self.title = '给张三预订2大1小家庭出行，总预算≤2000元'
+    self.description = '预订2大1小家庭出行，总预算≤2000元'
     self.timeout_seconds = 300
     
     def prepare

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例23: 预订后天上海到深圳的一等座
+# 验证用例23: 给张三预订后天上海到深圳的一等座
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索后天上海到深圳的高铁，
@@ -24,8 +24,8 @@ module V001V050
   class V023BookFirstClassTrainShanghaiShenzhenValidator < BaseValidator
     self.validator_id = 'v023_book_first_class_train_shanghai_shenzhen_validator'
     self.task_id = 'a09b2f8a-8e9f-44bc-b9e4-ddf833016e09'
-    self.title = '给张三订后天上海到深圳的一等座'
-    self.description = '搜索后天上海到深圳的高铁，选择一等座并完成预订'
+    self.title = '给张三预订后天上海到深圳的一等座'
+    self.description = '预订后天上海到深圳的一等座'
     self.timeout_seconds = 240
   
     def prepare

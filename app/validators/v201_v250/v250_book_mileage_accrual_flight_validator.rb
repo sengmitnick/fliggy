@@ -18,7 +18,7 @@ module V201V250
   class V250BookMileageAccrualFlightValidator < BaseValidator
     self.validator_id = 'v250_book_mileage_accrual_flight_validator'
     self.task_id = '5ff5b0ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '给张三预订航班（3天后去广州）'
+    self.title = '张三3天后要从北京去广州，需要预订合适的航班'
     self.description = '张三3天后要从北京去广州，需要预订合适的航班'
     self.timeout_seconds = 300
     

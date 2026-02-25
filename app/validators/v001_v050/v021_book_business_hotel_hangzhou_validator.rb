@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例21: 预订后天杭州商务酒店（类型：商务酒店）
+# 验证用例21: 给张三预订后天杭州商务酒店（类型：商务酒店）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索杭州的酒店，
@@ -32,8 +32,8 @@ module V001V050
   class V021BookBusinessHotelHangzhouValidator < BaseValidator
     self.validator_id = 'v021_book_business_hotel_hangzhou_validator'
     self.task_id = 'f25a6149-ef4c-4812-8a81-2965ba558232'
-    self.title = '给张三预订后天杭州商务酒店（1晚）'
-    self.description = '搜索杭州的酒店，找到类型为"商务酒店"的酒店并完成后天入住1晚的预订'
+    self.title = '给张三预订后天杭州商务酒店（类型：商务酒店）'
+    self.description = '预订后天杭州商务酒店（类型：商务酒店）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

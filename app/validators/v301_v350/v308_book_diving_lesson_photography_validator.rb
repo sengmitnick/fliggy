@@ -19,7 +19,7 @@ module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
     self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
-    self.title = '给刘强和陈静预订蜈支洲岛潜水（4天后，2人，含门票+潜水+摄影）'
+    self.title = '给张三刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
     self.description = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
     self.timeout_seconds = 300
     

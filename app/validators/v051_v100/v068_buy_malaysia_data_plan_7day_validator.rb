@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例68: 购买马来西亚流量包（马来西亚、30天、月包类型）
+# 验证用例68: 给张三购买马来西亚流量包（马来西亚、30天、月包类型）
 # 
 # 任务描述:
 #   搜索流量包 → 选择马来西亚地区 → 选30天月包套餐 → 填写手机号 → 创建订单
@@ -41,8 +41,8 @@ module V051V100
   class V068BuyMalaysiaDataPlan7dayValidator < BaseValidator
     self.validator_id = 'v068_buy_malaysia_data_plan_7day_validator'
     self.task_id = '979cd88d-bd8d-41bd-9ff8-a945286e05b1'
-    self.title = '给小明购买马来西亚流量包（30天月包）'
-    self.description = '搜索马来西亚流量包产品，选择30天月包套餐（按月计费）并成功创建订单'
+    self.title = '给张三购买马来西亚流量包（马来西亚、30天、月包类型）'
+    self.description = '购买马来西亚流量包（马来西亚、30天、月包类型）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

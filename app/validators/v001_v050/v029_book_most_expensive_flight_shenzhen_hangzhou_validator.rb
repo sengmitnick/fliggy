@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例29: 预订明天深圳到杭州最贵的航班
+# 验证用例29: 给张三预订明天深圳到杭州最贵的航班
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天深圳到杭州的航班，
@@ -24,8 +24,8 @@ module V001V050
   class V029BookMostExpensiveFlightShenzhenHangzhouValidator < BaseValidator
     self.validator_id = 'v029_book_most_expensive_flight_shenzhen_hangzhou_validator'
     self.task_id = 'a83f2e9b-740d-4542-87e8-8e5d44e5cf6d'
-    self.title = '给张三订明天深圳到杭州最贵的航班'
-    self.description = '搜索明天深圳到杭州的航班，找到价格最高的航班并完成预订'
+    self.title = '给张三预订明天深圳到杭州最贵的航班'
+    self.description = '预订明天深圳到杭州最贵的航班'
     self.timeout_seconds = 240
   
     def prepare

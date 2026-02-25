@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例44: 预订明天北京到天津最早汽车票
+# 验证用例44: 给张三预订明天北京到天津最早汽车票
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索北京到天津的汽车票，
@@ -26,8 +26,8 @@ module V001V050
   class V044BookBusBeijingTianjinValidator < BaseValidator
     self.validator_id = 'v044_book_bus_beijing_tianjin_validator'
     self.task_id = '68156569-46f4-4a08-99a1-e25e9c4d498f'
-    self.title = '给张三预订明天北京到天津最早的汽车票'
-    self.description = 'Agent 需要为张三预订明天从北京到天津的汽车票，找到发车时间最早的班次'
+    self.title = '给张三预订明天北京到天津最早汽车票'
+    self.description = '预订明天北京到天津最早汽车票'
     self.timeout_seconds = 240
   
     def prepare

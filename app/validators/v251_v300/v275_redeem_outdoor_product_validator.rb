@@ -8,7 +8,7 @@ module V251V300
   class V275RedeemOutdoorProductValidator < BaseValidator
     self.validator_id = 'v275_redeem_outdoor_product_validator'
     self.task_id = 'a5aef388-200e-4f74-9c41-eecdd50281b9'
-    self.title = '给张三兑换户外运动类商品'
+    self.title = '帮张三在积分商城的「户外运动」分类中选择商品兑换'
     self.description = '帮张三在积分商城的「户外运动」分类中选择商品兑换'
     self.timeout_seconds = 300
     

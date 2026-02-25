@@ -8,7 +8,7 @@ module V251V300
   class V272RedeemTopSalesProductValidator < BaseValidator
     self.validator_id = 'v272_redeem_top_sales_product_validator'
     self.task_id = '5d612ca8-0765-4fc4-ac2a-92c6e7b84075'
-    self.title = '给张三兑换销量最高的热门商品'
+    self.title = '帮张三在积分商城按销量排序，选择销量最高的商品兑换'
     self.description = '帮张三在积分商城按销量排序，选择销量最高的商品兑换'
     self.timeout_seconds = 300
     

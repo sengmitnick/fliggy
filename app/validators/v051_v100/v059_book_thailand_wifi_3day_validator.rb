@@ -35,7 +35,7 @@ module V051V100
   class V059BookThailandWifi3dayValidator < BaseValidator
     self.validator_id = 'v059_book_thailand_wifi_3day_validator'
     self.task_id = '6b2013cb-010e-4832-8605-40a394c83748'
-    self.title = '帮李四租泰国随身WiFi（1台、3天、选4G经济版上海浦东自取）'
+    self.title = '李四要去泰国3天，帮他租一台随身WiFi，选4G经济版（最便宜），7天后上海浦东自取'
     self.description = '李四要去泰国3天，帮他租一台随身WiFi，选4G经济版（最便宜），7天后上海浦东自取'
     self.timeout_seconds = 240
   

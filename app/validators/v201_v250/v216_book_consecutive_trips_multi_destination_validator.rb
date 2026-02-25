@@ -18,7 +18,7 @@ module V201V250
   class V216BookConsecutiveTripsMultiDestinationValidator < BaseValidator
     self.validator_id = 'v216_book_consecutive_trips_multi_destination_validator'
     self.task_id = '5ff687f0-6f6f-4f9f-ff9f-0f2a3b4c5d6f'
-    self.title = '给张三预订明天北京→上海→杭州→深圳4天连续行程（只能用飞机/火车）'
+    self.title = '帮张三订明天开始的连续多段行程：北京→上海→杭州→深圳（4天），只能使用飞机或火车，各段时间要衔接好'
     self.description = '帮张三订明天开始的连续多段行程：北京→上海→杭州→深圳（4天），只能使用飞机或火车，各段时间要衔接好'
     self.timeout_seconds = 300
     

@@ -20,7 +20,7 @@ module V201V250
   class V226BookStudentBudgetUnder300Validator < BaseValidator
     self.validator_id = 'v226_book_student_budget_under_300_validator'
     self.task_id = '3ff354ff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '给张三预订学生经济出行（火车+酒店，总预算≤300元）'
+    self.title = '张三是学生，想从广州到深圳找同学玩，需要预订火车票和经济型酒店住1晚，总预算只有300元'
     self.description = '张三是学生，想从广州到深圳找同学玩，需要预订火车票和经济型酒店住1晚，总预算只有300元'
     self.timeout_seconds = 300
     

@@ -6,7 +6,7 @@ module V101V150
   class V135BookEarliestAndLatestTrainValidator < BaseValidator
     self.validator_id = 'v135_book_earliest_and_latest_train_validator'
     self.task_id = 'b5c6d7e8-9f0a-1b2c-3d4e-5f6a7b8c9d1f'
-    self.title = '给张三预订明天最早和后天最晚高铁/动车（上海↔杭州往返，二等座）'
+    self.title = '帮张三订明天上海到杭州的最早高铁/动车（去程），以及后天杭州回上海的最晚高铁/动车（返程）。都为二等座'
     self.description = '帮张三订明天上海到杭州的最早高铁/动车（去程），以及后天杭州回上海的最晚高铁/动车（返程）。都为二等座'
     self.timeout_seconds = 300
 

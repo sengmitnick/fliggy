@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例190: 预订性价比最高组合
+# 验证用例190: 给张三预订性价比最高组合
 #
 # 任务描述:
 #   预订性价比最高组合（评分/价格比最优）
@@ -17,8 +17,8 @@ module V151V200
   class V190BookBestValueFlightHotelRatingPriceValidator < BaseValidator
     self.validator_id = 'v190_book_best_value_flight_hotel_rating_price_validator'
     self.task_id = '19700fc3-d99e-4691-bf05-a9d0b855d17a'
-    self.title = '给刘强预订明天性价比最高的航班+酒店组合'
-    self.description = '帮刘强预订明天从北京到上海的航班+酒店，要求性价比最高（评分/价格比最优）'
+    self.title = '给张三预订性价比最高组合'
+    self.description = '预订性价比最高组合'
     self.timeout_seconds = 300
     
     def prepare

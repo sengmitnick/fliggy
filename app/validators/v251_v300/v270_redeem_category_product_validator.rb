@@ -8,7 +8,7 @@ module V251V300
   class V270RedeemCategoryProductValidator < BaseValidator
     self.validator_id = 'v270_redeem_category_product_validator'
     self.task_id = 'c479d048-ba73-4eb7-b867-53a0abd4cdb3'
-    self.title = '给刘强按分类兑换商品（年货精选）'
+    self.title = '帮刘强在年货精选分类中选择商品兑换'
     self.description = '帮刘强在年货精选分类中选择商品兑换'
     self.timeout_seconds = 300
     
@@ -34,7 +34,7 @@ module V251V300
       
       # 查询刘强的地址信息
       @liuqiang_address = user.addresses.find_by!(name: '刘强', data_version: 0)
-      @expected_shipping_address = "#{@liuqiang_address.province}#{@liuqiang_address.city}#{@liuqiang_address.district}#{@liuqiang_address.detail}"
+      @expected_shipping_address = [@liuqiang_address.province, @liuqiang_address.city, @liuqiang_address.district, @liuqiang_address.detail].compact.join
       @expected_contact_name = @liuqiang_address.name
       @expected_contact_phone = @liuqiang_address.phone
       
@@ -141,7 +141,7 @@ module V251V300
       # 恢复地址信息
       if data['liuqiang_address_id']
         @liuqiang_address = Address.find(data['liuqiang_address_id'])
-        @expected_shipping_address = "#{@liuqiang_address.province}#{@liuqiang_address.city}#{@liuqiang_address.district}#{@liuqiang_address.detail}"
+        @expected_shipping_address = [@liuqiang_address.province, @liuqiang_address.city, @liuqiang_address.district, @liuqiang_address.detail].compact.join
         @expected_contact_name = @liuqiang_address.name
         @expected_contact_phone = @liuqiang_address.phone
       end

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例75: 办理美国商务签证（家庭申请，2人，价格最低）
+# 验证用例75: 给张三办理美国商务签证（家庭申请，2人，价格最低）
 # 
 # 任务描述:
 #   Agent 需要为2位家庭成员办理美国商务签证，
@@ -40,8 +40,8 @@ module V051V100
   class V075ApplyUsaBusinessVisaFamilyValidator < BaseValidator
     self.validator_id = 'v075_apply_usa_business_visa_family_validator'
     self.task_id = '100fd8a9-ca4c-48ee-8139-1e599dc77b16'
-    self.title = '给张三和李四办理美国商务签证（家庭申请，2人，价格最低）'
-    self.description = '为2位家庭成员办理美国商务签证，选择价格最低且支持家庭申请的产品'
+    self.title = '给张三办理美国商务签证（家庭申请，2人，价格最低）'
+    self.description = '办理美国商务签证（家庭申请，2人，价格最低）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -243,7 +243,7 @@ module V051V100
       raise "未找到可用的签证产品" unless cheapest_product
     
       # 6. 拼接完整地址
-      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+      full_address = [contact_address.province, contact_address.city, contact_address.district, contact_address.detail].compact.join
     
       # 7. 创建签证订单
       visa_order = VisaOrder.create!(

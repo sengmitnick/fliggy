@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例109: 预订网红民宿（成都宽窄巷子，高评分）
+# 验证用例109: 给张三预订网红民宿（成都宽窄巷子，高评分）
 #
 # 核心验证点:
 # 1. 订单创建: 民宿订单创建成功
@@ -15,8 +15,8 @@ module V101V150
   class V109PopularHomestayValidator < BaseValidator
     self.validator_id = 'v109_popular_homestay_validator'
     self.task_id = 'c7f2e8d9-3a1b-4c6e-9d8f-7a2e5b4c1d93'
-    self.title = '给王芳预订成都网红民宿（宽窄巷子高评分83晚）'
-    self.description = '帮王芳在成都宽窄巷子地区订网红民宿，要评分最高且>=4.5分的，住3晚'
+    self.title = '给张三预订网红民宿（成都宽窄巷子，高评分）'
+    self.description = '预订网红民宿（成都宽窄巷子，高评分）'
     self.timeout_seconds = 300
   
     def prepare

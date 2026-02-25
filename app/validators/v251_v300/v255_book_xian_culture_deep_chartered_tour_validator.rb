@@ -16,7 +16,7 @@ module V251V300
     self.validator_id = 'v255_book_xian_culture_deep_chartered_tour_validator'
     self.task_id = '55af070c-6229-4df7-ac27-966662a1af17'
     self.title = '给陈静预订西安文化深度游包车（后天出发，经济5座，6小时）'
-    self.description = '帮陈静订后天的西安文化深度游包车，选经济5座，6小时服务（半日游）'
+    self.description = '给陈静预订西安文化深度游包车（后天出发，经济5座，6小时）'
     self.timeout_seconds = 240
   
     def prepare

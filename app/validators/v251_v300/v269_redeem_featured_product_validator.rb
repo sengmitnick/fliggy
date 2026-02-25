@@ -8,7 +8,7 @@ module V251V300
   class V269RedeemFeaturedProductValidator < BaseValidator
     self.validator_id = 'v269_redeem_featured_product_validator'
     self.task_id = '13ec476f-dde0-4a31-9337-db353ba25efa'
-    self.title = '给王芳兑换精选推荐商品'
+    self.title = '帮王芳兑换积分商城首页精选推荐的热门商品'
     self.description = '帮王芳兑换积分商城首页精选推荐的热门商品'
     self.timeout_seconds = 300
     
@@ -31,7 +31,7 @@ module V251V300
       
       # 查询王芳的地址信息
       @wangfang_address = user.addresses.find_by!(name: '王芳', data_version: 0)
-      @expected_shipping_address = "#{@wangfang_address.province}#{@wangfang_address.city}#{@wangfang_address.district}#{@wangfang_address.detail}"
+      @expected_shipping_address = [@wangfang_address.province, @wangfang_address.city, @wangfang_address.district, @wangfang_address.detail].compact.join
       @expected_contact_name = @wangfang_address.name
       @expected_contact_phone = @wangfang_address.phone
       
@@ -135,7 +135,7 @@ module V251V300
       # 恢复地址信息
       if data['wangfang_address_id']
         @wangfang_address = Address.find(data['wangfang_address_id'])
-        @expected_shipping_address = "#{@wangfang_address.province}#{@wangfang_address.city}#{@wangfang_address.district}#{@wangfang_address.detail}"
+        @expected_shipping_address = [@wangfang_address.province, @wangfang_address.city, @wangfang_address.district, @wangfang_address.detail].compact.join
         @expected_contact_name = @wangfang_address.name
         @expected_contact_phone = @wangfang_address.phone
       end

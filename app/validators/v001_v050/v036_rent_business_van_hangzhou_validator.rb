@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例36: 租赁明天杭州商务车（租车2天，5座以上）
+# 验证用例36: 给张三租赁明天杭州商务车（租车2天，5座以上）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索杭州的租车服务，
@@ -25,8 +25,8 @@ module V001V050
   class V036RentBusinessVanHangzhouValidator < BaseValidator
     self.validator_id = 'v036_rent_business_van_hangzhou_validator'
     self.task_id = '73f0ea71-c91a-4c62-b5f0-fcaadc96b5a7'
-    self.title = '帮张三租明天杭州商务车（2天，5座以上）'
-    self.description = '搜索杭州的租车服务，找到商务车车型（5座以上）并租赁2天'
+    self.title = '给张三租赁明天杭州商务车（租车2天，5座以上）'
+    self.description = '租赁明天杭州商务车（租车2天，5座以上）'
     self.timeout_seconds = 240
   
     def prepare
@@ -125,7 +125,7 @@ module V001V050
     
       total_price = target_car.price_per_day * @rental_days
       pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
-      return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
+      return_datetime = (@pickup_date + @rental_days.days).to_time.in_time_zone.change(hour: 9, min: 0)
     
       CarOrder.create!(
         car_id: target_car.id,

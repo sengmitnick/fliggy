@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例175: 订购火车票后预订接站服务（高铁）
+# 验证用例175: 给张三订购火车票后预订接站服务（高铁）
 #
 # 任务描述:
 #   用户订了北京到南京的高铁，到达南京南站，需要接站到新街口商圈。
@@ -37,8 +37,8 @@ module V151V200
   class V175BookTrainAndStationPickupValidator < BaseValidator
     self.validator_id = 'v175_book_train_and_station_pickup_validator'
     self.task_id = '77ad42cd-6c18-4752-b8e4-f7ec1532fee0'
-    self.title = '给陈静预订后天北京到南京的高铁票，并预订南京南站接站到新街口商圈'
-    self.description = '帮陈静订后天从北京到南京的高铁，到达南京南站后接站到新街口商圈'
+    self.title = '给张三订购火车票后预订接站服务（高铁）'
+    self.description = '订购火车票后预订接站服务（高铁）'
     self.timeout_seconds = 300
   
     def prepare

@@ -17,7 +17,7 @@ module V201V250
   class V232BookHotelNearSpecificLocationValidator < BaseValidator
     self.validator_id = 'v232_book_hotel_near_specific_location_validator'
     self.task_id = '8ff8a9ff-9f9f-9f1f-1f2f-0f3a4b5c6d7f'
-    self.title = '给张三预订指定地点附近的酒店（后天入住，CBD核心区）'
+    self.title = '张三后天要去北京开会，需要在CBD核心区附近预订酒店住2晚，方便参会'
     self.description = '张三后天要去北京开会，需要在CBD核心区附近预订酒店住2晚，方便参会'
     self.timeout_seconds = 300
     

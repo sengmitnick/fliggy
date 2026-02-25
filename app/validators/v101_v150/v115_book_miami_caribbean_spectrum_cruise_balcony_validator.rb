@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例115: 预订加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）
+# 验证用例115: 给张三预订加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）
 #
 # 测试内容：
 # - 邮轮筛选（海洋光谱号/Royal Caribbean）
@@ -20,8 +20,8 @@ module V101V150
   class V115BookMiamiCaribbeanSpectrumCruiseBalconyValidator < BaseValidator
     self.validator_id = 'v115_book_miami_caribbean_spectrum_cruise_balcony_validator'
     self.task_id = 'b4a00a86-51cd-40b8-800a-67287efdfdd6'
-    self.title = '给王芳预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，5月，阳台房）'
-    self.description = '帮王芳预订加勒比邮轮航线，选择海洋光谱号5月份最近一班10天9晚行程，预订阳台房（舒适之选），为2位成人'
+    self.title = '给张三预订加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）'
+    self.description = '预订加勒比邮轮（海洋光谱号，10天9晚，5月出发，阳台房）'
     self.timeout_seconds = 240
 
     def prepare

@@ -9,7 +9,7 @@ module V151V200
   class V162BookCruiseAndHotelValidator < BaseValidator
     self.validator_id = 'v162_book_cruise_and_hotel_validator'
     self.task_id = 'f2a3b4c5-6d7e-8f9a-0b1c-2d3e4f5a6b7c'
-    self.title = '给张三预订后天上海出发日本邮轮6天5晚 + 前一晚酒店住宿'
+    self.title = '给张三预订后天上海出发的日本邮轮航线，并预订邮轮出发前一晚的上海酒店住宿'
     self.description = '预订后天上海出发的日本邮轮航线，并预订邮轮出发前一晚的上海酒店住宿'
     self.timeout_seconds = 300
 

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例35: 租赁后天广州豪华轿车（租车3天）
+# 验证用例35: 给张三租赁后天广州豪华轿车（租车3天）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索广州的租车服务，
@@ -25,8 +25,8 @@ module V001V050
   class V035RentLuxuryCarGuangzhouValidator < BaseValidator
     self.validator_id = 'v035_rent_luxury_car_guangzhou_validator'
     self.task_id = '024489de-0ebb-4238-ac62-d5adef07a43e'
-    self.title = '帮张三租后天广州豪华轿车（3天）'
-    self.description = '搜索广州的租车服务，找到豪华轿车车型并租赁3天'
+    self.title = '给张三租赁后天广州豪华轿车（租车3天）'
+    self.description = '租赁后天广州豪华轿车（租车3天）'
     self.timeout_seconds = 240
   
     def prepare
@@ -84,7 +84,7 @@ module V001V050
       add_assertion "租赁天数正确（3天）", weight: 20 do
         return_date = @order.return_datetime.to_date
         pickup_date = @order.pickup_datetime.to_date
-        actual_days = (return_date - pickup_date).to_i + 1
+        actual_days = (return_date - pickup_date).to_i
       
         expect(actual_days).to eq(@rental_days),
           "租赁天数不正确。期望: #{@rental_days}天, 实际: #{actual_days}天"
@@ -127,7 +127,7 @@ module V001V050
     
       total_price = target_car.price_per_day * @rental_days
       pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
-      return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
+      return_datetime = (@pickup_date + @rental_days.days).to_time.in_time_zone.change(hour: 9, min: 0)
     
       CarOrder.create!(
         car_id: target_car.id,

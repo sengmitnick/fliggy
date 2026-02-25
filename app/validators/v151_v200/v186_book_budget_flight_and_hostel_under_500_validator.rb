@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例186: 预订预算航班和青旅组合（总预算≤500元）
+# 验证用例186: 给张三预订预算航班和青旅组合（总预算≤500元）
 #
 # 任务描述:
 #   学生出行，需要预订航班+青旅，总预算≤500元
@@ -23,8 +23,8 @@ module V151V200
   class V186BookBudgetFlightAndHostelUnder500Validator < BaseValidator
     self.validator_id = 'v186_book_budget_flight_and_hostel_under_500_validator'
     self.task_id = '157ef268-c392-49fc-b869-c11412299bca'
-    self.title = '给王芳预订明天北京到上海的预算航班和青旅（总预算≤500元）'
-    self.description = '帮学生王芳订明天从北京到上海的航班+青旅，总预算不超过500元'
+    self.title = '给张三预订预算航班和青旅组合（总预算≤500元）'
+    self.description = '预订预算航班和青旅组合（总预算≤500元）'
     self.timeout_seconds = 300
   
     def prepare

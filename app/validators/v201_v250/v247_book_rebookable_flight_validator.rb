@@ -17,7 +17,7 @@ module V201V250
   class V247BookRebookableFlightValidator < BaseValidator
     self.validator_id = 'v247_book_rebookable_flight_validator'
     self.task_id = 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
-    self.title = '给张三预订可改签航班（去广州，行程可能变动）'
+    self.title = '张三要从上海去广州，但行程还没最终确定，需要预订支持改签的航班方便调整时间'
     self.description = '张三要从上海去广州，但行程还没最终确定，需要预订支持改签的航班方便调整时间'
     self.timeout_seconds = 300
     

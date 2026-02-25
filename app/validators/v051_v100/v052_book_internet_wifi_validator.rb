@@ -33,8 +33,8 @@ module V051V100
   class V052BookInternetWifiValidator < BaseValidator
     self.validator_id = 'v052_book_internet_wifi_validator'
     self.task_id = '05db4166-de34-4d4b-9078-6e672b53bb21'
-    self.title = '帮张三订去中国香港的随身WiFi（租1台用5天，选最便宜的，北京朝阳区自取）'
-    self.description = '张三下周要去中国香港出差5天，帮他租一台随身WiFi，选最便宜的（日租金最低），7天后到北京朝阳区自取'
+    self.title = '预订境外随身WiFi（帮张三订去中国香港的WiFi）'
+    self.description = '预订境外随身WiFi（帮张三订去中国香港的WiFi）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

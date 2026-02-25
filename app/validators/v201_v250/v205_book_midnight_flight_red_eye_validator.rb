@@ -16,7 +16,7 @@ module V201V250
   class V205BookMidnightFlightRedEyeValidator < BaseValidator
     self.validator_id = 'v205_book_midnight_flight_red_eye_validator'
     self.task_id = '8c9d0e1f-2a3b-4c5d-6e7f-8a9b0c1d2e3f'
-    self.title = '给张三预订后天红眼航班（23:00-次日02:00，北京→上海）'
+    self.title = '张三需要预订后天晚上23:00到次日凌暈02:00的深夜航班，从北京到上海'
     self.description = '张三需要预订后天晚上23:00到次日凌暈02:00的深夜航班，从北京到上海'
     self.timeout_seconds = 300
     

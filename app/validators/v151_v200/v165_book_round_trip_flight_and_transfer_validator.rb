@@ -9,7 +9,7 @@ module V151V200
   class V165BookRoundTripFlightAndTransferValidator < BaseValidator
     self.validator_id = 'v165_book_round_trip_flight_and_transfer_validator'
     self.task_id = 'c5d6e7f8-9a0b-1c2d-3e4f-5a6b7c8d9e1f'
-    self.title = '给张三预订明天北京⇄上海往返航班 + 往返机场接送服务'
+    self.title = '给张三预订明天北京到上海的往返航班，并预订两次机场接送服务（去程接机+返程送机）'
     self.description = '预订明天北京到上海的往返航班，并预订两次机场接送服务（去程接机+返程送机）'
     self.timeout_seconds = 300
 

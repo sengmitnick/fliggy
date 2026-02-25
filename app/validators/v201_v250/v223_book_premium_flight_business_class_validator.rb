@@ -18,7 +18,7 @@ module V201V250
   class V223BookPremiumFlightBusinessClassValidator < BaseValidator
     self.validator_id = 'v223_book_premium_flight_business_class_validator'
     self.task_id = '0ff021fe-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '给张三预订商务舱航班（价格≥2000元）'
+    self.title = '张三需要7天后从上海飞往纽约进行商务洽谈，希望预订商务舱航班，预算至少2000元起'
     self.description = '张三需要7天后从上海飞往纽约进行商务洽谈，希望预订商务舱航班，预算至少2000元起'
     self.timeout_seconds = 300
     

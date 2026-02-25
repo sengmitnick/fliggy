@@ -18,7 +18,7 @@ module V201V250
   class V245BookWidebodyAircraftValidator < BaseValidator
     self.validator_id = 'v245_book_widebody_aircraft_validator'
     self.task_id = '0ff06bff-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '给张三预订长途航班（去洛杉矶）'
+    self.title = '张三要从北京飞洛杉矶，需要预订合适的航班'
     self.description = '张三要从北京飞洛杉矶，需要预订合适的航班'
     self.timeout_seconds = 300
     

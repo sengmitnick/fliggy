@@ -20,8 +20,8 @@ module V251V300
   class V295BookMuslimFriendlyServiceValidator < BaseValidator
     self.validator_id = 'v295_book_muslim_friendly_service_validator'
     self.task_id = '16fd7e2d-f8e9-49c8-91fc-72958aa2ec90'
-    self.title = '给刘强和陈静预订西安自由行（2个一日游+酒店3晚，需要停车场）'
-    self.description = '帮刘强和陈静订6天后去西安玩3天的自由行，预订2个不同的一日游产品，以及有停车场的酒店住3晚'
+    self.title = '给刘强和陈静预订西安自由行（2个一日游+酒店3晚）'
+    self.description = '给刘强和陈静预订西安自由行（2个一日游+酒店3晚）'
     self.timeout_seconds = 300
     
     def prepare

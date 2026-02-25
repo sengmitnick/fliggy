@@ -17,7 +17,7 @@ module V201V250
   class V233BookHotelWithSpecificFacilitiesValidator < BaseValidator
     self.validator_id = 'v233_book_hotel_with_specific_facilities_validator'
     self.task_id = '9ff9b0ff-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '给张三预订带游泳池的酒店（明天入住）'
+    self.title = '张三明天要去上海出差，喜欢运动健身，需要预订带游泳池的酒店住1晚'
     self.description = '张三明天要去上海出差，喜欢运动健身，需要预订带游泳池的酒店住1晚'
     self.timeout_seconds = 300
     

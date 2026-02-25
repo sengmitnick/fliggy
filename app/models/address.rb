@@ -16,7 +16,7 @@ class Address < ApplicationRecord
   before_save :set_default_address, if: :is_default?
 
   def full_address
-    "#{province}#{city}#{district}#{detail}"
+    [province, city, district, detail].compact.join
   end
 
   def as_json(options = {})

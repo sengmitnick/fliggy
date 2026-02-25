@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例187: 预订火车+中档酒店，总预算800-1200元
+# 验证用例187: 给张三预订火车+中档酒店，总预算800-1200元
 #
 # 任务描述:
 #   预订火车+中档酒店，总预算800-1200元
@@ -22,7 +22,7 @@ module V151V200
   class V187BookMidRangeTrainAndHotel8001200Validator < BaseValidator
     self.validator_id = 'v187_book_mid_range_train_and_hotel_800_1200_validator'
     self.task_id = '9551dc4b-e494-48e9-8ee2-6be8838706cb'
-    self.title = '预订火车+中档酒店，总预算800-1200元'
+    self.title = '给张三预订火车+中档酒店，总预算800-1200元'
     self.description = '预订火车+中档酒店，总预算800-1200元'
     self.timeout_seconds = 300
     

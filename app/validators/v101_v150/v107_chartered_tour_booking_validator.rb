@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例107: 预订定制游（上海经典路线，8小时包车，7座商务车）
+# 验证用例107: 给张三预订定制游（上海经典路线，8小时包车，7座商务车）
 #
 # 核心验证点:
 # 1. 订单创建: 定制游订单创建成功
@@ -15,8 +15,8 @@ module V101V150
   class V107CharteredTourBookingValidator < BaseValidator
     self.validator_id = 'v107_chartered_tour_booking_validator'
     self.task_id = 'e9d3f5a7-2c8b-4e1f-a6d9-8b4c1f7e3a52'
-    self.title = '给小明预订明天上海包车游（经典路线8小时，7座商务车）'
-    self.description = '帮小明预订上海定制游，选经典路线，8小时包车，7座商务车，4位乘客，明天出发'
+    self.title = '给张三预订定制游（上海经典路线，8小时包车，7座商务车）'
+    self.description = '预订定制游（上海经典路线，8小时包车，7座商务车）'
     self.timeout_seconds = 240
   
     def prepare

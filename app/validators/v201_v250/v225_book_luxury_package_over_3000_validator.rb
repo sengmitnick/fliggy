@@ -20,7 +20,7 @@ module V201V250
   class V225BookLuxuryPackageOver3000Validator < BaseValidator
     self.validator_id = 'v225_book_luxury_package_over_3000_validator'
     self.task_id = '2ff243ff-3f3f-3f5f-5f6f-4f7a8b9c0d1f'
-    self.title = '给张三预订豪华套餐（航班+酒店，总价≥3000元）'
+    self.title = '张三5天后想从北京去三亚度假，希望预订高端航班和高星酒店住2晚，总预算至少3000元'
     self.description = '张三5天后想从北京去三亚度假，希望预订高端航班和高星酒店住2晚，总预算至少3000元'
     self.timeout_seconds = 300
     

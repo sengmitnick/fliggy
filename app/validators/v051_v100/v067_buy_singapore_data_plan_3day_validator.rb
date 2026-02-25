@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例67: 购买新加坡流量包（新加坡、3天、天包类型）
+# 验证用例67: 给张三购买新加坡流量包（新加坡、3天、天包类型）
 # 
 # 任务描述:
 #   搜索流量包 → 选择新加坡地区 → 选3天天包套餐 → 填写手机号 → 创建订单
@@ -41,8 +41,8 @@ module V051V100
   class V067BuySingaporeDataPlan3dayValidator < BaseValidator
     self.validator_id = 'v067_buy_singapore_data_plan_3day_validator'
     self.task_id = 'fa34ffd4-e826-4a88-8733-bba29363a333'
-    self.title = '给刘强购买新加坡流量包（3天天包）'
-    self.description = '搜索新加坡流量包产品，选择3天天包套餐（按天计费）并成功创建订单'
+    self.title = '给张三购买新加坡流量包（新加坡、3天、天包类型）'
+    self.description = '购买新加坡流量包（新加坡、3天、天包类型）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

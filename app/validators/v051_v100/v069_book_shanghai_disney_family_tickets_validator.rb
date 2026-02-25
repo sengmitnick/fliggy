@@ -41,7 +41,7 @@ module V051V100
     self.validator_id = 'v069_book_shanghai_disney_family_tickets_validator'
     self.task_id = '01352bcb-f7ff-4891-a072-114e6565b87d'
     self.title = '张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）'
-    self.description = '为张三一家（张三、王芳、小明）预订迪士尼门票，通过2个订单实现，选择最便宜的供应商'
+    self.description = '张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

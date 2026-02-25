@@ -271,6 +271,24 @@
   const resultPanel = document.getElementById('result-panel');
   const resultContent = document.getElementById('result-content');
 
+  // 使用事件委托来处理动态添加的按钮，避免重复绑定
+  sessionsList.addEventListener('click', (e) => {
+    const verifyBtn = e.target.closest('.verify-session-btn');
+    const removeBtn = e.target.closest('.remove-session-btn');
+    
+    if (verifyBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const sessionId = verifyBtn.dataset.sessionId;
+      if (sessionId) verifySession(sessionId);
+    } else if (removeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const sessionId = removeBtn.dataset.sessionId;
+      if (sessionId) removeSession(sessionId);
+    }
+  });
+
   // 启动新会话
   startBtn.addEventListener('click', async () => {
     // 禁用按钮
@@ -388,15 +406,7 @@
       </div>
     `).join('');
     
-    // 绑定验证按钮事件
-    document.querySelectorAll('.verify-session-btn').forEach(btn => {
-      btn.addEventListener('click', () => verifySession(btn.dataset.sessionId));
-    });
-    
-    // 绑定移除按钮事件
-    document.querySelectorAll('.remove-session-btn').forEach(btn => {
-      btn.addEventListener('click', () => removeSession(btn.dataset.sessionId));
-    });
+    // 事件监听器已通过事件委托绑定到 sessionsList 容器，无需重复绑定
   }
 
   // 验证指定会话
@@ -547,8 +557,10 @@
         
         showToast(`验证完成，得分: ${scorePercent}%`, isPass ? 'success' : 'error');
         
-        // 验证完成后从列表中移除该会话
-        removeSession(sessionId);
+        // 验证完成后延迟5秒再从列表中移除该会话（给用户时间查看结果）
+        setTimeout(() => {
+          removeSession(sessionId);
+        }, 5000);
       } else {
         throw new Error(data.reason || '验证失败');
       }

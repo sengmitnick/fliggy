@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例83: 购买全年交通意外险（北京，365天，全年无限次保障）
+# 验证用例83: 给张三购买全年交通意外险（北京，365天，全年无限次保障）
 # 
 # 任务描述:
 #   Agent 需要为北京的商务人士购买全年交通意外险，
@@ -37,7 +37,7 @@ module V051V100
     self.validator_id = 'v083_buy_annual_travel_plan_validator'
     self.task_id = 'a4b9bf4f-8238-4401-8ff3-a58352e12aea'
     self.title = '给张三购买全年交通意外险（北京，365天，全年无限次保障）'
-    self.description = '帮张三买个全年交通意外险，在北京用，明天开始生效，保障365天到明年今天结束，支持全年无限次保障'
+    self.description = '购买全年交通意外险（北京，365天，全年无限次保障）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

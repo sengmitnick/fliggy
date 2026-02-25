@@ -17,7 +17,7 @@ module V201V250
   class V235BookSpecificRoomTypeValidator < BaseValidator
     self.validator_id = 'v235_book_specific_room_type_validator'
     self.task_id = '1ff1d2ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '给张三预订大床房（后天入住成都）'
+    self.title = '张三后天要去成都出差，需要预订大床房住2晚'
     self.description = '张三后天要去成都出差，需要预订大床房住2晚'
     self.timeout_seconds = 300
     

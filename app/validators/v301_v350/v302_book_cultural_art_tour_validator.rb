@@ -19,8 +19,8 @@ module V301V350
   class V302BookCulturalArtTourValidator < BaseValidator
     self.validator_id = 'v302_book_cultural_art_tour_validator'
     self.task_id = 'f24660cb-1708-4a34-a89f-6108f9775035'
-    self.title = '给王芳预订西安文化艺术游（9天后，3天以上）'
-    self.description = '王芳对历史文化感兴趣，想订西安的文化艺术游，要博物馆和文化遗产'
+    self.title = '给王芳预订西安文化艺术游'
+    self.description = '给王芳预订西安文化艺术游'
     self.timeout_seconds = 300
     
     def prepare

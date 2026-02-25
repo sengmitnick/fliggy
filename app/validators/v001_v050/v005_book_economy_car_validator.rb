@@ -47,7 +47,7 @@ module V001V050
   class V005BookEconomyCarValidator < BaseValidator
     self.validator_id = 'v005_book_economy_car_validator'
     self.task_id = 'd62b9468-fc02-43ad-aa50-642bf54d0bc1'
-    self.title = '帮张三租后天深圳的经济型轿车（3天，预算≤200元/天）'
+    self.title = '帮张三在深圳宝安机场GTC地面交通中心租一辆经济型轿车（后天取车，租3天，预算≤200元/天）'
     self.description = '帮张三在深圳宝安机场GTC地面交通中心租一辆经济型轿车（后天取车，租3天，预算≤200元/天）'
     self.timeout_seconds = 300
   
