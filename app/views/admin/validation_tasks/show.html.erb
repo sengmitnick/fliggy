@@ -307,10 +307,13 @@
       
       const data = await response.json();
       
-      if (response.ok && data.session_id) {
+      // 适配新的响应格式：从 verification.config.params.session_id 提取
+      const sessionId = data.verification?.config?.params?.session_id;
+      
+      if (response.ok && sessionId) {
         // 添加新会话到列表
         const session = {
-          id: data.session_id,
+          id: sessionId,
           createdAt: new Date().toLocaleString('zh-CN')
         };
         sessions.push(session);

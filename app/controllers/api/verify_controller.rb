@@ -95,7 +95,7 @@ module Api
     
     # POST /api/tasks/:id/start
     # 甲方规范：创建训练会话
-    # 返回：{ task: {...}, session_id: "xxx" }
+    # 返回符合规范的完整 task 对象
     def start_task
       VERIFY_LOCK.synchronize do
         task_id = params[:id]
@@ -144,12 +144,33 @@ module Api
           end
         end
         
-        # 按照甲方格式返回
+        # 按照甲方规范格式返回完整 task 对象
         render json: {
-          task: prepare_info,            # 任务信息（instruction 等）
-          session_id: session_id,        # 会话 ID
-          task_id: task_id,              # 任务 ID（回显）
-          is_multi_turn: instance.is_a?(MultiTurnBaseValidator)  # 是否为多轮对话验证器
+          id: validator_class.task_id || task_id,
+          task: {
+            instruction: prepare_info[:title] || prepare_info[:task] || validator_class.title,
+            simulated_user_known_info: "",
+            simulated_user_persona: "",
+            success_criteria: ""
+          },
+          env_id: validator_class.validator_id,
+          version: "1",
+          verification: {
+            driver: "vm_http",
+            config: {
+              domain: "trip01",
+              verify_api: "/api/verify/run",
+              params: {
+                task_id: validator_class.task_id || task_id,
+                session_id: session_id
+              }
+            }
+          },
+          meta_data: {
+            difficulty: "easy",
+            is_multi_turn: instance.is_a?(MultiTurnBaseValidator),
+            timeout_seconds: validator_class.timeout_seconds
+          }
         }
       end
     rescue StandardError => e
