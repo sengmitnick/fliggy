@@ -80,8 +80,8 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（使用data_version隔离会话）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建 (30分)
+      add_assertion "订单已创建", weight: 30 do
         @order = InternetOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -112,8 +112,8 @@ module V051V100
           "未选择4G无限量。预期包含: #{@wifi_keyword}, 实际: #{wifi.name}"
       end
     
-      # 断言5: 租赁数量、天数和总价正确
-      add_assertion "租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金）", weight: 15 do
+      # 断言5: 租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金） (25分)
+      add_assertion "租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金）", weight: 25 do
         wifi = @order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
       
@@ -130,8 +130,8 @@ module V051V100
           "总价不正确。预期: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台 + 500元押金），实际: #{@order.total_price}元"
       end
     
-      # 断言6: 自取点和联系人信息正确
-      add_assertion "自取点和联系人信息正确（北京朝阳，王五）", weight: 25 do
+      # 断言6: 自取点和联系人信息正确（北京朝阳，王五） (15分)
+      add_assertion "自取点和联系人信息正确（北京朝阳，王五）", weight: 15 do
         expect(@order.delivery_method).to eq('pickup'),
           "配送方式不正确。预期: pickup（自取），实际: #{@order.delivery_method}"
         

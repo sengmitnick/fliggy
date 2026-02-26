@@ -96,7 +96,7 @@ module V101V150
     end
 
     def verify
-      # 断言1: 创建了汽车票订单
+      # 断言1: 创建了汽车票订单 (25分)
       add_assertion "创建了汽车票订单", weight: 25 do
         all_orders = BusTicketOrder
           .joins(:bus_ticket)
@@ -112,25 +112,25 @@ module V101V150
       
       return if @bus_order.nil?
       
-      # 断言2: 出发地正确
+      # 断言2: 出发地正确（上海） (15分)
       add_assertion "出发地正确（#{@origin}）", weight: 15 do
         expect(@bus_order.bus_ticket.origin).to eq(@origin),
           "出发地错误。期望: #{@origin}, 实际: #{@bus_order.bus_ticket.origin}"
       end
       
-      # 断言3: 目的地正确
+      # 断言3: 目的地正确（杭州） (15分)
       add_assertion "目的地正确（#{@destination}）", weight: 15 do
         expect(@bus_order.bus_ticket.destination).to eq(@destination),
           "目的地错误。期望: #{@destination}, 实际: #{@bus_order.bus_ticket.destination}"
       end
       
-      # 断言4: 发车日期正确
-      add_assertion "发车日期正确（#{@travel_date}）", weight: 10 do
+      # 断言4: 发车日期正确（明天） (5分)
+      add_assertion "发车日期正确（#{@travel_date}）", weight: 5 do
         expect(@bus_order.bus_ticket.departure_date).to eq(@travel_date),
           "发车日期错误。期望: #{@travel_date}（明天）, 实际: #{@bus_order.bus_ticket.departure_date}"
       end
       
-      # 断言5: 乘车人信息正确（张三）
+      # 断言5: 乘车人信息正确（张三） (10分)
       add_assertion "乘车人信息正确（张三）", weight: 10 do
         passenger = @bus_order.passengers.first
         expect(passenger).not_to be_nil, "未找到乘车人信息"
@@ -140,7 +140,7 @@ module V101V150
           "乘车人身份证错误。期望: #{@expected_passenger_id}，实际: #{passenger.passenger_id_number}"
       end
       
-      # 断言6: 创建了火车站接站服务
+      # 断言6: 创建了火车站接站服务 (20分) - 核心评分项
       add_assertion "创建了火车站接站服务", weight: 20 do
         @transfer = Transfer
           .where(transfer_type: 'train_pickup', data_version: @data_version)
@@ -152,7 +152,7 @@ module V101V150
       
       return if @transfer.nil?
       
-      # 断言7: 接站地点正确
+      # 断言7: 接站地点正确（杭州东站） (10分)
       add_assertion "接站地点正确（#{@pickup_location}）", weight: 10 do
         expect(@transfer.location_from).to eq(@pickup_location),
           "接站地点错误。期望: #{@pickup_location}, 实际: #{@transfer.location_from}"

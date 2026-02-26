@@ -38,7 +38,8 @@ module V101V150
     end
 
     def verify
-      add_assertion "创建了新能源车租车订单", weight: 30 do
+      # 断言1: 创建了新能源车租车订单 (20分) - 核心评分项
+      add_assertion "创建了新能源车租车订单", weight: 20 do
         all_car_orders = CarOrder
           .joins(:car)
           .includes(:car)
@@ -53,24 +54,29 @@ module V101V150
 
       return if @car_order.nil?
 
+      # 断言2: 车型类别=新能源 (20分) - 核心评分项
       add_assertion "车型类别=新能源", weight: 20 do
         expect(@car_order.car.category).to eq(@category)
       end
 
+      # 断言3: 租车地点=成都 (10分)
       add_assertion "租车地点=成都", weight: 10 do
         expect(@car_order.car.location).to eq(@location)
       end
 
+      # 断言4: 取车时间=明天 (10分)
       add_assertion "取车时间=明天", weight: 10 do
         expect(@car_order.pickup_datetime.to_date).to eq(@pickup_date)
       end
 
+      # 断言5: 租期=3天 (10分)
       add_assertion "租期=3天", weight: 10 do
         actual_days = (@car_order.return_datetime.to_date - @car_order.pickup_datetime.to_date).to_i
         expect(actual_days).to eq(@rental_days),
           "租期错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
       end
 
+      # 断言6: 订单状态支持取消 (10分)
       add_assertion "订单状态支持取消", weight: 10 do
         # Verify order status is 'confirmed' which can be cancelled
         status = @car_order.status.to_s
@@ -79,6 +85,7 @@ module V101V150
           "订单状态不支持取消。当前状态: #{status}"
       end
 
+      # 断言7: 车辆为新能源类型 (10分)
       add_assertion "车辆为新能源类型", weight: 10 do
         fuel_type = @car_order.car.fuel_type.to_s
         is_new_energy = fuel_type.include?("电") || fuel_type.include?("混动") || 
@@ -87,6 +94,7 @@ module V101V150
           "车辆不是新能源类型。实际燃料类型: #{fuel_type}"
       end
 
+      # 断言8: 司机信息正确（张三） (10分)
       add_assertion "司机信息正确（张三）", weight: 10 do
         expect(@car_order.driver_name).to eq(@expected_driver_name),
           "司机姓名错误。期望: #{@expected_driver_name}, 实际: #{@car_order.driver_name}"

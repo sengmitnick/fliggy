@@ -78,7 +78,7 @@ module V301V350
     end
     
     def verify
-      # 断言1: 创建了景点门票订单 (15%)
+      # 断言1: 创建了景点门票订单 (15分)
       add_assertion "创建了景点门票订单（西湖游船票）", weight: 15 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
@@ -95,7 +95,7 @@ module V301V350
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      # 断言2: 景点正确（杭州西湖） (10%)
+      # 断言2: 景点正确（杭州西湖） (10分)
       add_assertion "景点正确（杭州西湖）", weight: 10 do
         @ticket_orders.each do |order|
           expect(order.ticket.attraction.name).to eq(@attraction_name),
@@ -105,14 +105,14 @@ module V301V350
         end
       end
       
-      # 断言3: 门票类型正确（成人票） (5%)
+      # 断言3: 门票类型正确（成人票） (5分)
       add_assertion "门票类型正确（成人票）", weight: 5 do
         adult_tickets = @ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
         expect(adult_tickets.size).to be >= @participant_count,
           "成人票数量不足。期望至少#{@participant_count}张，实际找到#{adult_tickets.size}张"
       end
       
-      # 断言4: 门票游玩日期正确 (8%)
+      # 断言4: 门票游玩日期正确 (8分)
       add_assertion "门票游玩日期正确（#{@visit_date.strftime('%Y-%m-%d')}）", weight: 8 do
         @ticket_orders.each do |order|
           expect(order.visit_date).to eq(@visit_date),
@@ -120,7 +120,7 @@ module V301V350
         end
       end
       
-      # 断言5: 门票游客信息正确（张三、李四、刘强） (10%)
+      # 断言5: 门票游客信息正确（张三、李四、刘强） (10分)
       add_assertion "门票游客信息正确（张三、李四、刘强）", weight: 10 do
         all_passengers = @ticket_orders.flat_map { |o| o.passengers.to_a }.uniq
         expect(all_passengers.size).to eq(3),
@@ -132,8 +132,8 @@ module V301V350
           "门票游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
       end
       
-      # 断言6: 门票联系人信息正确（张三、李四或刘强） (7%)
-      add_assertion "门票联系人信息正确（张三、李四或刘强）", weight: 7 do
+      # 断言6: 门票联系人信息正确（张三、李四或刘强） (4分)
+      add_assertion "门票联系人信息正确（张三、李四或刘强）", weight: 4 do
         @ticket_orders.each do |order|
           if order.respond_to?(:contact_name) && order.contact_name.present?
             expect(@expected_contact_names).to include(order.contact_name),
@@ -151,7 +151,7 @@ module V301V350
         end
       end
       
-      # 断言7: 创建了自行车租赁订单 (15%)
+      # 断言7: 创建了自行车租赁订单 (15分)
       add_assertion "创建了自行车租赁订单", weight: 15 do
         all_activity_orders = ActivityOrder
           .joins(attraction_activity: :attraction)
@@ -173,7 +173,7 @@ module V301V350
       
       return if @bicycle_orders.nil? || @bicycle_orders.empty?
       
-      # 断言8: 自行车类型正确（双人车+单人车） (10%)
+      # 断言8: 自行车类型正确（双人车+单人车） (10分)
       add_assertion "自行车类型正确（双人车+单人车）", weight: 10 do
         double_bicycles = @bicycle_orders.select { |o| o.attraction_activity.name =~ /双人/ }
         single_bicycles = @bicycle_orders.select { |o| o.attraction_activity.name =~ /单人/ }
@@ -184,7 +184,7 @@ module V301V350
           "单人自行车数量不足。期望至少1辆，实际找到#{single_bicycles.size}辆"
       end
       
-      # 断言9: 自行车租赁日期正确 (5%)
+      # 断言9: 自行车租赁日期正确 (5分)
       add_assertion "自行车租赁日期正确（#{@visit_date.strftime('%Y-%m-%d')}）", weight: 5 do
         @bicycle_orders.each do |order|
           expect(order.visit_date).to eq(@visit_date),
@@ -192,7 +192,7 @@ module V301V350
         end
       end
       
-      # 断言10: 自行车游客信息正确（张三、李四、刘强） (10%)
+      # 断言10: 自行车游客信息正确（张三、李四、刘强） (10分)
       add_assertion "自行车游客信息正确（张三、李四、刘强）", weight: 10 do
         all_passengers = @bicycle_orders.flat_map { |o| o.passengers.to_a }.uniq
         expect(all_passengers.size).to eq(3),
@@ -204,7 +204,7 @@ module V301V350
           "自行车游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
       end
       
-      # 断言11: 自行车订单联系人信息正确（张三、李四或刘强） (8%)
+      # 断言11: 自行车订单联系人信息正确（张三、李四或刘强） (8分)
       add_assertion "自行车订单联系人信息正确（张三、李四或刘强）", weight: 8 do
         @bicycle_orders.each do |order|
           if order.respond_to?(:contact_name) && order.contact_name.present?
@@ -228,8 +228,8 @@ module V301V350
         end
       end
       
-      # 断言12: 自行车租赁景点正确 (2%)
-      add_assertion "自行车租赁景点正确（西湖）", weight: 2 do
+      # 断言12: 自行车租赁景点正确（西湖） (0分)
+      add_assertion "自行车租赁景点正确（西湖）", weight: 0 do
         @bicycle_orders.each do |order|
           expect(order.attraction_activity.attraction.name).to eq(@attraction_name),
             "自行车租赁景点错误。期望: #{@attraction_name}，实际: #{order.attraction_activity.attraction.name}"

@@ -146,9 +146,9 @@ module V251V300
         end
       end
       
-      # 断言7: 订单信息完整（权重5%）
+      # 断言7: 订单信息完整 (0分)
       # 验证出发时间格式、预订模式
-      add_assertion "订单信息完整", weight: 5 do
+      add_assertion "订单信息完整", weight: 0 do
         @charter_bookings.each do |booking|
           # 出发时间
           expect(booking.departure_time).to be_present,
@@ -163,7 +163,7 @@ module V251V300
         end
       end
       
-      # 断言8: 价格计算正确（权重5%）
+      # 断言8: 价格计算正确 (5分)
       add_assertion "价格计算正确", weight: 5 do
         @charter_bookings.each do |booking|
           # 使用服务重新计算价格

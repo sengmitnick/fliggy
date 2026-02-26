@@ -109,11 +109,13 @@
 
     <!-- 隐藏的input字段用于表单提交 -->
     <%= f.hidden_field :city, value: @current_city, data: { car_rental_tabs_target: 'cityInput' } %>
-    <%= f.hidden_field :pickup_location, value: '', data: { car_rental_tabs_target: 'pickupLocationInput' } %>
-    <%= f.hidden_field :return_city, value: '', data: { car_rental_tabs_target: 'returnCityInput' } %>
-    <%= f.hidden_field :return_location, value: '', data: { car_rental_tabs_target: 'returnLocationInput' } %>
-    <%= f.hidden_field :pickup_date, value: '', data: { car_rental_tabs_target: 'pickupDateInput' } %>
-    <%= f.hidden_field :return_date, value: '', data: { car_rental_tabs_target: 'returnDateInput' } %>
+    <%= f.hidden_field :pickup_location, value: @search_params&.dig(:pickup_location) || '', data: { car_rental_tabs_target: 'pickupLocationInput' } %>
+    <%= f.hidden_field :return_city, value: @search_params&.dig(:return_city) || '', data: { car_rental_tabs_target: 'returnCityInput' } %>
+    <%= f.hidden_field :return_location, value: @search_params&.dig(:return_location) || '', data: { car_rental_tabs_target: 'returnLocationInput' } %>
+    <%= f.hidden_field :pickup_date, value: @search_params&.dig(:pickup_date) || '', data: { car_rental_tabs_target: 'pickupDateInput' } %>
+    <%= f.hidden_field :return_date, value: @search_params&.dig(:return_date) || '', data: { car_rental_tabs_target: 'returnDateInput' } %>
+    <%= f.hidden_field :pickup_time, value: @search_params&.dig(:pickup_time) || '', data: { car_rental_tabs_target: 'pickupTimeInput' } %>
+    <%= f.hidden_field :return_time, value: @search_params&.dig(:return_time) || '', data: { car_rental_tabs_target: 'returnTimeInput' } %>
 
     <!-- 时间选择 -->
     <div class="flex justify-between items-center py-2 mb-4 border-b border-gray-50">
@@ -122,7 +124,7 @@
         data-action="click->car-rental-tabs#openPickupDateSelector"
         class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
         <div class="text-xs text-gray-400">取车时间</div>
-        <div class="text-xl font-bold" data-car-rental-tabs-target="pickupDateDisplay">1月10日 <span class="text-sm">13:55</span></div>
+        <div class="text-xl font-bold" data-car-rental-tabs-target="pickupDateDisplay">1月10日 <span class="text-sm">09:00</span></div>
       </button>
       <div 
         data-car-rental-tabs-target="durationDisplay"
@@ -132,7 +134,7 @@
         data-action="click->car-rental-tabs#openReturnDateSelector"
         class="text-center hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors">
         <div class="text-xs text-gray-400">还车时间</div>
-        <div class="text-xl font-bold" data-car-rental-tabs-target="returnDateDisplay">1月12日 <span class="text-sm">13:55</span></div>
+        <div class="text-xl font-bold" data-car-rental-tabs-target="returnDateDisplay">1月12日 <span class="text-sm">09:00</span></div>
       </button>
     </div>
 

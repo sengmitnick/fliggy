@@ -132,6 +132,7 @@ export default class extends Controller<HTMLElement> {
     if (!time) return
 
     this.selectedTime = time
+    console.log('[CarDatetimePicker] Time selected:', time)
 
     // Update UI to show selected state
     this.timeGridTarget.querySelectorAll('button').forEach(btn => {
@@ -152,6 +153,14 @@ export default class extends Controller<HTMLElement> {
     const [hours, minutes] = this.selectedTime.split(':').map(Number)
     const dateTime = new Date(this.selectedDate)
     dateTime.setHours(hours, minutes, 0, 0)
+    
+    console.log('[CarDatetimePicker] Confirming with:', {
+      selectedTime: this.selectedTime,
+      hours,
+      minutes,
+      dateTime: dateTime.toISOString(),
+      pickerType: this.pickerTypeValue
+    })
 
     // Dispatch event to car-rental-tabs controller
     const event = new CustomEvent('car-datetime-picker:datetime-selected', {

@@ -104,7 +104,7 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 订单已创建 (15分)
       add_assertion "订单已创建", weight: 15 do
         all_ticket_orders = TicketOrder
           .where(data_version: @data_version)
@@ -117,7 +117,7 @@ module V001V050
     
       return unless @ticket_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 订单属于张三（用户+联系电话）
+      # 断言2: 订单属于张三（用户+联系电话） (15分)
       add_assertion "订单属于张三（用户+联系电话）", weight: 15 do
         expected_user = User.find_by(email: 'demo@travel01.com', data_version: 0)
         expect(expected_user).not_to be_nil, "未找到用户张三（demo@travel01.com）"
@@ -129,10 +129,10 @@ module V001V050
           "订单用户错误。期望: 张三（#{expected_user.email}），实际: #{@ticket_order.user&.email || '无用户'}"
         
         expect(@ticket_order.contact_phone).to eq(expected_contact.phone),
-          "联系电话错误。期望: #{expected_contact.phone}（demo_user数据），实际: #{@ticket_order.contact_phone}"
+          "联系电话错误。期望: #{expected_contact.phone}, 实际: #{@ticket_order.contact_phone}"
       end
     
-      # 断言3: 景点正确
+      # 断言3: 景点正确（深圳欢乐港湾） (15分)
       add_assertion "景点正确", weight: 15 do
         ticket = @ticket_order.ticket
         attraction = ticket.attraction
@@ -141,7 +141,7 @@ module V001V050
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     
-      # 断言4: 票种正确（成人票）
+      # 断言4: 票种正确（成人票） (15分)
       add_assertion "票种正确（成人票）", weight: 15 do
         ticket = @ticket_order.ticket
       
@@ -149,19 +149,19 @@ module V001V050
           "票种错误。期望: 成人票(adult), 实际: #{ticket.ticket_type}"
       end
     
-      # 断言5: 游玩日期正确
+      # 断言5: 游玩日期正确（明天） (10分)
       add_assertion "游玩日期正确", weight: 10 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
-          "游玩日期错误。期望: #{@visit_date}, 实际: #{@ticket_order.visit_date}"
+          "游玩日期错误。期望: #{@visit_date}（明天）, 实际: #{@ticket_order.visit_date}"
       end
     
-      # 断言6: 数量正确（1张）
+      # 断言6: 数量正确（1张） (10分)
       add_assertion "数量正确（1张）", weight: 10 do
         expect(@ticket_order.quantity).to eq(@quantity),
           "数量错误。期望: #{@quantity}张, 实际: #{@ticket_order.quantity}张"
       end
     
-      # 断言7: 选择了最便宜的供应商（核心评分项）
+      # 断言7: 选择了最便宜的供应商 (20分) - 核心评分项
       add_assertion "选择了最便宜的供应商", weight: 20 do
         # 判断游玩日期是否为周末
         is_weekend = [0, 6].include?(@visit_date.wday)

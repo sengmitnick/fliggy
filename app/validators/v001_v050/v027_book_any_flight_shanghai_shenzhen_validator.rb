@@ -14,10 +14,11 @@ require_relative '../base_validator'
 #   ❌ 无价格时间要求，任意航班即可
 # 
 # 评分标准:
-#   - 订单已创建 (30分)
+#   - 订单已创建 (25分)
 #   - 出发城市正确（上海） (20分)
 #   - 目的城市正确（深圳） (20分)
-#   - 出发日期正确（明天） (30分)
+#   - 出发日期正确（明天） (25分)
+#   - 乘客信息正确（张三 110101199001011234） (10分)
 #
 module V001V050
   class V027BookAnyFlightShanghaiShenzhenValidator < BaseValidator
@@ -51,7 +52,8 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建 (25分)
+      add_assertion "订单已创建", weight: 25 do
         all_bookings = Booking
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -62,27 +64,30 @@ module V001V050
     
       return unless @booking
     
+      # 断言2: 出发城市正确（上海） (20分)
       add_assertion "出发城市正确（上海）", weight: 20 do
         expect(@booking.flight.departure_city).to eq(@origin),
           "出发城市错误。期望: #{@origin}, 实际: #{@booking.flight.departure_city}"
       end
     
+      # 断言3: 目的城市正确（深圳） (20分)
       add_assertion "目的城市正确（深圳）", weight: 20 do
         expect(@booking.flight.destination_city).to eq(@destination),
           "目的城市错误。期望: #{@destination}, 实际: #{@booking.flight.destination_city}"
       end
     
-      add_assertion "出发日期正确（明天）", weight: 20 do
+      # 断言4: 出发日期正确（明天） (25分)
+      add_assertion "出发日期正确（明天）", weight: 25 do
         expect(@booking.flight.flight_date).to eq(@target_date),
           "出发日期不正确。预期: #{@target_date}, 实际: #{@booking.flight.flight_date}"
       end
     
-      # 断言5: 乘客信息正确（来自demo_user）
+      # 断言5: 乘客信息正确（张三 110101199001011234） (10分)
       add_assertion "乘客信息正确（张三 110101199001011234）", weight: 10 do
         expect(@booking.passenger_name).to eq('张三'),
-          "乘客姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.passenger_name}"
+          "乘客姓名错误。期望: 张三, 实际: #{@booking.passenger_name}"
         expect(@booking.passenger_id_number).to eq('110101199001011234'),
-          "乘客身份证错误。期望: 110101199001011234（demo_user数据）, 实际: #{@booking.passenger_id_number}"
+          "乘客身份证错误。期望: 110101199001011234, 实际: #{@booking.passenger_id_number}"
       end
     end
   
