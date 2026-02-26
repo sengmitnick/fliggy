@@ -8,7 +8,7 @@ module V251V300
   class V268RedeemHighPriceProductWithMileageValidator < BaseValidator
     self.validator_id = 'v268_redeem_high_price_product_with_mileage_validator'
     self.task_id = '5cbb17c4-ca76-4bca-b9ef-e5b0253e6d97'
-    self.title = '给李四使用大量积分兑换高价商品'
+    self.title = '帮李四使用大量积分+现金兑换高价商品（京东E卡）'
     self.description = '帮李四使用大量积分+现金兑换高价商品（京东E卡）'
     self.timeout_seconds = 300
     
@@ -24,7 +24,7 @@ module V251V300
       
       # 查询李四的地址信息
       @lisi_address = user.addresses.find_by!(name: '李四', data_version: 0)
-      @expected_shipping_address = "#{@lisi_address.province}#{@lisi_address.city}#{@lisi_address.district}#{@lisi_address.detail}"
+      @expected_shipping_address = [@lisi_address.province, @lisi_address.city, @lisi_address.district, @lisi_address.detail].compact.join
       @expected_contact_name = @lisi_address.name
       @expected_contact_phone = @lisi_address.phone
       
@@ -133,7 +133,7 @@ module V251V300
       # 恢复地址信息
       if data['lisi_address_id']
         @lisi_address = Address.find(data['lisi_address_id'])
-        @expected_shipping_address = "#{@lisi_address.province}#{@lisi_address.city}#{@lisi_address.district}#{@lisi_address.detail}"
+        @expected_shipping_address = [@lisi_address.province, @lisi_address.city, @lisi_address.district, @lisi_address.detail].compact.join
         @expected_contact_name = @lisi_address.name
         @expected_contact_phone = @lisi_address.phone
       end

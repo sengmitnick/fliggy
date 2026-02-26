@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例25: 预订后天深圳到广州最快的高铁
+# 验证用例25: 给张三预订后天深圳到广州最快的高铁
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索后天深圳到广州的所有高铁，
@@ -24,8 +24,8 @@ module V001V050
   class V025BookFastestTrainShenzhenGuangzhouValidator < BaseValidator
     self.validator_id = 'v025_book_fastest_train_shenzhen_guangzhou_validator'
     self.task_id = 'd54d4ab5-970b-40be-b002-b855cdd9abf7'
-    self.title = '给张三订后天深圳到广州最快的高铁'
-    self.description = '在后天的车次中找到行程时间最短的高铁并完成预订'
+    self.title = '给张三预订后天深圳到广州最快的高铁'
+    self.description = '预订后天深圳到广州最快的高铁'
     self.timeout_seconds = 240
   
     def prepare

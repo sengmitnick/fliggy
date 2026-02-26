@@ -7,7 +7,7 @@ module V101V150
   class V124BookFlightAndHotelNearHongqiaoAirportValidator < BaseValidator
   self.validator_id = 'v124_book_flight_and_hotel_near_hongqiao_airport_validator'
   self.task_id = 'c5d6e7f8-9a0b-1c2d-3e4f-5a6b7c8d9e0f'
-  self.title = '给李四预订3天后上海→深圳航班+宝安机场附近酒店（当天入住2晚）'
+  self.title = '帮李四订3天后从上海飞深圳的航班，并在宝安国际机场附近订酒店（航班当天入住2晚）'
   self.description = '帮李四订3天后从上海飞深圳的航班，并在宝安国际机场附近订酒店（航班当天入住2晚）'
   self.timeout_seconds = 300
 

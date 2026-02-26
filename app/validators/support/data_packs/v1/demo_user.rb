@@ -82,7 +82,7 @@ if demo_user.persisted?
       {
         name: '李四',
         id_type: '身份证',
-        id_number: '110101199002022345',  # 1990年出生 - 成人（34岁）
+        id_number: '110101199001012345',  # 1990年出生 - 成人（34岁）
         phone: '13900139000',
         data_version: 0
       },

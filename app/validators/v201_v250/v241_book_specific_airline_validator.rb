@@ -18,7 +18,7 @@ module V201V250
   class V241BookSpecificAirlineValidator < BaseValidator
     self.validator_id = 'v241_book_specific_airline_validator'
     self.task_id = '7ff738ff-8f8f-8f0f-0f1f-9f2a3b4c5d6f'
-    self.title = '给张三预订东方航空航班（后天去上海）'
+    self.title = '张三后天要从北京去上海出差，公司有协议价，需要预订东方航空的航班'
     self.description = '张三后天要从北京去上海出差，公司有协议价，需要预订东方航空的航班'
     self.timeout_seconds = 300
     

@@ -21,7 +21,7 @@ module V201V250
   class V230BookPremiumWithinBudgetMaxValidator < BaseValidator
     self.validator_id = 'v230_book_premium_within_budget_max_validator'
     self.task_id = '6ff687ff-7f7f-7f9f-9f0f-8f1a2b3c4d5f'
-    self.title = '给张三预订预算内最高档组合（交通+酒店，≤2000元）'
+    self.title = '张三有固定预算2000元，想从广州去杭州出差，需要在预算内选择服务档次最高的组合，优先考虑酒店评分'
     self.description = '张三有固定预算2000元，想从广州去杭州出差，需要在预算内选择服务档次最高的组合，优先考虑酒店评分'
     self.timeout_seconds = 300
     

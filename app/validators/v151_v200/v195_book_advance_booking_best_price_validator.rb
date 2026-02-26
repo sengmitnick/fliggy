@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例195: 预订15天后出发的最优价格组合
+# 验证用例195: 给张三预订15天后出发的最优价格组合
 #
 # 任务描述:
 #   预订15天后出发的最优价格组合
@@ -18,8 +18,8 @@ module V151V200
   class V195BookAdvanceBookingBestPriceValidator < BaseValidator
     self.validator_id = 'v195_book_advance_booking_best_price_validator'
     self.task_id = '6f3a5eb6-ae1b-45cc-ae14-ecec290c6cba'
-    self.title = '给陈静预订15天后从北京到上海的最优价格组合'
-    self.description = '帮陈静预订15天后从北京到上海的最优价格组合（提前预订价格更优）'
+    self.title = '给张三预订15天后出发的最优价格组合'
+    self.description = '预订15天后出发的最优价格组合'
     self.timeout_seconds = 300
     
     def prepare

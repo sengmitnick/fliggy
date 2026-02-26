@@ -16,7 +16,7 @@ module V201V250
   class V239BookPetFriendlyHotelValidator < BaseValidator
     self.validator_id = 'v239_book_pet_friendly_hotel_validator'
     self.task_id = '5ff516ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '给张三预订后天成都宠物友好酒店（住2晚）'
+    self.title = '帮张三订后天在成都的酒店，要允许携带宠物的，住2晚'
     self.description = '帮张三订后天在成都的酒店，要允许携带宠物的，住2晚'
     self.timeout_seconds = 300
     

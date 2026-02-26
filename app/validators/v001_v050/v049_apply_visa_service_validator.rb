@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例49: 办理泰国旅游签证（1人，最快出签）
+# 验证用例49: 给张三办理泰国旅游签证（1人，最快出签）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索泰国旅游签证服务，
@@ -36,8 +36,8 @@ module V001V050
   class V049ApplyVisaServiceValidator < BaseValidator
     self.validator_id = 'v049_apply_visa_service_validator'
     self.task_id = '98c2a07d-46cc-4dba-ab27-fc783c9d3c09'
-    self.title = '给张三办理泰国旅游签证（最快出签）'
-    self.description = 'Agent 需要为张三办理泰国旅游签证，在多个服务商中选择办理时长最短的'
+    self.title = '给张三办理泰国旅游签证（1人，最快出签）'
+    self.description = '办理泰国旅游签证（1人，最快出签）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -194,7 +194,7 @@ module V001V050
       raise "未找到可用的签证产品" unless fastest_product
     
       # 5. 创建签证订单
-      full_address = "#{address.province}#{address.city}#{address.district}#{address.detail}"
+      full_address = [address.province, address.city, address.district, address.detail].compact.join
       visa_order = VisaOrder.create!(
         user_id: user.id,
         visa_product_id: fastest_product.id,

@@ -21,7 +21,7 @@ module V251V300
     self.validator_id = 'v283_book_business_travel_package_validator'
     self.task_id = '0c50dfc5-f31e-459a-b5bf-22f355a7cbce'
     self.title = '给张三预订商务出差套餐'
-    self.description = '给张三预订从深圳到上海的商务出差套餐（航班+酒店+接送机）'
+    self.description = '给张三预订商务出差套餐'
     self.timeout_seconds = 300
     
     def prepare

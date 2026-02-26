@@ -10,7 +10,7 @@ module V101V150
   class V147BookHotelPackageWithCityTransferValidator < BaseValidator
     self.validator_id = 'v147_book_hotel_package_with_city_transfer_validator'
     self.task_id = 'b7c8d9e0-1f2a-3b4c-5d6e-7f8a9b0c1d2e'
-    self.title = '给张三预订明天广州酒店套餐并预订机场往返接送（从北京出发，回北京，1晚）'
+    self.title = '帮张三预订明天广州酒店套餐，住1晚，并预订入住当天机场接机（从广州白云机场到酒店）+退房当天机场送机（从酒店到广州白云机场）服务'
     self.description = '帮张三预订明天广州酒店套餐，住1晚，并预订入住当天机场接机（从广州白云机场到酒店）+退房当天机场送机（从酒店到广州白云机场）服务'
     self.timeout_seconds = 300
 

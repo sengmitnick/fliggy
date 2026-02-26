@@ -17,7 +17,7 @@ module V251V300
     self.validator_id = 'v288_book_pet_friendly_hotel_validator'
     self.task_id = 'c98da49b-44d4-45bb-848a-ddedf749cf01'
     self.title = '给张三预订宠物友好酒店'
-    self.description = '给张三预订杭州宠物友好酒店'
+    self.description = '给张三预订宠物友好酒店'
     self.timeout_seconds = 300
     
     def prepare

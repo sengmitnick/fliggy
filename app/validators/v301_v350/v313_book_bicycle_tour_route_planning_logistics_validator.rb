@@ -17,7 +17,7 @@ module V301V350
   class V313BookBicycleTourRoutePlanningLogisticsValidator < BaseValidator
     self.validator_id = 'v313_book_bicycle_tour_route_planning_logistics_validator'
     self.task_id = '808b3eb8-c5d7-43e8-b730-d9d6c79ab5cb'
-    self.title = '给张三、李四和刘强预订西湖自行车环湖骑行（5天后，3人，含门票+自行车）'
+    self.title = '张三、李四和刘强想5天后去杭州西湖骑自行车环湖，需3人，要景区门票和自行车租赁（1辆双人车+1辆单人车）'
     self.description = '张三、李四和刘强想5天后去杭州西湖骑自行车环湖，需3人，要景区门票和自行车租赁（1辆双人车+1辆单人车）'
     self.timeout_seconds = 300
     

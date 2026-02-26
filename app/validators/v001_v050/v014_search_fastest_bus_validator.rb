@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订后天去深圳的大巴票（选最快的）
+# 验证用例: 给张三订后天杭州去深圳的大巴票（选最快的）
 # 
 # 任务描述:
 #   Agent 需要搜索后天杭州到深圳的所有大巴班次，
@@ -31,7 +31,7 @@ module V001V050
   class V014SearchFastestBusValidator < BaseValidator
     self.validator_id = 'v014_search_fastest_bus_validator'
     self.task_id = 'fc259aa8-f8e6-4d52-b9df-e72bf3076317'
-    self.title = '给张三订后天去深圳的大巴票（选最快的）'
+    self.title = '给张三订后天杭州去深圳的大巴票（选最快的）'
     self.description = '给张三搜索后天杭州到深圳的大巴班次，找出行程时间最短的并预订'
     self.timeout_seconds = 300
   
@@ -67,7 +67,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请搜索后天从#{@origin}到#{@destination}的所有大巴班次，找出行程时间最短的并预订（#{@passenger_count}人乘车）",
+        task: "给张三订后天杭州去深圳的大巴票（选最快的）",
         origin: @origin,
         destination: @destination,
         date: @target_date.to_s,
@@ -134,8 +134,9 @@ module V001V050
           data_version: 0
         )
       
-        # 找出最短时间
-        shortest_duration = all_buses.map(&:duration_minutes).compact.min
+        # 找出最短时间（排除负数和零值）
+        valid_durations = all_buses.map(&:duration_minutes).compact.select { |d| d > 0 }
+        shortest_duration = valid_durations.min
       
         # 实际预订的班次时间
         booked_duration = @order.bus_ticket.duration_minutes
@@ -200,8 +201,8 @@ module V001V050
         data_version: 0
       )
     
-      # 3. 找出行程时间最短的
-      buses_with_duration = all_buses.select { |bus| bus.respond_to?(:duration_minutes) && bus.duration_minutes }
+      # 3. 找出行程时间最短的（排除负数和零值）
+      buses_with_duration = all_buses.select { |bus| bus.respond_to?(:duration_minutes) && bus.duration_minutes && bus.duration_minutes > 0 }
     
       # 如果没有班次有时长，报错
       raise "没有找到符合条件的班次（#{@origin}→#{@destination}，日期#{@target_date}）" if buses_with_duration.empty?

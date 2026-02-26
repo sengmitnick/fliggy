@@ -9,7 +9,7 @@ module V151V200
   class V160BookCruiseAndAirportDropoffValidator < BaseValidator
     self.validator_id = 'v160_book_cruise_and_airport_dropoff_validator'
     self.task_id = 'd0e1f2a3-4b5c-6d7e-8f9a-0b1c2d3e4f5a'
-    self.title = '给张三预订明天上海出发日本邮轮6天5晚，并预订机场送机（送第7天从上海飞北京的航班）'
+    self.title = '给张三订明天上海出发的日本邮轮6天5晚，并订机场送机服务（送第7天从上海浦东飞北京的航班）'
     self.description = '给张三订明天上海出发的日本邮轮6天5晚，并订机场送机服务（送第7天从上海浦东飞北京的航班）'
     self.timeout_seconds = 300
 

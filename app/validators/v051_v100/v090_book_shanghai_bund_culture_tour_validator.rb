@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例90: 预订上海外滩历史文化讲解（评分最高）
+# 验证用例90: 给张三预订上海外滩历史文化讲解（评分最高）
 module V051V100
   class V090BookShanghaiBundCultureTourValidator < BaseValidator
     self.validator_id = 'v090_book_shanghai_bund_culture_tour_validator'
     self.task_id = 'b0ae1fdc-ef74-465b-ade9-04b581d0eb17'
-    self.title = '给李四预订3天后上海外滩历史文化讲解（评分最高的特级导游）'
-    self.description = '帮李四预订3天后的上海外滩历史文化讲解，要求评分最高的特级导游'
+    self.title = '给张三预订上海外滩历史文化讲解（评分最高）'
+    self.description = '预订上海外滩历史文化讲解（评分最高）'
     self.timeout_seconds = 240
   
     def prepare

@@ -6,7 +6,7 @@ module V101V150
   class V132BookHighspeedTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v132_book_highspeed_train_and_hotel_validator'
     self.task_id = 'b5c6d7e8-9f0a-1b2c-3d4e-5f6a7b8c9d0e'
-    self.title = '给张三预订后天上海到杭州高铁+酒店连住2晚（二等座）'
+    self.title = '帮张三订后天从上海到杭州的高铁（二等座），同时订杭州的酒店连住2晚'
     self.description = '帮张三订后天从上海到杭州的高铁（二等座），同时订杭州的酒店连住2晚'
     self.timeout_seconds = 300
 

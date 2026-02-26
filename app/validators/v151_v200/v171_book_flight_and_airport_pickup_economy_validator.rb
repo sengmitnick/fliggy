@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例171: 订购机票后预订接机服务（经济5座）
+# 验证用例171: 给张三订购机票后预订接机服务（经济5座）
 #
 # 任务描述:
 #   用户订了北京到上海的机票，到达浦东国际机场T1航站楼，需要接机到外滩酒店。
@@ -37,8 +37,8 @@ module V151V200
   class V171BookFlightAndAirportPickupEconomyValidator < BaseValidator
     self.validator_id = 'v171_book_flight_and_airport_pickup_economy_validator'
     self.task_id = 'a8f3d2e1-9b5c-4a7d-8e6f-1c2d3e4f5a6b'
-    self.title = '给张三预订后天北京到上海的机票，并预订浦东机场接机到外滩（经济5座）'
-    self.description = '帮张三订后天从北京到上海的航班，到达浦东机场T1后接机到外滩，车子选经济5座'
+    self.title = '给张三订购机票后预订接机服务（经济5座）'
+    self.description = '订购机票后预订接机服务（经济5座）'
     self.timeout_seconds = 300
   
     def prepare

@@ -18,7 +18,7 @@ module V201V250
   class V246BookFlightWithBaggageValidator < BaseValidator
     self.validator_id = 'v246_book_flight_with_baggage_validator'
     self.task_id = '1ff17cff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '给张三预订含托运行李的机票（3天后去成都）'
+    self.title = '张三3天后要从上海去成都出差，有大件行李需要托运，必须预订包含托运行李额度的机票'
     self.description = '张三3天后要从上海去成都出差，有大件行李需要托运，必须预订包含托运行李额度的机票'
     self.timeout_seconds = 300
     

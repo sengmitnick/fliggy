@@ -22,7 +22,7 @@ module V201V250
   class V228BookCheapestTotalPriceOptimizeValidator < BaseValidator
     self.validator_id = 'v228_book_cheapest_total_price_optimize_validator'
     self.task_id = 'b2c3d4e5-6f7a-8b9c-0d1e-2f3a4b5c6d7e'
-    self.title = '给张三预订总价最低组合（3天后往返交通+酒店住2晚）'
+    self.title = '张三3天后要从上海去北京出差2天，需要预订往返交通（可以是航班或火车）和酒店住2晚，希望总价最低'
     self.description = '张三3天后要从上海去北京出差2天，需要预订往返交通（可以是航班或火车）和酒店住2晚，希望总价最低'
     self.timeout_seconds = 300
     

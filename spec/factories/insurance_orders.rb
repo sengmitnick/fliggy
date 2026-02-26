@@ -68,7 +68,7 @@ FactoryBot.define do
       insured_persons do
         [
           { name: '张三', id_number: '110101199001011234', phone: '13800138000' },
-          { name: '李四', id_number: '110101199002022345', phone: '13800138001' },
+          { name: '李四', id_number: '110101199001012345', phone: '13800138001' },
           { name: '王五', id_number: '110101199003033456', phone: '13800138002' }
         ]
       end

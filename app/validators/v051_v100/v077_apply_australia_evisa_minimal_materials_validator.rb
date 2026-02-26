@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例77: 办理澳大利亚电子签证（1人，材料最少，邮寄方式）
+# 验证用例77: 给张三办理澳大利亚电子签证（1人，材料最少，邮寄方式）
 # 
 # 任务描述:
 #   Agent 需要办理澳大利亚电子签证，
@@ -36,8 +36,8 @@ module V051V100
   class V077ApplyAustraliaEvisaMinimalMaterialsValidator < BaseValidator
     self.validator_id = 'v077_apply_australia_evisa_minimal_materials_validator'
     self.task_id = '0c821879-db54-42b8-9526-3336bb7af223'
-    self.title = '给王芳办理澳大利亚电子签证（材料最少，邮寄方式）'
-    self.description = '办理澳大利亚电子签证，选择所需材料最少的产品，使用邮寄方式'
+    self.title = '给张三办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
+    self.description = '办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -212,7 +212,7 @@ module V051V100
       raise "未找到可用的签证产品" unless minimal_product
     
       # 5. 拼接完整地址
-      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+      full_address = [contact_address.province, contact_address.city, contact_address.district, contact_address.detail].compact.join
     
       # 6. 创建签证订单
       visa_order = VisaOrder.create!(

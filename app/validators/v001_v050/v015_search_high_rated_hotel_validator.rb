@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）
+# 验证用例: 给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚，2人）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索北京的酒店，
@@ -38,8 +38,8 @@ module V001V050
   class V015SearchHighRatedHotelValidator < BaseValidator
     self.validator_id = 'v015_search_high_rated_hotel_validator'
     self.task_id = 'fc7fa502-3236-4832-a95c-a72859407f3d'
-    self.title = '给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚）'
-    self.description = '给张三搜索后天入住北京的4星级及以上酒店，找到评分最高的并预订（4星级及以上，住2晚）'
+    self.title = '给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚，2人）'
+    self.description = '给张三搜索后天入住北京的4星级及以上酒店，找到评分最高的并预订（4星级及以上，住2晚，2人）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -64,7 +64,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订后天入住#{@city}的高档酒店（4星级及以上，评分最高，#{@adults_count}人入住#{@rooms_count}间）",
+        task: "给张三订后天入住北京的酒店（选评分最高的4星级及以上，住2晚，2人）",
         city: @city,
         min_star_level: @min_star_level,
         check_in_date: @check_in_date.to_s,

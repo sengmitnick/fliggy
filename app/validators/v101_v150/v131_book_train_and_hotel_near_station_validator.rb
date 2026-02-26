@@ -6,7 +6,7 @@ module V101V150
   class V131BookTrainAndHotelNearStationValidator < BaseValidator
     self.validator_id = 'v131_book_train_and_hotel_near_station_validator'
     self.task_id = 'a4b5c6d7-8e9f-0a1b-2c3d-4e5f6a7b8c9d'
-    self.title = '给张三预订明天北京到上海火车票+火车站附近酒店（二等座）'
+    self.title = '帮张三订明天从北京到上海的火车票（二等座），同时订上海火车站附近的酒店住1晚'
     self.description = '帮张三订明天从北京到上海的火车票（二等座），同时订上海火车站附近的酒店住1晚'
     self.timeout_seconds = 300
 

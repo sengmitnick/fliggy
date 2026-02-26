@@ -17,7 +17,7 @@ module V201V250
   class V207BookShortHaulFlightUnder2hValidator < BaseValidator
     self.validator_id = 'v207_book_short_haul_flight_under_2h_validator'
     self.task_id = '6f7798f1-7f7f-4f0d-df0f-1f3a4b5c6d7f'
-    self.title = '给张三预订后天短途航班（飞行时长≤2小时，深圳→上海）'
+    self.title = '张三需要预订后天从深圳到上海的航班，要求飞行时长≤2小时'
     self.description = '张三需要预订后天从深圳到上海的航班，要求飞行时长≤2小时'
     self.timeout_seconds = 300
     

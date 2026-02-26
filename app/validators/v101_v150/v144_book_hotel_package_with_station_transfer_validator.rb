@@ -10,7 +10,7 @@ module V101V150
   class V144BookHotelPackageWithStationTransferValidator < BaseValidator
     self.validator_id = 'v144_book_hotel_package_with_station_transfer_validator'
     self.task_id = 'e4f5a6b7-8c9d-0e1f-2a3b-4c5d6e7f8a9b'
-    self.title = '给张三预订明天酒店套餐后预订火车站接站服务（北京1晚）'
+    self.title = '帮张三预订明天北京酒店套餐，住1晚，并预订火车站接站服务'
     self.description = '帮张三预订明天北京酒店套餐，住1晚，并预订火车站接站服务'
     self.timeout_seconds = 300
 

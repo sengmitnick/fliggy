@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例82: 购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）
+# 验证用例82: 给张三购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）
 # 
 # 任务描述:
 #   Agent 需要为哈尔滨滑雪之旅购买运动保险，
@@ -37,8 +37,8 @@ module V051V100
   class V082BuySkiingSportsInsuranceValidator < BaseValidator
     self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
     self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
-    self.title = '给张三购买滑雪运动保险（哈尔滨15天后出行，保障3天，运动医疗保额最高）'
-    self.description = '帮张三买个滑雪保险，15天后去哈尔滨滑雪，保障3天，要选运动医疗保额最高的那个'
+    self.title = '给张三购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
+    self.description = '购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

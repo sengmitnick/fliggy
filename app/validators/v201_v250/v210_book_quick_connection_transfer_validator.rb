@@ -19,7 +19,7 @@ module V201V250
   class V210BookQuickConnectionTransferValidator < BaseValidator
     self.validator_id = 'v210_book_quick_connection_transfer_validator'
     self.task_id = '9fa021f4-0f0f-4f3f-ff3f-4f6a7b8c9d0f'
-    self.title = '给张三预订明天快速中转（深圳→北京→天津，航班转火车，中转时间≤3小时）'
+    self.title = '张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时'
     self.description = '张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时'
     self.timeout_seconds = 300
     

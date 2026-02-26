@@ -20,7 +20,7 @@ module V251V300
   class V265BookFamilyTourWithFamilyInsuranceValidator < BaseValidator
     self.validator_id = 'v265_book_family_tour_with_family_insurance_validator'
     self.task_id = '89326e33-0407-4028-8d62-82ea40ebd791'
-    self.title = '给张三、王芳和小明预订4天后三亚家庭游（2大1小）+全家境内保险套餐'
+    self.title = '帮张三、王芳和小明预订4天后三亚家庭跟团游（2成人+1儿童，共3人），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）'
     self.description = '帮张三、王芳和小明预订4天后三亚家庭跟团游（2成人+1儿童，共3人），并购买适合家庭出行的境内保险套餐（3人投保，保险类型包含亲子游或家庭保障场景）'
     self.timeout_seconds = 300
     

@@ -18,7 +18,7 @@ module V201V250
   class V202BookMorningFlightTimeWindowValidator < BaseValidator
     self.validator_id = 'v202_book_morning_flight_time_window_validator'
     self.task_id = 'eab7dcf4-8b17-4de8-9f8b-98eaa110ac1f'
-    self.title = '给张三预订明天上午航班（时间窗口9:00-12:00，深圳→北京）'
+    self.title = '张三需要预订明天9:00-12:00从深圳到北京的航班，适合商务出行'
     self.description = '张三需要预订明天9:00-12:00从深圳到北京的航班，适合商务出行'
     self.timeout_seconds = 300
     

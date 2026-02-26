@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例26: 预订明天广州到上海最便宜的高铁（二等座）
+# 验证用例26: 给张三预订明天广州到上海最便宜的高铁（二等座）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天广州到上海的所有高铁，
@@ -25,8 +25,8 @@ module V001V050
   class V026BookCheapestTrainGuangzhouShanghaiValidator < BaseValidator
     self.validator_id = 'v026_book_cheapest_train_guangzhou_shanghai_validator'
     self.task_id = '59234a60-b49c-4058-9813-7383c55efeb4'
-    self.title = '给张三订明天广州到上海最便宜的高铁（二等座）'
-    self.description = '在明天的车次中找到二等座价格最低的高铁并完成预订'
+    self.title = '给张三预订明天广州到上海最便宜的高铁（二等座）'
+    self.description = '预订明天广州到上海最便宜的高铁（二等座）'
     self.timeout_seconds = 240
   
     def prepare

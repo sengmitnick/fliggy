@@ -7,7 +7,7 @@ module V101V150
   class V130BookEarlyFlightAndBusinessHotelValidator < BaseValidator
   self.validator_id = 'v130_book_early_flight_and_business_hotel_validator'
   self.task_id = 'b27293c5-2a36-4bc9-aac4-b858aae91ac8'
-  self.title = '给刘强预订明天早班航班+商务酒店（9点前起飞，3星级以上，住4晚）'
+  self.title = '帮刘强订明天早上9点前从北京到上海的航班，并预订上海市区3星级以上商务酒店（明天入住4晚）'
   self.description = '帮刘强订明天早上9点前从北京到上海的航班，并预订上海市区3星级以上商务酒店（明天入住4晚）'
   self.timeout_seconds = 300
 

@@ -24,7 +24,7 @@ module V251V300
   class V266BookExtremeSportWithHighRiskInsuranceValidator < BaseValidator
     self.validator_id = 'v266_book_extreme_sport_with_high_risk_insurance_validator'
     self.task_id = '97bbddca-e45e-43e7-814c-88eaf6396ea0'
-    self.title = '给张三预订5天后华山攀岩活动（门票+活动+保险）'
+    self.title = '帮张三预订5天后去华山的攀岩活动，需要购买华山景区门票、预订攀岩活动（攀岩教学+安全装备+教练陪同）、购买包含运动伤害保障的专项保险，确保三个订单的时间一致，出行人信息一致'
     self.description = '帮张三预订5天后去华山的攀岩活动，需要购买华山景区门票、预订攀岩活动（攀岩教学+安全装备+教练陪同）、购买包含运动伤害保障的专项保险，确保三个订单的时间一致，出行人信息一致'
     self.timeout_seconds = 300
     

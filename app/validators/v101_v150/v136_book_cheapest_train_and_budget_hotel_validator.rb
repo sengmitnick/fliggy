@@ -6,7 +6,7 @@ module V101V150
   class V136BookCheapestTrainAndBudgetHotelValidator < BaseValidator
     self.validator_id = 'v136_book_cheapest_train_and_budget_hotel_validator'
     self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e2f'
-    self.title = '给张三预订后天最便宜火车票+经济型酒店（北京→天津，总价最低，二等座）'
+    self.title = '帮张三订后天北京到天津的火车票（二等座），同时订天津经济型酒店1晚，要求火车票+酒店总价最低'
     self.description = '帮张三订后天北京到天津的火车票（二等座），同时订天津经济型酒店1晚，要求火车票+酒店总价最低'
     self.timeout_seconds = 300
 

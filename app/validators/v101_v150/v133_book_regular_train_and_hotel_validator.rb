@@ -6,7 +6,7 @@ module V101V150
   class V133BookRegularTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v133_book_regular_train_and_hotel_validator'
     self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e1f'
-    self.title = '给张三预订明天北京到天津普通列车+酒店1晚（C/Z字头，二等座）'
+    self.title = '帮张三订明天从北京到天津的普通列车（C字头或Z字头，二等座），同时订天津的酒店住1晚'
     self.description = '帮张三订明天从北京到天津的普通列车（C字头或Z字头，二等座），同时订天津的酒店住1晚'
     self.timeout_seconds = 300
 

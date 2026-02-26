@@ -38,7 +38,7 @@ module V051V100
     self.validator_id = 'v070_book_beijing_happy_valley_family_tickets_validator'
     self.task_id = 'c6b1fc3d-40ad-47b8-a6db-adf4d8cb6210'
     self.title = '张三一家预订明天北京欢乐谷门票（2成人+1儿童）'
-    self.description = '为张三一家（张三、王芳、小明）预订北京欢乐谷门票，通过2个订单实现'
+    self.description = '张三一家预订明天北京欢乐谷门票（2成人+1儿童）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

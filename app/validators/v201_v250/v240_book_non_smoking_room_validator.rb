@@ -17,7 +17,7 @@ module V201V250
   class V240BookNonSmokingRoomValidator < BaseValidator
     self.validator_id = 'v240_book_non_smoking_room_validator'
     self.task_id = '6ff627ff-7f7f-7f9f-9f0f-8f1a2b3c4d5f'
-    self.title = '给张三预订明天杭州无烟房（住1晚）'
+    self.title = '帮张三订明天在杭州的酒店，要无烟房，住1晚'
     self.description = '帮张三订明天在杭州的酒店，要无烟房，住1晚'
     self.timeout_seconds = 300
     

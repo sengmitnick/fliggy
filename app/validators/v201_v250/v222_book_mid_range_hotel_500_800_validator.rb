@@ -17,7 +17,7 @@ module V201V250
   class V222BookMidRangeHotel500800Validator < BaseValidator
     self.validator_id = 'v222_book_mid_range_hotel_500_800_validator'
     self.task_id = '9fe910fd-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '给张三预订中档酒店（500-800元/晚）'
+    self.title = '张三打算2天后去杭州出差，想选一家中档舒适的酒店，预算是每晚500-800元'
     self.description = '张三打算2天后去杭州出差，想选一家中档舒适的酒店，预算是每晚500-800元'
     self.timeout_seconds = 300
     

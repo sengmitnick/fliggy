@@ -162,6 +162,7 @@
         <% if params[:orderable_type] == 'InternetWifi' %>
           <!-- WiFi只显示自取点信息 -->
           <% if params[:pickup_location_id].present? %>
+            <%= f.hidden_field :delivery_method, value: 'pickup' %>
             <div class="mb-4">
               <div class="flex justify-between items-center">
                 <label class="font-bold text-base">配送方式</label>
@@ -243,6 +244,7 @@
           <% end %>
         <% else %>
           <!-- 电话卡：只有邮寄配送方式 -->
+          <%= f.hidden_field :delivery_method, value: 'mail' %>
           <div class="mb-4">
             <div class="flex justify-between items-center">
               <label class="font-bold text-base">配送方式</label>
@@ -292,6 +294,12 @@
               <%= delivery.hidden_field :name, value: selected_address.name, data: { internet_order_form_target: "addressNameField" } %>
               <%= delivery.hidden_field :phone, value: selected_address.phone, data: { internet_order_form_target: "addressPhoneField" } %>
               <%= delivery.hidden_field :full_address, value: selected_address.full_address, data: { internet_order_form_target: "addressFullAddressField" } %>
+            <% end %>
+            
+            <!-- Hidden contact info fields (for validator v008 compatibility) -->
+            <%= f.fields_for :contact_info do |contact| %>
+              <%= contact.hidden_field :name, value: selected_address.name %>
+              <%= contact.hidden_field :phone, value: selected_address.phone %>
             <% end %>
             
           <% else %>

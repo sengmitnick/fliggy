@@ -20,7 +20,7 @@ module V251V300
     self.validator_id = 'v289_book_pregnancy_travel_package_validator'
     self.task_id = 'd4278542-8379-49b9-8095-63846c0c97ab'
     self.title = '给王芳预订孕妇出行套餐'
-    self.description = '给王芳（孕妇）预订从北京到三亚的孕妇友好的舒适座位+医疗保障服务'
+    self.description = '给王芳预订孕妇出行套餐'
     self.timeout_seconds = 300
     
     def prepare

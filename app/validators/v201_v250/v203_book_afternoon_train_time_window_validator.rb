@@ -18,7 +18,7 @@ module V201V250
   class V203BookAfternoonTrainTimeWindowValidator < BaseValidator
     self.validator_id = 'v203_book_afternoon_train_time_window_validator'
     self.task_id = '0b2354d7-2e2f-4c89-bc6e-7e9f8a0b1c2d'
-    self.title = '给张三预订后天下午高铁（时间窗口14:00-17:00，上海→杭州）'
+    self.title = '张三需要预订后天14:00-17:00从上海到杭州的高铁，适合下午茶时段出行'
     self.description = '张三需要预订后天14:00-17:00从上海到杭州的高铁，适合下午茶时段出行'
     self.timeout_seconds = 300
     

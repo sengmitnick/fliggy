@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例92: 预订苏州园林讲解（粉丝数最多的导游）
+# 验证用例92: 给张三预订苏州园林讲解（粉丝数最多的导游）
 module V051V100
   class V092BookSuzhouGardenTourValidator < BaseValidator
     self.validator_id = 'v092_book_suzhou_garden_tour_validator'
     self.task_id = 'aca21330-8a40-44bc-873b-4f93472a424d'
-    self.title = '给张三和李四预订苏州园林讲解（粉丝数最多的导游）'
-    self.description = '给张三、李四这10天后的苏州园林讲解（2位成人），选择粉丝数最多的导游'
+    self.title = '给张三预订苏州园林讲解（粉丝数最多的导游）'
+    self.description = '预订苏州园林讲解（粉丝数最多的导游）'
     self.timeout_seconds = 240
   
     def prepare

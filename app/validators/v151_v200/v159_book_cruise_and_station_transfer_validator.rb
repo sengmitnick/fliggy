@@ -9,7 +9,7 @@ module V151V200
   class V159BookCruiseAndStationTransferValidator < BaseValidator
     self.validator_id = 'v159_book_cruise_and_station_transfer_validator'
     self.task_id = 'c9d0e1f2-3a4b-5c6d-7e8f-9a0b1c2d3e4f'
-    self.title = '给张三预订明天上海出发日本邮轮6天5晚，并预订火车站接站（接今天从北京来的火车）'
+    self.title = '给张三预订明天上海出发的日本邮轮航线，并预订火车站接站服务（接今天从北京到上海虹桥站的火车）'
     self.description = '预订明天上海出发的日本邮轮航线，并预订火车站接站服务（接今天从北京到上海虹桥站的火车）'
     self.timeout_seconds = 300
 

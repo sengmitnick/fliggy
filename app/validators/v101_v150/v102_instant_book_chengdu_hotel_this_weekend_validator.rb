@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例102: 立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）
+# 验证用例102: 给张三立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索成都地区的酒店套餐，
@@ -40,8 +40,8 @@ module V101V150
   class V102InstantBookChengduHotelThisWeekendValidator < BaseValidator
     self.validator_id = 'v102_instant_book_chengdu_hotel_this_weekend_validator'
     self.task_id = 'e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b'
-    self.title = '给张三立即预约成都酒店套餐（下周六入住2晚，豪华套餐）'
-    self.description = '帮张三预约成都的2晚酒店套餐，下周六入住，选豪华套餐（包含早餐+晚餐的那种），立即预约模式'
+    self.title = '给张三立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）'
+    self.description = '立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

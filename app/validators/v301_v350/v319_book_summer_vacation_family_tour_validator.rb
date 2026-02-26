@@ -21,7 +21,7 @@ module V301V350
   class V319BookSummerVacationFamilyTourValidator < BaseValidator
     self.validator_id = 'v319_book_summer_vacation_family_tour_validator'
     self.task_id = "41296cec-e182-44c9-ac20-c2180e92c487"
-    self.title = "预订15天后北京到三亚往返机票+三亚亚龙湾亲子度假酒店亲子家庭房（5晚，1间房，2大1小）"
+    self.title = '给张三用户需要预订15天后北京到三亚的往返机票，以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，2成人+1儿童，酒店入住日期与航班衔接）'
     self.description = "用户需要预订15天后北京到三亚的往返机票，以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，2成人+1儿童，酒店入住日期与航班衔接）"
     self.timeout_seconds = 180
 

@@ -9,7 +9,7 @@ module V151V200
   class V151BookBusAndAirportDropoffValidator < BaseValidator
     self.validator_id = 'v151_book_bus_and_airport_dropoff_validator'
     self.task_id = 'f1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b6c'
-    self.title = '给张三预订明天广州到深圳下午汽车票，并预订深圳机场送机（搭乘后天深圳飞杭州的航班）'
+    self.title = '给张三订明天下午广州到深圳的汽车票，到达后订深圳机场送机服务（送张三去机场搭乘后天深圳飞杭州的航班）'
     self.description = '给张三订明天下午广州到深圳的汽车票，到达后订深圳机场送机服务（送张三去机场搭乘后天深圳飞杭州的航班）'
     self.timeout_seconds = 300
 

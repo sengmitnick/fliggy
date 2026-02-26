@@ -19,7 +19,7 @@ module V201V250
   class V221BookWeekTripBudget3000Validator < BaseValidator
     self.validator_id = 'v221_book_week_trip_budget_3000_validator'
     self.task_id = '8fd809fc-9f9f-9f1f-1f2f-0f3a4b5c6d7f'
-    self.title = '给张三预订7天自由行（往返交通+酒店，总预算≤3000元）'
+    self.title = '张三打算2天后从广州到成都玩7天，需要预订往返交通和酒店住宿，总预算控制在3000元以内'
     self.description = '张三打算2天后从广州到成都玩7天，需要预订往返交通和酒店住宿，总预算控制在3000元以内'
     self.timeout_seconds = 300
     

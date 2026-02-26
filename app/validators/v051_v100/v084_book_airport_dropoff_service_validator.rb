@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例84: 预订浦东机场送机服务（上海→北京航班，舒适5座）
+# 验证用例84: 给张三预订浦东机场送机服务（上海→北京航班，舒适5座）
 # 
 # 任务描述:
 #   用户明天从上海飞往北京，需要从市区送到浦东机场。
@@ -27,8 +27,8 @@ module V051V100
   class V084BookAirportDropoffServiceValidator < BaseValidator
     self.validator_id = 'v084_book_airport_dropoff_service_validator'
     self.task_id = '31608ddd-05b6-48a6-8e8e-b9a0cf0759b4'
-    self.title = '给张三预订明天浦东机场送机服务（上海→北京航班，舒适5座，最便宜）'
-    self.description = '帮张三预订明天送机服务，他从上海飞北京，要从市区送到浦东机场，选舒适5座最便宜的'
+    self.title = '给张三预订浦东机场送机服务（上海→北京航班，舒适5座）'
+    self.description = '预订浦东机场送机服务（上海→北京航班，舒适5座）'
     self.timeout_seconds = 240
   
     def prepare

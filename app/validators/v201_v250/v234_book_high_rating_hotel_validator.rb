@@ -17,7 +17,7 @@ module V201V250
   class V234BookHighRatingHotelValidator < BaseValidator
     self.validator_id = 'v234_book_high_rating_hotel_validator'
     self.task_id = '0ff0c1ff-1f1f-1f3f-3f4f-2f5a6b7c8d9f'
-    self.title = '给张三预订高评分酒店（3天后入住，评分≥4.5星）'
+    self.title = '张三3天后要去杭州出差，追求品质体验，需要预订评分48.5星以上的高评分酒店住1晚'
     self.description = '张三3天后要去杭州出差，追求品质体验，需要预订评分48.5星以上的高评分酒店住1晚'
     self.timeout_seconds = 300
     

@@ -58,8 +58,8 @@ module V051V100
   class V053BuyDataPlanValidator < BaseValidator
     self.validator_id = 'v053_buy_data_plan_validator'
     self.task_id = '22f7ecf1-8018-4a3f-8c00-f6fce7bee108'
-    self.title = '给张三买日本天包漫游流量（选最便宜的）'
-    self.description = '张三要去日本旅游，通过联系人选择器选择张三，帮他买天包漫游流量（运营商漫游包），选最便宜的套餐'
+    self.title = '给张三购买日本天包漫游流量（选最便宜的）'
+    self.description = '给张三购买日本天包漫游流量（选最便宜的）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

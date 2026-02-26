@@ -8,7 +8,7 @@ module V251V300
   class V271RedeemMultipleQuantityValidator < BaseValidator
     self.validator_id = 'v271_redeem_multiple_quantity_validator'
     self.task_id = '6d2fd384-9e74-4e8b-a0fc-cb3fcf871fdd'
-    self.title = '给张三兑换3个不同的低价商品'
+    self.title = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）'
     self.description = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）'
     self.timeout_seconds = 300
     

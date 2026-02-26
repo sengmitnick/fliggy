@@ -8,7 +8,7 @@ module V251V300
   class V276RedeemLuxuryProductValidator < BaseValidator
     self.validator_id = 'v276_redeem_luxury_product_validator'
     self.task_id = '5c26767f-392a-4da8-a10f-cb8b2b1c39aa'
-    self.title = '给张三兑换茅台飞天（高端商品）'
+    self.title = '帮张三使用大量积分兑换高端奢侈品（茅台飞天53度 500ml）'
     self.description = '帮张三使用大量积分兑换高端奢侈品（茅台飞天53度 500ml）'
     self.timeout_seconds = 300
     

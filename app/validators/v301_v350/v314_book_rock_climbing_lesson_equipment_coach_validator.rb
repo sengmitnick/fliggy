@@ -19,7 +19,7 @@ module V301V350
   class V314BookRockClimbingLessonEquipmentCoachValidator < BaseValidator
     self.validator_id = 'v314_book_rock_climbing_lesson_equipment_coach_validator'
     self.task_id = '58118f22-f2ac-492b-bf85-a73a4786c8aa'
-    self.title = '给刘强和陈静预订华山攀岩（6天后，2人，含教学+装备+教练+保险）'
+    self.title = '给张三刘强和陈静想6天后去华山攀岩，需2人，要专业教学、安全装备、教练陪同和保险保障'
     self.description = '刘强和陈静想6天后去华山攀岩，需2人，要专业教学、安全装备、教练陪同和保险保障'
     self.timeout_seconds = 300
     

@@ -17,7 +17,7 @@ module V201V250
   class V209BookOvernightTrainSleeperValidator < BaseValidator
     self.validator_id = 'v209_book_overnight_train_sleeper_validator'
     self.task_id = '8f9910f3-9f9f-4f2f-ff2f-3f5a6b7c8d9f'
-    self.title = '给张三预订后天夜间卧铺火车（时间窗口22:00-次日08:00，北京→西安）'
+    self.title = '张三需要预订后天从北京到西安的夜间卧铺火车，出发时间在22:00-次日08:00之间'
     self.description = '张三需要预订后天从北京到西安的夜间卧铺火车，出发时间在22:00-次日08:00之间'
     self.timeout_seconds = 300
     

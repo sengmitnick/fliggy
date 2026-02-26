@@ -16,7 +16,7 @@ module V251V300
     self.validator_id = 'v252_book_shanghai_featured_four_chartered_tour_validator'
     self.task_id = 'a692ca4a-a4a8-4060-b7d5-589e7c07a2b2'
     self.title = '给王芳等12人预订上海精华四景游包车（7天后出发，商务巴士，8小时）'
-    self.description = '帮王芳等12人订7天后的上海精华四景包车，选商务巴士，8小时服务（一日游）'
+    self.description = '给王芳等12人预订上海精华四景游包车（7天后出发，商务巴士，8小时）'
     self.timeout_seconds = 240
   
     def prepare

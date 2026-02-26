@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例196: 预订航班+机场3公里内酒店
+# 验证用例196: 给张三预订航班+机场3公里内酒店
 #
 # 任务描述:
 #   预订航班+机场3公里内酒店（便于转机）
@@ -18,8 +18,8 @@ module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
     self.task_id = '98182723-1c20-486b-b2c2-ba4d2e48e1df'
-    self.title = '给周敏预订明天北京到上海的航班+机场3公里内酒店'
-    self.description = '帮周敏订明天从北京到上海的航班，并预订机场3公里内的酒店（便于转机）'
+    self.title = '给张三预订航班+机场3公里内酒店'
+    self.description = '预订航班+机场3公里内酒店'
     self.timeout_seconds = 300
     
     def prepare

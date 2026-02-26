@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例34: 租赁明天深圳最便宜的车（租车1天，预算≤100元/天）
+# 验证用例34: 给张三租赁明天深圳最便宜的车（租车1天，预算≤100元/天）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳的租车服务，
@@ -25,8 +25,8 @@ module V001V050
   class V034RentCheapestCarShenzhenValidator < BaseValidator
     self.validator_id = 'v034_rent_cheapest_car_shenzhen_validator'
     self.task_id = '58fc94c1-6e60-45d2-8aea-c0fa3cc69ff6'
-    self.title = '帮张三租明天深圳最便宜的车（预算≤100元/天）'
-    self.description = '搜索深圳的租车服务，找到价格≤100元/天的车辆并租赁1天'
+    self.title = '给张三租赁明天深圳最便宜的车（租车1天，预算≤100元/天）'
+    self.description = '租赁明天深圳最便宜的车（租车1天，预算≤100元/天）'
     self.timeout_seconds = 240
   
     def prepare
@@ -116,7 +116,7 @@ module V001V050
     
       total_price = target_car.price_per_day * @rental_days
       pickup_datetime = @pickup_date.to_time.in_time_zone.change(hour: 9, min: 0)
-      return_datetime = (@pickup_date + (@rental_days - 1).days).to_time.in_time_zone.change(hour: 18, min: 0)
+      return_datetime = (@pickup_date + @rental_days.days).to_time.in_time_zone.change(hour: 9, min: 0)
     
       CarOrder.create!(
         car_id: target_car.id,

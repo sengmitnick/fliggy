@@ -21,7 +21,7 @@ module V201V250
   class V227BookBestValueFlightHotelComboValidator < BaseValidator
     self.validator_id = 'v227_book_best_value_flight_hotel_combo_validator'
     self.task_id = '5ff576ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '给张三预订性价比最高组合（明天航班+酒店住2晚）'
+    self.title = '张三明天要从深圳去上海出差，需要预订航班和酒店住2晚，希望综合考虑航班时长、价格、酒店评分等因素，选择性价比最高的组合'
     self.description = '张三明天要从深圳去上海出差，需要预订航班和酒店住2晚，希望综合考虑航班时长、价格、酒店评分等因素，选择性价比最高的组合'
     self.timeout_seconds = 300
     

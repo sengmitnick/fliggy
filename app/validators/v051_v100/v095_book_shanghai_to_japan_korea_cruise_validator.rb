@@ -2,14 +2,14 @@
 
 require_relative '../base_validator'
 
-# 验证用例95: 预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）
+# 验证用例95: 给张三预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）
 # 测试内容：邮轮筛选、出发港过滤、行程天数匹配、舱房类型选择、出发月份筛选、日期优化选择、预订数量验证
 module V051V100
   class V095BookShanghaiToJapanKoreaCruiseValidator < BaseValidator
     self.validator_id = 'v095_book_shanghai_to_japan_korea_cruise_validator'
     self.task_id = '25e31a26-07fd-4515-91c9-91e037c21aa4'
-    self.title = '给张三、李四预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
-    self.description = '给张三、李四预订香港出发的日韩邮轮，选择海洋光谱号1月份最近一班6天5晚行程，预订内舱房（性价比之选），共2位成人'
+    self.title = '给张三预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
+    self.description = '预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
     self.timeout_seconds = 240
   
     def prepare

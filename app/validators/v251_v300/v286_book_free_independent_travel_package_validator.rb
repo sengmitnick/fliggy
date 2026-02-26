@@ -22,7 +22,7 @@ module V251V300
     self.validator_id = 'v286_book_free_independent_travel_package_validator'
     self.task_id = '894541d3-6504-42a4-b182-14e38d262387'
     self.title = '给张三预订自由行套餐'
-    self.description = '给张三预订从深圳到北京的机+酒+接送+保险的自由行套餐'
+    self.description = '给张三预订自由行套餐'
     self.timeout_seconds = 300
     
     def prepare

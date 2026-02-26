@@ -17,8 +17,8 @@ module V251V300
   class V293BookDisabledAccessibleTravelValidator < BaseValidator
     self.validator_id = 'v293_book_disabled_accessible_travel_validator'
     self.task_id = '5a979b48-b8b5-425a-ae5d-8f4b27ee1d4d'
-    self.title = '给王芳预订健康养生出行（6天后广州-上海，含水疗养生酒店）'
-    self.description = '帮王芳订6天后从广州到上海的健康养生出行，她想放松身心，需要水疗养生酒店'
+    self.title = '给王芳预订健康养生出行（广州-上海）'
+    self.description = '给王芳预订健康养生出行（广州-上海）'
     self.timeout_seconds = 300
     
     def prepare

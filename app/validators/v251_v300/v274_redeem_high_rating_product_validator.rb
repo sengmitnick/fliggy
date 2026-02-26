@@ -8,7 +8,7 @@ module V251V300
   class V274RedeemHighRatingProductValidator < BaseValidator
     self.validator_id = 'v274_redeem_high_rating_product_validator'
     self.task_id = 'fdc187fc-0997-427d-9d9f-7a3241a8e088'
-    self.title = '给张三兑换评分最高的优质商品'
+    self.title = '帮张三在积分商城按评分排序，选择评分最高的商品兑换（≥ 4.8分）'
     self.description = '帮张三在积分商城按评分排序，选择评分最高的商品兑换（≥ 4.8分）'
     self.timeout_seconds = 300
     

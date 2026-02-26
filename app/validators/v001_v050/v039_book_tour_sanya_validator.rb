@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例39: 预订后天三亚6天5晚性价比跟团游（预算≤4000元/人）
+# 验证用例39: 给张三预订后天三亚6天5晚性价比跟团游（预算≤4000元/人）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索三亚的跟团游产品，
@@ -27,7 +27,7 @@ module V001V050
     self.validator_id = 'v039_book_tour_sanya_validator'
     self.task_id = 'f55024a4-37df-4c37-b0cb-62127f862740'
     self.title = '给张三预订后天三亚6天5晚性价比跟团游（预算≤4000元/人）'
-    self.description = '搜索三亚的跟团游产品，找到6天5晚且价格≤4000元/人的产品'
+    self.description = '预订后天三亚6天5晚性价比跟团游（预算≤4000元/人）'
     self.timeout_seconds = 240
   
     def prepare

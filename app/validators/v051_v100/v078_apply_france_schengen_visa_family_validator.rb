@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例78: 办理申根签证（法国，3人家庭，拒签可重新办理）
+# 验证用例78: 给张三办理申根签证（法国，3人家庭，拒签可重新办理）
 # 
 # 任务描述:
 #   Agent 需要为3人家庭办理法国申根签证，
@@ -36,8 +36,8 @@ module V051V100
   class V078ApplyFranceSchengenVisaFamilyValidator < BaseValidator
     self.validator_id = 'v078_apply_france_schengen_visa_family_validator'
     self.task_id = '29391193-cb90-41b1-b5c7-152b6da0630b'
-    self.title = '给张三的3人办理法国申根签证（支持拒签重办）'
-    self.description = '帮张三、李四、王芳这3个人办理法国申根签证，选择支持拒签后可重新办理的产品'
+    self.title = '给张三办理申根签证（法国，3人家庭，拒签可重新办理）'
+    self.description = '办理申根签证（法国，3人家庭，拒签可重新办理）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -222,7 +222,7 @@ module V051V100
       raise "未找到可用的签证产品" unless selected_product
     
       # 6. 拼接完整地址
-      full_address = "#{contact_address.province}#{contact_address.city}#{contact_address.district}#{contact_address.detail}"
+      full_address = [contact_address.province, contact_address.city, contact_address.district, contact_address.detail].compact.join
     
       # 7. 创建签证订单
       visa_order = VisaOrder.create!(

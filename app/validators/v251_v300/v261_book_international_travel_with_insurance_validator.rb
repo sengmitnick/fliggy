@@ -19,7 +19,7 @@ module V251V300
   class V261BookInternationalTravelWithInsuranceValidator < BaseValidator
     self.validator_id = 'v261_book_international_travel_with_insurance_validator'
     self.task_id = 'c8f11a6e-535a-4800-940e-df5c32cadd81'
-    self.title = '给张三和李四预订泰国5天游（15天后出发）+国际旅游综合保险'
+    self.title = '帮张三和李四预订泰国5天境外游（15天后出发，2人），并购买国际旅游综合保险（含医疗、意外、行李等）'
     self.description = '帮张三和李四预订泰国5天境外游（15天后出发，2人），并购买国际旅游综合保险（含医疗、意外、行李等）'
     self.timeout_seconds = 300
     

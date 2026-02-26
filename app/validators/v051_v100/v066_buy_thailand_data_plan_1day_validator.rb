@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例66: 购买泰国流量包（泰国、语音包类型）
+# 验证用例66: 给张三购买泰国流量包（泰国、语音包类型）
 # 
 # 任务描述:
 #   搜索流量包 → 选择泰国地区 → 选语音包套餐 → 填写手机号 → 创建订单
@@ -42,8 +42,8 @@ module V051V100
   class V066BuyThailandDataPlan1dayValidator < BaseValidator
     self.validator_id = 'v066_buy_thailand_data_plan_1day_validator'
     self.task_id = '5911f0c3-51a6-470b-a262-304a3c34c010'
-    self.title = '给王芳购买泰国流量包（语音包）'
-    self.description = '搜索泰国流量包产品，选择语音包套餐（支持境外拨打回境内）并成功创建订单'
+    self.title = '给张三购买泰国流量包（泰国、语音包类型）'
+    self.description = '购买泰国流量包（泰国、语音包类型）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

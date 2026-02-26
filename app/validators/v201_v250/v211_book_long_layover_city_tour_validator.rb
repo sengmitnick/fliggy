@@ -17,7 +17,7 @@ module V201V250
   class V211BookLongLayoverCityTourValidator < BaseValidator
     self.validator_id = 'v211_book_long_layover_city_tour_validator'
     self.task_id = '0fb132f5-1f1f-4f4f-ff4f-5f7a8b9c0d1f'
-    self.title = '给张三预订后天广州→上海→杭州航班（中转5-8小时可市内游）'
+    self.title = '帮张三订后天从广州经上海到杭州的航班，要求在上海中转时间5-8小时，时间足够市内游览'
     self.description = '帮张三订后天从广州经上海到杭州的航班，要求在上海中转时间5-8小时，时间足够市内游览'
     self.timeout_seconds = 300
     

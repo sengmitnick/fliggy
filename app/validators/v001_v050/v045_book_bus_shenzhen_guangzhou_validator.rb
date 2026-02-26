@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例45: 预订大后天深圳到广州最便宜汽车票（预算≤50元）
+# 验证用例45: 给张三预订大后天深圳到广州最便宜汽车票（预算≤50元）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳到广州的汽车票，
@@ -28,8 +28,8 @@ module V001V050
   class V045BookBusShenzhenGuangzhouValidator < BaseValidator
     self.validator_id = 'v045_book_bus_shenzhen_guangzhou_validator'
     self.task_id = '7de96a19-469c-4768-8dec-ed836ac17124'
-    self.title = '给张三预订3天后深圳到广州最便宜的汽车票（预算≤50元）'
-    self.description = 'Agent 需要为张三3天后从深圳到广州的汽车票，在预算≤50元的班次中选择最便宜的'
+    self.title = '给张三预订大后天深圳到广州最便宜汽车票（预算≤50元）'
+    self.description = '预订大后天深圳到广州最便宜汽车票（预算≤50元）'
     self.timeout_seconds = 240
   
     def prepare

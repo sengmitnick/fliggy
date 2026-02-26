@@ -18,7 +18,7 @@ module V201V250
   class V248BookSpecificSeatNumberValidator < BaseValidator
     self.validator_id = 'v248_book_specific_seat_number_validator'
     self.task_id = '3ff39eff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '给张三预订航班（后天去上海）'
+    self.title = '张三后天要从北京去上海，需要预订合适的航班'
     self.description = '张三后天要从北京去上海，需要预订合适的航班'
     self.timeout_seconds = 300
     

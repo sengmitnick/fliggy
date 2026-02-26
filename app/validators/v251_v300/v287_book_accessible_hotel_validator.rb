@@ -18,7 +18,7 @@ module V251V300
     self.validator_id = 'v287_book_accessible_hotel_validator'
     self.task_id = 'd72a4ed6-b4c8-40f7-b9cc-c0424c05be6a'
     self.title = '给张三预订健身养生酒店'
-    self.description = '给张三预订上海配备健身养生设施的酒店'
+    self.description = '给张三预订健身养生酒店'
     self.timeout_seconds = 300
     
     def prepare

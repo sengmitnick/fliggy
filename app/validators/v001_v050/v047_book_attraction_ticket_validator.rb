@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例47: 预订明天深圳欢乐港湾成人票（1张，最便宜供应商）
+# 验证用例47: 给张三预订明天深圳欢乐港湾成人票（1张，最便宜供应商）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳欢乐港湾的门票，
@@ -38,8 +38,8 @@ module V001V050
   class V047BookAttractionTicketValidator < BaseValidator
     self.validator_id = 'v047_book_attraction_ticket_validator'
     self.task_id = '72f0aacf-7273-46bb-a334-35194205d1d1'
-    self.title = '帮张三预订明天深圳欢乐港湾成人票1张（最便宜供应商）'
-    self.description = 'Agent 需要为张三预订明天深圳欢乐港湾的成人门票1张，在多个供应商中选择最便宜的'
+    self.title = '给张三预订明天深圳欢乐港湾成人票（1张，最便宜供应商）'
+    self.description = '预订明天深圳欢乐港湾成人票（1张，最便宜供应商）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

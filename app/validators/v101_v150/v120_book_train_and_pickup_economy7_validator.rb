@@ -41,7 +41,7 @@ module V101V150
     self.validator_id = 'v120_book_train_and_pickup_economy7_validator'
     self.task_id = '97534ade-23a0-4a65-aeeb-023d90721c96'
     self.title = '给小红家庭订购火车票后预订接站服务（经济7座，5人出行）'
-    self.description = '帮小红家庭5人出游（张建国爷爷、刘强爸爸、王芳妈妈、小明哥哥、小红妹妹），订购重庆到成都东站的火车（3天后），到达后预订接站到春熙路，选择经济7座'
+    self.description = '给小红家庭订购火车票后预订接站服务（经济7座，5人出行）'
     self.timeout_seconds = 300
   
     def prepare

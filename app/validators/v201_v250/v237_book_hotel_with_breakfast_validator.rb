@@ -17,7 +17,7 @@ module V201V250
   class V237BookHotelWithBreakfastValidator < BaseValidator
     self.validator_id = 'v237_book_hotel_with_breakfast_validator'
     self.task_id = '3ff3f4ff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '给张三预订明天广州带早餐的酒店（住2晚）'
+    self.title = '帮张三订明天在广州的酒店，要带早餐的，住2晚'
     self.description = '帮张三订明天在广州的酒店，要带早餐的，住2晚'
     self.timeout_seconds = 300
     

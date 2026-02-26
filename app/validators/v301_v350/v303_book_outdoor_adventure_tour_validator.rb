@@ -20,8 +20,8 @@ module V301V350
   class V303BookOutdoorAdventureTourValidator < BaseValidator
     self.validator_id = 'v303_book_outdoor_adventure_tour_validator'
     self.task_id = 'd11ffc15-c4d4-478c-a93f-67e8662ba77f'
-    self.title = '给刘强预订张家界户外探险游（10天后）'
-    self.description = '刘强热爱户外运动，想订张家界的户外探险游，要徒步露营和专业装备'
+    self.title = '给刘强预订张家界户外探险游'
+    self.description = '给刘强预订张家界户外探险游'
     self.timeout_seconds = 300
     
     def prepare

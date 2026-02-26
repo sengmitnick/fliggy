@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例31: 预订明天杭州到深圳经济舱航班
+# 验证用例31: 给张三预订明天杭州到深圳经济舱航班
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天杭州到深圳的航班，
@@ -24,8 +24,8 @@ module V001V050
   class V031BookEconomyClassFlightHangzhouShenzhenValidator < BaseValidator
     self.validator_id = 'v031_book_economy_class_flight_hangzhou_shenzhen_validator'
     self.task_id = '8a584a64-cfdb-471b-88f4-93b13e200d0b'
-    self.title = '给张三订明天杭州到深圳经济舱机票'
-    self.description = '搜索明天杭州到深圳的航班，选择经济舱航班并完成预订'
+    self.title = '给张三预订明天杭州到深圳经济舱航班'
+    self.description = '预订明天杭州到深圳经济舱航班'
     self.timeout_seconds = 240
   
     def prepare

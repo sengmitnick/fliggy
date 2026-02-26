@@ -29,7 +29,7 @@ module V101V150
     self.validator_id = 'v112_free_travel_package_validator'
     self.task_id = '2d8eeaf8-2fa3-41a1-be59-669915973d05'
     self.title = '给李四预订上海自由行一日游（2成人，5天后出发）'
-    self.description = '帮李四预订上海自由行一日游，2成人（张三和李四），当天往返'
+    self.description = '给李四预订上海自由行一日游（2成人，5天后出发）'
     self.timeout_seconds = 300
   
     def prepare

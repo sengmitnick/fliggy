@@ -9,7 +9,7 @@ module V151V200
   class V154BookTourAndStationTransferValidator < BaseValidator
     self.validator_id = 'v154_book_tour_and_station_transfer_validator'
     self.task_id = 'd9e0f1a2-3b4c-5d6e-7f8a-9b0c1d2e3f5a'
-    self.title = '给张三预订明天北京2日跟团游，并预订火车站接站（接今天从上海到北京的火车）'
+    self.title = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海到北京的火车）'
     self.description = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海到北京的火车）'
     self.timeout_seconds = 300
 

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例179: 预订晚班大巴和深夜入住酒店
+# 验证用例179: 给张三预订晚班大巴和深夜入住酒店
 #
 # 任务描述:
 #   用户需要预订晚上出发的长途大巴，并预订支持深夜入住的酒店
@@ -22,8 +22,8 @@ module V151V200
   class V179BookNightBusAndLateCheckinHotelValidator < BaseValidator
     self.validator_id = 'v179_book_night_bus_and_late_checkin_hotel_validator'
     self.task_id = 'd1757d07-df13-446b-ba4c-23790c798232'
-    self.title = '给李四预订明天北京到天津的晚班大巴，并预订深夜入住酒店'
-    self.description = '帮李四订明天晚上从北京到天津的长途大巴（18:00后出发），并预订支持深夜入住的酒店'
+    self.title = '给张三预订晚班大巴和深夜入住酒店'
+    self.description = '预订晚班大巴和深夜入住酒店'
     self.timeout_seconds = 300
   
     def prepare

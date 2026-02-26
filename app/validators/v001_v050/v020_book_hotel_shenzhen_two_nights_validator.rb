@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例20: 预订明天深圳酒店（1间房1成人，入住2晚）
+# 验证用例20: 给张三预订明天深圳酒店（1间房1成人，入住2晚）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳的酒店，
@@ -35,8 +35,8 @@ module V001V050
   class V020BookHotelShenzhenTwoNightsValidator < BaseValidator
     self.validator_id = 'v020_book_hotel_shenzhen_two_nights_validator'
     self.task_id = 'cebea439-0ffc-4798-9edb-e5cef8d09100'
-    self.title = '给张三订明天入住深圳的酒店（住2晚）'
-    self.description = '搜索深圳的酒店，预订明天入住、大后天退房（共2晚），预订1间房、1位成人、0位儿童'
+    self.title = '给张三预订明天深圳酒店（1间房1成人，入住2晚）'
+    self.description = '预订明天深圳酒店（1间房1成人，入住2晚）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

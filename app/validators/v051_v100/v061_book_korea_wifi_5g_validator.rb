@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 预订韩国随身WiFi（韩国、租用1台、3天后取件、共租5天、选5G高速）
+# 验证用例: 给张三搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索韩国地区的WiFi设备，
@@ -34,7 +34,7 @@ module V051V100
   class V061BookKoreaWifi5gValidator < BaseValidator
     self.validator_id = 'v061_book_korea_wifi_5g_validator'
     self.task_id = 'e8212b70-653b-4752-89e7-513eb4730cf2'
-    self.title = '给张三预订韩国5G高速WiFi（租1台用5天）'
+    self.title = '给张三搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单'
     self.description = '搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单'
     self.timeout_seconds = 240
   
@@ -126,14 +126,14 @@ module V051V100
         expect(@order.delivery_method).to eq('mail'),
           "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
         
-        contact_info = @order.contact_info.is_a?(String) ? (JSON.parse(@order.contact_info) rescue {}) : (@order.contact_info || {})
+        delivery_info = @order.delivery_info.is_a?(String) ? (JSON.parse(@order.delivery_info) rescue {}) : (@order.delivery_info || {})
         
-        expect(contact_info['name']).to eq(@expected_name),
-          "收货人姓名错误。期望: #{@expected_name}, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq(@expected_phone),
-          "收货电话错误。期望: #{@expected_phone}, 实际: #{contact_info['phone']}"
-        expect(contact_info['address']).to include(@expected_address_keyword),
-          "收货地址错误。期望包含: #{@expected_address_keyword}（#{@expected_name}的默认地址），实际: #{contact_info['address']}"
+        expect(delivery_info['name']).to eq(@expected_name),
+          "收货人姓名错误。期望: #{@expected_name}, 实际: #{delivery_info['name']}"
+        expect(delivery_info['phone']).to eq(@expected_phone),
+          "收货电话错误。期望: #{@expected_phone}, 实际: #{delivery_info['phone']}"
+        expect(delivery_info['full_address']).to include(@expected_address_keyword),
+          "收货地址错误。期望包含: #{@expected_address_keyword}（#{@expected_name}的默认地址），实际: #{delivery_info['full_address']}"
       end
     end
   
@@ -184,6 +184,7 @@ module V051V100
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 创建订单（使用 prepare 中查询的联系人）
+      full_address = [@address.province, @address.city, @address.district, @address.detail].compact.join
       order = InternetOrder.create!(
         orderable: target_wifi,
         user_id: user.id,
@@ -198,10 +199,15 @@ module V051V100
         }.to_json,
         total_price: target_wifi.daily_price * @rental_days * @quantity + 500,
         delivery_method: 'mail',
-        contact_info: {
+        delivery_info: {
+          address_id: @address.id,
           name: @expected_name,
           phone: @expected_phone,
-          address: "#{@address.province}#{@address.city}#{@address.district}#{@address.detail}"
+          full_address: full_address
+        }.to_json,
+        contact_info: {
+          name: @expected_name,
+          phone: @expected_phone
         }.to_json,
         status: 'pending',
         data_version: @data_version

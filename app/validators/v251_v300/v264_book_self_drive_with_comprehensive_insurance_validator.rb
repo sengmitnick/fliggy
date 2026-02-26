@@ -19,7 +19,7 @@ module V251V300
   class V264BookSelfDriveWithComprehensiveInsuranceValidator < BaseValidator
     self.validator_id = 'v264_book_self_drive_with_comprehensive_insurance_validator'
     self.task_id = '7c2e2d2c-6733-4917-9166-69ac075dd6ce'
-    self.title = '给张三、李四、王芳预订明天杭州5天自驾游+适合自驾场景的旅游保险'
+    self.title = '帮张三、李四、王芳3人在杭州预订明天开始的5天自驾游（明天取车，5天后还车），并购买适合自驾游场景的旅游保险，保险需为3人投保，保险时间需与租车时间一致，保障天数覆盖整个租车期间（5天）'
     self.description = '帮张三、李四、王芳3人在杭州预订明天开始的5天自驾游（明天取车，5天后还车），并购买适合自驾游场景的旅游保险，保险需为3人投保，保险时间需与租车时间一致，保障天数覆盖整个租车期间（5天）'
     self.timeout_seconds = 300
     

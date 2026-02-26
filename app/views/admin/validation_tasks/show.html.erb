@@ -271,6 +271,24 @@
   const resultPanel = document.getElementById('result-panel');
   const resultContent = document.getElementById('result-content');
 
+  // 使用事件委托来处理动态添加的按钮，避免重复绑定
+  sessionsList.addEventListener('click', (e) => {
+    const verifyBtn = e.target.closest('.verify-session-btn');
+    const removeBtn = e.target.closest('.remove-session-btn');
+    
+    if (verifyBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const sessionId = verifyBtn.dataset.sessionId;
+      if (sessionId) verifySession(sessionId);
+    } else if (removeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const sessionId = removeBtn.dataset.sessionId;
+      if (sessionId) removeSession(sessionId);
+    }
+  });
+
   // 启动新会话
   startBtn.addEventListener('click', async () => {
     // 禁用按钮
@@ -388,15 +406,7 @@
       </div>
     `).join('');
     
-    // 绑定验证按钮事件
-    document.querySelectorAll('.verify-session-btn').forEach(btn => {
-      btn.addEventListener('click', () => verifySession(btn.dataset.sessionId));
-    });
-    
-    // 绑定移除按钮事件
-    document.querySelectorAll('.remove-session-btn').forEach(btn => {
-      btn.addEventListener('click', () => removeSession(btn.dataset.sessionId));
-    });
+    // 事件监听器已通过事件委托绑定到 sessionsList 容器，无需重复绑定
   }
 
   // 验证指定会话
@@ -489,35 +499,40 @@
         ` : '';
         
         resultContent.innerHTML = `
-          <div class="p-4 md:p-6 rounded-lg ${isPass ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800'}">
-            <div class="mb-2 md:mb-3">
-              <span class="text-xs font-mono text-gray-500 dark:text-gray-400 break-all">会话 ID: ${sessionId}</span>
+          <div class="rounded-xl overflow-hidden ${isPass ? 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10' : 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10'} border ${isPass ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'} shadow-lg">
+            <!-- 顶部会话ID -->
+            <div class="px-4 md:px-6 pt-3 md:pt-4 pb-2">
+              <span class="inline-block text-[10px] md:text-xs font-mono ${isPass ? 'text-green-600/70 dark:text-green-400/70 bg-green-100/50 dark:bg-green-800/30' : 'text-red-600/70 dark:text-red-400/70 bg-red-100/50 dark:bg-red-800/30'} px-2 py-1 rounded">会话 ID: ${sessionId}</span>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center">
-                <div class="${isPass ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'} rounded-full p-2 md:p-3 mr-3 md:mr-4 flex-shrink-0">
-                  <svg class="w-6 h-6 md:w-8 md:h-8 ${isPass ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    ${isPass 
-                      ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
-                      : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
-                    }
-                  </svg>
+            
+            <!-- 主要结果区域 -->
+            <div class="px-4 md:px-6 pb-4 md:pb-5">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6">
+                <div class="flex items-center gap-3 md:gap-4">
+                  <div class="${isPass ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'} rounded-full p-2.5 md:p-3 flex-shrink-0 shadow-md">
+                    <svg class="w-7 h-7 md:w-9 md:h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      ${isPass 
+                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                      }
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-xl md:text-2xl font-bold ${isPass ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'} mb-0.5">
+                      ${isPass ? '✓ 验证通过' : '✗ 验证失败'}
+                    </h3>
+                    <p class="text-xs md:text-sm ${isPass ? 'text-green-700/80 dark:text-green-300/80' : 'text-red-700/80 dark:text-red-300/80'}">
+                      ${isPass ? '所有检查项均已通过' : '存在未通过的检查项'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 class="text-lg md:text-2xl font-bold ${isPass ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}">
-                    ${isPass ? '✓ 验证通过' : '✗ 验证失败'}
-                  </h3>
-                  <p class="text-xs md:text-sm ${isPass ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                    ${isPass ? '所有检查项均已通过' : '存在未通过的检查项'}
-                  </p>
-                </div>
-              </div>
-              <div class="text-left sm:text-right flex-shrink-0">
-                <div class="text-3xl md:text-4xl font-bold ${isPass ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                  ${scorePercent}%
-                </div>
-                <div class="text-xs md:text-sm ${isPass ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                  总得分
+                <div class="text-left sm:text-right flex-shrink-0">
+                  <div class="text-4xl md:text-5xl font-extrabold ${isPass ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} leading-none">
+                    ${scorePercent}<span class="text-2xl md:text-3xl">%</span>
+                  </div>
+                  <div class="text-xs md:text-sm font-medium ${isPass ? 'text-green-600/70 dark:text-green-400/70' : 'text-red-600/70 dark:text-red-400/70'} mt-1">
+                    总得分
+                  </div>
                 </div>
               </div>
             </div>
@@ -525,9 +540,16 @@
             ${assertionsHtml}
             
             ${data.reason && data.reason !== '无详细信息' ? `
-              <div class="border-t ${isPass ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'} pt-3 md:pt-4 mt-3 md:mt-4">
-                <h4 class="text-sm md:text-base font-semibold ${isPass ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'} mb-2">概要信息：</h4>
-                <p class="text-xs md:text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">${data.reason}</p>
+              <div class="px-4 md:px-6 pb-4 md:pb-5 pt-2">
+                <div class="${isPass ? 'bg-green-100/50 dark:bg-green-800/20 border-green-200 dark:border-green-700' : 'bg-red-100/50 dark:bg-red-800/20 border-red-200 dark:border-red-700'} border rounded-lg p-3 md:p-4">
+                  <h4 class="text-sm md:text-base font-semibold ${isPass ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100'} mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    概要信息
+                  </h4>
+                  <p class="text-xs md:text-sm ${isPass ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'} whitespace-pre-wrap break-words leading-relaxed">${data.reason}</p>
+                </div>
               </div>
             ` : ''}
           </div>
@@ -535,8 +557,10 @@
         
         showToast(`验证完成，得分: ${scorePercent}%`, isPass ? 'success' : 'error');
         
-        // 验证完成后从列表中移除该会话
-        removeSession(sessionId);
+        // 验证完成后延迟5秒再从列表中移除该会话（给用户时间查看结果）
+        setTimeout(() => {
+          removeSession(sessionId);
+        }, 5000);
       } else {
         throw new Error(data.reason || '验证失败');
       }

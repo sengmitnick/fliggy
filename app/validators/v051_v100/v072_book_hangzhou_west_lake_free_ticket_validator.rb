@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例72: 预订5天后上海迪士尼乐园儿童票
+# 验证用例72: 给张三预订5天后上海迪士尼乐园儿童票
 module V051V100
   class V072BookHangzhouWestLakeFreeTicketValidator < BaseValidator
     self.validator_id = 'v072_book_hangzhou_west_lake_free_ticket_validator'
     self.task_id = 'ae944d4f-9005-4e54-bf95-adf32269ccdf'
-    self.title = '给小明预订5天后上海迪士尼乐园儿童票（最便宜）'
-    self.description = '预订上海迪士尼乐园儿童票，选择最便宜供应商'
+    self.title = '给张三预订5天后上海迪士尼乐园儿童票'
+    self.description = '预订5天后上海迪士尼乐园儿童票'
     self.timeout_seconds = 240
   
     def prepare

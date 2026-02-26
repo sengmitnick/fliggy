@@ -18,7 +18,7 @@ module V201V250
   class V208BookFastestTrainShortestDurationValidator < BaseValidator
     self.validator_id = 'v208_book_fastest_train_shortest_duration_validator'
     self.task_id = '7f8809f2-8f8f-4f1e-ef1f-2f4a5b6c7d8f'
-    self.title = '给张三预订明天最快高铁（行程时间最短，上海→杭州）'
+    self.title = '张三需要预订明天从上海到杭州的高铁，要求行程时间最短'
     self.description = '张三需要预订明天从上海到杭州的高铁，要求行程时间最短'
     self.timeout_seconds = 300
     

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例48: 囤货武汉地区酒店套餐（2晚，1份，最佳性价比套餐选项）
+# 验证用例48: 给张三囤货武汉地区酒店套餐（2晚，1份，最佳性价比套餐选项）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索武汉地区的酒店套餐，
@@ -37,8 +37,8 @@ module V001V050
   class V048BookHotelPackageValidator < BaseValidator
     self.validator_id = 'v048_book_hotel_package_validator'
     self.task_id = '42336f26-7a26-4d2a-a07e-4f6841c05257'
-    self.title = '给张三囤货武汉地区2晚酒店套餐（1份，最佳性价比选项）'
-    self.description = 'Agent 需要为张三囤货购买武汉地区的2晚酒店套餐（1份），先囤再约，从套餐选项中选择性价比最佳的（含早或豪华套餐）'
+    self.title = '给张三囤货武汉地区酒店套餐（2晚，1份，最佳性价比套餐选项）'
+    self.description = '囤货武汉地区酒店套餐（2晚，1份，最佳性价比套餐选项）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

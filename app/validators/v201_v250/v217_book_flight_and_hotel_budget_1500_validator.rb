@@ -16,7 +16,7 @@ module V201V250
   class V217BookFlightAndHotelBudget1500Validator < BaseValidator
     self.validator_id = 'v217_book_flight_and_hotel_budget_1500_validator'
     self.task_id = 'a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d'
-    self.title = '给张三预订后天深圳→北京航班+酒店（总预算≤1500元）'
+    self.title = '帮张三订后天从深圳到北京的航班+酒店（当晚入住1晚），总预算不超过1500元'
     self.description = '帮张三订后天从深圳到北京的航班+酒店（当晚入住1晚），总预算不超过1500元'
     self.timeout_seconds = 300
     

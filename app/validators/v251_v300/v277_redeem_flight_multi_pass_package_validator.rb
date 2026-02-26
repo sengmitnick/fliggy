@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例277: 预订机票次卡
+# 验证用例277: 给张三预订机票次卡
 #
 # 任务描述:
 #   用户购买10次经济舱套餐，享受折扣价格和灵活使用
@@ -16,8 +16,8 @@ module V251V300
   class V277RedeemFlightMultiPassPackageValidator < BaseValidator
     self.validator_id = 'v277_redeem_flight_multi_pass_package_validator'
     self.task_id = '8b0d78b3-b4ce-4e39-963d-aa0e5c455398'
-    self.title = '给张三兑换机票次卡（10次经济舱套餐）'
-    self.description = '帮张三购买10次经济舱套餐，享受折扣价格和灵活使用'
+    self.title = '给张三预订机票次卡'
+    self.description = '预订机票次卡'
     self.timeout_seconds = 300
     
     def prepare

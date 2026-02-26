@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例106: 预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
+# 验证用例106: 给张三预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
 #
 # 核心验证点:
 # 1. 订单创建: 邮轮订单创建成功
@@ -15,8 +15,8 @@ module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
     self.task_id = 'b2c4e7f9-1d6a-4b8e-9c3f-5a7e2d8f1b94'
-    self.title = '给张建国、陈静预订日韩邮轮（海洋光谱号6天、上海出发，要岸上观光+主厨晚餐）'
-    self.description = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐'
+    self.title = '给张三预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
+    self.description = '预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
     self.timeout_seconds = 240
   
     def prepare

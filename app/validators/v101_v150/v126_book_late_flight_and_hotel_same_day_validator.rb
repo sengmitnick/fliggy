@@ -7,7 +7,7 @@ module V101V150
   class V126BookLateFlightAndHotelSameDayValidator < BaseValidator
   self.validator_id = 'v126_book_late_flight_and_hotel_same_day_validator'
   self.task_id = '508a7a67-bd2e-4c90-b030-64ab0f84e1d0'
-  self.title = '给刘强预订后天晚班航班+深圳市区酒店（当天入住1晚）'
+  self.title = '帮刘强订后天晚上18点后从上海飞深圳的航班，并订深圳市区酒店（航班当天入住1晚）'
   self.description = '帮刘强订后天晚上18点后从上海飞深圳的航班，并订深圳市区酒店（航班当天入住1晚）'
   self.timeout_seconds = 300
 

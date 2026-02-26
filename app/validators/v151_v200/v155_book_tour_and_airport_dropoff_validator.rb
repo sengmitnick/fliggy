@@ -9,7 +9,7 @@ module V151V200
   class V155BookTourAndAirportDropoffValidator < BaseValidator
     self.validator_id = 'v155_book_tour_and_airport_dropoff_validator'
     self.task_id = 'e0f1a2b3-4c5d-6e7f-8a9b-0c1d2e3f4a6b'
-    self.title = '给张三预订明天上海1日跟团游，并预订机场送机（送后天从上海飞北京的航班）'
+    self.title = '给张三订明天上海1日跟团游，并订机场送机服务（送后天从上海浦东飞北京的航班）'
     self.description = '给张三订明天上海1日跟团游，并订机场送机服务（送后天从上海浦东飞北京的航班）'
     self.timeout_seconds = 300
 

@@ -18,7 +18,7 @@ module V201V250
   class V244BookDirectFlightValidator < BaseValidator
     self.validator_id = 'v244_book_direct_flight_validator'
     self.task_id = '9ff95aff-0f0f-0f2f-2f3f-1f4a5b6c7d8f'
-    self.title = '给张三预订直飞航班（后天去北京，不转机）'
+    self.title = '张三后天要从深圳去北京参加重要会议，时间紧张，需要预订直飞航班避免转机延误'
     self.description = '张三后天要从深圳去北京参加重要会议，时间紧张，需要预订直飞航班避免转机延误'
     self.timeout_seconds = 300
     

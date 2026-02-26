@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例17: 预订明天上海任意酒店（入住1晚）
+# 验证用例: 在上海搜索酒店，选择任意一家并完成明天入住1晚的预订
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索上海的酒店，
@@ -15,9 +15,13 @@ require_relative '../base_validator'
 #   ❌ 不需要价格对比或评分筛选，任意酒店即可
 # 
 # 评分标准:
-#   - 订单已创建 (30分)
+#   - 创建了酒店订单 (30分)
 #   - 城市正确（上海） (30分)
-#   - 入住日期正确（明天入住，后天离店，共1晚）(40分)
+#   - 入住日期正确（明天） (12分)
+#   - 离店日期正确（后天，共1晚） (8分)
+#   - 房间数和人数正确（1间房，1成人，0儿童） (8分)
+#   - 入住人信息正确（张三 13800138000） (8分)
+#   - 订单状态和价格合理 (4分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -47,7 +51,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请预订明天入住#{@city}的任意酒店（入住1晚）",
+        task: "给张三订明天入住上海的任意酒店（住1晚）",
         city: @city,
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
@@ -61,7 +65,7 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（查询时过滤核心实体：城市）
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 30 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .where(
@@ -80,25 +84,25 @@ module V001V050
       return unless @hotel_booking
     
       # 断言2: 城市正确
-      add_assertion "城市正确（上海）", weight: 10 do
+      add_assertion "城市正确（上海）", weight: 30 do
         expect(@hotel_booking.hotel.city).to eq(@city),
           "城市错误。期望: #{@city}, 实际: #{@hotel_booking.hotel.city}"
       end
     
       # 断言3: 入住日期正确
-      add_assertion "入住日期正确（明天）", weight: 10 do
+      add_assertion "入住日期正确（明天）", weight: 12 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}, 实际: #{@hotel_booking.check_in_date}"
       end
     
       # 断言4: 离店日期正确
-      add_assertion "离店日期正确（后天，共1晚）", weight: 10 do
+      add_assertion "离店日期正确（后天，共1晚）", weight: 8 do
         expect(@hotel_booking.check_out_date).to eq(@check_out_date),
           "离店日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     
       # 断言5: 房间数和人数正确
-      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 30 do
+      add_assertion "房间数和人数正确（1间房，1成人，0儿童）", weight: 8 do
         expect(@hotel_booking.rooms_count).to eq(1),
           "房间数错误。期望: 1间, 实际: #{@hotel_booking.rooms_count}间"
         expect(@hotel_booking.adults_count).to eq(1),
@@ -108,7 +112,7 @@ module V001V050
       end
     
       # 断言6: 入住人信息正确（张三 13800138000）
-      add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
+      add_assertion "入住人信息正确（张三 13800138000）", weight: 8 do
         expect(@hotel_booking.guest_name).to eq('张三'),
           "入住人姓名错误。期望: 张三（demo_user数据）, 实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq('13800138000'),
@@ -116,7 +120,7 @@ module V001V050
       end
     
       # 断言7: 订单状态和价格合理
-      add_assertion "订单状态和价格合理", weight: 10 do
+      add_assertion "订单状态和价格合理", weight: 4 do
         expect(@hotel_booking.status).not_to be_nil
         expect(@hotel_booking.total_price).to be > 0
       end

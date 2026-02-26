@@ -20,7 +20,7 @@ module V301V350
   class V309BookLocalGuideCarCommentaryValidator < BaseValidator
     self.validator_id = 'v309_book_local_guide_car_commentary_validator'
     self.task_id = 'f4d35905-7889-4569-8f32-a0b6c76a7873'
-    self.title = '给张三、李四、刘强、王芳预订北京深度游（5天后，4人，含导游+包车）'
+    self.title = '张三、李四、刘强、王芳想5天后去北京玩深度游，需4人，要导游、包车和景点讲解'
     self.description = '张三、李四、刘强、王芳想5天后去北京玩深度游，需4人，要导游、包车和景点讲解'
     self.timeout_seconds = 300
     

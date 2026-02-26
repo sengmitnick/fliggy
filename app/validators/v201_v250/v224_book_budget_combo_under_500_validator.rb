@@ -21,7 +21,7 @@ module V201V250
   class V224BookBudgetComboUnder500Validator < BaseValidator
     self.validator_id = 'v224_book_budget_combo_under_500_validator'
     self.task_id = '1ff132ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '给张三预订经济型组合（火车+酒店，单项≤300元）'
+    self.title = '张三想后天从杭州去上海办事，预算比较紧，需要预订火车票和经济型酒店，每项都不超过300元'
     self.description = '张三想后天从杭州去上海办事，预算比较紧，需要预订火车票和经济型酒店，每项都不超过300元'
     self.timeout_seconds = 300
     

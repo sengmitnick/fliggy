@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例198: 预订景区附近酒店+景区门票
+# 验证用例198: 给张三预订景区附近酒店+景区门票
 #
 # 任务描述:
 #   预订景区附近酒店+景区门票
@@ -18,8 +18,8 @@ module V151V200
   class V198BookHotelNearAttractionAndTicketsValidator < BaseValidator
     self.validator_id = 'v198_book_hotel_near_attraction_and_tickets_validator'
     self.task_id = 'f5b7ea8b-d7b9-4ea6-9563-805862ebaa67'
-    self.title = '给张三预订明天北京欢乐谷附近的酒店+景区门票'
-    self.description = '帮张三订明天北京欢乐谷附近的酒店+景区门票'
+    self.title = '给张三预订景区附近酒店+景区门票'
+    self.description = '预订景区附近酒店+景区门票'
     self.timeout_seconds = 300
     
     def prepare

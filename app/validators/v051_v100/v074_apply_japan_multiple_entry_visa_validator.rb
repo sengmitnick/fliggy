@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例74: 办理日本多次往返签证（3年期，对比处理时效）
+# 验证用例74: 给张三办理日本多次往返签证（3年期，对比处理时效）
 # 
 # 任务描述:
 #   Agent 需要办理日本多次往返签证（3年或5年），
@@ -35,8 +35,8 @@ module V051V100
   class V074ApplyJapanMultipleEntryVisaValidator < BaseValidator
     self.validator_id = 'v074_apply_japan_multiple_entry_visa_validator'
     self.task_id = 'a4946c84-0632-454e-b424-c8bd78c3c138'
-    self.title = '给张三办理日本多次往返签证（对比3年/5年期，选最快出签）'
-    self.description = '需要办理日本多次签证，对比3年和5年签证的办理时效，选择最快的'
+    self.title = '给张三办理日本多次往返签证（3年期，对比处理时效）'
+    self.description = '办理日本多次往返签证（3年期，对比处理时效）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订后天从深圳到北京的最便宜机票
+# 验证用例: 需要在系统中搜索深圳到北京后天的航班，找到价格最低的航班并为张三成功创建订单。
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳到北京后天的航班，
@@ -71,7 +71,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三预订一张后天从#{@origin}到#{@destination}的低价机票",
+        task: "给张三订后天从#{@origin}到#{@destination}的最便宜机票",
         departure_city: @origin,
         destination_city: @destination,
         date: @target_date.to_s,

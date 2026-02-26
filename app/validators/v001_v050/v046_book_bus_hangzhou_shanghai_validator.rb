@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例46: 预订后天杭州到上海晚上汽车票（18:00后）
+# 验证用例46: 给张三预订后天杭州到上海晚上汽车票（18:00后）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索杭州到上海的汽车票，
@@ -27,8 +27,8 @@ module V001V050
   class V046BookBusHangzhouShanghaiValidator < BaseValidator
     self.validator_id = 'v046_book_bus_hangzhou_shanghai_validator'
     self.task_id = 'c8106cd5-941e-4b67-85f1-432f67d556a9'
-    self.title = '给张三预订后天杭州到上海晚上的汽车票（18:00后）'
-    self.description = 'Agent 需要为张三预订后天从杭州到上海的汽车票，找到发车时间在18:00后的班次'
+    self.title = '给张三预订后天杭州到上海晚上汽车票（18:00后）'
+    self.description = '预订后天杭州到上海晚上汽车票（18:00后）'
     self.timeout_seconds = 240
   
     def prepare

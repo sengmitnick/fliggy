@@ -16,7 +16,7 @@ module V251V300
     self.validator_id = 'v254_book_chengdu_featured_four_chartered_tour_validator'
     self.task_id = 'e82f3b3f-68f5-4d9e-9f0f-e454fd93ad36'
     self.title = '给刘强等6人预订成都精华四景游包车（10天后出发，舒适7座，6小时）'
-    self.description = '帮刘强等6人订10天后的成都精华四景包车，选舒适7座，6小时服务（半日游）'
+    self.description = '给刘强等6人预订成都精华四景游包车（10天后出发，舒适7座，6小时）'
     self.timeout_seconds = 240
   
     def prepare

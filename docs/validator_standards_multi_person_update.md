@@ -1,3 +1,4 @@
+
 # VALIDATOR_WRITING_STANDARDS.md 多人场景优化总结
 
 ## 📋 更新背景

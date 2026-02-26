@@ -19,7 +19,7 @@ module V301V350
   class V310BookPortraitPhotographyCostumeMakeupValidator < BaseValidator
     self.validator_id = 'v310_book_portrait_photography_costume_makeup_validator'
     self.task_id = '7230b4f9-7181-49ba-9478-979b313bdbca'
-    self.title = '给王芳预订东方明珠人像摄影（7天后，含跟拍+服装+化妆）'
+    self.title = '给张三王芳想7天后去上海东方明珠拍人像照，需1人，要人像跟拍、服装租赁和化妆造型'
     self.description = '王芳想7天后去上海东方明珠拍人像照，需1人，要人像跟拍、服装租赁和化妆造型'
     self.timeout_seconds = 300
     

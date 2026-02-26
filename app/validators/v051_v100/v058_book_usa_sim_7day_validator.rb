@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 购买美国7天共10GB流量SIM卡（数量1张）
+# 验证用例: 小明要去美国7天，帮他买一张7天有效期、共10GB流量的SIM卡，邮寄到成都高新
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索美国地区的SIM卡，
@@ -28,7 +28,7 @@ module V051V100
   class V058BookUsaSim7dayValidator < BaseValidator
     self.validator_id = 'v058_book_usa_sim_7day_validator'
     self.task_id = 'abd44239-e7bc-4665-ba95-4f6167f22c8e'
-    self.title = '帮小明买美国7天共10GB流量SIM卡（买1张邮寄到成都高新）'
+    self.title = '小明要去美国7天，帮他买一张7天有效期、共10GB流量的SIM卡，邮寄到成都高新'
     self.description = '小明要去美国7天，帮他买一张7天有效期、共10GB流量的SIM卡，邮寄到成都高新'
     self.timeout_seconds = 300
   
@@ -122,13 +122,13 @@ module V051V100
         expect(@order.delivery_method).to eq('mail'),
           "配送方式不正确。预期: mail（邮寄），实际: #{@order.delivery_method}"
         
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq(@expected_name),
-          "收件人姓名不正确。预期: #{@expected_name}, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq(@expected_phone),
-          "收件人电话不正确。预期: #{@expected_phone}, 实际: #{contact_info['phone']}"
-        expect(contact_info['address']).to include(@expected_province, @expected_city),
-          "收货地址不正确。预期包含: #{@expected_province}#{@expected_city}, 实际: #{contact_info['address']}"
+        delivery_info = @order.delivery_info  # jsonb字段，已经是Hash对象
+        expect(delivery_info['name']).to eq(@expected_name),
+          "收件人姓名不正确。预期: #{@expected_name}, 实际: #{delivery_info['name']}"
+        expect(delivery_info['phone']).to eq(@expected_phone),
+          "收件人电话不正确。预期: #{@expected_phone}, 实际: #{delivery_info['phone']}"
+        expect(delivery_info['full_address']).to include(@expected_province, @expected_city),
+          "收货地址不正确。预期包含: #{@expected_province}#{@expected_city}, 实际: #{delivery_info['full_address']}"
       end
     end
   
@@ -169,7 +169,7 @@ module V051V100
     
       # 2. 查找收货地址（从 prepare 预查询的数据）
       recipient_address = user.addresses.find_by!(name: '小明', data_version: 0)
-      full_address = "#{recipient_address.province}#{recipient_address.city}#{recipient_address.district}#{recipient_address.detail}"
+      full_address = [recipient_address.province, recipient_address.city, recipient_address.district, recipient_address.detail].compact.join
     
       # 3. 查找符合条件的SIM卡
       matching_sim_cards = InternetSimCard.where(
@@ -188,14 +188,19 @@ module V051V100
         order_type: 'sim_card',
         region: @region,
         quantity: 1,
-        rental_info: { validity_days: @validity_days }.to_json,
+        rental_info: { validity_days: @validity_days },  # jsonb字段不需要to_json
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: {
+        delivery_info: {  # jsonb字段不需要to_json
+          address_id: recipient_address.id,
           name: recipient_address.name,
           phone: recipient_address.phone,
-          address: full_address
-        }.to_json,
+          full_address: full_address
+        },
+        contact_info: {  # jsonb字段不需要to_json
+          name: recipient_address.name,
+          phone: recipient_address.phone
+        },
         status: 'pending',
         data_version: @data_version
       )

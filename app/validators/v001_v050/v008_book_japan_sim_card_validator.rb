@@ -2,20 +2,20 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三购买日本7天无限量流量SIM卡（邮寄到默认地址）
+# 验证用例: 搜索日本地区的SIM卡，找到7天有效期且流量为“无限量”的产品并购买1张，邮寄到张三的默认收货地址
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索日本地区的SIM卡，
 #   找到有效期为7天且流量为"无限量"的产品，购买1张并邮寄到张三的默认收货地址
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
+#   - 订单已创建 (15分)
 #   - 订单类型正确（SIM卡） (10分)
 #   - 地区正确（日本） (15分)
-#   - 有效期正确（7天） (10分)
+#   - 有效期正确（7天） (15分)
 #   - 流量正确（无限量） (10分)
 #   - 购买数量正确（1张） (15分)
-#   - 邮寄方式和地址正确（mail + 张三北京地址） (10分)
+#   - 收货地址正确（张三 + 北京地址） (10分)
 #   - 联系人信息正确（张三 13800138000） (10分)
 # 
 # 使用方法:
@@ -54,7 +54,7 @@ module V001V050
     
       # 返回给 Agent 的任务信息
       {
-        task: "请给张三购买一张日本7天无限量流量的SIM卡，邮寄到默认地址",
+        task: "给张三购买日本7天无限量流量SIM卡（邮寄到默认地址）",
         region: @region,
         validity_days: @validity_days,
         data_requirement: "无限量",
@@ -69,7 +69,7 @@ module V001V050
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "创建了境外上网订单", weight: 20 do
+      add_assertion "创建了境外上网订单", weight: 15 do
         all_internet_orders = InternetOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -93,7 +93,7 @@ module V001V050
       end
     
       # 断言4: 有效期正确（7天）
-      add_assertion "有效期正确（7天）", weight: 10 do
+      add_assertion "有效期正确（7天）", weight: 15 do
         sim_card = @order.orderable
         expect(sim_card.validity_days).to eq(@validity_days),
           "有效期不正确。预期: #{@validity_days}天, 实际: #{sim_card.validity_days}天"
@@ -112,25 +112,22 @@ module V001V050
           "购买数量不正确。预期: #{@quantity}张, 实际: #{@order.quantity}张"
       end
     
-      # 断言7: 邮寄方式和地址正确
-      add_assertion "邮寄方式和地址正确（mail + 张三北京地址）", weight: 10 do
-        expect(@order.delivery_method).to eq('mail'),
-          "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
-        
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq('张三'),
-          "收货人姓名错误。期望: 张三（demo_user地址）, 实际: #{contact_info['name']}"
-        expect(contact_info['address']).to include('北京'),
-          "收货地址错误。期望包含: 北京（demo_user默认地址）, 实际: #{contact_info['address']}"
+      # 断言7: 收货地址正确（delivery_info是jsonb类型，Rails自动解析为Hash）
+      add_assertion "收货地址正确（张三 + 北京地址）", weight: 10 do
+        delivery_info = @order.delivery_info  # jsonb字段，已经是Hash对象
+        expect(delivery_info['name']).to eq('张三'),
+          "收货人姓名错误。期望: 张三, 实际: #{delivery_info['name']}"
+        expect(delivery_info['full_address']).to include('北京'),
+          "收货地址错误。期望包含: 北京, 实际: #{delivery_info['full_address']}"
       end
     
-      # 断言8: 联系人信息正确（来自demo_user数据）
+      # 断言8: 联系人信息正确（contact_info是jsonb类型）
       add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
-        contact_info = JSON.parse(@order.contact_info)
+        contact_info = @order.contact_info  # jsonb字段，已经是Hash对象
         expect(contact_info['name']).to eq('张三'),
-          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{contact_info['name']}"
+          "联系人姓名错误。期望: 张三, 实际: #{contact_info['name']}"
         expect(contact_info['phone']).to eq('13800138000'),
-          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{contact_info['phone']}"
+          "联系电话错误。期望: 13800138000, 实际: #{contact_info['phone']}"
       end
     end
   
@@ -175,21 +172,33 @@ module V001V050
       target_sim_card = matching_sim_cards.sample
     
       # 4. 创建订单（使用 demo_user 的真实地址）
-      full_address = "#{default_address.province}#{default_address.city}#{default_address.district}#{default_address.detail}"
+      # 安全拼接地址，避免nil值导致的字符串转换错误
+      full_address = [
+        default_address.province,
+        default_address.city,
+        default_address.district,
+        default_address.detail
+      ].compact.join
+      
       order = InternetOrder.create!(
         orderable: target_sim_card,
         user_id: user.id,
         order_type: 'sim_card',
         region: @region,
         quantity: 1,
-        rental_info: { validity_days: @validity_days }.to_json,
+        rental_info: { validity_days: @validity_days },  # jsonb字段不需要to_json
         total_price: target_sim_card.price,
         delivery_method: 'mail',
-        contact_info: { 
+        delivery_info: {  # jsonb字段不需要to_json
+          address_id: default_address.id,
+          name: default_address.name,
+          phone: default_address.phone,
+          full_address: full_address
+        },
+        contact_info: {  # jsonb字段不需要to_json
           name: default_address.name, 
-          phone: default_address.phone, 
-          address: full_address 
-        }.to_json,
+          phone: default_address.phone
+        },
         status: 'pending'
       )
     

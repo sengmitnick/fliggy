@@ -8,7 +8,7 @@ module V251V300
   class V267RedeemLowPriceProductWithPointsValidator < BaseValidator
     self.validator_id = 'v267_redeem_low_price_product_with_points_validator'
     self.task_id = 'e02e9f3a-2b4c-4d1b-8a5f-6c7d8e9f0a1b'
-    self.title = '给张三使用会员积分兑换低价商品（1个）'
+    self.title = '帮张三使用少量积分+现金兑换热门低价商品（瑞幸咖啡券）'
     self.description = '帮张三使用少量积分+现金兑换热门低价商品（瑞幸咖啡券）'
     self.timeout_seconds = 300
     
@@ -27,7 +27,7 @@ module V251V300
       
       # 查询张三的地址信息
       @zhangsan_address = user.addresses.find_by!(name: '张三', data_version: 0)
-      @expected_shipping_address = "#{@zhangsan_address.province}#{@zhangsan_address.city}#{@zhangsan_address.district}#{@zhangsan_address.detail}"
+      @expected_shipping_address = [@zhangsan_address.province, @zhangsan_address.city, @zhangsan_address.district, @zhangsan_address.detail].compact.join
       @expected_contact_name = @zhangsan_address.name
       @expected_contact_phone = @zhangsan_address.phone
       
@@ -146,7 +146,7 @@ module V251V300
       # 恢复地址信息
       if data['zhangsan_address_id']
         @zhangsan_address = Address.find(data['zhangsan_address_id'])
-        @expected_shipping_address = "#{@zhangsan_address.province}#{@zhangsan_address.city}#{@zhangsan_address.district}#{@zhangsan_address.detail}"
+        @expected_shipping_address = [@zhangsan_address.province, @zhangsan_address.city, @zhangsan_address.district, @zhangsan_address.detail].compact.join
         @expected_contact_name = @zhangsan_address.name
         @expected_contact_phone = @zhangsan_address.phone
       end

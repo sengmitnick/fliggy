@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例64: 购买日本流量包（日本、3天、天包类型）
+# 验证用例64: 给张三购买日本流量包（日本、3天、天包类型）
 # 
 # 任务描述:
 #   搜索流量包 → 选择日本地区 → 选3天天包套餐 → 填写手机号 → 创建订单
@@ -41,8 +41,8 @@ module V051V100
   class V064BuyJapanDataPlan3dayValidator < BaseValidator
     self.validator_id = 'v064_buy_japan_data_plan_3day_validator'
     self.task_id = 'cae2d1e3-98d3-4b68-94c2-a90d2647e2cb'
-    self.title = '给张三购买日本流量包（3天天包）'
-    self.description = '搜索日本流量包产品，选择3天天包套餐（按天计费）并成功创建订单'
+    self.title = '给张三购买日本流量包（日本、3天、天包类型）'
+    self.description = '购买日本流量包（日本、3天、天包类型）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

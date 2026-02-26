@@ -2,13 +2,13 @@
 
 require_relative '../base_validator'
 
-# 验证用例73: 预订7天后深圳欢乐谷成人票（2张，最便宜）
+# 验证用例73: 给张三预订7天后深圳欢乐谷成人票（2张，最便宜）
 module V051V100
   class V073BookChengduHappyValleyNightTicketValidator < BaseValidator
     self.validator_id = 'v073_book_chengdu_happy_valley_night_ticket_validator'
     self.task_id = 'aa530ff5-edb9-4be1-866c-1ede13516233'
-    self.title = '给张三和李四预订7天后深圳欢乐谷成人票（最便宜）'
-    self.description = '预订深圳欢乐谷成人票并选择最便宜供应商'
+    self.title = '给张三预订7天后深圳欢乐谷成人票（2张，最便宜）'
+    self.description = '预订7天后深圳欢乐谷成人票（2张，最便宜）'
     self.timeout_seconds = 240
   
     def prepare

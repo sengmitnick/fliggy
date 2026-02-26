@@ -10,7 +10,7 @@ module V101V150
   class V145BookHotelPackageWithAirportDropoffValidator < BaseValidator
     self.validator_id = 'v145_book_hotel_package_with_airport_dropoff_validator'
     self.task_id = 'f5a6b7c8-9d0e-1f2a-3b4c-5d6e7f8a9b0c'
-    self.title = '给张三预订后天酒店套餐后预订送机服务（成都2晚）'
+    self.title = '帮张三预订后天成都酒店套餐，住2晚，退房当天预订送机服务'
     self.description = '帮张三预订后天成都酒店套餐，住2晚，退房当天预订送机服务'
     self.timeout_seconds = 300
 

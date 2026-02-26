@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例27: 预订明天上海到深圳任意航班
+# 验证用例27: 给张三预订明天上海到深圳任意航班
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索明天上海到深圳的航班，
@@ -23,8 +23,8 @@ module V001V050
   class V027BookAnyFlightShanghaiShenzhenValidator < BaseValidator
     self.validator_id = 'v027_book_any_flight_shanghai_shenzhen_validator'
     self.task_id = '4e165a52-184e-42c9-b89c-ef507e259ccb'
-    self.title = '给张三订明天上海到深圳任意航班'
-    self.description = '搜索明天上海到深圳的航班，选择任意一个航班并完成预订'
+    self.title = '给张三预订明天上海到深圳任意航班'
+    self.description = '预订明天上海到深圳任意航班'
     self.timeout_seconds = 240
   
     def prepare

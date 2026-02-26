@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例194: 预订明天出发的特价组合
+# 验证用例194: 给张三预订明天出发的特价组合
 #
 # 任务描述:
 #   预订明天出发的特价组合（航班+酒店）
@@ -18,8 +18,8 @@ module V151V200
   class V194BookLastMinuteDealDiscountComboValidator < BaseValidator
     self.validator_id = 'v194_book_last_minute_deal_discount_combo_validator'
     self.task_id = 'e5dc7f50-cb89-4ef1-baa8-81e296f08452'
-    self.title = '给刘强预订明天从北京到上海的特价组合（明天出发）'
-    self.description = '帮刘强订明天从北京到上海的特价组合（航班+酒店）'
+    self.title = '给张三预订明天出发的特价组合'
+    self.description = '预订明天出发的特价组合'
     self.timeout_seconds = 300
     
     def prepare

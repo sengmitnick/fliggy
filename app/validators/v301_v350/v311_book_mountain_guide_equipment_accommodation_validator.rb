@@ -16,7 +16,7 @@ module V301V350
   class V311BookMountainGuideEquipmentAccommodationValidator < BaseValidator
     self.validator_id = 'v311_book_mountain_guide_equipment_accommodation_validator'
     self.task_id = 'd31ed871-6c15-42f0-8fd0-3dfbeddca35e'
-    self.title = '给刘强和陈静预订华山登山套餐（6天后，2人，含门票+向导+住宿）'
+    self.title = '给张三刘强和陈静想6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
     self.description = '刘强和陈静想6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
     self.timeout_seconds = 300
     

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例104: 预订东南亚邮轮（爱达新星号，7天6晚，香港出发）
+# 验证用例104: 给张三预订东南亚邮轮（爱达新星号，7天6晚，香港出发）
 #
 # 核心验证点:
 # 1. 船只选择: 爱达新星号
@@ -15,8 +15,8 @@ module V101V150
   class V104BookSoutheastAsiaCruiseValidator < BaseValidator
     self.validator_id = 'v104_book_southeast_asia_cruise_validator'
     self.task_id = '8a7d1f3e-9c2b-4e85-a1f4-5d6c8e2b7a91'
-    self.title = '给王芳、刘强预订东南亚邮轮（爱达新星号7天、香港出发，海景房）'
-    self.description = '帮王芳和刘强订东南亚邮轮，要爱达新星号，7天6晚，香港出发，选最近的班次，海景房（性价比之选）'
+    self.title = '给张三预订东南亚邮轮（爱达新星号，7天6晚，香港出发）'
+    self.description = '预订东南亚邮轮（爱达新星号，7天6晚，香港出发）'
     self.timeout_seconds = 240
   
     def prepare

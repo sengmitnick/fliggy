@@ -18,7 +18,7 @@ module V251V300
   class V256BookRedEyeFlightCrossDayValidator < BaseValidator
     self.validator_id = 'v256_book_red_eye_flight_cross_day_validator'
     self.task_id = '4d5576f9-5f5f-4e9b-bf8f-9f1a2b3c4d5f'
-    self.title = '给张三预订红眼航班（后天北京→上海，23:00-次日02:00）'
+    self.title = '帮张三预订后天23:00-次日02:00从北京到上海的红眼航班，省钱实惠'
     self.description = '帮张三预订后天23:00-次日02:00从北京到上海的红眼航班，省钱实惠'
     self.timeout_seconds = 300
     

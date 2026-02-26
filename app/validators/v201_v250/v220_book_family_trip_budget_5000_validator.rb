@@ -16,7 +16,7 @@ module V201V250
   class V220BookFamilyTripBudget5000Validator < BaseValidator
     self.validator_id = 'v220_book_family_trip_budget_5000_validator'
     self.task_id = '7fc798fb-8f8f-8f0f-0f1f-9f2a3b4c5d6f'
-    self.title = '给张三预订3天后北京→三亚家庭出行套餐（2大1小+酒店2晚，总预算≤5000元）'
+    self.title = '帮张三订3天后从北京到三亚的家庭出行套餐（2大人1儿童）+酒店2晚，总预算不超过5000元'
     self.description = '帮张三订3天后从北京到三亚的家庭出行套餐（2大人1儿童）+酒店2晚，总预算不超过5000元'
     self.timeout_seconds = 300
     

@@ -22,7 +22,7 @@ module V251V300
   class V259BookHighRiskActivityWithInsuranceValidator < BaseValidator
     self.validator_id = 'v259_book_high_risk_activity_with_insurance_validator'
     self.task_id = '252c7d0b-4c3f-4877-9af0-1712884307df'
-    self.title = '给张三预订张家口崇礼万龙滑雪场（7天后，1人）：景点门票+滑雪装备租赁+运动保险'
+    self.title = '帮张三预订张家口崇礼万龙滑雪场，游玩日期为7天后，1人。需要购买：1）景点门票，2）滑雪装备租赁活动，3）包含滑雪场景保障的运动保险（保障期至少1天）'
     self.description = '帮张三预订张家口崇礼万龙滑雪场，游玩日期为7天后，1人。需要购买：1）景点门票，2）滑雪装备租赁活动，3）包含滑雪场景保障的运动保险（保障期至少1天）'
     self.timeout_seconds = 300
     
