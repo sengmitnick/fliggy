@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例51: 给张三预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）
+# 验证用例51: 给张三预订后天上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）
 # 
 # 任务描述:
 #   用户后天从北京飞往上海，需要在上海虹桥T2机场接机送到市区。
@@ -47,7 +47,7 @@ module V051V100
   class V051BookTransferServiceValidator < BaseValidator
     self.validator_id = 'v051_book_transfer_service_validator'
     self.task_id = 'fa751c19-28f4-4c7e-abdc-76fbef90ca1f'
-    self.title = '给张三预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
+    self.title = '给张三预订后天上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
     self.description = '预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
     self.timeout_seconds = 240
   

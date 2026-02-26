@@ -340,12 +340,18 @@
                   </div>
                 <% end %>
                 
-                <!-- Calendar Days (Current Month) -->
-                <% start_date = Time.zone.today %>
-                <% end_date = start_date.end_of_month %>
-                <% (start_date.beginning_of_month.wday).times do %>
-                  <div></div>
+                <!-- Calendar Days - Will be dynamically updated by Stimulus -->
+                <% 
+                  # Generate initial month (current month)
+                  start_date = Time.zone.today.beginning_of_month
+                  end_date = Time.zone.today.end_of_month
+                  
+                  # Add empty cells for days before month starts
+                  start_date.wday.times do
+                %>
+                  <div class="aspect-square"></div>
                 <% end %>
+                
                 <% (start_date..end_date).each do |date| %>
                   <% is_past = date < Time.zone.today %>
                   <% is_holiday = date.saturday? || date.sunday? %>
@@ -353,6 +359,7 @@
                           class="aspect-square rounded-lg text-sm flex flex-col items-center justify-center <%= is_past ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50' %>"
                           data-booking-modal-target="dateBtn"
                           data-date="<%= date.to_s %>"
+                          data-month="<%= date.month %>"
                           data-action="click->booking-modal#selectDate"
                           <%= 'disabled' if is_past %>>
                     <% if is_holiday && !is_past %>

@@ -34,11 +34,13 @@ locations_data = [
   
   # 上海
   { city: '上海', name: '虹桥国际机场T2航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: '虹桥T2', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '浦东国际机场T1航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '浦东国际机场T2航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海虹桥站西广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海虹桥站南广场接送中心', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海虹桥站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: '上海站', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '上海南站南广场停车场', location_type: 'train_station', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '陆家嘴金融区接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '陆家嘴金融区', location_type: 'other', created_at: timestamp, updated_at: timestamp },
