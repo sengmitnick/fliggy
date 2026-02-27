@@ -176,9 +176,15 @@ if demo_user.persisted?
         phone: '13300133001',
         email: 'chenjing@example.com',
         data_version: 0
+      },
+      {
+        name: '王五',
+        phone: '13700137000',
+        email: 'wangwu@example.com',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加联系人: 张三, 张建国, 李四, 王芳, 刘强, 小明, 小红, 陈静"
+    puts "     ✓ 添加联系人: 张三, 张建国, 李四, 王芳, 刘强, 小明, 小红, 陈静, 王五"
   end
   
   # 添加收货地址

@@ -49,11 +49,11 @@ module V051V100
     
       # 预查询用户和联系人（避免 simulate 中使用 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @contact = user.contacts.find_by!(name: '王五', data_version: 0)
+      @contact = user.contacts.find_by!(name: '王五')
       @expected_contact_name = @contact.name
       @expected_contact_phone = @contact.phone
       # 使用默认地址作为自取地址
-      default_address = user.addresses.find_by!(is_default: true, data_version: 0)
+      default_address = user.addresses.find_by!(is_default: true)
       @pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 查找符合条件的WiFi设备（注意：查询基线数据 data_version=0）
@@ -136,15 +136,25 @@ module V051V100
         expect(@order.delivery_method).to eq('pickup'),
           "配送方式不正确。预期: pickup（自取），实际: #{@order.delivery_method}"
         
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq(@expected_contact_name),
-          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq(@expected_contact_phone),
-          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{contact_info['phone']}"
+        # 支持Hash（Rails嵌套属性）和JSON字符串两种格式
+        contact_info = @order.contact_info
+        contact_info = JSON.parse(contact_info) if contact_info.is_a?(String)
         
-        delivery_info = JSON.parse(@order.delivery_info)
-        expect(delivery_info['address']).to include('北京', '朝阳'),
-          "自取地址不正确。预期包含: 北京朝阳, 实际: #{delivery_info['address']}"
+        actual_name = contact_info['name'] || contact_info[:name]
+        actual_phone = contact_info['phone'] || contact_info[:phone]
+        
+        expect(actual_name).to eq(@expected_contact_name),
+          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{actual_name}"
+        expect(actual_phone).to eq(@expected_contact_phone),
+          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{actual_phone}"
+        
+        # 支持Hash和JSON字符串两种格式
+        delivery_info = @order.delivery_info
+        delivery_info = JSON.parse(delivery_info) if delivery_info.is_a?(String)
+        
+        actual_address = delivery_info['address'] || delivery_info[:address]
+        expect(actual_address).to include('北京', '朝阳'),
+          "自取地址不正确。预期包含: 北京朝阳, 实际: #{actual_address}"
       end
     end
   
@@ -195,8 +205,8 @@ module V051V100
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 查找联系人（从 prepare 预查询的数据）
-      contact = user.contacts.find_by!(name: '王五', data_version: 0)
-      default_address = user.addresses.find_by!(is_default: true, data_version: 0)
+      contact = user.contacts.find_by!(name: '王五')
+      default_address = user.addresses.find_by!(is_default: true)
       pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 5. 创建订单
