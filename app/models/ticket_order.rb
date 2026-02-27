@@ -30,6 +30,9 @@ class TicketOrder < ApplicationRecord
   end
   
   def calculate_total_price
+    # Skip if total_price is already manually set (e.g., by validators)
+    return if total_price.present?
+    
     # Skip if no ticket or quantity
     return unless ticket && quantity
     
