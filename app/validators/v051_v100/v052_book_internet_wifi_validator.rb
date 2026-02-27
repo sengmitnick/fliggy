@@ -2,11 +2,11 @@
 
 require_relative '../base_validator'
 
-# 验证用例52: 预订境外随身WiFi（帮张三订去中国香港的WiFi）
+# 验证用例52: 帮张三预订去中国香港的随身WiFi（7天后取，租5天，选1台，北京朝阳区自取）
 # 
 # 任务描述:
 #   张三下周要去中国香港出差5天，需要租一台随身WiFi。
-#   帮他从可用的WiFi产品中选最便宜的，7天后到北京朝阳区自取。
+#   帮他从可用的WiFi产品中选最便宜的，7天后（2026-03-06）到北京朝阳区自取，租期5天（2026-03-06 至 2026-03-10）。
 #   联系人填张三。
 # 
 # 评分标准:
@@ -33,8 +33,8 @@ module V051V100
   class V052BookInternetWifiValidator < BaseValidator
     self.validator_id = 'v052_book_internet_wifi_validator'
     self.task_id = '05db4166-de34-4d4b-9078-6e672b53bb21'
-    self.title = '预订境外随身WiFi（帮张三订去中国香港的WiFi）'
-    self.description = '预订境外随身WiFi（帮张三订去中国香港的WiFi）'
+    self.title = '帮张三预订去中国香港的随身WiFi（7天后取，租5天，选1台，选最便宜，北京朝阳区自取）'
+    self.description = '帮张三预订去中国香港的随身WiFi，从可用产品中选最便宜的，7天后取件，租5天，选1台，北京朝阳区自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -57,11 +57,13 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "帮张三订去中国香港的随身WiFi，租1台用5天，选最便宜的",
+        task: "帮张三订去中国香港的随身WiFi，租1台用5天，选7天后取件（具体日期：#{(Date.current + 7.days).strftime('%Y-%m-%d')} 至 #{(Date.current + 11.days).strftime('%Y-%m-%d')}），选最便宜的",
+        rental_period: "#{(Date.current + 7.days).strftime('%Y-%m-%d')} 至 #{(Date.current + 11.days).strftime('%Y-%m-%d')}（共#{@rental_days}天）",
+        pickup_date: (Date.current + 7.days).strftime('%Y-%m-%d'),
+        return_date: (Date.current + 11.days).strftime('%Y-%m-%d'),
         rental_days: @rental_days,
         quantity: @quantity,
         delivery_method: "自取",
-        pickup_days_later: 7,
         contact_name: @contact_name,
         pickup_location: {
           city: @pickup_location.city,
@@ -118,6 +120,8 @@ module V051V100
       # 断言5: 租赁天数正确
       add_assertion "租赁天数正确（5天）", weight: 5 do
         actual_days = @internet_order.rental_info&.dig('rental_days') || @internet_order.rental_info&.dig(:rental_days)
+        # 容错处理：支持字符串和整数
+        actual_days = actual_days.to_i if actual_days.is_a?(String)
         expect(actual_days).to eq(@rental_days),
           "租赁天数错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
       end
@@ -134,10 +138,20 @@ module V051V100
         rental_info = @internet_order.rental_info.is_a?(String) ? (JSON.parse(@internet_order.rental_info) rescue {}) : (@internet_order.rental_info || {})
         actual_pickup_location = rental_info['pickup_location'] || rental_info[:pickup_location]
         
-        expect(actual_pickup_location).to include('北京'),
-          "取件地点应该在北京。实际: #{actual_pickup_location}"
-        expect(actual_pickup_location).to include('朝阳区'),
-          "取件地点应该在朝阳区。实际: #{actual_pickup_location}"
+        # 容错处理：支持字符串、Hash或 PickupLocation 对象
+        location_str = case actual_pickup_location
+                       when String
+                         actual_pickup_location
+                       when Hash
+                         actual_pickup_location.values.join(' ')
+                       else
+                         actual_pickup_location.to_s
+                       end
+        
+        expect(location_str).to include('北京'),
+          "取件地点应该在北京。实际: #{location_str}"
+        expect(location_str).to include('朝阳区'),
+          "取件地点应该在朝阳区。实际: #{location_str}"
       end
     
       # 断言8: 取件方式正确
