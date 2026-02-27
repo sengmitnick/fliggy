@@ -475,8 +475,8 @@ export default class extends Controller<HTMLElement> {
       return
     }
     
-    // 检查是否选择了自取点
-    if (!this.selectedPickupLocationId) {
+    // 验证自取点选择（仅自取模式需要）
+    if (this.currentDeliveryMethod === 'pickup' && !this.selectedPickupLocationId) {
       if (typeof (window as any).showToast === 'function') {
         (window as any).showToast('请先选择取件地址', 'warning')
       }
@@ -501,8 +501,11 @@ export default class extends Controller<HTMLElement> {
     const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
     const dateParams = `&start_date=${startDate}&end_date=${endDate}`
     const contactParams = `&contact_name=${encodeURIComponent(contactName)}&contact_phone=${encodeURIComponent(contactPhone)}`
-    const pickupParams = `&pickup_location_id=${this.selectedPickupLocationId}`
-    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${pickupParams}`
+    const deliveryParams = `&delivery_method=${this.currentDeliveryMethod}`
+    
+    // 只在自取模式下添加 pickup_location_id
+    const pickupParams = this.currentDeliveryMethod === 'pickup' ? `&pickup_location_id=${this.selectedPickupLocationId}` : ''
+    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${deliveryParams}${pickupParams}`
     window.location.href = url
   }
 }
