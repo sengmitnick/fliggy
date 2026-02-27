@@ -189,6 +189,12 @@
                 </div>
               </div>
               
+              <!-- Hidden fields for delivery_info (pickup location address) -->
+              <%= f.fields_for :delivery_info do |delivery| %>
+                <%= delivery.hidden_field :address, value: "#{pickup_location.city} #{pickup_location.district} #{pickup_location.detail}" %>
+                <%= delivery.hidden_field :method, value: "pickup" %>
+              <% end %>
+              
               <!-- WiFi联系人信息 -->
               <div class="mb-3">
                 <label class="font-bold text-base mb-2 block">联系人信息</label>
@@ -346,6 +352,12 @@
           <%= rental.hidden_field :rental_days, value: rental_days, data: { internet_order_form_target: "rentalDaysField" } %>
           <%= rental.hidden_field :pickup_date, value: pickup_date_value.to_s %>
           <%= rental.hidden_field :return_date, value: return_date_value.to_s %>
+          <% if params[:pickup_location_id].present? %>
+            <% pickup_loc = PickupLocation.find_by(id: params[:pickup_location_id]) %>
+            <% if pickup_loc %>
+              <%= rental.hidden_field :pickup_location, value: "#{pickup_loc.city} #{pickup_loc.district} #{pickup_loc.detail}" %>
+            <% end %>
+          <% end %>
         <% end %>
       </div>
     <% end %>

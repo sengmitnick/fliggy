@@ -247,7 +247,7 @@
     <!-- 联系人列表 -->
     <div class="space-y-2 max-h-96 overflow-y-auto">
       <% if current_user.contacts.any? %>
-        <% current_user.contacts.order(is_default: :desc, created_at: :desc).each do |contact| %>
+        <% current_user.contacts.order(is_default: :desc, name: :asc).each do |contact| %>
           <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if contact.is_default %>"
                data-action="click->wifi-booking#selectAddress"
                data-address-name="<%= contact.name %>"
