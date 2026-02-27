@@ -995,15 +995,29 @@ namespace :validator do
           validator: validator_name,
           error: '未找到任何 weight 定义',
           sum: 0,
-          weights: []
+          weights: [],
+          zero_count: 0
         }
-      elsif weights.sum != 100
-        weight_errors << {
-          validator: validator_name,
-          error: "权重总和为 #{weights.sum}，应该为 100",
-          sum: weights.sum,
-          weights: weights
-        }
+      else
+        zero_weights = weights.count { |w| w == 0 }
+        
+        if zero_weights > 0
+          weight_errors << {
+            validator: validator_name,
+            error: "发现 #{zero_weights} 个权重为0的断言（断言不能有0分）",
+            sum: weights.sum,
+            weights: weights,
+            zero_count: zero_weights
+          }
+        elsif weights.sum != 100
+          weight_errors << {
+            validator: validator_name,
+            error: "权重总和为 #{weights.sum}，应该为 100",
+            sum: weights.sum,
+            weights: weights,
+            zero_count: 0
+          }
+        end
       end
     end
     
@@ -1013,6 +1027,10 @@ namespace :validator do
       weight_errors.each do |error|
         puts "\n#{error[:validator]}"
         puts "  Error: #{error[:error]}"
+        if error[:zero_count] > 0
+          puts "  Zero weights: #{error[:zero_count]}/#{error[:weights].size} assertions"
+          puts "  🚨 All assertions MUST have non-zero weights"
+        end
         puts "  Weights: #{error[:weights].inspect}" if error[:weights].any?
         puts "  Sum: #{error[:sum]}"
       end
@@ -1021,7 +1039,7 @@ namespace :validator do
       puts "Please fix the weight sums before running simulations\n"
       exit 1
     else
-      puts "✅ All validators have correct weight sums (total = 100)\n"
+      puts "✅ All validators have correct weight sums (total = 100, no zero weights)\n"
     end
     
     # Step 7: 运行模拟测试
