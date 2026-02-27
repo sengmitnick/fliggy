@@ -49,11 +49,11 @@ module V051V100
     
       # 预查询用户和联系人（避免 simulate 中使用 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @contact = user.contacts.find_by!(name: '王五')
+      @contact = user.contacts.find_by!(name: '王五')  # DataVersionable default_scope already adds data_version filter
       @expected_contact_name = @contact.name
       @expected_contact_phone = @contact.phone
       # 使用默认地址作为自取地址
-      default_address = user.addresses.find_by!(is_default: true)
+      default_address = user.addresses.find_by!(is_default: true)  # DataVersionable default_scope already adds data_version filter
       @pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 查找符合条件的WiFi设备（注意：查询基线数据 data_version=0）
@@ -205,8 +205,8 @@ module V051V100
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 查找联系人（从 prepare 预查询的数据）
-      contact = user.contacts.find_by!(name: '王五')
-      default_address = user.addresses.find_by!(is_default: true)
+      contact = user.contacts.find_by!(name: '王五')  # DataVersionable default_scope already adds data_version filter
+      default_address = user.addresses.find_by!(is_default: true)  # DataVersionable default_scope already adds data_version filter
       pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 5. 创建订单
