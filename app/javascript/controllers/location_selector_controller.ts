@@ -425,7 +425,10 @@ export default class extends Controller<HTMLElement> {
 
     // Determine which types to show based on currentLocationType
     const shouldShowAirports = this.currentLocationType === 'airport' || !this.currentLocationType
-    const shouldShowStations = this.currentLocationType === 'station' || !this.currentLocationType
+    // Show stations for pickup (airport arrival can go to train stations)
+    const shouldShowStations = this.currentLocationType === 'station'
+      || this.currentLocationType === 'pickup'
+      || !this.currentLocationType
     const shouldShowOthers = !this.currentLocationType || this.currentLocationType === 'pickup' // Show others when type is not specified or when selecting pickup points
 
     // Airports
