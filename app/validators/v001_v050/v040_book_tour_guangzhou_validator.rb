@@ -16,13 +16,13 @@ require_relative '../base_validator'
 #   ❌ 天数+人员组成筛选，无价格限制
 # 
 # 评分标准:
-#   - 订单已创建 (25分)
-#   - 目的地正确（广州） (20分)
-#   - 出发日期正确（大后天） (15分)
-#   - 天数正确（4天3晚） (15分)
-#   - 人员组成正确（1成人1儿童） (20分)
-#   - 联系人信息正确（张三 13800138000） (5分)
-#   - 出行人信息正确（成人张三+儿童小明） (0分)
+#   - 订单已创建 (22分)
+#   - 目的地正确（广州） (18分)
+#   - 出发日期正确（大后天） (13分)
+#   - 天数正确（4天3晚） (13分)
+#   - 人员组成正确（1成人1儿童） (18分)
+#   - 联系人信息正确（张三 13800138000） (9分)
+#   - 出行人信息正确（成人张三+儿童小明） (7分)
 #
 module V001V050
   class V040BookTourGuangzhouValidator < BaseValidator
@@ -61,40 +61,39 @@ module V001V050
     end
   
     def verify
-      # 断言1: 订单已创建 (25分)
-      add_assertion "订单已创建", weight: 25 do
+      # 断言1: 订单已创建 (22分)
+      add_assertion "订单已创建", weight: 22 do
         all_tour_group_bookings = TourGroupBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
         expect(all_tour_group_bookings).not_to be_empty, "未找到任何TourGroupBooking记录"
         @booking = all_tour_group_bookings.first
-        # Replaced by expect(all_tour_group_bookings).not_to be_empty above, "未找到任何跟团游订单记录"
       end
     
       return unless @booking
     
-      # 断言2: 目的地正确（广州） (20分) - 核心评分项
-      add_assertion "目的地正确（#{@destination}）", weight: 20 do
+      # 断言2: 目的地正确（广州） (18分) - 核心评分项
+      add_assertion "目的地正确（#{@destination}）", weight: 18 do
         expect(@booking.tour_group_product.destination).to eq(@destination),
           "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      # 断言3: 出发日期正确（大后天） (15分)
-      add_assertion "出发日期正确（大后天）", weight: 15 do
+      # 断言3: 出发日期正确（大后天） (13分)
+      add_assertion "出发日期正确（大后天）", weight: 13 do
         departure_date = @booking.travel_date
         expect(departure_date).to eq(@departure_date),
           "出发日期不正确。期望: #{@departure_date}（大后天）, 实际: #{departure_date}"
       end
     
-      # 断言4: 天数正确（4天3晚） (15分)
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 15 do
+      # 断言4: 天数正确（4天3晚） (13分)
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 13 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
       end
     
-      # 断言5: 人员组成正确（1成人1儿童） (20分) - 核心评分项
-      add_assertion "人员组成正确（1成人1儿童）", weight: 20 do
+      # 断言5: 人员组成正确（1成人1儿童） (18分) - 核心评分项
+      add_assertion "人员组成正确（1成人1儿童）", weight: 18 do
         adult_ok = @booking.adult_count == @adult_count
         child_ok = @booking.child_count == @child_count
       
@@ -102,16 +101,16 @@ module V001V050
           "人员组成不正确。期望: #{@adult_count}成人#{@child_count}儿童, 实际: #{@booking.adult_count}成人#{@booking.child_count}儿童"
       end
     
-      # 断言6: 联系人信息正确（张三 13800138000） (5分)
-      add_assertion "联系人信息正确（张三 13800138000）", weight: 5 do
+      # 断言6: 联系人信息正确（张三 13800138000） (9分)
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 9 do
         expect(@booking.contact_name).to eq('张三'),
           "联系人姓名错误。期望: 张三, 实际: #{@booking.contact_name}"
         expect(@booking.contact_phone).to eq('13800138000'),
           "联系电话错误。期望: 13800138000, 实际: #{@booking.contact_phone}"
       end
     
-      # 断言7: 出行人信息正确（成人张三+儿童小明） (0分)
-      add_assertion "出行人信息正确（成人张三+儿童小明）", weight: 0 do
+      # 断言7: 出行人信息正确（成人张三+儿童小明） (7分)
+      add_assertion "出行人信息正确（成人张三+儿童小明）", weight: 7 do
         travelers = @booking.booking_travelers.where(data_version: @data_version)
         expect(travelers.size).to eq(2), "出行人数量错误。期望: 2人, 实际: #{travelers.size}人"
         
@@ -201,5 +200,5 @@ module V001V050
     
       { action: 'create_tour_booking', tour_name: target_tour.title, adults: @adult_count, children: @child_count }
     end
-    end
+  end
 end

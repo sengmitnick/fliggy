@@ -8,16 +8,16 @@ require_relative '../base_validator'
 #   用户需要预订3天后从北京到上海的航班，并购买交通意外险（必须包含航班延误保障）
 #
 # 评分标准:
-#   - 创建了航班订单 (20分) - 核心评分项
-#   - 创建了保险订单 (15分)
-#   - 航班日期正确（3天后）(15分)
-#   - 用户一致性（航班和保险为同一用户）(10分)
-#   - 保险日期与航班日期匹配 (10分)
-#   - 保险类型正确（交通意外险）(15分) - 核心评分项
-#   - 乘客信息正确（张三）(10分)
-#   - 保险被保险人信息正确 (0分)
-#   - 保险包含延误保障 (0分)
-#   - 订单状态有效 (5分)
+#   - 创建了航班订单 (18分) - 核心评分项
+#   - 创建了保险订单 (14分)
+#   - 航班日期正确（3天后）(14分)
+#   - 用户一致性（航班和保险为同一用户）(9分)
+#   - 保险日期与航班日期匹配 (9分)
+#   - 保险类型正确（交通意外险）(14分) - 核心评分项
+#   - 乘客信息正确（张三）(9分)
+#   - 保险被保险人信息正确 (5分)
+#   - 保险包含延误保障 (5分)
+#   - 订单状态有效 (3分)
 module V251V300
   class V262BookFlightWithDelayAndLuggageInsuranceValidator < BaseValidator
     self.validator_id = 'v262_book_flight_with_delay_and_luggage_insurance_validator'
@@ -68,8 +68,8 @@ module V251V300
     end
     
     def verify
-      # 断言1: 创建了航班订单 (20分) - 核心评分项
-      add_assertion "创建了航班订单", weight: 20 do
+      # 断言1: 创建了航班订单 (18分) - 核心评分项
+      add_assertion "创建了航班订单", weight: 18 do
         all_bookings = Booking
           .joins(:flight)
           .includes(:flight)
@@ -83,8 +83,8 @@ module V251V300
       
       return if @flight_booking.nil?
       
-      # 断言2: 创建了保险订单 (15分)
-      add_assertion "创建了保险订单", weight: 15 do
+      # 断言2: 创建了保险订单 (14分)
+      add_assertion "创建了保险订单", weight: 14 do
         @insurance_order = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -95,15 +95,15 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      # 断言3: 航班日期正确（3天后） (15分)
-      add_assertion "航班日期正确（#{@travel_date}，3天后）", weight: 15 do
+      # 断言3: 航班日期正确（3天后） (14分)
+      add_assertion "航班日期正确（#{@travel_date}，3天后）", weight: 14 do
         flight_date = @flight_booking.flight.departure_time.to_date
         expect(flight_date).to eq(@travel_date),
           "航班日期错误。期望: #{@travel_date}（3天后），实际: #{flight_date}"
       end
       
-      # 断言4: 用户一致性（航班和保险为同一用户） (10分)
-      add_assertion "用户一致性（航班和保险为同一用户）", weight: 10 do
+      # 断言4: 用户一致性（航班和保险为同一用户） (9分)
+      add_assertion "用户一致性（航班和保险为同一用户）", weight: 9 do
         flight_user_id = @flight_booking.user_id
         insurance_user_id = @insurance_order.user_id
         
@@ -111,8 +111,8 @@ module V251V300
           "用户不一致。航班订单用户ID: #{flight_user_id}，保险订单用户ID: #{insurance_user_id}"
       end
       
-      # 断言5: 保险日期与航班日期匹配 (10分)
-      add_assertion "保险日期与航班日期匹配", weight: 10 do
+      # 断言5: 保险日期与航班日期匹配 (9分)
+      add_assertion "保险日期与航班日期匹配", weight: 9 do
         flight_date = @flight_booking.flight.departure_time.to_date
         insurance_start_date = @insurance_order.start_date
         
@@ -120,29 +120,29 @@ module V251V300
           "保险日期与航班日期不匹配。航班日期: #{flight_date}，保险起始日期: #{insurance_start_date}"
       end
       
-      # 断言6: 保险类型正确（交通意外险） (15分) - 核心评分项
-      add_assertion "保险类型正确（交通意外险）", weight: 15 do
+      # 断言6: 保险类型正确（交通意外险） (14分) - 核心评分项
+      add_assertion "保险类型正确（交通意外险）", weight: 14 do
         product_type = @insurance_order.insurance_product.product_type
         expect(product_type).to eq('transport'),
           "保险类型错误。航班需购买交通意外险。期望: transport，实际: #{product_type}"
       end
       
-      # 断言7: 乘客信息正确（张三） (10分)
-      add_assertion "乘客信息正确（张三）", weight: 10 do
+      # 断言7: 乘客信息正确（张三） (9分)
+      add_assertion "乘客信息正确（张三）", weight: 9 do
         expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
           "乘客姓名错误。期望: #{@expected_passenger_name}，实际: #{@flight_booking.passenger_name}"
       end
       
-      # 断言8: 保险被保险人信息正确 (0分)
-      add_assertion "保险被保险人信息正确", weight: 0 do
+      # 断言8: 保险被保险人信息正确 (5分)
+      add_assertion "保险被保险人信息正确", weight: 5 do
         insured_persons = @insurance_order.insured_persons || []
         actual_names = insured_persons.map { |p| p.is_a?(Hash) ? p['name'] : p }.compact
         expect(actual_names).to include(@expected_passenger_name),
           "被保险人信息错误。期望包含: #{@expected_passenger_name}，实际: #{actual_names.join('、')}"
       end
       
-      # 断言9: 保险包含延误保障 (0分)
-      add_assertion "保险包含延误保障", weight: 0 do
+      # 断言9: 保险包含延误保障 (5分)
+      add_assertion "保险包含延误保障", weight: 5 do
         scenes = @insurance_order.insurance_product.scenes || []
         has_delay_coverage = scenes.include?('航班延误保障') || 
                              scenes.include?('航空保障') ||
@@ -152,7 +152,7 @@ module V251V300
           "保险不包含延误保障。保险场景: #{scenes.inspect}，需要包含'航班延误保障'或'航空保障'"
       end
       
-      add_assertion "订单状态有效", weight: 5 do
+      add_assertion "订单状态有效", weight: 3 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@insurance_order.status).to be_in(['pending', 'paid'])
       end
