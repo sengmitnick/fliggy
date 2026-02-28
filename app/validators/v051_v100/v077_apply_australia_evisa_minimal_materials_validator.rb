@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例77: 给张三办理澳大利亚电子签证（1人，材料最少，邮寄方式）
+# 验证用例77: 给王芳办理澳大利亚电子签证（1人，材料最少，邮寄方式）
 # 
 # 任务描述:
 #   Agent 需要办理澳大利亚电子签证，
@@ -13,16 +13,17 @@ require_relative '../base_validator'
 #   2. 需要选择"旅游签证"类型
 #   3. 需要对比所需材料数量（material_count）
 #   4. 需要选择材料数量最少的产品
-#   5. 使用邮寄方式（delivery_method: 'mail'）
+#   5. （已删除邮寄方式验证 - 签证业务仅支持邮寄，无需验证）
 #   ❌ 不能一次性提供：需要先搜索→筛选类型→对比材料数
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 国家正确（澳大利亚）(15分)
 #   - 签证类型正确（旅游签证）(15分)
-#   - 使用邮寄方式 (20分)
-#   - 选择了所需材料最少的产品 (25分)
-#   - 联系人和地址信息正确 (5分)
+#   - 选择了所需材料最少的产品 (30分) - 核心评分项
+#   - 订单价格正确 (12分)
+#   - 联系人姓名正确（王芳）(5分)
+#   - 联系电话正确（王芳的电话）(3分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -36,8 +37,8 @@ module V051V100
   class V077ApplyAustraliaEvisaMinimalMaterialsValidator < BaseValidator
     self.validator_id = 'v077_apply_australia_evisa_minimal_materials_validator'
     self.task_id = '0c821879-db54-42b8-9526-3336bb7af223'
-    self.title = '给张三办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
-    self.description = '办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
+    self.title = '给王芳办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
+    self.description = '给王芳办理澳大利亚电子签证（1人，材料最少，邮寄方式）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -64,11 +65,11 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请办理#{@country_name}#{@product_type}（#{@traveler_count}人），选择所需材料最少的产品，使用邮寄方式",
+        task: "请办理#{@country_name}#{@product_type}（#{@traveler_count}人），选择所需材料最少的产品",
         country_name: @country_name,
         product_type: @product_type,
         traveler_count: @traveler_count,
-        hint: "澳大利亚旅游签证为电子签证，无需邮寄护照原件。请选择所需材料数量（material_count）最少的产品，并使用邮寄方式（delivery_method: 'mail'）",
+        hint: "澳大利亚旅游签证为电子签证，无需邮寄护照原件。请选择所需材料数量（material_count）最少的产品",
         available_products_count: @available_products.count,
         note: "材料越少办理越便捷，邮寄方式需要填写收货地址"
       }
@@ -104,16 +105,8 @@ module V051V100
           "澳大利亚旅游签证为电子签证，无需邮寄护照原件"
       end
     
-      # 断言4: 使用邮寄方式
-      add_assertion "使用邮寄方式", weight: 20 do
-        delivery_method = @visa_order.delivery_method
-      
-        expect(delivery_method).to eq('mail'),
-          "配送方式错误。期望: mail（邮寄），实际: #{delivery_method}"
-      end
-    
-      # 断言5: 选择了所需材料最少的产品（核心评分项）
-      add_assertion "选择了所需材料最少的产品", weight: 25 do
+      # 断言4: 选择了所需材料最少的产品（核心评分项）
+      add_assertion "选择了所需材料最少的产品", weight: 30 do
         # 获取所有澳大利亚旅游签证产品
         australia = Country.find_by(name: @country_name, data_version: 0)
         all_products = VisaProduct.where(
@@ -133,26 +126,25 @@ module V051V100
           "实际选择: #{@visa_order.visa_product.name}（需要#{actual_count}种材料，#{@visa_order.visa_product.processing_days}个工作日，#{@visa_order.visa_product.price}元）"
       end
     
+      # 断言5: 订单价格正确
+      add_assertion "订单价格正确", weight: 12 do
+        expected_total = @visa_order.visa_product.price * @visa_order.traveler_count
+        actual_total = @visa_order.total_price
+      
+        expect(actual_total).to eq(expected_total),
+          "订单总价错误。期望: #{expected_total}元（单价#{@visa_order.visa_product.price}元 × #{@visa_order.traveler_count}人），实际: #{actual_total}元"
+      end
+    
       # 断言6: 联系人姓名正确（王芳）
-      add_assertion "联系人姓名正确（王芳）", weight: 2 do
+      add_assertion "联系人姓名正确（王芳）", weight: 5 do
         expect(@visa_order.contact_name).to eq('王芳'),
           "联系人姓名错误。期望: 王芳，实际: #{@visa_order.contact_name}"
       end
     
       # 断言7: 联系电话正确（王芳的电话）
-      add_assertion "联系电话正确（王芳的电话）", weight: 2 do
+      add_assertion "联系电话正确（王芳的电话）", weight: 3 do
         expect(@visa_order.contact_phone).to eq('13700137001'),
           "联系电话错误。期望: 13700137001（王芳），实际: #{@visa_order.contact_phone}"
-      end
-    
-      # 断言8: 收货地址与联系人匹配
-      add_assertion "收货地址与联系人匹配", weight: 1 do
-        # 王芳地址: 广东省广州天河区珠江新城花城大道85号
-        expected_pattern = /广东.*广州.*天河.*85/
-        actual_address = @visa_order.delivery_address || ''
-      
-        expect(actual_address).to match(expected_pattern),
-          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
       end
     end
   
