@@ -19,8 +19,8 @@ module V251V300
   class V294BookVegetarianServiceValidator < BaseValidator
     self.validator_id = 'v294_book_vegetarian_service_validator'
     self.task_id = 'd91a0668-9efb-4c74-b6f2-78d678ebde69'
-    self.title = '给张三预订含早餐服务的旅游'
-    self.description = '给张三预订含早餐服务的旅游'
+    self.title = '给张三预订含早餐服务的旅游（8天后峨眉山，含早餐酒店）'
+    self.description = '帮张三订8天后的峨眉山跟团游，需要配备早餐的酒店'
     self.timeout_seconds = 300
     
     def prepare

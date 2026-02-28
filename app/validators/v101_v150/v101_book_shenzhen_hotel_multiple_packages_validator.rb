@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例101: 给张三囤货深圳地区酒店套餐（2晚，2份，含早餐）
+# 验证用例101: 囤货深圳地区酒店套餐（2晚，2份，含早餐）
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索深圳地区的酒店套餐，
@@ -39,8 +39,8 @@ module V101V150
   class V101BookShenzhenHotelMultiplePackagesValidator < BaseValidator
     self.validator_id = 'v101_book_shenzhen_hotel_multiple_packages_validator'
     self.task_id = 'b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e'
-    self.title = '给张三囤货深圳地区酒店套餐（2晚，2份，含早餐）'
-    self.description = '囤货深圳地区酒店套餐（2晚，2份，含早餐）'
+    self.title = '帮张三囤货深圳的2晚酒店套餐，要买2份（先囤后约的那种），选含早餐的选项，性价比高一点的'
+    self.description = '帮张三囤货深圳的2晚酒店套餐，要买2份（先囤后约的那种），选含早餐的选项，性价比高一点的'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数

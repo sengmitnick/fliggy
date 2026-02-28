@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例278: 给张三囤酒店套餐
+# 验证用例278: 囤酒店套餐
 #
 # 任务描述:
 #   用户购买酒店套餐（2晚连住通兑），囤起来以后用
@@ -16,8 +16,8 @@ module V251V300
   class V278RedeemHotelStayPromotionPackageValidator < BaseValidator
     self.validator_id = 'v278_redeem_hotel_stay_promotion_package_validator'
     self.task_id = '64e513f9-454d-4346-af2b-cc7b87b03178'
-    self.title = '给张三囤酒店套餐'
-    self.description = '囤酒店套餐'
+    self.title = '给张三囤万豪酒店套餐（2晚连住）'
+    self.description = '帮张三囤2晚连住酒店套餐，有效期内随时使用'
     self.timeout_seconds = 300
     
     def prepare

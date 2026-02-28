@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例117: 给张三预订日韩邮轮（地中海辉煌号，7天6晚，2月出发，内舱房）
+# 验证用例117: 预订日韩邮轮（地中海辉煌号，7天6晚，2月出发，内舱房）
 #
 # 测试内容：
 # - 邮轮筛选（地中海辉煌号/MSC Cruises）
@@ -20,8 +20,8 @@ module V101V150
   class V117BookHongkongJapanKoreaBellissimaCruiseInteriorValidator < BaseValidator
     self.validator_id = 'v117_book_hongkong_japan_korea_bellissima_cruise_interior_validator'
     self.task_id = 'eb47869c-0c0f-4f08-b97a-49fa29721261'
-    self.title = '给张三预订日韩邮轮（地中海辉煌号，7天6晚，2月出发，内舱房）'
-    self.description = '预订日韩邮轮（地中海辉煌号，7天6晚，2月出发，内舱房）'
+    self.title = '帮张三预订日韩邮轮航线，选择地中海辉煌号（米其林星级餐厅邮轮）2月份最近一班7天6晚行程，预订内舱房（性价比之选），为2位成人'
+    self.description = '帮张三预订日韩邮轮航线，选择地中海辉煌号（米其林星级餐厅邮轮）2月份最近一班7天6晚行程，预订内舱房（性价比之选），为2位成人'
     self.timeout_seconds = 240
 
     def prepare

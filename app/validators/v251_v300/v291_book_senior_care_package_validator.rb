@@ -18,8 +18,8 @@ module V251V300
   class V291BookSeniorCarePackageValidator < BaseValidator
     self.validator_id = 'v291_book_senior_care_package_validator'
     self.task_id = '09a76fc5-3c70-446f-a35e-e52d8ed218f9'
-    self.title = '给张建国（老人）预订九寨沟跟团游（含老年人保险）'
-    self.description = '给张建国（老人）预订九寨沟跟团游（含老年人保险）'
+    self.title = '帮张建国老人订10天后出发的九寨沟跟团游，他65岁了，需要适老化服务和老年人专用保险'
+    self.description = '帮张建国老人订10天后出发的九寨沟跟团游，他65岁了，需要适老化服务和老年人专用保险'
     self.timeout_seconds = 300
     
     def prepare

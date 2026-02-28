@@ -19,8 +19,8 @@ module V301V350
   class V301BookSportsFitnessTourValidator < BaseValidator
     self.validator_id = 'v301_book_sports_fitness_tour_validator'
     self.task_id = 'c0e90a56-cd9b-4ef3-8486-8bc3e076e331'
-    self.title = '给李四预订深圳运动健身度假酒店'
-    self.description = '给李四预订深圳运动健身度假酒店'
+    self.title = '给李四预订深圳运动健身度假酒店（6天后，4晚）'
+    self.description = '李四是健身爱好者，想订深圳的运动健身度假，要健身房和游泳池'
     self.timeout_seconds = 300
     
     def prepare

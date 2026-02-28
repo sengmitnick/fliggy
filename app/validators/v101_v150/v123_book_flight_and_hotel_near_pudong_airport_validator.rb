@@ -7,7 +7,7 @@ module V101V150
   class V123BookFlightAndHotelNearPudongAirportValidator < BaseValidator
   self.validator_id = 'v123_book_flight_and_hotel_near_pudong_airport_validator'
   self.task_id = 'b3c4d5e6-7a8b-9c0d-1e2f-3a4b5c6d7e8f'
-  self.title = '帮张三订后天从北京飞上海的航班，并在浦东国际机场附近订酒店（航班当天入住1晚）'
+  self.title = '给张三预订后天北京→上海航班+浦东机场附近酒店（当天入住1晚）'
   self.description = '帮张三订后天从北京飞上海的航班，并在浦东国际机场附近订酒店（航班当天入住1晚）'
   self.timeout_seconds = 300
 

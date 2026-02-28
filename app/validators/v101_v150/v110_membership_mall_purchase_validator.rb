@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例110: 给张三会员商城购买商品（限定50里程预算）
+# 验证用例110: 会员商城购买商品（限定50里程预算）
 #
 # 任务描述:
 #   用户有50里程预算，需要在会员商城自主选择合适的热门商品，使用里程+现金混合支付
@@ -22,8 +22,8 @@ module V101V150
   class V110MembershipMallPurchaseValidator < BaseValidator
     self.validator_id = 'v110_membership_mall_purchase_validator'
     self.task_id = 'd00512b3-662a-4fb1-bd9f-30b245119d85'
-    self.title = '给张三会员商城购买商品（限定50里程预算）'
-    self.description = '会员商城购买商品（限定50里程预算）'
+    self.title = '给张三在会员商城买商品（北京配送，50里程预算1个）'
+    self.description = '帮张三在会员商城买热门商品，用里程+现金混合支付，里程不能超过50，配送到北京朝阳区'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数

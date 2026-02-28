@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例182: 给张三预订中转航班和中转城市酒店休息
+# 验证用例182: 预订中转航班和中转城市酒店休息
 #
 # 任务描述:
 #   用户需要预订中转航班（间隔>6小时），并在中转城市预订酒店休息
@@ -23,8 +23,8 @@ module V151V200
   class V182BookTransferFlightAndTransitHotelValidator < BaseValidator
     self.validator_id = 'v182_book_transfer_flight_and_transit_hotel_validator'
     self.task_id = '9aedf66b-ff40-41d2-9ff5-3e63982462a1'
-    self.title = '给张三预订中转航班和中转城市酒店休息'
-    self.description = '预订中转航班和中转城市酒店休息'
+    self.title = '给陈静预订明天北京经上海中转到深圳的航班，并预订上海中转酒店休息'
+    self.description = '帮陈静订明天从北京经上海中转到深圳的航班（中转时间>6小时），并在上海预订酒店休息'
     self.timeout_seconds = 300
   
     def prepare

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例189: 给张三预订总价最低的交通+酒店组合
+# 验证用例189: 预订总价最低的交通+酒店组合
 #
 # 任务描述:
 #   预订总价最低的往返交通+酒店组合
@@ -17,8 +17,8 @@ module V151V200
   class V189BookCheapestComboOptimizeTotalPriceValidator < BaseValidator
     self.validator_id = 'v189_book_cheapest_combo_optimize_total_price_validator'
     self.task_id = 'bba54fa4-35b4-4a29-942d-dd4d80abcd6d'
-    self.title = '给张三预订总价最低的交通+酒店组合'
-    self.description = '预订总价最低的交通+酒店组合'
+    self.title = '给李四预订明天总价最低的交通+酒店组合'
+    self.description = '帮李四预订明天从北京到上海的往返交通+酒店，总价要最低'
     self.timeout_seconds = 300
     
     def prepare

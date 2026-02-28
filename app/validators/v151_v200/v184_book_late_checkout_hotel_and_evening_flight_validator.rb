@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例184: 给张三预订延迟退房酒店和晚班航班
+# 验证用例184: 预订延迟退房酒店和晚班航班
 #
 # 任务描述:
 #   用户需要预订支持延迟退房（下午2点后）的酒店，并预订晚上的航班
@@ -23,8 +23,8 @@ module V151V200
   class V184BookLateCheckoutHotelAndEveningFlightValidator < BaseValidator
     self.validator_id = 'v184_book_late_checkout_hotel_and_evening_flight_validator'
     self.task_id = '2fc00235-eef6-4b3e-ab69-d838b5038fd8'
-    self.title = '给张三预订延迟退房酒店和晚班航班'
-    self.description = '预订延迟退房酒店和晚班航班'
+    self.title = '给张建国预订今晚上海延迟退房酒店，并预订明天晚上到北京的航班'
+    self.description = '帮张建国在上海预订支持延迟退房（下午2点后）的酒店，入住今晚，明天退房，并订明天晚上从上海到北京的航班'
     self.timeout_seconds = 300
   
     def prepare

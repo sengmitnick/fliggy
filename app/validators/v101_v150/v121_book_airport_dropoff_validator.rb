@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例121: 给张三预订送机服务
+# 验证用例121: 预订送机服务
 #
 # 任务描述:
 #   用户预订了从上海陆家嘴到浦东国际机场T2航站楼的送机服务（明天上午06:00出发）。
@@ -36,8 +36,8 @@ module V101V150
   class V121BookAirportDropoffValidator < BaseValidator
     self.validator_id = 'v121_book_airport_dropoff_validator'
     self.task_id = 'a8feeb5f-ef73-4817-919f-ee843937f5d8'
-    self.title = '给张三预订送机服务'
-    self.description = '预订送机服务'
+    self.title = '帮张三预订明天上午06:00从陆家嘴金融区到浦东机场T2航站楼的送机服务，搭乘航班飞成都'
+    self.description = '帮张三预订明天上午06:00从陆家嘴金融区到浦东机场T2航站楼的送机服务，搭乘航班飞成都'
     self.timeout_seconds = 300
   
     def prepare

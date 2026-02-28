@@ -9,7 +9,7 @@ module V151V200
   class V168BookOutboundTrainReturnFlightAndHotelValidator < BaseValidator
     self.validator_id = 'v168_book_outbound_train_return_flight_and_hotel_validator'
     self.task_id = 'f8a9b0c1-2d3e-4f5a-6b7c-8d9e0f1a2b3c'
-    self.title = '给张三预订明天上海到杭州的火车，预订后天杭州回上海的航班，并预订杭州酒店1晚'
+    self.title = '给张三预订明天去程火车+返程航班+上海→杭州→上海酒店1晚'
     self.description = '预订明天上海到杭州的火车，预订后天杭州回上海的航班，并预订杭州酒店1晚'
     self.timeout_seconds = 300
 

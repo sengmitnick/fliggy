@@ -18,8 +18,8 @@ module V251V300
   class V298BookWeddingHoneymoonPackageValidator < BaseValidator
     self.validator_id = 'v298_book_wedding_honeymoon_package_validator'
     self.task_id = '2202ed38-54cf-48f7-8fe6-190608cc46c7'
-    self.title = '给刘强和陈静预订三亚蜜月套餐'
-    self.description = '给刘强和陈静预订三亚蜜月套餐'
+    self.title = '给刘强和陈静预订三亚蜜月套餐（10天后，2人）'
+    self.description = '刘强和陈静新婚要去三亚度蜜月，订个高端豪华的跟团游和高评分酒店'
     self.timeout_seconds = 300
     
     def prepare

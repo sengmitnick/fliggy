@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例200: 给张三预订景区内酒店+包车游览
+# 验证用例200: 预订景区内酒店+包车游览
 #
 # 任务描述:
 #   预订景区内酒店+包车游览服务
@@ -18,8 +18,8 @@ module V151V200
   class V200BookScenicResortAndCharterTourValidator < BaseValidator
     self.validator_id = 'v200_book_scenic_resort_and_charter_tour_validator'
     self.task_id = '1c8e72f9-d895-4e13-9e5d-912749a6b8c5'
-    self.title = '给张三预订景区内酒店+包车游览'
-    self.description = '预订景区内酒店+包车游览'
+    self.title = '给王芳预订明天上海景区内酒店+包车游览'
+    self.description = '帮王芳订明天上海景区内的酒店+包车游览服务'
     self.timeout_seconds = 300
     
     def prepare

@@ -19,8 +19,8 @@ module V301V350
   class V304BookWellnessResortTourValidator < BaseValidator
     self.validator_id = 'v304_book_wellness_resort_tour_validator'
     self.task_id = 'd4804253-c7b6-42bc-a79b-2035d534f476'
-    self.title = '给刘强和陈静预订杭州养生度假酒店'
-    self.description = '给刘强和陈静预订杭州养生度假酒店'
+    self.title = '给刘强和陈静预订杭州养生度假酒店（8天后，≥3晚，含温泉SPA）'
+    self.description = '刘强和陈静想订杭州的养生度假，要温泉、SPA服务和高端养生酒店'
     self.timeout_seconds = 300
     
     def prepare

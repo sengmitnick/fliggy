@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例122: 给张三预订送站服务
+# 验证用例122: 预订送站服务
 #
 # 任务描述:
 #   用户预订了从上海外滩到上海虹桥火车站的送站服务（后天下午14:00出发）。
@@ -35,8 +35,8 @@ module V101V150
   class V122BookStationDropoffValidator < BaseValidator
     self.validator_id = 'v122_book_station_dropoff_validator'
     self.task_id = 'b7afcc22-6dff-4fb6-a389-a675def90300'
-    self.title = '给张三预订送站服务'
-    self.description = '预订送站服务'
+    self.title = '给李四预订后天送站服务（上海外滩→上海虹桥站，14:00出发）'
+    self.description = '帮李四预订后天下午14:00从外滩到上海虹桥火车站的送站服务'
     self.timeout_seconds = 300
   
     def prepare

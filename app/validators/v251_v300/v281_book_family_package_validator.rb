@@ -18,8 +18,8 @@ module V251V300
   class V281BookFamilyPackageValidator < BaseValidator
     self.validator_id = 'v281_book_family_package_validator'
     self.task_id = '97f3e67d-07f1-4e31-b1bc-0f6b87f0d09f'
-    self.title = '给张三一家预订亲子旅游套餐'
-    self.description = '给张三一家预订亲子旅游套餐'
+    self.title = '给张三、王芳和小明（9岁）预订包含亲子活动的跟团游套餐'
+    self.description = '给张三、王芳和小明（9岁）预订包含亲子活动的跟团游套餐'
     self.timeout_seconds = 300
     
     def prepare

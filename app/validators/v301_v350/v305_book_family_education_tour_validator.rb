@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例305: 给张三预订亲子教育游
+# 验证用例305: 预订亲子教育游
 #
 # 任务描述:
 #   用户预订亲子教育游(科技馆+动物园+互动课程)
@@ -19,8 +19,8 @@ module V301V350
   class V305BookFamilyEducationTourValidator < BaseValidator
     self.validator_id = 'v305_book_family_education_tour_validator'
     self.task_id = '5134922f-5d41-431e-b1f0-36ea208edf7f'
-    self.title = '给张三预订亲子教育游'
-    self.description = '预订亲子教育游'
+    self.title = '刘强、陈静带着小明想去北京玩亲子教育游，12天后出发，要科技馆、博物馆这类教育景点，行程至少2天，2大1小家庭套票'
+    self.description = '刘强、陈静带着小明想去北京玩亲子教育游，12天后出发，要科技馆、博物馆这类教育景点，行程至少2天，2大1小家庭套票'
     self.timeout_seconds = 300
     
     def prepare

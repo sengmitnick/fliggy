@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例176: 给张三预订凌晨航班和机场酒店
+# 验证用例176: 预订凌晨航班和机场酒店
 #
 # 任务描述:
 #   用户需要预订凌晨5-7点的航班，并在前一晚入住机场附近酒店
@@ -33,8 +33,8 @@ module V151V200
   class V176BookEarlyMorningFlightAndAirportHotelValidator < BaseValidator
     self.validator_id = 'v176_book_early_morning_flight_and_airport_hotel_validator'
     self.task_id = '1bf22b0b-0ed2-4d40-a704-15a738206a48'
-    self.title = '给张三预订凌晨航班和机场酒店'
-    self.description = '预订凌晨航班和机场酒店'
+    self.title = '给陈静预订明天凌晨北京到上海的航班，并预订今晚机场附近酒店'
+    self.description = '帮陈静订明天凌晨5-7点北京到上海的航班，因为是早班机，今晚先住机场附近酒店'
     self.timeout_seconds = 300
   
     def prepare

@@ -19,8 +19,8 @@ module V251V300
   class V297BookBusinessConferencePackageValidator < BaseValidator
     self.validator_id = 'v297_book_business_conference_package_validator'
     self.task_id = 'e83b5fa7-c5d9-41e8-a0cd-f1435c06ce7b'
-    self.title = '给李四预订北京商务出行套餐（机票+酒店）'
-    self.description = '给李四预订北京商务出行套餐（机票+酒店）'
+    self.title = '给李四预订北京商务出行套餐（5天后，商务舱机票+酒店）'
+    self.description = '李四要去北京商务出行，订商务舱机票和商务型酒店，住3晚'
     self.timeout_seconds = 300
     
     def prepare

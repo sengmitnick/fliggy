@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例106: 给张三预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
+# 验证用例106: 预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
 #
 # 核心验证点:
 # 1. 订单创建: 邮轮订单创建成功
@@ -15,8 +15,8 @@ module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
     self.task_id = 'b2c4e7f9-1d6a-4b8e-9c3f-5a7e2d8f1b94'
-    self.title = '给张三预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
-    self.description = '预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）'
+    self.title = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐+主厨晚餐）'
+    self.description = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐'
     self.timeout_seconds = 240
   
     def prepare
@@ -120,6 +120,25 @@ module V101V150
         expected_phone = @valid_contact_phones[@order.contact_name]
         expect(@order.contact_phone).to eq(expected_phone),
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
+      end
+    
+      # 断言7: 选择了最近日期的班次（权重0%）- 不计分，仅用于记录
+      add_assertion "选择了最近日期的班次", weight: 0 do
+        ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
+        japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
+      
+        available_sailings = CruiseSailing.where(
+          data_version: 0,
+          cruise_ship_id: ship.id,
+          cruise_route_id: japan_korea_route&.id,
+          duration_days: @duration_days,
+          duration_nights: @duration_nights
+        ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+      
+        nearest = available_sailings.order(departure_date: :asc).first
+        actual_sailing = @order.cruise_product.cruise_sailing
+        expect(actual_sailing.id).to eq(nearest.id),
+          "未选择最近日期的班次。应选: #{nearest.departure_date}, 实际: #{actual_sailing.departure_date}"
       end
     end
   

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例172: 给张三订购机票后预订接机服务（舒适5座）
+# 验证用例172: 订购机票后预订接机服务（舒适5座）
 #
 # 任务描述:
 #   商务人士订了广州到北京的机票，到达首都国际机场T3航站楼，需要接机到国贸CBD。
@@ -37,8 +37,8 @@ module V151V200
   class V172BookFlightAndAirportPickupComfortValidator < BaseValidator
     self.validator_id = 'v172_book_flight_and_airport_pickup_comfort_validator'
     self.task_id = '3c8e7f2a-4d1b-9a6c-5e8f-7b3d2a1c4e5f'
-    self.title = '给张三订购机票后预订接机服务（舒适5座）'
-    self.description = '订购机票后预订接机服务（舒适5座）'
+    self.title = '给李四预订后天广州到北京的机票，并预订首都机场接机到国贸CBD（舒适5座）'
+    self.description = '帮李四订后天从广州到北京的航班，到达首都机场T3后接机到国贸CBD，车子选舒适5座'
     self.timeout_seconds = 300
   
     def prepare

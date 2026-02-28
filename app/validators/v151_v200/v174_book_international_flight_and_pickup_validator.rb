@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例174: 给张三国际航班到达后预订接机服务
+# 验证用例174: 国际航班到达后预订接机服务
 #
 # 任务描述:
 #   用户订了国际航班，到达上海浦东国际机场T2航站楼（深夜22:00到达），需要接机到陆家嘴金融区。
@@ -37,8 +37,8 @@ module V151V200
   class V174BookInternationalFlightAndPickupValidator < BaseValidator
     self.validator_id = 'v174_book_international_flight_and_pickup_validator'
     self.task_id = '6c54e97f-e56a-441b-adcb-a0be3cb045e2'
-    self.title = '给张三国际航班到达后预订接机服务'
-    self.description = '国际航班到达后预订接机服务'
+    self.title = '给刘强预订3天后到达上海浦东T2的国际航班，并预订深夜接机到陆家嘴金融区'
+    self.description = '帮刘强订3天后到达上海浦东机场T2的国际航班（深夜22点左右到达），然后接机到陆家嘴金融区'
     self.timeout_seconds = 300
   
     def prepare

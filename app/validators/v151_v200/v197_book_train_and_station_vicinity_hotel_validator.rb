@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例197: 给张三预订火车+火车站1公里内酒店
+# 验证用例197: 预订火车+火车站1公里内酒店
 #
 # 任务描述:
 #   预订火车+火车站1公里内酒店（步行可达）
@@ -18,8 +18,8 @@ module V151V200
   class V197BookTrainAndStationVicinityHotelValidator < BaseValidator
     self.validator_id = 'v197_book_train_and_station_vicinity_hotel_validator'
     self.task_id = '23d8d144-0925-4316-8fec-88215475aef4'
-    self.title = '给张三预订火车+火车站1公里内酒店'
-    self.description = '预订火车+火车站1公里内酒店'
+    self.title = '给吴勇预订明天北京到上海的火车+火车站1公里内酒店'
+    self.description = '帮吴勇订明天从北京到上海的火车，并预订火车站1公里内的酒店（步行可达）'
     self.timeout_seconds = 300
     
     def prepare

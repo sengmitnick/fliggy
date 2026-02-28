@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例103: 给张三预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）
+# 验证用例103: 预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）
 #
 # 核心验证点:
 # 1. 船只选择: 地中海辉煌号
@@ -15,8 +15,8 @@ module V101V150
   class V103BookMediterraneanCruiseValidator < BaseValidator
     self.validator_id = 'v103_book_mediterranean_cruise_validator'
     self.task_id = 'c3f9e2a1-5b47-4d12-9a8e-7f1e3d4a6c89'
-    self.title = '给张三预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）'
-    self.description = '预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）'
+    self.title = '帮张三和李四订地中海邮轮，要地中海辉煌号，7天6晚的行程，巴塞罗那出发，选最近的班次，阳台房（观景之选）'
+    self.description = '帮张三和李四订地中海邮轮，要地中海辉煌号，7天6晚的行程，巴塞罗那出发，选最近的班次，阳台房（观景之选）'
     self.timeout_seconds = 240
   
     def prepare

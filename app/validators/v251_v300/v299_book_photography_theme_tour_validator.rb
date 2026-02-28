@@ -18,8 +18,8 @@ module V251V300
   class V299BookPhotographyThemeTourValidator < BaseValidator
     self.validator_id = 'v299_book_photography_theme_tour_validator'
     self.task_id = 'feeaef15-74e2-4fb2-a7fa-1b6c5bc2273f'
-    self.title = '给王芳预订云南摄影主题游'
-    self.description = '给王芳预订云南摄影主题游'
+    self.title = '给王芳预订云南摄影主题游（7天后，1人），选风景优美的跟团游（评分≥4.5）'
+    self.description = '王芳想去云南进行摄影主题旅游，选风景优美的跟团游（评分≥4.5）'
     self.timeout_seconds = 300
     
     def prepare

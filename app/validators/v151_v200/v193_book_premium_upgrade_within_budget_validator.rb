@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例193: 给张三预算内升级最高等级
+# 验证用例193: 预算内升级最高等级
 #
 # 任务描述:
 #   预订经济舱+标准房，预算内升级最高等级
@@ -18,8 +18,8 @@ module V151V200
   class V193BookPremiumUpgradeWithinBudgetValidator < BaseValidator
     self.validator_id = 'v193_book_premium_upgrade_within_budget_validator'
     self.task_id = '8cf29355-6c7f-458c-855e-c12a75be9643'
-    self.title = '给张三预算内升级最高等级'
-    self.description = '预算内升级最高等级'
+    self.title = '给王芳预订明天北京到上海的预算内最高等级的航班+酒店'
+    self.description = '帮王芳订明天从北京到上海的航班+酒店，在预算2000元内尽量升级到最高等级（商务舱或头等舱、高星级酒店）'
     self.timeout_seconds = 300
     
     def prepare

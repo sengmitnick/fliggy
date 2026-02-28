@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例279: 给张三兑换天猫超市卡
+# 验证用例279: 兑换天猫超市卡
 #
 # 任务描述:
 #   用户兑换天猫超市卡，需要填写收货地址
@@ -17,8 +17,8 @@ module V251V300
   class V279RedeemAttractionAnnualPassValidator < BaseValidator
     self.validator_id = 'v279_redeem_attraction_annual_pass_validator'
     self.task_id = 'd652bcc5-67fc-4740-b6c9-cc2489749e55'
-    self.title = '给张三兑换天猫超市卡'
-    self.description = '兑换天猫超市卡'
+    self.title = '给李四兑换天猫超市卡 200元'
+    self.description = '帮李四兑换天猫超市卡，需要填写收货地址'
     self.timeout_seconds = 300
     
     def prepare

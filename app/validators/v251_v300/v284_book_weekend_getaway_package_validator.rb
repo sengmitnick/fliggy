@@ -18,8 +18,8 @@ module V251V300
   class V284BookWeekendGetawayPackageValidator < BaseValidator
     self.validator_id = 'v284_book_weekend_getaway_package_validator'
     self.task_id = '1c21acda-6325-4222-95e3-d62e336cf477'
-    self.title = '给张三和王芳预订下周末度假套餐'
-    self.description = '给张三和王芳预订下周末度假套餐'
+    self.title = '给张三和王芳（夫妻）预订2天1晚含餐的下周末度假套餐'
+    self.description = '给张三和王芳（夫妻）预订2天1晚含餐的下周末度假套餐'
     self.timeout_seconds = 300
     
     def prepare

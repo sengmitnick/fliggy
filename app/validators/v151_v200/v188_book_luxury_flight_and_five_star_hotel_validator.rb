@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例188: 给张三预订商务舱+五星酒店
+# 验证用例188: 预订商务舱+五星酒店
 #
 # 任务描述:
 #   高端商务出行，预订商务舱+五星酒店
@@ -18,8 +18,8 @@ module V151V200
   class V188BookLuxuryFlightAndFiveStarHotelValidator < BaseValidator
     self.validator_id = 'v188_book_luxury_flight_and_five_star_hotel_validator'
     self.task_id = 'cb093340-9f54-4e5d-bcd0-fe9ac36bde61'
-    self.title = '给张三预订商务舱+五星酒店'
-    self.description = '预订商务舱+五星酒店'
+    self.title = '给陈静预订明天北京到上海的商务舱+五星酒店'
+    self.description = '帮陈静订明天从北京到上海的商务舱航班，并预订五星酒店（高端商务出行）'
     self.timeout_seconds = 300
     
     def prepare

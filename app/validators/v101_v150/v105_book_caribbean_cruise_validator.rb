@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例105: 给张三预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）
+# 验证用例105: 预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）
 #
 # 核心验证点:
 # 1. 船只选择: 海洋光谱号
@@ -15,8 +15,8 @@ module V101V150
   class V105BookCaribbeanCruiseValidator < BaseValidator
     self.validator_id = 'v105_book_caribbean_cruise_validator'
     self.task_id = 'f5e2d8c1-4a9b-3d76-8e1f-6c3a5b4d9e72'
-    self.title = '给张三预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）'
-    self.description = '预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）'
+    self.title = '帮小明和小红订加勒比邮轮，要海洋光谱号，10天9晚的行程，迈阿密出发，选最近的班次，豪华套房（顶级享受）'
+    self.description = '帮小明和小红订加勒比邮轮，要海洋光谱号，10天9晚的行程，迈阿密出发，选最近的班次，豪华套房（顶级享受）'
     self.timeout_seconds = 240
   
     def prepare

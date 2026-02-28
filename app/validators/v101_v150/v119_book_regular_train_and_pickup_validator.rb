@@ -153,7 +153,7 @@ module V101V150
           "到达城市错误。期望: #{@arrival_city}, 实际: #{train.arrival_city}"
       end
       
-      add_assertion "火车乘客信息正确（李四 110101199001012345）", weight: 10 do
+      add_assertion "火车乘客信息正确", weight: 10 do
         expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
           "火车票乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
         expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id_number),
@@ -271,7 +271,7 @@ module V101V150
       @transfer_type = data['transfer_type']
       @service_type = data['service_type']
       @expected_passenger_name = data['expected_passenger_name'] || '李四'
-      @expected_passenger_id_number = data['expected_passenger_id_number'] || '110101199001012345'
+      @expected_passenger_id_number = data['expected_passenger_id_number'] || '110101199002022345'
       @expected_passenger_phone = data['expected_passenger_phone'] || '13900139000'
     
       # 重新查询乘客信息用于验证

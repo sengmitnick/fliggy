@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例280: 给张三预订包车游
+# 验证用例280: 预订包车游
 #
 # 任务描述:
 #   用户预订深圳包车游（经典一日游路线）
@@ -18,8 +18,8 @@ module V251V300
   class V280BookCarRentalPackageValidator < BaseValidator
     self.validator_id = 'v280_book_car_rental_package_validator'
     self.task_id = 'f6d6a9af-de20-4b9c-85f2-f63ef9397045'
-    self.title = '给张三预订包车游'
-    self.description = '预订包车游'
+    self.title = '给张三预订深圳包车游（经典一日游）'
+    self.description = '帮张三预订深圳包车游经典一日游路线'
     self.timeout_seconds = 300
     
     def prepare

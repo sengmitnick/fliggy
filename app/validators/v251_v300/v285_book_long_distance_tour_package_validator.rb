@@ -19,8 +19,8 @@ module V251V300
   class V285BookLongDistanceTourPackageValidator < BaseValidator
     self.validator_id = 'v285_book_long_distance_tour_package_validator'
     self.task_id = '017fa810-5e0d-4b89-9eef-1ac127ff20fe'
-    self.title = '给张三和王芳预订云南长线游套餐'
-    self.description = '给张三和王芳预订云南长线游套餐'
+    self.title = '给张三和王芳（夫妻）预订7天6晚云南深度游套餐（昆明出发）'
+    self.description = '给张三和王芳（夫妻）预订7天6晚云南深度游套餐（昆明出发）'
     self.timeout_seconds = 300
     
     def prepare

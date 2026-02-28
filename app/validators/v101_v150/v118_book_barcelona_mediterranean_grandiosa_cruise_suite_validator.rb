@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例118: 给张三预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）
+# 验证用例118: 预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）
 #
 # 测试内容：
 # - 邮轮筛选（地中海辉煌号/MSC Cruises）
@@ -20,8 +20,8 @@ module V101V150
   class V118BookBarcelonaMediterraneanGrandiosaCruiseSuiteValidator < BaseValidator
     self.validator_id = 'v118_book_barcelona_mediterranean_grandiosa_cruise_suite_validator'
     self.task_id = '6382841f-d24d-4564-ad55-8414ccc4741c'
-    self.title = '给张三预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
-    self.description = '预订地中海邮轮（地中海辉煌号，7天6晚，4月出发，游艇俱乐部套房）'
+    self.title = '帮张建国（65岁）预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
+    self.description = '帮张建国（65岁）预订地中海邮轮航线，选择地中海辉煌号（欧洲最大邮轮之一）4月份最近一班7天6晚行程，预订游艇俱乐部套房（豪华之选），为4位成人'
     self.timeout_seconds = 240
 
     def prepare

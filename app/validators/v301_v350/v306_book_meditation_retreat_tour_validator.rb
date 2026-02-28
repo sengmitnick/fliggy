@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例306: 给张三预订禅修静心游
+# 验证用例306: 预订禅修静心游
 #
 # 任务描述:
 #   用户预订禅修静心游(寺庙+冥想+素食体验)
@@ -19,8 +19,8 @@ module V301V350
   class V306BookMeditationRetreatTourValidator < BaseValidator
     self.validator_id = 'v306_book_meditation_retreat_tour_validator'
     self.task_id = '13bb2b29-d9cb-4e2c-adb5-0e345081dbbc'
-    self.title = '给张三预订禅修静心游'
-    self.description = '预订禅修静心游'
+    self.title = '王芳想去杭州禅修静心，14天后出发，要寺庙参观、冥想体验和素食，行程至少3天，适合修身养性'
+    self.description = '王芳想去杭州禅修静心，14天后出发，要寺庙参观、冥想体验和素食，行程至少3天，适合修身养性'
     self.timeout_seconds = 300
     
     def prepare

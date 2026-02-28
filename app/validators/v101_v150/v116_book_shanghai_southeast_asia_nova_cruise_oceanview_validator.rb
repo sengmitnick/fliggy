@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例116: 给张三预订东南亚邮轮（爱达新星号，9天8晚，3月出发，海景房）
+# 验证用例116: 预订东南亚邮轮（爱达新星号，9天8晚，3月出发，海景房）
 #
 # 测试内容：
 # - 邮轮筛选（爱达新星号/AIDA Cruises）
@@ -20,8 +20,8 @@ module V101V150
   class V116BookShanghaiSoutheastAsiaNovaCruiseOceanviewValidator < BaseValidator
     self.validator_id = 'v116_book_shanghai_southeast_asia_nova_cruise_oceanview_validator'
     self.task_id = '70a9737c-8db3-4c11-b179-2522c8f58af2'
-    self.title = '给张三预订东南亚邮轮（爱达新星号，9天8晚，3月出发，海景房）'
-    self.description = '预订东南亚邮轮（爱达新星号，9天8晚，3月出发，海景房）'
+    self.title = '帮陈静预订东南亚邮轮航线，选择爱达新星号（环保LNG动力邮轮）3月份最近一班9天8晚行程，预订海景房（观景之选），为2位成人'
+    self.description = '帮陈静预订东南亚邮轮航线，选择爱达新星号（环保LNG动力邮轮）3月份最近一班9天8晚行程，预订海景房（观景之选），为2位成人'
     self.timeout_seconds = 240
 
     def prepare

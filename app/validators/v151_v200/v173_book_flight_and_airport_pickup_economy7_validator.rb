@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例173: 给张三订购机票后预订接机服务（经济7座，多人出行）
+# 验证用例173: 订购机票后预订接机服务（经济7座，多人出行）
 #
 # 任务描述:
 #   家庭出游（6人），订了成都到杭州的机票，到达萧山国际机场，需要接机到西湖风景区。
@@ -37,8 +37,8 @@ module V151V200
   class V173BookFlightAndAirportPickupEconomy7Validator < BaseValidator
     self.validator_id = 'v173_book_flight_and_airport_pickup_economy7_validator'
     self.task_id = 'c85d1c59-9430-4f34-9f74-9064baa17824'
-    self.title = '给张三订购机票后预订接机服务（经济7座，多人出行）'
-    self.description = '订购机票后预订接机服务（经济7座，多人出行）'
+    self.title = '给王芳等6人预订3天后成都到杭州的机票，并预订萧山机场接机到西湖（经济7座）'
+    self.description = '帮王芳一家6个人订3天后从成都到杭州的航班，到达萧山机场后接机到西湖风景区，6人出行需要7座车'
     self.timeout_seconds = 300
   
     def prepare

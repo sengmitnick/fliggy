@@ -17,8 +17,8 @@ module V251V300
   class V292BookStudentBudgetPackageValidator < BaseValidator
     self.validator_id = 'v292_book_student_budget_package_validator'
     self.task_id = 'fd50ec27-3219-4bab-9a00-659b10b5aeb0'
-    self.title = '给张三预订学生特惠套餐（北京-西安）'
-    self.description = '给张三预订学生特惠套餐（北京-西安）'
+    self.title = '帮张三订5天后从北京到西安的学生套餐，他预算只有500块，需要火车票和青旅住宿'
+    self.description = '帮张三订5天后从北京到西安的学生套餐，他预算只有500块，需要火车票和青旅住宿'
     self.timeout_seconds = 300
     
     def prepare

@@ -18,8 +18,8 @@ module V251V300
   class V300BookFoodExperienceTourValidator < BaseValidator
     self.validator_id = 'v300_book_food_experience_tour_validator'
     self.task_id = 'a780cbb3-8b82-49be-bbea-18baaa72e179'
-    self.title = '给李四预订成都美食体验游'
-    self.description = '给李四预订成都美食体验游'
+    self.title = '给李四预订成都美食体验游（8天后，3天）'
+    self.description = '李四想订成都的美食体验游，品尝地道美食、参观特色餐厅和市场'
     self.timeout_seconds = 300
     
     def prepare

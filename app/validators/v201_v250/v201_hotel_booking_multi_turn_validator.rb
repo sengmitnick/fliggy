@@ -28,7 +28,7 @@ module V201V250
   class V201HotelBookingMultiTurnValidator < MultiTurnBaseValidator
     self.validator_id = 'v201_hotel_booking_multi_turn_validator'
     self.task_id = '0b2d6f73-3d61-4dab-84da-4de740b906a3'
-    self.title = '张三模糊描述需求（我想订个酒店），AI助手通过反问获取城市、预算、日期等信息后完成预订'
+    self.title = '给张三预订酒店（模糊需求，多轮对话）'
     self.description = '张三模糊描述需求（我想订个酒店），AI助手通过反问获取城市、预算、日期等信息后完成预订'
     self.timeout_seconds = 300
     self.max_turns = 10

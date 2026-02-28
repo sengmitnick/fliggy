@@ -18,8 +18,8 @@ module V251V300
   class V290BookChildTravelAloneValidator < BaseValidator
     self.validator_id = 'v290_book_child_travel_alone_validator'
     self.task_id = 'c333c8fb-acf7-4b9b-970f-0deb234601e2'
-    self.title = '给张三和小明预订亲子游'
-    self.description = '给张三和小明预订亲子游'
+    self.title = '给张三和小明（10岁儿童）预订从上海到北京的亲子游'
+    self.description = '给张三和小明（10岁儿童）预订从上海到北京的亲子游'
     self.timeout_seconds = 300
     
     def prepare

@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例108: 给张三预订长租民宿（杭州西湖区，月租，性价比优先）
+# 验证用例108: 预订长租民宿（杭州西湖区，月租，性价比优先）
 #
 # 核心验证点:
 # 1. 订单创建: 民宿订单创建成功
@@ -17,8 +17,8 @@ module V101V150
   class V108LongTermHomestayValidator < BaseValidator
     self.validator_id = 'v108_long_term_homestay_validator'
     self.task_id = 'a8f4e3b7-9c2d-4e1f-b6a9-5d7c3e8f2a61'
-    self.title = '给张三预订长租民宿（杭州西湖区，月租，性价比优先）'
-    self.description = '预订长租民宿（杭州西湖区，月租，性价比优先）'
+    self.title = '帮李明在杭州西湖区订适合长租的民宿，月租30天，选价格最低的月租房（目前只有杭州有月租民宿）'
+    self.description = '帮李明在杭州西湖区订适合长租的民宿，月租30天，选价格最低的月租房（目前只有杭州有月租民宿）'
     self.timeout_seconds = 300
   
     def prepare

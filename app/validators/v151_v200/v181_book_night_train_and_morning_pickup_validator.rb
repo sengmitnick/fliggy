@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例181: 给张三预订夜间火车和清晨接站服务
+# 验证用例181: 预订夜间火车和清晨接站服务
 #
 # 任务描述:
 #   用户需要预订夜间火车（晚上8点后出发），并预订清晨接站服务
@@ -22,8 +22,8 @@ module V151V200
   class V181BookNightTrainAndMorningPickupValidator < BaseValidator
     self.validator_id = 'v181_book_night_train_and_morning_pickup_validator'
     self.task_id = '20114593-e2f1-4fc7-9ded-aa5c49df72a3'
-    self.title = '给张三预订夜间火车和清晨接站服务'
-    self.description = '预订夜间火车和清晨接站服务'
+    self.title = '给刘强预订明天北京到上海的夜间火车，并预订清晨接站服务'
+    self.description = '帮刘强订明天晚上从北京到上海的夜间火车（20:00后出发），并预订清晨接站服务'
     self.timeout_seconds = 300
   
     def prepare
