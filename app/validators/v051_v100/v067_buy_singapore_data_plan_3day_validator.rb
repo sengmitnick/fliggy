@@ -12,14 +12,14 @@ require_relative '../base_validator'
 #   选择: 新加坡3天漫游包+10元话费券，65元
 #   运营商: 中国电信 180 2712 8600
 #   流量: 0.5GB/天，4G/5G漫游
-#   手机号: 13600136000
+#   手机号: 13800138000
 #   总价: 65×1=65元
 # 
 # 操作步骤:
 #   1. 浏览流量包: 选择新加坡地区
 #   2. 查看套餐: 1天(26元)、3天(65元)、7天(125元)
 #   3. 选择3天: 65元（新加坡3天漫游包+10元话费券）
-#   4. 填写手机号: 13600136000
+#   4. 填写手机号: 13800138000
 #   5. 计算总价: 65×1=65元
 # 
 # 评分标准:
@@ -62,12 +62,12 @@ module V051V100
     
       # 查询乘客信息（预加载）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '刘强', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_phone = @passenger.phone
     
       # 返回给 Agent 的任务信息
       {
-        task: "给刘强购买新加坡流量包（3天天包）",
+        task: "给张三购买新加坡流量包（3天天包）",
         region: @region,
         validity_days: @validity_days,
         quantity: @quantity,

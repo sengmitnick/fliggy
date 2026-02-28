@@ -60,13 +60,24 @@ PickupLocation.insert_all([
     is_active: true,
     data_version: 0
   },
-  # 上海
+  # 上海 - 浦东新区
   {
     city: '上海',
-    district: '市区',
-    detail: '上海市浦东新区陆家嘴环路1000号恒生银行大厦',
-    phone: '13800000003',
-    business_hours: '8:00-23:00',
+    district: '浦东新区',
+    detail: '上海市浦东新区世纪大道1000号上海环球金融中心',
+    phone: '13800000013',
+    business_hours: '8:00-22:00',
+    notes: '(漫游超人)(北京时间)',
+    is_active: true,
+    data_version: 0
+  },
+  # 广州 - 天河区
+  {
+    city: '广州',
+    district: '天河区',
+    detail: '广州市天河区天河路208号天河城购物中心',
+    phone: '13800000014',
+    business_hours: '9:00-22:00',
     notes: '(漫游超人)(北京时间)',
     is_active: true,
     data_version: 0

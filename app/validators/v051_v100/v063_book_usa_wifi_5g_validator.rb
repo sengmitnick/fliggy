@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单
+# 验证用例: 给王芳搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单，14天后广州天河自取
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索美国地区的WiFi设备，
@@ -12,6 +12,8 @@ require_relative '../base_validator'
 #   地区: 美国
 #   产品: 美国随身WiFi·5G高速（42元/天）
 #   租用1台，租期7天，14天后取件
+#   自取地址: 广州市天河区
+#   联系人: 王芳
 #   总价: 42×7×1+500=794元
 # 
 # 评分标准:
@@ -20,7 +22,7 @@ require_relative '../base_validator'
 #   - 地区正确（美国） (10分)
 #   - 选择了美国5G高速WiFi (20分)
 #   - 租赁天数正确（7天）、总价正确（794元含押金） (20分)
-#   - 联系人信息正确（来自demo_user） (20分)
+#   - 自取点和联系人信息正确（广州天河，王芳） (20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -34,8 +36,8 @@ module V051V100
   class V063BookUsaWifi5gValidator < BaseValidator
     self.validator_id = 'v063_book_usa_wifi_5g_validator'
     self.task_id = 'fa80f73a-a50e-42f5-aa04-ff5acb84b351'
-    self.title = '给张三搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单'
-    self.description = '搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单'
+    self.title = '给王芳搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单，14天后广州天河自取'
+    self.description = '搜索美国WiFi租赁服务，选择5G高速版并成功创建7天租赁订单，14天后广州天河自取'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -53,22 +55,30 @@ module V051V100
     
       @matching_count = matching_wifis.count
     
-      # 查询收货地址（WiFi租赁需要邮寄）
+      # 查询联系人和自取地址
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @address = user.addresses.find_by!(name: '王芳', data_version: 0)
-      @expected_name = @address.name
-      @expected_phone = @address.phone
-      @expected_address_keyword = '广州'
+      @contact = user.contacts.find_by!(name: '王芳', data_version: 0)
+      @expected_name = @contact.name
+      @expected_phone = @contact.phone
+      @pickup_location = PickupLocation.find_by!(
+        city: '广州',
+        district: '天河区',
+        data_version: 0
+      )
+      @pickup_address = @pickup_location.full_info
     
       # 返回给 Agent 的任务信息
       {
-        task: "给王芳预订美国5G高速WiFi（租1台用7天）",
+        task: "给王芳预订美国5G高速WiFi（租1台用7天），14天后广州天河自取",
         region: @region,
         rental_days: @rental_days,
         quantity: @quantity,
         wifi_type: @wifi_keyword,
-        hint: "美国有多款WiFi可选，选择5G高速版（42元/天）。租赁: 1台×7天+押金500=794元",
-        matching_count: @matching_count
+        delivery_method: 'pickup',
+        contact_person: "#{@expected_name}（#{@expected_phone}）",
+        hint: "美国有多款WiFi可选，选择5G高速版（42元/天）。租赁: 1台×7天+押金500=794元。取件: 14天后、广州天河、自取",
+        matching_count: @matching_count,
+        pickup_location: @pickup_address
       }
     end
   
@@ -121,19 +131,30 @@ module V051V100
           "总价不正确。预期: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台 + 500元押金），实际: #{@order.total_price}元"
       end
     
-      # 断言6: 收货地址正确（王芳的广州地址）
-      add_assertion "收货地址正确（#{@expected_name}的#{@expected_address_keyword}地址）", weight: 20 do
-        expect(@order.delivery_method).to eq('mail'),
-          "交付方式错误。期望: mail（邮寄），实际: #{@order.delivery_method}"
+      # 断言6: 自取点和联系人信息正确（广州天河，王芳）
+      add_assertion "自取点和联系人信息正确（广州天河，#{@expected_name}）", weight: 20 do
+        expect(@order.delivery_method).to eq('pickup'),
+          "配送方式不正确。预期: pickup（自取），实际: #{@order.delivery_method}"
         
-        delivery_info = @order.delivery_info.is_a?(String) ? (JSON.parse(@order.delivery_info) rescue {}) : (@order.delivery_info || {})
+        # 支持Hash（Rails嵌套属性）和JSON字符串两种格式
+        contact_info = @order.contact_info
+        contact_info = JSON.parse(contact_info) if contact_info.is_a?(String)
         
-        expect(delivery_info['name']).to eq(@expected_name),
-          "收货人姓名错误。期望: #{@expected_name}, 实际: #{delivery_info['name']}"
-        expect(delivery_info['phone']).to eq(@expected_phone),
-          "收货电话错误。期望: #{@expected_phone}, 实际: #{delivery_info['phone']}"
-        expect(delivery_info['full_address']).to include(@expected_address_keyword),
-          "收货地址错误。期望包含: #{@expected_address_keyword}（#{@expected_name}的默认地址），实际: #{delivery_info['full_address']}"
+        actual_name = contact_info['name'] || contact_info[:name]
+        actual_phone = contact_info['phone'] || contact_info[:phone]
+        
+        expect(actual_name).to eq(@expected_name),
+          "联系人姓名不正确。预期: #{@expected_name}, 实际: #{actual_name}"
+        expect(actual_phone).to eq(@expected_phone),
+          "联系人电话不正确。预期: #{@expected_phone}, 实际: #{actual_phone}"
+        
+        # 支持Hash和JSON字符串两种格式
+        delivery_info = @order.delivery_info
+        delivery_info = JSON.parse(delivery_info) if delivery_info.is_a?(String)
+        
+        actual_address = delivery_info['address'] || delivery_info[:address]
+        expect(actual_address).to include('广州', '天河'),
+          "自取地址不正确。预期包含: 广州天河, 实际: #{actual_address}"
       end
     end
   
@@ -149,7 +170,7 @@ module V051V100
         matching_count: @matching_count,
         expected_name: @expected_name,
         expected_phone: @expected_phone,
-        expected_address_keyword: @expected_address_keyword
+        pickup_address: @pickup_address
       }
     end
   
@@ -162,7 +183,7 @@ module V051V100
       @matching_count = data['matching_count']
       @expected_name = data['expected_name']
       @expected_phone = data['expected_phone']
-      @expected_address_keyword = data['expected_address_keyword']
+      @pickup_address = data['pickup_address']
     end
   
     # 模拟 AI Agent 操作：预订美国5G WiFi
@@ -183,8 +204,16 @@ module V051V100
       start_date = Date.current + 14.days
       end_date = start_date + (@rental_days - 1).days
     
-      # 4. 创建订单（使用 prepare 中查询的联系人）
-      full_address = [@address.province, @address.city, @address.district, @address.detail].compact.join
+      # 4. 查找联系人和自取地址
+      contact = user.contacts.find_by!(name: '王芳', data_version: 0)
+      pickup_location = PickupLocation.find_by!(
+        city: '广州',
+        district: '天河区',
+        data_version: 0
+      )
+      pickup_address = pickup_location.full_info
+    
+      # 5. 创建订单
       order = InternetOrder.create!(
         orderable: target_wifi,
         user_id: user.id,
@@ -198,16 +227,15 @@ module V051V100
           unit_price: target_wifi.daily_price
         }.to_json,
         total_price: target_wifi.daily_price * @rental_days * @quantity + 500,
-        delivery_method: 'mail',
+        delivery_method: 'pickup',
         delivery_info: {
-          address_id: @address.id,
-          name: @expected_name,
-          phone: @expected_phone,
-          full_address: full_address
+          address: pickup_address,
+          method: "pickup"
         }.to_json,
         contact_info: {
-          name: @expected_name,
-          phone: @expected_phone
+          name: contact.name,
+          phone: contact.phone,
+          address: pickup_address
         }.to_json,
         status: 'pending',
         data_version: @data_version
