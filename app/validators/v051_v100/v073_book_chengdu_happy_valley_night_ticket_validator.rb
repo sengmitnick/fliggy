@@ -2,13 +2,44 @@
 
 require_relative '../base_validator'
 
-# 验证用例73: 给张三预订7天后深圳欢乐谷成人票（2张，最便宜）
+# 验证用例73: 给张三和李四预订7天后成都欢乐谷夜场票（成人票，2张，最便宜）
+# 
+# 任务描述:
+#   Agent 需要为张三预订7天后的成都欢乐谷夜场票（成人票）。
+#   乘客：张三、李四（2位成人）
+#   需要购买2张夜场成人票，并选择最便宜的供应商。
+#   注意：需要选择夜场票（名称包含"夜场"或"夜票"）。
+# 
+# 复杂度分析:
+#   1. 需要搜索"成都欢乐谷"景点
+#   2. 需要识别夜场票（名称包含"夜场"或"夜票"的成人票）
+#   3. 需要对比多个供应商的价格，选择最便宜的
+#   4. 需要填写正确的游玩日期（7天后）
+#   5. 需要填写2位乘客信息（张三、李四）
+# 
+# 评分标准:
+#   - 订单已创建 (20分)
+#   - 景点正确（成都欢乐谷）(15分)
+#   - 票种正确（夜场成人票）(20分)
+#   - 游玩日期正确（7天后）(5分)
+#   - 联系电话正确（张三的电话）(10分)
+#   - 乘客信息正确（张三和李四）(10分)
+#   - 选择了最便宜的供应商 (20分)
+# 
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v073_book_chengdu_happy_valley_night_ticket_validator/start
+#   
+#   # Agent 通过界面操作完成预订...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V051V100
   class V073BookChengduHappyValleyNightTicketValidator < BaseValidator
     self.validator_id = 'v073_book_chengdu_happy_valley_night_ticket_validator'
     self.task_id = 'aa530ff5-edb9-4be1-866c-1ede13516233'
-    self.title = '给张三预订7天后深圳欢乐谷成人票（2张，最便宜）'
-    self.description = '预订7天后深圳欢乐谷成人票（2张，最便宜）'
+    self.title = '给张三和李四预订7天后成都欢乐谷夜场票（成人票，2张，最便宜）'
+    self.description = '给张三和李四预订7天后成都欢乐谷夜场票（成人票，2张，最便宜）'
     self.timeout_seconds = 240
   
     def prepare
@@ -18,7 +49,7 @@ module V051V100
       raise "未找到足够的乘客信息" if @passengers.size < 2
       @contact_passenger = @passengers.first
       
-      @attraction_name = '深圳欢乐谷'
+      @attraction_name = '成都欢乐谷'
       @ticket_type = 'adult'
       @visit_date = Date.current + 7.days
       @quantity = 2
@@ -32,15 +63,11 @@ module V051V100
         data_version: 0
       )
     
-      # 判断是否为周末（周六=6, 周日=0）
-      @is_weekend = [0, 6].include?(@visit_date.wday)
-      @date_type_keyword = @is_weekend ? '周末' : '平日'
+      # 过滤出夜场票（名称包含"夜场"或"夜票"）
+      @applicable_tickets = @adult_tickets.select { |t| t.name.include?('夜场') || t.name.include?('夜票') }
     
-      # 过滤出对应的票种（平日或周末）
-      @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
-    
-      # 如果没有区分平日/周末的票，则使用所有成人票
-      @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
+      # 如果没有找到夜场票，抛出错误
+      raise "未找到成都欢乐谷夜场票" if @applicable_tickets.empty?
     
       cheapest_supplier = nil
       min_price = Float::INFINITY
@@ -61,14 +88,14 @@ module V051V100
       date_desc = "#{days_until_visit}天后"
     
       {
-        task: "请预订#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}#{@is_weekend ? '，周末' : ''}）#{@attraction_name}的成人票（2张），选择最便宜的供应商",
+        task: "请为张三和李四预订#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的夜场票（成人票，2张），选择最便宜的供应商",
+        passengers: "张三、李四",
         attraction_name: @attraction_name,
-        ticket_type: "成人票",
+        ticket_type: "夜场成人票",
         visit_date: @visit_date.to_s,
         date_description: "#{date_desc}（#{@visit_date.strftime('%Y年%m月%d日')}）",
-        date_type: @date_type_keyword,
         quantity: @quantity,
-        hint: "系统中有多个供应商提供成人票，请对比价格后选择最便宜的#{@date_type_keyword}票",
+        hint: "系统中有多个供应商提供夜场票，请对比价格后选择最便宜的夜场成人票",
         available_adult_tickets_count: @applicable_tickets.count
       }
     end
@@ -94,11 +121,16 @@ module V051V100
           "景点错误。期望: #{@attraction_name}, 实际: #{attraction.name}"
       end
     
-      add_assertion "票种正确（成人票）", weight: 20 do
+      add_assertion "票种正确（夜场成人票）", weight: 20 do
         ticket = @ticket_order.ticket
       
         expect(ticket.ticket_type).to eq(@ticket_type),
           "票种错误。期望: 成人票(adult), 实际: #{ticket.ticket_type}"
+        
+        # 验证是否为夜场票
+        is_night_ticket = ticket.name.include?('夜场') || ticket.name.include?('夜票')
+        expect(is_night_ticket).to be_truthy,
+          "未选择夜场票。期望: 名称包含'夜场'或'夜票'，实际票名: #{ticket.name}"
       end
     
       add_assertion "游玩日期正确（7天后，#{@visit_date}）", weight: 5 do
@@ -123,14 +155,8 @@ module V051V100
       end
     
       add_assertion "选择了最便宜的供应商", weight: 20 do
-        # 判断游玩日期是否为周末
-        is_weekend = [0, 6].include?(@visit_date.wday)
-        date_type_keyword = is_weekend ? '周末' : '平日'
-      
-        # 过滤出适用的票种（平日或周末）
-        applicable_tickets = @adult_tickets.select { |t| t.name.include?(date_type_keyword) }
-        # 如果没有区分平日/周末的票，则使用所有成人票
-        applicable_tickets = @adult_tickets if applicable_tickets.empty?
+        # 过滤出夜场票
+        applicable_tickets = @adult_tickets.select { |t| t.name.include?('夜场') || t.name.include?('夜票') }
       
         all_prices = []
         applicable_tickets.each do |ticket|
@@ -159,7 +185,7 @@ module V051V100
                        @ticket_order.supplier_id == cheapest[:supplier_id])
       
         expect(is_cheapest).to be_truthy,
-          "未选择最便宜的供应商（#{date_type_keyword}票中）。" \
+          "未选择最便宜的供应商（夜场票中）。" \
           "应选: #{cheapest[:supplier_name]}（#{cheapest[:ticket_name]}，#{cheapest[:price]}元），" \
           "实际选择: #{actual_supplier}（#{@ticket_order.ticket.name}，#{actual_price}元）"
       end
@@ -174,9 +200,7 @@ module V051V100
         visit_date: @visit_date.to_s,
         quantity: @quantity,
         attraction_id: @attraction&.id,
-        best_price: @best_price,
-        is_weekend: @is_weekend,
-        date_type_keyword: @date_type_keyword
+        best_price: @best_price
       }
     end
   
@@ -186,8 +210,6 @@ module V051V100
       @visit_date = Date.parse(data['visit_date'])
       @quantity = data['quantity']
       @best_price = data['best_price']
-      @is_weekend = data['is_weekend']
-      @date_type_keyword = data['date_type_keyword']
       @attraction = Attraction.find_by(id: data['attraction_id']) if data['attraction_id']
     
       if @attraction
@@ -196,9 +218,8 @@ module V051V100
           ticket_type: @ticket_type,
           data_version: 0
         )
-        # 重新过滤适用票种
-        @applicable_tickets = @adult_tickets.select { |t| t.name.include?(@date_type_keyword) }
-        @applicable_tickets = @adult_tickets if @applicable_tickets.empty?
+        # 重新过滤夜场票
+        @applicable_tickets = @adult_tickets.select { |t| t.name.include?('夜场') || t.name.include?('夜票') }
       end
     end
   
@@ -212,11 +233,9 @@ module V051V100
         data_version: 0
       )
     
-      # 判断是否为周末，过滤适用票种
-      is_weekend = [0, 6].include?(@visit_date.wday)
-      date_type_keyword = is_weekend ? '周末' : '平日'
-      applicable_tickets = adult_tickets.select { |t| t.name.include?(date_type_keyword) }
-      applicable_tickets = adult_tickets if applicable_tickets.empty?
+      # 过滤出夜场票
+      applicable_tickets = adult_tickets.select { |t| t.name.include?('夜场') || t.name.include?('夜票') }
+      raise "未找到成都欢乐谷夜场票" if applicable_tickets.empty?
     
       cheapest_supplier = nil
       min_price = Float::INFINITY

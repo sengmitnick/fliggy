@@ -2,13 +2,44 @@
 
 require_relative '../base_validator'
 
-# 验证用例71: 给张三预订本周末广州长隆野生动物世界成人票（4张）
+# 验证用例71: 给张三等4人预订下周六广州长隆野生动物世界成人票（张三、李四、王芳、刘强，4张），选择最便宜的供应商
+# 
+# 任务描述:
+#   Agent 需要为张三等4人预订下周六的广州长隆野生动物世界成人票。
+#   4位成人包括：张三、李四、王芳、刘强
+#   需要购买4张成人票，并选择最便宜的供应商。
+# 
+# 复杂度分析:
+#   1. 需要搜索"广州长隆野生动物世界"景点
+#   2. 需要查询成人票，并识别适用的票种（周末票）
+#   3. 需要对比多个供应商的价格，选择最便宜的
+#   4. 需要填写正确的游玩日期（下周六）
+#   5. 需要填写4位乘客信息（张三、李四、王芳、刘强）
+# 
+# 评分标准:
+#   - 订单已创建 (15分)
+#   - 景点正确（广州长隆野生动物世界）(15分)
+#   - 票种正确（成人票）(15分)
+#   - 数量正确（4张）(5分)
+#   - 游玩日期正确（下周六）(5分)
+#   - 联系电话正确（张三的电话）(10分)
+#   - 乘客信息正确（4位乘客：张三、李四、王芳、刘强）(10分)
+#   - 选择了最便宜的供应商 (25分)
+# 
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v071_book_guangzhou_chimelong_student_ticket_validator/start
+#   
+#   # Agent 通过界面操作完成预订...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V051V100
   class V071BookGuangzhouChimelongStudentTicketValidator < BaseValidator
     self.validator_id = 'v071_book_guangzhou_chimelong_student_ticket_validator'
     self.task_id = '5349ccad-e036-400c-a6e1-ffce23767534'
-    self.title = '给张三预订本周末广州长隆野生动物世界成人票（4张）'
-    self.description = '预订本周末广州长隆野生动物世界成人票（4张）'
+    self.title = '给张三等4人预订下周六广州长隆野生动物世界成人票（张三、李四、王芳、刘强，4张），选择最便宜的供应商'
+    self.description = '给张三等4人预订下周六广州长隆野生动物世界成人票（张三、李四、王芳、刘强，4张），选择最便宜的供应商'
     self.timeout_seconds = 240
   
     def prepare
@@ -66,7 +97,8 @@ module V051V100
       @best_price = min_price
     
       {
-        task: "请为4位成人预订下周六（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的成人票，选择最便宜的供应商",
+        task: "请为4位成人（张三、李四、王芳、刘强）预订下周六（#{@visit_date.strftime('%Y年%m月%d日')}）#{@attraction_name}的成人票，选择最便宜的供应商",
+        passengers: "张三、李四、王芳、刘强",
         attraction_name: @attraction_name,
         ticket_type: "成人票",
         visit_date: @visit_date.to_s,
@@ -111,7 +143,7 @@ module V051V100
           "数量错误。期望: #{@quantity}张, 实际: #{@ticket_order.quantity}张"
       end
     
-      add_assertion "游玩日期为周六", weight: 5 do
+      add_assertion "游玩日期正确（下周六）", weight: 5 do
         expect(@ticket_order.visit_date.saturday?).to be_truthy,
           "游玩日期不是周六。期望: 周六，实际: #{@ticket_order.visit_date.strftime('%Y年%m月%d日')}（周#{['日','一','二','三','四','五','六'][@ticket_order.visit_date.wday]}）"
         

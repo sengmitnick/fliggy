@@ -158,8 +158,8 @@
       </div>
       <div class="px-4 py-4 space-y-4">
         <!-- No Insurance Option -->
-        <label class="flex items-start gap-3 cursor-pointer" for="insurance_none">
-          <input type="radio" id="insurance_none" name="activity_order[insurance_type]" value="none" 
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_none" onclick="updateTotalPrice()">
+          <input type="radio" id="insurance_none" name="activity_order[insurance_type]" value="none" checked
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="0">
           <div class="flex-1">
@@ -174,7 +174,7 @@
         </label>
 
         <!-- Basic Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_basic">
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_basic" onclick="updateTotalPrice()">
           <input type="radio" id="insurance_basic" name="activity_order[insurance_type]" value="basic" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="9">
@@ -208,8 +208,8 @@
         </label>
 
         <!-- Premium Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5" for="insurance_premium">
-          <input type="radio" id="insurance_premium" name="activity_order[insurance_type]" value="premium" checked
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" for="insurance_premium" onclick="updateTotalPrice()">
+          <input type="radio" id="insurance_premium" name="activity_order[insurance_type]" value="premium" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="15">
           <div class="flex-1">
@@ -274,8 +274,8 @@
     </div>
     <!-- Hidden price elements for Stimulus controller -->
     <span id="base_price_display" style="display:none;"><%= @activity.current_price.to_i %></span>
-    <span id="insurance_price_display" style="display:none;">15</span>
-    <span id="total_price_display" style="display:none;"><%= @activity.current_price.to_i + 15 %></span>
+    <span id="insurance_price_display" style="display:none;">0</span>
+    <span id="total_price_display" style="display:none;"><%= @activity.current_price.to_i %></span>
     
     <button type="button" 
             data-activity-order-target="submitButton"
