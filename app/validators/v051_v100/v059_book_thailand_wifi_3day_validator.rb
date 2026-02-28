@@ -17,11 +17,12 @@ require_relative '../base_validator'
 #   总价: 9×3×1+500=527元
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 订单类型正确（wifi） (15分)
-#   - 地区正确（泰国） (15分)
-#   - 选择了泰国4G经济版WiFi (25分)
+#   - 订单已创建 (30分)
+#   - 订单类型正确（wifi） (10分)
+#   - 地区正确（泰国） (10分)
+#   - 选择了泰国4G经济版WiFi (10分)
 #   - 租赁天数正确（3天）、总价正确（527元含押金） (25分)
+#   - 自取点和联系人信息正确（上海浦东，李四） (15分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -78,8 +79,8 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建 (30分)
+      add_assertion "订单已创建", weight: 30 do
         @order = InternetOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -110,8 +111,8 @@ module V051V100
           "未选择4G经济版。预期包含: #{@wifi_keyword}, 实际: #{wifi.name}"
       end
     
-      # 断言5: 租赁天数和总价正确
-      add_assertion "租赁天数正确（3天）、总价正确（527元含押金）", weight: 15 do
+      # 断言5: 租赁天数正确（3天）、总价正确（527元含押金） (25分)
+      add_assertion "租赁天数正确（3天）、总价正确（527元含押金）", weight: 25 do
         wifi = @order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
       
@@ -125,20 +126,30 @@ module V051V100
           "总价不正确。预期: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台 + 500元押金），实际: #{@order.total_price}元"
       end
     
-      # 断言6: 自取点和联系人信息正确
-      add_assertion "自取点和联系人信息正确（上海浦东，李四）", weight: 25 do
+      # 断言6: 自取点和联系人信息正确（上海浦东，李四） (15分)
+      add_assertion "自取点和联系人信息正确（上海浦东，李四）", weight: 15 do
         expect(@order.delivery_method).to eq('pickup'),
           "配送方式不正确。预期: pickup（自取），实际: #{@order.delivery_method}"
         
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq(@expected_contact_name),
-          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq(@expected_contact_phone),
-          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{contact_info['phone']}"
+        # 支持Hash（Rails嵌套属性）和JSON字符串两种格式
+        contact_info = @order.contact_info
+        contact_info = JSON.parse(contact_info) if contact_info.is_a?(String)
         
-        delivery_info = JSON.parse(@order.delivery_info)
-        expect(delivery_info['address']).to include('上海', '浦东'),
-          "自取地址不正确。预期包含: 上海浦东, 实际: #{delivery_info['address']}"
+        actual_name = contact_info['name'] || contact_info[:name]
+        actual_phone = contact_info['phone'] || contact_info[:phone]
+        
+        expect(actual_name).to eq(@expected_contact_name),
+          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{actual_name}"
+        expect(actual_phone).to eq(@expected_contact_phone),
+          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{actual_phone}"
+        
+        # 支持Hash和JSON字符串两种格式
+        delivery_info = @order.delivery_info
+        delivery_info = JSON.parse(delivery_info) if delivery_info.is_a?(String)
+        
+        actual_address = delivery_info['address'] || delivery_info[:address]
+        expect(actual_address).to include('上海', '浦东'),
+          "自取地址不正确。预期包含: 上海浦东, 实际: #{actual_address}"
       end
     end
   

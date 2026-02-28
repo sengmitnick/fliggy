@@ -10,11 +10,13 @@ class CarOrdersController < ApplicationController
     @search_pickup_location = params[:pickup_location]
     @search_pickup_date = params[:pickup_date]
     @search_return_date = params[:return_date]
+    @search_pickup_time = params[:pickup_time]
+    @search_return_time = params[:return_time]
     
     # 计算总价
     pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
     return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
-    days_count = (return_date - pickup_date).to_i + 1
+    days_count = (return_date - pickup_date).to_i
     @total_price = (@car.price_per_day * days_count).round
   end
 

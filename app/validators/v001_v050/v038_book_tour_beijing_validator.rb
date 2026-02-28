@@ -20,7 +20,9 @@ require_relative '../base_validator'
 #   - 目的地正确（北京） (20分)
 #   - 出发日期正确（明天） (15分)
 #   - 天数正确（4天3晚） (20分)
-#   - 成人数量正确（2人） (20分)
+#   - 成人数量正确（2人） (10分)
+#   - 联系人信息正确（从出行人中选择：张三或李四） (5分)
+#   - 出行人信息正确（2位成人） (5分)
 #
 module V001V050
   class V038BookTourBeijingValidator < BaseValidator
@@ -69,6 +71,7 @@ module V001V050
     end
   
     def verify
+      # 断言1: 订单已创建 (25分)
       add_assertion "订单已创建", weight: 25 do
         all_tour_group_bookings = TourGroupBooking
           .where(data_version: @data_version)
@@ -81,34 +84,40 @@ module V001V050
     
       return unless @booking
     
+      # 断言2: 目的地正确（北京） (20分)
       add_assertion "目的地正确（#{@destination}）", weight: 20 do
         expect(@booking.tour_group_product.destination).to eq(@destination),
           "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
+      # 断言3: 出发日期正确（明天） (15分)
       add_assertion "出发日期正确（明天）", weight: 15 do
         departure_date = @booking.travel_date
         expect(departure_date).to eq(@departure_date),
           "出发日期不正确。期望: #{@departure_date}（明天）, 实际: #{departure_date}"
       end
     
+      # 断言4: 天数正确（4天3晚） (20分)
       add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 20 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
       end
     
+      # 断言5: 成人数量正确（2人） (10分)
       add_assertion "成人数量正确（#{@adult_count}人）", weight: 10 do
         expect(@booking.adult_count).to eq(@adult_count),
           "成人数量不正确。期望: #{@adult_count}人, 实际: #{@booking.adult_count}人"
       end
     
+      # 断言6: 联系人信息正确（从出行人中选择：张三或李四） (5分)
       add_assertion "联系人信息正确（从出行人中选择：张三或李四）", weight: 5 do
         expect(@valid_contact_phones.values).to include(@booking.contact_phone),
           "联系人电话错误。应从出行人中选择：#{@valid_contact_names.join('、')}，" \
           "对应电话：#{@valid_contact_phones.values.join('、')}，实际: #{@booking.contact_phone}"
       end
     
-      add_assertion "出行人信息正确（#{@adult_count}位成人）", weight: 10 do
+      # 断言7: 出行人信息正确（2位成人） (5分)
+      add_assertion "出行人信息正确（#{@adult_count}位成人）", weight: 5 do
         travelers = @booking.booking_travelers.where(data_version: @data_version, traveler_type: 'adult')
         expect(travelers.size).to eq(@adult_count),
           "成人出行人数量错误。期望: #{@adult_count}人, 实际: #{travelers.size}人"

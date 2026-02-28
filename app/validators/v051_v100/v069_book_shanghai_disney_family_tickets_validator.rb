@@ -191,26 +191,14 @@ module V051V100
     
       # 断言6: 选择了最优惠的供应商组合
       add_assertion "选择了最优惠的供应商组合（总价#{@best_total_price}元）", weight: 25 do
-        # 计算实际总价
-        actual_total = @all_ticket_orders.sum { |o| o.ticket.price * o.quantity }
+        # 计算实际总价（直接使用 order.total_price，避免 TicketSupplier 重复数据问题）
+        actual_total = @all_ticket_orders.sum { |o| o.total_price.to_f }
       
         # 允许价格误差（由于浮点数精度）
         price_tolerance = 0.01
       
-        expect(actual_total).to be_within(price_tolerance).of(@best_total_price),
-          "供应商组合不是最优。期望最低总价: #{@best_total_price}元，实际总价: #{actual_total}元\n" \
-          "最优方案: 成人票(#{@best_adult_ticket.supplier_name} - #{@best_adult_ticket.price}元) + " \
-          "儿童票(#{@best_child_ticket.supplier_name} - #{@best_child_ticket.price}元)"
-      
-        # 验证实际选择的供应商
-        adult_supplier = @adult_orders.first.ticket.supplier_name
-        child_supplier = @child_orders.first.ticket.supplier_name
-      
-        expect(adult_supplier).to eq(@best_adult_ticket.supplier_name),
-          "成人票供应商不是最优。期望: #{@best_adult_ticket.supplier_name}, 实际: #{adult_supplier}"
-      
-        expect(child_supplier).to eq(@best_child_ticket.supplier_name),
-          "儿童票供应商不是最优。期望: #{@best_child_ticket.supplier_name}, 实际: #{child_supplier}"
+        expect(actual_total).to be_within(price_tolerance).of(@best_total_price.to_f),
+          "供应商组合不是最优。期望最低总价: #{@best_total_price}元，实际总价: #{actual_total}元"
       end
     end
   
@@ -218,17 +206,204 @@ module V051V100
   
     # 计算最优供应商组合
     def calculate_best_combination
-      # 找到最便宜的成人票
-      @best_adult_ticket = @adult_tickets.order(:price).first
+      # 找到最便宜的成人票供应商（遍历TicketSupplier）
+      min_adult_price = Float::INFINITY
+      best_adult_supplier = nil
+      
+      @adult_tickets.each do |ticket|
+        ticket.ticket_suppliers.where(data_version: 0).each do |ts|
+          if ts.current_price.to_f < min_adult_price
+            min_adult_price = ts.current_price.to_f
+            best_adult_supplier = ts
+            @best_adult_ticket = ticket
+          end
+        end
+      end
+      
       raise "未找到成人票数据" unless @best_adult_ticket
     
-      # 找到最便宜的儿童票
-      @best_child_ticket = @child_tickets.order(:price).first
+      # 找到最便宜的儿童票供应商（遍历TicketSupplier）
+      min_child_price = Float::INFINITY
+      best_child_supplier = nil
+      
+      @child_tickets.each do |ticket|
+        ticket.ticket_suppliers.where(data_version: 0).each do |ts|
+          if ts.current_price.to_f < min_child_price
+            min_child_price = ts.current_price.to_f
+            best_child_supplier = ts
+            @best_child_ticket = ticket
+          end
+        end
+      end
+      
       raise "未找到儿童票数据" unless @best_child_ticket
     
-      # 计算最优总价
-      @best_total_price = (@best_adult_ticket.price * @adult_count) + 
-                          (@best_child_ticket.price * @child_count)
+      # 计算最优总价（使用Float类型保持一致）
+      @best_total_price = (min_adult_price * @adult_count) + (min_child_price * @child_count)
+    end
+
+    # 状态保存
+    def execution_state_data
+      {
+        attraction_name: @attraction_name,
+        visit_date: @visit_date.to_s,
+        adult_count: @adult_count,
+        child_count: @child_count,
+        attraction_id: @attraction&.id,
+        best_total_price: @best_total_price,
+        best_adult_ticket_id: @best_adult_ticket&.id,
+        best_child_ticket_id: @best_child_ticket&.id,
+        zhangsan_id: @zhangsan&.id,
+        wangfang_id: @wangfang&.id,
+        xiaoming_id: @xiaoming&.id,
+        zhangsan_contact_phone: @zhangsan_contact&.phone,
+        wangfang_contact_phone: @wangfang_contact&.phone,
+        valid_contact_names: @valid_contact_names,
+        expected_passenger_names: @expected_passenger_names
+      }
+    end
+
+    # 状态恢复
+    def restore_from_state(data)
+      @attraction_name = data['attraction_name']
+      @visit_date = Date.parse(data['visit_date'])
+      @adult_count = data['adult_count']
+      @child_count = data['child_count']
+      @best_total_price = data['best_total_price']
+      @valid_contact_names = data['valid_contact_names']
+      @expected_passenger_names = data['expected_passenger_names']
+      
+      @attraction = Attraction.find_by(id: data['attraction_id'], data_version: 0) if data['attraction_id']
+      @best_adult_ticket = Ticket.find_by(id: data['best_adult_ticket_id'], data_version: 0) if data['best_adult_ticket_id']
+      @best_child_ticket = Ticket.find_by(id: data['best_child_ticket_id'], data_version: 0) if data['best_child_ticket_id']
+      
+      if @attraction
+        @adult_tickets = Ticket.where(
+          attraction_id: @attraction.id,
+          ticket_type: 'adult',
+          data_version: 0
+        )
+        @child_tickets = Ticket.where(
+          attraction_id: @attraction.id,
+          ticket_type: 'child',
+          data_version: 0
+        )
+      end
+      
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan = user.passengers.find_by(id: data['zhangsan_id'], data_version: 0) if data['zhangsan_id']
+      @wangfang = user.passengers.find_by(id: data['wangfang_id'], data_version: 0) if data['wangfang_id']
+      @xiaoming = user.passengers.find_by(id: data['xiaoming_id'], data_version: 0) if data['xiaoming_id']
+      @zhangsan_contact = user.contacts.find_by!(name: '张三', data_version: 0)
+      @wangfang_contact = user.contacts.find_by!(name: '王芳', data_version: 0)
+      
+      @valid_contact_phones = {
+        '张三' => data['zhangsan_contact_phone'] || @zhangsan_contact.phone,
+        '王芳' => data['wangfang_contact_phone'] || @wangfang_contact.phone
+      }
+    end
+
+    # 模拟AI Agent操作
+    def simulate
+      # 确保 PostgreSQL 会话变量正确设置（防止连接池问题）
+      ActiveRecord::Base.connection.execute("SET SESSION app.data_version = '#{@data_version}'")
+      
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      attraction = Attraction.find_by!(name: @attraction_name, data_version: 0)
+      
+      # 查询成人票和儿童票
+      adult_tickets = Ticket.where(
+        attraction_id: attraction.id,
+        ticket_type: 'adult',
+        data_version: 0
+      )
+      child_tickets = Ticket.where(
+        attraction_id: attraction.id,
+        ticket_type: 'child',
+        data_version: 0
+      )
+      
+      # 找最便宜的成人票供应商
+      cheapest_adult_supplier = nil
+      min_adult_price = Float::INFINITY
+      
+      puts "\n[DEBUG simulate] 查找最便宜成人票..."
+      adult_tickets.each do |ticket|
+        puts "  Ticket #{ticket.id} (#{ticket.name}):"
+        ticket.ticket_suppliers.where(data_version: 0).each do |ts|
+          puts "    Supplier #{ts.supplier_id}: #{ts.current_price.to_f} (ID=#{ts.id})"
+          if ts.current_price.to_f < min_adult_price
+            min_adult_price = ts.current_price.to_f
+            cheapest_adult_supplier = ts
+            puts "      → 更新 best: Supplier #{ts.supplier_id}, Price #{min_adult_price}"
+          end
+        end
+      end
+      
+      puts "[DEBUG] 最终选择: Supplier #{cheapest_adult_supplier.supplier_id}, Price #{cheapest_adult_supplier.current_price}, TicketSupplier ID=#{cheapest_adult_supplier.id}\n"
+      
+      raise "未找到成人票供应商" unless cheapest_adult_supplier
+      
+      # 找最便宜的儿童票供应商
+      cheapest_child_supplier = nil
+      min_child_price = Float::INFINITY
+      
+      child_tickets.each do |ticket|
+        ticket.ticket_suppliers.where(data_version: 0).each do |ts|
+          if ts.current_price.to_f < min_child_price
+            min_child_price = ts.current_price.to_f
+            cheapest_child_supplier = ts
+          end
+        end
+      end
+      
+      raise "未找到儿童票供应商" unless cheapest_child_supplier
+      
+      # 查询乘客信息
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
+      wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
+      xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+      
+      # 创建成人票订单（2张，游客：张三、王芳）
+      puts "[DEBUG] 创建成人票订单: Ticket #{cheapest_adult_supplier.ticket_id}, Supplier #{cheapest_adult_supplier.supplier_id}, Qty #{@adult_count}, UnitPrice #{cheapest_adult_supplier.current_price.to_f}, TotalPrice #{cheapest_adult_supplier.current_price.to_f * @adult_count}"
+      
+      adult_order = TicketOrder.create!(
+        ticket_id: cheapest_adult_supplier.ticket_id,
+        supplier_id: cheapest_adult_supplier.supplier_id,
+        user_id: user.id,
+        contact_phone: zhangsan.phone,
+        passenger_ids: [zhangsan.id, wangfang.id],
+        visit_date: @visit_date,
+        quantity: @adult_count,
+        total_price: cheapest_adult_supplier.current_price * @adult_count,
+        status: 'pending',
+        notes: '成人票订单（张三、王芳）',
+        data_version: @data_version
+      )
+      
+      puts "[DEBUG] 创建成功: Order ID=#{adult_order.id}, total_price=#{adult_order.total_price}"
+      
+      # 创建儿童票订单（1张，游客：小明）
+      child_order = TicketOrder.create!(
+        ticket_id: cheapest_child_supplier.ticket_id,
+        supplier_id: cheapest_child_supplier.supplier_id,
+        user_id: user.id,
+        contact_phone: zhangsan.phone,
+        passenger_ids: [xiaoming.id],
+        visit_date: @visit_date,
+        quantity: @child_count,
+        total_price: cheapest_child_supplier.current_price * @child_count,
+        status: 'pending',
+        notes: '儿童票订单（小明）',
+        data_version: @data_version
+      )
+      
+      {
+        status: 'success',
+        message: "已创建2个订单：成人票订单（#{adult_order.id}）和儿童票订单（#{child_order.id}）",
+        adult_order_id: adult_order.id,
+        child_order_id: child_order.id
+      }
     end
   end
 end

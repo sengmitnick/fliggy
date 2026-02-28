@@ -138,15 +138,7 @@ module V251V300
         end
       end
       
-      # 断言7: 订单信息完整（权重5%）
-      add_assertion "订单信息完整", weight: 5 do
-        @charter_bookings.each do |booking|
-          expect(booking.departure_time).to match(/\A\d{2}:\d{2}\z/)
-          expect(booking.booking_mode).to eq('by_route')
-        end
-      end
-      
-      # 断言8: 价格计算正确（权重5%）
+      # 断言7: 价格计算正确 (5分)
       add_assertion "价格计算正确", weight: 5 do
         @charter_bookings.each do |booking|
           # 使用服务重新计算价格

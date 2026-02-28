@@ -92,7 +92,7 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 订单已创建 (10分)
       add_assertion "订单已创建", weight: 10 do
         all_insurance_orders = InsuranceOrder
           .where(data_version: @data_version)
@@ -105,35 +105,35 @@ module V001V050
     
       return unless @insurance_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 保险类型正确
+      # 断言2: 保险类型正确（境内旅游） (10分)
       add_assertion "保险类型正确（境内旅游）", weight: 10 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}, 实际: #{actual_type}"
       end
     
-      # 断言3: 目的地城市正确
+      # 断言3: 目的地城市正确（成都） (10分)
       add_assertion "目的地城市正确（#{@destination_city}）", weight: 10 do
         actual_destination = @insurance_order.destination
         expect(actual_destination).to eq(@destination_city),
           "目的地城市错误。期望: #{@destination_city}, 实际: #{actual_destination || '未填写'}"
       end
     
-      # 断言4: 出行开始时间正确（后天）
+      # 断言4: 出行开始时间正确（后天） (15分)
       add_assertion "出行开始时间正确（后天，#{@start_date}）", weight: 15 do
         actual_start_date = @insurance_order.start_date
         expect(actual_start_date).to eq(@start_date),
           "出行开始时间错误。期望: #{@start_date}（后天）, 实际: #{actual_start_date}"
       end
     
-      # 断言5: 保障天数正确
+      # 断言5: 保障天数正确（7天） (10分)
       add_assertion "保障天数正确（#{@days}天）", weight: 10 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
           "保障天数错误。期望: #{@days}天, 实际: #{actual_days}天"
       end
     
-      # 断言6: 根据成都差异化定价选择了最便宜的产品（核心评分项）
+      # 断言6: 根据成都差异化定价选择了最便宜的产品 (30分) - 核心评分项
       add_assertion "根据#{@destination_city}差异化定价选择了最便宜的产品", weight: 30 do
         # 获取所有在成都可用的境内旅游保险产品
         all_products = InsuranceProduct.where(
@@ -165,7 +165,7 @@ module V001V050
           "实际选择: #{@insurance_order.insurance_product.name}（#{@insurance_order.insurance_product.company}，在#{@destination_city}每天#{actual_city_price}元，#{@days}天共#{actual_total}元）"
       end
     
-      # 断言7: 被保人信息填写正确（姓名和身份证号）
+      # 断言7: 被保人信息填写正确（张三+身份证号） (5分)
       add_assertion "被保人信息填写正确（姓名和身份证号）", weight: 5 do
         insured_persons = @insurance_order.insured_persons || []
         expect(insured_persons).not_to be_empty, "未填写被保人信息"
@@ -179,14 +179,14 @@ module V001V050
         expect(zhang_san['id_number']).not_to be_empty, "被保人'张三'的身份证号为空"
       end
     
-      # 断言8: 被保人数量正确（1人）
+      # 断言8: 被保人数量正确（1人） (5分)
       add_assertion "被保人数量正确（#{@quantity}人）", weight: 5 do
         insured_count = (@insurance_order.insured_persons || []).size
         expect(insured_count).to eq(@quantity),
           "被保人数量错误。期望: #{@quantity}人, 实际: #{insured_count}人"
       end
     
-      # 断言9: 订单总价计算正确（使用成都的城市价格）
+      # 断言9: 订单总价计算正确（使用成都的城市价格） (5分)
       add_assertion "订单总价计算正确（使用#{@destination_city}的城市价格）", weight: 5 do
         city_price_per_day = @insurance_order.insurance_product.price_for_city(@city.id)
         expected_unit_price = city_price_per_day * @insurance_order.days

@@ -70,7 +70,7 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 订单已创建 (20分)
       add_assertion "订单已创建", weight: 20 do
         all_visa_orders = VisaOrder
           .where(data_version: @data_version)
@@ -83,21 +83,21 @@ module V001V050
     
       return unless @visa_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 国家正确
+      # 断言2: 国家正确（泰国） (15分)
       add_assertion "国家正确（泰国）", weight: 15 do
         actual_country = @visa_order.visa_product.country.name
         expect(actual_country).to eq(@country_name),
           "国家错误。期望: #{@country_name}, 实际: #{actual_country}"
       end
     
-      # 断言3: 签证类型正确
+      # 断言3: 签证类型正确（旅游签证） (15分)
       add_assertion "签证类型正确（旅游签证）", weight: 15 do
         actual_type = @visa_order.visa_product.product_type
         expect(actual_type).to eq(@product_type),
           "签证类型错误。期望: #{@product_type}, 实际: #{actual_type}"
       end
     
-      # 断言4: 选择了最快出签的服务商（核心评分项）
+      # 断言4: 选择了最快出签的服务商 (30分) - 核心评分项
       add_assertion "选择了最快出签的服务商", weight: 30 do
         # 获取所有泰国旅游签证产品
         thailand = Country.find_by(name: @country_name, data_version: 0)
@@ -118,7 +118,7 @@ module V001V050
           "实际选择: #{@visa_order.visa_product.name}（#{actual_days}个工作日，#{@visa_order.visa_product.price}元）"
       end
     
-      # 断言5: 订单价格和人数正确
+      # 断言5: 订单价格和人数正确 (10分)
       add_assertion "订单价格和人数正确", weight: 10 do
         expected_total = @visa_order.visa_product.price * @visa_order.traveler_count
         actual_total = @visa_order.total_price
@@ -130,14 +130,14 @@ module V001V050
           "订单总价错误。期望: #{expected_total}元（单价#{@visa_order.visa_product.price}元 × #{@visa_order.traveler_count}人），实际: #{actual_total}元"
       end
     
-      # 断言6: 联系人和地址信息正确
+      # 断言6: 联系人和地址信息正确（张三 13800138000 北京朝阳） (10分)
       add_assertion "联系人和地址信息正确（张三 13800138000 北京朝阳）", weight: 10 do
         expect(@visa_order.contact_name).to eq('张三'),
-          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@visa_order.contact_name}"
+          "联系人姓名错误。期望: 张三, 实际: #{@visa_order.contact_name}"
         expect(@visa_order.contact_phone).to eq('13800138000'),
-          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@visa_order.contact_phone}"
+          "联系人电话错误。期望: 13800138000, 实际: #{@visa_order.contact_phone}"
         expect(@visa_order.delivery_address).to include('北京'),
-          "地址错误。期望包含: 北京（demo_user数据）, 实际: #{@visa_order.delivery_address}"
+          "地址错误。期望包含: 北京, 实际: #{@visa_order.delivery_address}"
       end
     end
   

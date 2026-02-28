@@ -8,10 +8,13 @@ require_relative '../base_validator'
 #   用户需要预订2大1小出行套餐，总预算≤5000元
 #
 # 评分标准:
-#   - 创建了航班订单（至少包含3张票） (25%)
-#   - 创建了酒店订单 (15%)
-#   - 总价格≤5000元 (40%)
-#   - 订单状态有效 (20%)
+#   - 创建了航班订单（至少包含3张票） (30分) - 核心评分项
+#   - 创建了酒店订单 (15分)
+#   - 航班日期正确（3天后） (10分)
+#   - 酒店入住日期正确 (10分)
+#   - 总价格≤5000元 (15分) - 核心评分项
+#   - 乘客/入住人信息正确（2大1小） (10分)
+#   - 订单状态有效 (10分)
 module V201V250
   class V220BookFamilyTripBudget5000Validator < BaseValidator
     self.validator_id = 'v220_book_family_trip_budget_5000_validator'
@@ -68,7 +71,8 @@ module V201V250
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 25 do
+      # 断言1: 创建了航班订单 (30分) - 核心评分项
+      add_assertion "创建了航班订单", weight: 30 do
         @flight_bookings = Booking
           .joins(:flight)
           .where(flights: { departure_city: @departure_city, destination_city: @arrival_city })
@@ -80,6 +84,7 @@ module V201V250
       
       return if @flight_bookings.empty?
       
+      # 断言2: 创建了酒店订单 (15分)
       add_assertion "创建了酒店订单", weight: 15 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
@@ -92,6 +97,7 @@ module V201V250
       
       return if @hotel_booking.nil?
       
+      # 断言3: 航班日期正确（3天后） (10分)
       add_assertion "航班日期正确（#{@flight_date.strftime('%m月%d日')}）", weight: 10 do
         @flight_bookings.each do |booking|
           expect(booking.flight.flight_date).to eq(@flight_date),
@@ -99,12 +105,14 @@ module V201V250
         end
       end
       
+      # 断言4: 酒店入住日期正确（航班当天） (10分)
       add_assertion "酒店入住日期正确（#{@check_in_date.strftime('%m月%d日')}）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      add_assertion "总价格≤#{@max_budget}元", weight: 10 do
+      # 断言5: 总价格≤#{@max_budget}元 (15分) - 核心评分项
+      add_assertion "总价格≤#{@max_budget}元", weight: 15 do
         flight_total = @flight_bookings.sum(&:total_price)
         hotel_price = @hotel_booking.total_price
         total_price = flight_total + hotel_price
@@ -113,6 +121,7 @@ module V201V250
           "总价格超出预算。航班: #{flight_total}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
+      # 断言6: 乘客/入住人信息正确（2大1小） (10分)
       add_assertion "乘客/入住人信息正确（2大1小）", weight: 10 do
         passenger_names = @flight_bookings.map(&:passenger_name)
         adult_count = passenger_names.count(@expected_adult_name)
@@ -124,6 +133,7 @@ module V201V250
           "酒店入住人姓名错误。期望: #{@expected_adult_name}, 实际: #{@hotel_booking.guest_name}"
       end
       
+      # 断言7: 订单状态有效 (10分)
       add_assertion "订单状态有效", weight: 10 do
         @flight_bookings.each { |b| expect(b.status).to be_in(['pending', 'paid', 'completed']) }
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])

@@ -182,16 +182,16 @@ module V301V350
       # 创建漂流体验活动订单（包含安全保障和装备）
       ActivityOrder.create!(
         user: user,
-        attraction_activity: @rafting_activity,  # ✅ From data pack (data_version: 0)
+        attraction_activity: @rafting_activity,
         visit_date: @activity_date,
         quantity: @participant_count,
-        passenger_ids: [@zhangsan.id, @lisi.id, @liuqiang.id, @wangfang.id],  # ✅ 关联4个游客
+        passenger_ids: [@zhangsan.id, @lisi.id, @liuqiang.id, @wangfang.id],
         total_price: @rafting_activity.current_price * @participant_count,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
-        insurance_type: 'premium',  # 水上活动建议购买高级保险
+        insurance_type: 'premium',
         status: 'paid',
-        data_version: @data_version  # ✅ Session-scoped
+        data_version: @data_version
       )
     end
     

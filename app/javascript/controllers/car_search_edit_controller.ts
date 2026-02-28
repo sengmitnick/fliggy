@@ -42,6 +42,10 @@ export default class extends Controller {
     // stimulus-validator: disable-next-line
     "returnDateInput",
     // stimulus-validator: disable-next-line
+    "pickupTimeInput",
+    // stimulus-validator: disable-next-line
+    "returnTimeInput",
+    // stimulus-validator: disable-next-line
     "searchButton"
   ]
 
@@ -84,6 +88,10 @@ export default class extends Controller {
   declare readonly pickupDateInputTarget: HTMLInputElement
   // stimulus-validator: disable-next-line
   declare readonly returnDateInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
+  declare readonly pickupTimeInputTarget: HTMLInputElement
+  // stimulus-validator: disable-next-line
+  declare readonly returnTimeInputTarget: HTMLInputElement
   // stimulus-validator: disable-next-line
   declare readonly searchButtonTarget: HTMLInputElement
 
@@ -129,9 +137,33 @@ export default class extends Controller {
     this.returnCityValue = params.get('return_city') || ''
     this.returnLocationValue = params.get('return_location') || ''
     
-    // Load dates
-    this.pickupDateValue = params.get('pickup_date') || ''
-    this.returnDateValue = params.get('return_date') || ''
+    // Load dates and times
+    const pickupDate = params.get('pickup_date') || ''
+    const returnDate = params.get('return_date') || ''
+    const pickupTime = params.get('pickup_time') || ''
+    const returnTime = params.get('return_time') || ''
+    
+    // If we have both date and time, combine them into ISO datetime string
+    if (pickupDate && pickupTime) {
+      this.pickupDateValue = new Date(`${pickupDate}T${pickupTime}:00`).toISOString()
+    } else {
+      this.pickupDateValue = ''
+    }
+    
+    if (returnDate && returnTime) {
+      this.returnDateValue = new Date(`${returnDate}T${returnTime}:00`).toISOString()
+    } else {
+      this.returnDateValue = ''
+    }
+    
+    console.log('[CarSearchEdit] loadCurrentSearchParams:', {
+      pickupDate,
+      returnDate,
+      pickupTime,
+      returnTime,
+      pickupDateValue: this.pickupDateValue,
+      returnDateValue: this.returnDateValue
+    })
     
     // Enable swap toggle if return location is set
     if (this.returnLocationValue) {
@@ -211,8 +243,18 @@ export default class extends Controller {
       }
     }
     
-    // Update dates
+    // Update dates and times
     if (this.pickupDateValue && this.returnDateValue) {
+      // Load from current values
+      const pickupDate = new Date(this.pickupDateValue)
+      const returnDate = new Date(this.returnDateValue)
+      
+      // Update hidden fields with separate date and time
+      this.pickupDateInputTarget.value = this.formatDateForInput(pickupDate)
+      this.pickupTimeInputTarget.value = this.formatTimeForInput(pickupDate)
+      this.returnDateInputTarget.value = this.formatDateForInput(returnDate)
+      this.returnTimeInputTarget.value = this.formatTimeForInput(returnDate)
+      
       this.updateDateDisplays()
     } else {
       // Set default dates
@@ -223,6 +265,13 @@ export default class extends Controller {
       
       this.pickupDateValue = today.toISOString()
       this.returnDateValue = returnDate.toISOString()
+      
+      // Update hidden fields
+      this.pickupDateInputTarget.value = this.formatDateForInput(today)
+      this.pickupTimeInputTarget.value = this.formatTimeForInput(today)
+      this.returnDateInputTarget.value = this.formatDateForInput(returnDate)
+      this.returnTimeInputTarget.value = this.formatTimeForInput(returnDate)
+      
       this.updateDateDisplays()
     }
   }
@@ -429,14 +478,32 @@ export default class extends Controller {
   // Handle datetime selection from datetime picker
   private handleDateTimeSelected(event: Event): void {
     const customEvent = event as CustomEvent
-    const { type, date } = customEvent.detail
+    const { pickerType, dateTime, dateTimeString } = customEvent.detail
     
-    if (type === 'pickup') {
-      this.pickupDateValue = date
-      this.pickupDateInputTarget.value = date
-    } else if (type === 'return') {
-      this.returnDateValue = date
-      this.returnDateInputTarget.value = date
+    console.log('[CarSearchEdit] handleDateTimeSelected:', {
+      pickerType,
+      dateTime,
+      dateTimeString
+    })
+    
+    // Extract date and time separately
+    const date = new Date(dateTimeString)
+    const dateStr = this.formatDateForInput(date)
+    const timeStr = this.formatTimeForInput(date)
+    
+    console.log('[CarSearchEdit] Extracted:', {
+      dateStr,
+      timeStr
+    })
+    
+    if (pickerType === 'pickup') {
+      this.pickupDateValue = dateTimeString
+      this.pickupDateInputTarget.value = dateStr
+      this.pickupTimeInputTarget.value = timeStr
+    } else if (pickerType === 'return') {
+      this.returnDateValue = dateTimeString
+      this.returnDateInputTarget.value = dateStr
+      this.returnTimeInputTarget.value = timeStr
     }
     
     this.updateDateDisplays()
@@ -504,8 +571,26 @@ export default class extends Controller {
     this.pickupDateDisplayTarget.innerHTML = formatDate(pickupDate)
     this.returnDateDisplayTarget.innerHTML = formatDate(returnDate)
     
+    console.log('[CarSearchEdit] Updated displays:', {
+      pickupDisplay: this.pickupDateDisplayTarget.innerHTML,
+      returnDisplay: this.returnDateDisplayTarget.innerHTML
+    })
+    
     // Calculate duration
     const duration = Math.ceil((returnDate.getTime() - pickupDate.getTime()) / (1000 * 60 * 60 * 24))
     this.durationDisplayTarget.textContent = `${duration}天`
+  }
+  
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
+  private formatTimeForInput(date: Date): string {
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
   }
 }

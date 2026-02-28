@@ -201,16 +201,16 @@ module V301V350
       # 创建马术活动订单（包含教练和马场服务）
       ActivityOrder.create!(
         user: user,
-        attraction_activity: @equestrian_activity,  # ✅ From data pack (data_version: 0)
+        attraction_activity: @equestrian_activity,
         visit_date: @activity_date,
         quantity: @participant_count,
-        passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联2个游客（同时也是被投保人）
+        passenger_ids: [@liuqiang.id, @chenjing.id],
         total_price: @equestrian_activity.current_price * @participant_count,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
-        insurance_type: 'premium',  # 骑马活动建议购买保险
+        insurance_type: 'premium',
         status: 'paid',
-        data_version: @data_version  # ✅ Session-scoped
+        data_version: @data_version
       )
     end
     

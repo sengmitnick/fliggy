@@ -6,7 +6,7 @@
   <div class="bg-white rounded-xl p-1 shadow-sm flex items-center justify-between">
     <div class="pl-3 font-medium text-gray-800">取件方式</div>
     <div class="flex bg-gray-50 rounded-lg p-1">
-      <div data-action="click->wifi-booking#showComingSoon" data-method="mail" 
+      <div data-action="click->wifi-booking#selectDelivery" data-method="mail" 
            data-wifi-booking-target="mailTab"
            class="px-6 py-1.5 text-sm text-gray-500 cursor-pointer">邮寄</div>
       <div data-action="click->wifi-booking#selectDelivery" data-method="pickup" 
@@ -126,7 +126,7 @@
     <!-- 联系人姓名 -->
     <div class="flex justify-between items-center">
       <span class="font-medium text-gray-900">联系人姓名</span>
-      <div class="flex items-center space-x-1 cursor-pointer" data-action="click->wifi-booking#openAddressPicker">
+      <div class="flex items-center space-x-1">
         <% if current_user.contacts.any? %>
           <% default_contact = current_user.contacts.find_by(is_default: true) || current_user.contacts.first %>
           <input type="text" value="<%= default_contact.name %>" 
@@ -139,7 +139,8 @@
                  placeholder="请输入联系人姓名"
                  data-wifi-booking-target="contactName">
         <% end %>
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             data-action="click->wifi-booking#openAddressPicker">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
       </div>
@@ -244,9 +245,9 @@
     </div>
     
     <!-- 联系人列表 -->
-    <div class="space-y-2 max-h-96 overflow-y-auto">
+    <div class="space-y-2 max-h-[70vh] overflow-y-auto">
       <% if current_user.contacts.any? %>
-        <% current_user.contacts.order(is_default: :desc, created_at: :desc).each do |contact| %>
+        <% current_user.contacts.order(is_default: :desc, name: :asc).each do |contact| %>
           <div class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50 <%= 'border-[#FFDD00] bg-[#FFFDF2]' if contact.is_default %>"
                data-action="click->wifi-booking#selectAddress"
                data-address-name="<%= contact.name %>"

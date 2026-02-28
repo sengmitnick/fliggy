@@ -35,9 +35,13 @@ export default class extends Controller {
   private selectedDate: string | null = null
   private adultQuantity: number = 1
   private childQuantity: number = 0
+  private monthsData: Array<{month: number, year: number, firstDay: number, daysInMonth: number}> = []
 
   connect(): void {
     console.log("Booking modal controller connected")
+    
+    // Store calendar data for 4 months
+    this.generateMonthsData()
     
     // Listen for package selection changes from outside
     window.addEventListener("package:selected", (event: Event) => {
@@ -52,6 +56,22 @@ export default class extends Controller {
     window.addEventListener("bottom-bar:open-modal", () => {
       this.open()
     })
+  }
+
+  private generateMonthsData(): void {
+    // Pre-generate 4 months of calendar data
+    const today = new Date()
+    this.monthsData = []
+    
+    for (let i = 0; i < 4; i++) {
+      const monthDate = new Date(today.getFullYear(), today.getMonth() + i, 1)
+      this.monthsData.push({
+        month: monthDate.getMonth() + 1,
+        year: monthDate.getFullYear(),
+        firstDay: monthDate.getDay(),
+        daysInMonth: new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate()
+      })
+    }
   }
 
   open(): void {
@@ -149,11 +169,11 @@ export default class extends Controller {
 
   selectMonth(event: Event): void {
     const btn = event.currentTarget as HTMLElement
-    const month = btn.dataset.month
+    const month = parseInt(btn.dataset.month || "0")
 
     // Update tab styles
     this.monthTabTargets.forEach(tabEl => {
-      if (tabEl.dataset.month === month) {
+      if (parseInt(tabEl.dataset.month || "0") === month) {
         tabEl.classList.remove("text-foreground-muted")
         tabEl.classList.add("text-red-500", "border-b-2", "border-red-500")
       } else {
@@ -162,7 +182,82 @@ export default class extends Controller {
       }
     })
 
-    // TODO: Update calendar display for selected month
+    // Render calendar for selected month
+    this.renderCalendar(month)
+  }
+
+  private renderCalendar(month: number): void {
+    const monthData = this.monthsData.find(m => m.month === month)
+    if (!monthData) return
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    // Get current package price
+    const priceText = this.monthPriceTargets[0]?.textContent || "¥3975起"
+    const price = priceText.match(/\d+/)?.[0] || "3975"
+
+    // Clear calendar (keep weekday headers)
+    const calendarGrid = this.calendarTarget
+    const weekdayHeaders = calendarGrid.querySelectorAll('div.text-center.text-sm.font-medium')
+    calendarGrid.innerHTML = ''
+    
+    // Re-add weekday headers
+    weekdayHeaders.forEach(header => calendarGrid.appendChild(header))
+
+    // Add empty cells for days before month starts
+    for (let i = 0; i < monthData.firstDay; i++) {
+      const emptyCell = document.createElement('div')
+      emptyCell.className = 'aspect-square'
+      calendarGrid.appendChild(emptyCell)
+    }
+
+    // Add date buttons for each day
+    for (let day = 1; day <= monthData.daysInMonth; day++) {
+      const date = new Date(monthData.year, monthData.month - 1, day)
+      date.setHours(0, 0, 0, 0)
+      
+      const isPast = date < today
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6
+      const dateString = `${monthData.year}-${String(monthData.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = `aspect-square rounded-lg text-sm flex flex-col items-center justify-center ${isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50'}`
+      btn.dataset.bookingModalTarget = 'dateBtn'
+      btn.dataset.date = dateString
+      btn.dataset.month = String(month)
+      btn.dataset.action = 'click->booking-modal#selectDate'
+      
+      if (isPast) {
+        btn.disabled = true
+      }
+
+      // Holiday indicator
+      if (isWeekend && !isPast) {
+        const holiday = document.createElement('span')
+        holiday.className = 'text-xs text-[#FFD700]'
+        holiday.textContent = '休'
+        btn.appendChild(holiday)
+      }
+
+      // Day number
+      const dayNum = document.createElement('div')
+      dayNum.className = `font-medium ${isPast ? '' : 'text-foreground'}`
+      dayNum.textContent = String(day)
+      btn.appendChild(dayNum)
+
+      // Price
+      if (!isPast) {
+        const priceEl = document.createElement('div')
+        priceEl.className = 'text-xs text-red-500'
+        priceEl.dataset.bookingModalTarget = 'datePrice'
+        priceEl.textContent = `¥${price}`
+        btn.appendChild(priceEl)
+      }
+
+      calendarGrid.appendChild(btn)
+    }
   }
 
   selectDate(event: Event): void {

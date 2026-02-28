@@ -10,14 +10,14 @@ require_relative '../base_validator'
 #   保险天数需覆盖旅游天数（至少2天）
 #
 # 评分标准:
-#   - 创建了跟团游订单 (20%)
-#   - 出发日期正确（5天后） (5%)
-#   - 创建了保险订单 (20%)
-#   - 保险类型正确（境内旅游保险 domestic）(15%)
-#   - 保险保障天数与旅游天数匹配（≥2天）(15%)
-#   - 联系人信息正确（张三或李四） (10%)
-#   - 投保人信息正确（张三、李四） (10%)
-#   - 订单状态有效 (5%)
+#   - 创建了跟团游订单 (18分) - 核心评分项
+#   - 出发日期正确（5天后） (5分)
+#   - 创建了保险订单 (18分) - 核心评分项
+#   - 保险类型正确（境内旅游保险 domestic）(18分) - 核心评分项
+#   - 保险保障天数与旅游天数匹配（≥2天）(15分)
+#   - 联系人信息正确（张三或李四） (10分)
+#   - 投保人信息正确（张三、李四） (10分)
+#   - 订单状态有效 (6分)
 module V251V300
   class V257BookTourWithAccidentInsuranceValidator < BaseValidator
     self.validator_id = 'v257_book_tour_with_accident_insurance_validator'
@@ -73,7 +73,8 @@ module V251V300
     end
     
     def verify
-      add_assertion "创建了跟团游订单", weight: 20 do
+      # 断言1: 创建了跟团游订单 (18分) - 核心评分项
+      add_assertion "创建了跟团游订单", weight: 18 do
         all_bookings = TourGroupBooking
           .joins(:tour_group_product)
           .includes(:tour_group_product)
@@ -87,12 +88,14 @@ module V251V300
       
       return if @tour_booking.nil?
       
+      # 断言2: 出发日期正确（5天后） (5分)
       add_assertion "出发日期正确（5天后#{@travel_date}）", weight: 5 do
         expect(@tour_booking.travel_date).to eq(@travel_date),
           "出发日期错误。期望: #{@travel_date}（5天后），实际: #{@tour_booking.travel_date}"
       end
       
-      add_assertion "创建了保险订单", weight: 20 do
+      # 断言3: 创建了保险订单 (18分) - 核心评分项
+      add_assertion "创建了保险订单", weight: 18 do
         @insurance_order = InsuranceOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -103,12 +106,14 @@ module V251V300
       
       return if @insurance_order.nil?
       
-      add_assertion "保险类型正确（境内旅游保险）", weight: 20 do
+      # 断言4: 保险类型正确（境内旅游保险） (18分) - 核心评分项
+      add_assertion "保险类型正确（境内旅游保险）", weight: 18 do
         product_type = @insurance_order.insurance_product.product_type
         expect(product_type).to eq('domestic'),
           "保险类型错误。期望: domestic（境内旅游），实际: #{product_type}"
       end
       
+      # 断言5: 保险保障天数与旅游天数匹配 (15分)
       add_assertion "保险保障天数与旅游天数匹配", weight: 15 do
         insurance_days = @insurance_order.days
         tour_duration = @tour_booking.tour_group_product.duration
@@ -117,6 +122,7 @@ module V251V300
           "保险天数不足。旅游天数: #{tour_duration}天，保险天数: #{insurance_days}天"
       end
       
+      # 断言6: 联系人信息正确（张三或李四） (10分)
       add_assertion "联系人信息正确（张三或李四）", weight: 10 do
         expect(@expected_contact_names).to include(@tour_booking.contact_name),
           "联系人姓名错误。期望: 张三或李四，实际: #{@tour_booking.contact_name}"
@@ -126,6 +132,7 @@ module V251V300
           "联系电话与联系人不匹配。联系人: #{@tour_booking.contact_name}，期望电话: #{expected_phone}，实际电话: #{@tour_booking.contact_phone}"
       end
       
+      # 断言7: 投保人信息正确（张三、李四） (10分)
       add_assertion "投保人信息正确（张三、李四）", weight: 10 do
         insured = @insurance_order.insured_persons || []
         @expected_insured_names.each do |name|
@@ -134,7 +141,8 @@ module V251V300
         end
       end
       
-      add_assertion "订单状态有效", weight: 5 do
+      # 断言8: 订单状态有效 (6分)
+      add_assertion "订单状态有效", weight: 6 do
         expect(@tour_booking.status).to be_in(['pending', 'paid', 'confirmed'])
         expect(@insurance_order.status).to be_in(['pending', 'paid'])
       end

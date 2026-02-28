@@ -13,11 +13,11 @@
     # 计算取还车日期时间
     pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
     return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
-    days_count = (return_date - pickup_date).to_i + 1
+    days_count = (return_date - pickup_date).to_i
     
     # 从搜索参数获取时间，如果没有则使用默认时间 09:00
-    pickup_time = params[:pickup_time].present? ? params[:pickup_time] : '09:00'
-    return_time = params[:return_time].present? ? params[:return_time] : '09:00'
+    pickup_time = @search_pickup_time.presence || '09:00'
+    return_time = @search_return_time.presence || '09:00'
     
     pickup_datetime = "#{pickup_date.strftime('%Y-%m-%d')} #{pickup_time}:00"
     return_datetime = "#{return_date.strftime('%Y-%m-%d')} #{return_time}:00"
@@ -86,7 +86,7 @@
    <% 
       pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
       return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
-      days_count = (return_date - pickup_date).to_i + 1
+      days_count = (return_date - pickup_date).to_i
       weekday_names = ['日', '一', '二', '三', '四', '五', '六']
     %>
     <div class="bg-white rounded-xl p-4">

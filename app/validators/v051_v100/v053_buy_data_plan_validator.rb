@@ -157,14 +157,12 @@ module V051V100
     
       # 断言5: 手机号与张三的Passenger记录一致
       add_assertion "手机号与张三的联系人信息一致", weight: 15 do
-        contact_info = begin
-          JSON.parse(@internet_order.contact_info)
-        rescue JSON::ParserError, TypeError
-          nil
-        end
+        # 支持Hash（Rails嵌套属性）和JSON字符串两种格式
+        contact_info = @internet_order.contact_info
+        contact_info = JSON.parse(contact_info) if contact_info.is_a?(String)
       
         expect(contact_info).not_to be_nil, "contact_info 为空或无法解析"
-        actual_phone = contact_info['phone']
+        actual_phone = contact_info['phone'] || contact_info[:phone]
         
         expect(actual_phone).to eq(@zhangsan_phone),
           "手机号与张三的联系人记录不一致。期望: #{@zhangsan_phone}（张三的Passenger记录），实际: #{actual_phone}。" \

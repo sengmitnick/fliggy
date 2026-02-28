@@ -17,11 +17,12 @@ require_relative '../base_validator'
 #   总价: 18×7×2+500=752元
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 订单类型正确（wifi） (15分)
-#   - 地区正确（日本） (15分)
-#   - 选择了日本4G无限量WiFi (20分)
-#   - 租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金） (30分)
+#   - 订单已创建 (30分)
+#   - 订单类型正确（wifi） (10分)
+#   - 地区正确（日本） (10分)
+#   - 选择了日本4G无限量WiFi (10分)
+#   - 租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金） (25分)
+#   - 自取点和联系人信息正确（北京朝阳，王五） (15分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -48,11 +49,11 @@ module V051V100
     
       # 预查询用户和联系人（避免 simulate 中使用 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @contact = user.contacts.find_by!(name: '王五', data_version: 0)
+      @contact = user.contacts.find_by!(name: '王五')  # DataVersionable default_scope already adds data_version filter
       @expected_contact_name = @contact.name
       @expected_contact_phone = @contact.phone
       # 使用默认地址作为自取地址
-      default_address = user.addresses.find_by!(is_default: true, data_version: 0)
+      default_address = user.addresses.find_by!(is_default: true)  # DataVersionable default_scope already adds data_version filter
       @pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 查找符合条件的WiFi设备（注意：查询基线数据 data_version=0）
@@ -80,8 +81,8 @@ module V051V100
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（使用data_version隔离会话）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建 (30分)
+      add_assertion "订单已创建", weight: 30 do
         @order = InternetOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -112,8 +113,8 @@ module V051V100
           "未选择4G无限量。预期包含: #{@wifi_keyword}, 实际: #{wifi.name}"
       end
     
-      # 断言5: 租赁数量、天数和总价正确
-      add_assertion "租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金）", weight: 15 do
+      # 断言5: 租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金） (25分)
+      add_assertion "租赁数量正确（2台）、天数正确（7天）、总价正确（752元含押金）", weight: 25 do
         wifi = @order.orderable
         expected_price = wifi.daily_price * @rental_days * @quantity + 500
       
@@ -130,20 +131,30 @@ module V051V100
           "总价不正确。预期: #{expected_price}元（#{wifi.daily_price}元/天 × #{@rental_days}天 × #{@quantity}台 + 500元押金），实际: #{@order.total_price}元"
       end
     
-      # 断言6: 自取点和联系人信息正确
-      add_assertion "自取点和联系人信息正确（北京朝阳，王五）", weight: 25 do
+      # 断言6: 自取点和联系人信息正确（北京朝阳，王五） (15分)
+      add_assertion "自取点和联系人信息正确（北京朝阳，王五）", weight: 15 do
         expect(@order.delivery_method).to eq('pickup'),
           "配送方式不正确。预期: pickup（自取），实际: #{@order.delivery_method}"
         
-        contact_info = JSON.parse(@order.contact_info)
-        expect(contact_info['name']).to eq(@expected_contact_name),
-          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{contact_info['name']}"
-        expect(contact_info['phone']).to eq(@expected_contact_phone),
-          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{contact_info['phone']}"
+        # 支持Hash（Rails嵌套属性）和JSON字符串两种格式
+        contact_info = @order.contact_info
+        contact_info = JSON.parse(contact_info) if contact_info.is_a?(String)
         
-        delivery_info = JSON.parse(@order.delivery_info)
-        expect(delivery_info['address']).to include('北京', '朝阳'),
-          "自取地址不正确。预期包含: 北京朝阳, 实际: #{delivery_info['address']}"
+        actual_name = contact_info['name'] || contact_info[:name]
+        actual_phone = contact_info['phone'] || contact_info[:phone]
+        
+        expect(actual_name).to eq(@expected_contact_name),
+          "联系人姓名不正确。预期: #{@expected_contact_name}, 实际: #{actual_name}"
+        expect(actual_phone).to eq(@expected_contact_phone),
+          "联系人电话不正确。预期: #{@expected_contact_phone}, 实际: #{actual_phone}"
+        
+        # 支持Hash和JSON字符串两种格式
+        delivery_info = @order.delivery_info
+        delivery_info = JSON.parse(delivery_info) if delivery_info.is_a?(String)
+        
+        actual_address = delivery_info['address'] || delivery_info[:address]
+        expect(actual_address).to include('北京', '朝阳'),
+          "自取地址不正确。预期包含: 北京朝阳, 实际: #{actual_address}"
       end
     end
   
@@ -194,8 +205,8 @@ module V051V100
       end_date = start_date + (@rental_days - 1).days
     
       # 4. 查找联系人（从 prepare 预查询的数据）
-      contact = user.contacts.find_by!(name: '王五', data_version: 0)
-      default_address = user.addresses.find_by!(is_default: true, data_version: 0)
+      contact = user.contacts.find_by!(name: '王五')  # DataVersionable default_scope already adds data_version filter
+      default_address = user.addresses.find_by!(is_default: true)  # DataVersionable default_scope already adds data_version filter
       pickup_address = [default_address.province, default_address.city, default_address.district, default_address.detail].compact.join
     
       # 5. 创建订单

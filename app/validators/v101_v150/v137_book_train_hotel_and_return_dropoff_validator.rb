@@ -2,6 +2,34 @@
 
 require_relative '../base_validator'
 
+# 验证用例137: 帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务
+# 
+# 任务描述:
+#   Agent 需要在系统中完成三项预订：
+#   1. 上海→杭州的火车票（后天，二等座）
+#   2. 杭州酒店1晚（入住日期=火车到达日）
+#   3. 返程送站服务（从酒店到火车站）
+# 
+# 复杂度分析:
+#   1. 需要搜索上海→杭州的火车票
+#   2. 需要选择"后天"出发日期，座位类型为二等座
+#   3. 需要预订杭州酒店1晚（入住日期与火车日期一致）
+#   4. 需要预订送站服务（退房后从酒店到火车站）
+#   5. 需要协调3个订单的时间和地点逻辑
+#   ✅ 多模块组合（火车+酒店+接送） + 时间协调 + 地点关联
+# 
+# 评分标准:
+#   - 创建了火车票+酒店+送站3个订单 (25分)
+#   - 火车票路线正确（上海→杭州） (10分)
+#   - 座位类型=二等座 (10分)
+#   - 乘客信息正确（张三） (10分)
+#   - 酒店城市正确（杭州） (10分)
+#   - 入住日期=火车日期 (10分)
+#   - 送站终点=火车站 (10分)
+#   - 送站起点=酒店地址附近 (5分)
+#   - 送站时间=退房后合理时间 (5分)
+#   - 入住人信息正确（张三） (5分)
+#
 module V101V150
   class V137BookTrainHotelAndReturnDropoffValidator < BaseValidator
     self.validator_id = 'v137_book_train_hotel_and_return_dropoff_validator'
@@ -47,7 +75,8 @@ module V101V150
     end
 
     def verify
-      add_assertion "创建了火车票+酒店+送站3个订单", weight: 20 do
+      # 断言1: 创建了火车票+酒店+送站3个订单 (25分) - 核心评分项
+      add_assertion "创建了火车票+酒店+送站3个订单", weight: 25 do
         train_bookings = TrainBooking
           .joins(:train)
           .where(trains: { departure_city: @departure_city, arrival_city: @arrival_city })
@@ -74,15 +103,18 @@ module V101V150
 
       return if @train_booking.nil? || @hotel_booking.nil? || @transfer.nil?
 
+      # 断言2: 火车票路线正确（#{@departure_city}→#{@arrival_city}） (10分)
       add_assertion "火车票路线正确（#{@departure_city}→#{@arrival_city}）", weight: 10 do
         expect(@train_booking.train.departure_city).to eq(@departure_city)
         expect(@train_booking.train.arrival_city).to eq(@arrival_city)
       end
 
+      # 断言3: 座位类型=二等座 (10分)
       add_assertion "座位类型=二等座", weight: 10 do
         expect(@train_booking.seat_type).to eq('second_class')
       end
 
+      # 断言4: 乘客信息正确（张三） (10分)
       add_assertion "乘客信息正确（张三）", weight: 10 do
         expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
           "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
@@ -90,14 +122,17 @@ module V101V150
           "乘客身份证号错误。期望: #{@expected_passenger_id}, 实际: #{@train_booking.passenger_id_number}"
       end
 
+      # 断言5: 酒店城市正确（#{@hotel_city}） (10分)
       add_assertion "酒店城市正确（#{@hotel_city}）", weight: 10 do
         expect(@hotel_booking.hotel.city).to eq(@hotel_city)
       end
 
+      # 断言6: 入住日期=火车日期（#{@check_in_date}） (10分)
       add_assertion "入住日期=火车日期（#{@check_in_date}）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date)
       end
 
+      # 断言7: 送站终点=火车站 (10分)
       add_assertion "送站终点=火车站", weight: 10 do
         destination = @transfer.location_to.to_s
         has_station = destination.include?("站") || destination.include?("火车站") || destination.include?("Railway")
@@ -105,6 +140,7 @@ module V101V150
           "送站终点不是火车站。实际: #{destination}"
       end
 
+      # 断言8: 送站起点=酒店地址附近 (5分)
       add_assertion "送站起点=酒店地址附近", weight: 5 do
         origin = @transfer.location_from.to_s
         hotel_address = @hotel_booking.hotel.address.to_s
@@ -113,6 +149,7 @@ module V101V150
         expect(origin).not_to be_empty, "送站起点为空"
       end
 
+      # 断言9: 送站时间=退房后合理时间 (5分)
       add_assertion "送站时间=退房后合理时间", weight: 5 do
         transfer_time = @transfer.pickup_datetime
         checkout_date = @hotel_booking.check_out_date
@@ -121,6 +158,7 @@ module V101V150
           "送站时间不在退房日期。期望: #{checkout_date}, 实际: #{transfer_time.to_date}"
       end
 
+      # 断言10: 入住人信息正确（张三） (5分)
       add_assertion "入住人信息正确（张三）", weight: 5 do
         expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
           "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"

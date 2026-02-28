@@ -20,6 +20,8 @@ export default class extends Controller {
     "returnLocationInput",
     "pickupDateInput",
     "returnDateInput",
+    "pickupTimeInput",
+    "returnTimeInput",
     "searchButton"
   ]
 
@@ -29,7 +31,9 @@ export default class extends Controller {
     returnCity: String,
     returnLocation: String,
     pickupDate: String,
-    returnDate: String
+    returnDate: String,
+    pickupTime: String,
+    returnTime: String
   }
 
   declare readonly domesticButtonTarget: HTMLButtonElement
@@ -50,6 +54,8 @@ export default class extends Controller {
   declare readonly returnLocationInputTarget: HTMLInputElement
   declare readonly pickupDateInputTarget: HTMLInputElement
   declare readonly returnDateInputTarget: HTMLInputElement
+  declare readonly pickupTimeInputTarget: HTMLInputElement
+  declare readonly returnTimeInputTarget: HTMLInputElement
   declare readonly searchButtonTarget: HTMLInputElement
   declare cityValue: string
   declare pickupLocationValue: string
@@ -57,6 +63,8 @@ export default class extends Controller {
   declare returnLocationValue: string
   declare pickupDateValue: string
   declare returnDateValue: string
+  declare pickupTimeValue: string
+  declare returnTimeValue: string
 
   private isDomestic: boolean = true
   private isSwapEnabled: boolean = false
@@ -90,10 +98,40 @@ export default class extends Controller {
     
     // Do not set default pickup location - user must select
     
-    // Set default dates if not set
-    if (!this.pickupDateValue || !this.returnDateValue) {
+    // Check if dates are already set from URL params (search results page)
+    const hasPickupDate = this.pickupDateInputTarget.value !== ''
+    const hasReturnDate = this.returnDateInputTarget.value !== ''
+    const hasPickupTime = this.pickupTimeInputTarget.value !== ''
+    const hasReturnTime = this.returnTimeInputTarget.value !== ''
+    
+    console.log('[CarRentalTabs] initializeDefaults - URL params:', {
+      hasPickupDate,
+      hasReturnDate,
+      hasPickupTime,
+      hasReturnTime,
+      pickupDateValue: this.pickupDateInputTarget.value,
+      returnDateValue: this.returnDateInputTarget.value,
+      pickupTimeValue: this.pickupTimeInputTarget.value,
+      returnTimeValue: this.returnTimeInputTarget.value
+    })
+    
+    if (hasPickupDate && hasReturnDate && hasPickupTime && hasReturnTime) {
+      // URL params exist - use them
+      const pickupDate = new Date(`${this.pickupDateInputTarget.value}T${this.pickupTimeInputTarget.value}:00`)
+      const returnDate = new Date(`${this.returnDateInputTarget.value}T${this.returnTimeInputTarget.value}:00`)
+      
+      console.log('[CarRentalTabs] Loading from URL params:', {
+        pickupDate: pickupDate.toISOString(),
+        returnDate: returnDate.toISOString()
+      })
+      
+      this.updatePickupDate(pickupDate)
+      this.updateReturnDate(returnDate)
+    } else {
+      // No URL params - set defaults
+      console.log('[CarRentalTabs] No URL params, using defaults')
       const today = new Date()
-      today.setHours(13, 55, 0, 0)
+      today.setHours(13, 55, 0, 0)  // Default pickup time: 13:55
       const returnDate = new Date(today)
       returnDate.setDate(returnDate.getDate() + 2)
       
@@ -275,6 +313,12 @@ export default class extends Controller {
     const customEvent = event as CustomEvent
     const { pickerType, dateTime } = customEvent.detail
     
+    console.log('[CarRentalTabs] Received datetime:', {
+      pickerType,
+      dateTime,
+      dateTimeISO: new Date(dateTime).toISOString()
+    })
+    
     if (pickerType === 'pickup') {
       this.updatePickupDate(new Date(dateTime))
       this.ensureReturnDateValid()
@@ -337,7 +381,16 @@ export default class extends Controller {
   private updatePickupDate(date: Date): void {
     this.pickupDateValue = date.toISOString()
     this.pickupDateInputTarget.value = this.formatDateForInput(date)
+    this.pickupTimeInputTarget.value = this.formatTimeForInput(date)
+    this.pickupTimeValue = this.formatTimeForInput(date)
     this.pickupDateDisplayTarget.innerHTML = this.formatDateDisplay(date)
+    
+    console.log('[CarRentalTabs] Updated pickup:', {
+      date: this.formatDateForInput(date),
+      time: this.formatTimeForInput(date),
+      display: this.pickupDateDisplayTarget.innerHTML
+    })
+    
     this.updateDuration()
   }
 
@@ -345,7 +398,16 @@ export default class extends Controller {
   private updateReturnDate(date: Date): void {
     this.returnDateValue = date.toISOString()
     this.returnDateInputTarget.value = this.formatDateForInput(date)
+    this.returnTimeInputTarget.value = this.formatTimeForInput(date)
+    this.returnTimeValue = this.formatTimeForInput(date)
     this.returnDateDisplayTarget.innerHTML = this.formatDateDisplay(date)
+    
+    console.log('[CarRentalTabs] Updated return:', {
+      date: this.formatDateForInput(date),
+      time: this.formatTimeForInput(date),
+      display: this.returnDateDisplayTarget.innerHTML
+    })
+    
     this.updateDuration()
   }
 
@@ -364,20 +426,20 @@ export default class extends Controller {
   }
 
   // Update duration display
-  // Formula: (end_date - start_date).days (date difference)
-  // Example: 2月26日 00:00 to 3月1日 00:00 = 3天 (26, 27, 28三个日历日)
+  // Formula: ceil((end_time - start_time) / 24 hours) (actual hours, rounded up to days)
+  // Example: 1月10日 13:55 to 1月11日 18:00 = 28小时 = 2天 (超过24小时按2天算)
+  // Example: 1月10日 13:55 to 1月12日 12:00 = 46.5小时 = 2天 (不足48小时按2天算)
+  // Example: 1月10日 13:55 to 1月12日 14:00 = 48.08小时 = 3天 (超过48小时按3天算)
   private updateDuration(): void {
     if (!this.pickupDateValue || !this.returnDateValue) return
     
-    // Extract date-only parts (ignore time)
+    // Use actual datetime (keep time information)
     const pickupDate = new Date(this.pickupDateValue)
-    pickupDate.setHours(0, 0, 0, 0)
     const returnDate = new Date(this.returnDateValue)
-    returnDate.setHours(0, 0, 0, 0)
     
-    // Calculate difference in milliseconds and convert to days
-    const diffTime = returnDate.getTime() - pickupDate.getTime()
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))  // Date difference only, no +1
+    // Calculate difference in hours and convert to days (round up)
+    const diffHours = (returnDate.getTime() - pickupDate.getTime()) / (1000 * 60 * 60)
+    const diffDays = Math.ceil(diffHours / 24)  // Round up: any hours over 24 = next day
     
     this.durationDisplayTarget.textContent = `${diffDays}天`
   }
@@ -388,6 +450,13 @@ export default class extends Controller {
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
+  }
+
+  // Format time for input (HH:MM)
+  private formatTimeForInput(date: Date): string {
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${hours}:${minutes}`
   }
 
   // Format date for display

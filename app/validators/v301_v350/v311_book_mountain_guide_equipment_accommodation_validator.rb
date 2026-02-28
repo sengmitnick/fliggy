@@ -2,21 +2,33 @@
 
 require_relative '../base_validator'
 
-# V311: 预订登山门票+向导装备+山顶住宿
+# V311: 给刘强和陈静预订6天后华山登山服务（2人），包含门票、登山向导+装备租赁和山顶住宿1晚
 #
 # 任务描述:
 #   用户需要预订登山服务套餐，包含景点门票、登山向导+装备租赁活动、山顶住宿
 #
 # 评分标准:
-#   - 创建门票订单+景点正确+门票类型 (35%)
-#   - 创建活动订单+活动名称 (20%)
-#   - 创建酒店订单+住客信息 (20%)
-#   - 日期和人数正确 (25%)
+#   - 创建了景点门票订单 (14分) - 核心评分项
+#   - 景点正确（华山） (10分)
+#   - 门票类型正确（成人票） (5分)
+#   - 门票游玩日期正确 (5分)
+#   - 门票数量正确 (5分)
+#   - 门票游客信息正确（刘强+陈静） (6分)
+#   - 联系电话正确（刘强或陈静） (6分)
+#   - 创建了景点活动订单（登山向导+装备租赁） (11分) - 核心评分项
+#   - 活动名称正确（包含登山/向导/装备） (5分)
+#   - 活动日期正确 (4分)
+#   - 活动人数正确 (4分)
+#   - 活动游客信息正确（刘强+陈静） (5分)
+#   - 创建了酒店订单（山顶住宿） (8分) - 核心评分项
+#   - 住客信息正确（刘强或陈静） (6分)
+#   - 酒店入住日期正确 (4分)
+#   - 酒店入住人数正确 (2分)
 module V301V350
   class V311BookMountainGuideEquipmentAccommodationValidator < BaseValidator
     self.validator_id = 'v311_book_mountain_guide_equipment_accommodation_validator'
     self.task_id = 'd31ed871-6c15-42f0-8fd0-3dfbeddca35e'
-    self.title = '给张三刘强和陈静想6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
+    self.title = '给刘强和陈静预订6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
     self.description = '刘强和陈静想6天后去华山登山，需2人，要门票、登山向导+装备租赁和山顶住宿1晚'
     self.timeout_seconds = 300
     
@@ -83,8 +95,8 @@ module V301V350
     end
     
     def verify
-      # 断言1: 创建了景点门票订单 (15%)
-      add_assertion "创建了景点门票订单（登山门票）", weight: 15 do
+      # 断言1: 创建了景点门票订单 (14分) - 核心评分项
+      add_assertion "创建了景点门票订单（登山门票）", weight: 14 do
         @ticket_order = TicketOrder
           .joins(ticket: :attraction)
           .where(attractions: { id: @attraction.id })
@@ -97,32 +109,32 @@ module V301V350
       
       return if @ticket_order.nil?
       
-      # 断言2: 景点正确（华山） (10%)
+      # 断言2: 景点正确（华山） (10分)
       add_assertion "景点正确（华山）", weight: 10 do
         expect(@ticket_order.ticket.attraction.name).to eq('华山'),
           "景点错误。期望: 华山, 实际: #{@ticket_order.ticket.attraction.name}"
       end
       
-      # 断言3: 门票类型正确（成人票） (5%)
+      # 断言3: 门票类型正确（成人票） (5分)
       add_assertion "门票类型正确（成人票）", weight: 5 do
         expect(@ticket_order.ticket.ticket_type).to eq('adult'),
           "门票类型错误。期望: adult（成人票）, 实际: #{@ticket_order.ticket.ticket_type}"
       end
       
-      # 断言4: 门票游玩日期正确 (8%)
-      add_assertion "门票游玩日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 8 do
+      # 断言4: 门票游玩日期正确 (5分)
+      add_assertion "门票游玩日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 5 do
         expect(@ticket_order.visit_date).to eq(@travel_date),
           "门票游玩日期错误。期望: #{@travel_date}（6天后）, 实际: #{@ticket_order.visit_date}"
       end
       
-      # 断言5: 门票数量正确 (5%)
+      # 断言5: 门票数量正确 (5分)
       add_assertion "门票数量正确（#{@participant_count}张）", weight: 5 do
         expect(@ticket_order.quantity).to eq(@participant_count),
           "门票数量错误。期望: #{@participant_count}张, 实际: #{@ticket_order.quantity}张"
       end
       
-      # 断言6: 门票游客信息正确（刘强+陈静） (7%)
-      add_assertion "门票游客信息正确（刘强+陈静）", weight: 7 do
+      # 断言6: 门票游客信息正确（刘强+陈静） (6分)
+      add_assertion "门票游客信息正确（刘强+陈静）", weight: 6 do
         passengers = @ticket_order.passengers.to_a
         expect(passengers.size).to eq(2),
           "门票游客数量错误。期望: 2人（刘强+陈静），实际: #{passengers.size}人"
@@ -133,17 +145,15 @@ module V301V350
           "门票游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
       end
       
-      # 断言7: 联系人信息正确（刘强或陈静） (8%)
-      add_assertion "联系人信息正确（刘强或陈静）", weight: 8 do
-        expect(@expected_contact_names).to include(@ticket_order.contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@ticket_order.contact_name}"
-        expected_phone = @expected_contact_phones[@ticket_order.contact_name]
-        expect(@ticket_order.contact_phone).to eq(expected_phone),
-          "联系电话错误。期望: #{expected_phone}, 实际: #{@ticket_order.contact_phone}"
+      # 断言7: 联系电话正确（刘强或陈静） (6分)
+      add_assertion "联系电话正确（刘强或陈静）", weight: 6 do
+        expected_phones = [@liuqiang.phone, @chenjing.phone]
+        expect(expected_phones).to include(@ticket_order.contact_phone),
+          "联系电话错误。期望: #{expected_phones.join('或')}, 实际: #{@ticket_order.contact_phone}"
       end
       
-      # 断言8: 创建了景点活动订单 (12%)
-      add_assertion "创建了景点活动订单（登山向导+装备租赁）", weight: 12 do
+      # 断言8: 创建了景点活动订单 (11分) - 核心评分项
+      add_assertion "创建了景点活动订单（登山向导+装备租赁）", weight: 11 do
         @activity_order = ActivityOrder
           .joins(attraction_activity: :attraction)
           .where(attractions: { id: @attraction.id })
@@ -156,27 +166,27 @@ module V301V350
       
       return if @activity_order.nil?
       
-      # 断言9: 活动名称正确（包含登山/向导/装备） (5%)
+      # 断言9: 活动名称正确（包含登山/向导/装备） (5分)
       add_assertion "活动名称正确（包含登山/向导/装备）", weight: 5 do
         activity_name = @activity_order.attraction_activity.name
         expect(activity_name).to match(/登山|向导|装备/),
           "活动名称不符合。期望包含: 登山/向导/装备, 实际: #{activity_name}"
       end
       
-      # 断言10: 活动日期正确 (5%)
-      add_assertion "活动日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 5 do
+      # 断言10: 活动日期正确 (4分)
+      add_assertion "活动日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 4 do
         expect(@activity_order.visit_date).to eq(@travel_date),
           "活动游玩日期错误。期望: #{@travel_date}（6天后）, 实际: #{@activity_order.visit_date}"
       end
       
-      # 断言11: 活动人数正确 (5%)
-      add_assertion "活动人数正确（#{@participant_count}人）", weight: 5 do
+      # 断言11: 活动人数正确 (4分)
+      add_assertion "活动人数正确（#{@participant_count}人）", weight: 4 do
         expect(@activity_order.quantity).to eq(@participant_count),
           "活动人数错误。期望: #{@participant_count}人, 实际: #{@activity_order.quantity}人"
       end
       
-      # 断言12: 活动游客信息正确（刘强+陈静） (7%)
-      add_assertion "活动游客信息正确（刘强+陈静）", weight: 7 do
+      # 断言12: 活动游客信息正确（刘强+陈静） (5分)
+      add_assertion "活动游客信息正确（刘强+陈静）", weight: 5 do
         passengers = @activity_order.passengers.to_a
         expect(passengers.size).to eq(2),
           "活动游客数量错误。期望: 2人（刘强+陈静），实际: #{passengers.size}人"
@@ -187,7 +197,7 @@ module V301V350
           "活动游客信息错误。期望: #{expected_names.join('、')}，实际: #{passenger_names.join('、')}"
       end
       
-      # 断言13: 创建了酒店订单 (8%)
+      # 断言13: 创建了酒店订单 (8分) - 核心评分项
       add_assertion "创建了酒店订单（山顶住宿）", weight: 8 do
         @hotel_booking = HotelBooking
           .where(data_version: @data_version)
@@ -199,8 +209,8 @@ module V301V350
       
       return if @hotel_booking.nil?
       
-      # 断言14: 住客信息正确（刘强或陈静） (8%)
-      add_assertion "住客信息正确（刘强或陈静）", weight: 8 do
+      # 断言14: 住客信息正确（刘强或陈静） (6分)
+      add_assertion "住客信息正确（刘强或陈静）", weight: 6 do
         expect(@expected_contact_names).to include(@hotel_booking.guest_name),
           "住客姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@hotel_booking.guest_name}"
         expected_phone = @expected_contact_phones[@hotel_booking.guest_name]
@@ -208,8 +218,8 @@ module V301V350
           "联系电话错误。期望: #{expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
       
-      # 断言15: 酒店入住日期正确 (5%)
-      add_assertion "酒店入住日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 5 do
+      # 断言15: 酒店入住日期正确 (4分)
+      add_assertion "酒店入住日期正确（#{@travel_date.strftime('%Y-%m-%d')}）", weight: 4 do
         expect(@hotel_booking.check_in_date).to eq(@travel_date),
           "酒店入住日期错误。期望: #{@travel_date}（6天后）, 实际: #{@hotel_booking.check_in_date}"
         
@@ -218,7 +228,7 @@ module V301V350
           "酒店退房日期错误。期望: #{expected_checkout}（住#{@nights}晚）, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      # 断言16: 酒店入住人数正确 (2%)
+      # 断言16: 酒店入住人数正确 (2分)
       add_assertion "酒店入住人数正确（#{@participant_count}人）", weight: 2 do
         expect(@hotel_booking.adults_count).to eq(@participant_count),
           "酒店入住人数错误。期望: #{@participant_count}人, 实际: #{@hotel_booking.adults_count}人"
@@ -231,14 +241,13 @@ module V301V350
       # Randomly select one of the couple as contact
       contact_person = [@liuqiang, @chenjing].sample
       
-      # 1. 创建景点门票订单（登山门票） - Use existing passenger phone
+      # 1. 创建景点门票订单（登山门票）
       TicketOrder.create!(
         user: user,
         ticket: @ticket,
         visit_date: @travel_date,
         quantity: @participant_count,
-        passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联游客信息
-        contact_name: contact_person.name,
+        passenger_ids: [@liuqiang.id, @chenjing.id],
         contact_phone: contact_person.phone,
         total_price: @ticket.current_price * @participant_count,
         insurance_price: 0,

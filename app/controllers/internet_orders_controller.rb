@@ -67,7 +67,7 @@ class InternetOrdersController < ApplicationController
     params.require(:internet_order).permit(
       :orderable_id, :orderable_type, :order_type, :region, 
       :quantity, :total_price, :delivery_method,
-      delivery_info: [:address_id, :name, :phone, :full_address],
+      delivery_info: [:address_id, :name, :phone, :full_address, :address, :method],
       contact_info: [:name, :phone, :passenger_id],
       rental_info: [:pickup_date, :return_date, :pickup_location, :days, :rental_days]
     )

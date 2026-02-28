@@ -117,7 +117,9 @@ class CarsController < ApplicationController
       pickup_location: params[:pickup_location],
       return_location: params[:return_location],
       pickup_date: params[:pickup_date],
-      return_date: params[:return_date]
+      return_date: params[:return_date],
+      pickup_time: params[:pickup_time],
+      return_time: params[:return_time]
     }
   end
   
@@ -160,6 +162,8 @@ class CarsController < ApplicationController
       return_location: params[:return_location],
       pickup_date: params[:pickup_date],
       return_date: params[:return_date],
+      pickup_time: params[:pickup_time],
+      return_time: params[:return_time],
       sort: params[:sort],
       quick_select: params[:quick_select],
       price_service: params[:price_service]

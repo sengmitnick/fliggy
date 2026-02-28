@@ -68,7 +68,7 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（最近创建的一条）
+      # 断言1: 订单已创建 (20分)
       add_assertion "订单已创建", weight: 20 do
         all_hotel_package_orders = HotelPackageOrder
           .where(data_version: @data_version)
@@ -81,22 +81,21 @@ module V001V050
     
       return unless @package_order # 如果没有订单，后续断言无法继续
     
-      # 断言2: 城市正确
+      # 断言2: 城市正确（武汉） (15分)
       add_assertion "城市正确（武汉）", weight: 15 do
         actual_city = @package_order.hotel_package.city
         expect(actual_city).to eq(@city),
           "城市错误。期望: #{@city}, 实际: #{actual_city}"
       end
     
-      # 断言3: 套餐晚数正确
+      # 断言3: 套餐晚数正确（2晚） (15分)
       add_assertion "套餐晚数正确（2晚）", weight: 15 do
         actual_nights = @package_order.hotel_package.night_count
         expect(actual_nights).to eq(@night_count),
           "套餐晚数错误。期望: #{@night_count}晚, 实际: #{actual_nights}晚"
       end
     
-      # 断言4: 选择了性价比更高的选项（核心评分项）
-      # 性价比判断：含早套餐 > 豪华套餐 > 标准套餐
+      # 断言4: 选择了性价比更高的选项（含早或豪华套餐） (30分) - 核心评分项
       add_assertion "选择了性价比更高的选项（含早或豪华套餐）", weight: 30 do
         selected_option = @package_order.package_option
         option_name = selected_option.name
@@ -110,7 +109,7 @@ module V001V050
           "实际选择: #{option_name}（#{selected_option.description}）"
       end
     
-      # 断言5: 订单价格和数量正确
+      # 断言5: 订单价格和数量正确 (10分)
       add_assertion "订单价格和数量正确", weight: 10 do
         expected_total = @package_order.package_option.price * @package_order.quantity
         actual_total = @package_order.total_price
@@ -119,12 +118,12 @@ module V001V050
           "订单总价错误。期望: #{expected_total}元（单价#{@package_order.package_option.price}元 × #{@package_order.quantity}份），实际: #{actual_total}元"
       end
     
-      # 断言6: 联系人信息正确
+      # 断言6: 联系人信息正确（张三 13800138000） (10分)
       add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
         expect(@package_order.contact_name).to eq('张三'),
-          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@package_order.contact_name}"
+          "联系人姓名错误。期望: 张三, 实际: #{@package_order.contact_name}"
         expect(@package_order.contact_phone).to eq('13800138000'),
-          "联系人电话错误。期望: 13800138000（demo_user数据）, 实际: #{@package_order.contact_phone}"
+          "联系人电话错误。期望: 13800138000, 实际: #{@package_order.contact_phone}"
       end
     end
   

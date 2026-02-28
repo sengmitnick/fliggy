@@ -65,7 +65,7 @@
             </div>
             <div class="flex items-center">
               <span class="text-text-muted mr-2">取还日期:</span>
-              <span><%= order.rental_info['pickup_date'] %> 至 <%= order.rental_info['return_date'] %></span>
+              <span><%= order.rental_info['start_date'] || order.rental_info['pickup_date'] %> 至 <%= order.rental_info['end_date'] || order.rental_info['return_date'] %></span>
             </div>
           <% end %>
           

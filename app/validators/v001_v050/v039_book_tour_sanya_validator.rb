@@ -16,11 +16,13 @@ require_relative '../base_validator'
 #   ✅ 天数+预算筛选，性价比优选
 # 
 # 评分标准:
-#   - 订单已创建 (20分)
-#   - 目的地正确（三亚） (20分)
-#   - 出发日期正确（后天） (15分)
-#   - 天数正确（6天5晚） (15分)
-#   - 价格符合预算（≤4000元/人） (30分)
+#   - 订单已创建 (18分)
+#   - 目的地正确（三亚） (18分)
+#   - 出发日期正确（后天） (13分)
+#   - 天数正确（6天5晚） (13分)
+#   - 价格符合预算（≤4000元/人） (23分)
+#   - 联系人信息正确（张三 13800138000） (10分)
+#   - 出行人信息正确（张三 110101199001011234） (5分)
 #
 module V001V050
   class V039BookTourSanyaValidator < BaseValidator
@@ -66,57 +68,63 @@ module V001V050
     end
   
     def verify
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建 (18分)
+      add_assertion "订单已创建", weight: 18 do
         all_tour_group_bookings = TourGroupBooking
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
         expect(all_tour_group_bookings).not_to be_empty, "未找到任何TourGroupBooking记录"
         @booking = all_tour_group_bookings.first
-        # Replaced by expect(all_tour_group_bookings).not_to be_empty above, "未找到任何跟团游订单记录"
       end
     
       return unless @booking
     
-      add_assertion "目的地正确（#{@destination}）", weight: 20 do
+      # 断言2: 目的地正确（三亚） (18分) - 核心评分项
+      add_assertion "目的地正确（#{@destination}）", weight: 18 do
         expect(@booking.tour_group_product.destination).to eq(@destination),
           "目的地不正确。期望: #{@destination}, 实际: #{@booking.tour_group_product.destination}"
       end
     
-      add_assertion "出发日期正确（后天）", weight: 15 do
+      # 断言3: 出发日期正确（后天） (13分)
+      add_assertion "出发日期正确（后天）", weight: 13 do
         departure_date = @booking.travel_date
         expect(departure_date).to eq(@departure_date),
           "出发日期不正确。期望: #{@departure_date}（后天）, 实际: #{departure_date}"
       end
     
-      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 15 do
+      # 断言4: 天数正确（6天5晚） (13分)
+      add_assertion "天数正确（#{@duration}天#{@nights}晚）", weight: 13 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数不正确。期望: #{@duration}天, 实际: #{@booking.tour_group_product.duration}天"
       end
     
-      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 20 do
+      # 断言5: 价格符合预算（≤4000元/人） (23分) - 核心评分项
+      add_assertion "价格符合预算（≤#{@budget_per_person}元/人）", weight: 23 do
         price_per_person = @booking.tour_package.price
       
         expect(price_per_person <= @budget_per_person).to be_truthy,
           "价格超出预算。预算: ≤#{@budget_per_person}元/人, 实际: #{price_per_person}元/人"
       end
     
-      add_assertion "联系人信息正确（张三 13800138000）", weight: 5 do
+      # 断言6: 联系人信息正确（张三 13800138000） (10分)
+      add_assertion "联系人信息正确（张三 13800138000）", weight: 10 do
         expect(@booking.contact_name).to eq('张三'),
-          "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.contact_name}"
+          "联系人姓名错误。期望: 张三, 实际: #{@booking.contact_name}"
         expect(@booking.contact_phone).to eq('13800138000'),
-          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
+          "联系电话错误。期望: 13800138000, 实际: #{@booking.contact_phone}"
       end
     
-      add_assertion "出行人信息正确（张三 110101199001011234）", weight: 10 do
+      # 断言7: 出行人信息正确（张三 110101199001011234） (5分)
+      add_assertion "出行人信息正确（张三 110101199001011234）", weight: 5 do
         travelers = @booking.booking_travelers.where(data_version: @data_version)
         expect(travelers.size).to eq(1), "出行人数量错误。期望: 1人, 实际: #{travelers.size}人"
         
         traveler = travelers.first
         expect(traveler.traveler_name).to eq('张三'),
-          "出行人姓名错误。期望: 张三（demo_user数据）, 实际: #{traveler.traveler_name}"
+          "出行人姓名错误。期望: 张三, 实际: #{traveler.traveler_name}"
         expect(traveler.id_number).to eq('110101199001011234'),
-          "出行人身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{traveler.id_number}"
+          "出行人身份证号错误。期望: 110101199001011234, 实际: #{traveler.id_number}"
         expect(traveler.traveler_type).to eq('adult'),
           "出行人类型错误。期望: adult, 实际: #{traveler.traveler_type}"
       end
@@ -187,5 +195,5 @@ module V001V050
     
       { action: 'create_tour_booking', tour_name: target_tour.title, price: target_package.price }
     end
-    end
+  end
 end

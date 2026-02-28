@@ -122,10 +122,10 @@
                 
                 <!-- 取件日期和归还日期 -->
                 <div class="mt-3 space-y-1">
-                  <% pickup_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
-                  <% return_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + (params[:days]&.to_i || 7).days) %>
-                  <p>取件日期: <span class="font-medium text-gray-900"><%= pickup_date_value.strftime('%Y-%m-%d') %></span></p>
-                  <p>归还日期: <span class="font-medium text-gray-900"><%= return_date_value.strftime('%Y-%m-%d') %></span></p>
+                  <% start_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
+                  <% end_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + (params[:days]&.to_i || 7).days) %>
+                  <p>取件日期: <span class="font-medium text-gray-900"><%= start_date_value.strftime('%Y-%m-%d') %></span></p>
+                  <p>归还日期: <span class="font-medium text-gray-900"><%= end_date_value.strftime('%Y-%m-%d') %></span></p>
                 </div>
               <% end %>
             </div>
@@ -160,8 +160,11 @@
       <% else %>
         <!-- 电话卡和WiFi需要配送信息 -->
         <% if params[:orderable_type] == 'InternetWifi' %>
-          <!-- WiFi只显示自取点信息 -->
-          <% if params[:pickup_location_id].present? %>
+          <!-- WiFi支持自取和邮寄两种方式 -->
+          <% delivery_method = params[:delivery_method] || 'pickup' %>
+          
+          <% if delivery_method == 'pickup' %>
+            <!-- WiFi自取场景 -->
             <%= f.hidden_field :delivery_method, value: 'pickup' %>
             <div class="mb-4">
               <div class="flex justify-between items-center">
@@ -189,19 +192,38 @@
                 </div>
               </div>
               
+              <!-- Hidden fields for delivery_info (pickup location address) -->
+              <%= f.fields_for :delivery_info do |delivery| %>
+                <%= delivery.hidden_field :address, value: "#{pickup_location.city} #{pickup_location.district} #{pickup_location.detail}" %>
+                <%= delivery.hidden_field :method, value: "pickup" %>
+              <% end %>
+              
               <!-- WiFi联系人信息 -->
               <div class="mb-3">
                 <label class="font-bold text-base mb-2 block">联系人信息</label>
                 
                 <% if @passengers.any? %>
                   <% 
-                    # Determine default selected passenger based on passenger_id param or first passenger
-                    selected_index = 0
-                    if params[:passenger_id].present?
-                      passenger_index = @passengers.find_index { |p| p.id.to_s == params[:passenger_id] }
-                      selected_index = passenger_index if passenger_index
+                    # Priority: URL params (contact_name/contact_phone) > passenger_id param > first passenger
+                    if params[:contact_name].present? && params[:contact_phone].present?
+                      # Use contact info from URL params (user typed in wifi_content.html.erb)
+                      selected_passenger_name = params[:contact_name]
+                      selected_passenger_phone = params[:contact_phone]
+                      selected_passenger_id = nil
+                    elsif params[:passenger_id].present?
+                      # Use selected passenger from picker
+                      passenger = @passengers.find { |p| p.id.to_s == params[:passenger_id] }
+                      selected_passenger = passenger || @passengers.first
+                      selected_passenger_name = selected_passenger.name
+                      selected_passenger_phone = selected_passenger.phone
+                      selected_passenger_id = selected_passenger.id
+                    else
+                      # Use first passenger as default
+                      selected_passenger = @passengers.first
+                      selected_passenger_name = selected_passenger.name
+                      selected_passenger_phone = selected_passenger.phone
+                      selected_passenger_id = selected_passenger.id
                     end
-                    selected_passenger = @passengers[selected_index]
                   %>
                   
                   <!-- 显示选中的联系人 -->
@@ -212,8 +234,8 @@
                       </svg>
                       <div class="flex-1">
                         <div class="font-medium text-gray-900 mb-1">
-                          <span data-internet-order-form-target="selectedPassengerName"><%= selected_passenger.name %></span>
-                          <span class="ml-2" data-internet-order-form-target="selectedPassengerPhone"><%= selected_passenger.phone %></span>
+                          <span data-internet-order-form-target="selectedPassengerName"><%= selected_passenger_name %></span>
+                          <span class="ml-2" data-internet-order-form-target="selectedPassengerPhone"><%= selected_passenger_phone %></span>
                         </div>
                       </div>
                     </div>
@@ -227,9 +249,9 @@
                   
                   <!-- Hidden fields for selected passenger -->
                   <%= f.fields_for :contact_info do |contact| %>
-                    <%= contact.hidden_field :passenger_id, value: selected_passenger.id, data: { internet_order_form_target: "passengerIdField" } %>
-                    <%= contact.hidden_field :name, value: selected_passenger.name, data: { internet_order_form_target: "passengerNameField" } %>
-                    <%= contact.hidden_field :phone, value: selected_passenger.phone, data: { internet_order_form_target: "passengerPhoneField" } %>
+                    <%= contact.hidden_field :passenger_id, value: selected_passenger_id, data: { internet_order_form_target: "passengerIdField" } %>
+                    <%= contact.hidden_field :name, value: selected_passenger_name, data: { internet_order_form_target: "passengerNameField" } %>
+                    <%= contact.hidden_field :phone, value: selected_passenger_phone, data: { internet_order_form_target: "passengerPhoneField" } %>
                   <% end %>
                   
                 <% else %>
@@ -240,6 +262,73 @@
                   </button>
                 <% end %>
               </div>
+            <% end %>
+          <% else %>
+            <!-- WiFi邮寄场景 -->
+            <%= f.hidden_field :delivery_method, value: 'mail' %>
+            <div class="mb-4">
+              <div class="flex justify-between items-center">
+                <label class="font-bold text-base">配送方式</label>
+                <span class="text-sm text-gray-900">邮寄</span>
+              </div>
+            </div>
+            
+            <% if @addresses.any? %>
+              <% 
+                # Determine default selected index based on address_id param
+                selected_index = 0
+                if params[:address_id].present?
+                  address_index = @addresses.find_index { |addr| addr.id.to_s == params[:address_id] }
+                  selected_index = address_index if address_index
+                end
+                selected_address = @addresses[selected_index]
+              %>
+              
+              <!-- 显示选中的地址 -->
+              <div class="bg-[#F7F8FA] rounded-lg p-4 mb-3" data-internet-order-form-target="selectedAddressCard">
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 text-gray-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <div class="flex-1">
+                    <div class="font-medium text-gray-900 mb-1">
+                      <span data-internet-order-form-target="selectedAddressName"><%= selected_address.name %></span>
+                      <span data-internet-order-form-target="selectedAddressPhone"><%= selected_address.phone %></span>
+                    </div>
+                    <div class="text-sm text-gray-600 leading-relaxed" data-internet-order-form-target="selectedAddressText">
+                      <%= selected_address.full_address %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" 
+                      data-action="internet-order-form#openAddressModal"
+                      class="block text-center text-blue-500 text-sm py-2 w-full">
+                更换地址
+              </button>
+              
+              <!-- Hidden fields for selected address -->
+              <%= f.fields_for :delivery_info do |delivery| %>
+                <%= delivery.hidden_field :address_id, value: selected_address.id, data: { internet_order_form_target: "addressIdField" } %>
+                <%= delivery.hidden_field :name, value: selected_address.name, data: { internet_order_form_target: "addressNameField" } %>
+                <%= delivery.hidden_field :phone, value: selected_address.phone, data: { internet_order_form_target: "addressPhoneField" } %>
+                <%= delivery.hidden_field :full_address, value: selected_address.full_address, data: { internet_order_form_target: "addressFullAddressField" } %>
+              <% end %>
+              
+              <!-- Hidden contact info fields (for validator v061 compatibility) -->
+              <%= f.fields_for :contact_info do |contact| %>
+                <%= contact.hidden_field :name, value: selected_address.name %>
+                <%= contact.hidden_field :phone, value: selected_address.phone %>
+              <% end %>
+              
+            <% else %>
+              <button type="button" 
+                      onclick="window.showToast('精彩即将上线', 'info')" 
+                      class="block text-center text-blue-500 py-3 border border-dashed border-gray-300 rounded w-full">
+                + 添加收货地址
+              </button>
             <% end %>
           <% end %>
         <% else %>
@@ -328,11 +417,17 @@
         </div>
         <%= f.fields_for :rental_info, data: { internet_order_form_target: "rentalInfoField" } do |rental| %>
           <% rental_days = (params[:days].presence || '7').to_i %>
-          <% pickup_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
-          <% return_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + rental_days.days) %>
+          <% start_date_value = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.tomorrow %>
+          <% end_date_value = params[:end_date].present? ? Date.parse(params[:end_date]) : (Date.tomorrow + rental_days.days) %>
           <%= rental.hidden_field :rental_days, value: rental_days, data: { internet_order_form_target: "rentalDaysField" } %>
-          <%= rental.hidden_field :pickup_date, value: pickup_date_value.to_s %>
-          <%= rental.hidden_field :return_date, value: return_date_value.to_s %>
+          <%= rental.hidden_field :start_date, value: start_date_value.to_s %>
+          <%= rental.hidden_field :end_date, value: end_date_value.to_s %>
+          <% if params[:pickup_location_id].present? %>
+            <% pickup_loc = PickupLocation.find_by(id: params[:pickup_location_id]) %>
+            <% if pickup_loc %>
+              <%= rental.hidden_field :pickup_location, value: "#{pickup_loc.city} #{pickup_loc.district} #{pickup_loc.detail}" %>
+            <% end %>
+          <% end %>
         <% end %>
       </div>
     <% end %>

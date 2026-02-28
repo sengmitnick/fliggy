@@ -227,14 +227,41 @@ export default class extends Controller<HTMLElement> {
   // 更新日期范围（验证结束日期>=开始日期）
   updateDateRange(event: Event): void {
     if (this.hasStartDateTarget && this.hasEndDateTarget) {
-      const start = new Date(this.startDateTarget.value)
-      const end = new Date(this.endDateTarget.value)
-      if (end < start) {
-        this.endDateTarget.value = this.startDateTarget.value
+      const target = event.target as HTMLInputElement
+      
+      console.log('[WiFi Date Debug] Event triggered by:', target === this.startDateTarget ? 'START' : 'END')
+      console.log('[WiFi Date Debug] Start value:', this.startDateTarget.value)
+      console.log('[WiFi Date Debug] End value:', this.endDateTarget.value)
+      
+      // 如果用户先选择了结束日期,但开始日期为空,将开始日期设为结束日期
+      if (target === this.endDateTarget && this.endDateTarget.value && !this.startDateTarget.value) {
+        console.log('[WiFi Date Debug] Case 1: Setting start date to match end date')
+        this.startDateTarget.value = this.endDateTarget.value
       }
       
-      // 如果是结束日期变化，自动确认并关闭
-      const target = event.target as HTMLInputElement
+      // 如果两个日期都有值,验证结束日期>=开始日期
+      if (this.startDateTarget.value && this.endDateTarget.value) {
+        const start = new Date(this.startDateTarget.value)
+        const end = new Date(this.endDateTarget.value)
+        console.log('[WiFi Date Debug] Start Date object:', start)
+        console.log('[WiFi Date Debug] End Date object:', end)
+        console.log('[WiFi Date Debug] Is end < start?', end < start)
+        
+        if (end < start) {
+          // 如果是用户刚选择了开始日期，清空结束日期让用户重新选择
+          // 如果是用户刚选择了结束日期，将结束日期设为开始日期
+          if (target === this.startDateTarget) {
+            console.log('[WiFi Date Debug] User selected start date > end date, CLEARING end date')
+            this.endDateTarget.value = ''
+            return // 不自动关闭模态框，让用户选择结束日期
+          } else {
+            console.log('[WiFi Date Debug] User selected end date < start date, setting end = start')
+            this.endDateTarget.value = this.startDateTarget.value
+          }
+        }
+      }
+      
+      // 如果是结束日期变化且有值,自动确认并关闭
       if (target === this.endDateTarget && this.endDateTarget.value) {
         this.confirmDateSelection()
       }
@@ -448,8 +475,8 @@ export default class extends Controller<HTMLElement> {
       return
     }
     
-    // 检查是否选择了自取点
-    if (!this.selectedPickupLocationId) {
+    // 验证自取点选择（仅自取模式需要）
+    if (this.currentDeliveryMethod === 'pickup' && !this.selectedPickupLocationId) {
       if (typeof (window as any).showToast === 'function') {
         (window as any).showToast('请先选择取件地址', 'warning')
       }
@@ -474,8 +501,11 @@ export default class extends Controller<HTMLElement> {
     const priceParams = `days=${days}&price=${unitPrice}&total=${totalPrice}`
     const dateParams = `&start_date=${startDate}&end_date=${endDate}`
     const contactParams = `&contact_name=${encodeURIComponent(contactName)}&contact_phone=${encodeURIComponent(contactPhone)}`
-    const pickupParams = `&pickup_location_id=${this.selectedPickupLocationId}`
-    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${pickupParams}`
+    const deliveryParams = `&delivery_method=${this.currentDeliveryMethod}`
+    
+    // 只在自取模式下添加 pickup_location_id
+    const pickupParams = this.currentDeliveryMethod === 'pickup' ? `&pickup_location_id=${this.selectedPickupLocationId}` : ''
+    const url = `${baseUrl}?${params}&${priceParams}${dateParams}${contactParams}${deliveryParams}${pickupParams}`
     window.location.href = url
   }
 }

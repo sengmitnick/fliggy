@@ -100,12 +100,14 @@
         </div>
 
         <!-- 隐藏的input字段用于表单提交 -->
-        <%= f.hidden_field :city, value: '', data: { car_search_edit_target: 'cityInput' } %>
-        <%= f.hidden_field :pickup_location, value: '', data: { car_search_edit_target: 'pickupLocationInput' } %>
-        <%= f.hidden_field :return_city, value: '', data: { car_search_edit_target: 'returnCityInput' } %>
-        <%= f.hidden_field :return_location, value: '', data: { car_search_edit_target: 'returnLocationInput' } %>
-        <%= f.hidden_field :pickup_date, value: '', data: { car_search_edit_target: 'pickupDateInput' } %>
-        <%= f.hidden_field :return_date, value: '', data: { car_search_edit_target: 'returnDateInput' } %>
+        <%= f.hidden_field :city, value: params[:city] || '', data: { car_search_edit_target: 'cityInput' } %>
+        <%= f.hidden_field :pickup_location, value: params[:pickup_location] || '', data: { car_search_edit_target: 'pickupLocationInput' } %>
+        <%= f.hidden_field :return_city, value: params[:return_city] || '', data: { car_search_edit_target: 'returnCityInput' } %>
+        <%= f.hidden_field :return_location, value: params[:return_location] || '', data: { car_search_edit_target: 'returnLocationInput' } %>
+        <%= f.hidden_field :pickup_date, value: params[:pickup_date] || '', data: { car_search_edit_target: 'pickupDateInput' } %>
+        <%= f.hidden_field :return_date, value: params[:return_date] || '', data: { car_search_edit_target: 'returnDateInput' } %>
+        <%= f.hidden_field :pickup_time, value: params[:pickup_time] || '', data: { car_search_edit_target: 'pickupTimeInput' } %>
+        <%= f.hidden_field :return_time, value: params[:return_time] || '', data: { car_search_edit_target: 'returnTimeInput' } %>
 
         <!-- 时间选择 -->
         <div class="flex justify-between items-center py-2 mb-4 border-b border-gray-50">

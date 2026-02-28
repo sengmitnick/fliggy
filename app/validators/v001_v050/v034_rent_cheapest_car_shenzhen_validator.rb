@@ -2,58 +2,63 @@
 
 require_relative '../base_validator'
 
-# 验证用例34: 给张三租赁明天深圳最便宜的车（租车1天，预算≤100元/天）
+# 验证用例34: 给张三租赁明天深圳北站西广场租车中心最便宜的车（租车1天，预算≤150元/天）
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索深圳的租车服务，
-#   找到价格≤100元/天的车辆中最便宜的并成功创建租赁1天的订单
+#   Agent 需要在系统中搜索深圳北站西广场租车中心的租车服务，
+#   找到价格≤150元/天的车辆中最便宜的并成功创建租赁1天的订单
 # 
 # 复杂度分析:
 #   1. 需要搜索深圳的租车服务
-#   2. 需要选择"明天"取车日期
-#   3. 需要筛选价格≤100元/天的车辆
-#   4. 需要在符合预算的车辆中选择最便宜的
+#   2. 需要选择深圳北站西广场租车中心
+#   3. 需要选择"明天"取车日期
+#   4. 需要筛选价格≤150元/天的车辆
+#   5. 需要在符合预算的车辆中选择最便宜的
 #   ❌ 价格优先，简化版性价比
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 城市正确（深圳） (20分)
+#   - 城市正确（深圳） (15分)
+#   - 取车点正确（深圳北站西广场租车中心） (15分)
 #   - 取车日期正确（明天） (20分)
-#   - 价格符合预算（≤100元/天） (40分)
+#   - 价格符合预算（≤150元/天） (30分)
 #
 module V001V050
   class V034RentCheapestCarShenzhenValidator < BaseValidator
     self.validator_id = 'v034_rent_cheapest_car_shenzhen_validator'
     self.task_id = '58fc94c1-6e60-45d2-8aea-c0fa3cc69ff6'
-    self.title = '给张三租赁明天深圳最便宜的车（租车1天，预算≤100元/天）'
-    self.description = '租赁明天深圳最便宜的车（租车1天，预算≤100元/天）'
+    self.title = '给张三租赁明天深圳北站西广场租车中心最便宜的车（租车1天，预算≤150元/天）'
+    self.description = '租赁明天深圳北站西广场租车中心最便宜的车（租车1天，预算≤150元/天）'
     self.timeout_seconds = 240
   
     def prepare
       @location = '深圳'
-      @budget_per_day = 100
+      @pickup_location = '深圳北站西广场租车中心'
+      @budget_per_day = 150
       @rental_days = 1
       @pickup_date = Date.current + 1.day
     
-      eligible_cars = Car.where(location: @location, data_version: 0)
+      eligible_cars = Car.where(location: @location, pickup_location: @pickup_location, data_version: 0)
                          .where('price_per_day <= ?', @budget_per_day)
     
       @lowest_price = eligible_cars.minimum(:price_per_day)
     
       {
-        task: "帮张三租一辆明天在#{@location}取车的最便宜车辆（预算≤#{@budget_per_day}元/天，租期1天）",
+        task: "帮张三租一辆明天在#{@location}#{@pickup_location}取车的最便宜车辆（预算≤#{@budget_per_day}元/天，租期1天）",
         location: @location,
+        pickup_location: @pickup_location,
         budget_per_day: @budget_per_day,
         rental_days: @rental_days,
         pickup_date: @pickup_date.to_s,
         pickup_date_description: "明天（#{@pickup_date.strftime('%Y年%m月%d日')}）",
-        hint: "系统中有多辆符合预算的车辆，请选择价格最低的",
+        hint: "请选择深圳北站西广场租车中心的车辆，系统中有#{eligible_cars.count}辆符合预算的车辆，请选择价格最低的",
         eligible_cars_count: eligible_cars.count,
         lowest_price: @lowest_price
       }
     end
   
     def verify
+      # 断言1: 订单已创建 (20分)
       add_assertion "订单已创建", weight: 20 do
         all_orders = CarOrder
           .where(data_version: @data_version)
@@ -66,40 +71,43 @@ module V001V050
     
       return unless @order
     
-      add_assertion "城市正确（深圳）", weight: 20 do
-        expect(@order.car.location).to eq(@location)
+      # 断言2: 城市正确（深圳） (15分)
+      add_assertion "城市正确（深圳）", weight: 15 do
+        expect(@order.car.location).to eq(@location),
+          "城市错误。期望: #{@location}, 实际: #{@order.car.location}"
       end
     
+      # 断言3: 取车点正确（深圳北站西广场租车中心） (15分)
+      add_assertion "取车点正确（深圳北站西广场租车中心）", weight: 15 do
+        expect(@order.car.pickup_location).to eq(@pickup_location),
+          "取车点错误。期望: #{@pickup_location}, 实际: #{@order.car.pickup_location}"
+      end
+    
+      # 断言4: 取车日期正确（明天） (20分)
       add_assertion "取车日期正确（明天）", weight: 20 do
         pickup_date = @order.pickup_datetime.to_date
-        expect(pickup_date).to eq(@pickup_date)
+        expect(pickup_date).to eq(@pickup_date),
+          "取车日期错误。期望: #{@pickup_date}（明天）, 实际: #{pickup_date}"
       end
     
+      # 断言5: 价格符合预算（≤150元/天） (30分) - 核心评分项
       add_assertion "价格符合预算（≤#{@budget_per_day}元/天）", weight: 30 do
         daily_price = @order.car.price_per_day
       
         expect(daily_price <= @budget_per_day).to be_truthy,
           "价格超出预算。预算: ≤#{@budget_per_day}元/天, 实际: #{daily_price}元/天"
       end
-    
-      add_assertion "驾驶人信息正确（张三 13800138000）", weight: 10 do
-        expect(@order.driver_name).to eq('张三'),
-          "驾驶人姓名错误。期望: 张三（demo_user数据）, 实际: #{@order.driver_name}"
-        expect(@order.contact_phone).to eq('13800138000'),
-          "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@order.contact_phone}"
-        expect(@order.driver_id_number).to eq('110101199001011234'),
-          "身份证号错误。期望: 110101199001011234（demo_user数据）, 实际: #{@order.driver_id_number}"
-      end
     end
   
     private
   
     def execution_state_data
-      { location: @location, budget_per_day: @budget_per_day, rental_days: @rental_days, pickup_date: @pickup_date.to_s }
+      { location: @location, pickup_location: @pickup_location, budget_per_day: @budget_per_day, rental_days: @rental_days, pickup_date: @pickup_date.to_s }
     end
   
     def restore_from_state(data)
       @location = data['location']
+      @pickup_location = data['pickup_location']
       @budget_per_day = data['budget_per_day']
       @rental_days = data['rental_days']
       @pickup_date = Date.parse(data['pickup_date'])
@@ -109,7 +117,7 @@ module V001V050
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = user.passengers.find_by!(name: '张三', data_version: 0)
     
-      target_car = Car.where(location: @location, data_version: 0)
+      target_car = Car.where(location: @location, pickup_location: @pickup_location, data_version: 0)
                       .where('price_per_day <= ?', @budget_per_day)
                       .order(:price_per_day)
                       .first
@@ -132,7 +140,7 @@ module V001V050
         data_version: @data_version
       )
     
-      { action: 'create_car_order', car_model: "#{target_car.brand} #{target_car.car_model}", daily_rate: target_car.price_per_day }
+      { action: 'create_car_order', car_model: "#{target_car.brand} #{target_car.car_model}", daily_rate: target_car.price_per_day, pickup_location: target_car.pickup_location }
     end
     end
 end

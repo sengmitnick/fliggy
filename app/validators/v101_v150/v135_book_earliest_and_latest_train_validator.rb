@@ -2,6 +2,30 @@
 
 require_relative '../base_validator'
 
+# 验证用例135: 帮张三订明天上海到杭州的最早高铁/动车（去程），以及后天杭州回上海的最晚高铁/动车（返程）。都为二等座
+# 
+# 任务描述:
+#   Agent 需要在系统中搜索往返火车票，
+#   找到明天上海→杭州的最早车次，以及后天杭州→上海的最晚车次，都为二等座
+# 
+# 复杂度分析:
+#   1. 需要搜索上海→杭州的高铁/动车（去程）
+#   2. 需要选择"明天"出发的最早车次
+#   3. 需要搜索杭州→上海的高铁/动车（返程）
+#   4. 需要选择"后天"出发的最晚车次
+#   5. 两张票都必须是二等座
+#   ✅ 往返双程 + 时间优化（最早/最晚） + 座位类型限制
+# 
+# 评分标准:
+#   - 创建了2个火车票订单（去程+返程） (20分)
+#   - 去程订单正确（上海→杭州，明天） (20分)
+#   - 返程订单正确（杭州→上海，后天） (20分)
+#   - 座位类型都为二等座 (10分)
+#   - 去程乘客信息正确（张三） (5分)
+#   - 返程乘客信息正确（张三） (5分)
+#   - 去程为最早车次 (10分)
+#   - 返程为最晚车次 (10分)
+#
 module V101V150
   class V135BookEarliestAndLatestTrainValidator < BaseValidator
     self.validator_id = 'v135_book_earliest_and_latest_train_validator'
@@ -56,6 +80,7 @@ module V101V150
     end
 
     def verify
+      # 断言1: 创建了2个火车票订单（去程+返程） (20分) - 核心评分项
       add_assertion "创建了2个火车票订单（去程+返程）", weight: 20 do
         all_train_bookings = TrainBooking
           .joins(:train)
@@ -80,6 +105,7 @@ module V101V150
 
       return if @outbound_bookings.nil? || @outbound_bookings.empty? || @return_bookings.nil? || @return_bookings.empty?
 
+      # 断言2: 去程订单正确（上海→杭州，明天） (20分) - 核心评分项
       add_assertion "去程订单正确（上海→杭州，明天）", weight: 20 do
         outbound_booking = @outbound_bookings.first
         expect(outbound_booking.train.departure_city).to eq(@outbound_departure_city)
@@ -88,6 +114,7 @@ module V101V150
           "去程日期错误。期望: #{@outbound_date}（明天），实际: #{outbound_booking.train.departure_time.to_date}"
       end
 
+      # 断言3: 返程订单正确（杭州→上海，后天） (20分) - 核心评分项
       add_assertion "返程订单正确（杭州→上海，后天）", weight: 20 do
         return_booking = @return_bookings.first
         expect(return_booking.train.departure_city).to eq(@return_departure_city)
@@ -96,12 +123,14 @@ module V101V150
           "返程日期错误。期望: #{@return_date}（后天），实际: #{return_booking.train.departure_time.to_date}"
       end
 
+      # 断言4: 座位类型都为二等座 (10分)
       add_assertion "座位类型都为二等座", weight: 10 do
         [@outbound_bookings.first, @return_bookings.first].each do |booking|
           expect(booking.seat_type).to eq('second_class'), "订单#{booking.id}的座位类型错误"
         end
       end
 
+      # 断言5: 去程乘客信息正确（张三） (5分)
       add_assertion "去程乘客信息正确（张三）", weight: 5 do
         outbound_booking = @outbound_bookings.first
         expect(outbound_booking.passenger_name).to eq(@expected_passenger_name),
@@ -110,6 +139,7 @@ module V101V150
           "去程乘客身份证号错误。期望: #{@expected_passenger_id}, 实际: #{outbound_booking.passenger_id_number}"
       end
 
+      # 断言6: 返程乘客信息正确（张三） (5分)
       add_assertion "返程乘客信息正确（张三）", weight: 5 do
         return_booking = @return_bookings.first
         expect(return_booking.passenger_name).to eq(@expected_passenger_name),
@@ -118,13 +148,15 @@ module V101V150
           "返程乘客身份证号错误。期望: #{@expected_passenger_id}, 实际: #{return_booking.passenger_id_number}"
       end
 
-      add_assertion "去程为最早车次", weight: 15 do
+      # 断言7: 去程为最早车次 (10分)
+      add_assertion "去程为最早车次", weight: 10 do
         outbound_booking = @outbound_bookings.first
         expect(outbound_booking.train.id).to eq(@earliest_outbound_train.id),
           "去程车次错误。期望最早车次: #{@earliest_outbound_train.train_number}（#{@earliest_outbound_train.departure_time.strftime('%H:%M')}），实际: #{outbound_booking.train.train_number}（#{outbound_booking.train.departure_time.strftime('%H:%M')}）"
       end
 
-      add_assertion "返程为最晚车次", weight: 15 do
+      # 断言8: 返程为最晚车次 (10分)
+      add_assertion "返程为最晚车次", weight: 10 do
         return_booking = @return_bookings.first
         expect(return_booking.train.id).to eq(@latest_return_train.id),
           "返程车次错误。期望最晚车次: #{@latest_return_train.train_number}（#{@latest_return_train.departure_time.strftime('%H:%M')}），实际: #{return_booking.train.train_number}（#{return_booking.train.departure_time.strftime('%H:%M')}）"

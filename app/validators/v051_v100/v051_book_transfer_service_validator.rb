@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例51: 给张三预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）
+# 验证用例51: 给张三预订后天上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）
 # 
 # 任务描述:
 #   用户后天从北京飞往上海，需要在上海虹桥T2机场接机送到市区。
@@ -12,13 +12,13 @@ require_relative '../base_validator'
 #   1. 用户选择"接我"服务（from_airport = 从机场接到市区）
 #   2. 根据航班的起降城市，确定降落机场（如：北京→上海，降落在上海虹桥T2）
 #   3. 上车点：降落机场（location_from = 虹桥T2，自动确定）
-#   4. 下车点：上海火车站（location_to = 上海火车站，距离虹桥约20公里）
+#   4. 下车点：上海虹桥站（location_to = 上海虹桥站）
 #   5. 浏览可用车型套餐，选择最便宜的
 # 
 # 复杂度分析:
 #   1. 需要理解"接机"含义：from_airport = 从机场出发，送到市区
 #   2. 需要根据航班降落城市确定机场（location_from = 虹桥T2）
-#   3. 需要选择下车地点为上海火车站
+#   3. 需要选择下车地点为上海虹桥站
 #   4. 需要对比不同供应商的价格（阳光出行、伙力专车等）
 #   5. 需要对比不同车型的价格（经济5座、舒适5座、经济7座）
 #   6. 需要选择最低价格的套餐
@@ -29,7 +29,7 @@ require_relative '../base_validator'
 #   - 订单已创建 (15分)
 #   - 服务类型正确（airport_pickup）(10分)
 #   - 上车点正确（虹桥T2）(10分)
-#   - 下车点正确（上海站）(10分)
+#   - 下车点正确（上海虹桥站）(10分)
 #   - 选择了车辆类型 (10分)
 #   - 联系人信息正确（姓名、电话）(10分)
 #   - 选择了最便宜的套餐 (25分)
@@ -47,7 +47,7 @@ module V051V100
   class V051BookTransferServiceValidator < BaseValidator
     self.validator_id = 'v051_book_transfer_service_validator'
     self.task_id = 'fa751c19-28f4-4c7e-abdc-76fbef90ca1f'
-    self.title = '给张三预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
+    self.title = '给张三预订后天上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
     self.description = '预订上海虹桥机场接机服务（北京→上海航班，选择最便宜套餐）'
     self.timeout_seconds = 240
   
@@ -57,11 +57,11 @@ module V051V100
       @service_type = 'from_airport' # 接机服务：从机场接到市区
       @transfer_type = 'airport_pickup' # 服务类型：机场接送
     
-      # 模拟场景：用户乘坐航班从北京飞往上海，抵达上海后需要从虹桥T2机场接到上海火车站
+      # 模拟场景：用户乘坐航班从北京飞往上海，抵达上海后需要从虹桥T2机场接到上海虹桥站
       @departure_city = '北京' # 航班出发城市
       @arrival_city = '上海' # 航班降落城市
       @arrival_airport = '虹桥T2' # 降落机场（上车点）
-      @destination_address = '上海站' # 下车点（上海火车站，明确要求）
+      @destination_address = '上海虹桥站' # 下车点（上海虹桥站）
       @flight_date = (Date.current + 2.days).strftime('%Y-%m-%d') # 后天
     
       @location_from = @arrival_airport # 上车点 = 虹桥T2
@@ -82,7 +82,7 @@ module V051V100
       # 返回给 Agent 的任务信息
       {
         task: "请预订机场接机服务，选择价格最便宜的服务商",
-        scenario: "后天从北京飞往上海，在虹桥T2机场接机，送到上海火车站",
+        scenario: "后天从北京飞往上海，在虹桥T2机场接机，送到上海虹桥站",
         flight_info: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
@@ -92,7 +92,7 @@ module V051V100
         pickup_location: "#{@arrival_airport}（上车点，自动确定）",
         dropoff_location: @destination_address,
         pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
-        flow_hint: "1. 找到北京→上海的航班 → 2. 确认降落机场为虹桥T2 → 3. 选择接机服务 → 4. 上车点自动=虹桥T2 → 5. 下车点选择'上海站'（上海火车站） → 6. 对比车型价格 → 7. 选择最便宜的套餐",
+        flow_hint: "1. 找到北京→上海的航班 → 2. 确认降落机场为虹桥T2 → 3. 选择接机服务 → 4. 上车点自动=虹桥T2 → 5. 下车点选择'上海虹桥站' → 6. 对比车型价格 → 7. 选择最便宜的套餐",
         available_packages_count: @available_packages.count
       }
     end

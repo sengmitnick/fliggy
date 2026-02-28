@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单
+# 验证用例: 张三要去韩国5天，帮他租一台随身WiFi，选5G高速版，3天后北京朝阳邮寄
 # 
 # 任务描述:
 #   Agent 需要在系统中搜索韩国地区的WiFi设备，
@@ -12,6 +12,8 @@ require_relative '../base_validator'
 #   地区: 韩国
 #   产品: 韩国随身WiFi·5G高速（26元/天）
 #   租用1台，租期5天，3天后取件
+#   邮寄地址: 北京市朝阳区建国路88号
+#   联系人: 张三 13800138000
 #   总价: 26×5×1+500=630元
 # 
 # 评分标准:
@@ -20,7 +22,7 @@ require_relative '../base_validator'
 #   - 地区正确（韩国） (10分)
 #   - 选择了韩国5G高速WiFi (20分)
 #   - 租赁天数正确（5天）、总价正确（630元含押金） (20分)
-#   - 联系人信息正确（来自demo_user） (20分)
+#   - 收货地址正确（张三的北京地址） (20分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -34,8 +36,8 @@ module V051V100
   class V061BookKoreaWifi5gValidator < BaseValidator
     self.validator_id = 'v061_book_korea_wifi_5g_validator'
     self.task_id = 'e8212b70-653b-4752-89e7-513eb4730cf2'
-    self.title = '给张三搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单'
-    self.description = '搜索韩国WiFi租赁服务，选择5G高速版并成功创建5天租赁订单'
+    self.title = '张三要去韩国5天，帮他租一台随身WiFi，选5G高速版，3天后北京朝阳邮寄'
+    self.description = '张三要去韩国5天，帮他租一台随身WiFi，选5G高速版，3天后北京朝阳邮寄'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -62,12 +64,14 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "给张三预订韩国5G高速WiFi（租1台用5天）",
+        task: "请预订1台韩国5G高速WiFi，租用5天，邮寄到张三的北京地址",
         region: @region,
         rental_days: @rental_days,
         quantity: @quantity,
         wifi_type: @wifi_keyword,
-        hint: "韩国有多款WiFi可选，选择5G高速版（26元/天）。租赁: 1台×5天+押金500=630元",
+        delivery_method: 'mail',
+        contact_person: "#{@expected_name}（#{@expected_phone}）",
+        hint: "韩国有多款WiFi可选，选择5G高速版（26元/天）。租赁: 1台×5天+押金500=630元。取件: 3天后、北京市朝阳区建国路88号、邮寄。联系人: 张三/#{@expected_phone}",
         matching_count: @matching_count
       }
     end
