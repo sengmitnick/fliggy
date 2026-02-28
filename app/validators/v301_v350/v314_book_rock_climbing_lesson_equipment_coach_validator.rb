@@ -179,16 +179,16 @@ module V301V350
       # 创建攀岩活动订单（包含教学、装备、教练）
       ActivityOrder.create!(
         user: user,
-        attraction_activity: @climbing_activity,  # ✅ From data pack (data_version: 0)
+        attraction_activity: @climbing_activity,
         visit_date: @activity_date,
         quantity: @participant_count,
-        passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联游客信息
+        passenger_ids: [@liuqiang.id, @chenjing.id],
         total_price: @climbing_activity.current_price * @participant_count,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
-        insurance_type: 'premium',  # 高风险活动必须购买保险
+        insurance_type: 'premium',
         status: 'paid',
-        data_version: @data_version  # ✅ Session-scoped
+        data_version: @data_version
       )
     end
     
