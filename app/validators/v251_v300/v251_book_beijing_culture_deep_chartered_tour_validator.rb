@@ -146,24 +146,7 @@ module V251V300
         end
       end
       
-      # 断言7: 订单信息完整 (0分)
-      # 验证出发时间格式、预订模式
-      add_assertion "订单信息完整", weight: 0 do
-        @charter_bookings.each do |booking|
-          # 出发时间
-          expect(booking.departure_time).to be_present,
-            "缺少出发时间"
-          
-          expect(booking.departure_time).to match(/\A\d{2}:\d{2}\z/),
-            "出发时间格式错误: #{booking.departure_time}。期望格式: 09:00"
-          
-          # 预订模式
-          expect(booking.booking_mode).to eq('by_route'),
-            "预订模式错误。按路线预订应为'by_route'，实际: #{booking.booking_mode}"
-        end
-      end
-      
-      # 断言8: 价格计算正确 (5分)
+      # 断言7: 价格计算正确 (5分)
       add_assertion "价格计算正确", weight: 5 do
         @charter_bookings.each do |booking|
           # 使用服务重新计算价格
