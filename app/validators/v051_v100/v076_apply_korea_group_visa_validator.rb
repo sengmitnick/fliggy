@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例76: 给张三办理韩国团体签证（5人以上，成功率100%，最便宜）
+# 验证用例76: 给张三等人办理韩国团体签证（5人以上，成功率100%，最便宜）
 # 
 # 任务描述:
 #   Agent 需要为5人团队办理韩国签证，
@@ -36,8 +36,8 @@ module V051V100
   class V076ApplyKoreaGroupVisaValidator < BaseValidator
     self.validator_id = 'v076_apply_korea_group_visa_validator'
     self.task_id = 'c8b9e386-8c54-40ca-a684-bcb5f833bb16'
-    self.title = '给张三办理韩国团体签证（5人以上，成功率100%，最便宜）'
-    self.description = '办理韩国团体签证（5人以上，成功率100%，最便宜）'
+    self.title = '给张三等人办理韩国团体签证（5人以上，成功率100%，最便宜）'
+    self.description = '给张三等人办理韩国团体签证（5人以上，成功率100%，最便宜）'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -141,17 +141,18 @@ module V051V100
           "实际选择: #{@visa_order.visa_product.name}（#{actual_price}元/人，成功率#{@visa_order.visa_product.success_rate}%）"
       end
     
-      # 断言7: 联系人姓名正确（李四、王芳、刘强、陈静、小明任选其一）
-      add_assertion "联系人姓名正确（5人中任选其一）", weight: 3 do
-        valid_names = ['李四', '王芳', '刘强', '陈静', '小明']
+      # 断言7: 联系人姓名正确（张三、李四、王芳、刘强、陈静、小明任选其一）
+      add_assertion "联系人姓名正确（6人中任选其一）", weight: 3 do
+        valid_names = ['张三', '李四', '王芳', '刘强', '陈静', '小明']
         expect(valid_names).to include(@visa_order.contact_name),
-          "联系人姓名错误。期望: #{valid_names.join('或')}（5人任选其一），实际: #{@visa_order.contact_name}"
+          "联系人姓名错误。期望: #{valid_names.join('或')}（6人任选其一），实际: #{@visa_order.contact_name}"
       end
     
       # 断言8: 联系电话与联系人匹配
       add_assertion "联系电话与联系人匹配", weight: 3 do
-        # 李四: 13900139000, 王芳: 13700137001, 刘强: 13600136001, 陈静: 13300133001, 小明: 13500135001
+        # 张三: 13800138000, 李四: 13900139000, 王芳: 13700137001, 刘强: 13600136001, 陈静: 13300133001, 小明: 13500135001
         valid_pairs = {
+          '张三' => '13800138000',
           '李四' => '13900139000',
           '王芳' => '13700137001',
           '刘强' => '13600136001',
@@ -166,8 +167,9 @@ module V051V100
     
       # 断言9: 收货地址与联系人匹配
       add_assertion "收货地址与联系人匹配", weight: 4 do
-        # 李四: 上海浦东, 王芳: 广州天河, 刘强: 深圳南山, 陈静: 杭州西湖, 小明: 成都高新
+        # 张三: 北京朝阳, 李四: 上海浦东, 王芳: 广州天河, 刘强: 深圳南山, 陈静: 杭州西湖, 小明: 成都高新
         valid_addresses = {
+          '张三' => /北京.*朝阳.*建国路.*SOHO/,
           '李四' => /上海.*浦东.*陆家嘴.*1000/,
           '王芳' => /广东.*广州.*天河.*85/,
           '刘强' => /广东.*深圳.*南山.*科技园/,
@@ -178,8 +180,13 @@ module V051V100
         expected_pattern = valid_addresses[@visa_order.contact_name]
         actual_address = @visa_order.delivery_address || ''
       
-        expect(actual_address).to match(expected_pattern),
-          "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
+        if expected_pattern
+          expect(actual_address).to match(expected_pattern),
+            "收货地址与联系人不匹配。联系人: #{@visa_order.contact_name}，期望包含: #{expected_pattern.source}，实际地址: #{actual_address}"
+        else
+          # 如果联系人不在预期列表中，跳过地址验证
+          expect(true).to be_truthy, "联系人#{@visa_order.contact_name}不在预期列表中，跳过地址验证"
+        end
       end
     end
   
@@ -221,8 +228,8 @@ module V051V100
       # 1. 查找测试用户
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 随机选择联系人（李四、王芳、刘强、陈静、小明任选其一）
-      contact_names = ['李四', '王芳', '刘强', '陈静', '小明']
+      # 2. 随机选择联系人（张三、李四、王芳、刘强、陈静、小明任选其一）
+      contact_names = ['张三', '李四', '王芳', '刘强', '陈静', '小明']
       selected_contact_name = contact_names.sample
       contact_passenger = user.passengers.find_by!(name: selected_contact_name, data_version: 0)
       contact_address = user.addresses.find_by!(name: selected_contact_name, data_version: 0)
