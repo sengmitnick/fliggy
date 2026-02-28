@@ -251,7 +251,7 @@ module V051V100
       # 查询乘客信息
       passengers = user.passengers.where(data_version: 0).where(name: ['张三', '李四', '王芳', '刘强']).to_a
       raise "未找到足够的乘客信息" if passengers.size < 4
-      contact_passenger = passengers.first
+      contact_passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       
       TicketOrder.create!(
         ticket_id: cheapest_supplier.ticket_id,
