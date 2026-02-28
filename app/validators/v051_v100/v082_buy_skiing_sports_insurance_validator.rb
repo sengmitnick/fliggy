@@ -2,28 +2,28 @@
 
 require_relative '../base_validator'
 
-# 验证用例82: 给张三购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）
+# 验证用例82: 给张三购买滑雪运动保险（出行人：张三，目的地：哈尔滨，出行日期：15天后，保障期：3天）
 # 
 # 任务描述:
 #   Agent 需要为哈尔滨滑雪之旅购买运动保险，
-#   选择运动医疗保额最高的专业滑雪保险产品
+#   选择专业的滑雪保险产品（产品名称包含'滑雪'）
 # 
 # 复杂度分析:
 #   1. 需要搜索"境内旅游"类型的保险产品
-#   2. 需要识别适合滑雪场景的产品（scenes包含'滑雪'）
-#   3. 需要理解滑雪运动需要专业的运动医疗保障
-#   4. 需要对比运动医疗保额（coverage_details.sports_injury）
-#   5. 需要选择运动医疗保额最高的产品
-#   ❌ 不能一次性提供：需要先搜索→筛选滑雪→对比运动保额→选择
+#   2. 需要识别符合保障期限的产品（3天）
+#   3. 需要理解滑雪运动需要专业的滑雪保险
+#   4. 需要选择名称包含"滑雪"的专业保险产品
+#   ❌ 不能一次性提供：需要先搜索→筛选符合期限→选择滑雪保险
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
 #   - 保险类型正确（境内旅游）(10分)
 #   - 目的地正确（哈尔滨）(10分)
 #   - 出行开始时间正确（15天后）(10分)
-#   - 产品适合滑雪场景 (15分)
-#   - 选择了运动医疗保额最高的产品 (25分)
-#   - 保障天数正确（3天）(10分)
+#   - 被保险人信息正确 (10分)
+#   - 联系人电话正确 (5分)
+#   - 选择了专业滑雪保险产品 (30分)
+#   - 保障天数正确（3天）(5分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -37,8 +37,8 @@ module V051V100
   class V082BuySkiingSportsInsuranceValidator < BaseValidator
     self.validator_id = 'v082_buy_skiing_sports_insurance_validator'
     self.task_id = '1d4d5de8-989c-46da-b68a-c36ce36fc968'
-    self.title = '给张三购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
-    self.description = '购买滑雪运动保险（哈尔滨，3天，运动医疗保额最高）'
+    self.title = '给张三购买滑雪运动保险（出行人：张三，目的地：哈尔滨，出行日期：15天后，保障期：3天）'
+    self.description = '为张三购买哈尔滨滑雪运动保险，出行开始日期为15天后，保障期3天'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -59,21 +59,19 @@ module V051V100
       @expected_insured_id_number = @zhangsan.id_number
       @expected_contact_phone = @zhangsan.phone  # 单人保险：被保险人就是联系人
     
-      # 查找适合滑雪的境内旅游保险产品（注意：查询基线数据 data_version=0）
+      # 查找符合保障期限的境内旅游保险产品（注意：查询基线数据 data_version=0）
       @available_products = InsuranceProduct.where(
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
     
-      # 找到运动医疗保额最高的产品
-      @highest_sports_product = @available_products.max_by do |p|
-        p.coverage_details['sports_injury'] || p.coverage_details['medical'] || 0
-      end
+      # 找到名称包含"滑雪"的专业保险产品
+      @skiing_product = @available_products.find { |p| p.name.include?('滑雪') }
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为张三购买哈尔滨滑雪运动保险（15天后出发，保障期#{@days}天），滑雪属于高风险运动，请选择适合滑雪且运动医疗保额最高的产品",
+        task: "请为张三购买哈尔滨滑雪运动保险（15天后出发，保障期#{@days}天），请选择专业的滑雪保险产品",
         product_type: "境内旅游",
         destination: @destination,
         days: @days,
@@ -82,7 +80,7 @@ module V051V100
         insured_person: @expected_insured_name,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
-        hint: "滑雪属于高风险运动，需要购买专业的滑雪运动保险（scenes包含'滑雪'）。请对比运动医疗保额（coverage_details.sports_injury或medical）后选择最高的",
+        hint: "滑雪属于高风险运动，需要购买专业的滑雪保险产品（产品名称包含'滑雪'）",
         available_products_count: @available_products.count,
         note: "滑雪保险通常包含运动意外、运动医疗、滑雪装备损失等保障"
       }
@@ -138,56 +136,35 @@ module V051V100
         end
       end
     
-      # 断言6: 联系人电话正确（张三的电话）
+      # 断言6: 联系人电话正确（订单级别的contact_phone字段）
       add_assertion "联系人电话正确（#{@expected_contact_phone}）", weight: 5 do
-        insured_persons = @insurance_order.insured_persons || []
-        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
-        
-        # 单人保险：被保险人就是联系人，验证电话字段
-        if zhangsan_record.is_a?(Hash)
-          actual_phone = zhangsan_record['phone'] || zhangsan_record['contact_phone']
-          expect(actual_phone).to eq(@expected_contact_phone),
-            "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone}"
-        end
+        actual_phone = @insurance_order.contact_phone
+        expect(actual_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone || '未填写'}"
       end
     
-      # 断言7: 产品适合滑雪场景
-      add_assertion "产品适合滑雪场景", weight: 5 do
-        scenes = @insurance_order.insurance_product.scenes || []
-        has_scene = scenes.include?(@scene)
-      
-        expect(has_scene).to be_truthy,
-          "所选产品不适合滑雪场景。期望: scenes包含'#{@scene}', 实际: scenes=#{scenes.inspect}。" \
-          "滑雪属于高风险运动，需要专业的滑雪运动保险"
-      end
-    
-      # 断言8: 选择了运动医疗保额最高的产品（核心评分项）
-      add_assertion "选择了运动医疗保额最高的产品", weight: 25 do
-        # 获取所有适合滑雪的产品
+      # 断言7: 选择了专业滑雪保险产品（核心评分项）
+      add_assertion "选择了专业滑雪保险产品", weight: 30 do
+        # 获取所有符合保障期限的产品
         all_products = InsuranceProduct.where(
           product_type: @product_type,
           data_version: 0
         ).where('min_days <= ? AND max_days >= ?', @days, @days)
-         .select { |p| p.scenes&.include?(@scene) }
+         .to_a
       
-        # 找到运动医疗保额最高的
-        highest_product = all_products.max_by do |p|
-          p.coverage_details['sports_injury'] || p.coverage_details['medical'] || 0
-        end
+        # 找到专业滑雪保险产品（名称包含"滑雪"）
+        skiing_product = all_products.find { |p| p.name.include?('滑雪') }
       
-        actual_coverage = @insurance_order.insurance_product.coverage_details['sports_injury'] || 
-                          @insurance_order.insurance_product.coverage_details['medical'] || 0
-        highest_coverage = highest_product.coverage_details['sports_injury'] || 
-                           highest_product.coverage_details['medical'] || 0
+        actual_product_name = @insurance_order.insurance_product.name
       
-        expect(@insurance_order.insurance_product_id).to eq(highest_product.id),
-          "未选择运动医疗保额最高的产品。" \
-          "应选: #{highest_product.name}（#{highest_product.company}，运动医疗保额#{highest_coverage}元），" \
-          "实际选择: #{@insurance_order.insurance_product.name}（#{@insurance_order.insurance_product.company}，运动医疗保额#{actual_coverage}元）。" \
-          "滑雪运动应选择运动医疗保额最高的产品"
+        expect(@insurance_order.insurance_product_id).to eq(skiing_product&.id),
+          "未选择专业滑雪保险产品。" \
+          "应选: #{skiing_product&.name}（华泰财险，专业滑雪保障），" \
+          "实际选择: #{actual_product_name}（#{@insurance_order.insurance_product.company}）。" \
+          "滑雪运动应选择名称包含'滑雪'的专业保险产品"
       end
     
-      # 断言9: 保障天数正确
+      # 断言8: 保障天数正确
       add_assertion "保障天数正确（#{@days}天）", weight: 5 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
@@ -237,11 +214,9 @@ module V051V100
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
     
-      @highest_sports_product = @available_products.max_by do |p|
-        p.coverage_details['sports_injury'] || p.coverage_details['medical'] || 0
-      end
+      @skiing_product = @available_products.find { |p| p.name.include?('滑雪') }
     end
   
     # 模拟 AI Agent 操作：为张三购买滑雪运动医疗保额最高的保险
@@ -249,35 +224,32 @@ module V051V100
       # 1. 查找测试用户（数据包中已创建）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
     
-      # 2. 查找适合滑雪的境内旅游保险产品
+      # 2. 查找符合保障期限的境内旅游保险产品
       available_products = InsuranceProduct.where(
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
     
-      raise "未找到适合滑雪的保险产品" if available_products.empty?
+      raise "未找到符合保障期限的保险产品" if available_products.empty?
     
-      # 3. 选择运动医疗保额最高的
-      highest_sports_product = available_products.max_by do |p|
-        p.coverage_details['sports_injury'] || p.coverage_details['medical'] || 0
-      end
+      # 3. 选择专业滑雪保险产品（名称包含"滑雪"）
+      skiing_product = available_products.find { |p| p.name.include?('滑雪') }
     
-      raise "未找到可用的保险产品" unless highest_sports_product
+      raise "未找到专业滑雪保险产品" unless skiing_product
     
       # 4. 构建被保险人信息（使用 prepare 中查询的张三信息）
       insured_persons_data = [{
         name: @zhangsan.name,
-        id_number: @zhangsan.id_number,
-        phone: @zhangsan.phone  # 联系电话
+        id_number: @zhangsan.id_number
       }]
     
       # 5. 创建保险订单
-      unit_price = highest_sports_product.price_per_day * @days
+      unit_price = skiing_product.price_per_day * @days
     
       insurance_order = InsuranceOrder.create!(
         user_id: user.id,
-        insurance_product_id: highest_sports_product.id,
+        insurance_product_id: skiing_product.id,
         source: 'standalone',  # 单独购买
         start_date: @start_date,
         end_date: @end_date,
@@ -285,6 +257,9 @@ module V051V100
         destination: @destination,
         destination_type: 'domestic',
         insured_persons: insured_persons_data,
+        contact_name: @zhangsan.name,  # 联系人姓名
+        contact_phone: @zhangsan.phone,  # 联系人电话
+        contact_email: user.email,  # 联系人邮箱
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,
@@ -296,12 +271,11 @@ module V051V100
       {
         action: 'create_insurance_order',
         order_id: insurance_order.id,
-        insurance_product_name: highest_sports_product.name,
-        company: highest_sports_product.company,
-        product_type: highest_sports_product.product_type,
-        scenes: highest_sports_product.scenes,
-        sports_injury_coverage: highest_sports_product.coverage_details['sports_injury'] || highest_sports_product.coverage_details['medical'],
-        price_per_day: highest_sports_product.price_per_day,
+        insurance_product_name: skiing_product.name,
+        company: skiing_product.company,
+        product_type: skiing_product.product_type,
+        scenes: skiing_product.scenes,
+        price_per_day: skiing_product.price_per_day,
         days: @days,
         quantity: @quantity,
         unit_price: unit_price,

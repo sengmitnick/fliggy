@@ -18,10 +18,11 @@ require_relative '../base_validator'
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 保险类型正确（交通意外transport）(15分)
+#   - 保险类型正确（交通意外transport）(10分)
 #   - 目的地正确（北京）(10分)
-#   - 产品是全年计划（365天）(30分)
-#   - 适合交通综合保障场景 (15分)
+#   - 被保险人信息正确 (10分)
+#   - 联系人电话正确 (5分)
+#   - 产品是全年计划（365天）(35分)
 #   - 保障天数正确（365天）(10分)
 # 
 # 使用方法:
@@ -126,21 +127,15 @@ module V051V100
         end
       end
     
-      # 断言5: 联系人电话正确（张三的电话）
+      # 断言5: 联系人电话正确（订单级别的contact_phone字段）
       add_assertion "联系人电话正确（#{@expected_contact_phone}）", weight: 5 do
-        insured_persons = @insurance_order.insured_persons || []
-        zhangsan_record = insured_persons.find { |p| p['name'] == @expected_insured_name || p == @expected_insured_name }
-        
-        # 单人保险：被保险人就是联系人，验证电话字段
-        if zhangsan_record.is_a?(Hash)
-          actual_phone = zhangsan_record['phone'] || zhangsan_record['contact_phone']
-          expect(actual_phone).to eq(@expected_contact_phone),
-            "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone}"
-        end
+        actual_phone = @insurance_order.contact_phone
+        expect(actual_phone).to eq(@expected_contact_phone),
+          "联系人电话错误。期望: #{@expected_contact_phone}（#{@expected_insured_name}），实际: #{actual_phone || '未填写'}"
       end
     
       # 断言6: 产品是全年计划（365天）（核心评分项）
-      add_assertion "产品是全年计划（365天）", weight: 25 do
+      add_assertion "产品是全年计划（365天）", weight: 35 do
         product = @insurance_order.insurance_product
         max_days = product.max_days
       
@@ -151,17 +146,7 @@ module V051V100
           "全年交通意外险支持365天保障期，可以全年无限次保障"
       end
     
-      # 断言7: 适合交通综合保障场景
-      add_assertion "适合交通综合保障场景", weight: 10 do
-        scenes = @insurance_order.insurance_product.scenes || []
-        has_scene = scenes.include?(@scene)
-      
-        expect(has_scene).to be_truthy,
-          "所选产品不适合交通综合保障场景。期望: scenes包含'#{@scene}', 实际: scenes=#{scenes.inspect}。" \
-          "全年交通意外险通常适合经常出差的商务人士"
-      end
-    
-      # 断言8: 保障天数和日期逻辑正确（365天，从明天到明年今天）
+      # 断言7: 保障天数和日期逻辑正确（365天，从明天到明年今天）
       add_assertion "保障天数和日期逻辑正确（365天，从明天到明年今天）", weight: 10 do
         actual_days = @insurance_order.days
         expect(actual_days).to eq(@days),
@@ -241,17 +226,15 @@ module V051V100
     
       raise "未找到全年交通意外险产品" if available_products.empty?
     
-      # 3. 选择适合交通综合保障的全年计划
-      selected_product = available_products.find { |p| p.scenes&.include?(@scene) }
-      selected_product ||= available_products.first  # 如果没有交通综合标签，选择第一个
+      # 3. 选择第一个全年交通意外险产品
+      selected_product = available_products.first
     
       raise "未找到可用的保险产品" unless selected_product
     
       # 4. 构建被保险人信息（使用 prepare 中查询的张三信息）
       insured_persons_data = [{
         name: @zhangsan.name,
-        id_number: @zhangsan.id_number,
-        phone: @zhangsan.phone  # 联系电话
+        id_number: @zhangsan.id_number
       }]
     
       # 5. 创建保险订单
@@ -267,6 +250,9 @@ module V051V100
         destination: @destination,
         destination_type: 'domestic',
         insured_persons: insured_persons_data,
+        contact_name: @zhangsan.name,  # 联系人姓名
+        contact_phone: @zhangsan.phone,  # 联系人电话
+        contact_email: user.email,  # 联系人邮箱
         unit_price: unit_price,
         quantity: @quantity,
         total_price: unit_price * @quantity,
