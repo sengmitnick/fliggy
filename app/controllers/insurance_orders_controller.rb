@@ -69,17 +69,31 @@ class InsuranceOrdersController < ApplicationController
   def create
     @product = InsuranceProduct.find(params[:insurance_order][:insurance_product_id])
     
+    # Get contact information from contact_id first
+    contact = nil
+    if params[:contact_id].present?
+      contact = current_user.contacts.find_by(id: params[:contact_id])
+    end
+    
     # Get insured persons from form
     insured_persons_params = params[:insurance_order][:insured_persons] || []
     insured_persons = []
     
-    # Parse insured persons array
+    # Parse insured persons array and add emergency contact info to each person
     insured_persons_params.each do |_index, person_data|
       if person_data[:name].present? && person_data[:id_number].present?
-        insured_persons << {
+        person_hash = {
           name: person_data[:name],
           id_number: person_data[:id_number]
         }
+        
+        # Add emergency contact information to each insured person
+        if contact
+          person_hash[:emergency_contact_name] = contact.name
+          person_hash[:emergency_contact_phone] = contact.phone
+        end
+        
+        insured_persons << person_hash
       end
     end
 
@@ -89,6 +103,13 @@ class InsuranceOrdersController < ApplicationController
     @order.source = 'standalone'
     @order.quantity = insured_persons.size
     @order.status = 'pending'
+    
+    # Save contact information at order level
+    if contact
+      @order.contact_name = contact.name
+      @order.contact_phone = contact.phone
+      @order.contact_email = contact.email
+    end
     
     # CRITICAL: Recalculate unit_price with correct days and city_id
     # The unit_price from form may be outdated if quantity changed

@@ -332,6 +332,25 @@ attractions_data = [
     updated_at: timestamp
   },
   {
+    name: "成都欢乐谷",
+    slug: "chengdu-happy-valley",
+    city: "成都",
+    district: "金牛区",
+    address: "四川省成都市金牛区西华大道16号",
+    cover_image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    latitude: 30.720,
+    longitude: 104.014,
+    description: "西南地区大型主题乐园，拥有9大主题区域和100多个游乐项目。特色夜场开放至22:00，夜间灯光秀璀璨夺目，是年轻人夜生活的热门选择。",
+    opening_hours: "09:30-22:00（夜场18:00-22:00）",
+    phone: "028-89338000",
+    rating: 4.6,
+    review_count: 14560,
+    is_free: false,
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
     name: "广州长隆野生动物世界",
     slug: "guangzhou-chimelong-safari-park",
     city: "广州",
@@ -689,6 +708,53 @@ tickets_data << {
   original_price: 149,
   requirements: "适用于1.2米-1.5米儿童。含园区所有适龄游乐项目。",
   sales_count: 8560,
+  validity_days: 90,
+  booking_notice: "游玩当天15:00前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# 成都欢乐谷门票
+attraction = attractions["成都欢乐谷"]
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "成都欢乐谷夜场票（成人票）",
+  ticket_type: "adult",
+  current_price: 120,
+  original_price: 150,
+  requirements: "夜场专用票，18:00-22:00入园。含园区所有夜间开放游乐项目和灯光秀演出，不含餐饮。",
+  sales_count: 8560,
+  validity_days: 90,
+  booking_notice: "当天17:00前可预订，夜场18:00开始入园",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "成都欢乐谷成人票",
+  ticket_type: "adult",
+  current_price: 220,
+  original_price: 260,
+  requirements: "含园区所有游乐项目，不含收费项目和餐饮。",
+  sales_count: 13560,
+  validity_days: 90,
+  booking_notice: "游玩当天15:00前可预订",
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+tickets_data << {
+  attraction_id: attraction.id,
+  name: "成都欢乐谷儿童票",
+  ticket_type: "child",
+  current_price: 110,
+  original_price: 130,
+  requirements: "适用于1.2米-1.5米儿童。含园区所有适龄游乐项目。",
+  sales_count: 7560,
   validity_days: 90,
   booking_notice: "游玩当天15:00前可预订",
   data_version: 0,
@@ -1645,6 +1711,57 @@ ticket_suppliers_data << {
   updated_at: timestamp
 }
 
+# 成都欢乐谷夜场票（成人票） - 4个供应商
+ticket = tickets["成都欢乐谷_成都欢乐谷夜场票（成人票）"]
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["携程旅行"].id,
+  current_price: 115,
+  original_price: 150,
+  stock: 400,
+  discount_info: "夜场特惠",
+  sales_count: 2580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["美团门票"].id,
+  current_price: 108,
+  original_price: 150,
+  stock: 350,
+  discount_info: "新用户立减42元",
+  sales_count: 1980,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["飞猪旅行"].id,
+  current_price: 112,
+  original_price: 150,
+  stock: 300,
+  discount_info: nil,
+  sales_count: 1580,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+ticket_suppliers_data << {
+  ticket_id: ticket.id,
+  supplier_id: suppliers["景区官方"].id,
+  current_price: 120,
+  original_price: 150,
+  stock: 500,
+  discount_info: nil,
+  sales_count: 2280,
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
 # 广州长隆野生动物世界成人票 - 4个供应商
 ticket = tickets["广州长隆野生动物世界_广州长隆野生动物世界成人票"]
 ticket_suppliers_data << {
@@ -1776,8 +1893,9 @@ ticket_suppliers_data << {
 
 # 为其他所有门票添加供应商（已有供应商的跳过）
 tickets.each do |key, ticket|
-  # 跳过已有供应商的门票（广州长隆三张票）
+  # 跳过已有供应商的门票（广州长隆、成都欢乐谷夜场票）
   next if key.start_with?('广州长隆野生动物世界')
+  next if key == '成都欢乐谷_成都欢乐谷夜场票（成人票）'
   
   # 为每张门票添加3个供应商：携程、飞猪、景区官方
   base_price = ticket.current_price
@@ -2459,6 +2577,25 @@ if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
   # 添加西湖门票（免费景区，但游船、部分景点需门票）
   xihu_tickets_data << {
     attraction_id: xihu.id,
+    name: "西湖门票（免费）",
+    ticket_type: "adult",
+    original_price: 0,
+    current_price: 0,
+    discount_info: nil,
+    requirements: "所有游客，需提前预约",
+    booking_notice: "西湖景区免费开放，但需提前1天预约；凭预约码入园；预约当日有效。",
+    refund_policy: "未使用可随时取消预约。",
+    validity_days: 1,
+    sales_count: 85600,
+    stock: 9999,
+    image_url: ImageSeedHelper.random_image_from_category(:attractions),
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+  
+  xihu_tickets_data << {
+    attraction_id: xihu.id,
     name: "西湖游船票",
     ticket_type: "adult",
     original_price: 55,
@@ -2495,7 +2632,7 @@ if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
     updated_at: timestamp
   }
   
-  puts "     ✓ 为杭州西湖添加2张门票（游船成人票、游船儿童票）"
+  puts "     ✓ 为杭州西湖添加3张门票（免费门票、游船成人票、游船儿童票）"
 end
 
 # 杭州西湖景点内项目 (V313需要：自行车租赁服务)
@@ -2549,8 +2686,25 @@ end
 
 # 为西湖门票添加供应商关联
 if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
+  free_ticket = Ticket.find_by(attraction_id: xihu.id, name: '西湖门票（免费）', data_version: 0)
   boat_ticket = Ticket.find_by(attraction_id: xihu.id, name: '西湖游船票', data_version: 0)
   child_ticket = Ticket.find_by(attraction_id: xihu.id, ticket_type: 'child', data_version: 0)
+  
+  if free_ticket
+    # 免费票供应商（景区官方预约）
+    xihu_ticket_suppliers_data << {
+      ticket_id: free_ticket.id,
+      supplier_id: 4,  # 景区官方
+      current_price: 0,
+      original_price: 0,
+      stock: 9999,
+      discount_info: nil,
+      sales_count: 85600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
   
   if boat_ticket && child_ticket
     # 游船成人票供应商
@@ -2633,7 +2787,7 @@ if (xihu = Attraction.find_by(name: '西湖', city: '杭州', data_version: 0))
       updated_at: timestamp
     }
     
-    puts "     ✓ 为西湖门票添加供应商关联（6个）"
+    puts "     ✓ 为西湖门票添加供应商关联（7个）"
   end
 end
 

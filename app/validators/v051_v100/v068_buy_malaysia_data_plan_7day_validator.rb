@@ -12,14 +12,14 @@ require_relative '../base_validator'
 #   选择: 马来西亚30天漫游月包+50元话费券，248元
 #   运营商: 中国电信 180 2712 8600
 #   流量: 12GB/月，4G/5G漫游
-#   手机号: 13500135000
+#   手机号: 13800138000
 #   总价: 248×1=248元
 # 
 # 操作步骤:
 #   1. 浏览流量包: 选择马来西亚地区
 #   2. 查看套餐: 30天(248元)、60天(448元)、90天(648元)
 #   3. 选择30天: 248元（马来西亚30天漫游月包+50元话费券）
-#   4. 填写手机号: 13500135000
+#   4. 填写手机号: 13800138000
 #   5. 计算总价: 248×1=248元
 # 
 # 评分标准:
@@ -62,12 +62,12 @@ module V051V100
     
       # 查询乘客信息（预加载）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '小明', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_phone = @passenger.phone
     
       # 返回给 Agent 的任务信息
       {
-        task: "给小明购买马来西亚流量包（30天月包）",
+        task: "给张三购买马来西亚流量包（30天月包）",
         region: @region,
         validity_days: @validity_days,
         quantity: @quantity,

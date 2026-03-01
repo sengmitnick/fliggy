@@ -62,12 +62,12 @@ module V051V100
     
       # 查询乘客信息（预加载）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '李四', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_phone = @passenger.phone
     
       # 返回给 Agent 的任务信息
       {
-        task: "给李四购买韩国流量包（30天月包）",
+        task: "给张三购买韩国流量包（30天月包）",
         region: @region,
         validity_days: @validity_days,
         quantity: @quantity,

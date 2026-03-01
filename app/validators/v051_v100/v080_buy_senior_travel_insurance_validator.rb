@@ -2,11 +2,12 @@
 
 require_relative '../base_validator'
 
-# 验证用例80: 给张建国购买境内旅游保险(65岁老人,北京出行5天,选医疗保额最高的)
+# 验证用例80: 给张建国购买境内旅游保险(65岁老人,联系人张三,5天后去北京玩5天,选医疗保额最高的)
 # 
 # 任务描述:
 #   张建国65岁(张三的父亲/小明的爷爷),5天后要去北京玩5天,帮他买个境内旅游保险,
 #   老人家要医疗保额最高的那种(老人通常需要更高保额)
+#   注意：张建国的联系人是张三(他的儿子)
 # 
 # 复杂度分析:
 #   1. 需要搜索"境内旅游"类型的保险产品
@@ -23,7 +24,8 @@ require_relative '../base_validator'
 #   - 出行开始时间正确(5天后)(5分)
 #   - 保障天数正确(5天)(5分)
 #   - 被保险人信息正确(张建国)(5分)
-#   - 选择了医疗保额最高的产品 (30分)
+#   - 联系人信息正确(张三)(5分)
+#   - 选择了医疗保额最高的产品 (25分)
 #   - 订单价格计算正确 (10分)
 # 
 # 使用方法:
@@ -38,8 +40,8 @@ module V051V100
   class V080BuySeniorTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v080_buy_senior_travel_insurance_validator'
     self.task_id = 'b0be2515-74d7-4a7d-823d-cac17397ff55'
-    self.title = '给张建国购买境内旅游保险(65岁老人,北京出行5天,选医疗保额最高的)'
-    self.description = '给张建国购买境内旅游保险(65岁老人,北京出行5天,选医疗保额最高的)'
+    self.title = '给张建国购买境内旅游保险(65岁老人,联系人张三,5天后去北京玩5天,选医疗保额最高的)'
+    self.description = '给张建国购买境内旅游保险(65岁老人,联系人张三,5天后去北京玩5天,选医疗保额最高的)。注意：张建国的联系人是张三(他的儿子)'
     self.timeout_seconds = 240
   
     # 准备阶段:设置任务参数
@@ -65,11 +67,10 @@ module V051V100
       @expected_contact_phone = @zhangsan.phone
     
       # 查找境内旅游保险产品(注意:查询基线数据 data_version=0)
-      # 只筛选官方精选产品(official_select: true,前端首页显示)
+      # 包含所有产品(包括进阶款等非官方精选产品)
       # 排除运动保险(有 sports_injury 保障的产品)
       all_domestic_products = InsuranceProduct.where(
         product_type: @product_type,
-        official_select: true,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
       
@@ -92,7 +93,7 @@ module V051V100
         insured_name: @expected_insured_name,
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
-        hint: "老年人旅游风险较高,建议选择医疗保额(coverage_details.medical)最高的保险产品。系统中官方精选有多款产品,请对比医疗保额后选择",
+        hint: "老年人旅游风险较高,建议选择医疗保额(coverage_details.medical)最高的保险产品。系统中有多款产品(包括基础款、尊享款、进阶款等),请对比医疗保额后选择",
         available_products_count: @available_products.count,
         note: "老人旅游保险通常要求更高的医疗保障,部分产品可能有年龄限制"
       }
@@ -113,7 +114,7 @@ module V051V100
       return unless @insurance_order # 如果没有订单,后续断言无法继续
     
       # 断言2: 保险类型正确(核心实体)
-      add_assertion "保险类型正确(境内旅游)", weight: 18 do
+      add_assertion "保险类型正确(境内旅游)", weight: 20 do
         actual_type = @insurance_order.insurance_product.product_type
         expect(actual_type).to eq(@product_type),
           "保险类型错误。期望: #{@product_type}(境内旅游),实际: #{actual_type}"
@@ -159,34 +160,28 @@ module V051V100
       
       # 断言7: 联系人信息正确（老人的联系人应该是儿子张三）
       add_assertion "联系人信息正确（老人的联系人应该是儿子张三）", weight: 5 do
-        # 注意：InsuranceOrder 没有单独的 contact_name/contact_phone 字段
-        # 对于老人保险，联系人通常存储在 insured_persons 中或作为紧急联系人
-        # 这里验证被保险人列表中是否包含家属联系人信息
         insured_persons = @insurance_order.insured_persons || []
+        expect(insured_persons).not_to be_empty, "未找到投保人信息"
         
-        # 检查是否有张三作为联系人（老人保险通常需要家属联系人）
-        # 方式1: 检查是否在投保人列表中有张三的信息
-        has_zhangsan_contact = insured_persons.any? { |p| (p['name'] || p[:name]) == @expected_contact_name }
+        # 检查第一个被保险人的紧急联系人字段
+        first_person = insured_persons.first
+        emergency_contact_name = first_person['emergency_contact_name']
+        emergency_contact_phone = first_person['emergency_contact_phone']
         
-        # 方式2: 如果只有张建国，验证是否有紧急联系人字段（emergency_contact）
-        has_emergency_contact = insured_persons.any? do |p|
-          p['emergency_contact_name'] == @expected_contact_name ||
-          p['emergency_contact_phone'] == @expected_contact_phone
-        end
+        # 验证紧急联系人姓名
+        expect(emergency_contact_name).to eq(@expected_contact_name),
+          "未找到有效的紧急联系人信息。期望联系人: #{@expected_contact_name}，实际: #{emergency_contact_name || '未填写'}"
         
-        has_valid_contact = has_zhangsan_contact || has_emergency_contact
-        
-        expect(has_valid_contact).to be_truthy,
-          "未找到有效的联系人信息。老人保险应包含家属联系人（#{@expected_contact_name}），" \
-          "实际被保险人: #{insured_persons.map { |p| p['name'] || p[:name] }.compact.join('、')}"
+        # 验证紧急联系人电话
+        expect(emergency_contact_phone).to eq(@expected_contact_phone),
+          "紧急联系人电话错误。期望: #{@expected_contact_phone}，实际: #{emergency_contact_phone || '未填写'}"
       end
     
       # 断言8: 选择了医疗保额最高的产品(核心评分项 - 业务逻辑)
-      add_assertion "选择了医疗保额最高的产品", weight: 27 do
-        # 获取所有官方精选的境内旅游保险产品(排除运动保险)
+      add_assertion "选择了医疗保额最高的产品", weight: 25 do
+        # 获取所有境内旅游保险产品(包括进阶款等,排除运动保险)
         all_domestic_products = InsuranceProduct.where(
           product_type: @product_type,
-          official_select: true,
           data_version: 0
         ).where('min_days <= ? AND max_days >= ?', @days, @days)
         
@@ -252,51 +247,32 @@ module V051V100
       }
     end
   
-    # 从状态恢复实例变量
+    # 从状态数据恢复
     def restore_from_state(data)
       @product_type = data['product_type']
       @destination = data['destination']
       @days = data['days']
       @quantity = data['quantity']
       @age = data['age']
+      @start_date = Date.parse(data['start_date']) if data['start_date']
+      @end_date = Date.parse(data['end_date']) if data['end_date']
       @highest_medical = data['highest_medical']
       @expected_insured_name = data['expected_insured_name']
       @expected_insured_id_number = data['expected_insured_id_number']
       @expected_contact_name = data['expected_contact_name']
       @expected_contact_phone = data['expected_contact_phone']
-      @start_date = data['start_date'] ? Date.parse(data['start_date']) : nil
-      @end_date = data['end_date'] ? Date.parse(data['end_date']) : nil
-    
-      # 重新加载 demo_user 的出行人信息
-      user = User.find_by(email: 'demo@travel01.com', data_version: 0)
-      if user
-        @zhangjianguo = user.passengers.find_by(name: '张建国', data_version: 0)
-        @zhangsan = user.passengers.find_by(name: '张三', data_version: 0)
-      end
-      
-      # 重新加载可用产品列表(只筛选官方精选,排除运动保险)
-      all_domestic_products = InsuranceProduct.where(
-        product_type: @product_type,
-        official_select: true,
-        data_version: 0
-      ).where('min_days <= ? AND max_days >= ?', @days, @days)
-      
-      @available_products = all_domestic_products.select do |p|
-        !p.coverage_details.key?('sports_injury')
-      end
     end
   
-    # 模拟 AI Agent 操作:为65岁老人购买医疗保额最高的境内旅游保险
+    # 模拟 Agent 行为的实现
     def simulate
-      # 1. 查找测试用户和出行人信息(数据包中已创建)
+      # 0. 加载用户和联系人信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
-      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)  # 儿子作为紧急联系人
+      zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
     
-      # 2. 查找官方精选的境内旅游保险产品(排除运动保险)
+      # 1. 搜索所有境内旅游保险产品(包括进阶款等,排除运动保险)
       all_domestic_products = InsuranceProduct.where(
-        product_type: @product_type,
-        official_select: true,
+        product_type: 'domestic',
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
       
@@ -305,20 +281,21 @@ module V051V100
         !p.coverage_details.key?('sports_injury')
       end
     
-      raise "未找到境内旅游保险产品" if available_products.empty?
-    
-      # 3. 选择医疗保额最高的产品(如果有多个,选择价格最低的)
+      # 2. 找到医疗保额最高的产品
       highest_medical = available_products.map { |p| p.coverage_details['medical'] || 0 }.max
-      highest_products = available_products.select { |p| (p.coverage_details['medical'] || 0) == highest_medical }
-      highest_medical_product = highest_products.min_by(&:price_per_day)
+      highest_products = available_products.select do |p|
+        (p.coverage_details['medical'] || 0) == highest_medical
+      end
     
-      raise "未找到可用的保险产品" unless highest_medical_product
+      # 3. 选择第一个医疗保额最高的产品
+      selected_product = highest_products.first
+      raise "未找到符合条件的保险产品" unless selected_product
     
-      # 4. 计算价格(考虑城市差异化定价)
+      # 4. 计算价格
       city = City.find_by(name: @destination, data_version: 0)
-      city_id = city&.id
-      unit_price = highest_medical_product.calculate_price(@days, city_id: city_id)
-      
+      unit_price = selected_product.calculate_price(@days, city_id: city&.id)
+      total_price = unit_price * @quantity
+    
       # 5. 准备投保人信息(张建国,65岁) + 紧急联系人(张三)
       insured_persons_data = [
         { 
@@ -329,44 +306,22 @@ module V051V100
         }
       ]
     
-      # 6. 创建保险订单
-      insurance_order = InsuranceOrder.create!(
-        user_id: user.id,
-        insurance_product_id: highest_medical_product.id,
-        source: 'standalone',  # 单独购买
+      # 6. 创建订单
+      order = InsuranceOrder.create!(
+        user: user,
+        insurance_product: selected_product,
+        destination: @destination,
         start_date: @start_date,
         end_date: @end_date,
         days: @days,
-        destination: @destination,
-        destination_type: 'domestic',
+        quantity: @quantity,
         insured_persons: insured_persons_data,
         unit_price: unit_price,
-        quantity: @quantity,
-        total_price: unit_price * @quantity,
-        status: 'pending',
+        total_price: total_price,
         data_version: @data_version
       )
     
-      # 返回操作信息
-      {
-        action: 'create_insurance_order',
-        order_id: insurance_order.id,
-        insurance_product_name: highest_medical_product.name,
-        company: highest_medical_product.company,
-        product_type: highest_medical_product.product_type,
-        medical_coverage: highest_medical_product.coverage_details['medical'],
-        price_per_day: highest_medical_product.price_per_day,
-        days: @days,
-        quantity: @quantity,
-        insured_person: insured_persons_data.first,
-        unit_price: unit_price,
-        total_price: insurance_order.total_price,
-        destination: @destination,
-        age: @age,
-        start_date: @start_date.to_s,
-        user_email: user.email,
-        emergency_contact: { name: zhangsan.name, phone: zhangsan.phone }  # 返回联系人信息
-      }
+      order
     end
-    end
+  end
 end

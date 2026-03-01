@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例69: 张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）
+# 验证用例69: 给张三一家预订后天上海迪士尼门票（张三、王芳、小明，2成人+1儿童，最便宜）
 # 
 # 任务描述:
 #   Agent 需要为张三一家预订后天的上海迪士尼乐园门票。
@@ -11,21 +11,25 @@ require_relative '../base_validator'
 #   - 1个成人票订单（数量2张，游客：张三、王芳）
 #   - 1个儿童票订单（数量1张，游客：小明）
 #   并选择最便宜的供应商组合
+#   
+#   **注意：上海迪士尼有平日票和周末票之分，需要根据访问日期选择正确的票种**
 # 
 # 复杂度分析:
 #   1. 需要搜索"上海迪士尼乐园"景点
-#   2. 需要理解系统不支持家庭套票，必须分别预订
-#   3. 需要创建2个独立订单（成人票订单 + 儿童票订单）
-#   4. 需要对比供应商价格，选择最优组合
-#   5. 需要填写正确的游玩日期（后天）
+#   2. 需要判断访问日期是平日还是周末，选择对应票种
+#   3. 需要理解系统不支持家庭套票，必须分别预订
+#   4. 需要创建2个独立订单（成人票订单 + 儿童票订单）
+#   5. 需要对比供应商价格，选择最优组合
+#   6. 需要填写正确的游玩日期（后天）
 #   ❌ 不能一次性提供：需要先搜索→识别票种→对比价格→创建2个订单
 # 
 # 评分标准:
-#   - 创建了2个订单（成人票+儿童票）(20分)
+#   - 创建了2个订单（成人票+儿童票）(15分)
 #   - 景点正确（上海迪士尼乐园）(15分)
-#   - 成人票数量正确（2张）(15分)
-#   - 儿童票数量正确（1张）(15分)
+#   - 成人票数量正确（2张）(10分)
+#   - 儿童票数量正确（1张）(10分)
 #   - 游玩日期正确（后天）(10分)
+#   - 游客名字正确（张三、王芳、小明）(15分)
 #   - 选择了最优惠的供应商组合 (25分)
 # 
 # 使用方法:
@@ -40,8 +44,8 @@ module V051V100
   class V069BookShanghaiDisneyFamilyTicketsValidator < BaseValidator
     self.validator_id = 'v069_book_shanghai_disney_family_tickets_validator'
     self.task_id = '01352bcb-f7ff-4891-a072-114e6565b87d'
-    self.title = '张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）'
-    self.description = '张三一家预订后天上海迪士尼门票（2成人+1儿童，最便宜）'
+    self.title = '给张三一家预订后天上海迪士尼门票（张三、王芳、小明，2成人+1儿童，最便宜）'
+    self.description = '给张三一家预订后天上海迪士尼门票（张三、王芳、小明，2成人+1儿童，最便宜）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -51,6 +55,10 @@ module V051V100
       @visit_date = Date.current + 2.days  # 后天
       @adult_count = 2  # 2个成人
       @child_count = 1  # 1个儿童
+      
+      # 判断访问日期是平日还是周末（周六、周日为周末）
+      @is_weekend = @visit_date.saturday? || @visit_date.sunday?
+      @date_type = @is_weekend ? '周末' : '平日'
     
       # 查找目标景点（注意：查询基线数据 data_version=0）
       @attraction = Attraction.find_by(name: @attraction_name, data_version: 0)
@@ -75,18 +83,18 @@ module V051V100
       }
       @expected_passenger_names = [@zhangsan.name, @wangfang.name, @xiaoming.name]
     
-      # 查找成人票和儿童票
+      # 查找成人票和儿童票（根据平日/周末筛选）
       @adult_tickets = Ticket.where(
         attraction_id: @attraction.id,
         ticket_type: 'adult',
         data_version: 0
-      )
+      ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{@date_type}）%")
     
       @child_tickets = Ticket.where(
         attraction_id: @attraction.id,
         ticket_type: 'child',
         data_version: 0
-      )
+      ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{@date_type}）%")
     
       # 计算最优方案
       calculate_best_combination
@@ -98,6 +106,8 @@ module V051V100
         attraction_name: @attraction_name,
         visit_date: @visit_date.to_s,
         date_description: "后天（#{@visit_date.strftime('%Y年%m月%d日')}）",
+        date_type: @date_type,
+        is_weekend: @is_weekend,
         adult_count: @adult_count,
         child_count: @child_count,
         hint: "系统不支持家庭套票，需要分别购买：2张成人票（游客：张三、王芳）和1张儿童票（游客：小明）。请对比供应商价格后选择最优惠的组合方案",
@@ -109,7 +119,7 @@ module V051V100
     # 验证阶段：检查订单是否符合要求
     def verify
       # 断言1: 创建了成人票和儿童票订单
-      add_assertion "创建了成人票和儿童票订单", weight: 20 do
+      add_assertion "创建了成人票和儿童票订单", weight: 15 do
         # 查询当前会话的订单（按景点和 data_version 筛选）
         all_orders = TicketOrder
           .joins(ticket: :attraction)
@@ -126,6 +136,13 @@ module V051V100
       
         expect(@all_ticket_orders).not_to be_empty,
           "未找到成人票或儿童票订单（找到#{all_orders.size}个订单，但都不是成人票/儿童票）"
+      
+        # 验证票种类型（平日票或周末票）
+        @all_ticket_orders.each do |order|
+          ticket_name = order.ticket.name
+          expect(ticket_name).to include(@date_type),
+            "订单ID: #{order.id}, 票种类型错误。期望包含: #{@date_type}, 实际票名: #{ticket_name}"
+        end
       
         # 分离成人票和儿童票（不管日期）
         all_adult_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
@@ -166,7 +183,7 @@ module V051V100
       end
     
       # 断言3: 成人票数量正确（2张）
-      add_assertion "成人票总数量正确（2张）", weight: 15 do
+      add_assertion "成人票总数量正确（2张）", weight: 10 do
         total_adult_quantity = @adult_orders.sum(&:quantity)
       
         expect(total_adult_quantity).to eq(@adult_count),
@@ -174,7 +191,7 @@ module V051V100
       end
     
       # 断言4: 儿童票数量正确（1张）
-      add_assertion "儿童票总数量正确（1张）", weight: 15 do
+      add_assertion "儿童票总数量正确（1张）", weight: 10 do
         total_child_quantity = @child_orders.sum(&:quantity)
       
         expect(total_child_quantity).to eq(@child_count),
@@ -189,7 +206,24 @@ module V051V100
         end
       end
     
-      # 断言6: 选择了最优惠的供应商组合
+      # 断言6: 游客名字正确（张三、王芳、小明）
+      add_assertion "游客名字正确（张三、王芳、小明）", weight: 15 do
+        # 从所有订单中提取 passenger_ids（JSON格式）
+        all_passenger_ids = @all_ticket_orders.flat_map { |o| o.passenger_ids || [] }.compact.uniq
+        
+        expect(all_passenger_ids).not_to be_empty, "订单中未找到任何游客ID"
+        
+        # 查询实际的游客信息
+        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        actual_passengers = user.passengers.where(id: all_passenger_ids, data_version: 0).to_a
+        actual_names = actual_passengers.map(&:name).sort
+        
+        # 验证游客名字
+        expect(actual_names).to match_array(@expected_passenger_names.sort),
+          "游客名字错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{actual_names.join('、')}"
+      end
+    
+      # 断言7: 选择了最优惠的供应商组合
       add_assertion "选择了最优惠的供应商组合（总价#{@best_total_price}元）", weight: 25 do
         # 计算实际总价（直接使用 order.total_price，避免 TicketSupplier 重复数据问题）
         actual_total = @all_ticket_orders.sum { |o| o.total_price.to_f }
@@ -247,6 +281,8 @@ module V051V100
       {
         attraction_name: @attraction_name,
         visit_date: @visit_date.to_s,
+        is_weekend: @is_weekend,
+        date_type: @date_type,
         adult_count: @adult_count,
         child_count: @child_count,
         attraction_id: @attraction&.id,
@@ -267,6 +303,8 @@ module V051V100
     def restore_from_state(data)
       @attraction_name = data['attraction_name']
       @visit_date = Date.parse(data['visit_date'])
+      @is_weekend = data['is_weekend']
+      @date_type = data['date_type']
       @adult_count = data['adult_count']
       @child_count = data['child_count']
       @best_total_price = data['best_total_price']
@@ -282,12 +320,12 @@ module V051V100
           attraction_id: @attraction.id,
           ticket_type: 'adult',
           data_version: 0
-        )
+        ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{@date_type}）%")
         @child_tickets = Ticket.where(
           attraction_id: @attraction.id,
           ticket_type: 'child',
           data_version: 0
-        )
+        ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{@date_type}）%")
       end
       
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -311,23 +349,28 @@ module V051V100
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       attraction = Attraction.find_by!(name: @attraction_name, data_version: 0)
       
-      # 查询成人票和儿童票
+      # 判断访问日期是平日还是周末
+      is_weekend = @visit_date.saturday? || @visit_date.sunday?
+      date_type = is_weekend ? '周末' : '平日'
+      
+      # 查询成人票和儿童票（根据平日/周末筛选）
       adult_tickets = Ticket.where(
         attraction_id: attraction.id,
         ticket_type: 'adult',
         data_version: 0
-      )
+      ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{date_type}）%")
+      
       child_tickets = Ticket.where(
         attraction_id: attraction.id,
         ticket_type: 'child',
         data_version: 0
-      )
+      ).where("name LIKE ?", "%上海迪士尼乐园1日票（#{date_type}）%")
       
       # 找最便宜的成人票供应商
       cheapest_adult_supplier = nil
       min_adult_price = Float::INFINITY
       
-      puts "\n[DEBUG simulate] 查找最便宜成人票..."
+      puts "\n[DEBUG simulate] 查找最便宜成人票（#{date_type}）..."
       adult_tickets.each do |ticket|
         puts "  Ticket #{ticket.id} (#{ticket.name}):"
         ticket.ticket_suppliers.where(data_version: 0).each do |ts|
@@ -377,7 +420,7 @@ module V051V100
         quantity: @adult_count,
         total_price: cheapest_adult_supplier.current_price * @adult_count,
         status: 'pending',
-        notes: '成人票订单（张三、王芳）',
+        notes: "成人票订单（张三、王芳）",
         data_version: @data_version
       )
       
@@ -394,7 +437,7 @@ module V051V100
         quantity: @child_count,
         total_price: cheapest_child_supplier.current_price * @child_count,
         status: 'pending',
-        notes: '儿童票订单（小明）',
+        notes: "儿童票订单（小明）",
         data_version: @data_version
       )
       

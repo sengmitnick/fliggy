@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例70: 张三一家预订明天北京欢乐谷门票（2成人+1儿童）
+# 验证用例70: 给张三一家预订明天北京欢乐谷门票（张三、王芳、小明，2成人+1儿童）
 # 
 # 任务描述:
 #   Agent 需要为张三一家预订明天的北京欢乐谷门票。
@@ -23,7 +23,8 @@ require_relative '../base_validator'
 #   - 成人票数量正确（2张）(15分)
 #   - 儿童票数量正确（1张）(15分)
 #   - 游玩日期正确（明天）(10分)
-#   - 联系人和联系电话正确 (25分)
+#   - 联系电话正确（张三或王芳的电话）(10分)
+#   - 游客名字正确（张三、王芳、小明）(15分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -37,8 +38,8 @@ module V051V100
   class V070BookBeijingHappyValleyFamilyTicketsValidator < BaseValidator
     self.validator_id = 'v070_book_beijing_happy_valley_family_tickets_validator'
     self.task_id = 'c6b1fc3d-40ad-47b8-a6db-adf4d8cb6210'
-    self.title = '张三一家预订明天北京欢乐谷门票（2成人+1儿童）'
-    self.description = '张三一家预订明天北京欢乐谷门票（2成人+1儿童）'
+    self.title = '给张三一家预订明天北京欢乐谷门票（张三、王芳、小明，2成人+1儿童）'
+    self.description = '给张三一家预订明天北京欢乐谷门票（张三、王芳、小明，2成人+1儿童）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -100,6 +101,13 @@ module V051V100
         @all_ticket_orders = all_orders.select { |o| ['adult', 'child'].include?(o.ticket.ticket_type) }
         expect(@all_ticket_orders).not_to be_empty, "未找到成人票或儿童票订单"
       
+        # 验证票种名称（确保是北京欢乐谷的票）
+        @all_ticket_orders.each do |order|
+          ticket_name = order.ticket.name
+          expect(ticket_name).to include(@attraction_name),
+            "订单ID: #{order.id}, 票种名称错误。期望包含: #{@attraction_name}, 实际票名: #{ticket_name}"
+        end
+      
         all_adult_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'adult' }
         all_child_orders = @all_ticket_orders.select { |o| o.ticket.ticket_type == 'child' }
       
@@ -157,7 +165,7 @@ module V051V100
       end
     
       # 断言6: 联系电话正确
-      add_assertion "联系电话正确（张三或王芳的电话）", weight: 25 do
+      add_assertion "联系电话正确（张三或王芳的电话）", weight: 10 do
         @all_ticket_orders.each do |order|
           actual_contact_phone = order.contact_phone
         
@@ -166,6 +174,23 @@ module V051V100
           expect(valid_phones).to include(actual_contact_phone),
             "订单ID: #{order.id}, 联系电话错误。期望其中之一: #{valid_phones.join('或')}, 实际: #{actual_contact_phone}"
         end
+      end
+    
+      # 断言7: 游客名字正确（张三、王芳、小明）
+      add_assertion "游客名字正确（张三、王芳、小明）", weight: 15 do
+        # 从所有订单中提取 passenger_ids（JSON格式）
+        all_passenger_ids = @all_ticket_orders.flat_map { |o| o.passenger_ids || [] }.compact.uniq
+        
+        expect(all_passenger_ids).not_to be_empty, "订单中未找到任何游客ID"
+        
+        # 查询实际的游客信息
+        user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+        actual_passengers = user.passengers.where(id: all_passenger_ids, data_version: 0).to_a
+        actual_names = actual_passengers.map(&:name).sort
+        
+        # 验证游客名字
+        expect(actual_names).to match_array(@expected_passenger_names.sort),
+          "游客名字错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{actual_names.join('、')}"
       end
     end
 

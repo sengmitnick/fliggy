@@ -243,7 +243,7 @@
       </div>
       <div class="px-4 py-4 space-y-4">
         <!-- No Insurance Option -->
-        <label class="flex items-start gap-3 cursor-pointer">
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" onclick="updateTotalPrice()">
           <input type="radio" name="insurance_type" value="none" checked 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="0">
@@ -274,7 +274,7 @@
         </label>
 
         <!-- Basic Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5">
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" onclick="updateTotalPrice()">
           <input type="radio" name="insurance_type" value="basic" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="9">
@@ -308,7 +308,7 @@
         </label>
 
         <!-- Premium Insurance -->
-        <label class="flex items-start gap-3 cursor-pointer p-3 border-2 border-accent rounded-lg hover:bg-accent/5">
+        <label class="flex items-start gap-3 cursor-pointer p-3 border border-border rounded-lg hover:border-accent hover:bg-accent/5" onclick="updateTotalPrice()">
           <input type="radio" name="insurance_type" value="premium" 
                  class="mt-1 w-5 h-5 text-accent border-border focus:ring-accent" 
                  data-price="15">

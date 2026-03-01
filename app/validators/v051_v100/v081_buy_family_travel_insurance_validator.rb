@@ -2,29 +2,30 @@
 
 require_relative '../base_validator'
 
-# 验证用例81: 给张三购买家庭旅游保险（三亚出行，3人，7天）
+# 验证用例81: 给张三购买旅游保险（出行人：张三/王芳/小明，目的地：三亚，出行日期：7天后，保障期：7天）
 # 
 # 任务描述:
 #   Agent 需要为家庭（2成人+1儿童）购买三亚出行的旅游保险，
-#   选择适合亲子游场景的境内旅游保险产品
+#   选择符合保障期限的境内旅游保险产品
 # 
 # 复杂度分析:
 #   1. 需要搜索"境内旅游"类型的保险产品
-#   2. 需要识别适合亲子游场景的产品（scenes包含'亲子游'）
+#   2. 需要识别符合保障期限的产品（7天）
 #   3. 需要理解家庭保险需要多人投保（3人）
 #   4. 需要对比不同产品的价格和保障范围
 #   5. 需要填写3人的投保信息
-#   ❌ 不能一次性提供：需要先搜索→筛选亲子游产品→对比价格→购买
+#   ❌ 不能一次性提供：需要先搜索→筛选符合保障期限的产品→对比价格→购买
 # 
 # 评分标准:
 #   - 订单已创建 (20分)
-#   - 保险类型正确（境内旅游）(10分)
-#   - 目的地正确（三亚）(10分)
-#   - 出行开始时间正确（7天后）(10分)
-#   - 保障天数正确（7天）(10分)
-#   - 人数正确（3人）(10分)
-#   - 产品适合亲子游场景 (20分)
-#   - 订单价格计算正确 (10分)
+#   - 保险类型正确（境内旅游）(7分)
+#   - 目的地正确（三亚）(7分)
+#   - 出行开始时间正确（7天后）(7分)
+#   - 保障天数正确（7天）(7分)
+#   - 人数正确（3人）(7分)
+#   - 被保险人信息正确 (8分)
+#   - 联系人信息正确 (7分)
+#   - 订单价格计算正确 (30分)
 # 
 # 使用方法:
 #   # 准备阶段
@@ -38,8 +39,8 @@ module V051V100
   class V081BuyFamilyTravelInsuranceValidator < BaseValidator
     self.validator_id = 'v081_buy_family_travel_insurance_validator'
     self.task_id = 'ba8f8cf7-8220-4b08-8c2f-23b58edb3926'
-    self.title = '给张三购买家庭旅游保险（三亚出行，3人，7天）'
-    self.description = '购买家庭旅游保险（三亚出行，3人，7天）'
+    self.title = '给张三购买旅游保险（出行人：张三/王芳/小明，目的地：三亚，出行日期：7天后，保障期：7天）'
+    self.description = '为张三一家（出行人：张三、王芳、小明，共3人）购买三亚旅游保险，出行开始日期为7天后，保障期7天'
     self.timeout_seconds = 240
   
     # 准备阶段：设置任务参数
@@ -69,12 +70,12 @@ module V051V100
         @wangfang.name => @wangfang.phone
       }
     
-      # 查找适合亲子游的境内旅游保险产品（注意：查询基线数据 data_version=0）
+      # 查找符合保障期限的境内旅游保险产品（注意：查询基线数据 data_version=0）
       @available_products = InsuranceProduct.where(
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
     
       # 注意：保险产品支持城市差异化定价
       # 例如：三亚地区的保险价格可能高于其他城市（7元/天 vs 默认5元/天）
@@ -82,7 +83,7 @@ module V051V100
     
       # 返回给 Agent 的任务信息
       {
-        task: "请为张三一家（张三、王芳、小明）购买#{@destination}出行的旅游保险（7天后出发，保障期#{@days}天，共#{@quantity}人），选择适合亲子游场景的产品",
+        task: "请为张三一家（张三、王芳、小明）购买#{@destination}出行的旅游保险（7天后出发，保障期#{@days}天，共#{@quantity}人）",
         product_type: "境内旅游",
         destination: @destination,
         days: @days,
@@ -91,9 +92,9 @@ module V051V100
         start_date: @start_date.to_s,
         end_date: @end_date.to_s,
         insured_persons: @expected_insured_names,
-        hint: "三亚是热门的亲子游目的地，请选择适合亲子游场景（scenes包含'亲子游'）的保险产品",
+        hint: "三亚是热门的家庭旅游目的地，请选择适合保障期限的保险产品",
         available_products_count: @available_products.count,
-        note: "家庭保险支持多人共同投保，适合亲子游的产品保障范围更适合家庭出行场景"
+        note: "家庭保险支持多人共同投保，保障范围应适合家庭出行场景"
       }
     end
   
@@ -196,18 +197,8 @@ module V051V100
           "实际被保险人: #{insured_persons.map { |p| p['name'] || p[:name] }.join('、')}"
       end
     
-      # 断言9: 产品适合亲子游场景（核心评分项）
-      add_assertion "产品适合亲子游场景", weight: 20 do
-        scenes = @insurance_order.insurance_product.scenes || []
-        has_scene = scenes.include?(@scene)
-      
-        expect(has_scene).to be_truthy,
-          "所选产品不适合亲子游场景。期望: scenes包含'#{@scene}', 实际: scenes=#{scenes.inspect}。" \
-          "亲子游场景的保险产品保障范围更适合家庭出行，包括海岛度假、户外活动等常见家庭旅游场景"
-      end
-    
-      # 断言10: 订单价格计算正确
-      add_assertion "订单价格计算正确", weight: 10 do
+      # 断言9: 订单价格计算正确（增加权重，因为删除了场景验证）
+      add_assertion "订单价格计算正确", weight: 30 do
         # 验证 total_price = unit_price × quantity（订单已保存正确的unit_price，包含城市差异化定价）
         expected_total = @insurance_order.unit_price * @insurance_order.quantity
         actual_total = @insurance_order.total_price
@@ -255,7 +246,7 @@ module V051V100
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
       
       # 重新加载被保险人数据
       user = User.find_by(email: 'demo@travel01.com', data_version: 0)
@@ -279,16 +270,16 @@ module V051V100
       # 3. 查找三亚相关的城市配置（用于差异化定价）
       sanya_city = City.find_by(name: @destination, data_version: 0)
     
-      # 4. 查找适合亲子游的境内旅游保险产品
+      # 4. 查找符合保障期限的境内旅游保险产品
       available_products = InsuranceProduct.where(
         product_type: @product_type,
         data_version: 0
       ).where('min_days <= ? AND max_days >= ?', @days, @days)
-       .select { |p| p.scenes&.include?(@scene) }
+       .to_a
     
-      raise "未找到适合亲子游的保险产品" if available_products.empty?
+      raise "未找到符合保障期限的保险产品" if available_products.empty?
     
-      # 5. 选择第一个适合亲子游的产品
+      # 5. 选择第一个可用产品
       selected_product = available_products.first
     
       raise "未找到可用的保险产品" unless selected_product
