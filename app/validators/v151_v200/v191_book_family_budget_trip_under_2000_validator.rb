@@ -44,12 +44,11 @@ module V151V200
         .select { |t| t.departure_time.to_date == @travel_date }
         .to_a
       
-      expect(@available_trains).not_to be_empty,
-        "数据包缺少#{@departure_city}→#{@arrival_city}的火车（#{@travel_date}）"
+      raise "数据包缺少#{@departure_city}→#{@arrival_city}的火车（#{@travel_date})" if @available_trains.empty?
       
       # 查找经济型酒店
       @available_hotels = Hotel.where(city: @arrival_city, data_version: 0).order(price: :asc).limit(20).to_a
-      expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
+      raise "数据包缺少#{@arrival_city}的酒店" if @available_hotels.empty?
       
       {
         task: "请为#{@passenger.name}一家2大1小家庭预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的行程（交通+住宿1晚），总预算≤#{@max_budget}元",
@@ -118,7 +117,7 @@ module V151V200
         
         # 检查是否包含主要家庭成员（至少张三或王芳）
         has_family_member = @expected_passengers.any? { |name| passenger_names.include?(name) }
-        expect(has_family_member).to be true,
+        expect(has_family_member).to eq(true),
           "乘客信息错误。期望包含: #{@expected_passengers.join('、')}，实际: #{passenger_names.join('、')}"
       end
       

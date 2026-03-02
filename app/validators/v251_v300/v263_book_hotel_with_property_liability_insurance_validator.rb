@@ -115,8 +115,12 @@ module V251V300
         insured_persons = @insurance_order.insured_persons || []
         
         expect(insured_persons).not_to be_empty, "保险订单缺少投保人信息"
-        expect(insured_persons).to include(guest_name),
-          "投保人姓名与入住人不一致。入住人: #{guest_name}, 投保人: #{insured_persons.join(', ')}"
+        
+        # 从 Hash 数组中提取 name 字段
+        insured_names = insured_persons.map { |p| p.is_a?(Hash) ? (p['name'] || p[:name]) : p.to_s }
+        
+        expect(insured_names).to include(guest_name),
+          "投保人姓名与入住人不一致。入住人: #{guest_name}, 投保人: #{insured_names.join(', ')}"
       end
       
       add_assertion "保险起止日期覆盖住宿期间", weight: 10 do

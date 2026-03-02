@@ -24,7 +24,7 @@ module V151V200
     
     def prepare
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇')
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
@@ -144,7 +144,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      passenger = user.passengers.find_by!(name: '吴勇')  # 移除 data_version: 0
       
       # 选择火车
       train = @available_trains.min_by(&:price_second_class)
@@ -206,7 +206,7 @@ module V151V200
     
     def restore_from_state(data)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '吴勇', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '吴勇')  # 移除 data_version: 0
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       

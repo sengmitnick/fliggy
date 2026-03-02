@@ -30,7 +30,7 @@ module V101V150
       expected_days = 7
       expected_nights = 6
       expected_cabin_category = 'interior'
-      expected_month = 2
+      expected_month = 3
       adult_count = 2
 
       # 预查询张三的乘客信息（避免 simulate 中查询 data_version: 0）
@@ -57,7 +57,7 @@ module V101V150
       expected_days = 7
       expected_nights = 6
       expected_cabin_category = 'interior'
-      expected_month = 2
+      expected_month = 3
       adult_count = 2
 
       # 预查询张三的乘客信息
@@ -114,7 +114,7 @@ module V101V150
       expected_days = 7
       expected_nights = 6
       expected_cabin_category = 'interior'
-      expected_month = 2
+      expected_month = 3
       adult_count = 2
 
       add_assertion "订单已创建", weight: 20 do
@@ -164,7 +164,7 @@ module V101V150
           "行程晚数错误。期望: #{expected_nights}晚，实际: #{actual_nights}晚"
       end
       
-      add_assertion "出发月份正确（2月份）", weight: 10 do
+      add_assertion "出发月份正确（3月份）", weight: 10 do
         sailing = @order.cruise_product.cruise_sailing
         actual_month = sailing.departure_date.month
         

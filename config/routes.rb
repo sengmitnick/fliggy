@@ -506,7 +506,9 @@ Rails.application.routes.draw do
     member do
       patch :cancel
       patch :pay
+      patch :update_additional_service
       get :success
+      get :detail
     end
   end
   # End routes for bookings

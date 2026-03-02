@@ -41,13 +41,15 @@ module V301V350
       @seat_class = "一等座"
       @train_number = "Z50"
       
-      # 查找指定车次（北京到成都的列车）
-      @train = Train.find_by!(
+      # 查找指定车次（北京到成都的列车，60天后出发）
+      @train = Train.where(
         train_number: @train_number,
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         data_version: 0
-      )
+      ).find { |t| t.departure_time.to_date == @departure_date }
+      
+      raise "数据包缺少#{@departure_date}从#{@departure_city}到#{@arrival_city}的#{@train_number}列车" if @train.nil?
 
       {
         task: "请为张三预订#{@departure_date.strftime('%Y年%m月%d日')}（60天后）从北京到成都的火车票，车次#{@train_number}，座位类型为一等座。",

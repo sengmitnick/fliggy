@@ -28,6 +28,7 @@ module V201V250
       @departure_city = '广州'
       @arrival_city = '深圳'
       @max_budget = 300
+      @travel_date = Date.current + 1.day  # 明天出行
       
       # 查询demo_user乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -40,14 +41,14 @@ module V201V250
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .where(data_version: 0)
-        .order(price_second_class: :asc)
+        .select { |t| t.departure_time.to_date == @travel_date }  # 只选择指定日期的火车
+        .sort_by(&:price_second_class)
       
       @available_hotels = Hotel.where(city: @arrival_city, data_version: 0)
         .order(price: :asc)
       
       raise "未找到火车或酒店" if @available_trains.empty? || @available_hotels.empty?
       
-      @travel_date = @available_trains.first.departure_time.to_date
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
       
@@ -218,7 +219,8 @@ module V201V250
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .where(data_version: 0)
-        .order(price_second_class: :asc)
+        .select { |t| t.departure_time.to_date == @travel_date }  # 只选择指定日期的火车
+        .sort_by(&:price_second_class)
       
       @available_hotels = Hotel.where(city: @arrival_city, data_version: 0)
         .order(price: :asc)

@@ -57,8 +57,8 @@ module V101V150
     end
   
     def verify
-      # 断言1: 订单已创建（权重25%）
-      add_assertion "订单已创建", weight: 25 do
+      # 断言1: 订单已创建（权重20%）
+      add_assertion "订单已创建", weight: 20 do
         all_orders = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -88,8 +88,8 @@ module V101V150
           "行程晚数错误。期望: #{@duration_nights}晚, 实际: #{sailing.duration_nights}晚"
       end
     
-      # 断言4: 已备注岸上观光需求（权重20%）
-      add_assertion "已备注岸上观光需求", weight: 20 do
+      # 断言4: 已备注岸上观光需求（权重15%）
+      add_assertion "已备注岸上观光需求", weight: 15 do
         remark = @order.remark || ''
         shore_excursion_mentioned = remark.include?('岸上观光') || 
                                      remark.include?('冲绳') ||
@@ -99,8 +99,8 @@ module V101V150
           "未在备注中说明岸上观光需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
-      # 断言5: 已备注餐饮需求（权重20%）
-      add_assertion "已备注餐饮需求", weight: 20 do
+      # 断言5: 已备注餐饮需求（权重15%）
+      add_assertion "已备注餐饮需求", weight: 15 do
         remark = @order.remark || ''
         dining_mentioned = remark.include?('主厨') ||
                           remark.include?('晚餐') ||
@@ -122,8 +122,8 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言7: 选择了最近日期的班次（权重0%）- 不计分，仅用于记录
-      add_assertion "选择了最近日期的班次", weight: 0 do
+      # 断言7: 选择了最近日期的班次（权重15%）
+      add_assertion "选择了最近日期的班次", weight: 15 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       

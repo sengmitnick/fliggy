@@ -28,7 +28,8 @@
   </div>
 
   <!-- Flight Details -->
-  <%= link_to booking_path(booking), class: "block" do %>
+  <% detail_url = (booking.status == 'paid' || booking.status == 'completed') ? detail_booking_path(booking) : booking_path(booking) %>
+  <%= link_to detail_url, class: "block" do %>
     <div class="px-4 py-4">
       <!-- Outbound Flight -->
       <div class="flex items-center justify-between mb-2">
