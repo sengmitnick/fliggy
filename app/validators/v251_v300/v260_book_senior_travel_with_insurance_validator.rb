@@ -239,8 +239,7 @@ module V251V300
       @expected_insured_name = data['expected_insured_name']
       
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @wangdaye = user.passengers.where(name: '王大爷', data_version: 0).or(user.passengers.where(name: '王大爷（68岁）', data_version: 0)).first!
-      @lidama = user.passengers.where(name: '李大妈', data_version: 0).or(user.passengers.where(name: '李大妈（66岁）', data_version: 0)).first!
+      @zhangjianguo = user.passengers.find_by!(name: '张建国', data_version: 0)
       
       @tour_product = TourGroupProduct.find(data['tour_product_id']) if data['tour_product_id']
       
