@@ -2,21 +2,33 @@
 
 require_relative '../base_validator'
 
-# V312: 预订冲浪教学+海滩娱乐+装备提供
+# V312: 刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供
 #
 # 任务描述:
-#   用户需要预订冲浪服务套餐，包含教学、海滩娱乐和装备提供
+#   用户需要在4天后为2人预订深圳大梅沙海滨公园的冲浪服务，包含：
+#   1) 冲浪教学活动订单（ActivityOrder）
+#   2) 海滩娱乐活动订单（ActivityOrder）
+#   确保景点、活动项目、日期和人数正确
 #
 # 评分标准:
-#   - 创建冲浪活动订单+景点正确+活动名称+游客信息 (40%)
-#   - 创建娱乐活动订单+活动名称+游客信息 (30%)
-#   - 日期和人数正确 (15%)
-#   - 联系人信息正确 (15%)
+#   - 创建了冲浪活动订单 (15%)
+#   - 景点正确（深圳大梅沙海滨公园） (10%)
+#   - 冲浪活动名称正确（包含"冲浪"） (5%)
+#   - 冲浪活动日期正确（4天后） (8%)
+#   - 冲浪活动人数正确（2人） (5%)
+#   - 冲浪活动游客信息正确（刘强+陈静） (7%)
+#   - 冲浪活动联系人信息正确（刘强或陈静） (8%)
+#   - 创建了娱乐活动订单 (12%)
+#   - 娱乐活动名称正确（不包含"冲浪"） (5%)
+#   - 娱乐活动日期正确（4天后） (5%)
+#   - 娱乐活动人数正确（2人） (5%)
+#   - 娱乐活动游客信息正确（刘强+陈静） (8%)
+#   - 娱乐活动联系人信息正确（刘强或陈静） (7%)
 module V301V350
   class V312BookSurfingLessonBeachEquipmentValidator < BaseValidator
     self.validator_id = 'v312_book_surfing_lesson_beach_equipment_validator'
     self.task_id = 'c132957d-cbea-4e0b-8190-acd5d2d2ce30'
-    self.title = '给张三刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
+    self.title = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
     self.description = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
     self.timeout_seconds = 300
     
@@ -254,6 +266,8 @@ module V301V350
         attraction_id: @attraction&.id,
         surfing_activity_id: @surfing_activity&.id,
         entertainment_activity_id: @entertainment_activity&.id,
+        liuqiang_id: @liuqiang&.id,
+        chenjing_id: @chenjing&.id,
         expected_contact_names: @expected_contact_names,
         expected_contact_phones: @expected_contact_phones
       }
@@ -268,6 +282,8 @@ module V301V350
       @attraction = Attraction.find(data['attraction_id']) if data['attraction_id']
       @surfing_activity = AttractionActivity.find(data['surfing_activity_id']) if data['surfing_activity_id']
       @entertainment_activity = AttractionActivity.find(data['entertainment_activity_id']) if data['entertainment_activity_id']
+      @liuqiang = Passenger.find(data['liuqiang_id']) if data['liuqiang_id']
+      @chenjing = Passenger.find(data['chenjing_id']) if data['chenjing_id']
     end
   end
 end

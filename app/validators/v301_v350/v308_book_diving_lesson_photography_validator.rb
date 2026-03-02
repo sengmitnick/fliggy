@@ -2,24 +2,28 @@
 
 require_relative '../base_validator'
 
-# V308: 预订蜈支洲岛潜水服务（4天后，2人）
+# V308: 刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务
 #
 # 任务描述:
-#   用户需要预订蜈支洲岛的潜水服务（4天后，2人），包含景区门票、潜水教学+体验和水下摄影服务
+#   用户需要在4天后为2人预订蜈支洲岛的潜水服务，包含：
+#   1) 景区门票订单（TicketOrder）
+#   2) 潜水教学+体验活动订单（ActivityOrder）
+#   3) 水下摄影服务订单（ActivityOrder）
+#   确保景点、服务项目、日期和人数正确
 #
 # 评分标准:
 #   - 购买了景区门票 (20%)
 #   - 景点正确（蜈支洲岛） (10%)
-#   - 预订了潜水活动 (25%)
-#   - 预订了摄影服务 (20%)
-#   - 活动日期正确（4天后） (10%)
-#   - 联系电话正确（刘强） (10%)
+#   - 预订了潜水活动（潜水教学+体验） (25%)
+#   - 预订了摄影服务（水下摄影服务） (20%)
+#   - 三个订单的日期均正确（4天后） (10%)
+#   - 联系电话正确（刘强或陈静） (10%)
 #   - 订单状态和价格有效 (5%)
 module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
     self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
-    self.title = '给张三刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
+    self.title = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
     self.description = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
     self.timeout_seconds = 300
     
@@ -102,7 +106,7 @@ module V301V350
       
       return if @diving_order.nil?
       
-      # 断言3: 预订了摄影服务
+      # 断言3: 预订了水下摄影服务
       add_assertion "预订了摄影服务（水下摄影服务）", weight: 20 do
         all_activity_orders = ActivityOrder
           .joins(:attraction_activity)
@@ -119,8 +123,8 @@ module V301V350
         expect(@photography_order).not_to be_nil, "未预订摄影服务"
       end
       
-      # 断言4: 游玩日期正确（4天后）
-      add_assertion "活动日期正确", weight: 10 do
+      # 断言4: 三个订单的日期均正确（4天后）
+      add_assertion "三个订单的日期均正确（4天后）", weight: 10 do
         expect(@ticket_order.visit_date).to eq(@visit_date),
           "门票游玩日期错误。期望: #{@visit_date}（4天后），实际: #{@ticket_order.visit_date}"
         
