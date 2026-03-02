@@ -70,6 +70,8 @@
       </div>
     </div>
 
+    <!-- Passenger and Contact Phone Section (Shared Controller Scope) -->
+    <div data-controller="passenger-contact-sync">
     <!-- Passenger Selection -->
     <div class="mt-2 bg-surface">
       <div class="px-4 py-3 border-b border-border">
@@ -81,10 +83,14 @@
           <% @passengers.each_with_index do |passenger, index| %>
             <label class="flex items-center gap-3 px-4 py-4 cursor-pointer hover:bg-surface-secondary active:bg-surface-secondary">
               <div class="flex items-center justify-center w-6 h-6">
-                <%= f.check_box :passenger_ids, 
-                    { multiple: true, id: "passenger_#{passenger.id}", class: "w-5 h-5 text-accent border-border focus:ring-accent cursor-pointer" }, 
-                    passenger.id, 
-                    nil %>
+                <input type="checkbox" 
+                       name="activity_order[passenger_ids][]" 
+                       id="passenger_<%= passenger.id %>" 
+                       value="<%= passenger.id %>" 
+                       class="w-5 h-5 text-accent border-border focus:ring-accent cursor-pointer"
+                       data-passenger-contact-sync-target="checkbox"
+                       data-passenger-phone="<%= passenger.phone %>"
+                       data-action="change->passenger-contact-sync#syncPhone" />
               </div>
               <div class="flex items-center justify-center w-10 h-10 bg-surface-secondary rounded-full text-lg">
                 👤
@@ -120,7 +126,6 @@
     </div>
 
     <!-- Contact Phone -->
-    <!-- stimulus-validator: disable-next-line -->
     <div class="mt-2 bg-surface px-4 py-4" data-controller="contact-selector"
          data-contact-selector-selected-contact-id-value="0">
       <h3 class="font-semibold text-foreground mb-3">联系电话</h3>
@@ -132,12 +137,13 @@
           <option value="+886">+886</option>
         </select>
         <%= f.text_field :contact_phone, 
-            placeholder: "18027128600",
             required: true,
             pattern: "[0-9]{11}",
             type: "tel",
-            value: @passengers.find(&:is_self)&.phone || @passengers.first&.phone,
-            data: { "contact-selector-target": "contactPhoneInput" },
+            data: { 
+              "contact-selector-target": "contactPhoneInput",
+              "passenger-contact-sync-target": "phoneInput"
+            },
             class: "flex-1 min-w-0 px-3 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" %>
         <button type="button" 
                 class="p-2.5 border border-border rounded-lg shrink-0"
@@ -150,6 +156,7 @@
       
       <%= render 'shared/contact_selector_modal' %>
     </div>
+    </div>  <!-- End of passenger-contact-sync controller scope -->
 
     <!-- Insurance Options -->
     <div class="mt-2 bg-surface">

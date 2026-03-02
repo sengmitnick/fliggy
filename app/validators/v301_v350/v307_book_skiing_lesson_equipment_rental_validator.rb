@@ -2,27 +2,28 @@
 
 require_relative '../base_validator'
 
-# V307: 预订张家口崇礼万龙滑雪场门票+装备租赁（3天后，2人）
+# V307: 刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁
 #
 # 任务描述:
 #   用户需要在3天后为2人预订张家口崇礼万龙滑雪场的滑雪服务，包含：
-#   1) 滑雪场门票订单（TicketOrder）
+#   1) 滑雪场全天票订单（TicketOrder，明确要求全天票）
 #   2) 滑雪装备租赁活动订单（ActivityOrder）
-#   确保景点、日期和人数正确
+#   确保景点、票型、日期和人数正确
 #
 # 评分标准:
-#   - 创建了门票订单 (20%)
-#   - 景点正确（崇礼万龙滑雪场） (15%)
+#   - 创建了全天票订单 (20%)
+#   - 景点正确（崇礼万龙滑雪场） (10%)
+#   - 票型正确（全天票） (10%)
 #   - 创建了滑雪装备租赁活动订单 (25%)
 #   - 两个订单的日期均正确（3天后） (15%)
-#   - 联系电话正确（刘强） (10%)
-#   - 两个订单的人数均正确（2人） (15%)
+#   - 联系电话正确（刘强或陈静） (10%)
+#   - 两个订单的人数均正确（2人） (10%)
 module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
     self.task_id = '72e6f61b-18de-4434-a053-2297fd7be1b9'
-    self.title = '给张三刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要门票和装备租赁'
-    self.description = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要门票和装备租赁'
+    self.title = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁'
+    self.description = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁'
     self.timeout_seconds = 300
     
     def prepare
@@ -45,13 +46,15 @@ module V301V350
       @city = '张家口'
       @activity_name = '滑雪装备租赁（全套）'
       
+      @ticket_name = '崇礼万龙滑雪场全天票'
+      
       # 查找崇礼万龙滑雪场
       @attraction = Attraction.find_by(name: @attraction_name, city: @city, data_version: 0)
       raise "未找到#{@attraction_name}" unless @attraction
       
-      # 查找门票
-      @ticket = @attraction.tickets.where(data_version: 0).first
-      raise "未找到#{@attraction_name}的门票" unless @ticket
+      # 查找全天票（明确指定）
+      @ticket = @attraction.tickets.find_by(name: @ticket_name, data_version: 0)
+      raise "未找到#{@attraction_name}的全天票" unless @ticket
       
       # 查找滑雪装备租赁活动
       @equipment_activity = @attraction.attraction_activities
@@ -61,20 +64,21 @@ module V301V350
       raise "未找到#{@attraction_name}的滑雪装备租赁活动" unless @equipment_activity
       
       {
-        task: "请预订#{@city}#{@attraction_name}的滑雪服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含滑雪场门票和滑雪装备租赁。",
+        task: "请预订#{@city}#{@attraction_name}的滑雪服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含滑雪场全天票和滑雪装备租赁。",
         requirements: {
           attraction: @attraction_name,
           city: @city,
+          ticket_type: '全天票',
           visit_date: @visit_date,
           participant_count: @participant_count,
-          services: ['景区门票', '滑雪装备租赁']
+          services: ['景区全天票', '滑雪装备租赁']
         },
-        hint: "需要同时预订景区门票和滑雪装备租赁活动。"
+        hint: "需要同时预订景区全天票和滑雪装备租赁活动。"
       }
     end
     
     def verify
-      add_assertion "创建了门票订单", weight: 20 do
+      add_assertion "创建了全天票订单", weight: 20 do
         all_ticket_orders = TicketOrder
           .joins(ticket: :attraction)
           .includes(ticket: :attraction)
@@ -88,10 +92,17 @@ module V301V350
       
       return if @ticket_orders.nil? || @ticket_orders.empty?
       
-      add_assertion "景点正确（#{@attraction_name}）", weight: 15 do
+      add_assertion "景点正确（#{@attraction_name}）", weight: 10 do
         @ticket_orders.each do |order|
           expect(order.ticket.attraction.name).to eq(@attraction_name),
             "景点错误。期望: #{@attraction_name}，实际: #{order.ticket.attraction.name}"
+        end
+      end
+      
+      add_assertion "票型正确（全天票）", weight: 10 do
+        @ticket_orders.each do |order|
+          expect(order.ticket.name).to match(/全天票/),
+            "票型错误。期望: 全天票，实际: #{order.ticket.name}"
         end
       end
       
@@ -131,7 +142,7 @@ module V301V350
         end
       end
       
-      add_assertion "两个订单的人数均正确（2人）", weight: 15 do
+      add_assertion "两个订单的人数均正确（2人）", weight: 10 do
         @ticket_orders.each do |order|
           expect(order.quantity).to eq(@participant_count),
             "门票订单人数错误。期望: #{@participant_count}人, 实际: #{order.quantity}人"
@@ -186,6 +197,7 @@ module V301V350
         participant_count: @participant_count,
         attraction_name: @attraction_name,
         city: @city,
+        ticket_name: @ticket_name,
         activity_name: @activity_name,
         attraction_id: @attraction&.id,
         ticket_id: @ticket&.id,
@@ -200,6 +212,7 @@ module V301V350
       @participant_count = data['participant_count']
       @attraction_name = data['attraction_name']
       @city = data['city']
+      @ticket_name = data['ticket_name']
       @activity_name = data['activity_name']
       @expected_contact_names = data['expected_contact_names']
       @expected_contact_phones = data['expected_contact_phones']
