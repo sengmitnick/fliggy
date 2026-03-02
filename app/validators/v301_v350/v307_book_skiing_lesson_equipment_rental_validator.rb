@@ -125,11 +125,9 @@ module V301V350
       
       add_assertion "联系电话正确（刘强或陈静）", weight: 10 do
         @ticket_orders.each do |order|
-          expect(@expected_contact_names).to include(order.contact_name),
-            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}中的一个, 实际: #{order.contact_name}"
-          expected_phone = @expected_contact_phones[order.contact_name]
-          expect(order.contact_phone).to eq(expected_phone),
-            "联系电话错误。期望: #{expected_phone}（#{order.contact_name}）, 实际: #{order.contact_phone}"
+          expected_phones = @expected_contact_phones.values
+          expect(expected_phones).to include(order.contact_phone),
+            "联系电话错误。期望: #{expected_phones.join('或')}, 实际: #{order.contact_phone}"
         end
       end
       
@@ -156,7 +154,6 @@ module V301V350
       TicketOrder.create!(
         user: user,
         ticket: @ticket,
-        contact_name: contact_person.name,
         contact_phone: contact_person.phone,
         visit_date: @visit_date,
         quantity: @participant_count,
@@ -170,7 +167,7 @@ module V301V350
       ActivityOrder.create!(
         user: user,
         attraction_activity: @equipment_activity,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
         visit_date: @visit_date,
         quantity: @participant_count,

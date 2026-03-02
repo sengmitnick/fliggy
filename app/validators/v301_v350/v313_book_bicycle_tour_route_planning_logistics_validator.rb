@@ -259,7 +259,6 @@ module V301V350
         quantity: 3,  # 3张门票
         passenger_ids: [@zhangsan.id, @lisi.id, @liuqiang.id],  # ✅ 关联3个游客
         total_price: @boat_ticket.current_price * 3,
-        contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
         status: 'paid',
         data_version: @data_version

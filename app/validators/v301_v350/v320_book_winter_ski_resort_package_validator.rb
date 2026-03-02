@@ -276,7 +276,6 @@ module V301V350
         visit_date: @visit_date,
         quantity: 2,
         passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联2个游客
-        contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
         total_price: @ticket.current_price * 2,
         status: 'pending',

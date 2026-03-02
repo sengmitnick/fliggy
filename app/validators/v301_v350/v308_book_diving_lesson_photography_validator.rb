@@ -134,11 +134,9 @@ module V301V350
       end
       
       add_assertion "联系电话正确（刘强或陈静）", weight: 10 do
-        expect(@expected_contact_names).to include(@ticket_order.contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_names.join('或')}中的一个, 实际: #{@ticket_order.contact_name}"
-        expected_phone = @expected_contact_phones[@ticket_order.contact_name]
-        expect(@ticket_order.contact_phone).to eq(expected_phone),
-          "联系电话错误。期望: #{expected_phone}（#{@ticket_order.contact_name}）, 实际: #{@ticket_order.contact_phone}"
+        expected_phones = @expected_contact_phones.values
+        expect(expected_phones).to include(@ticket_order.contact_phone),
+          "联系电话错误。期望: #{expected_phones.join('或')}, 实际: #{@ticket_order.contact_phone}"
       end
       
       # 断言5: 订单状态和价格有效
@@ -176,7 +174,6 @@ module V301V350
         ticket: adult_ticket,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_name: contact_person.name,
         contact_phone: contact_person.phone,
         total_price: adult_ticket.current_price * @participant_count,
         status: 'paid',
@@ -191,7 +188,7 @@ module V301V350
         attraction_activity: diving_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
         total_price: diving_activity.current_price * @participant_count,
         insurance_type: 'premium',
@@ -207,7 +204,7 @@ module V301V350
         attraction_activity: photography_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
         total_price: photography_activity.current_price * @participant_count,
         insurance_type: 'none',

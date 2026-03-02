@@ -132,10 +132,10 @@ module V301V350
       
       # 断言7: 冲浪活动联系人信息正确（刘强或陈静） (8%)
       add_assertion "冲浪活动联系人信息正确（刘强或陈静）", weight: 8 do
-        if @surfing_order.respond_to?(:contact_name) && @surfing_order.contact_name.present?
-          expect(@expected_contact_names).to include(@surfing_order.contact_name),
-            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@surfing_order.contact_name}"
-          expected_phone = @expected_contact_phones[@surfing_order.contact_name]
+        if @surfing_order.respond_to?(:passenger_name) && @surfing_order.passenger_name.present?
+          expect(@expected_contact_names).to include(@surfing_order.passenger_name),
+            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@surfing_order.passenger_name}"
+          expected_phone = @expected_contact_phones[@surfing_order.passenger_name]
           expect(@surfing_order.contact_phone).to eq(expected_phone),
             "联系电话错误。期望: #{expected_phone}, 实际: #{@surfing_order.contact_phone}"
         end
@@ -198,10 +198,10 @@ module V301V350
       
       # 断言13: 娱乐活动联系人信息正确（刘强或陈静） (7%)
       add_assertion "娱乐活动联系人信息正确（刘强或陈静）", weight: 7 do
-        if @entertainment_order.respond_to?(:contact_name) && @entertainment_order.contact_name.present?
-          expect(@expected_contact_names).to include(@entertainment_order.contact_name),
-            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@entertainment_order.contact_name}"
-          expected_phone = @expected_contact_phones[@entertainment_order.contact_name]
+        if @entertainment_order.respond_to?(:passenger_name) && @entertainment_order.passenger_name.present?
+          expect(@expected_contact_names).to include(@entertainment_order.passenger_name),
+            "联系人姓名错误。期望: #{@expected_contact_names.join('或')}, 实际: #{@entertainment_order.passenger_name}"
+          expected_phone = @expected_contact_phones[@entertainment_order.passenger_name]
           expect(@entertainment_order.contact_phone).to eq(expected_phone),
             "联系电话错误。期望: #{expected_phone}, 实际: #{@entertainment_order.contact_phone}"
         end
@@ -221,7 +221,7 @@ module V301V350
         visit_date: @activity_date,
         quantity: @participant_count,
         passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联游客信息
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
         total_price: @surfing_activity.current_price * @participant_count,
         insurance_type: 'premium',
@@ -236,7 +236,7 @@ module V301V350
         visit_date: @activity_date,
         quantity: @participant_count,
         passenger_ids: [@liuqiang.id, @chenjing.id],  # ✅ 关联游客信息
-        contact_name: contact_person.name,
+        passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
         total_price: @entertainment_activity.current_price * @participant_count,
         insurance_type: 'basic',
