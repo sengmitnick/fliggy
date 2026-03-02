@@ -29,9 +29,9 @@ module V301V350
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
       # Pre-query existing passengers from demo_user (family: 刘强+陈静+小明)
-      @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
-      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
-      @xiaoming = user.passengers.find_by!(name: '小明', data_version: 0)
+      @liuqiang = user.passengers.find_by!(name: '刘强')
+      @chenjing = user.passengers.find_by!(name: '陈静')
+      @xiaoming = user.passengers.find_by!(name: '小明')
       
       # Expected contact info (multi-choice: 刘强、陈静 or 小明)
       @expected_contact_names = [@liuqiang.name, @chenjing.name, @xiaoming.name]
