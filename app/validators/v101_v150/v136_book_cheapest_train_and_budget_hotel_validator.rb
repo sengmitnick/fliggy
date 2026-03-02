@@ -47,10 +47,10 @@ module V101V150
 
       raise "未找到符合条件的经济型酒店" if @available_hotels.empty?
 
-      # 计算最低总价
+      # 计算最低总价（使用overnight房型与simulate保持一致）
       cheapest_train = @available_trains.first
       cheapest_hotel = @available_hotels.first
-      cheapest_room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first
+      cheapest_room = cheapest_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first
       @min_total_price = cheapest_train.price_second_class + (cheapest_room ? cheapest_room.price : cheapest_hotel.price)
     end
 
