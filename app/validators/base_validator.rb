@@ -289,7 +289,10 @@ class BaseValidator
   end
   
   # 执行验证阶段（验证用户操作结果）
-  def execute_verify
+  # cleanup: 是否在验证完成后自动清理数据
+  #   - true: 验证后删除当前 data_version 的所有数据（自动化测试用）
+  #   - false: 验证后保留数据（手动测试用，方便检查）
+  def execute_verify(cleanup: true)
     result = {
       execution_id: @execution_id,
       status: 'unknown',
@@ -326,8 +329,10 @@ class BaseValidator
     # ⚠️ 注释掉以便调试和重复验证
     # cleanup_execution_state
     
-    # 验证完成后，回滚到基线状态（删除当前 data_version 的所有数据）
-    rollback_to_baseline
+    # 验证完成后，可选地回滚到基线状态（删除当前 data_version 的所有数据）
+    # cleanup=true: 自动化测试（execute_simulate）
+    # cleanup=false: 手动浏览器测试（用户需要检查数据）
+    rollback_to_baseline if cleanup
     
     result
   end

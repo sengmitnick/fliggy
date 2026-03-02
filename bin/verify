@@ -124,7 +124,8 @@ class VerifyCLI
     
     begin
       # execute_verify 内部已经处理了事务，不需要外层事务
-      result = instance.execute_verify
+      # cleanup: false 表示不自动清理数据，方便手动测试检查
+      result = instance.execute_verify(cleanup: false)
       
       # 显示结果
       display_result(result)

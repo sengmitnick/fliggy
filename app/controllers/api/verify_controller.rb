@@ -82,7 +82,8 @@ module Api
         validator_class = state_data['validator_class'].constantize
         
         instance = validator_class.new(execution_id)
-        verify_result = instance.execute_verify
+        # cleanup: false 表示不自动清理数据，方便手动测试检查
+        verify_result = instance.execute_verify(cleanup: false)
         
         # 验证完成后取消活跃状态
         execution.deactivate!
@@ -379,7 +380,8 @@ module Api
           validator_class = state_data['validator_class'].constantize
           
           instance = validator_class.new(session_id)
-          verify_result = instance.execute_verify
+          # cleanup: false 表示不自动清理数据，方便手动测试检查
+          verify_result = instance.execute_verify(cleanup: false)
           
           # 验证完成后取消活跃状态
           execution.deactivate!

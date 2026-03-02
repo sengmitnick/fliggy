@@ -269,10 +269,10 @@ module V301V350
         user: user,
         attraction_activity: @bicycle_activity_double,
         visit_date: @visit_date,
-        quantity: 1,  # 1辆双人车
+        quantity: 2,  # 2个座位（双人车）
         passenger_ids: [@zhangsan.id, @lisi.id],  # ✅ 双人车关联2个游客
-        total_price: @bicycle_activity_double.current_price,
-        contact_name: contact_passenger.name,
+        total_price: @bicycle_activity_double.current_price * 2,
+        passenger_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
         status: 'paid',
         notes: '双人自行车租赁，2人使用',
@@ -287,7 +287,7 @@ module V301V350
         quantity: 1,  # 1辆单人车
         passenger_ids: [@liuqiang.id],  # ✅ 单人车关联1个游客
         total_price: @bicycle_activity_single.current_price,
-        contact_name: contact_passenger.name,
+        passenger_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
         status: 'paid',
         notes: '单人自行车租赁，1人使用',

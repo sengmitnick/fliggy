@@ -253,17 +253,9 @@ module V301V350
       
       # 断言10: 联系人信息正确（刘强、陈静或小明） (12%)
       add_assertion "联系人信息正确（刘强、陈静或小明）", weight: 12 do
-        # 验证机票订单联系人
+        # 验证机票订单联系人（Booking模型只有contact_phone字段，没有contact_name）
         @flight_bookings.each do |booking|
-          if booking.respond_to?(:contact_name) && booking.contact_name.present?
-            expect(@expected_contact_names).to include(booking.contact_name),
-              "机票联系人姓名错误。期望: #{@expected_contact_names.join('、')}, 实际: #{booking.contact_name}"
-            expected_phone = @expected_contact_phones[booking.contact_name]
-            if expected_phone
-              expect(booking.contact_phone).to eq(expected_phone),
-                "机票联系电话错误。期望: #{expected_phone}, 实际: #{booking.contact_phone}"
-            end
-          elsif booking.contact_phone.present?
+          if booking.contact_phone.present?
             expect(@expected_contact_phones.values).to include(booking.contact_phone),
               "机票联系电话错误。期望: #{@expected_contact_phones.values.join('/')}, 实际: #{booking.contact_phone}"
           end
@@ -361,6 +353,9 @@ module V301V350
         outbound_flight_id: @outbound_flight&.id,
         return_flight_id: @return_flight&.id,
         hotel_id: @hotel&.id,
+        hotel_room_id: @hotel_room&.id,
+        attraction_id: @attraction&.id,
+        activity_id: @activity&.id,
         expected_contact_names: @expected_contact_names,
         expected_contact_phones: @expected_contact_phones
       }
@@ -378,6 +373,17 @@ module V301V350
       @outbound_flight = Flight.find_by(id: state['outbound_flight_id']) if state['outbound_flight_id']
       @return_flight = Flight.find_by(id: state['return_flight_id']) if state['return_flight_id']
       @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      @hotel_room = HotelRoom.find_by(id: state['hotel_room_id']) if state['hotel_room_id']
+      @attraction = Attraction.find_by(id: state['attraction_id']) if state['attraction_id']
+      @activity = AttractionActivity.find_by(id: state['activity_id']) if state['activity_id']
+      
+      # Restore family members for verify method
+      user = User.find_by(email: 'demo@travel01.com', data_version: 0)
+      if user
+        @liuqiang = user.passengers.find_by(name: '刘强', data_version: 0)
+        @chenjing = user.passengers.find_by(name: '陈静', data_version: 0)
+        @xiaoming = user.passengers.find_by(name: '小明', data_version: 0)
+      end
     end
   end
 end
