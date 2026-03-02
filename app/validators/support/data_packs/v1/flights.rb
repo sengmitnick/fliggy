@@ -26,11 +26,11 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 puts "正在加载 flights_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来16天的航班数据（从今天开始）
+# 生成未来21天的航班数据（从今天开始，支持20天后的返程航班）
 start_date = Date.current
-end_date = start_date + 15.days
+end_date = start_date + 20.days
 
-puts "  航班日期范围: #{start_date} 至 #{end_date} (共16天)"
+puts "  航班日期范围: #{start_date} 至 #{end_date} (共21天)"
 
 # ==================== 航班数据 ====================
 # 深圳 -> 北京 航班（每天4个航班，最低价 550元）
