@@ -831,6 +831,151 @@ end
 TourGroupProduct.insert_all(sanya_6day_products_data) if sanya_6day_products_data.any?
 puts "✓ 添加了 #{sanya_6day_products_data.count} 个三亚6天5晚跟团游产品"
 
+# ====================  补充：亲子主题跟团游产品 (family_tour_supplement) ====================
+puts "\n👶 补充亲子主题跟团游产品..."
+
+timestamp_family = Time.current
+
+# 亲子主题跟团游产品（支持 v281 验证器）
+family_tour_products_data = []
+
+# 每个目的地生成 1-2 个亲子产品
+['\u4e09亚', '\u676d州', '\u5317京', '\u4e0a海', '\u6210都', '\u5e7f州', '\u6df1圳', '\u53a6门', '\u5927连', '\u9752岛'].each_with_index do |destination, idx|
+  departure_cities = case destination
+  when '\u4e09亚' then ['\u4e09亚', '\u6d77口', '\u5e7f州', '\u6df1圳']
+  when '\u676d州' then ['\u676d州', '\u4e0a海', '\u5b81波']
+  when '\u5317京' then ['\u5317京', '\u5929津', '\u77f3家庄']
+  when '\u4e0a海' then ['\u4e0a海', '\u676d州', '\u5357京']
+  when '\u6210都' then ['\u6210都', '\u91cd庆']
+  when '\u5e7f州' then ['\u5e7f州', '\u6df1圳']
+  when '\u6df1圳' then ['\u6df1圳', '\u5e7f州', '\u73e0海']
+  when '\u53a6门' then ['\u53a6门', '\u798f州']
+  when '\u5927连' then ['\u5927连', '\u6c88阳']
+  when '\u9752岛' then ['\u9752岛', '\u6d4e南']
+  else [destination]
+  end
+  
+  selected_departure = departure_cities.sample
+  
+  # 亲子主题景点
+  attractions = case destination
+  when '\u4e09亚' then ['\u4e9a\u9f99\u6e7e', '\u871c\u6708\u6e7e', '\u84b8\u53f7\u6e7e', '\u4e09\u4e9a\u4e9a\u9f99\u6e7e\u70ed\u5e26\u5929\u5802\u68ee\u6797\u516c\u56ed', '\u4e09\u4e9a\u6d77\u6d0b\u9986']
+  when '\u676d州' then ['\u676d州\u52a8\u7269\u56ed', '\u676d州\u690d\u7269\u56ed', '\u897f\u6eaa\u6e7f\u5730', '\u5343\u5c9b\u6e56', '\u4e4c\u9547']
+  when '\u5317京' then ['\u5317\u4eac\u52a8\u7269\u56ed', '\u5317\u4eac\u6b22\u4e50\u8c37', '\u79d1\u6280\u9986', '\u9896\u548c\u56ed', '\u6545\u5bab']
+  when '\u4e0a\u6d77' then ['\u4e0a\u6d77\u8fea\u58eb\u5c3c', '\u4e0a\u6d77\u6d77\u6d0b\u6c34\u65cf\u9986', '\u4e0a\u6d77\u79d1\u6280\u9986', '\u4e1c\u65b9\u660e\u73e0', '\u4e16\u7eaa\u516c\u56ed']
+  when '\u6210\u90fd' then ['\u6210\u90fd\u5927\u7194\u732b\u7e41\u80b2\u57fa\u5730', '\u6210\u90fd\u6d77\u660c\u6781\u5730\u6d77\u6d0b\u516c\u56ed', '\u6210\u90fd\u52a8\u7269\u56ed', '\u9526\u91cc', '\u5bbd\u7a84\u5df7']
+  when '\u5e7f\u5dde' then ['\u957f\u9686\u6b22\u4e50\u4e16\u754c', '\u5e7f\u5dde\u957f\u9686\u91ce\u751f\u52a8\u7269\u4e16\u754c', '\u5e7f\u5dde\u6d77\u6d0b\u9986', '\u5e7f\u5dde\u79d1\u5b66\u4e2d\u5fc3', '\u5e7f\u5dde\u5854']
+  when '\u6df1\u5733' then ['\u6df1\u5733\u6b22\u4e50\u8c37', '\u4e16\u754c\u4e4b\u7a97', '\u6df1\u5733\u91ce\u751f\u52a8\u7269\u56ed', '\u5c0f\u6885\u6c99\u6d77\u6ee8\u516c\u56ed', '\u6d77\u4e0a\u4e16\u754c']
+  when '\u53a6\u95e8' then ['\u53a6\u95e8\u79d1\u6280\u9986', '\u53a6\u95e8\u6d77\u5e95\u4e16\u754c', '\u80e1\u91cc\u5c71\u70ae\u53f0', '\u66fe\u5382\u571f', '\u9f13\u6d6a\u5c7f']
+  when '\u5927\u8fde' then ['\u5927\u8fde\u8001\u864e\u6ee9\u6d77\u6d0b\u516c\u56ed', '\u5927\u8fde\u68ee\u6797\u52a8\u7269\u56ed', '\u661f\u6d77\u5e7f\u573a', '\u91d1\u77f3\u6ee9', '\u5927\u8fde\u53d1\u73b0\u738b\u56fd']
+  when '\u9752\u5c9b' then ['\u9752\u5c9b\u6d77\u6d0b\u516c\u56ed', '\u9752\u5c9b\u91ce\u751f\u52a8\u7269\u4e16\u754c', '\u680e\u6728\u8001\u4eba\u6751', '\u91d1\u6c99\u6ee9', '\u9752\u5c9b\u5564\u9152\u535a\u7269\u9986']
+  else [destination]
+  end
+  
+  selected_attractions = attractions.sample([attractions.count, 4].min)
+  
+  # 生成 3-5 天的亲子产品
+  duration = [3, 4, 5].sample
+  nights = duration - 1
+  
+  base_price = case duration
+  when 3 then rand(1588..2588)
+  when 4 then rand(2288..3588)
+  when 5 then rand(3088..4588)
+  end
+  
+  original_price = (base_price * rand(1.2..1.4)).to_i
+  group_size = [4, 6, 8].sample
+  
+  title = "【精品小团】#{destination}#{selected_attractions.first(2).join('+')} #{duration}天#{nights}晚 #{group_size}人团 亲子游·家庭游·含酒店·含餐食"
+  subtitle = "亲子游·#{selected_attractions.first}·适合儿童"
+  
+  family_tour_products_data << {
+    title: title,
+    subtitle: subtitle,
+    destination: destination,
+    departure_city: selected_departure,
+    tour_category: 'group_tour',
+    travel_type: '\u8ddf\u56e2\u6e38',
+    duration: duration,
+    badge: "多日游·#{group_size}人团",
+    price: base_price,
+    original_price: original_price,
+    rating: [4.7, 4.8, 4.9].sample,
+    rating_desc: "#{rand(50..300)}条评价",
+    sales_count: rand(50..500),
+    highlights: ['亲子活动', '家庭游', '儿童设施', '含酒店', '含餐食'],
+    tags: ['亲子', '家庭', '儿童', '互动体验', '含酒店', '含餐食', '含门票'],
+    departure_label: "#{selected_departure}出发",
+    is_featured: idx < 3,  # 前3个设置为精选
+    display_order: 0,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map.values.sample,
+    data_version: 0,
+    created_at: timestamp_family,
+    updated_at: timestamp_family
+  }
+end
+
+TourGroupProduct.insert_all(family_tour_products_data) if family_tour_products_data.any?
+puts "✓ 添加了 #{family_tour_products_data.count} 个亲子主题跟团游产品"
+
+# 为亲子产品生成套餐
+family_packages_data = []
+
+# 查询刚创建的亲子产品
+TourGroupProduct.where("tags LIKE ?", "%亲子%")
+  .where(data_version: 0)
+  .where("created_at >= ?", timestamp_family - 1.minute)
+  .find_each do |product|
+  # 每个产品生成 2-3 个套餐
+  packages_count = rand(2..3)
+  
+  packages_count.times do |i|
+    base_price = product.price
+    
+    package_price = case i
+    when 0 then base_price
+    when 1 then (base_price * rand(1.2..1.4)).to_i
+    when 2 then (base_price * rand(1.5..1.8)).to_i
+    end
+    
+    child_price = (package_price * rand(0.5..0.7)).to_i  # 亲子游儿童价更低
+    
+    package_names = case i
+    when 0 then ['基础套餐', '经济套餐', '标准套餐']
+    when 1 then ['豪华套餐', '高级套餐', '优选套餐']
+    when 2 then ['至尊套餐', '尊享套餐', 'VIP套餐']
+    end
+    
+    description = case i
+    when 0
+      "✓ 三星级亲子酒店住宿\n✓ 包含儿童早餐\n✓ 景点首道门票\n✓ 旅游大巴接送\n✓ 亲子导游服务\n✓ 儿童礼品"
+    when 1
+      "✓ 四星级亲子主题酒店\n✓ 包含儿童三餐\n✓ 景点门票+互动体验\n✓ 豪华旅游大巴\n✓ 金牌亲子导游\n✓ 赠送亲子意外险\n✓ 儿童专属礼包"
+    when 2
+      "✓ 五星级亲子度假酒店\n✓ 包含亲子全程餐食\n✓ 景点VIP通道+互动体验\n✓ 商务车接送\n✓ 资深亲子导游一对一\n✓ 赠送亲子意外险+家庭旅拍\n✓ 24小时管家服务\n✓ 儿童超值礼包"
+    end
+    
+    family_packages_data << {
+      tour_group_product_id: product.id,
+      name: package_names.sample,
+      price: package_price,
+      child_price: child_price,
+      description: description,
+      is_featured: i == 0,
+      display_order: i,
+      purchase_count: rand(10..200),
+      data_version: 0,
+      created_at: timestamp_family,
+      updated_at: timestamp_family
+    }
+  end
+end
+
+TourPackage.insert_all(family_packages_data) if family_packages_data.any?
+puts "✓ 为亲子产品添加了 #{family_packages_data.count} 个套餐"
+
 # 为新产品创建套餐
 sanya_packages_data = []
 
