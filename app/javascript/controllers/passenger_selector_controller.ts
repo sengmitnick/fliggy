@@ -157,11 +157,18 @@ export default class extends Controller {
       this.countTabTarget.classList.add("border-transparent")
     }
     
+    // Clear count mode data (mutually exclusive)
+    this.adults = 0
+    this.children = 0
+    this.infants = 0
+    
     // Show passenger list panel, hide count panel (only if both panels exist)
     if (this.hasPassengerListPanelTarget && this.hasCountPanelTarget) {
       this.passengerListPanelTarget.classList.remove("hidden")
       this.countPanelTarget.classList.add("hidden")
     }
+    
+    this.updateCounters()
   }
 
   switchToCountTab(event: Event): void {
@@ -176,29 +183,54 @@ export default class extends Controller {
       this.passengerTabTarget.classList.add("border-transparent")
     }
     
+    // Clear passenger name mode data (mutually exclusive)
+    this.selectedPassengerIds.clear()
+    this.selectedPassengerNames.clear()
+    
+    // Uncheck all checkboxes in passenger list
+    if (this.hasPassengerListPanelTarget) {
+      const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+      checkboxes.forEach((checkbox: Element) => {
+        (checkbox as HTMLInputElement).checked = false
+      })
+    }
+    
     // Show count panel, hide passenger list panel (only if both panels exist)
     if (this.hasPassengerListPanelTarget && this.hasCountPanelTarget) {
       this.countPanelTarget.classList.remove("hidden")
       this.passengerListPanelTarget.classList.add("hidden")
     }
+    
+    this.updateCounters()
   }
 
   togglePassenger(event: Event): void {
     const checkbox = event.target as HTMLInputElement
     const passengerId = parseInt(checkbox.value)
     const passengerName = checkbox.dataset.passengerName || ''
+    const passengerType = checkbox.dataset.passengerType || 'adult' // 'child' or 'adult'
     
     if (checkbox.checked) {
       this.selectedPassengerIds.add(passengerId)
       this.selectedPassengerNames.set(passengerId, passengerName)
+      
+      // Increment appropriate counter based on passenger type
+      if (passengerType === 'child') {
+        this.children++
+      } else {
+        this.adults++
+      }
     } else {
       this.selectedPassengerIds.delete(passengerId)
       this.selectedPassengerNames.delete(passengerId)
+      
+      // Decrement appropriate counter based on passenger type
+      if (passengerType === 'child') {
+        this.children--
+      } else {
+        this.adults--
+      }
     }
-    
-    // Auto-update adults count based on number of selected passengers
-    const selectedCount = this.selectedPassengerNames.size
-    this.adults = selectedCount
     
     // Update modal title and counters to reflect current selection
     this.updateCounters()
@@ -320,10 +352,8 @@ export default class extends Controller {
           })
         }
       } else {
-        // Passenger name mode: clear counts
-        this.adults = 0
-        this.children = 0
-        this.infants = 0
+        // Passenger name mode: counts are already set by togglePassenger
+        // Do NOT clear counts - they reflect the actual selected passengers
       }
     }
     

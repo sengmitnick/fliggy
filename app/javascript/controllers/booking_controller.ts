@@ -1,13 +1,21 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller<HTMLElement> {
-  static targets = ["termsModal", "insuranceModal", "memberModal", "confirmModal", "totalPriceAmount"]
+  static targets = [
+    "termsModal", "insuranceModal", "memberModal", "confirmModal",
+    "confirmModalPassengerList", "totalPriceAmount", "passengerCount",
+    "passengerCountText", "checkIcon"
+  ]
 
   declare readonly termsModalTarget: HTMLElement
   declare readonly insuranceModalTarget: HTMLElement
   declare readonly memberModalTarget: HTMLElement
   declare readonly confirmModalTarget: HTMLElement
+  declare readonly confirmModalPassengerListTarget: HTMLElement
   declare readonly totalPriceAmountTarget: HTMLElement
+  declare readonly passengerCountTarget: HTMLElement
+  declare readonly passengerCountTextTarget: HTMLElement
+  declare readonly checkIconTargets: HTMLElement[]
 
   // 追踪会员检查是否已完成
   private memberCheckCompleted: boolean = false
@@ -15,6 +23,203 @@ export default class extends Controller<HTMLElement> {
   private isSecondWait: boolean = false
   // 存储需要注册的航空公司列表
   private missingAirlines: string[] = []
+  // 多乘客选择
+  private selectedPassengers: Map<string, { name: string, type: string, idNumber: string, phone: string }> = new Map()
+
+  connect(): void {
+    // Load selected passengers from localStorage (from search page)
+    this.loadPassengersFromLocalStorage()
+    
+    // Set default insurance selection visual style ("无保障" is checked by default)
+    this.initializeDefaultInsuranceStyle()
+  }
+
+  private initializeDefaultInsuranceStyle(): void {
+    // Find the default checked radio button (无保障)
+    const defaultRadio = document.querySelector('input[name="insurance_selection"][checked]') as HTMLInputElement
+    if (defaultRadio) {
+      const card = defaultRadio.closest('[data-insurance-card]') as HTMLElement
+      if (card) {
+        // Remove default gray border
+        card.classList.remove('border-gray-300')
+        // Add gray border for "无保障" selection
+        card.classList.add('border-gray-400')
+        // Show checkmark
+        const checkmark = card.querySelector('.bg-yellow-400') as HTMLElement
+        if (checkmark) {
+          checkmark.style.display = 'flex'
+        }
+      }
+    }
+  }
+
+  private updateConfirmModalPassengers(): void {
+    if (!this.confirmModalPassengerListTarget) return
+    
+    // Get selected passengers from Map
+    const passengers = Array.from(this.selectedPassengers.values())
+    
+    if (passengers.length === 0) {
+      this.confirmModalPassengerListTarget.innerHTML = '<div class="text-gray-500 text-center">未选择乘客</div>'
+      return
+    }
+    
+    // Generate HTML for each passenger
+    const passengersHtml = passengers.map(passenger => {
+      // Mask ID number: show first 6 and last 4 digits
+      const maskedIdNumber = passenger.idNumber.length >= 18 
+        ? passenger.idNumber.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2')
+        : passenger.idNumber
+      
+      const childBadge = passenger.type === 'child'
+        ? '<span class="ml-2 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs border border-orange-300 rounded">儿童票</span>'
+        : ''
+      
+      const svgPath = 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+      
+      return `
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-bold">
+              ${passenger.name} ${maskedIdNumber} 身份证
+              ${childBadge}
+            </div>
+            <div class="text-green-600 flex items-center mt-1">
+              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="${svgPath}" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+    
+    // Populate the container
+    this.confirmModalPassengerListTarget.innerHTML = passengersHtml
+  }
+
+  private loadPassengersFromLocalStorage(): void {
+    const savedState = localStorage.getItem('passenger_selection')
+    if (!savedState) return
+    
+    try {
+      const state = JSON.parse(savedState)
+      const passengerIds = state.passengerIds || []
+      
+      // Only apply if passenger names mode was used (not count mode)
+      if (passengerIds.length === 0) return
+      
+      let firstAdultPhone = ''
+      
+      // Find and select passengers by their IDs
+      passengerIds.forEach((passengerId: number) => {
+        const passengerElement = document.querySelector(`[data-passenger-id="${passengerId}"]`) as HTMLElement
+        if (passengerElement) {
+          const passengerName = passengerElement.dataset.passengerName || ''
+          const passengerType = passengerElement.dataset.passengerType || 'adult'
+          const passengerIdNumber = passengerElement.dataset.passengerIdNumber || ''
+          const passengerPhone = passengerElement.dataset.passengerPhone || ''
+          
+          // Add to selected passengers
+          this.selectedPassengers.set(passengerId.toString(), {
+            name: passengerName,
+            type: passengerType,
+            idNumber: passengerIdNumber,
+            phone: passengerPhone
+          })
+          
+          // Update UI to show selected state
+          this.updatePassengerUI(passengerElement, true)
+          
+          // Store first adult passenger's phone
+          if (!firstAdultPhone && passengerType === 'adult' && passengerPhone) {
+            firstAdultPhone = passengerPhone
+          }
+        }
+      })
+      
+      // Auto-fill contact phone with first adult passenger's phone
+      if (firstAdultPhone) {
+        const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
+        if (contactPhoneField && !contactPhoneField.value) {
+          contactPhoneField.value = firstAdultPhone
+        }
+      }
+      
+      // Update displays after loading all passengers
+      this.updatePassengerCountDisplay()
+      this.updateTotalPrice()
+      this.updateHiddenField()
+    } catch (e) {
+      console.error('Failed to load passengers from localStorage:', e)
+    }
+  }
+
+  togglePassenger(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const passengerId = target.dataset.passengerId
+    const passengerName = target.dataset.passengerName
+    const passengerType = target.dataset.passengerType || 'adult'
+    const passengerIdNumber = target.dataset.passengerIdNumber || ''
+    const passengerPhone = target.dataset.passengerPhone || ''
+    
+    if (!passengerId || !passengerName) return
+    
+    // Check if already selected
+    if (this.selectedPassengers.has(passengerId)) {
+      this.selectedPassengers.delete(passengerId)
+      this.updatePassengerUI(target, false)
+    } else {
+      // Check max limit (3 passengers for flight)
+      if (this.selectedPassengers.size >= 3) {
+        alert('最多只能选择3位乘机人')
+        return
+      }
+      
+      this.selectedPassengers.set(passengerId, {
+        name: passengerName,
+        type: passengerType,
+        idNumber: passengerIdNumber,
+        phone: passengerPhone
+      })
+      this.updatePassengerUI(target, true)
+    }
+    
+    this.updatePassengerCountDisplay()
+    this.updateTotalPrice()
+    this.updateHiddenField()
+  }
+
+  private updatePassengerUI(element: HTMLElement, selected: boolean): void {
+    const checkIcon = element.querySelector('[data-booking-target="checkIcon"]') as HTMLElement
+    if (checkIcon) {
+      if (selected) {
+        checkIcon.classList.remove('text-gray-300')
+        checkIcon.classList.add('text-yellow-400')
+      } else {
+        checkIcon.classList.add('text-gray-300')
+        checkIcon.classList.remove('text-yellow-400')
+      }
+    }
+  }
+
+  private updatePassengerCountDisplay(): void {
+    const count = this.selectedPassengers.size
+    if (this.passengerCountTarget) {
+      this.passengerCountTarget.textContent = `已选${count}人`
+    }
+    if (this.passengerCountTextTarget) {
+      this.passengerCountTextTarget.textContent = `共${count}人`
+    }
+  }
+
+  private updateHiddenField(): void {
+    const passengerIds = Array.from(this.selectedPassengers.keys()).join(',')
+    const hiddenField = document.getElementById('booking_passenger_ids') as HTMLInputElement
+    if (hiddenField) {
+      hiddenField.value = passengerIds
+    }
+  }
 
   selectPassenger(event: Event): void {
     const radio = event.currentTarget as HTMLInputElement
@@ -107,9 +312,9 @@ export default class extends Controller<HTMLElement> {
     const insurancePriceField = document.getElementById('booking_insurance_price') as HTMLInputElement
     const insurancePrice = parseInt(insurancePriceField?.value || '0')
     
-    // 计算总价：基础价格 + 保险价格 × 人数（当前假设为1人）
-    const passengerCount = 1
-    const totalPrice = basePrice + (insurancePrice * passengerCount)
+    // 计算总价：基础价格 × 乘客人数 + 保险价格 × 乘客人数
+    const passengerCount = this.selectedPassengers.size || 0
+    const totalPrice = (basePrice * passengerCount) + (insurancePrice * passengerCount)
     
     this.totalPriceAmountTarget.textContent = totalPrice.toString()
   }
@@ -183,6 +388,9 @@ export default class extends Controller<HTMLElement> {
   }
 
   showConfirmModal(): void {
+    // Update passenger list in confirmation modal with actual selected passengers
+    this.updateConfirmModalPassengers()
+    
     this.confirmModalTarget.classList.remove('hidden')
     
     // 如果是第二次等待（会员确认后），等待5-10秒后提交
@@ -264,16 +472,33 @@ export default class extends Controller<HTMLElement> {
   handleSubmit(event: Event): void {
     event.preventDefault()
     
-    // 验证是否已选择乘机人
-    const selectedPassenger = document.querySelector('input[name="booking[passenger_name]"]:checked') as HTMLInputElement
+    // 验证是否已选择乘机人（检查 passenger_ids hidden field）
+    const passengerIdsField = document.getElementById('booking_passenger_ids') as HTMLInputElement
+    const selectedPassengerIds = passengerIdsField?.value || ''
     
-    if (!selectedPassenger) {
+    if (!selectedPassengerIds || selectedPassengerIds.trim() === '') {
       // 显示错误提示
       if (window.showToast) {
         window.showToast('请先选择乘机人')
       } else {
         alert('请先选择乘机人')
       }
+      return
+    }
+    
+    // 验证联系电话是否已填写
+    const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
+    const contactPhone = contactPhoneField?.value || ''
+    
+    if (!contactPhone || contactPhone.trim() === '') {
+      // 显示错误提示
+      if (window.showToast) {
+        window.showToast('请填写联系电话')
+      } else {
+        alert('请填写联系电话')
+      }
+      // 聚焦到联系电话输入框
+      contactPhoneField?.focus()
       return
     }
     

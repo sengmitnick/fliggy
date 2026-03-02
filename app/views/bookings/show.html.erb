@@ -1,5 +1,6 @@
+<% group_bookings = @booking.group_bookings %>
 <div class="min-h-screen bg-gray-100 pb-20" data-controller="payment-confirmation"
-     data-payment-confirmation-amount-value="<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %>"
+     data-payment-confirmation-amount-value="<%= @booking.group_total_price.to_i %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value="/bookings/<%= @booking.id %>/pay"
      data-payment-confirmation-success-url-value="/bookings/<%= @booking.id %>/success">
@@ -35,57 +36,88 @@
     </div>
   </div>
 
-  <!-- Insurance Selection (安心旅途推荐) -->
+  <!-- Additional Services Selection (附加服务推荐) -->
   <div class="bg-white mb-4">
-    <div class="container mx-auto px-4 py-4">
-      <h3 class="text-lg font-bold mb-2">安心旅途推荐</h3>
+    <div class="container mx-auto px-4 py-4" 
+         data-controller="insurance-selection"
+         data-insurance-selection-booking-id-value="<%= @booking.id %>"
+         data-insurance-selection-group-size-value="<%= @booking.group_bookings.size %>">
+      <h3 class="text-lg font-bold mb-2">附加服务推荐 <span class="text-orange-500 text-sm font-normal">让出行更舒适</span></h3>
       <div class="text-sm text-blue-600 mb-4">
-        添加保障 <span class="text-gray-900 font-medium">出行有备无患</span>
+        添加增值服务 <span class="text-gray-900 font-medium">享受更多权益</span>
       </div>
 
-      <!-- Insurance Options -->
+      <!-- Service Options -->
       <div class="grid grid-cols-3 gap-3">
-        <!-- 不推荐 - 普通出行 -->
-        <div class="border-2 rounded-lg p-3 text-center">
-          <div class="text-xs text-gray-500 mb-1">不推荐</div>
-          <div class="font-bold mb-2">普通出行</div>
+        <!-- 无附加服务 - 标准出行 -->
+        <label class="relative border-2 rounded-lg p-3 text-center cursor-pointer transition-all hover:border-gray-400 border-gray-300" data-insurance-card>
+          <input type="radio" name="additional_service_selection" value="none" class="hidden"
+                 data-action="change->insurance-selection#selectInsurance"
+                 data-insurance-type="none"
+                 data-insurance-price="0"
+                 checked>
+          <div class="text-xs text-gray-500 mb-1">标准服务</div>
+          <div class="font-bold mb-2">无附加服务</div>
           <div class="text-red-500 text-xl mb-2">×</div>
-          <div class="text-xs text-gray-500">不含机酒券</div>
+          <div class="text-xs text-gray-500">不含权益</div>
           <div class="text-red-500 text-xl">×</div>
-          <div class="text-xs text-gray-500 mb-2">无出行保险</div>
-        </div>
+          <div class="text-xs text-gray-500 mb-2">无增值服务</div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
 
-        <!-- 性价比优选 - 省心出行 -->
-        <div class="border-2 border-purple-400 bg-purple-50 rounded-lg p-3 text-center relative">
+        <!-- 性价比优选 - 省心服务包 -->
+        <label class="relative border-2 border-gray-300 rounded-lg p-3 text-center cursor-pointer transition-all hover:border-purple-400" data-insurance-card>
+          <input type="radio" name="additional_service_selection" value="standard" class="hidden"
+                 data-action="change->insurance-selection#selectInsurance"
+                 data-insurance-type="standard"
+                 data-insurance-price="42">
           <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-purple-400 text-white text-xs px-3 py-0.5 rounded-full">
             性价比优选
           </div>
-          <div class="font-bold mt-2 mb-2">省心出行</div>
+          <div class="font-bold mt-2 mb-2">省心服务包</div>
           <div class="text-green-500 text-xl mb-1">✓</div>
-          <div class="text-xs text-gray-600 mb-1">位权益</div>
+          <div class="text-xs text-gray-600 mb-1">机酒优惠券</div>
           <div class="text-yellow-500 text-xl mb-1">⚡</div>
-          <div class="text-xs text-gray-600 mb-2">3礼遇</div>
+          <div class="text-xs text-gray-600 mb-2">3大礼遇</div>
           <div class="flex items-center justify-center gap-1">
             <span class="text-xs text-gray-400 line-through">¥82</span>
-            <span class="text-red-500 font-bold">¥42</span>
+            <span class="text-red-500 font-bold">¥42/人</span>
           </div>
-        </div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
 
-        <!-- 热卖推荐 - 快乐出行 -->
-        <div class="border-2 border-orange-400 bg-orange-50 rounded-lg p-3 text-center relative">
+        <!-- 热卖推荐 - 尊享服务包 -->
+        <label class="relative border-2 border-gray-300 rounded-lg p-3 text-center cursor-pointer transition-all hover:border-orange-400" data-insurance-card>
+          <input type="radio" name="additional_service_selection" value="premium" class="hidden"
+                 data-action="change->insurance-selection#selectInsurance"
+                 data-insurance-type="premium"
+                 data-insurance-price="46">
           <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-orange-400 text-white text-xs px-3 py-0.5 rounded-full">
             热卖推荐
           </div>
-          <div class="font-bold mt-2 mb-2">快乐出行</div>
+          <div class="font-bold mt-2 mb-2">尊享服务包</div>
           <div class="text-green-500 text-xl mb-1">✓</div>
-          <div class="text-xs text-gray-600 mb-1">视频会员6...</div>
+          <div class="text-xs text-gray-600 mb-1">视频会员6个月</div>
           <div class="text-green-500 text-xl mb-1">✓</div>
-          <div class="text-xs text-gray-600 mb-2">赠飞么么干</div>
+          <div class="text-xs text-gray-600 mb-2">赠零食大礼包</div>
           <div class="flex items-center justify-center gap-1">
             <span class="text-xs text-gray-400 line-through">¥94</span>
-            <span class="text-red-500 font-bold">¥46</span>
+            <span class="text-red-500 font-bold">¥46/人</span>
           </div>
-        </div>
+          <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center" style="display: none;">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </label>
       </div>
     </div>
   </div>
@@ -94,7 +126,9 @@
   <div class="container mx-auto px-4 mb-4">
     <div class="bg-white rounded-lg shadow p-4">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="font-bold">已选择: 1成人</h3>
+        <% adult_count = group_bookings.count { |b| !Passenger.find_by(name: b.passenger_name, id_number: b.passenger_id_number)&.child_ticket? } %>
+        <% child_count = group_bookings.count { |b| Passenger.find_by(name: b.passenger_name, id_number: b.passenger_id_number)&.child_ticket? } %>
+        <h3 class="font-bold">已选择: <%= "#{adult_count}成人" if adult_count > 0 %><%= "+#{child_count}儿童" if child_count > 0 %></h3>
       </div>
     </div>
   </div>
@@ -104,49 +138,59 @@
     <div class="bg-white rounded-lg shadow p-4">
       <h3 class="font-bold mb-3">预订订单</h3>
       
-      <!-- Passenger -->
-      <div class="flex items-center justify-between py-2 border-b">
-        <span class="text-gray-600">乘机人</span>
-        <span class="font-bold"><%= @booking.passenger_name %></span>
-      </div>
+      <!-- Passengers List -->
+      <% group_bookings.each_with_index do |booking, index| %>
+        <div class="flex items-center justify-between py-2 border-b">
+          <span class="text-gray-600">乘机人<%= index + 1 %></span>
+          <span class="font-bold"><%= booking.passenger_name %></span>
+        </div>
+      <% end %>
 
       <% if @booking.trip_type == 'multi_city' && @booking.multi_city_flights.present? %>
-        <!-- Multi-city Flight Prices -->
+        <!-- Multi-city Flight Prices (total for all passengers) -->
         <% @booking.multi_city_flight_objects.each_with_index do |flight, index| %>
           <% next unless flight %>
           <div class="flex items-center justify-between py-2 border-b">
-            <span class="text-gray-600">第<%= index + 1 %>程机票 (<%= flight.departure_city %> → <%= flight.destination_city %>)</span>
-            <span>¥<%= flight.price.to_i %></span>
+            <span class="text-gray-600">第<%= index + 1 %>程机票 (<%= flight.departure_city %> → <%= flight.destination_city %>) × <%= group_bookings.size %>人</span>
+            <span>¥<%= group_bookings.sum { |b| (b.multi_city_flight_objects[index]&.price || 0).to_i } %></span>
           </div>
         <% end %>
       <% else %>
-        <!-- Outbound Ticket Price -->
+        <!-- Outbound Ticket Price (total for all passengers) -->
         <div class="flex items-center justify-between py-2 border-b">
-          <span class="text-gray-600"><%= @booking.trip_type == 'round_trip' ? '去程机票' : '机票' %></span>
-          <span>¥<%= (@booking.flight.price).to_i %></span>
+          <span class="text-gray-600"><%= @booking.trip_type == 'round_trip' ? '去程机票' : '机票' %> × <%= group_bookings.size %>人</span>
+          <span>¥<%= group_bookings.sum { |b| b.total_price.to_i - (b.return_flight ? (b.return_flight.price || 0).to_i : 0) } %></span>
         </div>
 
-        <!-- Return Ticket Price (if round trip) -->
+        <!-- Return Ticket Price (if round trip, total for all passengers) -->
         <% if @booking.trip_type == 'round_trip' && @booking.return_flight %>
           <div class="flex items-center justify-between py-2 border-b">
-            <span class="text-gray-600">返程机票</span>
-            <span>¥<%= (@booking.return_flight.price).to_i %></span>
+            <span class="text-gray-600">返程机票 × <%= group_bookings.size %>人</span>
+            <span>¥<%= group_bookings.sum { |b| (b.return_flight&.price || 0).to_i } %></span>
           </div>
         <% end %>
       <% end %>
 
-      <!-- Insurance -->
-      <% if @booking.insurance_type.present? && @booking.insurance_type != 'none' %>
+      <!-- Insurance (total for all passengers) -->
+      <% total_insurance = group_bookings.sum { |b| b.insurance_price || 0 } %>
+      <% if total_insurance > 0 %>
         <div class="flex items-center justify-between py-2 border-b">
-          <span class="text-gray-600">保险<%= @booking.trip_type == 'round_trip' ? '（往返×2）' : (@booking.trip_type == 'multi_city' ? "（×#{@booking.multi_city_flight_objects.length}）" : '') %></span>
-          <span>¥<%= @booking.insurance_price.to_i %></span>
+          <span class="text-gray-600">保险<%= @booking.trip_type == 'round_trip' ? '（往返×2）' : (@booking.trip_type == 'multi_city' ? "（×#{@booking.multi_city_flight_objects.length}）" : '') %> × <%= group_bookings.size %>人</span>
+          <span>¥<%= total_insurance.to_i %></span>
         </div>
       <% end %>
+
+      <!-- Additional Service (total for all passengers) -->
+      <% total_additional_service = group_bookings.sum { |b| b.additional_service_price || 0 } %>
+      <div class="flex items-center justify-between py-2 border-b" data-additional-service-item style="<%= total_additional_service > 0 ? '' : 'display: none;' %>">
+        <span class="text-gray-600" data-additional-service-name>附加服务 × <%= group_bookings.size %>人</span>
+        <span data-additional-service-price>¥<%= total_additional_service.to_i %></span>
+      </div>
 
       <!-- Total -->
       <div class="flex items-center justify-between py-3 font-bold text-lg">
         <span>总计</span>
-        <span class="text-red-500">¥<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %></span>
+        <span class="text-red-500" data-price-display>¥<%= @booking.group_total_price.to_i %></span>
       </div>
     </div>
   </div>
@@ -156,7 +200,7 @@
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
       <div>
         <div class="text-xs text-gray-500">总计</div>
-        <div class="text-xl font-bold text-red-500">¥<%= (@booking.total_price + (@booking.insurance_price || 0)).to_i %></div>
+        <div class="text-xl font-bold text-red-500" data-price-display>¥<%= @booking.group_total_price.to_i %></div>
       </div>
       <button type="button" 
               data-action="click->payment-confirmation#showPasswordModal" 

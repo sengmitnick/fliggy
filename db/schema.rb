@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_28_101458) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_02_084224) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -270,6 +270,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_28_101458) do
     t.string "seat_preference"
     t.string "seat_number"
     t.string "frequent_flyer_number"
+    t.string "booking_group_id"
+    t.string "additional_service_type"
+    t.decimal "additional_service_price"
+    t.index ["booking_group_id"], name: "index_bookings_on_booking_group_id"
     t.index ["data_version"], name: "index_bookings_on_data_version"
     t.index ["flight_id"], name: "index_bookings_on_flight_id"
     t.index ["return_flight_id"], name: "index_bookings_on_return_flight_id"

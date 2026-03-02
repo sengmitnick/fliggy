@@ -49,6 +49,7 @@
               type="checkbox" 
               value="<%= passenger.id %>"
               data-passenger-name="<%= passenger.name %>"
+              data-passenger-type="<%= passenger.child_ticket? ? 'child' : 'adult' %>"
               data-action="change->passenger-selector#togglePassenger"
               class="w-6 h-6 rounded-full border-2 border-gray-300 text-primary focus:ring-0 focus:ring-offset-0">
           </label>

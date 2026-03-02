@@ -4,9 +4,23 @@ class Booking < ApplicationRecord
   belongs_to :flight
   belongs_to :return_flight, class_name: 'Flight', optional: true
   belongs_to :return_offer, class_name: 'FlightOffer', optional: true
+  
+  # 关联同一批次创建的订单（多乘客订单组）
+  scope :in_group, ->(group_id) { where(booking_group_id: group_id) }
+  
+  # 获取同组的所有订单
+  def group_bookings
+    return Booking.where(id: id) if booking_group_id.blank?
+    Booking.where(booking_group_id: booking_group_id).order(created_at: :asc)
+  end
+  
+  # 计算订单组总价（含保险和附加服务）
+  def group_total_price
+    group_bookings.sum { |b| b.total_price + (b.insurance_price || 0) + (b.additional_service_price || 0) }
+  end
 
-  validates :passenger_name, :passenger_id_number, :contact_phone, :total_price, presence: true
-  validates :contact_phone, format: { with: /\A1[3-9]\d{9}\z/, message: "手机号码格式不正确" }
+  validates :passenger_name, :passenger_id_number, :total_price, presence: true
+  validates :contact_phone, format: { with: /\A1[3-9]\d{9}\z/, message: "手机号码格式不正确" }, allow_blank: true
   validates :total_price, numericality: { greater_than: 0 }
   validates :accept_terms, acceptance: true
   validates :insurance_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true

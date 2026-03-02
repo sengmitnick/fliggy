@@ -189,13 +189,17 @@
     <!-- 已选择人数 -->
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold">已选择: 1成人</h3>
-        <button type="button" onclick="window.showToast('精彩即将上线，敬请期待')" class="text-blue-500 text-sm">邀请好友填写</button>
+        <h3 class="font-bold">请选择乘机人 
+          <span class="text-xs font-normal text-gray-400 ml-1">最多选择3人</span>
+        </h3>
+        <span class="text-blue-500 text-sm" data-booking-target="passengerCount">已选0人</span>
       </div>
 
-      <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
-        会员价商品限本人陆旅客使用身份证或户口簿购买｜仅限1位以下(含1位)
-        乘客购买｜当前价格剩余6张
+      <div class="bg-blue-50 text-blue-600 text-xs px-3 py-2 rounded mt-3">
+        <svg class="inline w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        请为每位乘客选择乘机人信息｜当前价格剩余6张
       </div>
     </div>
 
@@ -203,7 +207,13 @@
     <div class="bg-white rounded-lg shadow mb-4">
       <% if @passengers.any? %>
         <% @passengers.each_with_index do |passenger, index| %>
-          <label class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50">
+          <div class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50"
+               data-action="click->booking#togglePassenger"
+               data-passenger-id="<%= passenger.id %>"
+               data-passenger-name="<%= passenger.name %>"
+               data-passenger-id-number="<%= passenger.id_number %>"
+               data-passenger-phone="<%= passenger.phone %>"
+               data-passenger-type="<%= passenger.child_ticket? ? 'child' : 'adult' %>">
             <div class="flex items-center flex-1">
               <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
@@ -214,22 +224,22 @@
                   <% if passenger.is_self? %>
                     <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">本人</span>
                   <% end %>
+                  <% if passenger.child_ticket? %>
+                    <span class="ml-2 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs border border-orange-300 rounded">儿童票</span>
+                  <% end %>
                 </div>
                 <div class="text-sm text-gray-600 mt-1">
                   <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
-                  <span class="ml-2 text-gray-400">其他证件 ></span>
                 </div>
               </div>
             </div>
-            <%= form.radio_button :passenger_name, passenger.name, 
-                id: "passenger_#{passenger.id}", 
-                class: "w-5 h-5",
-                data: { 
-                  action: "change->booking#selectPassenger",
-                  id_number: passenger.id_number,
-                  phone: passenger.phone
-                } %>
-          </label>
+            <!-- 选中状态: 黄色勾选 -->
+            <div class="text-gray-300" data-booking-target="checkIcon">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+          </div>
         <% end %>
       <% else %>
         <div class="p-4 text-center text-gray-500">
@@ -264,6 +274,7 @@
     </div>
 
     <!-- 隐藏字段 -->
+    <%= form.hidden_field :passenger_ids, id: "booking_passenger_ids", value: "" %>
     <%= form.hidden_field :passenger_id_number, id: "passenger_id_number" %>
     <% if @trip_type == 'multi_city' && @multi_city_flights.present? %>
       <% # 多程航班：存储所有航班信息为 JSON %>
@@ -439,7 +450,7 @@
     <div class="fixed bottom-0 left-0 right-0  mx-auto bg-white border-t shadow-lg">
       <div class="container mx-auto px-4 py-3 flex items-center justify-between">
         <div>
-          <div class="text-xs text-gray-500">共1人 已优惠¥<%= rand(10..50) %></div>
+          <div class="text-xs text-gray-500"><span data-booking-target="passengerCountText">共0人</span> 已优惠¥<%= rand(10..50) %></div>
           <div class="text-2xl font-bold text-red-500" data-booking-target="totalPrice">
             <% base_price = if @trip_type == 'multi_city' && @multi_city_flights.present?
               @multi_city_flights.sum { |f| (f[:offer]&.price || f[:flight]&.final_price || 0) }.to_i
@@ -624,15 +635,9 @@
             </div>
           <% end %>
           
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-bold"><%= @passengers.first&.name %> <%= @passengers.first&.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || @passengers.first&.id_number %> 身份证</div>
-              <div class="text-green-600 flex items-center mt-1">
-                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-              </div>
-            </div>
+          <!-- 乘客信息（动态填充） -->
+          <div data-booking-target="confirmModalPassengerList">
+            <!-- JavaScript will dynamically populate selected passengers here -->
           </div>
           
           <div class="flex items-center justify-between">

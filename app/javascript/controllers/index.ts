@@ -135,6 +135,7 @@ import CharterSearchController from "./charter_search_controller"
 import CharterRoutesSearchController from "./charter_routes_search_controller"
 import TransferTimePickerController from "./transfer_time_picker_controller"
 import DropdownSortController from "./dropdown_sort_controller"
+import InsuranceSelectionController from "./insurance_selection_controller"
 
 const application = Application.start()
 
@@ -273,5 +274,6 @@ application.register("charter-search", CharterSearchController)
 application.register("charter-routes-search", CharterRoutesSearchController)
 application.register("transfer-time-picker", TransferTimePickerController)
 application.register("dropdown-sort", DropdownSortController)
+application.register("insurance-selection", InsuranceSelectionController)
 
 window.Stimulus = application
