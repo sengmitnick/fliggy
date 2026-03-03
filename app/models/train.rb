@@ -10,8 +10,8 @@ class Train < ApplicationRecord
   validates :available_seats, numericality: { greater_than_or_equal_to: 0 }
 
   scope :by_route, ->(departure, arrival) { where(departure_city: departure, arrival_city: arrival) }
-  scope :by_date, ->(date) { where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = ?", date) }
-  scope :available, -> { where('available_seats > ?', 0) }
+  scope :by_date, ->(date) { where("DATE(departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') = :date", date: date) }
+  scope :available, -> { where('available_seats > :zero', zero: 0) }
   scope :high_speed, -> { where("train_number LIKE 'G%' OR train_number LIKE 'D%'") }
   scope :ordered_by_time, ->(direction = :asc) { 
     order(Arel.sql("EXTRACT(HOUR FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') * 60 + EXTRACT(MINUTE FROM departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Shanghai') #{direction == :desc ? 'DESC' : 'ASC'}"))
