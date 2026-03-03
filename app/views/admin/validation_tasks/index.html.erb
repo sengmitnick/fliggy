@@ -9,57 +9,60 @@
     </div>
   </div>
 
-  <!-- Search Box -->
+  <!-- Filters Section -->
   <div class="mb-6">
-    <%= form_with url: admin_validation_tasks_path, method: :get, class: "max-w-2xl" do |f| %>
-      <div class="relative">
-        <%= f.text_field :q, 
-            value: @search_query,
-            placeholder: "搜索任务ID、标题或描述（例如：v320、滑雪、张家界）",
-            class: "w-full px-4 py-3 pl-12 pr-4 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
-        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-          <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <!-- Directory Filter (Left) -->
+      <% unless @search_query.present? %>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">目录筛选：</span>
+          
+          <!-- All Tasks Button -->
+          <%= link_to admin_validation_tasks_path, 
+              class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory.nil? ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
+            全部 (<%= @tasks.total_count %>)
+          <% end %>
+          
+          <!-- Directory Buttons -->
+          <% @directories.each do |directory| %>
+            <%= link_to admin_validation_tasks_path(directory: directory), 
+                class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory == directory ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
+              <%= directory %>
+            <% end %>
+          <% end %>
         </div>
+      <% end %>
+      
+      <!-- Search Box (Right) -->
+      <div class="<%= @search_query.present? ? 'w-full' : 'ml-auto' %>">
+        <%= form_with url: admin_validation_tasks_path, method: :get, class: "max-w-md" do |f| %>
+          <div class="relative">
+            <%= f.text_field :q, 
+                value: @search_query,
+                placeholder: "搜索任务ID、标题或描述（例如：v320、滑雪、张家界）",
+                class: "w-full px-4 py-2 pl-10 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <% if @search_query.present? %>
+              <%= link_to admin_validation_tasks_path, class: "absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
         <% if @search_query.present? %>
-          <%= link_to admin_validation_tasks_path, class: "absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          <% end %>
-        <% end %>
-      </div>
-    <% end %>
-    <% if @search_query.present? %>
-      <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        搜索 "<span class="font-semibold"><%= @search_query %></span>" 找到 <%= @tasks.total_count %> 个结果
-      </div>
-    <% end %>
-  </div>
-
-  <!-- Directory Filter -->
-  <% unless @search_query.present? %>
-    <div class="mb-6">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">目录筛选：</span>
-        
-        <!-- All Tasks Button -->
-        <%= link_to admin_validation_tasks_path, 
-            class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory.nil? ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
-          全部 (<%= @tasks.total_count %>)
-        <% end %>
-        
-        <!-- Directory Buttons -->
-        <% @directories.each do |directory| %>
-          <%= link_to admin_validation_tasks_path(directory: directory), 
-              class: "px-4 py-2 rounded-lg text-sm font-medium transition-colors #{@selected_directory == directory ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}" do %>
-            <%= directory %>
-          <% end %>
+          <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            搜索 "<span class="font-semibold"><%= @search_query %></span>" 找到 <%= @tasks.total_count %> 个结果
+          </div>
         <% end %>
       </div>
     </div>
-  <% end %>
+  </div>
 
   <!-- Tasks Table -->
   <div class="card bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
