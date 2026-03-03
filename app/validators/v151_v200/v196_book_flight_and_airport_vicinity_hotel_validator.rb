@@ -2,29 +2,33 @@
 
 require_relative '../base_validator'
 
-# 验证用例196: 预订航班+机场3公里内酒店
+# V196: 给王芳预订明天北京到上海的航班+机场3公里内酒店（住一晚）
 #
 # 任务描述:
-#   预订航班+机场3公里内酒店（便于转机）
+#   用户需要为王芳预订出行服务，包含：
+#   1) 航班订单（Booking，北京到上海，明天出发）
+#   2) 机场附近酒店（HotelBooking，上海机场≤3公里范围，住一晚，便于转机）
+#   3) 乘客和入住人（王芳）
+#   确保航班出发/到达城市、酒店距离机场范围、住宿天数、乘客信息、入住日期与航班衔接正确
 #
 # 评分标准:
-#   - 创建了航班订单 (25%)
-#   - 创建了酒店订单 (25%)
+#   - 创建了航班订单（北京→上海） (25%)
+#   - 创建了酒店订单（上海） (25%)
 #   - 酒店在机场附近（≤3公里） (15%)
-#   - 出发/到达城市正确 (10%)
-#   - 乘客和入住人信息正确（周敏） (15%)
-#   - 日期合理 (10%)
+#   - 出发/到达城市正确（北京→上海） (10%)
+#   - 乘客和入住人信息正确（王芳） (15%)
+#   - 日期合理（入住日期为航班到达日或次日） (10%)
 module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
     self.task_id = '98182723-1c20-486b-b2c2-ba4d2e48e1df'
-    self.title = '给周敏预订明天北京到上海的航班+机场3公里内酒店'
-    self.description = '帮周敏订明天从北京到上海的航班，并预订机场3公里内的酒店（便于转机）'
+    self.title = '给王芳预订明天北京到上海的航班+机场3公里内酒店（住一晚）'
+    self.description = '给王芳预订明天北京到上海的航班+机场3公里内酒店（住一晚）'
     self.timeout_seconds = 300
     
     def prepare
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏')
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
@@ -52,7 +56,7 @@ module V151V200
         "数据包缺少#{@arrival_city}机场附近（≤#{@max_distance}公里）的酒店"
       
       {
-        task: "请为#{@passenger.name}预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班，并预订机场#{@max_distance}公里内的酒店（便于转机）",
+        task: "请为#{@passenger.name}预订#{@travel_date.strftime('%m月%d日')}从#{@departure_city}到#{@arrival_city}的航班，并预订机场#{@max_distance}公里内的酒店（住一晚，便于转机）",
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @travel_date.strftime('%Y-%m-%d'),
@@ -135,7 +139,7 @@ module V151V200
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = user.passengers.find_by!(name: '周敏')  # 移除 data_version: 0，default_scope 已处理
+      passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       
       # 选择航班
       flight = @available_flights.min_by(&:price)
@@ -200,7 +204,7 @@ module V151V200
     
     def restore_from_state(data)
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '周敏')
+      @passenger = user.passengers.find_by!(name: '王芳', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
