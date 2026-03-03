@@ -327,6 +327,11 @@ module V301V350
         room_type: @room_type,
         attraction_id: @attraction&.id,
         hotel_id: @hotel&.id,
+        ticket_id: @ticket&.id,
+        hotel_room_id: @hotel_room&.id,
+        ski_equipment_id: @ski_equipment&.id,
+        liuqiang_id: @liuqiang&.id,
+        chenjing_id: @chenjing&.id,
         expected_contact_names: @expected_contact_names,
         expected_contact_phones: @expected_contact_phones
       }
@@ -342,8 +347,14 @@ module V301V350
       @room_type = state['room_type']
       @expected_contact_names = state['expected_contact_names']
       @expected_contact_phones = state['expected_contact_phones']
-      @attraction = Attraction.find_by(id: state['attraction_id']) if state['attraction_id']
-      @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      
+      @attraction = Attraction.find(state['attraction_id']) if state['attraction_id']
+      @hotel = Hotel.find(state['hotel_id']) if state['hotel_id']
+      @ticket = Ticket.find(state['ticket_id']) if state['ticket_id']
+      @hotel_room = HotelRoom.find(state['hotel_room_id']) if state['hotel_room_id']
+      @ski_equipment = AttractionActivity.find(state['ski_equipment_id']) if state['ski_equipment_id']
+      @liuqiang = Passenger.find(state['liuqiang_id']) if state['liuqiang_id']
+      @chenjing = Passenger.find(state['chenjing_id']) if state['chenjing_id']
     end
   end
 end
