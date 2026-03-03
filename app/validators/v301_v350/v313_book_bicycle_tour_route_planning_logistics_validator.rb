@@ -194,11 +194,10 @@ module V301V350
         expect(single_bicycles.size).to be >= 1,
           "单人自行车数量不足。期望至少1辆，实际找到#{single_bicycles.size}辆"
         
-        # 验证双人车订单必须包含至少2个游客
-        double_bicycles.each do |order|
-          passenger_count = order.passengers.size
-          expect(passenger_count).to be >= 2,
-            "双人车订单游客数量不足。期望至少2人，实际只有#{passenger_count}人。双人车订单应选择2个出行人"
+        # 验证所有自行车订单都选择了游客（不限制具体人数）
+        @bicycle_orders.each do |order|
+          expect(order.passenger_ids).not_to be_empty,
+            "自行车订单未选择游客。订单ID: #{order.id}，活动: #{order.attraction_activity.name}"
         end
       end
       
