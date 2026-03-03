@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# V320: 刘强和陈静想45天后去崇礼滑雪，需2人，要万龙滑雪场门票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）
+# V320: 刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）
 #
 # 任务描述:
 #   用户需要在45天后为2人（刘强、陈静）预订崇礼滑雪服务，包含：
@@ -26,8 +26,8 @@ module V301V350
   class V320BookWinterSkiResortPackageValidator < BaseValidator
     self.validator_id = 'v320_book_winter_ski_resort_package_validator'
     self.task_id = "fb78ecc4-1181-49ba-9b77-09a5c4368c42"
-    self.title = '刘强和陈静想45天后去崇礼滑雪，需2人，要万龙滑雪场门票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
-    self.description = '刘强和陈静想45天后去崇礼滑雪，需2人，要万龙滑雪场门票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
+    self.title = '刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
+    self.description = '刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
     self.timeout_seconds = 180
 
     def prepare
@@ -67,9 +67,10 @@ module V301V350
         data_version: 0
       )
 
-      # 查找滑雪票
+      # 查找滑雪票（明确指定全天票）
       @ticket = Ticket.find_by!(
         attraction: @attraction,
+        name: "崇礼万龙滑雪场全天票",
         ticket_type: "adult",
         data_version: 0
       )
@@ -93,7 +94,7 @@ module V301V350
       )
 
       {
-        task: "请为刘强和陈静预订#{@visit_date.strftime('%Y年%m月%d日')}（45天后）的#{@resort_name}成人滑雪票2张，以及#{@hotel_name}#{@room_type}（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
+        task: "请为刘强和陈静预订#{@visit_date.strftime('%Y年%m月%d日')}（45天后）的张家口崇礼#{@resort_name}全天票2张（成人票），以及#{@hotel_name}#{@room_type}（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
         requirements: {
           resort_name: @resort_name,
           city_name: @city_name,
@@ -101,7 +102,7 @@ module V301V350
           check_in_date: @check_in_date,
           check_out_date: @check_out_date,
           ticket_quantity: 2,
-          ticket_type: '成人票',
+          ticket_type: '全天票（成人）',
           nights: 2,
           hotel_name: @hotel_name,
           room_type: @room_type,
