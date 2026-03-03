@@ -18,7 +18,7 @@ namespace :validator do
     
     if current_version == old_version
       puts "✅ Schema version already in sync: #{current_version}"
-      return
+      next
     end
     
     # Update validator version
