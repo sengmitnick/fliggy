@@ -1,8 +1,45 @@
 # frozen_string_literal: true
 
 namespace :validator do
+  desc "Sync data_pack_validator.rb with current schema version"
+  task sync_schema_version: :environment do
+    validator_file = Rails.root.join('lib/data_pack_validator.rb')
+    schema_file = Rails.root.join('db/schema.rb')
+    
+    # Extract current schema version
+    schema_content = File.read(schema_file)
+    current_version = schema_content.match(/ActiveRecord::Schema\[\d+\.\d+\]\.define\(version:\s*([\d_]+)\)/)[1]
+    
+    # Read validator file
+    validator_content = File.read(validator_file)
+    
+    # Extract current validator version
+    old_version = validator_content.match(/VALIDATED_SCHEMA_VERSION = '([\d_]+)'/)[1]
+    
+    if current_version == old_version
+      puts "✅ Schema version already in sync: #{current_version}"
+      return
+    end
+    
+    # Update validator version
+    new_content = validator_content.gsub(
+      /VALIDATED_SCHEMA_VERSION = '[\d_]+'/,
+      "VALIDATED_SCHEMA_VERSION = '#{current_version}'"
+    )
+    
+    File.write(validator_file, new_content)
+    
+    puts "✅ Updated data_pack_validator.rb"
+    puts "   Old version: #{old_version}"
+    puts "   New version: #{current_version}"
+  end
+
   desc "Reset baseline data (clear entire database and reload data packs)"
   task reset_baseline: :environment do
+    # Auto-sync schema version before validation
+    puts "\n🔄 Auto-syncing schema version..."
+    Rake::Task['validator:sync_schema_version'].invoke
+    
     puts "\n" + "="*80
     puts "🔄 重置验证器基线数据 - 模拟甲方交付新环境初始化"
     puts "="*80
