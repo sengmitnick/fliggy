@@ -2,24 +2,29 @@
 
 require_relative '../base_validator'
 
-# 验证用例281: 给张三一家预订亲子旅游套餐
+# V281: 给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）
 #
 # 任务描述:
-#   给张三、王芳和小明（9岁）预订包含亲子活动的跟团游套餐
+#   用户需要为张三一家预订三亚亲子旅游服务，包含：
+#   1) 跟团游订单（TourGroupBooking，三亚目的地，包含亲子标签的产品）
+#   2) 人数配置（2大1小：张三、王芳、小明）
+#   3) 游客信息（3人：张三、王芳、小明，含年龄、身份证号）
+#   4) 联系人信息（成人之一：张三或王芳）
+#   确保目的地为三亚、产品包含亲子元素、人数配置正确、游客信息完整、联系人为成人
 #
 # 评分标准:
-#   - 创建跟团游订单 (20%)
-#   - 人数配置正确 (2大1小) (15%)
+#   - 创建了跟团游预订（三亚） (20%)
+#   - 人数配置正确（2大1小：张三、王芳、小明） (15%)
 #   - 游客信息正确（张三、王芳、小明） (15%)
-#   - 联系人信息正确 (15%)
-#   - 行程包含亲子元素 (20%)
-#   - 订单状态正确 (15%)
+#   - 联系人信息正确（张三或王芳，成人） (15%)
+#   - 行程适合亲子家庭（标题或标签包含"亲子"关键词） (20%)
+#   - 订单状态正确（pending或confirmed） (15%)
 module V251V300
   class V281BookFamilyPackageValidator < BaseValidator
     self.validator_id = 'v281_book_family_package_validator'
     self.task_id = '97f3e67d-07f1-4e31-b1bc-0f6b87f0d09f'
-    self.title = '给张三、王芳和小明（9岁）预订包含亲子活动的跟团游套餐'
-    self.description = '给张三、王芳和小明（9岁）预订包含亲子活动的跟团游套餐'
+    self.title = '给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）'
+    self.description = '给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）'
     self.timeout_seconds = 300
     
     def prepare
@@ -102,12 +107,12 @@ module V251V300
           "联系人电话与姓名不匹配。联系人: #{@booking.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@booking.contact_phone}"
       end
       
-      add_assertion "行程包含亲子元素", weight: 20 do
+      add_assertion "行程适合亲子家庭", weight: 20 do
         product = @booking.tour_group_product
         expect(product).not_to be_nil, "订单没有关联产品"
-        has_family_tag = product.tags.to_s.include?(@keyword)
+        has_family_tag = product.tags.to_s.include?(@keyword) || product.title.to_s.include?(@keyword)
         expect(has_family_tag).to be(true),
-          "产品未包含亲子标签。期望包含: #{@keyword}, 实际标签: #{product.tags}"
+          "产品不适合亲子游。期望包含关键词: #{@keyword}, 实际标题: #{product.title}, 标签: #{product.tags}"
       end
       
       add_assertion "订单状态正确", weight: 15 do

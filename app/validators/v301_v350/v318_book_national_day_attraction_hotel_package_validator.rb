@@ -2,28 +2,33 @@
 
 require_relative '../base_validator'
 
-# V318: 给刘强和陈静预订7天后张家界国家森林公园门票+张家界武陵源度假酒店（2晚，1间房，2人）
+# V318: 刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张成人票）和武陵源度假酒店豪华双床房（7天后入住，2晚，1间房）
 #
 # 任务描述:
-#   刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张成人票）和武陵源度假酒店豪华双床房（2晚）
+#   用户需要在7天后为2人（刘强、陈静）预订张家界旅游服务，包含：
+#   1) 景区门票订单（TicketOrder，张家界国家森林公园成人票2张）
+#   2) 酒店订单（HotelBooking，张家界武陵源度假酒店豪华双床房，2晚，1间房）
+#   确保景区、酒店、票型、房型、日期和人数正确
 #
 # 评分标准:
-#   - 创建门票订单+景区正确 (20%)
+#   - 创建了门票订单（张家界国家森林公园） (12%)
+#   - 景区正确（张家界国家森林公园） (8%)
 #   - 门票类型和数量正确（2张成人票） (8%)
 #   - 门票游客信息正确（刘强+陈静） (7%)
 #   - 游玩日期正确（7天后） (8%)
-#   - 创建酒店订单+酒店名称正确 (20%)
+#   - 创建了酒店订单（张家界武陵源度假酒店） (12%)
+#   - 酒店名称正确（张家界武陵源度假酒店） (8%)
 #   - 房型正确（豪华双床房） (5%)
 #   - 入住退房日期正确（2晚） (8%)
-#   - 房间数和人数正确（1间2人） (5%)
+#   - 房间数和人数正确（1间房，2成人） (5%)
 #   - 联系人信息正确（刘强或陈静） (10%)
 #   - 订单状态和价格有效 (9%)
 module V301V350
   class V318BookNationalDayAttractionHotelPackageValidator < BaseValidator
     self.validator_id = 'v318_book_national_day_attraction_hotel_package_validator'
     self.task_id = "2fa37623-24e7-46f7-a054-b2c98c7c7227"
-    self.title = '给张三刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张）和武陵源度假酒店豪华双床房（2晚）'
-    self.description = "刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张）和武陵源度假酒店豪华双床房（2晚）"
+    self.title = '刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张成人票）和武陵源度假酒店豪华双床房（7天后入住，2晚，1间房）'
+    self.description = '刘强和陈静想7天后去张家界，需2人，要国家森林公园门票（2张成人票）和武陵源度假酒店豪华双床房（7天后入住，2晚，1间房）'
     self.timeout_seconds = 180
 
     def prepare
@@ -325,6 +330,10 @@ module V301V350
         room_type: @room_type,
         attraction_id: @attraction&.id,
         hotel_id: @hotel&.id,
+        ticket_id: @ticket&.id,
+        hotel_room_id: @hotel_room&.id,
+        liuqiang_id: @liuqiang&.id,
+        chenjing_id: @chenjing&.id,
         expected_contact_names: @expected_contact_names,
         expected_contact_phones: @expected_contact_phones
       }
@@ -340,8 +349,13 @@ module V301V350
       @room_type = state['room_type']
       @expected_contact_names = state['expected_contact_names']
       @expected_contact_phones = state['expected_contact_phones']
-      @attraction = Attraction.find_by(id: state['attraction_id']) if state['attraction_id']
-      @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      
+      @attraction = Attraction.find(state['attraction_id']) if state['attraction_id']
+      @hotel = Hotel.find(state['hotel_id']) if state['hotel_id']
+      @ticket = Ticket.find(state['ticket_id']) if state['ticket_id']
+      @hotel_room = HotelRoom.find(state['hotel_room_id']) if state['hotel_room_id']
+      @liuqiang = Passenger.find(state['liuqiang_id']) if state['liuqiang_id']
+      @chenjing = Passenger.find(state['chenjing_id']) if state['chenjing_id']
     end
   end
 end

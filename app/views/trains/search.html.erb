@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-surface" data-controller="train-list">
+<div class="min-h-screen bg-surface-elevated" data-controller="train-list">
   <!-- Header with Route Info -->
   <div class="bg-white border-b border-border sticky top-0 z-10">
     <!-- Back Button and Actions -->
@@ -29,7 +29,7 @@
     <!-- Date Selector -->
     <div class="flex overflow-x-auto gap-2 px-4 pb-3 no-scrollbar">
       <% (0..4).each do |offset| %>
-        <% target_date = Date.today + offset.days %>
+        <% target_date = @date + offset.days %>
         <% is_selected = target_date == @date %>
         <%= link_to search_trains_path(
           departure_city: @departure_city,
@@ -101,8 +101,9 @@
 
   <!-- Train List -->
   <div class="px-4 pb-20">
-    <% if @trains.any? %>
-      <% @trains.each do |train| %>
+    <% trains_array = @trains.to_a %>
+    <% if trains_array.any? %>
+      <% trains_array.each do |train| %>
         <%= link_to train_path(train), class: "block" do %>
           <div class="bg-white rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow mb-3 overflow-hidden" data-train-list-target="trainItem">
             <!-- Main Train Info -->

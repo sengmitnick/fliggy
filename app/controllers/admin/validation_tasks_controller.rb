@@ -8,9 +8,18 @@ class Admin::ValidationTasksController < Admin::BaseController
     # 获取所有目录用于筛选
     @directories = all_tasks.map { |t| extract_directory(t[:validator_id]) }.uniq.sort
     
-    # 按目录筛选
-    @selected_directory = params[:directory]
-    filtered_tasks = if @selected_directory.present?
+    # 搜索功能
+    @search_query = params[:q].to_s.strip
+    filtered_tasks = if @search_query.present?
+      # 模糊搜索：支持 validator_id、title、description
+      all_tasks.select do |t|
+        t[:validator_id].to_s.downcase.include?(@search_query.downcase) ||
+        t[:title].to_s.downcase.include?(@search_query.downcase) ||
+        t[:description].to_s.downcase.include?(@search_query.downcase)
+      end
+    elsif params[:directory].present?
+      # 按目录筛选
+      @selected_directory = params[:directory]
       all_tasks.select { |t| extract_directory(t[:validator_id]) == @selected_directory }
     else
       all_tasks

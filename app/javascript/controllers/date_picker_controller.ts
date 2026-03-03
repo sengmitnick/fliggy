@@ -177,6 +177,12 @@ export default class extends Controller<HTMLElement> {
       const url = new URL(window.location.href)
       url.searchParams.set('date', dateStr)
       window.location.href = url.toString()
+    } else if (window.location.pathname.includes('/trains/search')) {
+      // Trains search page mode - reload with new date
+      console.log('Date picker: Trains search mode, reloading with new date')
+      const url = new URL(window.location.href)
+      url.searchParams.set('date', dateStr)
+      window.location.href = url.toString()
     } else if (window.location.pathname.includes('/chartered_tours/search')) {
       // Chartered tours search page mode - reload with new date
       console.log('Date picker: Chartered tours search mode, reloading with new date')

@@ -2,27 +2,32 @@
 
 require_relative '../base_validator'
 
-# V320: 预订45天后崇礼万龙滑雪场门票+崇礼万龙度假酒店（2晚，1间房，2人）
+# V320: 刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）
 #
 # 任务描述:
-#   用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）
+#   用户需要在45天后为2人（刘强、陈静）预订崇礼滑雪服务，包含：
+#   1) 滑雪场门票订单（TicketOrder，崇礼万龙滑雪场成人票2张）
+#   2) 酒店订单（HotelBooking，崇礼万龙度假酒店滑雪主题大床房，2晚，1间房）
+#   确保滑雪场、酒店、票型、房型、日期和人数正确
 #
 # 评分标准:
-#   - 创建滑雪票订单+滑雪场正确 (20%)
+#   - 创建了滑雪票订单（崇礼万龙滑雪场） (12%)
+#   - 滑雪场正确（崇礼万龙滑雪场） (8%)
 #   - 门票类型和数量正确（2张成人票） (8%)
 #   - 滑雪票游客信息正确（刘强+陈静） (7%)
 #   - 滑雪日期正确（45天后） (8%)
-#   - 创建酒店订单+酒店名称房型正确 (20%)
+#   - 创建了酒店订单（崇礼万龙度假酒店） (12%)
+#   - 酒店名称和房型正确（崇礼万龙度假酒店 滑雪主题大床房） (8%)
 #   - 入住退房日期正确（2晚） (8%)
-#   - 房间数和人数正确（1间2人） (5%)
+#   - 房间数和人数正确（1间房，2成人） (5%)
 #   - 联系人信息正确（刘强或陈静） (15%)
 #   - 订单状态和价格有效 (9%)
 module V301V350
   class V320BookWinterSkiResortPackageValidator < BaseValidator
     self.validator_id = 'v320_book_winter_ski_resort_package_validator'
     self.task_id = "fb78ecc4-1181-49ba-9b77-09a5c4368c42"
-    self.title = '给张三用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）'
-    self.description = "用户需要预订45天后的崇礼万龙滑雪场成人滑雪票（2张）和崇礼万龙度假酒店滑雪主题大床房（入住2晚）"
+    self.title = '刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
+    self.description = '刘强和陈静想45天后去张家口崇礼滑雪，需2人，要万龙滑雪场全天票（2张成人票）和万龙度假酒店滑雪主题大床房（45天后入住，2晚，1间房）'
     self.timeout_seconds = 180
 
     def prepare
@@ -62,9 +67,10 @@ module V301V350
         data_version: 0
       )
 
-      # 查找滑雪票
+      # 查找滑雪票（明确指定全天票）
       @ticket = Ticket.find_by!(
         attraction: @attraction,
+        name: "崇礼万龙滑雪场全天票",
         ticket_type: "adult",
         data_version: 0
       )
@@ -88,7 +94,7 @@ module V301V350
       )
 
       {
-        task: "请为刘强和陈静预订#{@visit_date.strftime('%Y年%m月%d日')}（45天后）的#{@resort_name}成人滑雪票2张，以及#{@hotel_name}#{@room_type}（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
+        task: "请为刘强和陈静预订#{@visit_date.strftime('%Y年%m月%d日')}（45天后）的张家口崇礼#{@resort_name}全天票2张（成人票），以及#{@hotel_name}#{@room_type}（入住#{@check_in_date.strftime('%m月%d日')}至#{@check_out_date.strftime('%m月%d日')}，共2晚）。",
         requirements: {
           resort_name: @resort_name,
           city_name: @city_name,
@@ -96,7 +102,7 @@ module V301V350
           check_in_date: @check_in_date,
           check_out_date: @check_out_date,
           ticket_quantity: 2,
-          ticket_type: '成人票',
+          ticket_type: '全天票（成人）',
           nights: 2,
           hotel_name: @hotel_name,
           room_type: @room_type,
@@ -322,6 +328,11 @@ module V301V350
         room_type: @room_type,
         attraction_id: @attraction&.id,
         hotel_id: @hotel&.id,
+        ticket_id: @ticket&.id,
+        hotel_room_id: @hotel_room&.id,
+        ski_equipment_id: @ski_equipment&.id,
+        liuqiang_id: @liuqiang&.id,
+        chenjing_id: @chenjing&.id,
         expected_contact_names: @expected_contact_names,
         expected_contact_phones: @expected_contact_phones
       }
@@ -337,8 +348,14 @@ module V301V350
       @room_type = state['room_type']
       @expected_contact_names = state['expected_contact_names']
       @expected_contact_phones = state['expected_contact_phones']
-      @attraction = Attraction.find_by(id: state['attraction_id']) if state['attraction_id']
-      @hotel = Hotel.find_by(id: state['hotel_id']) if state['hotel_id']
+      
+      @attraction = Attraction.find(state['attraction_id']) if state['attraction_id']
+      @hotel = Hotel.find(state['hotel_id']) if state['hotel_id']
+      @ticket = Ticket.find(state['ticket_id']) if state['ticket_id']
+      @hotel_room = HotelRoom.find(state['hotel_room_id']) if state['hotel_room_id']
+      @ski_equipment = AttractionActivity.find(state['ski_equipment_id']) if state['ski_equipment_id']
+      @liuqiang = Passenger.find(state['liuqiang_id']) if state['liuqiang_id']
+      @chenjing = Passenger.find(state['chenjing_id']) if state['chenjing_id']
     end
   end
 end

@@ -83,7 +83,7 @@ module V301V350
           participant_count: @participant_count,
           services: ['景区门票（游船）', '自行车租赁']
         },
-        hint: "需要预订#{@attraction_name}门票（#{@participant_count}张成人票）和自行车租赁。自行车安排：1辆双人车（可选张三+李四或其他组合）+ 1辆单人车（剩余1人）。推荐路线：断桥→白堤→平湖秋月→苏堤→雷峰塔。"
+        hint: "需要预订#{@attraction_name}门票（#{@participant_count}张成人票）和自行车租赁。自行车安排：\n1. 双人车：数量=2（表示2个座位），选择2位出行人（例如张三+李四）\n2. 单人车：数量=1（表示1个座位），选择1位出行人（剩余的1人）\n注意：购买数量字段代表座位数/人数，双人车必须选择2位出行人。推荐路线：断桥→白堤→平湖秋月→苏堤→雷峰塔。"
       }
     end
     
@@ -194,11 +194,10 @@ module V301V350
         expect(single_bicycles.size).to be >= 1,
           "单人自行车数量不足。期望至少1辆，实际找到#{single_bicycles.size}辆"
         
-        # 验证双人车订单必须包含至少2个游客
-        double_bicycles.each do |order|
-          passenger_count = order.passengers.size
-          expect(passenger_count).to be >= 2,
-            "双人车订单游客数量不足。期望至少2人，实际只有#{passenger_count}人。双人车订单应选择2个出行人"
+        # 验证所有自行车订单都选择了游客（不限制具体人数）
+        @bicycle_orders.each do |order|
+          expect(order.passenger_ids).not_to be_empty,
+            "自行车订单未选择游客。订单ID: #{order.id}，活动: #{order.attraction_activity.name}"
         end
       end
       

@@ -50,8 +50,8 @@ class ActivityOrder < ApplicationRecord
   
   def passenger_ids_match_quantity
     return if passenger_ids.blank? # 允许为空，用于passenger_name方式
-    if passenger_ids.is_a?(Array) && passenger_ids.size != quantity
-      errors.add(:passenger_ids, "选择的出行人数量必须等于购买数量")
+    if passenger_ids.is_a?(Array) && passenger_ids.size > quantity
+      errors.add(:passenger_ids, "选择的出行人数量不能超过购买数量（#{quantity}人）")
     end
   end
 end

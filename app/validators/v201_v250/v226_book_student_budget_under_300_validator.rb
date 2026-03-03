@@ -2,26 +2,30 @@
 
 require_relative '../base_validator'
 
-# V226: 预订学生预算（总预算≤300元）
+# V226: 给张三预订明天从广州到深圳的最便宜火车票+经济型酒店住1晚，总预算不超过300元
 #
 # 任务描述:
-#   用户需要预订学生出行（火车票+经济酒店），总预算≤300元
+#   用户需要为张三预订明天从广州到深圳的出行，包含：
+#   1) 火车票订单（TrainBooking，广州→深圳，明天出发，二等座）
+#   2) 酒店订单（HotelBooking，深圳，入住1晚，经济型酒店）
+#   3) 乘车人和入住人信息（张三）
+#   必须选择最便宜的火车二等座和最便宜的经济型酒店，确保总价≤300元
 #
 # 评分标准:
-#   - 创建了火车票订单 (15%)
-#   - 创建了酒店订单 (15%)
-#   - 出行日期正确 (10%)
-#   - 酒店入住日期正确 (10%)
-#   - 乘车人信息正确 (10%)
-#   - 入住人信息正确 (5%)
-#   - 总价格≤300元 (30%)
+#   - 创建了火车票订单（广州→深圳） (15%)
+#   - 创建了酒店订单（深圳） (15%)
+#   - 出行日期正确（明天） (10%)
+#   - 酒店入住日期正确（明天入住，后天退房） (10%)
+#   - 乘车人信息正确（张三，含姓名、身份证、手机号） (10%)
+#   - 入住人信息正确（张三，含姓名、手机号） (5%)
+#   - 总价格≤300元（火车票+酒店） (30%)
 #   - 订单状态有效 (5%)
 module V201V250
   class V226BookStudentBudgetUnder300Validator < BaseValidator
     self.validator_id = 'v226_book_student_budget_under_300_validator'
     self.task_id = '3ff354ff-4f4f-4f6f-6f7f-5f8a9b0c1d2f'
-    self.title = '张三是学生，想从广州到深圳找同学玩，需要预订火车票和经济型酒店住1晚，总预算只有300元'
-    self.description = '张三是学生，想从广州到深圳找同学玩，需要预订火车票和经济型酒店住1晚，总预算只有300元'
+    self.title = '给张三预订明天从广州到深圳的最便宜火车票+经济型酒店住1晚，总预算不超过300元'
+    self.description = '给张三预订明天从广州到深圳的最便宜火车票+经济型酒店住1晚，总预算不超过300元'
     self.timeout_seconds = 300
     
     def prepare
@@ -53,15 +57,16 @@ module V201V250
       @check_out_date = @check_in_date + 1.day
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的学生出行，包括火车票和经济型酒店1晚，总预算≤#{@max_budget}元。",
+        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@arrival_city}的最便宜出行方案，包括火车票（二等座）和经济型酒店1晚，总预算≤#{@max_budget}元。",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           travel_date: @travel_date,
-          max_budget: "≤#{@max_budget}元",
-          purpose: '学生经济出行'
+          seat_type: '二等座（最便宜）',
+          hotel_type: '经济型酒店（最便宜）',
+          max_budget: "≤#{@max_budget}元（硬约束）"
         },
-        hint: "选择最便宜的火车票和酒店，总价≤#{@max_budget}元。"
+        hint: "必须选择最便宜的火车二等座和最便宜的经济型酒店，确保总价不超过#{@max_budget}元。"
       }
     end
     
@@ -126,7 +131,7 @@ module V201V250
         total_price = train_price + hotel_price
         
         expect(total_price).to be <= @max_budget,
-          "总价格超出学生预算。火车票: #{train_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
+          "总价格超出预算。火车票: #{train_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -155,7 +160,7 @@ module V201V250
         break if best_combo
       end
       
-      raise "未找到符合学生预算的组合" if best_combo.nil?
+      raise "未找到符合预算（≤#{@max_budget}元）的组合" if best_combo.nil?
       
       TrainBooking.create!(
         user: user,
