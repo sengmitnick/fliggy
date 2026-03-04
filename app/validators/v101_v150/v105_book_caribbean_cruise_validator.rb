@@ -2,32 +2,46 @@
 
 require_relative '../base_validator'
 
-# 验证用例105: 预订加勒比邮轮（海洋光谱号，10天9晚，迈阿密出发）
+# 验证用例105: 给小明、小红预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，豪华套房，选择最近的班次）
 #
-# 核心验证点:
-# 1. 船只选择: 海洋光谱号
-# 2. 出发港口: 迈阿密
-# 3. 行程时长: 10天9晚
-# 4. 舱房类型: 豪华套房（suite）
-# 5. 班次选择: 最近日期的可用班次
-# 6. 订单信息: 预订数量、乘客信息、联系人、电话、总价计算
+# 任务描述:
+#   用户想预订迈阿密出发的加勒比邮轮，为2位成人（小明、小红）。
+#   要求海洋光谱号，行程10天9晚，选择最近的一个班次，预订豪华套房（顶级享受）。
+#   Agent 需要在符合条件的班次中，选择departure_date（出发日期）最早的班次。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索迈阿密出发的加勒比邮轮产品
+#   2. 筛选船只名包含"海洋光谱号"的班次
+#   3. 筛选出发港包含"迈阿密"、行程10天9晚的班次
+#   4. 筛选加勒比航线（region='caribbean'）的班次
+#   5. 选择departure_date最早的班次
+#   6. 预订豪华套房（category='suite'），为2位成人
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解邮轮筛选：船只名包含"海洋光谱号"
+#   2. 需要理解出发港筛选：departure_port包含"迈阿密"
+#   3. 需要理解行程天数：duration_days=10且duration_nights=9
+#   4. 需要理解航线区域筛选：region='caribbean'（加勒比航线）
+#   5. 需要选择最近的班次：对比多个班次的departure_date，选择最早的
+#   6. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确筛选并选择最早日期的班次
 #
 # 评分标准（9项，总计100分）：
-#   - 订单已创建（20分）
-#   - 船只正确（海洋光谱号）（20分）
-#   - 出发港正确（迈阿密）（15分）
-#   - 行程天数正确（10天9晚）（15分）
-#   - 舱房类型正确（豪华套房）（15分）
-#   - 预订数量正确（2位成人）（5分）
+#   - 订单已创建（15分）
+#   - 船只正确（海洋光谱号）（10分）
+#   - 出发港正确（迈阿密）（10分）
+#   - 行程天数正确（10天9晚）（10分）
+#   - 舱房类型正确（豪华套房）（10分）
+#   - 预订数量正确（2位成人）（10分）
+#   - 联系人信息正确（小明或小红）（10分）
+#   - 选择了最近日期的班次（15分）
 #   - 乘客信息正确（小明、小红）（10分）
-#   - 联系人信息正确（小明或小红）（5分）
-#   - 选择了最近日期的班次（5分）
 module V101V150
   class V105BookCaribbeanCruiseValidator < BaseValidator
     self.validator_id = 'v105_book_caribbean_cruise_validator'
     self.task_id = 'f5e2d8c1-4a9b-3d76-8e1f-6c3a5b4d9e72'
-    self.title = '帮小明和小红订加勒比邮轮，要海洋光谱号，10天9晚的行程，迈阿密出发，选最近的班次，豪华套房（顶级享受）'
-    self.description = '帮小明和小红订加勒比邮轮，要海洋光谱号，10天9晚的行程，迈阿密出发，选最近的班次，豪华套房（顶级享受）'
+    self.title = '给小明、小红预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，豪华套房，选择最近的班次）'
+    self.description = '预订迈阿密出发加勒比邮轮（海洋光谱号，10天9晚，豪华套房）'
     self.timeout_seconds = 240
   
     def prepare
@@ -66,8 +80,8 @@ module V101V150
     end
   
     def verify
-      # 断言1: 订单已创建（权重20%）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建（15%）
+      add_assertion "订单已创建", weight: 15 do
         all_orders = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -79,24 +93,24 @@ module V101V150
     
       return if @order.nil?
     
-      # 断言2: 船只正确（权重20%）
-      add_assertion "船只正确（海洋光谱号）", weight: 20 do
+      # 断言2: 船只正确（10%）
+      add_assertion "船只正确（海洋光谱号）", weight: 10 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
         expect(ship.name).to include(@ship_keyword),
           "船只不符合要求。期望包含: #{@ship_keyword}, 实际: #{ship.name}"
       end
     
-      # 断言3: 出发港正确（权重15%）
-      add_assertion "出发港正确（迈阿密）", weight: 15 do
+      # 断言3: 出发港正确（10%）
+      add_assertion "出发港正确（迈阿密）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
         expect(sailing.departure_port).to include(@departure_port_keyword),
           "出发港不符合要求。期望包含: #{@departure_port_keyword}, 实际: #{sailing.departure_port}"
       end
     
-      # 断言4: 行程天数正确（权重15%）
-      add_assertion "行程天数正确（10天9晚）", weight: 15 do
+      # 断言4: 行程天数正确（10%）
+      add_assertion "行程天数正确（10天9晚）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
         expect(sailing.duration_days).to eq(@duration_days),
@@ -105,33 +119,22 @@ module V101V150
           "行程晚数错误。期望: #{@duration_nights}晚, 实际: #{sailing.duration_nights}晚"
       end
     
-      # 断言5: 舱房类型正确（权重15%）
-      add_assertion "舱房类型正确（豪华套房）", weight: 15 do
+      # 断言5: 舱房类型正确（10%）
+      add_assertion "舱房类型正确（豪华套房）", weight: 10 do
         product = @order.cruise_product
         cabin = product.cabin_type
         expect(cabin.category).to eq(@cabin_category),
           "舱房类型错误。期望: #{@cabin_category}（豪华套房），实际: #{cabin.category}（#{cabin.name}）"
       end
     
-      # 断言6: 预订数量正确（权重5%）
-      add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 5 do
+      # 断言6: 预订数量正确（10%）
+      add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 10 do
         expect(@order.quantity).to eq(@adult_count),
           "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
       end
     
-      # 断言7: 乘客信息正确（权重10%）
-      add_assertion "乘客信息正确（小明、小红）", weight: 10 do
-        passenger_list = @order.passenger_list
-        expect(passenger_list).not_to be_empty,
-          "乘客信息缺失"
-        
-        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact.sort
-        expect(passenger_names).to match_array(@expected_passenger_names.sort),
-          "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
-      end
-    
-      # 断言8: 联系人信息正确（权重5%）
-      add_assertion "联系人信息正确（小明或小红）", weight: 5 do
+      # 断言7: 联系人信息正确（10%）- 验证联系人为小明或小红，且电话匹配
+      add_assertion "联系人信息正确（小明或小红）", weight: 10 do
         valid_contacts = ['小明', '小红']
         expect(valid_contacts).to include(@order.contact_name),
           "联系人姓名错误。期望: 小明或小红, 实际: #{@order.contact_name}"
@@ -141,8 +144,8 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言9: 选择了最近日期的班次（权重5%）
-      add_assertion "选择了最近日期的班次", weight: 5 do
+      # 断言8: 选择了最近日期的班次（15%）- 在所有符合条件的班次中选择最早的
+      add_assertion "选择了最近日期的班次", weight: 15 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         caribbean_route = CruiseRoute.where(data_version: 0).find_by(region: 'caribbean')
       
@@ -158,8 +161,23 @@ module V101V150
       
         nearest = available_sailings.order(departure_date: :asc).first
         actual_sailing = @order.cruise_product.cruise_sailing
+        
         expect(actual_sailing.id).to eq(nearest.id),
-          "未选择最近日期的班次。应选: #{nearest.departure_date}, 实际: #{actual_sailing.departure_date}"
+          "未选择最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
+      end
+  
+      # 断言9: 乘客信息正确（10%）- 验证填写了小明、小红的乘客信息
+      add_assertion "乘客信息正确（小明、小红）", weight: 10 do
+        passenger_list = @order.passenger_list
+        expect(passenger_list).not_to be_empty, "未填写乘客信息（passenger_info为空）"
+        expect(passenger_list.size).to eq(@adult_count),
+          "乘客数量错误。期望: #{@adult_count}位, 实际: #{passenger_list.size}位"
+        
+        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact
+        @expected_passenger_names.each do |expected_name|
+          expect(passenger_names).to include(expected_name),
+            "缺少乘客信息。期望包含: #{expected_name}, 实际乘客: #{passenger_names.join('、')}"
+        end
       end
     end
   

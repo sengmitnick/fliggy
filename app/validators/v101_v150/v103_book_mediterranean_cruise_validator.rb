@@ -2,32 +2,46 @@
 
 require_relative '../base_validator'
 
-# 验证用例103: 预订地中海邮轮（地中海辉煌号，7天6晚，巴塞罗那出发）
+# 验证用例103: 给张三、李四预订地中海邮轮（地中海辉煌号，7天6晚，阳台房，巴塞罗那出发，选择最近的班次）
 #
-# 核心验证点:
-# 1. 船只选择: 地中海辉煌号
-# 2. 出发港口: 巴塞罗那
-# 3. 行程时长: 7天6晚
-# 4. 舱房类型: 阳台房（balcony）
-# 5. 班次选择: 最近日期的可用班次
-# 6. 订单信息: 预订数量、乘客信息、联系人、电话、总价计算
+# 任务描述:
+#   用户想预订地中海邮轮，为2位成人（张三、李四）。
+#   要求地中海辉煌号，从巴塞罗那出发，行程7天6晚，选择最近的一个班次，预订阳台房（观景之选）。
+#   Agent 需要在符合条件的班次中，选择departure_date（出发日期）最早的班次。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索地中海邮轮产品
+#   2. 筛选船只名包含"地中海辉煌号"的班次
+#   3. 筛选出发港包含"巴塞罗那"、行程7天6晚的班次
+#   4. 在符合条件的班次中，选择departure_date最早的班次
+#   5. 预订阳台房（category='balcony'），为2位成人
+#   6. 填写乘客信息（张三、李四），联系人从出行人中选择
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解邮轮筛选：船只名包含"地中海辉煌号"
+#   2. 需要理解出发港筛选：departure_port包含"巴塞罗那"
+#   3. 需要理解行程天数：duration_days=7且duration_nights=6
+#   4. 需要选择最近班次：对比多个班次的departure_date，选择最早的
+#   5. 需要理解舱房类型：选择阳台房（balcony，观景之选）
+#   6. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确筛选符合条件的班次并选择最早日期的
 #
 # 评分标准（9项，总计100分）：
-#   - 订单已创建（20分）
-#   - 船只正确（地中海辉煌号）（20分）
-#   - 出发港正确（巴塞罗那）（15分）
+#   - 订单已创建（15分）
+#   - 船只正确（地中海辉煌号）（15分）
+#   - 出发港正确（巴塞罗那）（10分）
 #   - 行程天数正确（7天6晚）（15分）
 #   - 舱房类型正确（阳台房）（15分）
 #   - 预订数量正确（2位成人）（5分）
 #   - 乘客信息正确（张三、李四）（10分）
-#   - 联系人信息正确（张三或李四）（5分）
+#   - 联系人信息正确（张三或李四）（10分）
 #   - 选择了最近日期的班次（5分）
 module V101V150
   class V103BookMediterraneanCruiseValidator < BaseValidator
     self.validator_id = 'v103_book_mediterranean_cruise_validator'
     self.task_id = 'c3f9e2a1-5b47-4d12-9a8e-7f1e3d4a6c89'
-    self.title = '帮张三和李四订地中海邮轮，要地中海辉煌号，7天6晚的行程，巴塞罗那出发，选最近的班次，阳台房（观景之选）'
-    self.description = '帮张三和李四订地中海邮轮，要地中海辉煌号，7天6晚的行程，巴塞罗那出发，选最近的班次，阳台房（观景之选）'
+    self.title = '给张三、李四预订地中海邮轮（地中海辉煌号，7天6晚，阳台房，巴塞罗那出发，选择最近的班次）'
+    self.description = '预订地中海邮轮（地中海辉煌号，7天6晚，阳台房，巴塞罗那出发）'
     self.timeout_seconds = 240
   
     def prepare
@@ -66,8 +80,8 @@ module V101V150
     end
   
     def verify
-      # 断言1: 订单已创建（权重20%）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建（15%）
+      add_assertion "订单已创建", weight: 15 do
         all_orders = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -79,23 +93,23 @@ module V101V150
     
       return if @order.nil?
     
-      # 断言2: 船只正确（权重20%）
-      add_assertion "船只正确（地中海辉煌号）", weight: 20 do
+      # 断言2: 船只正确（15%）
+      add_assertion "船只正确（地中海辉煌号）", weight: 15 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
         expect(ship.name).to include(@ship_keyword),
           "船只不符合要求。期望包含: #{@ship_keyword}, 实际: #{ship.name}"
       end
     
-      # 断言3: 出发港正确（权重15%）
-      add_assertion "出发港正确（巴塞罗那）", weight: 15 do
+      # 断言3: 出发港正确（10%）
+      add_assertion "出发港正确（巴塞罗那）", weight: 10 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
         expect(sailing.departure_port).to include(@departure_port_keyword),
           "出发港不符合要求。期望包含: #{@departure_port_keyword}, 实际: #{sailing.departure_port}"
       end
     
-      # 断言4: 行程天数正确（权重15%）
+      # 断言4: 行程天数正确（15%）
       add_assertion "行程天数正确（7天6晚）", weight: 15 do
         product = @order.cruise_product
         sailing = product.cruise_sailing
@@ -105,7 +119,7 @@ module V101V150
           "行程晚数错误。期望: #{@duration_nights}晚, 实际: #{sailing.duration_nights}晚"
       end
     
-      # 断言5: 舱房类型正确（权重15%）
+      # 断言5: 舱房类型正确（15%）
       add_assertion "舱房类型正确（阳台房）", weight: 15 do
         product = @order.cruise_product
         cabin = product.cabin_type
@@ -113,13 +127,13 @@ module V101V150
           "舱房类型错误。期望: #{@cabin_category}（阳台房），实际: #{cabin.category}（#{cabin.name}）"
       end
     
-      # 断言6: 预订数量正确（权重5%）
+      # 断言6: 预订数量正确（5%）
       add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 5 do
         expect(@order.quantity).to eq(@adult_count),
           "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
       end
     
-      # 断言7: 乘客信息正确（权重10%）
+      # 断言7: 乘客信息正确（10%）
       add_assertion "乘客信息正确（张三、李四）", weight: 10 do
         passenger_list = @order.passenger_list
         expect(passenger_list).not_to be_empty,
@@ -130,8 +144,8 @@ module V101V150
           "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
       end
     
-      # 断言8: 联系人信息正确（权重5%）
-      add_assertion "联系人信息正确（张三或李四）", weight: 5 do
+      # 断言8: 联系人信息正确（10%）
+      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
         valid_contacts = ['张三', '李四']
         expect(valid_contacts).to include(@order.contact_name),
           "联系人姓名错误。期望: 张三或李四, 实际: #{@order.contact_name}"
@@ -141,7 +155,7 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言9: 选择了最近日期的班次（权重5%）
+      # 断言9: 选择了最近日期的班次（5%）
       add_assertion "选择了最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         mediterranean_route = CruiseRoute.where(data_version: 0).find_by(region: 'mediterranean')

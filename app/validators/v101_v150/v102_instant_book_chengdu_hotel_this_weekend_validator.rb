@@ -2,31 +2,39 @@
 
 require_relative '../base_validator'
 
-# 验证用例102: 立即预约成都地区酒店套餐（下周六入住，2晚，豪华套餐）
+# 验证用例102: 给张三立即预约成都地区酒店套餐（2晚，豪华套餐，下周六入住）
 # 
 # 任务描述:
-#   Agent 需要在系统中搜索成都地区的酒店套餐，
-#   选择立即预约模式，选择豪华套餐选项（包含早餐+晚餐），
-#   并指定下周六入住，连住2晚
+#   用户想立即预约成都地区的酒店套餐，入住时间为下周六开始，连住2晚。
+#   要求选择豪华套餐选项（包含早餐+晚餐，服务最全面），使用立即预约模式（非囤货模式）。
+#   Agent 需要搜索符合条件的套餐，计算下周六日期，选择合适的酒店，并指定具体的入住日期完成预订。
 # 
-# 复杂度分析:
-#   1. 需要搜索"成都"地区的酒店套餐（从多个城市中筛选）
-#   2. 需要选择2晚的套餐（筛选night_count）
-#   3. 需要选择立即预约模式（instant booking）而非囤货模式（stockup）
-#   4. 需要从套餐选项中选择豪华套餐（包含早餐+晚餐，服务最全面）
-#   5. 需要计算本周六的日期并设置为入住日期
-#   6. 需要选择具体的酒店和填写联系人信息
-#   ❌ 不能一次性提供：需要先搜索套餐→计算周末日期→选择豪华套餐→选择酒店→设置日期→预约
+# 业务流程（6个关键步骤）：
+#   1. 搜索成都地区的酒店套餐产品
+#   2. 筛选2晚的套餐（night_count=2）
+#   3. 选择豪华套餐选项（包含早餐+晚餐，服务最全面）
+#   4. 选择立即预约模式（instant booking，需指定入住日期和酒店）
+#   5. 计算下周六日期并设置为入住日期（check_in_date），连住2晚（check_out_date=下周六+2天）
+#   6. 填写联系人信息并提交订单
 # 
-# 评分标准:
-#   - 订单已创建 (20分)
-#   - 城市正确（成都）(10分)
-#   - 套餐晚数正确（2晚）(10分)
-#   - 预约模式正确（instant而非stockup）(15分)
-#   - 选择了豪华套餐选项（包含早餐+晚餐）(20分)
-#   - 入住日期正确（下周六开始，连住2晚）(15分)
-#   - 联系人信息正确（张三）(5分)
-#   - 订单价格和数量正确 (5分)
+# 复杂度分析（6个关键点）：
+#   1. 需要理解城市筛选：成都地区的酒店套餐
+#   2. 需要理解套餐晚数：2晚（night_count=2）
+#   3. 需要理解预约模式：instant（立即预约，需指定日期和酒店）vs stockup（囤货，不指定日期）
+#   4. 需要理解套餐选项：从多个选项中选择豪华套餐（包含早餐+晚餐）
+#   5. 需要理解日期计算：下周六（Date.current.next_occurring(:saturday) + 7.days 如果今天是周六），check_out_date=下周六+2天
+#   6. 需要理解联系人信息填写：使用乘客信息中的张三
+#   ❌ 不能随机选择：必须精确选择豪华套餐选项、正确计算下周六日期
+# 
+# 评分标准（8项，总计100分）：
+#   - 订单已创建（20分）
+#   - 城市正确（成都）（10分）
+#   - 套餐晚数正确（2晚）（10分）
+#   - 预约模式正确（instant立即预约）（15分）
+#   - 选择了豪华套餐选项（包含早餐+晚餐）（20分）
+#   - 入住日期正确（下周六开始，连住2晚）（15分）
+#   - 联系人信息正确（张三）（5分）
+#   - 订单价格和数量正确（5分）
 # 
 # 使用方法:
 #   # 准备阶段
@@ -40,8 +48,8 @@ module V101V150
   class V102InstantBookChengduHotelThisWeekendValidator < BaseValidator
     self.validator_id = 'v102_instant_book_chengdu_hotel_this_weekend_validator'
     self.task_id = 'e5f6a7b8-c9d0-1e2f-3a4b-5c6d7e8f9a0b'
-    self.title = '帮张三预约成都的2晚酒店套餐，下周六入住，选豪华套餐（包含早餐+晚餐的那种），立即预约模式'
-    self.description = '帮张三预约成都的2晚酒店套餐，下周六入住，选豪华套餐（包含早餐+晚餐的那种），立即预约模式'
+    self.title = '给张三立即预约成都地区酒店套餐（2晚，豪华套餐，下周六入住）'
+    self.description = '立即预约成都地区酒店套餐（2晚，豪华套餐，下周六入住）'
     self.timeout_seconds = 300
   
     # 准备阶段：设置任务参数
@@ -51,17 +59,19 @@ module V101V150
       @night_count = 2
       @quantity = 1
     
-      # 计算下周六的日期（标准算法）
+      # 计算下周六的日期
       today = Date.current
       
+      # 先计算到本周六的天数
       if today.saturday?
-        @check_in_date = today + 7.days  # 今天是周六，选择下一个周六
+        days_until_this_saturday = 0  # 今天就是周六
       else
-        days_until_next_saturday = (6 - today.wday) % 7
-        days_until_next_saturday = 7 if days_until_next_saturday == 0  # 今天是周日
-        @check_in_date = today + days_until_next_saturday.days
+        days_until_this_saturday = (6 - today.wday) % 7
+        days_until_this_saturday = 7 if days_until_this_saturday == 0  # 今天是周日，本周六是7天后
       end
       
+      # 下周六 = 本周六 + 7天
+      @check_in_date = today + days_until_this_saturday.days + 7.days
       @check_out_date = @check_in_date + @night_count.days
     
       # 查找成都地区的2晚套餐（注意：查询基线数据 data_version=0）
