@@ -59,16 +59,26 @@ module ValidatorChecker
       puts "="*70
       
       if errors[:step1]&.any?
-        puts "\n❌ Step 1: validator_id Format Errors"
+        puts "\n❌ Step 1: validator_id and task_id Format Errors"
         puts "-" * 70
         errors[:step1].each do |error|
           puts "\n#{error[:validator]}"
           puts "  File: #{error[:file]}"
-          puts "  validator_id: #{error[:validator_id] || 'NOT DEFINED'}"
-          puts "  Expected: #{error[:expected]}"
-          puts "  Issue: #{error[:issue]}"
+          
+          if error[:format_error]  # task_id UUID format error
+            puts "  Format Error: #{error[:format_error]}"
+            puts "  Detail: #{error[:detail]}"
+            puts "  Expected: #{error[:expected]}"
+            puts "  Actual: #{error[:actual]}"
+            puts "  → #{error[:fix_hint]}"
+          else  # validator_id error
+            puts "  validator_id: #{error[:validator_id] || 'NOT DEFINED'}"
+            puts "  Expected: #{error[:expected]}"
+            puts "  Issue: #{error[:issue]}"
+            puts "  → Ensure validator_id matches filename format"
+          end
         end
-        puts "\n💡 Fix: Ensure validator_id matches filename format"
+        puts "\n💡 Fix: Ensure validator_id matches filename and task_id is valid UUID"
       end
       
       if errors[:step2]&.any?
@@ -158,6 +168,8 @@ module ValidatorChecker
       files.each do |file|
         validator_name = File.basename(file, '.rb')
         content = File.read(file)
+        
+        # Check validator_id
         validator_id_match = content.match(/self\.validator_id\s*=\s*['"]([^'"]+)['"]/)  
         validator_id = validator_id_match ? validator_id_match[1] : nil
         expected_id = validator_name
@@ -166,6 +178,36 @@ module ValidatorChecker
           errors << { validator: validator_name, file: file, validator_id: nil, expected: expected_id, issue: 'validator_id not defined' }
         elsif validator_id != expected_id
           errors << { validator: validator_name, file: file, validator_id: validator_id, expected: expected_id, issue: 'validator_id does not match filename' }
+        end
+        
+        # Check task_id UUID format
+        task_id_match = content.match(/self\.task_id\s*=\s*['"]([^'"]+)['"]/)  
+        if task_id_match
+          task_id = task_id_match[1]
+          
+          # UUID format: 8-4-4-4-12 (e.g., 550e8400-e29b-41d4-a716-446655440000)
+          uuid_pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          
+          unless task_id.match?(uuid_pattern)
+            # Detect invalid characters (non-hex)
+            invalid_chars = task_id.gsub('-', '').chars.select { |c| !c.match?(/[0-9a-f]/i) }.uniq
+            
+            error_detail = if invalid_chars.any?
+              "包含非十六进制字符: #{invalid_chars.join(', ')}"
+            else
+              "格式不符合 UUID 标准（应为 8-4-4-4-12 格式）"
+            end
+            
+            errors << {
+              validator: validator_name,
+              file: file,
+              format_error: 'task_id 不符合标准 UUID 格式',
+              detail: error_detail,
+              expected: '标准 UUID 格式（仅包含 0-9, a-f 字符）',
+              actual: "'#{task_id}'",
+              fix_hint: 'task_id 必须符合标准 UUID 格式（8-4-4-4-12，仅包含 0-9, a-f 字符）。可使用 SecureRandom.uuid 生成标准 UUID'
+            }
+          end
         end
       end
       

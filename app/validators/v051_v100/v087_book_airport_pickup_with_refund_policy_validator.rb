@@ -42,7 +42,7 @@ require_relative '../base_validator'
 module V051V100
   class V087BookAirportPickupWithRefundPolicyValidator < BaseValidator
     self.validator_id = 'v087_book_airport_pickup_with_refund_policy_validator'
-    self.task_id = 'a2c3d4e5-f6g7-h8i9-j0k1-l2m3n4o5p6q7'
+    self.task_id = '309c926d-835e-4915-83b2-69118b74f6bc'
     self.title = '给张三预订上海浦东国际机场接机服务（北京→上海航班，浦东国际机场T2航站楼→徐家汇商圈接送服务点，舒适5座，3天后上午11点，要求随时退）'
     self.description = '预订上海浦东国际机场接机服务（浦东T2→徐家汇商圈，舒适5座，3天后上午11点，要求随时退）'
     self.timeout_seconds = 240

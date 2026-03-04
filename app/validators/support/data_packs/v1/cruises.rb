@@ -177,6 +177,32 @@ middle_east_route = CruiseRoute.find_by(region: 'middle_east')
 xisha_islands_route = CruiseRoute.find_by(region: 'xisha_islands')
 
 cruise_sailings_data = [
+  # 海洋光谱号 - 明天出发的上海日韩航线（为v158验证器准备）
+  # 注意：使用 Date.today + 2.days 确保覆盖 Date.current + 1.day
+  # 原因：Date.current 可能比 Date.today 晚1天（时区差异）
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: japan_korea_route.id,
+    departure_date: Date.today + 2.days,  # Date.today+2 覆盖 Date.current+1
+    return_date: Date.today + 8.days,     # 6天后返回
+    duration_days: 6,
+    duration_nights: 5,
+    departure_port: '上海登船',
+    arrival_port: '上海离船',
+    status: 'on_sale',
+    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '上海', title: '登船', description: '上海吴淞口码头登船，开启6天5晚日韩之旅', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] },
+      { day: 2, port: '海上巡航', title: '海上巡航', description: '享受游轮上的各种设施和娱乐活动', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] },
+      { day: 3, port: '福冈', title: '岸上观光', description: '日本福冈博多港，购物天堂和美食之都', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] },
+      { day: 4, port: '济州岛', title: '岸上观光', description: '韩国济州岛，火山岛屿风光', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] },
+      { day: 5, port: '海上巡航', title: '海上巡航', description: '海上巡航日，放松休闲', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] },
+      { day: 6, port: '上海', title: '离船', description: '返回上海吴淞口码头，结束愉快的游轮之旅', images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)] }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
   # 海洋光谱号 - 日韩航线
   {
     cruise_ship_id: spectrum.id,
