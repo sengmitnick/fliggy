@@ -2,13 +2,40 @@
 
 require_relative '../base_validator'
 
-# 验证用例93: 给张三预订武汉黄鹤楼讲解（经验最丰富的导游）
+# 验证用例93: 给张三、李四、王芳预订武汉黄鹤楼讲解（3成人，选择经验年限最长的导游，2天后）
+#
+# 任务描述:
+#   用户想在2天后预订武汉黄鹤楼的深度讲解，为3位成人（张三、李四、王芳）。
+#   Agent 需要在符合条件的黄鹤楼导游中，选择experience_years（经验年限）最长的导游。
+#
+# 业务流程（5个关键步骤）：
+#   1. 搜索武汉黄鹤楼相关的深度游产品
+#   2. 筛选venue为"武汉黄鹤楼"的导游
+#   3. 对比多个导游的experience_years（经验年限）
+#   4. 选择experience_years最长的导游（如年限相同则按rating降序排序）
+#   5. 预订该导游的华中地区产品
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解景点筛选：venue="武汉黄鹤楼"
+#   2. 需要理解"经验最丰富"条件：对比多个导游的experience_years字段
+#   3. 需要选择experience_years最大值的导游
+#   4. 需要处理经验年限相同的情况：按rating降序排序
+#   5. 需要填写3位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确对比experience_years并选择最长的
+#
+# 评分标准（6项，总计100分）：
+#   - 订单已创建（20分）
+#   - 向导景点正确（武汉黄鹤楼）（15分）
+#   - 产品地点正确（华中）（15分）
+#   - 选择了经验年限最长的导游（30分）
+#   - 人数信息正确（3成人）（10分）
+#   - 联系人信息正确（从出行人中选择：张三、李四或王芳）（10分）
 module V051V100
   class V093BookWuhanYellowCraneTowerTourValidator < BaseValidator
     self.validator_id = 'v093_book_wuhan_yellow_crane_tower_tour_validator'
     self.task_id = '5da3a869-cfbc-4ea3-bd95-c84f378ae696'
-    self.title = '给张三预订武汉黄鹤楼讲解（经验最丰富的导游）'
-    self.description = '预订武汉黄鹤楼讲解（经验最丰富的导游）'
+    self.title = '给张三、李四、王芳预订武汉黄鹤楼讲解（3成人，选择经验年限最长的导游，2天后）'
+    self.description = '预订武汉黄鹤楼讲解（3成人，选择经验年限最长的导游，2天后）'
     self.timeout_seconds = 240
   
     def prepare

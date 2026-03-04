@@ -2,13 +2,39 @@
 
 require_relative '../base_validator'
 
-# 验证用例90: 给张三预订上海外滩历史文化讲解（评分最高）
+# 验证用例90: 给李四预订上海外滩历史文化讲解（选择评分最高的导游，3天后）
+#
+# 任务描述:
+#   用户想在3天后预订上海外滩的历史文化讲解，要求选择评分最高的导游。
+#   Agent 需要在符合条件的外滩导游中，选择rating（评分）最高的导游。
+#
+# 业务流程（5个关键步骤）：
+#   1. 搜索上海外滩相关的深度游产品
+#   2. 筛选venue为"上海外滩"的导游
+#   3. 对比多个导游的rating（评分）
+#   4. 选择rating最高的导游（如评分相同则按served_count排序）
+#   5. 预订该导游的华东地区产品
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解地点筛选：venue="上海外滩"
+#   2. 需要理解"评分最高"条件：对比多个导游的rating字段
+#   3. 需要选择rating最大值的导游
+#   4. 需要处理评分相同的情况：按served_count降序排序
+#   5. 需要预订该导游的华东地区产品
+#   ❌ 不能随机选择：必须精确对比rating并选择最高的
+#
+# 评分标准（5项，总计100分）：
+#   - 订单已创建（20分）
+#   - 向导景点正确（上海外滩）（20分）
+#   - 产品地点正确（华东）（25分）
+#   - 选择了评分最高的外滩导游（25分）
+#   - 联系人信息正确（李四）（10分）
 module V051V100
   class V090BookShanghaiBundCultureTourValidator < BaseValidator
     self.validator_id = 'v090_book_shanghai_bund_culture_tour_validator'
     self.task_id = 'b0ae1fdc-ef74-465b-ade9-04b581d0eb17'
-    self.title = '给张三预订上海外滩历史文化讲解（评分最高）'
-    self.description = '预订上海外滩历史文化讲解（评分最高）'
+    self.title = '给李四预订上海外滩历史文化讲解（选择评分最高的导游，3天后）'
+    self.description = '预订上海外滩历史文化讲解（选择评分最高的导游，3天后）'
     self.timeout_seconds = 240
   
     def prepare
