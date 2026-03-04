@@ -12,6 +12,7 @@ class CruiseOrder < ApplicationRecord
   
   before_validation :generate_order_number, on: :create
   before_validation :calculate_total_price
+  before_save :parse_passenger_info_string
   
   # 订单状态
   enum :status, {
@@ -53,5 +54,15 @@ class CruiseOrder < ApplicationRecord
     base_price = cruise_product.price_per_person * quantity
     insurance = (insurance_price || 0) * quantity
     self.total_price = base_price + insurance
+  end
+  
+  def parse_passenger_info_string
+    if passenger_info.is_a?(String) && passenger_info.present?
+      begin
+        self.passenger_info = JSON.parse(passenger_info)
+      rescue JSON::ParserError
+        # Keep original value if parsing fails
+      end
+    end
   end
 end

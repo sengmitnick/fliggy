@@ -2,13 +2,46 @@
 
 require_relative '../base_validator'
 
-# 验证用例95: 给张三预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）
-# 测试内容：邮轮筛选、出发港过滤、行程天数匹配、舱房类型选择、出发月份筛选、日期优化选择、预订数量验证
+# 验证用例95: 给张三、李四预订香港出发日韩邮轮（海洋光谱号，6天5晚，内舱房，选择1月份最近的班次）
+#
+# 任务描述:
+#   用户想预订香港出发的日韩邮轮，为2位成人（张三、李四）。
+#   要求海洋光谱号，行程6天5晚，选择1月份最近的一个班次，预订内舱房（性价比之选）。
+#   Agent 需要在符合条件的班次中，选择1月份departure_date（出发日期）最早的班次。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索香港出发的日韩邮轮产品
+#   2. 筛选船只名包含"海洋光谱号"的班次
+#   3. 筛选出发港包含"香港"、行程6天5晚的班次
+#   4. 筛选出发月份为1月的班次
+#   5. 在1月班次中，选择departure_date最早的班次
+#   6. 预订内舱房（category='interior'），为2位成人
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解邮轮筛选：船只名包含"海洋光谱号"
+#   2. 需要理解出发港筛选：departure_port包含"香港"
+#   3. 需要理解行程天数：duration_days=6且duration_nights=5
+#   4. 需要理解"1月份"条件：筛选departure_date的月份=1
+#   5. 需要选择1月份最早的班次：对比多个班次的departure_date，选择最早的
+#   6. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确筛选1月份班次并选择最早日期的
+#
+# 评分标准（10项，总计100分）：
+#   - 订单已创建（15分）
+#   - 船只正确（海洋光谱号）（10分）
+#   - 出发港正确（香港）（10分）
+#   - 行程天数正确（6天5晚）（10分）
+#   - 出发月份正确（1月份）（10分）
+#   - 舱房类型正确（内舱房）（10分）
+#   - 预订数量正确（2位成人）（10分）
+#   - 联系人信息正确（张三或李四）（10分）
+#   - 选择了1月份最近日期的班次（5分）
+#   - 乘客信息正确（张三、李四）（10分）
 module V051V100
   class V095BookShanghaiToJapanKoreaCruiseValidator < BaseValidator
     self.validator_id = 'v095_book_shanghai_to_japan_korea_cruise_validator'
     self.task_id = '25e31a26-07fd-4515-91c9-91e037c21aa4'
-    self.title = '给张三预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
+    self.title = '给张三、李四预订香港出发日韩邮轮（海洋光谱号，6天5晚，内舱房，选择1月份最近的班次）'
     self.description = '预订香港出发日韩邮轮（海洋光谱号，6天5晚，1月出发）'
     self.timeout_seconds = 240
   
@@ -99,8 +132,8 @@ module V051V100
           "出发月份错误。期望: #{@expected_month}月, 实际: #{actual_month}月（#{sailing.departure_date}）"
       end
     
-      # 断言6: 舱房类型正确（15%）
-      add_assertion "舱房类型正确（内舱房）", weight: 15 do
+      # 断言6: 舱房类型正确（10%）
+      add_assertion "舱房类型正确（内舱房）", weight: 10 do
         product = @order.cruise_product
         cabin = product.cabin_type
         expect(cabin.category).to eq(@cabin_category),
@@ -113,19 +146,8 @@ module V051V100
           "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
       end
     
-      # 断言8: 乘客信息正确（10%）- 验证包含张三和李四
-      add_assertion "乘客信息正确（张三、李四）", weight: 10 do
-        passenger_list = @order.passenger_list
-        expect(passenger_list).not_to be_empty,
-          "乘客信息缺失"
-        
-        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact.sort
-        expect(passenger_names).to match_array(@expected_passenger_names.sort),
-          "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
-      end
-    
-      # 断言9: 联系人信息正确（5%）- 验证联系人为张三或李四，且电话匹配
-      add_assertion "联系人信息正确（张三或李四）", weight: 5 do
+      # 断言8: 联系人信息正确（10%）- 验证联系人为张三或李四，且电话匹配
+      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
         valid_contacts = ['张三', '李四']
         expect(valid_contacts).to include(@order.contact_name),
           "联系人姓名错误。期望: 张三或李四, 实际: #{@order.contact_name}"
@@ -135,7 +157,7 @@ module V051V100
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言10: 选择了1月份最近日期的班次（5%）- 在所有符合条件的1月班次中选择最早的
+      # 断言9: 选择了1月份最近日期的班次（5%）- 在所有符合条件的1月班次中选择最早的
       add_assertion "选择了1月份最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         
@@ -153,6 +175,20 @@ module V051V100
         
         expect(actual_sailing.id).to eq(nearest.id),
           "未选择1月份最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
+      end
+  
+      # 断言10: 乘客信息正确（10%）- 验证填写了张三、李四的乘客信息
+      add_assertion "乘客信息正确（张三、李四）", weight: 10 do
+        passengers = @order.passenger_list
+        expect(passengers).not_to be_empty, "未填写乘客信息（passenger_info为空）"
+        expect(passengers.size).to eq(@adult_count),
+          "乘客数量错误。期望: #{@adult_count}位, 实际: #{passengers.size}位"
+        
+        passenger_names = passengers.map { |p| p['name'] || p[:name] }.compact
+        @expected_passenger_names.each do |expected_name|
+          expect(passenger_names).to include(expected_name),
+            "缺少乘客信息。期望包含: #{expected_name}, 实际乘客: #{passenger_names.join('、')}"
+        end
       end
     end
   
@@ -232,14 +268,14 @@ module V051V100
       contact_names = ['张三', '李四']
       selected_contact_name = contact_names.sample
       contact_passenger = selected_contact_name == '张三' ? zhangsan : lisi
-      
-      # 创建乘客信息数组
+    
+      # 准备乘客信息数组（张三、李四）
       passenger_info = [
         { name: zhangsan.name, id_number: zhangsan.id_number, phone: zhangsan.phone },
         { name: lisi.name, id_number: lisi.id_number, phone: lisi.phone }
       ]
     
-      # 创建订单（2位成人）
+      # 创建订单（2位成人，包含乘客信息）
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: cruise_product.id,

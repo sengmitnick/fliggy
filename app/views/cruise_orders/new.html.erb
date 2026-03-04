@@ -95,6 +95,77 @@
       </div>
     </section>
 
+    <!-- Passenger Information (with modal) -->
+    <div data-controller="cruise-traveler-selector"
+         data-cruise-traveler-selector-current-index-value="0">
+    <section class="bg-white rounded-lg p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold text-gray-900">乘客信息</h2>
+        <span class="text-sm text-gray-500">请填写 <span data-cruise-order-form-target="passengerCountDisplay"><%= @product.occupancy_requirement %></span> 位乘客</span>
+      </div>
+      
+      <div id="passengersContainer" data-cruise-traveler-selector-target="container">
+        <% @product.occupancy_requirement.times do |index| %>
+          <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200" data-cruise-traveler-selector-target="card" data-index="<%= index %>">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold">
+                  <%= index + 1 %>
+                </div>
+                <span class="text-sm font-medium text-gray-900">乘客<%= index + 1 %></span>
+              </div>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex items-center py-2 border-b border-gray-200">
+                <label class="text-sm text-gray-600 w-16">姓名</label>
+                <input type="text" 
+                       placeholder="请输入姓名"
+                       data-cruise-traveler-selector-target="nameInput"
+                       data-index="<%= index %>"
+                       class="flex-1 text-sm text-gray-900 focus:outline-none bg-transparent" />
+                <button type="button" 
+                        class="text-primary"
+                        data-action="click->cruise-traveler-selector#openModal"
+                        data-index="<%= index %>">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="flex items-center py-2 border-b border-gray-200">
+                <label class="text-sm text-gray-600 w-16">身份证</label>
+                <input type="text" 
+                       placeholder="请输入身份证号"
+                       data-cruise-traveler-selector-target="idInput"
+                       data-index="<%= index %>"
+                       class="flex-1 text-sm text-gray-900 focus:outline-none bg-transparent" />
+              </div>
+              
+              <div class="flex items-center py-2">
+                <label class="text-sm text-gray-600 w-16">手机号</label>
+                <input type="text" 
+                       placeholder="请输入手机号（选填）"
+                       data-cruise-traveler-selector-target="phoneInput"
+                       data-index="<%= index %>"
+                       class="flex-1 text-sm text-gray-900 focus:outline-none bg-transparent" />
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Hidden field to store passenger_info JSON -->
+      <%= f.hidden_field :passenger_info, 
+                        value: '[]',
+                        data: { cruise_traveler_selector_target: "hiddenField" } %>
+    </section>
+
+      <!-- Passenger Selector Modal -->
+      <%= render 'shared/cruise_traveler_selector_modal' %>
+    </div>
+
     <!-- Contact Information -->
     <section class="bg-white rounded-lg p-4 shadow-sm">
       <div class="flex items-center justify-between mb-3">

@@ -11,6 +11,18 @@ require_relative '../base_validator'
 # 4. 特殊需求备注: 岸上观光（冲绳）
 # 5. 特殊需求备注: 主厨晚餐
 # 6. 班次选择: 最近日期的可用班次
+# 7. 订单信息: 预订数量、乘客信息、联系人、电话
+#
+# 评分标准（9项，总计100分）：
+#   - 订单已创建（20分）
+#   - 船只正确（海洋光谱号）（15分）
+#   - 行程天数正确（6天5晚）（10分）
+#   - 已备注岸上观光需求（15分）
+#   - 已备注餐饮需求（15分）
+#   - 预订数量正确（2位成人）（5分）
+#   - 乘客信息正确（张建国、陈静）（10分）
+#   - 联系人信息正确（张建国或陈静）（5分）
+#   - 选择了最近日期的班次（5分）
 module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
@@ -111,8 +123,25 @@ module V101V150
           "未在备注中说明餐饮需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
-      # 断言6: 联系人信息正确（权重10%）
-      add_assertion "联系人信息正确（张建国或陈静）", weight: 10 do
+      # 断言6: 预订数量正确（权重5%）
+      add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 5 do
+        expect(@order.quantity).to eq(@adult_count),
+          "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
+      end
+    
+      # 断言7: 乘客信息正确（权重10%）
+      add_assertion "乘客信息正确（张建国、陈静）", weight: 10 do
+        passenger_list = @order.passenger_list
+        expect(passenger_list).not_to be_empty,
+          "乘客信息缺失"
+        
+        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact.sort
+        expect(passenger_names).to match_array(@expected_passenger_names.sort),
+          "乘客信息错误。期望: #{@expected_passenger_names.sort.join('、')}, 实际: #{passenger_names.join('、')}"
+      end
+    
+      # 断言8: 联系人信息正确（权重5%）
+      add_assertion "联系人信息正确（张建国或陈静）", weight: 5 do
         valid_contacts = ['张建国', '陈静']
         expect(valid_contacts).to include(@order.contact_name),
           "联系人姓名错误。期望: 张建国或陈静, 实际: #{@order.contact_name}"
@@ -122,8 +151,8 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言7: 选择了最近日期的班次（权重15%）
-      add_assertion "选择了最近日期的班次", weight: 15 do
+      # 断言9: 选择了最近日期的班次（权重5%）
+      add_assertion "选择了最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       
