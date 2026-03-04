@@ -2,22 +2,21 @@
 
 require_relative '../base_validator'
 
-# V260: 给张建国预订桂林跟团游+购买境内旅游保险（10天后出发）
+# V260: 帮张建国（老年人）预订桂林跟团游（10天后出发，行程≤5天），并购买境内旅游保险（保额：意外身故≥50万、意外医疗≥5万）
 #
 # 任务描述:
-#   帮张建国这位老年人预订桂林跟团游（10天后出发，行程≤5天），
-#   并购买境内旅游保险，保额要求：意外身故≥50万元、意外医疗≥5万元
+#   帮张建国（老年人）预订桂林跟团游（10天后出发，行程≤5天），并购买境内旅游保险（保额：意外身故≥50万、意外医疗≥5万）
 #
 # 评分标准:
-#   - 创建了桂林跟团游订单 (20%)
-#   - 预订了2位老年人 (5%)
+#   - 创建了跟团游订单 (20%)
+#   - 预订了1位老年人 (5%)
 #   - 创建了保险订单 (15%)
-#   - 保险类型正确（境内旅游保险domestic）(15%)
-#   - 保险保额达标（意外身故≥50万、意外医疗≥5万）(15%)
+#   - 保险类型正确（境内旅游保险） (15%)
+#   - 保险保额适合高龄人群 (15%)
 #   - 保险日期与跟团游匹配 (5%)
 #   - 保险天数与行程天数一致 (5%)
-#   - 联系人信息正确（王大爷或李大妈） (10%)
-#   - 投保人信息正确（王大爷、李大妈） (5%)
+#   - 联系人信息正确（张建国） (10%)
+#   - 投保人信息正确（张建国） (5%)
 #   - 订单状态有效 (5%)
 module V251V300
   class V260BookSeniorTravelWithInsuranceValidator < BaseValidator
@@ -154,8 +153,15 @@ module V251V300
       
       add_assertion "投保人信息正确（张建国）", weight: 5 do
         insured = @insurance_order.insured_persons || []
-        expect(insured).to include(@expected_insured_name),
-          "投保人列表中缺少#{@expected_insured_name}。期望: [#{@expected_insured_name}]，实际: #{insured.inspect}"
+        # insured_persons 可能是字符串数组或哈希数组
+        insured_names = if insured.first.is_a?(Hash)
+                          insured.map { |p| p['name'] || p[:name] }
+                        else
+                          insured
+                        end
+        
+        expect(insured_names).to include(@expected_insured_name),
+          "投保人列表中缺少#{@expected_insured_name}。期望包含: #{@expected_insured_name}，实际投保人: #{insured_names.join(', ')}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
