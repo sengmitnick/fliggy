@@ -2,13 +2,40 @@
 
 require_relative '../base_validator'
 
-# 验证用例89: 给张三预订北京故宫文化深度游（高评分文化讲解）
+# 验证用例89: 给张三预订北京故宫文化深度游（高评分文化讲解，选择服务客户数最多的向导，5天后）
+#
+# 任务描述:
+#   用户想在5天后预订北京故宫的文化深度游，要求向导评分≥4.9分且是文化讲解类型。
+#   Agent 需要在符合条件的向导中，选择服务客户数最多（served_count最大）的向导。
+#
+# 业务流程（5个关键步骤）：
+#   1. 搜索北京故宫相关的深度游产品
+#   2. 筛选评分≥4.9分的向导
+#   3. 筛选文化讲解类型的向导
+#   4. 在符合条件的向导中，对比served_count（已服务客户数）
+#   5. 选择served_count最多的向导进行预订
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解"高评分"条件：评分≥4.9分
+#   2. 需要理解"文化讲解"：向导title需包含"文化讲解"
+#   3. 需要对比多个向导的served_count字段
+#   4. 需要选择served_count最大值的向导
+#   5. 需要预订该向导的故宫产品
+#   ❌ 不能随机选择：必须精确对比served_count并选择最多的
+#
+# 评分标准（6项，总计100分）：
+#   - 订单已创建（20分）
+#   - 向导评分符合要求（≥4.9分）（15分）
+#   - 向导类型正确（文化讲解）（15分）
+#   - 产品地点正确（北京）（15分）
+#   - 选择了服务客户数最多的向导（25分）
+#   - 联系人信息正确（张三）（10分）
 module V051V100
   class V089BookBeijingForbiddenCityCultureTourValidator < BaseValidator
     self.validator_id = 'v089_book_beijing_forbidden_city_culture_tour_validator'
     self.task_id = 'a5f889d8-3913-4451-97a9-3fce8e3e463b'
-    self.title = '给张三预订北京故宫文化深度游（高评分文化讲解）'
-    self.description = '预订北京故宫文化深度游（高评分文化讲解）'
+    self.title = '给张三预订北京故宫文化深度游（高评分文化讲解，选择服务客户数最多的向导，5天后）'
+    self.description = '预订北京故宫文化深度游（高评分文化讲解，选择服务客户数最多的向导，5天后）'
     self.timeout_seconds = 240
   
     def prepare
