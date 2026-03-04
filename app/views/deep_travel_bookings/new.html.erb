@@ -317,6 +317,7 @@
              data-passenger-id="<%= passenger.id %>"
              data-name="<%= passenger.name %>"
              data-id-number="<%= passenger.id_number %>"
+             data-passenger-type="<%= passenger.child_ticket? ? 'child' : 'adult' %>"
              onclick="selectPassengerForTraveler(this)">
           <div class="flex items-start justify-between">
             <div class="flex items-center flex-1">
@@ -328,6 +329,9 @@
                   <span class="font-medium text-base text-[#111111]"><%= passenger.name %></span>
                   <% if passenger.is_self? %>
                     <span class="ml-2 text-xs text-gray-500">本人</span>
+                  <% end %>
+                  <% if passenger.child_ticket? %>
+                    <span class="ml-2 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs border border-orange-300 rounded">儿童票</span>
                   <% end %>
                 </div>
                 <div class="text-sm text-gray-500 mt-1">身份证 <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1 ********\2') %></div>
@@ -345,10 +349,12 @@
 
 <script>
 let currentTravelerIndex = null;
+let selectedPassengers = {}; // 追踪每个游客位置选择的出行人ID
 
 // Open passenger selection modal
 function openPassengerModal(travelerIndex) {
   currentTravelerIndex = travelerIndex;
+  updatePassengerModalDisplay();
   document.getElementById('passenger-modal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -447,12 +453,55 @@ function confirmAddPassenger() {
   });
 }
 
+// Update passenger modal display based on selected passengers
+function updatePassengerModalDisplay() {
+  const passengerItems = document.querySelectorAll('.passenger-modal-item');
+  const selectedPassengerIds = Object.values(selectedPassengers).filter(id => id !== null);
+  
+  passengerItems.forEach(item => {
+    const passengerId = item.dataset.passengerId;
+    const isSelected = selectedPassengerIds.includes(passengerId);
+    const isCurrentSelection = selectedPassengers[currentTravelerIndex] === passengerId;
+    
+    // 隐藏条件：已被其他游客位置选择（当前游客位置的选择除外）
+    if (isSelected && !isCurrentSelection) {
+      item.style.display = 'none';
+    } else {
+      item.style.display = '';
+    }
+  });
+}
+
+// Clear passenger selection for a specific traveler
+function clearPassengerSelection(travelerIndex) {
+  // 清除selectedPassengers记录
+  delete selectedPassengers[travelerIndex];
+  
+  // 清空表单字段
+  const nameInput = document.querySelector(`[data-traveler-index="${travelerIndex}"].traveler-name-input`);
+  const idInput = document.querySelector(`[data-traveler-index="${travelerIndex}"].traveler-id-input`);
+  
+  if (nameInput) nameInput.value = '';
+  if (idInput) idInput.value = '';
+  
+  // 重置卡片样式
+  const travelerCard = document.querySelector(`.traveler-card[data-traveler-index="${travelerIndex}"]`);
+  if (travelerCard) {
+    travelerCard.classList.remove('border-[#FFDD00]', 'bg-[#FFF9E6]');
+    travelerCard.classList.add('border-gray-200', 'bg-gray-50');
+  }
+}
+
 // Select passenger for current traveler
 function selectPassengerForTraveler(element) {
   if (currentTravelerIndex === null) return;
   
+  const passengerId = element.dataset.passengerId;
   const name = element.dataset.name;
   const idNumber = element.dataset.idNumber;
+  
+  // 记录此游客位置选择的出行人ID
+  selectedPassengers[currentTravelerIndex] = passengerId;
   
   // Update form fields
   const nameInput = document.querySelector(`[data-traveler-index="${currentTravelerIndex}"].traveler-name-input`);
