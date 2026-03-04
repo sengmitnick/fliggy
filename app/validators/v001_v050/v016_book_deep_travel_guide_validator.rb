@@ -2,36 +2,39 @@
 
 require_relative '../base_validator'
 
-# 验证用例: 给张三订7天后的华东深度旅行向导服务（选评分≥4.8且经验最丰富的）
-# 
+# 验证用例16: 给张三7天后订华东深度旅行向导服务（选评分≥4.8且经验最丰富的）
+#
 # 任务描述:
-#   Agent 需要在深度旅行服务中搜索专业向导，
-#   找到评分≥4.8分且服务客户数≥1000人的向导并成功预订其产品
-# 
-# 复杂度分析:
+#   用户想在7天后预订华东地区的深度旅行向导服务，为1位成人。
+#   Agent 需要在符合条件的华东向导中，选择served_count（服务客户数）最多的向导。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索华东地区相关的深度游产品
+#   2. 筛选评分≥4.8分且服务客户数≥1000人的向导
+#   3. 对比多个符合条件向导的served_count（服务客户数）
+#   4. 选择served_count最多的向导（如服务数相同则按rating降序排序）
+#   5. 选择该向导的华东地区产品
+#   6. 预订该向导的产品并填写完整预订信息
+#
+# 复杂度分析（6个关键点）：
 #   1. 需要理解"深度旅行向导"这一特殊服务类型（非常规机酒火车）
 #   2. 需要同时满足两个筛选条件（评分 AND 服务数量）
-#   3. 需要从7位向导中筛选出符合条件的（4位符合条件）
-#   4. 需要在符合条件的向导中选择服务最多的（最有经验）
-#   5. 需要选择该向导的产品并填写完整预订信息
-#   6. 需要计算总价（向导服务费 × 人数）
-#   ❌ 不能一次性提供：需要先浏览向导列表→筛选评分和经验→选择向导→选择产品→填写信息→预订
-# 
-# 评分标准:
-#   - 订单已创建 (20分)
-#   - 向导评分符合要求（≥4.8分）(20分)
-#   - 服务客户数符合要求（≥1000人）(20分)
-#   - 选择了经验最丰富的向导（服务数最多）(20分)
-#   - 订单信息完整且合理（日期、人数、联系方式、价格）(20分)
-# 
-# 使用方法:
-#   # 准备阶段
-#   POST /api/verify/book_deep_travel_guide/prepare
-#   
-#   # Agent 通过界面操作完成搜索和预订...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+#   3. 需要理解"经验最丰富"条件：对比多个向导的served_count字段
+#   4. 需要选择served_count最大值的向导
+#   5. 需要处理服务数相同的情况：按rating降序排序
+#   6. 需要填写完整的预订信息（联系人、游客、日期、价格）
+#   ❌ 不能随机选择：必须精确对比served_count并选择最多的
+#
+# 评分标准（9项，总计100分）：
+#   - 创建了深度旅行预订订单（20分）
+#   - 向导评分符合要求（≥4.8分）（10分）
+#   - 服务客户数符合要求（≥1000人）（10分）
+#   - 产品地区正确（华东）（10分）
+#   - 选择了华东地区经验最丰富的向导（服务数最多）（30分）
+#   - 联系人信息正确（张三 13800138000）（5分）
+#   - 游客信息正确（张三 110101199001011234 13800138000）（5分）
+#   - 订单信息完整且合理（5分）
+#   - 预订日期在向导的可预订时间范围内（5分）
 module V001V050
   class V016BookDeepTravelGuideValidator < BaseValidator
     self.validator_id = 'v016_book_deep_travel_guide_validator'
@@ -88,7 +91,6 @@ module V001V050
   
     # 验证阶段：检查订单是否符合要求
     def verify
-      # 断言1: 必须有订单创建（查询时过滤核心实体：地区）
       add_assertion "创建了深度旅行预订订单", weight: 20 do
         all_deep_travel_bookings = DeepTravelBooking
           .joins(deep_travel_product: :deep_travel_guide)
@@ -107,7 +109,6 @@ module V001V050
     
       return unless @booking  # 如果没有订单，后续断言无法继续
     
-      # 断言2: 向导评分符合要求
       add_assertion "向导评分符合要求（≥4.8分）", weight: 10 do
         guide = @booking.deep_travel_guide
         expect(guide).not_to be_nil, "订单未关联向导信息"
@@ -117,7 +118,6 @@ module V001V050
           "向导评分不符合要求。要求: ≥#{@min_rating}分, 实际: #{actual_rating}分 (向导: #{guide.name})"
       end
     
-      # 断言3: 服务客户数符合要求
       add_assertion "服务客户数符合要求（≥1000人）", weight: 10 do
         guide = @booking.deep_travel_guide
         actual_served_count = guide.served_count.to_i
@@ -126,7 +126,6 @@ module V001V050
           "服务客户数不符合要求。要求: ≥#{@min_served_count}人, 实际: #{actual_served_count}人 (向导: #{guide.name})"
       end
     
-      # 断言4: 产品地区正确（华东）
       add_assertion "产品地区正确（华东）", weight: 10 do
         product = @booking.deep_travel_product
         expect(product).not_to be_nil, "订单未关联产品信息"
@@ -134,7 +133,6 @@ module V001V050
           "产品地区不符合要求。要求: #{@location}, 实际: #{product.location}"
       end
     
-      # 断言5: 选择了经验最丰富的向导（核心评分项）
       add_assertion "选择了华东地区经验最丰富的向导（服务数最多）", weight: 30 do
         # 查找所有符合条件的向导
         qualified_guides = DeepTravelGuide.joins(:deep_travel_products)
@@ -153,7 +151,6 @@ module V001V050
           "实际选择: #{@booking.deep_travel_guide.name}（#{@booking.deep_travel_guide.venue}，#{@booking.deep_travel_guide.title}，评分#{@booking.deep_travel_guide.rating}分，已服务#{@booking.deep_travel_guide.served_count}人）"
       end
     
-      # 断言6: 联系人信息正确（张三 13800138000）
       add_assertion "联系人信息正确（张三 13800138000）", weight: 5 do
         expect(@booking.contact_name).to eq('张三'),
           "联系人姓名错误。期望: 张三（demo_user数据）, 实际: #{@booking.contact_name}"
@@ -161,7 +158,6 @@ module V001V050
           "联系电话错误。期望: 13800138000（demo_user数据）, 实际: #{@booking.contact_phone}"
       end
     
-      # 断言7: 游客信息正确（张三 110101199001011234 13800138000）
       add_assertion "游客信息正确（张三 110101199001011234 13800138000）", weight: 5 do
         expect(@booking.traveler_name).to eq('张三'),
           "游客姓名错误。期望: 张三（demo_user passengers数据）, 实际: #{@booking.traveler_name}"
@@ -171,7 +167,6 @@ module V001V050
           "游客电话错误。期望: 13800138000（demo_user passengers数据）, 实际: #{@booking.traveler_phone}"
       end
     
-      # 断言8: 订单信息完整且合理
       add_assertion "订单信息完整且合理", weight: 5 do
         errors = []
         guide = @booking.deep_travel_guide
@@ -205,7 +200,6 @@ module V001V050
           "订单信息存在问题: #{errors.join('; ')}"
       end
       
-      # 断言9: 预订日期在向导的可预订时间范围内
       add_assertion "预订日期在向导的可预订时间范围内", weight: 5 do
         guide = @booking.deep_travel_guide
         travel_date = @booking.travel_date
@@ -335,10 +329,8 @@ module V001V050
         travel_date: actual_travel_date.to_s,
         original_travel_date: @travel_date.to_s,
         date_adjusted: (actual_travel_date != @travel_date),
-        travelers: "#{@adult_count}位成人",
-        total_price: total_price,
-        user_email: user.email
+        total_price: total_price
       }
     end
-    end
+  end
 end

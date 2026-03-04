@@ -2,13 +2,40 @@
 
 require_relative '../base_validator'
 
-# 验证用例92: 给张三预订苏州园林讲解（粉丝数最多的导游）
+# 验证用例92: 给张三、李四预订苏州园林讲解（2成人，选择粉丝数最多的导游，10天后）
+#
+# 任务描述:
+#   用户想在10天后预订苏州园林的深度讲解，为2位成人（张三、李四）。
+#   Agent 需要在符合条件的苏州园林导游中，选择follower_count（粉丝数）最多的导游。
+#
+# 业务流程（5个关键步骤）：
+#   1. 搜索苏州园林相关的深度游产品
+#   2. 筛选venue为"苏州园林"的导游
+#   3. 对比多个导游的follower_count（粉丝数）
+#   4. 选择follower_count最多的导游（如粉丝数相同则按rating降序排序）
+#   5. 预订该导游的华东地区产品
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解景点筛选：venue="苏州园林"
+#   2. 需要理解"粉丝数最多"条件：对比多个导游的follower_count字段
+#   3. 需要选择follower_count最大值的导游
+#   4. 需要处理粉丝数相同的情况：按rating降序排序
+#   5. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确对比follower_count并选择最多的
+#
+# 评分标准（6项，总计100分）：
+#   - 订单已创建（20分）
+#   - 向导景点正确（苏州园林）（15分）
+#   - 产品地点正确（华东）（15分）
+#   - 选择了粉丝数最多的导游（30分）
+#   - 人数信息正确（2成人）（10分）
+#   - 联系人信息正确（从出行人中选择：张三或李四）（10分）
 module V051V100
   class V092BookSuzhouGardenTourValidator < BaseValidator
     self.validator_id = 'v092_book_suzhou_garden_tour_validator'
     self.task_id = 'aca21330-8a40-44bc-873b-4f93472a424d'
-    self.title = '给张三预订苏州园林讲解（粉丝数最多的导游）'
-    self.description = '预订苏州园林讲解（粉丝数最多的导游）'
+    self.title = '给张三、李四预订苏州园林讲解（2成人，选择粉丝数最多的导游，10天后）'
+    self.description = '预订苏州园林讲解（2成人，选择粉丝数最多的导游，10天后）'
     self.timeout_seconds = 240
   
     def prepare

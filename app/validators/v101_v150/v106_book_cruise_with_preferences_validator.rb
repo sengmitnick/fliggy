@@ -2,21 +2,47 @@
 
 require_relative '../base_validator'
 
-# 验证用例106: 预订邮轮（海洋光谱号日韩航线6天5晚，含岸上观光+主厨晚餐需求）
+# 验证用例106: 给张建国、陈静预订上海出发日韩邮轮（海洋光谱号，6天5晚，内舱房，选择最近的班次，需备注冲绳岸上观光+主厨晚餐）
 #
-# 核心验证点:
-# 1. 订单创建: 邮轮订单创建成功
-# 2. 船只选择: 海洋光谱号
-# 3. 行程时长: 6天5晚
-# 4. 特殊需求备注: 岸上观光（冲绳）
-# 5. 特殊需求备注: 主厨晚餐
-# 6. 班次选择: 最近日期的可用班次
+# 任务描述:
+#   用户想预订上海出发的日韩邮轮，为2位成人（张建国、陈静）。
+#   要求海洋光谱号，行程6天5晚，选择最近的一个班次，预订内舱房。
+#   特殊需求：在订单备注中说明需要预订冲绳岸上观光套餐和主厨特选晚餐。
+#   Agent 需要在符合条件的班次中，选择departure_date（出发日期）最早的班次，并在remark字段中填写特殊需求。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索上海出发的日韩邮轮产品
+#   2. 筛选船只名包含"海洋光谱号"的班次
+#   3. 筛选出发港包含"上海"、行程6天5晚的班次
+#   4. 选择departure_date最早的班次
+#   5. 预订内舱房（category='interior'），为2位成人
+#   6. 在订单备注（remark）中填写特殊需求：冲绳岸上观光套餐 + 主厨特选晚餐
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解邮轮筛选：船只名包含"海洋光谱号"
+#   2. 需要理解出发港筛选：departure_port包含"上海"
+#   3. 需要理解行程天数：duration_days=6且duration_nights=5
+#   4. 需要选择最近的班次：对比多个班次的departure_date，选择最早的
+#   5. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   6. 需要在订单备注中说明特殊需求：岸上观光（冲绳）+ 主厨晚餐
+#   ❌ 不能随机选择：必须精确筛选并选择最早日期的班次
+#
+# 评分标准（9项，总计100分）：
+#   - 订单已创建（15分）
+#   - 船只正确（海洋光谱号）（10分）
+#   - 行程天数正确（6天5晚）（10分）
+#   - 已备注岸上观光需求（15分）
+#   - 已备注餐饮需求（15分）
+#   - 预订数量正确（2位成人）（10分）
+#   - 联系人信息正确（张建国或陈静）（10分）
+#   - 选择了最近日期的班次（5分）
+#   - 乘客信息正确（张建国、陈静）（10分）
 module V101V150
   class V106BookCruiseWithPreferencesValidator < BaseValidator
     self.validator_id = 'v106_book_cruise_with_preferences_validator'
     self.task_id = 'b2c4e7f9-1d6a-4b8e-9c3f-5a7e2d8f1b94'
-    self.title = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐+主厨晚餐）'
-    self.description = '帮张建国和陈静订日韩邮轮，要海洋光谱号，6天5晚，上海出发，选最近的班次，内舱房就行。备注里要加上冲绳岸上观光和主厨特选晚餐'
+    self.title = '给张建国、陈静预订上海出发日韩邮轮（海洋光谱号，6天5晚，内舱房，选择最近的班次，需备注冲绳岸上观光+主厨晚餐）'
+    self.description = '预订上海出发日韩邮轮（海洋光谱号，6天5晚，内舱房，备注特殊需求）'
     self.timeout_seconds = 240
   
     def prepare
@@ -57,8 +83,8 @@ module V101V150
     end
   
     def verify
-      # 断言1: 订单已创建（权重20%）
-      add_assertion "订单已创建", weight: 20 do
+      # 断言1: 订单已创建（15%）
+      add_assertion "订单已创建", weight: 15 do
         all_orders = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -70,8 +96,8 @@ module V101V150
     
       return if @order.nil?
     
-      # 断言2: 船只正确（权重15%）
-      add_assertion "船只正确（海洋光谱号）", weight: 15 do
+      # 断言2: 船只正确（10%）
+      add_assertion "船只正确（海洋光谱号）", weight: 10 do
         product = @order.cruise_product
         ship = product.cruise_sailing.cruise_ship
         expect(ship.name).to include(@ship_keyword),
@@ -111,7 +137,13 @@ module V101V150
           "未在备注中说明餐饮需求。实际备注: #{remark.empty? ? '(空)' : remark}"
       end
     
-      # 断言6: 联系人信息正确（权重10%）
+      # 断言6: 预订数量正确（10%）
+      add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 10 do
+        expect(@order.quantity).to eq(@adult_count),
+          "预订数量错误。期望: #{@adult_count}位成人, 实际: #{@order.quantity}位"
+      end
+    
+      # 断言7: 联系人信息正确（10%）- 验证联系人为张建国或陈静，且电话匹配
       add_assertion "联系人信息正确（张建国或陈静）", weight: 10 do
         valid_contacts = ['张建国', '陈静']
         expect(valid_contacts).to include(@order.contact_name),
@@ -122,8 +154,8 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@order.contact_phone}"
       end
     
-      # 断言7: 选择了最近日期的班次（权重15%）
-      add_assertion "选择了最近日期的班次", weight: 15 do
+      # 断言8: 选择了最近日期的班次（5%）- 在所有符合条件的班次中选择最早的
+      add_assertion "选择了最近日期的班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       
@@ -135,10 +167,27 @@ module V101V150
           duration_nights: @duration_nights
         ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
       
+        expect(available_sailings).not_to be_empty, "未找到符合条件的班次"
+      
         nearest = available_sailings.order(departure_date: :asc).first
         actual_sailing = @order.cruise_product.cruise_sailing
+        
         expect(actual_sailing.id).to eq(nearest.id),
-          "未选择最近日期的班次。应选: #{nearest.departure_date}, 实际: #{actual_sailing.departure_date}"
+          "未选择最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
+      end
+  
+      # 断言9: 乘客信息正确（10%）- 验证填写了张建国、陈静的乘客信息
+      add_assertion "乘客信息正确（张建国、陈静）", weight: 10 do
+        passenger_list = @order.passenger_list
+        expect(passenger_list).not_to be_empty, "未填写乘客信息（passenger_info为空）"
+        expect(passenger_list.size).to eq(@adult_count),
+          "乘客数量错误。期望: #{@adult_count}位, 实际: #{passenger_list.size}位"
+        
+        passenger_names = passenger_list.map { |p| p['name'] || p[:name] }.compact
+        @expected_passenger_names.each do |expected_name|
+          expect(passenger_names).to include(expected_name),
+            "缺少乘客信息。期望包含: #{expected_name}, 实际乘客: #{passenger_names.join('、')}"
+        end
       end
     end
   
@@ -196,6 +245,7 @@ module V101V150
       japan_korea_route = CruiseRoute.where(data_version: 0).find_by(region: 'japan_korea')
       raise "未找到日韩航线" unless japan_korea_route
     
+      # 查找符合条件的班次（6天5晚，上海出发）
       available_sailings = CruiseSailing.where(
         data_version: 0,
         cruise_ship_id: ship.id,
@@ -205,6 +255,7 @@ module V101V150
       ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
       raise "未找到符合条件的班次" if available_sailings.empty?
     
+      # 选择最近日期的班次
       nearest_sailing = available_sailings.order(departure_date: :asc).first
     
       # 查找内舱房舱房类型（从基线数据中查找）

@@ -2,13 +2,36 @@
 
 require_relative '../base_validator'
 
-# 验证用例94: 给张三预订成田机场免税店优惠券（全日空免税，最高折扣）
+# 验证用例94: 给张三兑换成田机场免税店优惠券（全日空免税，最高折扣）
+#
+# 任务描述:
+#   用户想为张三兑换成田机场全日空免税店的优惠券。
+#   Agent 需要在符合条件的优惠券中，选择discount_value（折扣值）最高的优惠券。
+#
+# 业务流程（4个关键步骤）：
+#   1. 搜索成田机场相关的免税店优惠券
+#   2. 筛选品牌名包含“全日空”且门店城市包含“成田”的优惠券
+#   3. 对比多个符合条件优惠券的discount_value（折扣值）
+#   4. 选择discount_value最高的优惠券并兑换
+#
+# 复杂度分析（4个关键点）：
+#   1. 需要理解“免税店优惠券”这一特殊服务类型
+#   2. 需要同时满足两个筛选条件（品牌包含“全日空” AND 城市包含“成田”）
+#   3. 需要理解“最高折扣”条件：对比多个优惠券的discount_value字段
+#   4. 需要选择discount_value最大值的优惠券
+#   ❌ 不能随机选择：必须精确对比discount_value并选择最高的
+#
+# 评分标准（4项，总计100分）：
+#   - 优惠券已兑换（20分）
+#   - 品牌正确（全日空免税店）（30分）
+#   - 门店城市正确（成田）（20分）
+#   - 选择了折扣最高的优惠券（30分）
 module V051V100
   class V094RedeemNaritaAirportDutyFreeShopCouponValidator < BaseValidator
     self.validator_id = 'v094_redeem_narita_airport_duty_free_shop_coupon_validator'
     self.task_id = 'ecf457a8-face-4e6a-9380-668b730c5fc2'
-    self.title = '给张三预订成田机场免税店优惠券（全日空免税，最高折扣）'
-    self.description = '预订成田机场免税店优惠券（全日空免税，最高折扣）'
+    self.title = '给张三兑换成田机场免税店优惠券（全日空免税，最高折扣）'
+    self.description = '兑换成田机场免税店优惠券（全日空免税，最高折扣）'
     self.timeout_seconds = 180
   
     def prepare

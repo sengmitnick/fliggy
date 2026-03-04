@@ -1,0 +1,55 @@
+<div id="cruiseTravelerSelectorModal" 
+     class="fixed inset-0 bg-black/60 z-50 hidden" 
+     data-cruise-traveler-selector-target="modal"
+     data-action="click->cruise-traveler-selector#closeModal">
+  <div class="absolute bottom-0 left-0 w-full bg-white rounded-t-2xl transform transition-transform duration-300"
+       data-action="click->cruise-traveler-selector#stopPropagation">
+    <div class="relative bg-white rounded-t-2xl px-4 py-4 border-b border-gray-100">
+      <h3 class="text-center text-lg font-medium text-gray-900">选择常用乘客</h3>
+      <button type="button" 
+              class="absolute right-4 top-4 text-gray-500 hover:text-gray-700" 
+              data-action="click->cruise-traveler-selector#closeModal">
+        <svg class="w-6 h-6 border border-gray-800 rounded-full p-1 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-4 h-[400px] bg-white overflow-y-auto">
+      <% if current_user.passengers.any? %>
+        <% current_user.passengers.order(created_at: :desc).limit(20).each do |passenger| %>
+          <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg mb-2 cursor-pointer hover:bg-gray-100"
+               data-action="click->cruise-traveler-selector#selectPassenger"
+               data-passenger-id="<%= passenger.id %>"
+               data-passenger-name="<%= passenger.name %>"
+               data-passenger-id-number="<%= passenger.id_number %>"
+               data-passenger-phone="<%= passenger.phone %>">
+            <div class="flex flex-col">
+              <div class="flex items-center mb-1">
+                <span class="text-base font-bold text-gray-900"><%= passenger.name %></span>
+              </div>
+              <% if passenger.id_number.present? %>
+                <span class="text-sm text-gray-500">
+                  <%= passenger.id_number[0..5] %>****<%= passenger.id_number[-4..-1] %>
+                </span>
+              <% end %>
+              <% if passenger.phone.present? %>
+                <span class="text-xs text-gray-400 mt-0.5"><%= passenger.phone %></span>
+              <% end %>
+            </div>
+            <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary hidden" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center text-gray-400 py-8">
+          <p>暂无常用乘客</p>
+          <p class="text-sm mt-2">您可以在<a href="<%= passengers_path %>" class="text-primary">常用信息</a>中添加</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

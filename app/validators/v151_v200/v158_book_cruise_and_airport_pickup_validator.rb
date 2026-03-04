@@ -36,7 +36,7 @@ module V151V200
         .where("departure_date >= ?", @departure_date)
         .to_a
       
-      expect(@available_sailings).not_to be_empty, "数据包缺少上海出发的邮轮班次"
+      raise "数据包缺少上海出发的邮轮班次" if @available_sailings.empty?
       
       # 查找今天从北京飞到上海浦东的航班（接机）
       @pickup_flights = Flight
@@ -45,7 +45,7 @@ module V151V200
         .where("arrival_airport LIKE ?", "%浦东%")
         .to_a
       
-      expect(@pickup_flights).not_to be_empty, "数据包缺少#{@flight_origin}到#{@departure_port}浦东的航班"
+      raise "数据包缺少#{@flight_origin}到#{@departure_port}浦东的航班" if @pickup_flights.empty?
     end
 
     def simulate

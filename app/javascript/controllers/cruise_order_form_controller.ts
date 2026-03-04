@@ -5,7 +5,7 @@ export default class extends Controller<HTMLElement> {
     "modal", "nameInput", "phoneInput", "emailInput", "contactItem",
     "insuranceCard", "checkmark", "insurancePriceInput", "insuranceTypeInput", "quantityInput",
     "totalPrice", "submitBtn", "form", "acceptTermsCheckbox", "termsSection", "termsError",
-    "quantityDisplay", "decrementBtn"
+    "quantityDisplay", "decrementBtn", "passengerCountDisplay"
   ]
 
   declare readonly modalTarget: HTMLElement
@@ -26,6 +26,7 @@ export default class extends Controller<HTMLElement> {
   declare readonly termsErrorTarget: HTMLElement
   declare readonly quantityDisplayTarget: HTMLElement
   declare readonly decrementBtnTarget: HTMLButtonElement
+  declare readonly passengerCountDisplayTarget: HTMLElement
   declare readonly hasModalTarget: boolean
   declare readonly hasContactItemTarget: boolean
   declare readonly hasInsuranceCardTarget: boolean
@@ -71,6 +72,20 @@ export default class extends Controller<HTMLElement> {
   }
 
   validateForm(event: Event): boolean {
+    // Sync passenger data from cruise-traveler-selector controller before validation
+    const travelerSelectorElement = document.querySelector('[data-controller~="cruise-traveler-selector"]')
+    if (travelerSelectorElement) {
+      const travelerController = this.application.getControllerForElementAndIdentifier(
+        travelerSelectorElement as HTMLElement,
+        'cruise-traveler-selector'
+      ) as any
+      
+      if (travelerController && travelerController.syncPassengerData) {
+        travelerController.syncPassengerData()
+        console.log('Synced passenger data before form submission')
+      }
+    }
+    
     // Check if accept_terms checkbox is checked
     if (!this.acceptTermsCheckboxTarget.checked) {
       event.preventDefault()
@@ -273,6 +288,10 @@ export default class extends Controller<HTMLElement> {
     
     this.quantityInputTarget.value = newQuantity.toString()
     this.quantityDisplayTarget.textContent = newQuantity.toString()
+    this.passengerCountDisplayTarget.textContent = newQuantity.toString()
+    
+    // Update passenger cards via cruise-traveler-selector controller
+    this.updatePassengerCards(newQuantity)
     
     this.updateDecrementButtonState()
     this.updateTotalPrice()
@@ -286,6 +305,10 @@ export default class extends Controller<HTMLElement> {
     if (newQuantity >= this.occupancyRequirement) {
       this.quantityInputTarget.value = newQuantity.toString()
       this.quantityDisplayTarget.textContent = newQuantity.toString()
+      this.passengerCountDisplayTarget.textContent = newQuantity.toString()
+      
+      // Update passenger cards via cruise-traveler-selector controller
+      this.updatePassengerCards(newQuantity)
       
       this.updateDecrementButtonState()
       this.updateTotalPrice()
@@ -300,6 +323,21 @@ export default class extends Controller<HTMLElement> {
       this.decrementBtnTarget.disabled = true
     } else {
       this.decrementBtnTarget.disabled = false
+    }
+  }
+
+  // Update passenger cards in cruise-traveler-selector controller
+  private updatePassengerCards(quantity: number): void {
+    const travelerSelectorElement = document.querySelector('[data-controller~="cruise-traveler-selector"]')
+    if (travelerSelectorElement) {
+      const travelerController = this.application.getControllerForElementAndIdentifier(
+        travelerSelectorElement as HTMLElement,
+        'cruise-traveler-selector'
+      ) as any
+      
+      if (travelerController && travelerController.updatePassengerCards) {
+        travelerController.updatePassengerCards(quantity)
+      }
     }
   }
 

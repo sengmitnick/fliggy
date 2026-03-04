@@ -113,7 +113,7 @@ class CruiseOrdersController < ApplicationController
       :insurance_type,
       :remark,
       :accept_terms,
-      passenger_info: {}
+      :passenger_info
     )
   end
 end

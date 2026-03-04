@@ -2,47 +2,47 @@
 
 require_relative '../base_validator'
 
-# 验证用例85: 给张三预订上海接站服务（北京→上海火车，虹桥站→张江酒店，经济7座，后天下午2点）
+# 验证用例85: 给张三预订上海接机服务（北京→上海航班，虹桥机场→张江酒店，经济7座，后天下午2点）
 # 
 # 任务描述:
-#   用户后天从北京坐火车到上海，一家5口人需要在虹桥火车站接站送到张江酒店。
-#   Agent 需要通过搜索火车班次确定到达车站位置，选择经济7座车型中价格最低的套餐
+#   用户后天从北京坐飞机到上海，一家5口人需要在虹桥机场接机送到张江酒店。
+#   Agent 需要通过搜索航班确定到达机场位置，选择经济7座车型中价格最低的套餐
 # 
 # 业务流程:
-#   1. 用户选择"接我"服务（from_station = 从车站接到目的地）
-#   2. 根据火车班次的起终城市搜索（北京→上海），确定到达车站（如：上海虹桥站）
-#   3. 上车点：到达车站（location_from = 上海虹桥站西广场接送中心，通过火车班次搜索确定）
+#   1. 用户选择"接我"服务（from_airport = 从机场接到目的地）
+#   2. 根据航班的起终城市搜索（北京→上海），确定到达机场（如：上海虹桥机场T2）
+#   3. 上车点：到达机场（location_from = 虹桥T2接机处，通过航班搜索确定）
 #   4. 下车点：酒店地址（location_to = 浦东新区张江酒店）
 #   5. 用车时间：后天下午2点（pickup_datetime）
 #   6. 根据5人家庭需求，筛选经济7座车型
 #   7. 浏览经济7座车型套餐，选择价格最低的
 # 
 # 复杂度分析:
-#   1. 需要理解"接站"含义：from_station = 从车站出发，送到目的地
-#   2. 需要根据火车班次起终城市（北京→上海）搜索火车，确定到达车站位置（location_from = 上海虹桥站）
+#   1. 需要理解"接机"含义：from_airport = 从机场出发，送到目的地
+#   2. 需要根据航班起终城市（北京→上海）搜索航班，确定到达机场位置（location_from = 虹桥T2）
 #   3. 需要理解5人家庭需要7座车（座位需求匹配）
 #   4. 需要选择下车地点（张江酒店）
 #   5. 需要设置用车时间（后天下午2点）
 #   6. 需要筛选经济7座车型
 #   7. 需要对比同类车型不同供应商的价格
 #   8. 需要选择最低价格的套餐
-#   ❌ 不能一次性提供：需要先搜索火车班次→确定车站→选地址→设置时间→筛选车型→对比价格→预订
+#   ❌ 不能一次性提供：需要先搜索航班→确定机场→选地址→设置时间→筛选车型→对比价格→预订
 # 
 # 评分标准:
-#   - 创建了接站订单 (15分)
-#   - 服务类型正确（train_pickup + from_station）(10分)
-#   - 上车点和下车点正确（虹桥站→张江酒店）(10分)
+#   - 创建了接机订单 (15分)
+#   - 服务类型正确（airport_pickup + from_airport）(10分)
+#   - 上车点和下车点正确（虹桥机场→张江酒店）(10分)
 #   - 车辆类型正确（economy_7 经济7座）(15分)
 #   - 联系人信息正确（4个成人中任选1人）(5分)
 #   - 选择了该车型中价格最低的套餐 (30分)
 #   - 订单价格正确 (5分)
 #   - 用车时间正确（后天下午2点）(10分)
 module V051V100
-  class V085BookTrainStationPickupValidator < BaseValidator
-    self.validator_id = 'v085_book_train_station_pickup_validator'
+  class V085BookAirportPickupValidator < BaseValidator
+    self.validator_id = 'v085_book_airport_pickup_validator'
     self.task_id = '74f8237a-b1b5-4670-b135-2867748d0721'
-    self.title = '给张三预订上海接站服务（北京→上海火车，虹桥站→张江酒店，经济7座，后天下午2点）'
-    self.description = '预订上海虹桥火车站接站服务（虹桥站西广场→浦东新区张江酒店，经济7座，后天下午2点）'
+    self.title = '给张三预订上海接机服务（北京→上海航班，虹桥机场→张江酒店，经济7座，后天下午2点）'
+    self.description = '预订上海虹桥机场接机服务（虹桥T2→浦东新区张江酒店，经济7座，后天下午2点）'
     self.timeout_seconds = 240
   
     def prepare
@@ -57,18 +57,18 @@ module V051V100
       @valid_passenger_names = [@zhangjianguo.name, @zhangsan.name, @wangfang.name, @lisi.name]
       @valid_passenger_phones = [@zhangjianguo.phone, @zhangsan.phone, @wangfang.phone, @lisi.phone]
       
-      @service_type = 'from_station'  # 火车站接站服务
-      @transfer_type = 'train_pickup'
-      @departure_city = '北京'  # 火车出发城市
-      @arrival_city = '上海'  # 火车到达城市
-      @arrival_station = '虹桥站西广场接送中心'  # 到达车站（上车点，上海，通过火车班次搜索确定）
+      @service_type = 'from_airport'  # 机场接机服务
+      @transfer_type = 'airport_pickup'
+      @departure_city = '北京'  # 航班出发城市
+      @arrival_city = '上海'  # 航班到达城市
+      @arrival_airport = '虹桥T2接机处'  # 到达机场（上车点，上海，通过航班搜索确定）
       @dropoff_location = '浦东新区张江酒店'  # 下车点（目的地）
-      @train_date = (Date.current + 2.days).strftime('%Y-%m-%d')  # 后天
+      @flight_date = (Date.current + 2.days).strftime('%Y-%m-%d')  # 后天
       @pickup_datetime = Date.current + 2.days + 14.hours  # 后天下午2点（预计到达时间）
       @vehicle_category = 'economy_7'  # 经济7座（家庭出行，5人）
       @passenger_count = 5  # 乘客人数
     
-      @location_from = @arrival_station  # 上车点 = 到达车站（通过火车班次搜索确定）
+      @location_from = @arrival_airport  # 上车点 = 到达机场（通过航班搜索确定）
       @location_to = @dropoff_location  # 下车点 = 目的地
     
       @available_packages = TransferPackage.where(
@@ -78,27 +78,30 @@ module V051V100
       )
     
       {
-        task: "请预订火车站接站服务，从车站送到酒店，选择经济7座车型中价格最低的套餐",
-        scenario: "后天从北京坐火车到上海，一家5口人，需要在车站接站送到浦东新区酒店",
-        train_info: {
+        task: "请预订机场接机服务，从机场送到酒店，选择经济7座车型中价格最低的套餐",
+        scenario: "后天从北京坐飞机到上海，一家5口人，需要在机场接机送到浦东新区酒店",
+        flight_info: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
-          train_date: @train_date
+          flight_date: @flight_date,
+          flight_number: "CA1903",
+          arrival_airport: "虹桥T2",
+          arrival_time: "14:00"
         },
-        service_type: "火车站接站（from_station）",
-        pickup_location: "到达车站（上车点，通过#{@departure_city}→#{@arrival_city}火车班次搜索确定）",
+        service_type: "机场接机（from_airport）",
+        pickup_location: "虹桥T2接机处（上车点，通过CA1903航班搜索确定）",
         dropoff_location: "#{@dropoff_location}（下车点，目的地酒店）",
         pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
         passenger_count: @passenger_count,
         vehicle_category: '经济7座（economy_7）',
-        flow_hint: "1. 搜索#{@departure_city}→#{@arrival_city}火车班次 → 2. 确认到达车站（如上海虹桥站） → 3. 选择接站服务 → 4. 上车点自动=到达车站 → 5. 下车点输入目的地酒店地址 → 6. 根据5人家庭需求筛选经济7座车型 → 7. 对比同类车型不同供应商价格 → 8. 选择该车型中价格最低的套餐",
-        hint: "家庭出行5人需要7座车（经济7座可容纳6人），选择economy_7车型中价格最低的套餐",
+        flow_hint: "1. 搜索#{@departure_city}→#{@arrival_city}航班（CA1903，后天下午14:00到达虹桥T2） → 2. 确认到达机场（虹桥T2） → 3. 选择接机服务 → 4. 上车点自动=虹桥T2 → 5. 下车点输入目的地酒店地址 → 6. 根据5人家庭需求筛选经济7座车型 → 7. 对比同类车型不同供应商价格 → 8. 选择该车型中价格最低的套餐",
+        hint: "家庭出行5人需要7座车（经济7座可容纳6人），搜索CA1903航班确定到达虹桥T2，选择economy_7车型中价格最低的套餐",
         available_packages_count: @available_packages.count
       }
     end
   
     def verify
-      add_assertion "创建了接站订单", weight: 15 do
+      add_assertion "创建了接机订单", weight: 15 do
         all_transfers = Transfer
           .where(data_version: @data_version)
           .where(transfer_type: @transfer_type)
@@ -106,23 +109,23 @@ module V051V100
           .order(created_at: :desc)
           .to_a
         
-        expect(all_transfers).not_to be_empty, "未找到任何火车站接站订单记录"
+        expect(all_transfers).not_to be_empty, "未找到任何机场接机订单记录"
         @transfer = all_transfers.first
       end
     
       return if @transfer.nil?
     
-      add_assertion "服务类型正确（train_pickup + from_station）", weight: 10 do
+      add_assertion "服务类型正确（airport_pickup + from_airport）", weight: 10 do
         expect(@transfer.transfer_type).to eq(@transfer_type),
-          "服务类型错误。期望: #{@transfer_type}（火车站接送）, 实际: #{@transfer.transfer_type}"
+          "服务类型错误。期望: #{@transfer_type}（机场接送）, 实际: #{@transfer.transfer_type}"
         expect(@transfer.service_type).to eq(@service_type),
-          "具体服务类型错误。期望: #{@service_type}（从车站接），实际: #{@transfer.service_type}"
+          "具体服务类型错误。期望: #{@service_type}（从机场接），实际: #{@transfer.service_type}"
       end
     
-      add_assertion "上车点和下车点正确（虹桥站→张江酒店）", weight: 10 do
-        # 验证上车点包含虹桥站
+      add_assertion "上车点和下车点正确（虹桥机场→张江酒店）", weight: 10 do
+        # 验证上车点包含虹桥
         expect(@transfer.location_from).to include('虹桥'),
-          "上车点错误（缺少虹桥）。期望包含: 虹桥站西广场接送中心, 实际: #{@transfer.location_from}"
+          "上车点错误（缺少虹桥）。期望包含: 虹桥T2接机处, 实际: #{@transfer.location_from}"
         
         # 验证下车点包含张江
         expect(@transfer.location_to).to include('张江'),
@@ -213,9 +216,9 @@ module V051V100
         transfer_type: @transfer_type,
         departure_city: @departure_city,
         arrival_city: @arrival_city,
-        arrival_station: @arrival_station,
+        arrival_airport: @arrival_airport,
         dropoff_location: @dropoff_location,
-        train_date: @train_date,
+        flight_date: @flight_date,
         location_from: @location_from,
         location_to: @location_to,
         pickup_datetime: @pickup_datetime.to_s,
@@ -231,9 +234,9 @@ module V051V100
       @transfer_type = data['transfer_type']
       @departure_city = data['departure_city']
       @arrival_city = data['arrival_city']
-      @arrival_station = data['arrival_station']
+      @arrival_airport = data['arrival_airport']
       @dropoff_location = data['dropoff_location']
-      @train_date = data['train_date']
+      @flight_date = data['flight_date']
       @location_from = data['location_from']
       @location_to = data['location_to']
       @vehicle_category = data['vehicle_category']

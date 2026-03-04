@@ -121,7 +121,7 @@
         <% 5.times do |i| %>
           <% date = today + i.days %>
           <% is_first = i == 0 %>
-          <% is_available = (i != 2 && i != 3) %>
+          <% is_available = true %>
           
           <% if is_available %>
             <button class="shrink-0 w-[72px] h-[72px] <%= is_first ? 'bg-[#ffeeb8] border-[#ffeeb8]' : 'bg-[#f5f7fa]' %> rounded-lg flex flex-col justify-center items-center border relative hover:bg-[#ffeeb8] transition-colors"
