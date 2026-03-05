@@ -2,34 +2,41 @@
 
 require_relative '../base_validator'
 
-# 验证用例113: 给刘强预订杭州私家团（4天3晚，2成人1儿童）
+# 验证用例113: 给刘强预订杭州私家团（4天3晚，刘强、陈静、小红，10天后出发，独立成团）
 #
 # 任务描述:
-#   帮刘强预订杭州私家团，4天3晚，2成人（刘强、陈静）1儿童（小红），独立成团
+#   用户刘强想预订杭州私家团，4天3晚，包含2成人（刘强、陈静）和1儿童（小红），要求独立成团。
+#   Agent 需要在符合条件的私家团产品中完成预订，并正确填写游客信息。
 #
-# 评分标准:
-#   - 订单已创建 (20分)
-#   - 目的地正确（杭州）(15分)
-#   - 旅游类型正确（独立成团）(20分)
-#   - 天数正确（4天）(10分)
-#   - 联系人信息正确（刘强）(10分)
-#   - 人数正确（2成人1儿童）(10分)
-#   - 游客信息正确（刘强、陈静、小红）(15分)
+# 业务流程（5个关键步骤）：
+#   1. 搜索杭州目的地的私家团产品（travel_type='独立成团'）
+#   2. 选择符合天数要求的产品（4天行程）
+#   3. 设置出发日期（10天后出发）
+#   4. 设置人数（2成人1儿童）并选择套餐
+#   5. 填写联系人信息（刘强）和游客信息（刘强、陈静、小红含身份证号）并提交订单
 #
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v113_private_group_booking_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+# 复杂度分析（5个关键点）：
+#   1. 需要理解旅游类型：travel_type='独立成团'（私家团，非跟团游或自由行）
+#   2. 需要理解目的地筛选：杭州（destination包含'杭州'）
+#   3. 需要理解人数组合：2成人1儿童（成人刘强、陈静，儿童小红）
+#   4. 需要理解游客信息：必须填写所有游客的姓名、身份证号、类型（成人/儿童）
+#   5. 需要理解联系人信息：使用刘强的乘客信息（姓名+手机号）
+#   ❌ 不能遗漏：必须创建3条游客记录（2成人+1儿童），每条都有身份证号
+#
+# 评分标准（7项，总计100分）：
+#   - 订单已创建（20分）
+#   - 目的地正确（杭州）（15分）
+#   - 旅游类型正确（独立成团）（20分）
+#   - 天数正确（4天）（10分）
+#   - 联系人信息正确（刘强 13600136001）（10分）
+#   - 人数正确（2成人1儿童）（10分）
+#   - 游客信息正确（刘强、陈静、小红含身份证号）（15分）
 module V101V150
   class V113PrivateGroupBookingValidator < BaseValidator
     self.validator_id = 'v113_private_group_booking_validator'
     self.task_id = '6835d498-1040-44bb-bedf-2d628e59de70'
-    self.title = '帮刘强预订杭州私家团，4天3晚，2成人（刘强、陈静）1儿童（小红），独立成团'
-    self.description = '帮刘强预订杭州私家团，4天3晚，2成人（刘强、陈静）1儿童（小红），独立成团'
+    self.title = '给刘强预订杭州私家团（4天3晚，刘强、陈静、小红，10天后出发，独立成团）'
+    self.description = '预订杭州私家团（4天3晚，刘强、陈静、小红，独立成团）'
     self.timeout_seconds = 300
   
     def prepare
@@ -46,8 +53,11 @@ module V101V150
       @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
       @xiaohong = user.passengers.find_by!(name: '小红', data_version: 0)
       
-      @expected_contact_name = @liuqiang.name
-      @expected_contact_phone = @liuqiang.phone
+      # 允许联系人是任何一个成年人（刘强或陈静）
+      @allowed_contacts = [
+        { name: @liuqiang.name, phone: @liuqiang.phone },
+        { name: @chenjing.name, phone: @chenjing.phone }
+      ]
       @expected_adult_names = [@liuqiang.name, @chenjing.name].sort
       @expected_child_names = [@xiaohong.name]
     
@@ -86,6 +96,7 @@ module V101V150
     end
   
     def verify
+      # 断言1: 订单已创建（权重20%）
       add_assertion "订单已创建", weight: 20 do
         all_bookings = TourGroupBooking.joins(:tour_group_product)
                                        .where(tour_group_products: { travel_type: @travel_type })
@@ -103,28 +114,37 @@ module V101V150
     
       return if @bookings.nil? || @bookings.empty?
     
+      # 断言2: 目的地正确（权重15%）
       add_assertion "目的地正确（#{@destination}）", weight: 15 do
         expect(@booking.tour_group_product.destination).to include(@destination),
           "目的地错误。期望包含: #{@destination}，实际: #{@booking.tour_group_product.destination}"
       end
     
+      # 断言3: 旅游类型正确（权重20%）
       add_assertion "旅游类型正确（独立成团）", weight: 20 do
         expect(@booking.tour_group_product.travel_type).to eq(@travel_type),
           "旅游类型错误。期望: #{@travel_type}（私家团），实际: #{@booking.tour_group_product.travel_type}"
       end
     
+      # 断言4: 天数正确（权重10%）
       add_assertion "天数正确（#{@duration}天）", weight: 10 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数错误。期望: #{@duration}天，实际: #{@booking.tour_group_product.duration}天"
       end
     
-      add_assertion "联系人信息正确（刘强 13600136001）", weight: 10 do
-        expect(@booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@booking.contact_name}"
-        expect(@booking.contact_phone).to eq(@expected_contact_phone),
-          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      # 断言5: 联系人信息正确（权重10%）
+      add_assertion "联系人信息正确（刘强或陈静）", weight: 10 do
+        contact_valid = @allowed_contacts.any? do |contact|
+          @booking.contact_name == contact[:name] && @booking.contact_phone == contact[:phone]
+        end
+        
+        expect(contact_valid).to be_truthy,
+          "联系人信息错误。" \
+          "期望: 刘强（13600136001）或陈静（13700137001），" \
+          "实际: #{@booking.contact_name}（#{@booking.contact_phone}）"
       end
     
+      # 断言6: 人数正确（权重10%）
       add_assertion "人数正确（#{@adult_count}成人#{@child_count}儿童）", weight: 10 do
         expect(@booking.adult_count).to eq(@adult_count),
           "成人数量错误。期望: #{@adult_count}人，实际: #{@booking.adult_count}人"
@@ -132,6 +152,7 @@ module V101V150
           "儿童数量错误。期望: #{@child_count}人，实际: #{@booking.child_count}人"
       end
       
+      # 断言7: 游客信息正确（权重15%）
       add_assertion "游客信息正确（刘强、陈静、小红）", weight: 15 do
         travelers = @booking.booking_travelers.where(data_version: @data_version).to_a
         
@@ -251,8 +272,7 @@ module V101V150
         child_count: @child_count,
         travel_type: @travel_type,
         travel_date: @travel_date.to_s,
-        expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone,
+        allowed_contacts: @allowed_contacts,
         expected_adult_names: @expected_adult_names,
         expected_child_names: @expected_child_names
       }
@@ -265,16 +285,25 @@ module V101V150
       @child_count = data['child_count']
       @travel_type = data['travel_type']
       @travel_date = Date.parse(data['travel_date'])
-      @expected_contact_name = data['expected_contact_name'] || '刘强'
-      @expected_contact_phone = data['expected_contact_phone'] || '13600136001'
-      @expected_adult_names = data['expected_adult_names'] || ['刘强', '陈静'].sort
-      @expected_child_names = data['expected_child_names'] || ['小红']
-    
+      
       # 重新查询乘客信息用于验证身份证号
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
       @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
       @xiaohong = user.passengers.find_by!(name: '小红', data_version: 0)
+      
+      # 恢复允许的联系人列表
+      @allowed_contacts = if data['allowed_contacts']
+        data['allowed_contacts'].map { |c| { name: c['name'], phone: c['phone'] } }
+      else
+        [
+          { name: @liuqiang.name, phone: @liuqiang.phone },
+          { name: @chenjing.name, phone: @chenjing.phone }
+        ]
+      end
+      
+      @expected_adult_names = data['expected_adult_names'] || ['刘强', '陈静'].sort
+      @expected_child_names = data['expected_child_names'] || ['小红']
     
       @qualified_products = TourGroupProduct.where(
         travel_type: @travel_type,

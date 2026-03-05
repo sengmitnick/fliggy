@@ -2,34 +2,42 @@
 
 require_relative '../base_validator'
 
-# 验证用例112: 给李四预订上海自由行一日游（2成人，5天后出发）
+# 验证用例112: 给李四预订上海自由行一日游（张三和李四，5天后出发）
 #
 # 任务描述:
-#   帮李四预订上海自由行一日游，2成人（张三和李四），当天往返
+#   用户李四想预订上海自由行一日游，2成人（张三和李四），5天后出发，当天往返。
+#   要求选择自由出行类型的一日游产品。
+#   Agent 需要在符合条件的产品中选择合适的完成预订。
 #
-# 评分标准:
-#   - 订单已创建 (20分)
-#   - 目的地正确（上海）(15分)
-#   - 旅游类型正确（自由出行）(20分)
-#   - 天数正确（1天）(10分)
-#   - 联系人信息正确（李四）(10分)
-#   - 人数正确（2成人）(10分)
-#   - 游客信息正确（张三、李四）(15分)
+# 业务流程（5个关键步骤）：
+#   1. 搜索上海目的地的自由行产品（travel_type='自由出行'）
+#   2. 筛选一日游产品（duration=1）
+#   3. 设置出行日期（5天后出发）、人数（2成人0儿童）
+#   4. 填写联系人信息（李四）和游客信息（张三、李四）
+#   5. 选择合适的套餐并提交订单
 #
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v112_free_travel_package_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+# 复杂度分析（5个关键点）：
+#   1. 需要理解旅游类型：travel_type='自由出行'（自由行，非跟团游、非独立成团）
+#   2. 需要理解行程时长：duration=1（一日游，当天往返）
+#   3. 需要理解出行日期计算：5天后出发（Date.current + 5.days）
+#   4. 需要理解联系人和游客信息：联系人李四，游客张三和李四（2人）
+#   5. 需要正确填写游客身份信息：姓名 + 身份证号（使用Passenger表中的信息）
+#   ❌ 不能随机选择：必须精确匹配旅游类型、行程天数、目的地、人数
+#
+# 评分标准（7项，总计100分）：
+#   - 订单已创建（20分）
+#   - 目的地正确（上海）（15分）
+#   - 旅游类型正确（自由出行）（20分）
+#   - 天数正确（1天一日游）（10分）
+#   - 联系人信息正确（张三或李四）（10分）
+#   - 人数正确（2成人0儿童）（10分）
+#   - 游客信息正确（张三、李四）（15分）
 module V101V150
   class V112FreeTravelPackageValidator < BaseValidator
     self.validator_id = 'v112_free_travel_package_validator'
     self.task_id = '2d8eeaf8-2fa3-41a1-be59-669915973d05'
-    self.title = '帮李四预订上海自由行一日游，2成人（张三和李四），当天往返'
-    self.description = '帮李四预订上海自由行一日游，2成人（张三和李四），当天往返'
+    self.title = '给李四预订上海自由行一日游（张三和李四，5天后出发）'
+    self.description = '预订上海自由行一日游（张三和李四，5天后出发）'
     self.timeout_seconds = 300
   
     def prepare
@@ -40,13 +48,16 @@ module V101V150
       @travel_type = '自由出行'
       @travel_date = Date.current + 5.days  # 5天后出发
     
-      # 预查询李四的乘客信息（避免 simulate 中查询 data_version: 0）
+      # 预查询李四和张三的乘客信息（避免 simulate 中查询 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @lisi = user.passengers.find_by!(name: '李四', data_version: 0)
       @zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
-      @expected_contact_name = @lisi.name
-      @expected_contact_phone = @lisi.phone
+      # 联系人可以是张三或李四
+      @allowed_contacts = [
+        { name: @zhangsan.name, phone: @zhangsan.phone },
+        { name: @lisi.name, phone: @lisi.phone }
+      ]
       @expected_traveler_names = [@zhangsan.name, @lisi.name].sort
     
       # 查找符合条件的自由行产品
@@ -84,6 +95,7 @@ module V101V150
     end
   
     def verify
+      # 断誀1: 订单已创建（权重20%）
       add_assertion "订单已创建", weight: 20 do
         all_bookings = TourGroupBooking.joins(:tour_group_product)
                                        .where(tour_group_products: { travel_type: @travel_type })
@@ -101,28 +113,37 @@ module V101V150
     
       return if @bookings.nil? || @bookings.empty?
     
+      # 断誀2: 目的地正确（权重15%）
       add_assertion "目的地正确（#{@destination}）", weight: 15 do
         expect(@booking.tour_group_product.destination).to include(@destination),
           "目的地错误。期望包含: #{@destination}，实际: #{@booking.tour_group_product.destination}"
       end
     
+      # 断誀3: 旅游类型正确（权重20%）
       add_assertion "旅游类型正确（自由出行）", weight: 20 do
         expect(@booking.tour_group_product.travel_type).to eq(@travel_type),
           "旅游类型错误。期望: #{@travel_type}（自由行），实际: #{@booking.tour_group_product.travel_type}"
       end
     
+      # 断誀4: 天数正确（权重10%）
       add_assertion "天数正确（#{@duration}天一日游）", weight: 10 do
         expect(@booking.tour_group_product.duration).to eq(@duration),
           "天数错误。期望: #{@duration}天（一日游），实际: #{@booking.tour_group_product.duration}天"
       end
     
-      add_assertion "联系人信息正确（李四 13900139000）", weight: 10 do
-        expect(@booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@booking.contact_name}"
-        expect(@booking.contact_phone).to eq(@expected_contact_phone),
-          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
+      # 断誀5: 联系人信息正确（权重10%）
+      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
+        contact_valid = @allowed_contacts.any? do |contact|
+          @booking.contact_name == contact[:name] && @booking.contact_phone == contact[:phone]
+        end
+        
+        expect(contact_valid).to be_truthy,
+          "联系人信息错误。" \
+          "期望: 张三（13800138000）或李四（13900139000），" \
+          "实际: #{@booking.contact_name}（#{@booking.contact_phone}）"
       end
     
+      # 断誀6: 人数正确（权重10%）
       add_assertion "人数正确（#{@adult_count}成人#{@child_count}儿童）", weight: 10 do
         expect(@booking.adult_count).to eq(@adult_count),
           "成人数量错误。期望: #{@adult_count}人，实际: #{@booking.adult_count}人"
@@ -130,6 +151,7 @@ module V101V150
           "儿童数量错误。期望: #{@child_count}人，实际: #{@booking.child_count}人"
       end
       
+      # 断誀7: 游客信息正确（权重15%）
       add_assertion "游客信息正确（张三、李四）", weight: 15 do
         travelers = @booking.booking_travelers.where(data_version: @data_version).to_a
         
@@ -220,8 +242,7 @@ module V101V150
         child_count: @child_count,
         travel_type: @travel_type,
         travel_date: @travel_date.to_s,
-        expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone,
+        allowed_contacts: @allowed_contacts,
         expected_traveler_names: @expected_traveler_names
       }
     end
@@ -233,8 +254,12 @@ module V101V150
       @child_count = data['child_count']
       @travel_type = data['travel_type']
       @travel_date = Date.parse(data['travel_date'])
-      @expected_contact_name = data['expected_contact_name'] || '李四'
-      @expected_contact_phone = data['expected_contact_phone'] || '13900139000'
+      @allowed_contacts = data['allowed_contacts'] || [
+        { 'name' => '张三', 'phone' => '13800138000' },
+        { 'name' => '李四', 'phone' => '13900139000' }
+      ]
+      # 转换为 symbol keys
+      @allowed_contacts = @allowed_contacts.map { |c| { name: c['name'], phone: c['phone'] } }
       @expected_traveler_names = data['expected_traveler_names'] || ['张三', '李四'].sort
     
       # 重新查询乘客信息用于验证身份证号
