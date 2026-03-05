@@ -36,7 +36,7 @@ module V101V150
     self.validator_id = 'v109_popular_homestay_validator'
     self.task_id = 'c7f2e8d9-3a1b-4c6e-9d8f-7a2e5b4c1d93'
     self.title = '帮王芳在成都宽窄巷子订网红民宿（5天后入住，3晚，评分最高且>=4.5分）'
-    self.description = '帮王芳在成都宽窄巷子订网红民宿（5天后入住，3晚，评分最高且>=4.5分）'
+    self.description = '预订成都宽窄巷子网红民宿（评分最高，3晚，5天后入住）'
     self.timeout_seconds = 300
   
     def prepare

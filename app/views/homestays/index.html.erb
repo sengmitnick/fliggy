@@ -121,7 +121,7 @@
 
     <!-- Guests/Beds & Promotion -->
     <button class="flex items-center justify-between mb-5 w-full" data-action="click->hotel-guest-selector#openModal">
-      <span class="text-gray-400 text-lg">人数/床数</span>
+      <span class="text-gray-700 text-base" data-hotel-guest-selector-target="displayText"><%= @rooms %>间房 <%= @adults %>成人 <%= @children %>儿童</span>
       <div class="bg-orange-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
         出行特惠
         <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

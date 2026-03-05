@@ -2,32 +2,42 @@
 
 require_relative '../base_validator'
 
-# 验证用例111: 预订热门民宿（上海CBD核心区）
+# 验证用例111: 给张三预订上海CBD核心区民宿（评分最高，2成人，2晚，大后天入住）
 #
 # 任务描述:
-#   在上海CBD核心区预订评分最高的民宿，入住2晚
+#   用户张三想在上海CBD核心区预订民宿，2成人入住2晚，大后天入住。
+#   要求选择评分最高的民宿。
+#   Agent 需要在符合条件的民宿中，选择评分最高的完成预订。
 #
-# 评分标准:
-#   - 订单已创建 (25分)
-#   - 城市/地区正确（上海CBD核心区）(15分)
-#   - 住宿类型正确（民宿）(20分)
-#   - 入住天数正确（2晚）(15分)
-#   - 选择了评分最高的民宿（优化项）(25分)
+# 业务流程（5个关键步骤）：
+#   1. 搜索上海CBD核心区的民宿（hotel_type='homestay'）
+#   2. 按评分排序，选择评分最高的民宿
+#   3. 设置入住日期（大后天入住）、入住天数（2晚）
+#   4. 设置入住人数（1间房，2成人，0儿童）
+#   5. 填写张三的联系人信息并提交订单
 #
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v111_homestay_booking_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+# 复杂度分析（5个关键点）：
+#   1. 需要理解住宿类型：hotel_type='homestay'（民宿，非酒店 'hotel'）
+#   2. 需要理解地区筛选：上海CBD核心区（地址包含'CBD核心区'）
+#   3. 需要理解入住人数：2成人（0儿童），预订1间房
+#   4. 需要理解评分优化：选择评分最高的民宿
+#   5. 需要理解联系人信息：使用张三的乘客信息（姓名+手机号）
+#   ❌ 不能随机选择：必须精确匹配住宿类型、地区、人数，并选择最高评分
+#
+# 评分标准（7项，总计100分）：
+#   - 订单已创建（25分）
+#   - 城市/地区正确（上海CBD核心区）（15分）
+#   - 住宿类型正确（民宿 hotel_type='homestay'）（20分）
+#   - 入住天数正确（2晚）（10分）
+#   - 房间数和人数正确（1间房，2成人，0儿童）（10分）
+#   - 入住人信息正确（张三 13800138000）（10分）
+#   - 选择评分最高的民宿（10分）
 module V101V150
   class V111HomestayBookingValidator < BaseValidator
     self.validator_id = 'v111_homestay_booking_validator'
     self.task_id = '7874748d-a0b8-4725-a536-ff9141c0fed1'
-    self.title = '给张三预订上海CBD核心区民宿（评分最高，2晚）'
-    self.description = '帮张三在上海CBD核心区预订评分最高的民宿，入住2晚'
+    self.title = '给张三预订上海CBD核心区民宿（评分最高，2成人，2晚，大后天入住）'
+    self.description = '预订上海CBD核心区民宿（评分最高，2成人，2晚，大后天入住）'
     self.timeout_seconds = 300
   
     def prepare
@@ -54,7 +64,7 @@ module V101V150
       @best_homestay = @qualified_homestays.order(rating: :desc).first
     
       {
-        task: "请在#{@city}#{@area}地区预订评分最高的民宿，入住#{@nights}晚（大后天入住，#{@check_in_date.strftime('%Y年%m月%d日')}到#{@check_out_date.strftime('%Y年%m月%d日')}）",
+        task: "请在#{@city}#{@area}地区预订评分最高的民宿，2成人入住#{@nights}晚（大后天入住，#{@check_in_date.strftime('%Y年%m月%d日')}到#{@check_out_date.strftime('%Y年%m月%d日')}）",
         requirements: {
           city: @city,
           area: @area,
@@ -75,7 +85,8 @@ module V101V150
     end
   
     def verify
-      add_assertion "订单已创建", weight: 25 do
+      # 断言1: 订单已创建（权重25%）
+      add_assertion "创建了民宿订单", weight: 25 do
         all_bookings = HotelBooking.joins(:hotel)
                                     .where(hotels: { hotel_type: 'homestay' })
                                     .where(data_version: @data_version)
@@ -93,6 +104,7 @@ module V101V150
     
       return if @bookings.nil? || @bookings.empty?
     
+      # 断言2: 城市/地区正确（权重15%）
       add_assertion "城市/地区正确（#{@city}#{@area}）", weight: 15 do
         expect(@booking.hotel.city == @city || @booking.hotel.city.start_with?(@city)).to be_truthy,
           "城市错误。期望: #{@city}，实际: #{@booking.hotel.city}"
@@ -100,17 +112,20 @@ module V101V150
           "地区错误。期望地址包含: #{@area}，实际地址: #{@booking.hotel.address}"
       end
     
-      add_assertion "住宿类型正确（民宿）", weight: 20 do
+      # 断言3: 住宿类型正确（权重20%）
+      add_assertion "住宿类型正确（民宿 hotel_type='homestay'）", weight: 20 do
         expect(@booking.hotel.hotel_type).to eq('homestay'),
           "住宿类型错误。期望: homestay（民宿），实际: #{@booking.hotel.hotel_type}（#{@booking.hotel.hotel_type == 'hotel' ? '酒店' : @booking.hotel.hotel_type}）"
       end
     
+      # 断言4: 入住天数正确（权重10%）
       add_assertion "入住天数正确（#{@nights}晚）", weight: 10 do
         actual_nights = (@booking.check_out_date - @booking.check_in_date).to_i
         expect(actual_nights).to eq(@nights),
           "入住天数错误。期望: #{@nights}晚，实际: #{actual_nights}晚（入住#{@booking.check_in_date}，离店#{@booking.check_out_date}）"
       end
     
+      # 断言5: 房间数和人数正确（权重10%）
       add_assertion "房间数和人数正确（1间房，2成人，0儿童）", weight: 10 do
         expect(@booking.rooms_count).to eq(1),
           "房间数错误。期望: 1间, 实际: #{@booking.rooms_count}间"
@@ -120,6 +135,7 @@ module V101V150
           "儿童数错误。期望: 0人, 实际: #{@booking.children_count}人"
       end
     
+      # 断言6: 入住人信息正确（权重10%）
       add_assertion "入住人信息正确（张三 13800138000）", weight: 10 do
         expect(@booking.guest_name).to eq(@expected_guest_name),
           "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@booking.guest_name}"
@@ -127,6 +143,7 @@ module V101V150
           "联系手机错误。期望: #{@expected_guest_phone}, 实际: #{@booking.guest_phone}"
       end
     
+      # 断言7: 选择评分最高的民宿（权重10%）
       add_assertion "选择了评分最高的民宿", weight: 10 do
         # 获取所有符合条件的民宿
         qualified_homestays = Hotel.where(
