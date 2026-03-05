@@ -1,4 +1,4 @@
-<div class="bg-gray-100 pb-4" data-controller="train-city-selector date-picker" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Time.zone.today.to_s %>">
+<div class="bg-gray-100 pb-4" data-controller="train-city-selector date-picker passenger-selector" data-train-city-selector-departure-city-value="北京" data-train-city-selector-destination-city-value="杭州" data-date-picker-current-date-value="<%= Time.zone.today.to_s %>">
   <!-- Header with Banner -->
   <div class="relative">
     <%= render 'shared/transport_header', background_image: '活动.png', return_path: root_path %>
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Date Section -->
-      <div class="mb-4 py-3 border-t border-gray-100">
+      <div class="py-3 border-t border-gray-100">
         <button 
           data-action="click->date-picker#openModal"
           type="button"
@@ -68,7 +68,22 @@
           </div>
         </button>
         <%= f.hidden_field :date, value: Time.zone.today.strftime("%Y-%m-%d"), data: { date_picker_target: "dateInput" } %>
+      <%= f.hidden_field :passenger_count, value: 1, data: { passenger_selector_target: "passengerCountInput" } %>
       </div>
+
+      <!-- Passenger Section -->
+      <button 
+        type="button"
+        data-action="click->passenger-selector#openModal"
+        class="w-full flex items-center justify-between py-3 border-t border-gray-100">
+        <div data-passenger-selector-target="selectedDisplay">
+          <div class="text-base text-gray-800">选择乘车人</div>
+          <div class="text-sm" style="color: #00A0E9;">快速找到低价票</div>
+        </div>
+        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </button>
 
       <!-- Filters -->
       <div class="mb-6 flex items-center gap-6">
@@ -246,6 +261,9 @@
       <% end %>
     </div>
   </div>
+
+  <!-- Passenger Selector Modal -->
+  <%= render 'shared/passenger_selector_modal' %>
 
   <!-- Train City Selector Modal -->
   <%= render 'trains/city_selector_modal' %>

@@ -6,7 +6,9 @@ export default class extends Controller<HTMLElement> {
     "selectedCarriage",
     "carriageButton",
     "seatButton",
-    "selectedSeatCount"
+    "selectedSeatCount",
+    "passengerCount",
+    "checkIcon"
   ]
 
   declare readonly totalPriceTarget: HTMLElement
@@ -14,20 +16,205 @@ export default class extends Controller<HTMLElement> {
   declare readonly carriageButtonTargets: HTMLButtonElement[]
   declare readonly seatButtonTargets: HTMLButtonElement[]
   declare readonly selectedSeatCountTarget: HTMLElement
+  declare readonly passengerCountTarget: HTMLElement
+  declare readonly checkIconTargets: HTMLElement[]
 
   private basePrice: number = 0
+  private bookingOptionFee: number = 0
   private insurancePrice: number = 0
   private currentCarriage: string = ''
   private selectedSeats: Set<string> = new Set()
   private maxSeats: number = 1
+  private selectedPassengers: Map<string, any> = new Map()
+  private maxPassengers: number = 5 // Allow multiple passengers like flight booking
 
   connect(): void {
-    // Get base price from hidden field
+    // Get base price from hidden field (single passenger price from backend)
     const priceField = document.getElementById('booking_total_price') as HTMLInputElement
     if (priceField) {
-      this.basePrice = parseFloat(priceField.value || '0')
+      const singlePassengerPrice = parseFloat(priceField.value || '0')
+      this.basePrice = singlePassengerPrice // Store single passenger price
     }
+    
+    // Get booking option fee from backend (already included in total_price)
+    const bookingOptionField = document.getElementById('booking_option_id') as HTMLInputElement
+    if (bookingOptionField && bookingOptionField.value) {
+      // The basePrice already includes booking option fee per passenger
+      this.bookingOptionFee = 0 // Already included in basePrice
+    }
+    
+    // Allow multiple passengers (like flight booking)
+    // Get max passengers from URL parameter
+    const urlParams = new URLSearchParams(window.location.search)
+    const passengerCount = urlParams.get('passenger_count')
+    if (passengerCount) {
+      this.maxPassengers = parseInt(passengerCount)
+      this.maxSeats = this.maxPassengers
+    }
+    
+    // Filter passengers by type based on homepage selection
+    this.filterPassengersByType()
+    
+    // Load selected passengers from localStorage (from search page)
+    this.loadPassengersFromLocalStorage()
+    
     this.updateTotalPrice()
+  }
+
+  togglePassenger(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const passengerId = target.dataset.passengerId
+    const passengerName = target.dataset.passengerName
+    const passengerType = target.dataset.passengerType || 'adult'
+    const passengerIdNumber = target.dataset.passengerIdNumber || ''
+    const passengerPhone = target.dataset.passengerPhone || ''
+    
+    if (!passengerId || !passengerName) return
+    
+    // Check if already selected
+    if (this.selectedPassengers.has(passengerId)) {
+      this.selectedPassengers.delete(passengerId)
+      this.updatePassengerUI(target, false)
+    } else {
+      // Check max limit
+      if (this.selectedPassengers.size >= this.maxPassengers) {
+        window.showToast(`最多只能选择${this.maxPassengers}位乘车人`)
+        return
+      }
+      
+      this.selectedPassengers.set(passengerId, {
+        name: passengerName,
+        type: passengerType,
+        idNumber: passengerIdNumber,
+        phone: passengerPhone
+      })
+      this.updatePassengerUI(target, true)
+    }
+    
+    this.updatePassengerCountDisplay()
+  }
+
+  private updatePassengerUI(element: HTMLElement, selected: boolean): void {
+    const checkIcon = element.querySelector('[data-train-booking-target="checkIcon"]') as HTMLElement
+    if (checkIcon) {
+      if (selected) {
+        checkIcon.classList.remove('text-gray-300')
+        checkIcon.classList.add('text-yellow-400')
+      } else {
+        checkIcon.classList.add('text-gray-300')
+        checkIcon.classList.remove('text-yellow-400')
+      }
+    }
+  }
+
+  private updatePassengerCountDisplay(): void {
+    const count = this.selectedPassengers.size
+    if (this.passengerCountTarget) {
+      this.passengerCountTarget.textContent = `已选${count}人`
+    }
+    // Update max seats for seat selection
+    this.maxSeats = count > 0 ? count : 1
+    this.updateSelectedSeatCount()
+  }
+
+  private filterPassengersByType(): void {
+    const savedState = localStorage.getItem('passenger_selection')
+    if (!savedState) return
+    
+    try {
+      const state = JSON.parse(savedState)
+      const adults = state.adults || 0
+      const children = state.children || 0
+      
+      // Get all passenger elements
+      const passengerElements = document.querySelectorAll('[data-passenger-type]')
+      
+      // Determine which passenger types should be selectable
+      const allowAdults = adults > 0
+      const allowChildren = children > 0
+      
+      passengerElements.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement
+        const passengerType = htmlElement.dataset.passengerType
+        
+        // Find the checkbox within this passenger element
+        const checkbox = htmlElement.querySelector('input[type="checkbox"]') as HTMLInputElement
+        if (!checkbox) return
+        
+        if (passengerType === 'child' && !allowChildren) {
+          // Disable child passenger checkboxes if no children selected
+          checkbox.disabled = true
+          checkbox.checked = false
+          htmlElement.style.opacity = '0.5'
+        } else if (passengerType === 'adult' && !allowAdults) {
+          // Disable adult passenger checkboxes if no adults selected
+          checkbox.disabled = true
+          checkbox.checked = false
+          htmlElement.style.opacity = '0.5'
+        } else {
+          // Enable checkbox if type matches selection
+          checkbox.disabled = false
+          htmlElement.style.opacity = ''
+        }
+      })
+    } catch (e) {
+      console.error('Failed to filter passengers by type:', e)
+    }
+  }
+
+  private loadPassengersFromLocalStorage(): void {
+    const savedState = localStorage.getItem('passenger_selection')
+    if (!savedState) return
+    
+    try {
+      const state = JSON.parse(savedState)
+      const passengerIds = state.passengerIds || []
+      
+      // Only apply if passenger names mode was used (not count mode)
+      if (passengerIds.length === 0) return
+      
+      let firstAdultPhone = ''
+      
+      // Find and select passengers by their IDs
+      passengerIds.forEach((passengerId: number) => {
+        const passengerElement = document.querySelector(`[data-passenger-id="${passengerId}"]`) as HTMLElement
+        if (passengerElement) {
+          const passengerName = passengerElement.dataset.passengerName || ''
+          const passengerType = passengerElement.dataset.passengerType || 'adult'
+          const passengerIdNumber = passengerElement.dataset.passengerIdNumber || ''
+          const passengerPhone = passengerElement.dataset.passengerPhone || ''
+          
+          // Add to selected passengers
+          this.selectedPassengers.set(passengerId.toString(), {
+            name: passengerName,
+            type: passengerType,
+            idNumber: passengerIdNumber,
+            phone: passengerPhone
+          })
+          
+          // Update UI to show selected state
+          this.updatePassengerUI(passengerElement, true)
+          
+          // Store first adult passenger's phone
+          if (!firstAdultPhone && passengerType === 'adult' && passengerPhone) {
+            firstAdultPhone = passengerPhone
+          }
+        }
+      })
+      
+      // Auto-fill contact phone with first adult passenger's phone
+      if (firstAdultPhone) {
+        const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
+        if (contactPhoneField && !contactPhoneField.value) {
+          contactPhoneField.value = firstAdultPhone
+        }
+      }
+      
+      // Update displays after loading all passengers
+      this.updatePassengerCountDisplay()
+    } catch (e) {
+      console.error('Failed to load passengers from localStorage:', e)
+    }
   }
 
   selectPassenger(event: Event): void {
@@ -119,8 +306,7 @@ export default class extends Controller<HTMLElement> {
     if (!form) return
 
     // Validate passenger selection
-    const passengerRadio = document.querySelector('input[name="passenger"]:checked') as HTMLInputElement
-    if (!passengerRadio) {
+    if (this.selectedPassengers.size === 0) {
       window.showToast('请选择乘车人')
       return
     }
@@ -130,6 +316,23 @@ export default class extends Controller<HTMLElement> {
     if (!phoneField || !phoneField.value.trim()) {
       window.showToast('请输入联系手机')
       return
+    }
+
+    // Fill passenger_ids field with all selected passenger IDs (comma-separated)
+    const passengerIds = Array.from(this.selectedPassengers.keys()).join(',')
+    const passengerIdsField = document.getElementById('booking_passenger_ids') as HTMLInputElement
+    if (passengerIdsField) {
+      passengerIdsField.value = passengerIds
+    }
+
+    // Fill first passenger info for fallback (in case passenger_ids is empty)
+    const firstPassenger = Array.from(this.selectedPassengers.values())[0]
+    if (firstPassenger) {
+      const nameField = document.getElementById('booking_passenger_name') as HTMLInputElement
+      const idNumberField = document.getElementById('booking_passenger_id_number') as HTMLInputElement
+      
+      if (nameField) nameField.value = firstPassenger.name
+      if (idNumberField) idNumberField.value = firstPassenger.idNumber
     }
 
     // Set accept_terms to 1 (普通预订自动同意协议)
@@ -161,9 +364,8 @@ export default class extends Controller<HTMLElement> {
     event.preventDefault()
 
     // Validate passenger selection
-    const passengerRadio = document.querySelector('input[name="passenger"]:checked') as HTMLInputElement
-    if (!passengerRadio) {
-      alert('请选择乘车人')
+    if (this.selectedPassengers.size === 0) {
+      window.showToast('请选择乘车人')
       return
     }
 
@@ -331,7 +533,9 @@ export default class extends Controller<HTMLElement> {
   }
 
   private updateTotalPrice(): void {
-    const total = this.basePrice + this.insurancePrice
+    // Calculate total = (base price per passenger × passenger count) + (insurance × passenger count)
+    const passengerCount = this.selectedPassengers.size || 1
+    const total = (this.basePrice * passengerCount) + (this.insurancePrice * passengerCount)
     if (this.totalPriceTarget) {
       this.totalPriceTarget.textContent = `¥${Math.round(total)}`
     }

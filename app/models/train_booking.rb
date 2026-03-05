@@ -7,8 +7,20 @@ class TrainBooking < ApplicationRecord
   validates :passenger_name, :passenger_id_number, :contact_phone, :total_price, :seat_type, presence: true
   validates :contact_phone, format: { with: /\A1[3-9]\d{9}\z/, message: "手机号码格式不正确" }
   validates :total_price, numericality: { greater_than: 0 }
-  validates :accept_terms, acceptance: true
+  validates :accept_terms, acceptance: { message: "请阅读并同意预订协议" }
   validates :insurance_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
+  # Chinese attribute names for better error messages
+  def self.human_attribute_name(attr, options = {})
+    {
+      passenger_name: '乘客姓名',
+      passenger_id_number: '身份证号',
+      contact_phone: '联系手机',
+      total_price: '总价',
+      seat_type: '座位类型',
+      accept_terms: '预订协议'
+    }[attr.to_sym] || super
+  end
 
   # 订单状态
   enum :status, {
