@@ -1,18 +1,22 @@
 # frozen_string_literal: true
 
-# 民宿补充数据包 v1 - 添加杭州西湖区月租房和成都宽窄巷子民宿
+# 民宿补充数据包 v1 - 添加杭州西湖区民宿和成都宽窄巷子民宿
 # 补充长租民宿和网红民宿数据
 #
 # 用途：
-# - 支持 v108 验证器（杭州西湖区月租民宿）
+# - 支持 v108 验证器（杭州西湖区民宿）
 # - 支持 v109 验证器（成都宽窄巷子网红民宿）
+#
+# 注意：
+# - 所有房间都是 overnight 类型（默认），用户可以根据需要的天数灵活预订
+# - 移除了 room_category 字段的业务逻辑，所有房间都可按天数预订
 #
 # 加载方式：
 # rake validator:reset_baseline
 
 require_relative '../../../../../app/helpers/image_seed_helper'
 
-puts "正在加载 homestays_supplement_v1 数据包（杭州月租+成都网红民宿）..."
+puts "正在加载 homestays_supplement_v1 数据包（杭州民宿+成都网红民宿）..."
 
 timestamp = Time.current
 
@@ -48,16 +52,16 @@ Hotel.insert_all(hangzhou_homestays_data)
 hangzhou_homestays = Hotel.where(city: '杭州', hotel_type: 'homestay', data_version: 0)
                            .where("address LIKE ?", "%西湖区%")
 
-# 为杭州民宿创建月租房型
+# 为杭州民宿创建房型
 hangzhou_rooms_data = []
 hangzhou_homestays.each do |hotel|
-  # 每个民宿添加 2-3 个月租房型
+  # 每个民宿添加 2-3 个房型
   room_types = ['一居室', '两居室', '三居室'].sample(rand(2..3))
   room_types.each_with_index do |room_type, index|
     hangzhou_rooms_data << {
       hotel_id: hotel.id,
-      room_type: "#{room_type}月租房",
-      room_category: 'monthly',  # 月租房标识
+      room_type: "#{room_type}房",
+      # room_category: 'overnight' 是默认值，不需要显式指定
       bed_type: room_type.include?('一') ? 'queen' : 'king',
       max_guests: room_type.include?('一') ? 2 : (room_type.include?('两') ? 4 : 6),
       area: rand(30..80),
@@ -111,16 +115,16 @@ Hotel.insert_all(chengdu_homestays_data)
 chengdu_homestays = Hotel.where(city: '成都', hotel_type: 'homestay', data_version: 0)
                           .where("address LIKE ?", "%宽窄巷子%")
 
-# 为成都民宿创建整晚房型（overnight）
+# 为成都民宿创建房型
 chengdu_rooms_data = []
 chengdu_homestays.each do |hotel|
-  # 每个民宿添加 2-3 个整晚房型
+  # 每个民宿添加 2-3 个房型
   room_types = ['大床房', '双床房', '榻榻米房'].sample(rand(2..3))
   room_types.each_with_index do |room_type, index|
     chengdu_rooms_data << {
       hotel_id: hotel.id,
       room_type: room_type,
-      room_category: 'overnight',  # 整晚房标识
+      # room_category: 'overnight' 是默认值，不需要显式指定
       bed_type: room_type == '双床房' ? 'twin' : 'queen',
       max_guests: 2,
       area: rand(20..40),
@@ -136,5 +140,5 @@ end
 HotelRoom.insert_all(chengdu_rooms_data) if chengdu_rooms_data.any?
 
 puts "✓ 数据包加载完成"
-puts "  - 杭州西湖区月租民宿: #{hangzhou_homestays.count} 家，月租房型: #{hangzhou_rooms_data.size} 个"
-puts "  - 成都宽窄巷子网红民宿: #{chengdu_homestays.count} 家，整晚房型: #{chengdu_rooms_data.size} 个"
+puts "  - 杭州西湖区民宿: #{hangzhou_homestays.count} 家，房型: #{hangzhou_rooms_data.size} 个"
+puts "  - 成都宽窄巷子网红民宿: #{chengdu_homestays.count} 家，房型: #{chengdu_rooms_data.size} 个"
