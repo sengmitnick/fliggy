@@ -104,7 +104,7 @@
     <% trains_array = @trains.to_a %>
     <% if trains_array.any? %>
       <% trains_array.each do |train| %>
-        <%= link_to train_path(train), class: "block" do %>
+        <%= link_to train_path(train, passenger_count: params[:passenger_count]), class: "block" do %>
           <div class="bg-white rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow mb-3 overflow-hidden" data-train-list-target="trainItem">
             <!-- Main Train Info -->
             <div class="p-4">

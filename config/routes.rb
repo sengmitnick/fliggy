@@ -601,6 +601,7 @@ Rails.application.routes.draw do
 
   # Do not write business logic at admin dashboard
   namespace :admin do
+    resources :hotel_rooms
     resources :membership_orders
     resources :membership_products
     resources :validation_tasks, only: [:index, :show]

@@ -19,7 +19,8 @@ export default class extends Controller {
     "phone",
     "driverName",
     "driverIdNumber",
-    "contactPhone"
+    "contactPhone",
+    "passengerCountInput"
   ]
 
   static values = {
@@ -63,6 +64,8 @@ export default class extends Controller {
   declare readonly hasDriverIdNumberTarget: boolean
   declare readonly contactPhoneTarget: HTMLElement
   declare readonly hasContactPhoneTarget: boolean
+  declare readonly passengerCountInputTarget: HTMLInputElement
+  declare readonly hasPassengerCountInputTarget: boolean
 
   declare selectedIdValue: number
   declare readonly hasSelectedIdValue: boolean
@@ -103,6 +106,11 @@ export default class extends Controller {
     // Show passenger list panel by default (only if tabs exist - flight booking mode)
     if (this.hasPassengerTabTarget && this.hasCountTabTarget) {
       this.switchToPassengerTab(event)
+    }
+    
+    // Auto-select passengers based on localStorage (only if passenger list exists)
+    if (this.hasPassengerListPanelTarget && this.hasSelection) {
+      this.autoSelectPassengersFromLocalStorage()
     }
     
     // Highlight the selected passenger in the modal (car rental mode)
@@ -166,6 +174,11 @@ export default class extends Controller {
     if (this.hasPassengerListPanelTarget && this.hasCountPanelTarget) {
       this.passengerListPanelTarget.classList.remove("hidden")
       this.countPanelTarget.classList.add("hidden")
+    }
+    
+    // Auto-select passengers from localStorage when switching to passenger tab
+    if (this.hasPassengerListPanelTarget && this.hasSelection) {
+      this.autoSelectPassengersFromLocalStorage()
     }
     
     this.updateCounters()
@@ -367,6 +380,12 @@ export default class extends Controller {
     this.hasSelection = true
     this.saveToLocalStorage()
     this.updateDisplay()
+    
+    // Update passenger count in hidden field if it exists (for train search form)
+    if (this.hasPassengerCountInputTarget) {
+      const totalCount = this.adults + this.children + this.infants
+      this.passengerCountInputTarget.value = totalCount.toString()
+    }
     
     // Close modal directly without triggering restore logic
     this.modalTarget.classList.add("hidden")
@@ -632,5 +651,105 @@ export default class extends Controller {
         }
       }
     })
+  }
+
+  private autoSelectPassengersFromLocalStorage(): void {
+    // Get all checkboxes in passenger list
+    const checkboxes = this.passengerListPanelTarget.querySelectorAll('input[type="checkbox"]')
+    
+    // Reset current selection
+    this.adults = 0
+    this.children = 0
+    this.infants = 0
+    this.selectedPassengerIds.clear()
+    this.selectedPassengerNames.clear()
+    
+    // Priority 1: Restore specific passengers by IDs (if saved)
+    if (this.confirmedPassengerIds.size > 0) {
+      this.restorePassengersByIds(checkboxes)
+      return
+    }
+    
+    // Priority 2: Auto-select by count (if only counts were saved)
+    this.autoSelectPassengersByCount(checkboxes)
+  }
+  
+  // eslint-disable-next-line no-undef
+  private restorePassengersByIds(checkboxes: NodeListOf<Element>): void {
+    // Restore passengers by their specific IDs from localStorage
+    checkboxes.forEach((checkbox: Element) => {
+      const cb = checkbox as HTMLInputElement
+      const passengerId = parseInt(cb.value)
+      
+      // Check if this passenger was previously selected
+      if (this.confirmedPassengerIds.has(passengerId) && !cb.disabled) {
+        cb.checked = true
+        const passengerType = cb.dataset.passengerType || 'adult'
+        const passengerName = cb.dataset.passengerName || ''
+        
+        this.selectedPassengerIds.add(passengerId)
+        this.selectedPassengerNames.set(passengerId, passengerName)
+        
+        if (passengerType === 'child') {
+          this.children++
+        } else {
+          this.adults++
+        }
+      }
+    })
+    
+    // Update counters to reflect restored selection
+    this.updateCounters()
+  }
+  
+  // eslint-disable-next-line no-undef
+  private autoSelectPassengersByCount(checkboxes: NodeListOf<Element>): void {
+    // Auto-select passengers by count (when only counts were saved)
+    const requiredAdults = this.confirmedAdults
+    const requiredChildren = this.confirmedChildren
+    
+    // Collect available passengers by type
+    const adultCheckboxes: HTMLInputElement[] = []
+    const childCheckboxes: HTMLInputElement[] = []
+    
+    checkboxes.forEach((checkbox: Element) => {
+      const cb = checkbox as HTMLInputElement
+      const passengerType = cb.dataset.passengerType || 'adult'
+      
+      if (passengerType === 'adult') {
+        adultCheckboxes.push(cb)
+      } else if (passengerType === 'child') {
+        childCheckboxes.push(cb)
+      }
+    })
+    
+    // Auto-select required number of adults
+    for (let i = 0; i < Math.min(requiredAdults, adultCheckboxes.length); i++) {
+      const cb = adultCheckboxes[i]
+      if (!cb.disabled) {
+        cb.checked = true
+        const passengerId = parseInt(cb.value)
+        const passengerName = cb.dataset.passengerName || ''
+        this.selectedPassengerIds.add(passengerId)
+        this.selectedPassengerNames.set(passengerId, passengerName)
+        this.adults++
+      }
+    }
+    
+    // Auto-select required number of children
+    for (let i = 0; i < Math.min(requiredChildren, childCheckboxes.length); i++) {
+      const cb = childCheckboxes[i]
+      if (!cb.disabled) {
+        cb.checked = true
+        const passengerId = parseInt(cb.value)
+        const passengerName = cb.dataset.passengerName || ''
+        this.selectedPassengerIds.add(passengerId)
+        this.selectedPassengerNames.set(passengerId, passengerName)
+        this.children++
+      }
+    }
+    
+    // Update counters to reflect auto-selection
+    this.updateCounters()
   }
 }

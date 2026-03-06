@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-100 pb-20" data-controller="train-booking">
+<div class="min-h-screen bg-gray-100 pb-20" data-controller="train-booking passenger-selector">
   <!-- Header -->
   <div class="bg-white border-b">
     <div class="container mx-auto px-4 py-4 flex items-center">
@@ -94,7 +94,21 @@
   </div>
 
   <%= form_with url: train_bookings_path, method: :post, class: "container mx-auto px-4 py-4", data: { action: "submit->train-booking#handleSubmit" } do |f| %>
+    <% if @train_booking.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <h3 class="font-medium text-red-800 mb-2">😢 提交失败，请检查以下问题：</h3>
+        <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+          <% @train_booking.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+    
     <%= f.hidden_field :train_id, value: @train.id, name: 'train_booking[train_id]' %>
+    <%= f.hidden_field :passenger_ids, id: 'booking_passenger_ids', name: 'train_booking[passenger_ids]' %>
+    <%= f.hidden_field :passenger_name, id: 'booking_passenger_name', name: 'train_booking[passenger_name]' %>
+    <%= f.hidden_field :passenger_id_number, id: 'booking_passenger_id_number', name: 'train_booking[passenger_id_number]' %>
     <%= f.hidden_field :seat_type, value: @selected_seat_type, id: 'booking_seat_type', name: 'train_booking[seat_type]' %>
     <%= f.hidden_field :booking_option_id, value: @booking_option_id, id: 'booking_option_id', name: 'train_booking[booking_option_id]' %>
     <%= f.hidden_field :total_price, value: @selected_price, id: 'booking_total_price', name: 'train_booking[total_price]' %>
@@ -106,22 +120,31 @@
     <!-- 已选择人数 -->
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold">已选择: 1成人</h3>
-        <button type="button" onclick="window.showToast('功能开发中')" class="text-blue-500 text-sm">邀请好友填写</button>
+        <h3 class="font-bold">请选择乘车人 
+          <span class="text-xs font-normal text-gray-400 ml-1">最多选择<%= params[:passenger_count] || 1 %>人</span>
+        </h3>
+        <span class="text-blue-500 text-sm" data-train-booking-target="passengerCount">已选0人</span>
       </div>
 
-      <div class="bg-red-50 text-red-600 text-sm px-3 py-2 rounded mt-3">
-        会员价商品限本人陆旅客使用身份证或户口簿购买｜仅限1位以下(含1位)
-        乘客购买
+      <div class="bg-blue-50 text-blue-600 text-xs px-3 py-2 rounded mt-3">
+        <svg class="inline w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        请为每位乘客选择乘车人信息｜当前价格剩余6张
       </div>
     </div>
 
-    <!-- Passenger Section -->
+    <!-- 乘车人选择 -->
     <div class="bg-white rounded-lg shadow mb-4">
-
-      <% if current_user.passengers.any? %>
-        <% current_user.passengers.order(is_self: :desc, created_at: :desc).each_with_index do |passenger, index| %>
-          <label class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50">
+      <% if @passengers.any? %>
+        <% @passengers.each_with_index do |passenger, index| %>
+          <div class="flex items-center justify-between p-4 border-b cursor-pointer hover:bg-gray-50"
+               data-action="click->train-booking#togglePassenger"
+               data-passenger-id="<%= passenger.id %>"
+               data-passenger-name="<%= passenger.name %>"
+               data-passenger-id-number="<%= passenger.id_number %>"
+               data-passenger-phone="<%= passenger.phone %>"
+               data-passenger-type="<%= passenger.child_ticket? ? 'child' : 'adult' %>">
             <div class="flex items-center flex-1">
               <svg class="w-5 h-5 mr-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
@@ -129,28 +152,25 @@
               <div class="flex-1">
                 <div class="flex items-center">
                   <span class="font-bold text-lg"><%= passenger.name %></span>
-                  <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">成人票</span>
+                  <% if passenger.is_self? %>
+                    <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">本人</span>
+                  <% end %>
+                  <% if passenger.child_ticket? %>
+                    <span class="ml-2 px-2 py-0.5 bg-orange-50 text-orange-600 text-xs border border-orange-300 rounded">儿童票</span>
+                  <% end %>
                 </div>
                 <div class="text-sm text-gray-600 mt-1">
-                  身份证 <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
-                  <span class="ml-2 text-gray-400">其他证件 ></span>
+                  <%= passenger.id_type %> <%= passenger.id_number&.gsub(/(\d{6})\d{8}(\d{4})/, '\1********\2') || passenger.id_number %>
                 </div>
               </div>
             </div>
-            <input type="radio" 
-                   name="passenger" 
-                   id="passenger_<%= passenger.id %>"
-                   class="w-5 h-5 text-orange-500"
-                   <%= 'checked' if index == 0 %>
-                   data-action="change->train-booking#selectPassenger"
-                   data-passenger-name="<%= passenger.name %>"
-                   data-id-number="<%= passenger.id_number %>"
-                   data-phone="<%= passenger.phone %>" />
-          </label>
-          <% if index == 0 %>
-            <%= f.hidden_field :passenger_name, id: 'booking_passenger_name', name: 'train_booking[passenger_name]', value: passenger.name %>
-            <%= f.hidden_field :passenger_id_number, id: 'booking_passenger_id_number', name: 'train_booking[passenger_id_number]', value: passenger.id_number %>
-          <% end %>
+            <!-- 选中状态: 黄色勾选 -->
+            <div class="text-gray-300" data-train-booking-target="checkIcon">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+          </div>
         <% end %>
       <% else %>
         <div class="p-4 text-center text-gray-500">
@@ -158,8 +178,14 @@
         </div>
       <% end %>
 
-      <%= link_to new_passenger_path(source: 'train', return_to: 'train_booking_new', train_id: @train.id, seat_type: @selected_seat_type), 
-                  class: "w-full py-4 border-t flex items-center justify-center text-gray-700" do %>
+      <!-- 添加乘车人按钮 -->
+      <%= link_to new_passenger_path(
+        source: 'train',
+        return_to: 'train_booking_new',
+        train_id: @train.id,
+        seat_type: @selected_seat_type,
+        booking_option_id: @booking_option_id
+      ), class: "w-full py-4 border-t flex items-center justify-center text-gray-700" do %>
         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
         </svg>
@@ -308,4 +334,7 @@
       </div>
     </div>
   <% end %>
+
+  <!-- Passenger Selector Modal -->
+  <%= render 'shared/passenger_selector_modal' %>
 </div>

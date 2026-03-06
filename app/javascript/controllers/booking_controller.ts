@@ -27,6 +27,9 @@ export default class extends Controller<HTMLElement> {
   private selectedPassengers: Map<string, { name: string, type: string, idNumber: string, phone: string }> = new Map()
 
   connect(): void {
+    // Filter passengers by type based on homepage selection
+    this.filterPassengersByType()
+    
     // Load selected passengers from localStorage (from search page)
     this.loadPassengersFromLocalStorage()
     
@@ -96,6 +99,51 @@ export default class extends Controller<HTMLElement> {
     
     // Populate the container
     this.confirmModalPassengerListTarget.innerHTML = passengersHtml
+  }
+
+  private filterPassengersByType(): void {
+    const savedState = localStorage.getItem('passenger_selection')
+    if (!savedState) return
+    
+    try {
+      const state = JSON.parse(savedState)
+      const adults = state.adults || 0
+      const children = state.children || 0
+      
+      // Get all passenger elements
+      const passengerElements = document.querySelectorAll('[data-passenger-type]')
+      
+      // Determine which passenger types should be selectable
+      const allowAdults = adults > 0
+      const allowChildren = children > 0
+      
+      passengerElements.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement
+        const passengerType = htmlElement.dataset.passengerType
+        
+        // Find the checkbox within this passenger element
+        const checkbox = htmlElement.querySelector('input[type="checkbox"]') as HTMLInputElement
+        if (!checkbox) return
+        
+        if (passengerType === 'child' && !allowChildren) {
+          // Disable child passenger checkboxes if no children selected
+          checkbox.disabled = true
+          checkbox.checked = false
+          htmlElement.style.opacity = '0.5'
+        } else if (passengerType === 'adult' && !allowAdults) {
+          // Disable adult passenger checkboxes if no adults selected
+          checkbox.disabled = true
+          checkbox.checked = false
+          htmlElement.style.opacity = '0.5'
+        } else {
+          // Enable checkbox if type matches selection
+          checkbox.disabled = false
+          htmlElement.style.opacity = ''
+        }
+      })
+    } catch (e) {
+      console.error('Failed to filter passengers by type:', e)
+    }
   }
 
   private loadPassengersFromLocalStorage(): void {

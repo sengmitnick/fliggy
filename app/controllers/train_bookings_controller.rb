@@ -7,6 +7,12 @@ class TrainBookingsController < ApplicationController
     @selected_seat_type = params[:seat_type] || 'second_class'
     @booking_option_id = params[:booking_option_id]
     
+    # Initialize empty train_booking for form error display
+    @train_booking = current_user.train_bookings.build(train: @train)
+    
+    # Load passengers for selection
+    @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
+    
     # Calculate base price based on seat type
     base_price = case @selected_seat_type
     when 'second_class' then @train.price_second_class
@@ -39,46 +45,125 @@ class TrainBookingsController < ApplicationController
 
   def create
     @train = Train.find(params[:train_booking][:train_id])
-    @train_booking = current_user.train_bookings.build(train_booking_params)
-    @train_booking.train = @train
-
-    # 计算总价（基础票价 + 预订选项额外费用 + 保险价格）
-    base_price = calculate_ticket_price(@train, @train_booking.seat_type)
-    @train_booking.total_price = base_price
     
-    # 添加预订选项额外费用
-    if @train_booking.booking_option_id.present?
-      booking_option = @train.booking_options.find_by(id: @train_booking.booking_option_id)
-      @train_booking.total_price += booking_option.extra_fee if booking_option
-    end
-    
-    # 添加保险费用
-    if @train_booking.insurance_price.present?
-      @train_booking.total_price += @train_booking.insurance_price
-    end
-
-    if @train_booking.save
-      # 创建订单成功后，跳转到锁定页面
-      redirect_to lock_train_booking_path(@train_booking)
+    # Parse passenger IDs (like flight booking does)
+    passenger_ids = if params[:train_booking][:passenger_ids].present?
+      params[:train_booking][:passenger_ids].split(',').map(&:strip).reject(&:blank?)
     else
-      # 验证失败，返回预订页
-      @selected_seat_type = @train_booking.seat_type
-      @booking_option_id = @train_booking.booking_option_id
-      
-      # 重新计算价格
-      base_price = calculate_ticket_price(@train, @selected_seat_type)
-      @selected_price = base_price
-      if @booking_option_id.present?
-        booking_option = @train.booking_options.find_by(id: @booking_option_id)
-        @selected_price += booking_option.extra_fee if booking_option
-        @selected_booking_option = booking_option
-      end
-      
-      @seat_type_label = @train_booking.seat_type_label
-      @hot_cities = City.hot_cities.order(:pinyin)
-      @all_cities = City.all.order(:pinyin)
-      render 'train_bookings/new', status: :unprocessable_entity
+      # If no passenger IDs, use passenger_name to find single passenger
+      passenger = current_user.passengers.find_by(name: params[:train_booking][:passenger_name])
+      passenger ? [passenger.id.to_s] : []
     end
+    
+    if passenger_ids.empty?
+      flash.now[:alert] = '请至少选择一位乘车人'
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
+      @train_booking = current_user.train_bookings.build
+      load_train_data_for_render
+      render :new, status: :unprocessable_entity
+      return
+    end
+    
+    passengers = current_user.passengers.where(id: passenger_ids)
+    
+    if passengers.empty?
+      flash.now[:alert] = '未找到选中的乘车人'
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
+      @train_booking = current_user.train_bookings.build
+      load_train_data_for_render
+      render :new, status: :unprocessable_entity
+      return
+    end
+    
+    # Create separate booking for each passenger (like flight booking)
+    booking_group_id = SecureRandom.uuid
+    created_bookings = []
+    errors_occurred = false
+    
+    passengers.each do |passenger|
+      booking = create_booking_for_passenger(passenger, booking_group_id)
+      if booking.persisted?
+        created_bookings << booking
+      else
+        errors_occurred = true
+        Rails.logger.error "Failed to create train booking for passenger #{passenger.name}: #{booking.errors.full_messages}"
+      end
+    end
+    
+    if errors_occurred
+      # Rollback all created bookings on error
+      created_bookings.each(&:destroy)
+      
+      # Initialize @train_booking for form error display
+      first_passenger = passengers.first
+      @train_booking = current_user.train_bookings.build(train_booking_params.except(:passenger_ids))
+      @train_booking.passenger_name = first_passenger.name
+      @train_booking.passenger_id_number = first_passenger.id_number
+      @train_booking.valid?  # Trigger validation to populate errors
+      
+      flash.now[:alert] = '订单创建失败，请检查输入信息'
+      @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
+      load_train_data_for_render
+      render :new, status: :unprocessable_entity
+    else
+      # All bookings created successfully, redirect to first booking's lock page
+      redirect_to lock_train_booking_path(created_bookings.first), notice: "订单创建成功（共#{created_bookings.size}个乘车人）"
+    end
+  end
+  
+  # Create booking for a single passenger (like flight booking)
+  def create_booking_for_passenger(passenger, booking_group_id = nil)
+    booking = current_user.train_bookings.build(train_booking_params.except(:passenger_ids))
+    booking.booking_group_id = booking_group_id if booking_group_id.present?
+    booking.passenger_name = passenger.name
+    booking.passenger_id_number = passenger.id_number
+    booking.train = @train
+    
+    # Calculate price for single passenger
+    base_price = calculate_ticket_price(@train, booking.seat_type)
+    # Child ticket is 50% of adult price
+    booking.total_price = passenger.child_ticket? ? (base_price * 0.5) : base_price
+    
+    # Add booking option extra fee
+    if booking.booking_option_id.present?
+      booking_option = @train.booking_options.find_by(id: booking.booking_option_id)
+      fee = booking_option&.extra_fee || 0
+      booking.total_price += passenger.child_ticket? ? (fee * 0.5) : fee
+    end
+    
+    # Add insurance fee per passenger
+    if booking.insurance_price.present?
+      booking.total_price += booking.insurance_price
+    end
+    
+    booking.save
+    booking
+  end
+  
+  # Reload train data for re-rendering form on validation failure
+  def load_train_data_for_render
+    @selected_seat_type = params[:train_booking][:seat_type] || 'second_class'
+    @booking_option_id = params[:train_booking][:booking_option_id]
+    
+    # Calculate base price
+    base_price = calculate_ticket_price(@train, @selected_seat_type)
+    @selected_price = base_price
+    if @booking_option_id.present?
+      booking_option = @train.booking_options.find_by(id: @booking_option_id)
+      @selected_price += booking_option.extra_fee if booking_option
+      @selected_booking_option = booking_option
+    end
+    
+    @seat_type_label = case @selected_seat_type
+    when 'second_class' then '二等座'
+    when 'first_class' then '一等座'
+    when 'business_class' then '商务座'
+    when 'no_seat' then '无座'
+    else '二等座'
+    end
+    
+    @hot_cities = City.hot_cities.order(:pinyin)
+    @all_cities = City.all.order(:pinyin)
   end
 
   def show
@@ -93,6 +178,20 @@ class TrainBookingsController < ApplicationController
     if @train_booking.paid? || @train_booking.completed?
       redirect_to success_train_booking_path(@train_booking)
       return
+    end
+
+    # 查询同一booking_group_id下的所有订单（多乘客场景）
+    if @train_booking.booking_group_id.present?
+      @all_bookings = current_user.train_bookings
+        .where(booking_group_id: @train_booking.booking_group_id)
+        .order(created_at: :asc)
+      @total_group_price = @all_bookings.sum(:total_price)
+      @passenger_count = @all_bookings.count
+    else
+      # 单乘客订单
+      @all_bookings = [@train_booking]
+      @total_group_price = @train_booking.total_price
+      @passenger_count = 1
     end
 
     # 模拟座位锁定过程，随机生成座位号（如果用户选择了在线选座）
@@ -125,6 +224,20 @@ class TrainBookingsController < ApplicationController
   def success
     # 支付成功页面
     @train = @train_booking.train
+    
+    # 查询同一booking_group_id下的所有订单（多乘客场景）
+    if @train_booking.booking_group_id.present?
+      @all_bookings = current_user.train_bookings
+        .where(booking_group_id: @train_booking.booking_group_id)
+        .order(created_at: :asc)
+      @total_group_price = @all_bookings.sum(:total_price)
+      @passenger_count = @all_bookings.count
+    else
+      # 单乘客订单
+      @all_bookings = [@train_booking]
+      @total_group_price = @train_booking.total_price
+      @passenger_count = 1
+    end
   end
 
   def cancel
@@ -153,7 +266,8 @@ class TrainBookingsController < ApplicationController
       :seat_number,
       :insurance_type,
       :insurance_price,
-      :accept_terms
+      :accept_terms,
+      :passenger_ids  # Add passenger_ids parameter for multi-passenger booking
     )
   end
 

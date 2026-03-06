@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-yellow-400" 
      data-controller="train-booking-lock payment-confirmation"
-     data-payment-confirmation-amount-value="<%= @train_booking.total_price.to_i %>"
+     data-payment-confirmation-amount-value="<%= @total_group_price.to_i %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value="<%= pay_train_booking_path(@train_booking) %>"
      data-payment-confirmation-success-url-value="<%= success_train_booking_path(@train_booking) %>">
@@ -95,10 +95,13 @@
       <div class="border-t pt-3 flex items-center justify-between">
         <div>
           <span class="font-medium text-gray-900"><%= @train_booking.passenger_name %></span>
+          <% if @passenger_count > 1 %>
+            <span class="text-sm text-gray-600"> 等<%= @passenger_count %>人</span>
+          <% end %>
         </div>
         <div class="flex items-center space-x-2">
           <span class="text-gray-900"><%= @train_booking.seat_type_label %></span>
-          <span class="text-gray-900">¥<%= @train_booking.total_price.to_i %></span>
+          <span class="text-gray-900">¥<%= @total_group_price.to_i %></span>
           <span class="text-gray-900" data-train-booking-lock-target="seatDisplay" style="display: none;">
             <%= @train_booking.carriage_number %>车厢 <%= @train_booking.seat_number %>
           </span>
@@ -129,7 +132,7 @@
       <div class="flex items-center space-x-2">
         <div class="text-left">
           <div class="text-red-500 text-2xl font-bold">
-            ¥ <%= @train_booking.total_price.to_i %>
+            ¥ <%= @total_group_price.to_i %>
           </div>
           <div class="text-xs text-gray-500">订单总额</div>
         </div>

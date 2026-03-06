@@ -31,8 +31,8 @@ class CharterBookingsController < ApplicationController
       status: 'pending'
     )
     
-    # 获取用户的常用联系人（如果有）
-    @contacts = current_user.contacts.limit(3)
+    # 获取用户的所有联系人
+    @contacts = current_user.contacts.order(:is_default => :desc, :created_at => :desc)
   end
 
   def create
@@ -61,7 +61,7 @@ class CharterBookingsController < ApplicationController
       @duration_hours = @charter_booking.duration_hours || 8
       @passengers_count = @charter_booking.passengers_count || 1
       @total_price = @charter_booking.total_price || 0
-      @contacts = current_user.contacts.limit(3)
+      @contacts = current_user.contacts.order(:is_default => :desc, :created_at => :desc)
       render :new, status: :unprocessable_entity
     end
   end
@@ -79,8 +79,8 @@ class CharterBookingsController < ApplicationController
     @passengers_count = @charter_booking.passengers_count
     @total_price = @charter_booking.total_price
     
-    # 获取用户的常用联系人（如果有）
-    @contacts = current_user.contacts.limit(3)
+    # 获取用户的所有联系人
+    @contacts = current_user.contacts.order(:is_default => :desc, :created_at => :desc)
     
     # 使用 new 页面的视图
     render :new
@@ -108,7 +108,7 @@ class CharterBookingsController < ApplicationController
       @duration_hours = @charter_booking.duration_hours
       @passengers_count = @charter_booking.passengers_count
       @total_price = @charter_booking.total_price
-      @contacts = current_user.contacts.limit(3)
+      @contacts = current_user.contacts.order(:is_default => :desc, :created_at => :desc)
       render :new, status: :unprocessable_entity
     end
   end

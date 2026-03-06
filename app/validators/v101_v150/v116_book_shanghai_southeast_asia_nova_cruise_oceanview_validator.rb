@@ -2,212 +2,284 @@
 
 require_relative '../base_validator'
 
-# V116: 帮陈静预订3月份上海出发的爱达新星号东南亚邮轮（9天8晚，最近班次，2间海景房）
+# 验证用例116: 给陈静、刘强预订东南亚邮轮（爱达新星号，上海出发，9天8晚，海景房，3月份最近的班次）
 #
 # 任务描述:
-#   用户需要为陈静预订东南亚邮轮服务，包含：
-#   1) 邮轮订单（CruiseOrder，爱达新星号，上海出发）
-#   2) 行程要求（9天8晚，3月份最近的班次）
-#   3) 舱房类型（海景房 ocean_view，2间）
-#   4) 乘客人数（2位成人）
-#   确保船只、出发港、行程天数、出发月份（选择最近班次）、舱房类型和预订数量正确
+#   用户想预订东南亚邮轮，为2位成人（陈静、刘强）。
+#   要求爱达新星号，行程9天8晚，从上海出发，选择3月份最近的一个班次，预订海景房（观景之选）。
+#   Agent 需要在符合条件的班次中，选择3月份departure_date（出发日期）最早的班次。
 #
-# 评分标准:
-#   - 创建了邮轮订单（爱达新星号） (20%)
-#   - 船只正确（爱达新星号） (15%)
-#   - 出发港正确（上海） (10%)
-#   - 行程天数正确（9天8晚） (10%)
-#   - 出发月份正确（3月份，最近班次） (10%)
-#   - 舱房类型正确（海景房） (15%)
-#   - 预订数量正确（2间海景房） (10%)
-#   - 联系人信息正确（陈静） (10%)
+# 业务流程（6个关键步骤）：
+#   1. 搜索爱达新星号的邮轮班次
+#   2. 筛选船只名包含"新星"的班次
+#   3. 筛选出发港包含"上海"、行程9天8晚的班次
+#   4. 筛选出发月份为3月的班次
+#   5. 在3月班次中，选择departure_date最早的班次
+#   6. 预订海景房（category='ocean_view'），为2位成人，填写2位成人的出行信息，联系人从出行人中选择
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解邮轮筛选：船只名包含"爱达新星号"（关键词"新星"）
+#   2. 需要理解出发港筛选：departure_port包含"上海"
+#   3. 需要理解行程天数：duration_days=9且duration_nights=8
+#   4. 需要理解"3月份"条件：筛选departure_date的月份=3
+#   5. 需要选择3月份最早的班次：对比多个班次的departure_date，选择最早的
+#   6. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确筛选3月份班次并选择最早日期的
+#
+# 评分标准（10项，总计100分）：
+#   - 订单已创建（15分）
+#   - 船只正确（爱达新星号）（10分）
+#   - 出发港正确（上海）（10分）
+#   - 行程天数正确（9天8晚）（10分）
+#   - 出发月份正确（3月份）（10分）
+#   - 舱房类型正确（海景房）（15分）
+#   - 预订数量正确（2位成人）（10分）
+#   - 联系人信息正确（陈静或刘强）（10分）
+#   - 选择了3月份最近日期的班次（5分）
+#   - 乘客信息正确（陈静、刘强）（5分）
 module V101V150
   class V116BookShanghaiSoutheastAsiaNovaCruiseOceanviewValidator < BaseValidator
     self.validator_id = 'v116_book_shanghai_southeast_asia_nova_cruise_oceanview_validator'
     self.task_id = '70a9737c-8db3-4c11-b179-2522c8f58af2'
-    self.title = '帮陈静预订3月份上海出发的爱达新星号东南亚邮轮（9天8晚，最近班次，2间海景房）'
-    self.description = '帮陈静预订3月份上海出发的爱达新星号东南亚邮轮（9天8晚，最近班次，2间海景房）'
+    self.title = '给陈静、刘强预订东南亚邮轮（爱达新星号，上海出发，9天8晚，海景房，3月份最近的班次）'
+    self.description = '预订东南亚邮轮（爱达新星号，9天8晚，上海出发，3月出发）'
     self.timeout_seconds = 240
 
-    def prepare
-      ship_keyword = '新星'
-      departure_port_keyword = '上海'
-      expected_days = 9
-      expected_nights = 8
-      expected_cabin_category = 'ocean_view'
-      expected_month = 3
-      adult_count = 2
+  def prepare
+    @ship_keyword = '新星'
+    @departure_port_keyword = '上海'
+    @expected_days = 9
+    @expected_nights = 8
+    @expected_cabin_category = 'ocean_view'
+    @expected_month = 3
+    @adult_count = 2
 
-      # 预查询陈静的乘客信息（避免 simulate 中查询 data_version: 0）
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
-      @expected_contact_name = @chenjing.name
-      @expected_contact_phone = @chenjing.phone
+    # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
+    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    @chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+    @liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+    @expected_passenger_names = [@chenjing.name, @liuqiang.name]
+    
+    # 有效联系人电话映射（联系人可以是任何一个出行人）
+    @valid_contact_phones = {
+      '陈静' => @chenjing.phone,
+      '刘强' => @liuqiang.phone
+    }
 
-      {
-        task: "请预订东南亚邮轮，要求爱达新星号，行程#{expected_days}天#{expected_nights}晚，从#{departure_port_keyword}出发，选择#{expected_month}月份最近的一个班次，预订海景房（观景之选），为#{adult_count}位成人",
-        ship_keyword: ship_keyword,
-        departure_port_keyword: departure_port_keyword,
-        duration: "#{expected_days}天#{expected_nights}晚",
-        cabin_category: '海景房（ocean_view）',
-        month: "#{expected_month}月",
-        adult_count: adult_count,
-        hint: "筛选船只名包含'新星'、出发港包含'上海'、duration_days=9且duration_nights=8的班次，选择#{expected_month}月份最近日期的班次，预订海景房（category='ocean_view'）"
-      }
+    {
+      task: "请预订东南亚邮轮，要求爱达新星号，行程#{@expected_days}天#{@expected_nights}晚，从#{@departure_port_keyword}出发，选择#{@expected_month}月份最近的一个班次，预订海景房（观景之选），为#{@adult_count}位成人",
+      ship_keyword: @ship_keyword,
+      departure_port_keyword: @departure_port_keyword,
+      duration: "#{@expected_days}天#{@expected_nights}晚",
+      cabin_category: '海景房（ocean_view）',
+      month: "#{@expected_month}月",
+      adult_count: @adult_count,
+      hint: "筛选船只名包含'新星'、出发港包含'上海'、duration_days=9且duration_nights=8的班次，选择#{@expected_month}月份最近日期的班次，预订海景房（category='ocean_view'）",
+      expected_passengers: @expected_passenger_names.join('、')
+    }
+  end
+
+  def simulate
+    # 预查询乘客信息
+    user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+    chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
+    liuqiang = user.passengers.find_by!(name: '刘强', data_version: 0)
+
+    sailing = CruiseSailing
+      .joins(:cruise_ship)
+      .where('cruise_ships.name LIKE ?', "%#{@ship_keyword}%")
+      .where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+      .where(duration_days: @expected_days, duration_nights: @expected_nights)
+      .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+      .where('departure_date >= ?', Date.current)
+      .where(data_version: '0')
+      .order(:departure_date)
+      .first
+
+    raise "未找到符合条件的航次（#{@ship_keyword}，#{@departure_port_keyword}，#{@expected_days}天#{@expected_nights}晚，#{@expected_month}月）" unless sailing
+
+    cabin_type = CabinType.where(data_version: '0', cruise_ship_id: sailing.cruise_ship_id, category: @expected_cabin_category).first
+    raise "未找到符合条件的舱房类型（#{@expected_cabin_category}）" unless cabin_type
+
+    product = CruiseProduct.find_or_create_by!(
+      cruise_sailing_id: sailing.id,
+      cabin_type_id: cabin_type.id,
+      data_version: @data_version
+    ) do |p|
+      p.merchant_name = 'AIDA邮轮旗舰店'
+      p.price_per_person = 5800.0
+      p.occupancy_requirement = 2
+      p.stock = 10
+      p.sales_count = 0
+      p.is_refundable = true
+      p.requires_confirmation = false
+      p.status = 'on_sale'
     end
 
-    def simulate
-      ship_keyword = '新星'
-      departure_port_keyword = '上海'
-      expected_days = 9
-      expected_nights = 8
-      expected_cabin_category = 'ocean_view'
-      expected_month = 3
-      adult_count = 2
+    CruiseOrder.create!(
+      user_id: user.id,
+      cruise_product_id: product.id,
+      quantity: @adult_count,
+      contact_name: chenjing.name,
+      contact_phone: chenjing.phone,
+      passenger_info: [
+        { name: chenjing.name, id_number: chenjing.id_number, phone: chenjing.phone },
+        { name: liuqiang.name, id_number: liuqiang.id_number, phone: liuqiang.phone }
+      ],
+      total_price: product.price_per_person * @adult_count,
+      accept_terms: true,
+      status: 'pending',
+      data_version: @data_version
+    )
+  end
 
-      # 预查询陈静的乘客信息
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      chenjing = user.passengers.find_by!(name: '陈静', data_version: 0)
-
-      sailing = CruiseSailing
-        .joins(:cruise_ship)
-        .where('cruise_ships.name LIKE ?', "%#{ship_keyword}%")
-        .where('departure_port LIKE ?', "%#{departure_port_keyword}%")
-        .where(duration_days: expected_days, duration_nights: expected_nights)
-        .where('EXTRACT(MONTH FROM departure_date) = ?', expected_month)
-        .where('departure_date >= ?', Date.current)
-        .where(data_version: '0')
-        .order(:departure_date)
-        .first
-
-      raise "未找到符合条件的航次（#{ship_keyword}，#{departure_port_keyword}，#{expected_days}天#{expected_nights}晚，#{expected_month}月）" unless sailing
-
-      cabin_type = CabinType.where(data_version: '0', cruise_ship_id: sailing.cruise_ship_id, category: expected_cabin_category).first
-      raise "未找到符合条件的舱房类型（#{expected_cabin_category}）" unless cabin_type
-
-      product = CruiseProduct.find_or_create_by!(
-        cruise_sailing_id: sailing.id,
-        cabin_type_id: cabin_type.id,
-        data_version: @data_version
-      ) do |p|
-        p.merchant_name = 'AIDA邮轮旗舰店'
-        p.price_per_person = 5800.0
-        p.occupancy_requirement = 2
-        p.stock = 10
-        p.sales_count = 0
-        p.is_refundable = true
-        p.requires_confirmation = false
-        p.status = 'on_sale'
+  def verify
+    # 断言1: 订单已创建（权重15%）
+    add_assertion "订单已创建", weight: 15 do
+      all_orders = CruiseOrder
+        .joins(cruise_product: { cruise_sailing: :cruise_ship })
+        .where('cruise_ships.name LIKE ?', "%#{@ship_keyword}%")
+        .where(data_version: @data_version)
+        .order(created_at: :desc)
+        .to_a
+      
+      expect(all_orders).not_to be_empty,
+        "未找到任何邮轮订单。请确认是否已创建订单"
+      
+      @order = all_orders.find do |o|
+        sailing = o.cruise_product.cruise_sailing
+        cabin_type = o.cruise_product.cabin_type
+        sailing.departure_port.include?(@departure_port_keyword) &&
+          cabin_type&.category == @expected_cabin_category
       end
-
-      CruiseOrder.create!(
-        user_id: user.id,
-        cruise_product_id: product.id,
-        quantity: adult_count,
-        contact_name: chenjing.name,
-        contact_phone: chenjing.phone,
-        total_price: product.price_per_person * adult_count,
-        accept_terms: true,
-        status: 'pending',
-        data_version: @data_version
-      )
+      
+      expect(@order).not_to be_nil,
+        "未找到符合条件的订单（出发港：#{@departure_port_keyword}，舱房类型：#{@expected_cabin_category}）"
     end
-
-    def verify
-      ship_keyword = '新星'
-      departure_port_keyword = '上海'
-      expected_days = 9
-      expected_nights = 8
-      expected_cabin_category = 'ocean_view'
-      expected_month = 3
-      adult_count = 2
-
-      add_assertion "订单已创建", weight: 20 do
-        all_orders = CruiseOrder
-          .joins(cruise_product: { cruise_sailing: :cruise_ship })
-          .where('cruise_ships.name LIKE ?', "%#{ship_keyword}%")
-          .where(data_version: @data_version)
-          .order(created_at: :desc)
-          .to_a
-        
-        expect(all_orders).not_to be_empty,
-          "未找到任何邮轮订单。请确认是否已创建订单"
-        
-        @order = all_orders.find do |o|
-          sailing = o.cruise_product.cruise_sailing
-          cabin_type = o.cruise_product.cabin_type
-          sailing.departure_port.include?(departure_port_keyword) &&
-            cabin_type&.category == expected_cabin_category
-        end
-        
-        expect(@order).not_to be_nil,
-          "未找到符合条件的订单（出发港：#{departure_port_keyword}，舱房类型：#{expected_cabin_category}）"
-      end
+    
+    return if @order.nil?
+    
+    # 断言2: 船只正确（权重10%）
+    add_assertion "船只正确（爱达新星号）", weight: 10 do
+      ship_name = @order.cruise_product.cruise_sailing.cruise_ship.name
+      expect(ship_name).to include(@ship_keyword),
+        "船只错误。期望: 包含'#{@ship_keyword}'，实际: #{ship_name}"
+    end
+    
+    # 断言3: 出发港正确（权重10%）
+    add_assertion "出发港正确（上海）", weight: 10 do
+      departure_port = @order.cruise_product.cruise_sailing.departure_port
+      expect(departure_port).to include(@departure_port_keyword),
+        "出发港错误。期望: 包含'#{@departure_port_keyword}'，实际: #{departure_port}"
+    end
+    
+    # 断言4: 行程天数正确（权重10%）
+    add_assertion "行程天数正确（#{@expected_days}天#{@expected_nights}晚）", weight: 10 do
+      sailing = @order.cruise_product.cruise_sailing
+      actual_days = sailing.duration_days
+      actual_nights = sailing.duration_nights
       
-      return if @order.nil?
+      expect(actual_days).to eq(@expected_days),
+        "行程天数错误。期望: #{@expected_days}天，实际: #{actual_days}天"
+      expect(actual_nights).to eq(@expected_nights),
+        "行程晚数错误。期望: #{@expected_nights}晚，实际: #{actual_nights}晚"
+    end
+    
+    # 断言5: 出发月份正确（权重10%）
+    add_assertion "出发月份正确（3月份）", weight: 10 do
+      sailing = @order.cruise_product.cruise_sailing
+      actual_month = sailing.departure_date.month
       
-      add_assertion "船只正确（爱达新星号）", weight: 15 do
-        ship_name = @order.cruise_product.cruise_sailing.cruise_ship.name
-        expect(ship_name).to include(ship_keyword),
-          "船只错误。期望: 包含'#{ship_keyword}'，实际: #{ship_name}"
-      end
+      expect(actual_month).to eq(@expected_month),
+        "出发月份错误。期望: #{@expected_month}月, 实际: #{actual_month}月（#{sailing.departure_date}）"
+    end
+    
+    # 断言6: 舱房类型正确（权重15%）
+    add_assertion "舱房类型正确（海景房）", weight: 15 do
+      cabin_type = @order.cruise_product.cabin_type
+      expect(cabin_type&.category).to eq(@expected_cabin_category),
+        "舱房类型错误。期望: #{@expected_cabin_category}（海景房），实际: #{cabin_type&.category}"
+    end
+    
+    # 断言7: 预订数量正确（权重10%）
+    add_assertion "预订数量正确（#{@adult_count}位成人）", weight: 10 do
+      expect(@order.quantity).to eq(@adult_count),
+        "预订数量错误。期望: #{@adult_count}位成人，实际: #{@order.quantity}位"
+    end
+    
+    # 断言8: 联系人信息正确（权重10%）
+    add_assertion "联系人信息正确（陈静或刘强）", weight: 10 do
+      valid_contacts = ['陈静', '刘强']
+      expect(valid_contacts).to include(@order.contact_name),
+        "联系人姓名错误。期望: 陈静或刘强，实际: #{@order.contact_name}"
       
-      add_assertion "出发港正确（上海）", weight: 10 do
-        departure_port = @order.cruise_product.cruise_sailing.departure_port
-        expect(departure_port).to include(departure_port_keyword),
-          "出发港错误。期望: 包含'#{departure_port_keyword}'，实际: #{departure_port}"
-      end
+      expected_phone = @valid_contact_phones[@order.contact_name]
+      expect(@order.contact_phone).to eq(expected_phone),
+        "联系人电话与姓名不匹配。联系人: #{@order.contact_name}，期望电话: #{expected_phone}，实际电话: #{@order.contact_phone}"
+    end
+    
+    # 断言9: 选择了3月份最近日期的班次（权重5%）
+    add_assertion "选择了3月份最近日期的班次", weight: 5 do
+      ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
       
-      add_assertion "行程天数正确（#{expected_days}天#{expected_nights}晚）", weight: 10 do
-        sailing = @order.cruise_product.cruise_sailing
-        actual_days = sailing.duration_days
-        actual_nights = sailing.duration_nights
-        
-        expect(actual_days).to eq(expected_days),
-          "行程天数错误。期望: #{expected_days}天，实际: #{actual_days}天"
-        expect(actual_nights).to eq(expected_nights),
-          "行程晚数错误。期望: #{expected_nights}晚，实际: #{actual_nights}晚"
-      end
+      # 筛选符合条件的班次：正确的出发港、行程天数、出发月份
+      available_sailings = CruiseSailing.where(
+        data_version: 0,
+        cruise_ship_id: ship.id,
+        duration_days: @expected_days,
+        duration_nights: @expected_nights
+      ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+       .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+       .where('departure_date >= ?', Date.current)
       
-      add_assertion "出发月份正确（3月份）", weight: 10 do
-        sailing = @order.cruise_product.cruise_sailing
-        actual_month = sailing.departure_date.month
-        
-        expect(actual_month).to eq(expected_month),
-          "出发月份错误。期望: #{expected_month}月, 实际: #{actual_month}月（#{sailing.departure_date}）"
-      end
+      nearest = available_sailings.order(departure_date: :asc).first
+      actual_sailing = @order.cruise_product.cruise_sailing
       
-      add_assertion "舱房类型正确（海景房）", weight: 15 do
-        cabin_type = @order.cruise_product.cabin_type
-        expect(cabin_type&.category).to eq(expected_cabin_category),
-          "舱房类型错误。期望: #{expected_cabin_category}（海景房），实际: #{cabin_type&.category}"
-      end
+      expect(actual_sailing.id).to eq(nearest.id),
+        "未选择3月份最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
+    end
+    
+    # 断言10: 乘客信息正确（权重5%）
+    add_assertion "乘客信息正确（陈静、刘强）", weight: 5 do
+      passengers = @order.passenger_list
+      expect(passengers).not_to be_empty, "未填写乘客信息（passenger_info为空）"
+      expect(passengers.size).to eq(@adult_count),
+        "乘客数量错误。期望: #{@adult_count}位，实际: #{passengers.size}位"
       
-      add_assertion "预订数量正确（#{adult_count}间海景房）", weight: 10 do
-        expect(@order.quantity).to eq(adult_count),
-          "预订数量错误。期望: #{adult_count}间，实际: #{@order.quantity}间"
-      end
-      
-      add_assertion "联系人信息正确（陈静 13300133001）", weight: 10 do
-        expect(@order.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@order.contact_name}"
-        expect(@order.contact_phone).to eq(@expected_contact_phone),
-          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@order.contact_phone}"
+      passenger_names = passengers.map { |p| p['name'] || p[:name] }.compact
+      @expected_passenger_names.each do |expected_name|
+        expect(passenger_names).to include(expected_name),
+          "缺少乘客信息。期望包含: #{expected_name}，实际乘客: #{passenger_names.join('、')}"
       end
     end
+  end
 
     private
 
-    def execution_state_data
-      {
-        expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone
-      }
-    end
+  def execution_state_data
+    {
+      ship_keyword: @ship_keyword,
+      departure_port_keyword: @departure_port_keyword,
+      expected_days: @expected_days,
+      expected_nights: @expected_nights,
+      expected_cabin_category: @expected_cabin_category,
+      expected_month: @expected_month,
+      adult_count: @adult_count,
+      expected_passenger_names: @expected_passenger_names,
+      valid_contact_phones: @valid_contact_phones
+    }
+  end
 
-    def restore_from_state(data)
-      @expected_contact_name = data['expected_contact_name'] || '陈静'
-      @expected_contact_phone = data['expected_contact_phone'] || '13300133001'
-    end
+  def restore_from_state(data)
+    @ship_keyword = data['ship_keyword'] || '新星'
+    @departure_port_keyword = data['departure_port_keyword'] || '上海'
+    @expected_days = data['expected_days'] || 9
+    @expected_nights = data['expected_nights'] || 8
+    @expected_cabin_category = data['expected_cabin_category'] || 'ocean_view'
+    @expected_month = data['expected_month'] || 3
+    @adult_count = data['adult_count'] || 2
+    @expected_passenger_names = data['expected_passenger_names'] || ['陈静', '刘强']
+    @valid_contact_phones = data['valid_contact_phones'] || { '陈静' => '13300133001', '刘强' => '13600136001' }
+  end
   end
 end
