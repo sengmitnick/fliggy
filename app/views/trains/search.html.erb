@@ -161,21 +161,21 @@
                 <% if train.price_business_class && train.price_business_class > 0 %>
                   <div class="flex-1 text-center py-2 px-3 bg-white rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
                     <div class="text-xs text-muted-foreground mb-1">商务座</div>
-                    <div class="text-sm font-semibold text-foreground">¥<%= train.price_business_class.to_i %></div>
+                    <div class="text-sm font-semibold text-foreground">¥<%= train.price_business_class.to_f.round(1) %></div>
                     <div class="text-xs text-green-600 mt-0.5"><%= (rand(100) + 10).to_s %>张</div>
                   </div>
                 <% end %>
                 <% if train.price_first_class && train.price_first_class > 0 %>
                   <div class="flex-1 text-center py-2 px-3 bg-white rounded-lg border border-border hover:border-primary transition-colors cursor-pointer">
                     <div class="text-xs text-muted-foreground mb-1">一等座</div>
-                    <div class="text-sm font-semibold text-foreground">¥<%= train.price_first_class.to_i %></div>
+                    <div class="text-sm font-semibold text-foreground">¥<%= train.price_first_class.to_f.round(1) %></div>
                     <div class="text-xs text-green-600 mt-0.5">有票</div>
                   </div>
                 <% end %>
                 <% if train.price_second_class && train.price_second_class > 0 %>
                   <div class="flex-1 text-center py-2 px-3 bg-white rounded-lg border-2 border-primary hover:bg-primary/5 transition-colors cursor-pointer">
                     <div class="text-xs text-muted-foreground mb-1">二等座</div>
-                    <div class="text-lg font-bold text-primary">¥<%= train.price_second_class.to_i %></div>
+                    <div class="text-lg font-bold text-primary">¥<%= train.price_second_class.to_f.round(1) %></div>
                     <div class="text-xs <%= train.available_seats > 0 ? 'text-green-600' : 'text-red-600' %> mt-0.5">
                       <%= train.available_seats > 0 ? '有票' : '候补' %>
                     </div>
@@ -184,7 +184,7 @@
                 <% if train.available_seats == 0 %>
                   <div class="flex-1 text-center py-2 px-3 bg-white rounded-lg border border-orange-300 hover:border-orange-500 transition-colors cursor-pointer">
                     <div class="text-xs text-muted-foreground mb-1">无座</div>
-                    <div class="text-sm font-semibold text-orange-600">¥<%= (train.price_second_class * 0.75).to_i %></div>
+                    <div class="text-sm font-semibold text-orange-600">¥<%= (train.price_second_class * 0.75).round(1) %></div>
                     <div class="text-xs text-orange-600 mt-0.5">候补</div>
                   </div>
                 <% end %>

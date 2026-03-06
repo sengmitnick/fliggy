@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-yellow-400" 
      data-controller="train-booking-lock payment-confirmation"
-     data-payment-confirmation-amount-value="<%= @total_group_price.to_i %>"
+     data-payment-confirmation-amount-value="<%= @total_group_price.to_f.round(2) %>"
      data-payment-confirmation-user-email-value="<%= current_user.email %>"
      data-payment-confirmation-payment-url-value="<%= pay_train_booking_path(@train_booking) %>"
      data-payment-confirmation-success-url-value="<%= success_train_booking_path(@train_booking) %>">
@@ -81,7 +81,7 @@
           </div>
           <div class="border-t-2 border-gray-300 relative">
             <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-white px-2 text-sm text-gray-600">
-              <%= @train.train_number %> >
+              <%= @train.train_number %> &gt;
             </div>
           </div>
         </div>
@@ -92,22 +92,53 @@
         </div>
       </div>
 
-      <div class="border-t pt-3 flex items-center justify-between">
-        <div>
-          <span class="font-medium text-gray-900"><%= @train_booking.passenger_name %></span>
-          <% if @passenger_count > 1 %>
-            <span class="text-sm text-gray-600"> 等<%= @passenger_count %>人</span>
-          <% end %>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span class="text-gray-900"><%= @train_booking.seat_type_label %></span>
-          <span class="text-gray-900">¥<%= @total_group_price.to_i %></span>
-          <span class="text-gray-900" data-train-booking-lock-target="seatDisplay" style="display: none;">
-            <%= @train_booking.carriage_number %>车厢 <%= @train_booking.seat_number %>
-          </span>
-          <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded" data-train-booking-lock-target="seatBadge" style="display: none;">
-            靠窗
-          </span>
+      <!-- Passenger List -->
+      <div class="border-t pt-3 space-y-4">
+        <% @all_bookings.each_with_index do |booking, index| %>
+          <div class="<%= 'pt-4 border-t border-gray-100' if index > 0 %>">
+            <!-- Passenger Header -->
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="font-medium text-gray-900">乘车人<%= index + 1 %>: <%= booking.passenger_name %></span>
+              </div>
+              <div class="text-right">
+                <div class="text-gray-900 font-semibold">¥<%= booking.total_price.to_f.round(1) %></div>
+              </div>
+            </div>
+            
+            <!-- Passenger Details -->
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span class="text-gray-500">姓名</span>
+                <div class="text-gray-900"><%= booking.passenger_name %></div>
+              </div>
+              <div>
+                <span class="text-gray-500">身份证号</span>
+                <div class="text-gray-900"><%= booking.passenger_id_number.to_s.gsub(/(?<=.{6}).{8}(?=.{4})/, '********') %></div>
+              </div>
+              <div>
+                <span class="text-gray-500">联系电话</span>
+                <div class="text-gray-900"><%= booking.passenger_phone || booking.contact_phone %></div>
+              </div>
+              <div>
+                <span class="text-gray-500">座位信息</span>
+                <div class="text-gray-900"><%= booking.seat_type_label %></div>
+              </div>
+            </div>
+            
+            <!-- Seat Assignment (hidden initially, shown after locking) -->
+            <div class="mt-2 text-sm" data-train-booking-lock-target="seatDisplay-<%= booking.id %>" style="display: none;">
+              <span class="text-gray-600">座位号：</span>
+              <span class="text-gray-900 font-medium"><%= booking.carriage_number %>车厢 <%= booking.seat_number %></span>
+              <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded ml-2">已分配</span>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Total Price Summary -->
+        <div class="pt-4 border-t border-gray-200 flex items-center justify-between">
+          <div class="font-medium text-gray-900">总计</div>
+          <div class="text-red-500 text-xl font-bold">¥<%= @total_group_price.to_f.round(1) %></div>
         </div>
       </div>
     </div>
@@ -132,7 +163,7 @@
       <div class="flex items-center space-x-2">
         <div class="text-left">
           <div class="text-red-500 text-2xl font-bold">
-            ¥ <%= @total_group_price.to_i %>
+            ¥ <%= @total_group_price.to_f.round(1) %>
           </div>
           <div class="text-xs text-gray-500">订单总额</div>
         </div>

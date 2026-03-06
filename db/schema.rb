@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_05_115041) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_06_035241) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1790,6 +1790,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_05_115041) do
     t.bigint "booking_option_id"
     t.integer "ticket_count", default: 1
     t.string "booking_group_id"
+    t.string "passenger_phone"
     t.index ["booking_option_id"], name: "index_train_bookings_on_booking_option_id"
     t.index ["data_version"], name: "index_train_bookings_on_data_version"
     t.index ["train_id"], name: "index_train_bookings_on_train_id"

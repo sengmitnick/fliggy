@@ -115,6 +115,8 @@ export default class extends Controller<HTMLElement> {
     // Update max seats for seat selection
     this.maxSeats = count > 0 ? count : 1
     this.updateSelectedSeatCount()
+    // Update total price based on passenger count
+    this.updateTotalPrice()
   }
 
   private filterPassengersByType(): void {
@@ -533,11 +535,29 @@ export default class extends Controller<HTMLElement> {
   }
 
   private updateTotalPrice(): void {
-    // Calculate total = (base price per passenger × passenger count) + (insurance × passenger count)
-    const passengerCount = this.selectedPassengers.size || 1
-    const total = (this.basePrice * passengerCount) + (this.insurancePrice * passengerCount)
+    // Calculate total price considering adult and child passengers
+    let total = 0
+    
+    if (this.selectedPassengers.size === 0) {
+      // No passenger selected, use single adult base price
+      total = this.basePrice + this.insurancePrice
+    } else {
+      // Calculate total for each passenger type
+      this.selectedPassengers.forEach((passenger) => {
+        const passengerType = passenger.type || 'adult'
+        let passengerPrice = this.basePrice
+        
+        // Child ticket is 50% of adult price
+        if (passengerType === 'child') {
+          passengerPrice = this.basePrice * 0.5
+        }
+        
+        total += passengerPrice + this.insurancePrice
+      })
+    }
+    
     if (this.totalPriceTarget) {
-      this.totalPriceTarget.textContent = `¥${Math.round(total)}`
+      this.totalPriceTarget.textContent = `¥${total.toFixed(1)}`
     }
   }
 }
