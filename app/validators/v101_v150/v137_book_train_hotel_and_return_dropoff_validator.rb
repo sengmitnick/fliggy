@@ -223,14 +223,14 @@ module V101V150
         data_version: @data_version
       )
 
-      # 送站服务：从酒店到火车站
+      # 送站服务：从杭州东站东广场接送中心到杭州东站（不是从酒店）
       Transfer.create!(
         user: user,
         transfer_type: 'train_dropoff',  # 送到火车站
         service_type: 'to_station',      # 到站服务
-        location_from: "#{hotel.name}",
-        location_to: "杭州火车站",
-        pickup_datetime: @dropoff_date.to_time + 10.hours,
+        location_from: "杭州东站东广场接送中心",  # 使用TransferLocation中的精确名称
+        location_to: "杭州东站",
+        pickup_datetime: @dropoff_date.in_time_zone + 10.hours,  # 10:00送站，使用in_time_zone确保时区正确
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
         passenger_phone: passenger.phone,
