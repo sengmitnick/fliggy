@@ -2,40 +2,60 @@
 
 require_relative '../base_validator'
 
-# 验证用例137: 帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务
-# 
+# 验证用例137: 帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）
+#
 # 任务描述:
-#   Agent 需要在系统中完成三项预订：
-#   1. 上海→杭州的火车票（后天，二等座）
-#   2. 杭州酒店1晚（入住日期=火车到达日）
-#   3. 返程送站服务（从酒店到火车站）
-# 
-# 复杂度分析:
-#   1. 需要搜索上海→杭州的火车票
-#   2. 需要选择"后天"出发日期，座位类型为二等座
-#   3. 需要预订杭州酒店1晚（入住日期与火车日期一致）
-#   4. 需要预订送站服务（退房后从酒店到火车站）
-#   5. 需要协调3个订单的时间和地点逻辑
-#   ✅ 多模块组合（火车+酒店+接送） + 时间协调 + 地点关联
-# 
-# 评分标准:
-#   - 创建了火车票+酒店+送站3个订单 (25分)
-#   - 火车票路线正确（上海→杭州） (10分)
-#   - 座位类型=二等座 (10分)
-#   - 乘客信息正确（张三） (10分)
-#   - 酒店城市正确（杭州） (10分)
-#   - 入住日期=火车日期 (10分)
-#   - 送站终点=火车站 (10分)
-#   - 送站起点=酒店地址附近 (5分)
-#   - 送站时间=退房后合理时间 (5分)
-#   - 入住人信息正确（张三） (5分)
+#   张三后天需要从上海到杭州出差，需要预订火车票（二等座）、杭州酒店住1晚，以及返程时大后天上午10:00从杭州东站广场接送中心到杭州东站的送站服务。
+#   Agent 需要创建3个订单（火车票+酒店+送站服务），确保酒店入住日期与火车日期一致，送站服务在退房日上午10:00从接送中心出发到火车站。
+#
+# 业务流程（11个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘客、入住人和送站乘客信息）
+#   2. 搜索上海→杭州火车票（后天出发）
+#   3. 按二等座价格升序排序，选择火车票
+#   4. 创建火车票订单（座位类型=二等座）
+#   5. 搜索杭州酒店
+#   6. 筛选酒店房间（room_category='overnight'，排除钟点房）
+#   7. 按房间价格升序排序，选择酒店房间
+#   8. 创建酒店订单（入住日期=火车日期，入住1晚，退房日期=大后天）
+#   9. 创建送站服务订单（transfer_type='train_dropoff', service_type='to_station'）
+#   10. 设置送站起点为杭州的接送点（TransferLocation中的地点，如"杭州东站广场接送中心"或"杭州站南广场"），终点为对应火车站
+#   11. 设置送站时间为退房日期当天上午10:00（pickup_datetime = 大后天 10:00）
+#
+# 复杂度分析（10个关键点）：
+#   1. 需要理解火车+酒店+送站服务的三模块组合预订场景
+#   2. 需要明确火车路线（上海→杭州，后天出发）
+#   3. 需要选择二等座座位类型（seat_type = 'second_class'）
+#   4. 需要协调酒店入住日期与火车到达日期一致（check_in_date = train_date）
+#   5. 需要计算退房日期（check_out_date = check_in_date + 1.day = 大后天）
+#   6. 需要理解送站服务类型（transfer_type='train_dropoff' 送到火车站，service_type='to_station' 到站服务）
+#   7. 需要设置送站起点为TransferLocation中的接送点（location_from，如"杭州东站广场接送中心"或"杭州站南广场"）
+#   8. 需要设置送站终点为对应的火车站（location_to，如"杭州东站"或"杭州站"）
+#   9. 需要明确送站时间（pickup_datetime = 大后天 10:00）
+#   10. 需要使用受益人信息作为乘客、入住人和送站乘客信息
+#   ❌ 不能一次性提供所有信息：需要分别查询火车、酒店数据，协调时间和地点逻辑，分步骤创建3个订单。
+#
+# 评分标准（10项，总计100分）：
+#   1. 创建了火车票+酒店+送站3个订单（25分）
+#   2. 火车票路线正确（上海→杭州）（10分）
+#   3. 座位类型=二等座（10分）
+#   4. 乘客信息正确（张三的姓名和身份证号）（10分）
+#   5. 酒店城市正确（杭州）（10分）
+#   6. 入住日期=火车日期（10分）
+#   7. 送站终点=火车站（10分）
+#   8. 送站起点为杭州的接送点（TransferLocation中的地点，如"杭州东站广场接送中心"）（5分）
+#   9. 送站时间为10:00（5分）
+#   10. 入住人信息正确（张三的姓名和联系电话）（5分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v137_book_train_hotel_and_return_dropoff_validator]
+#   或访问 http://localhost:<PORT>/api/tasks 获取任务列表
 #
 module V101V150
   class V137BookTrainHotelAndReturnDropoffValidator < BaseValidator
     self.validator_id = 'v137_book_train_hotel_and_return_dropoff_validator'
     self.task_id = 'd7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f3a'
-    self.title = '帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
-    self.description = '帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务'
+    self.title = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）'
+    self.description = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）'
     self.timeout_seconds = 300
 
     def task_description
@@ -140,22 +160,24 @@ module V101V150
           "送站终点不是火车站。实际: #{destination}"
       end
 
-      # 断言8: 送站起点=酒店地址附近 (5分)
-      add_assertion "送站起点=酒店地址附近", weight: 5 do
+      # 断言8: 送站起点为杭州的接送点 (5分)
+      add_assertion "送站起点为杭州的接送点", weight: 5 do
         origin = @transfer.location_from.to_s
-        hotel_address = @hotel_booking.hotel.address.to_s
-        hotel_name = @hotel_booking.hotel.name.to_s
-        # 简单验证：起点不为空即可
-        expect(origin).not_to be_empty, "送站起点为空"
+        # 验证起点包含"杭州"和"站"关键词（如"杭州东站广场接送中心"或"杭州站南广场"）
+        has_hangzhou = origin.include?("杭州")
+        has_station = origin.include?("站")
+        expect(has_hangzhou && has_station).to be(true),
+          "送站起点不是杭州的接送点。实际: #{origin}"
       end
 
-      # 断言9: 送站时间=退房后合理时间 (5分)
-      add_assertion "送站时间=退房后合理时间", weight: 5 do
+      # 断言9: 送站时间为10:00 (5分)
+      add_assertion "送站时间为10:00", weight: 5 do
         transfer_time = @transfer.pickup_datetime
-        checkout_date = @hotel_booking.check_out_date
-        # 送站时间应该在退房日期当天
-        expect(transfer_time.to_date).to eq(checkout_date),
-          "送站时间不在退房日期。期望: #{checkout_date}, 实际: #{transfer_time.to_date}"
+        pickup_hour = transfer_time.hour
+        pickup_minute = transfer_time.min
+        # 验证时间为10:00
+        expect(pickup_hour).to eq(10), "送站时间错误。期望: 10:00, 实际: #{transfer_time.strftime('%H:%M')}"
+        expect(pickup_minute).to eq(0), "送站时间错误。期望: 10:00, 实际: #{transfer_time.strftime('%H:%M')}"
       end
 
       # 断言10: 入住人信息正确（张三） (5分)
@@ -201,14 +223,14 @@ module V101V150
         data_version: @data_version
       )
 
-      # 送站服务：从酒店到火车站
+      # 送站服务：从杭州东站东广场接送中心到杭州东站（不是从酒店）
       Transfer.create!(
         user: user,
         transfer_type: 'train_dropoff',  # 送到火车站
         service_type: 'to_station',      # 到站服务
-        location_from: "#{hotel.name}",
-        location_to: "杭州火车站",
-        pickup_datetime: @dropoff_date.to_time + 10.hours,
+        location_from: "杭州东站东广场接送中心",  # 使用TransferLocation中的精确名称
+        location_to: "杭州东站",
+        pickup_datetime: @dropoff_date.in_time_zone + 10.hours,  # 10:00送站，使用in_time_zone确保时区正确
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
         passenger_phone: passenger.phone,

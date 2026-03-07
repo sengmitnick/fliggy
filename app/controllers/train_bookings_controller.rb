@@ -14,7 +14,7 @@ class TrainBookingsController < ApplicationController
     @passengers = current_user.passengers.order(is_self: :desc, created_at: :desc)
     
     # Calculate base price based on seat type
-    base_price = case @selected_seat_type
+    @base_price = case @selected_seat_type
     when 'second_class' then @train.price_second_class
     when 'first_class' then @train.price_first_class
     when 'business_class' then @train.price_business_class
@@ -23,11 +23,15 @@ class TrainBookingsController < ApplicationController
     end
     
     # Add extra fee from booking option if selected
-    @selected_price = base_price
+    @booking_option_fee = 0
+    @selected_price = @base_price
     if @booking_option_id.present?
       booking_option = @train.booking_options.find_by(id: @booking_option_id)
-      @selected_price += booking_option.extra_fee if booking_option
-      @selected_booking_option = booking_option
+      if booking_option
+        @booking_option_fee = booking_option.extra_fee
+        @selected_price += @booking_option_fee
+        @selected_booking_option = booking_option
+      end
     end
 
     # Seat type label for display
@@ -117,6 +121,7 @@ class TrainBookingsController < ApplicationController
     booking.booking_group_id = booking_group_id if booking_group_id.present?
     booking.passenger_name = passenger.name
     booking.passenger_id_number = passenger.id_number
+    booking.passenger_phone = passenger.phone  # Store passenger's own phone number
     booking.train = @train
     
     # Calculate price for single passenger
@@ -146,12 +151,16 @@ class TrainBookingsController < ApplicationController
     @booking_option_id = params[:train_booking][:booking_option_id]
     
     # Calculate base price
-    base_price = calculate_ticket_price(@train, @selected_seat_type)
-    @selected_price = base_price
+    @base_price = calculate_ticket_price(@train, @selected_seat_type)
+    @booking_option_fee = 0
+    @selected_price = @base_price
     if @booking_option_id.present?
       booking_option = @train.booking_options.find_by(id: @booking_option_id)
-      @selected_price += booking_option.extra_fee if booking_option
-      @selected_booking_option = booking_option
+      if booking_option
+        @booking_option_fee = booking_option.extra_fee
+        @selected_price += @booking_option_fee
+        @selected_booking_option = booking_option
+      end
     end
     
     @seat_type_label = case @selected_seat_type

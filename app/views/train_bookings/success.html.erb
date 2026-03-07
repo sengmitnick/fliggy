@@ -75,62 +75,79 @@
         </div>
 
         <div class="border-t border-gray-200 pt-4 mb-4">
-          <h3 class="text-base font-bold text-gray-900 mb-3">乘车人信息</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <div class="text-sm text-gray-600 mb-1">姓名</div>
-              <div class="text-base text-gray-900"><%= @train_booking.passenger_name %></div>
-            </div>
-            <div>
-              <div class="text-sm text-gray-600 mb-1">身份证号</div>
-              <div class="text-base text-gray-900 font-mono">
-                <%= @train_booking.passenger_id_number[0..5] %>********<%= @train_booking.passenger_id_number[-4..-1] %>
+          <h3 class="text-base font-bold text-gray-900 mb-4">乘车人信息（共<%= @passenger_count %>人）</h3>
+          <div class="space-y-4">
+            <% @all_bookings.each_with_index do |booking, index| %>
+              <div class="<%= 'pt-4 border-t border-gray-100' if index > 0 %>">
+                <!-- Passenger Header -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="font-medium text-gray-900">乘车人<%= index + 1 %>: <%= booking.passenger_name %></div>
+                  <div class="text-gray-900 font-semibold">¥<%= booking.total_price.to_f.round(1) %></div>
+                </div>
+                
+                <!-- Passenger Details Grid -->
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div class="text-xs text-gray-500 mb-1">姓名</div>
+                    <div class="text-base text-gray-900"><%= booking.passenger_name %></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500 mb-1">身份证号</div>
+                    <div class="text-base text-gray-900 font-mono">
+                      <%= booking.passenger_id_number.to_s.gsub(/(?<=.{6}).{8}(?=.{4})/, '********') %>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500 mb-1">联系电话</div>
+                    <div class="text-base text-gray-900"><%= booking.passenger_phone || booking.contact_phone %></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-gray-500 mb-1">座位信息</div>
+                    <div class="text-base text-gray-900 font-medium text-blue-600">
+                      <%= booking.seat_info %>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="text-sm text-gray-600 mb-1">联系电话</div>
-              <div class="text-base text-gray-900"><%= @train_booking.contact_phone %></div>
-            </div>
-            <div>
-              <div class="text-sm text-gray-600 mb-1">座位信息</div>
-              <div class="text-base text-gray-900 font-medium text-blue-600">
-                <%= @train_booking.seat_info %>
-              </div>
-            </div>
+            <% end %>
           </div>
         </div>
 
-        <% if @train_booking.insurance_type.present? && @train_booking.insurance_type != 'none' %>
+        <% if @all_bookings.any? { |b| b.insurance_type.present? && b.insurance_type != 'none' } %>
           <div class="border-t border-gray-200 pt-4 mb-4">
             <h3 class="text-base font-bold text-gray-900 mb-2">保险信息</h3>
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-sm text-gray-900">
-                  <%= InsuranceService.get_option(@train_booking.insurance_type)[:name] %>
+            <% @all_bookings.each_with_index do |booking, index| %>
+              <% if booking.insurance_type.present? && booking.insurance_type != 'none' %>
+                <div class="flex items-center justify-between <%= 'mt-2' if index > 0 %>">
+                  <div>
+                    <div class="text-sm text-gray-900">
+                      <%= booking.passenger_name %> - <%= InsuranceService.get_option(booking.insurance_type)[:name] %>
+                    </div>
+                    <div class="text-xs text-gray-600">
+                      最高赔付 <%= number_to_currency(InsuranceService.get_option(booking.insurance_type)[:coverage] / 10000.0, unit: '万元', precision: 0) %>
+                    </div>
+                  </div>
+                  <div class="text-sm text-gray-900">¥<%= booking.insurance_price.to_f.round(1) %></div>
                 </div>
-                <div class="text-xs text-gray-600">
-                  最高赔付 <%= number_to_currency(InsuranceService.get_option(@train_booking.insurance_type)[:coverage] / 10000.0, unit: '万元', precision: 0) %>
-                </div>
-              </div>
-              <div class="text-sm text-gray-900">¥<%= @train_booking.insurance_price %></div>
-            </div>
+              <% end %>
+            <% end %>
           </div>
         <% end %>
 
         <div class="border-t border-gray-200 pt-4">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-gray-600">票价</span>
-            <span class="text-gray-900">¥<%= (@train_booking.total_price - (@train_booking.insurance_price || 0)).round(2) %></span>
+            <span class="text-gray-600">票价合计</span>
+            <span class="text-gray-900">¥<%= (@total_group_price - @all_bookings.sum { |b| b.insurance_price || 0 }).round(1) %></span>
           </div>
-          <% if @train_booking.insurance_price.present? && @train_booking.insurance_price > 0 %>
+          <% if @all_bookings.sum { |b| b.insurance_price || 0 } > 0 %>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-gray-600">保险费</span>
-              <span class="text-gray-900">¥<%= @train_booking.insurance_price %></span>
+              <span class="text-gray-600">保险费合计</span>
+              <span class="text-gray-900">¥<%= @all_bookings.sum { |b| b.insurance_price || 0 }.round(1) %></span>
             </div>
           <% end %>
           <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-gray-200">
             <span class="text-gray-900">总计</span>
-            <span class="text-blue-600">¥<%= @train_booking.total_price %></span>
+            <span class="text-blue-600">¥<%= @total_group_price.to_f.round(1) %></span>
           </div>
         </div>
       </div>

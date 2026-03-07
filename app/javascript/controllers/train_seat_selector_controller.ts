@@ -70,7 +70,7 @@ export default class extends Controller<HTMLElement> {
     priceElements.forEach((priceEl: Element) => {
       if (priceEl instanceof HTMLElement) {
         const extraFee = parseFloat(priceEl.dataset.extraFee || '0')
-        const totalPrice = Math.floor(basePrice + extraFee)
+        const totalPrice = (basePrice + extraFee).toFixed(1)
         priceEl.textContent = totalPrice.toString()
       }
     })

@@ -2,12 +2,54 @@
 
 require_relative '../base_validator'
 
+# 验证用例133: 帮张三预订明天北京→天津列车（C字头城际或Z字头直达特快，二等座）+天津酒店（明天入住1晚）
+#
+# 任务描述:
+#   张三明天需要从北京乘火车到天津，希望预订C字头城际列车或Z字头直达特快的二等座，同时预订天津的酒店住1晚。
+#   Agent 需要创建1个火车票订单和1个酒店订单，确保车次为C字头（城际列车）或Z字头（直达特快），不选择G高铁或D动车，座位类型为二等座，酒店入住日期为列车到达当天。
+#
+# 业务流程（8个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘客和入住人信息）
+#   2. 搜索北京→天津火车（明天出发）
+#   3. 筛选C字头城际列车或Z字头直达特快（车次号以'C'或'Z'开头）
+#   4. 创建火车票订单（使用张三的乘客信息，座位类型=二等座）
+#   5. 搜索天津市区酒店
+#   6. 筛选整晚房型（排除钟点房 room_category = 'overnight'）
+#   7. 计算入住和退房日期（列车到达当天入住，住1晚）
+#   8. 创建酒店订单（使用张三的入住人信息）
+#
+# 复杂度分析（8个关键点）：
+#   1. 需要理解城际/直达特快列车+酒店组合预订场景
+#   2. 需要明确列车路线（北京→天津，明天出发）
+#   3. 需要筛选C字头城际列车或Z字头直达特快（车次号LIKE 'C%' OR LIKE 'Z%'，排除G高铁和D动车）
+#   4. 需要理解C字头（城际Intercity）和Z字头（直达特快Direct Express）的区别，本任务允许两者
+#   5. 需要选择二等座座位类型（seat_type = 'second_class'）
+#   6. 需要使用受益人信息作为火车乘客和酒店入住人
+#   7. 需要明确酒店城市（天津，到达城市）
+#   8. 需要理解入住时间逻辑（列车到达当天入住，住1晚）
+#   ❌ 不能一次性提供所有信息：需要分别查询列车和酒店数据，筛选C/Z字头车次，分步骤创建订单。
+#
+# 评分标准（9项，总计100分）：
+#   1. 创建了火车票订单（20分）
+#   2. 火车票路线正确（北京→天津）（15分）
+#   3. 车次为C字头城际或Z字头直达特快（15分）
+#   4. 座位类型=二等座（10分）
+#   5. 乘客信息正确（张三的姓名和身份证号）（10分）
+#   6. 创建了酒店订单（15分）
+#   7. 酒店城市正确（天津）（5分）
+#   8. 入住日期=火车日期（火车当天入住）（5分）
+#   9. 入住人信息正确（张三的姓名和电话）（5分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v133_book_regular_train_and_hotel_validator]
+#   或访问 http://localhost:<PORT>/api/tasks 获取任务列表
+#
 module V101V150
   class V133BookRegularTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v133_book_regular_train_and_hotel_validator'
     self.task_id = 'c6d7e8f9-0a1b-2c3d-4e5f-6a7b8c9d0e1f'
-    self.title = '帮张三订明天从北京到天津的普通列车（C字头或Z字头，二等座），同时订天津的酒店住1晚'
-    self.description = '帮张三订明天从北京到天津的普通列车（C字头或Z字头，二等座），同时订天津的酒店住1晚'
+    self.title = '帮张三预订明天北京→天津列车（C字头城际或Z字头直达特快，二等座）+天津酒店（明天入住1晚）'
+    self.description = '帮张三预订明天北京→天津列车（C字头城际或Z字头直达特快，二等座）+天津酒店（明天入住1晚）'
     self.timeout_seconds = 300
 
     def task_description
@@ -67,11 +109,11 @@ module V101V150
         expect(@train_booking.train.arrival_city).to eq(@arrival_city)
       end
 
-      add_assertion "车次为普通列车（C/Z字头）", weight: 15 do
+      add_assertion "车次为C字头城际或Z字头直达特快", weight: 15 do
         train_number = @train_booking.train.train_number
         is_regular = train_number.start_with?('C') || train_number.start_with?('Z')
         expect(is_regular).to be(true),
-          "车次不是普通列车。期望: C/Z字头, 实际: #{train_number}"
+          "车次不是C/Z字头。期望: C字头城际或Z字头直达特快, 实际: #{train_number}"
       end
 
       add_assertion "座位类型=二等座", weight: 10 do

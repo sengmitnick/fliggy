@@ -31,3 +31,13 @@
   [31mremotes/origin/verify-test[m
   [31mremotes/origin/verify-test-frame-2[m
   [31mremotes/origin/verify-test-frame-5[m
+[33m6fecc44[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/cs0306[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/feature/cs0306[m[33m)[m Merge pull request #173 from sengmitnick/feature/cs0305
+[33md186899[m[33m ([m[1;31morigin/feature/cs0305[m[33m, [m[1;32mfeature/cs0305[m[33m)[m feat: implement multi-passenger train booking with passenger preselection
+[33mba31d69[m refactor: improve validator documentation and scoring criteria
+[33m29a982d[m refactor: enhance v118 cruise booking validator with detailed assertions
+[33mab665bd[m refactor: enhance v117 validator with detailed assertions and nearest sailing selection logic
+[33mf70bacb[m refactor: update cruise booking validators v114-v116 with detailed test specs
+[33m163e03c[m refactor: enhance validator documentation and scoring for v112 and v113
+[33m94ae8f1[m refactor: improve validator descriptions and UI display
+[33mca8c3ee[m feat: add hotel rooms admin CRUD and update v109 validator documentation
+[33m8a498b3[m refactor: improve contact sorting and validator documentation

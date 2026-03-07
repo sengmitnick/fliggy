@@ -63,7 +63,7 @@
     <div class="space-y-2">
       <div class="flex items-center justify-between">
         <div class="text-gray-600">
-          成人 ¥<%= @selected_price.to_i %>
+          成人 ¥<%= @base_price.to_f.round(1) %>
           <button type="button" onclick="window.showToast('功能开发中')" class="inline-block align-middle">
             <svg class="inline w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -74,10 +74,12 @@
         <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
       </div>
 
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600">出行无忧礼包¥59/人</div>
-        <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
-      </div>
+      <% if @booking_option_fee.present? && @booking_option_fee > 0 %>
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600">出行无忧礼包¥<%= @booking_option_fee.to_f.round(1) %>/人</div>
+          <button type="button" onclick="window.showToast('功能开发中')" class="text-2xl text-gray-400">></button>
+        </div>
+      <% end %>
     </div>
 
     <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-sm">
@@ -117,7 +119,7 @@
     <%= f.hidden_field :insurance_price, id: 'booking_insurance_price', name: 'train_booking[insurance_price]', value: '0' %>
     <%= f.hidden_field :accept_terms, id: 'booking_accept_terms', name: 'train_booking[accept_terms]', value: '0' %>
 
-    <!-- 已选择人数 -->
+    <!-- Passenger Selection Section -->
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <div class="flex items-center justify-between">
         <h3 class="font-bold">请选择乘车人 
