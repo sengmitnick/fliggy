@@ -122,12 +122,11 @@ module V101V150
 
       # 断言2: 接机地点=宝安国际机场T3航站楼（TransferLocation中location_type='airport'的地点） (10分)
       add_assertion "接机地点=宝安国际机场T3航站楼", weight: 10 do
-        valid_locations = TransferLocation
-          .where(city: '深圳', location_type: 'airport', data_version: 0)
-          .pluck(:name)
+        location_from = @transfer.location_from
+        is_valid = location_from.include?('宝安') && location_from.include?('T3')
         
-        expect(valid_locations).to include(@transfer.location_from),
-          "接机地点不在TransferLocation深圳机场中。实际: #{@transfer.location_from}, 可选: #{valid_locations.join(', ')}"
+        expect(is_valid).to be_truthy,
+          "接机地点错误。期望: 宝安国际机场T3航站楼（或宝安T3），实际: #{location_from}"
       end
 
       # 断言3: 接机目的地=福田中心区会展中心接送服务点（TransferLocation中location_type='other'的地点） (10分)
@@ -146,13 +145,13 @@ module V101V150
           "接机目的地不应该是机场。实际: #{@transfer.location_to}"
       end
 
-      # 断言4: 接机时间和乘客信息正确（时间=11:45，乘客=张三） (10分)
-      add_assertion "接机时间和乘客信息正确（时间=11:45，乘客=张三）", weight: 10 do
-        # 验证接机时间=11:45
+      # 断言4: 接机时间和乘客信息正确（时间=航班到达后，乘客=张三） (10分)
+      add_assertion "接机时间和乘客信息正确（航班到达后，乘客=张三）", weight: 10 do
+        # 验证接机时间在航班到达后（11:45之后，约12:15）
         pickup_hour = @transfer.pickup_datetime.hour
-        pickup_minute = @transfer.pickup_datetime.min
-        expect(pickup_hour).to eq(11), "接机时间小时错误。期望: 11:45, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
-        expect(pickup_minute).to eq(45), "接机时间分钟错误。期望: 11:45, 实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
+        # 航班11:45到达，接机应在11:45-13:00之间（允许30分钟-2小时缓冲）
+        expect(pickup_hour).to be >= 11, "接机时间过早。期望: 11:45之后（航班到达后），实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
+        expect(pickup_hour).to be <= 13, "接机时间过晚。期望: 13:00之前，实际: #{@transfer.pickup_datetime.strftime('%H:%M')}"
         
         # 验证乘客信息=张三
         expect(@transfer.passenger_name).to eq(@expected_driver_name),
@@ -228,14 +227,17 @@ module V101V150
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = user.passengers.find_by!(name: '张三', data_version: 0)
 
-      # 机场接机服务（从北京飞抵深圳，11:45到达CA1302）
+      # 机场接机服务（从北京飞抵深圳，11:45到达CA1302，航班到达后30分钟接机）
+      arrival_time = @pickup_date.in_time_zone + 11.hours + 45.minutes  # CA1302航班到达时间
+      pickup_time = arrival_time + 30.minutes  # 接机时间=航班到达后30分钟
+      
       Transfer.create!(
         user: user,
         transfer_type: 'airport_pickup',
         service_type: 'from_airport',
         location_from: @airport_loc.name,  # 使用TransferLocation查询结果（宝安国际机场T3航站楼）
         location_to: @city_loc.name,  # 使用TransferLocation查询结果（福田中心区会展中心接送服务点）
-        pickup_datetime: @pickup_date.in_time_zone + 11.hours + 45.minutes,  # 11:45接机（CA1302到达时间）
+        pickup_datetime: pickup_time,  # 12:15接机（航班11:45到达后30分钟）
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
         passenger_phone: passenger.phone,

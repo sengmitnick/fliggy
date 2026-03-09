@@ -26,7 +26,7 @@ products_data = [
     slug: 'luckin-coffee-9',
     category: 'popular',
     price_cash: 9.90,
-    price_mileage: 0,
+    price_mileage: 50,  # 需要50积分+9.9元混合支付，支持V267测试
     original_price: 15.00,
     sales_count: 5234,
     stock: 9999,

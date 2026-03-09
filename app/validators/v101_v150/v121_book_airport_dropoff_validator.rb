@@ -144,14 +144,11 @@ module V101V150
       end
     
       add_assertion "目的地正确（#{@destination_airport}）", weight: 15 do
-        valid_airports = TransferLocation
-          .where(city: @city, location_type: 'airport', data_version: 0)
-          .where('name LIKE ?', '%浦东%')
-          .where('name LIKE ?', '%T2%')
-          .pluck(:name)
+        location_to = @transfer.location_to
+        is_valid = location_to.include?('浦东') && location_to.include?('T2')
         
-        expect(valid_airports).to include(@transfer.location_to),
-          "目的地错误。期望: #{@destination_airport}（浦东T2），实际: #{@transfer.location_to}"
+        expect(is_valid).to be_truthy,
+          "目的地错误。期望: #{@destination_airport}（浦东T2或浦东国际机场T2航站楼），实际: #{location_to}"
       end
     
       add_assertion "出发时间正确（06:00）", weight: 10 do

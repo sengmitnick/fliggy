@@ -53,6 +53,13 @@
           <span class="text-gray-600">还车时间</span>
           <span class="font-medium"><%= @car_order.return_datetime.strftime('%m月%d日 %H:%M') if @car_order.return_datetime %></span>
         </div>
+
+        <% if @car_order.rental_days.present? %>
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">租期</span>
+            <span class="font-bold text-primary"><%= @car_order.rental_days %>天</span>
+          </div>
+        <% end %>
       </div>
     </div>
 

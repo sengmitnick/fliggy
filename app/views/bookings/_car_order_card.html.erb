@@ -51,6 +51,11 @@
               还车: <%= booking.return_datetime.strftime('%Y-%m-%d %H:%M') %>
             </div>
           <% end %>
+          <% if booking.rental_days.present? %>
+            <div class="text-xs text-primary font-bold mt-1">
+              租期: <%= booking.rental_days %>天
+            </div>
+          <% end %>
           <div class="text-xs text-text-muted mt-1">
             地点: <%= booking.pickup_location %>
           </div>

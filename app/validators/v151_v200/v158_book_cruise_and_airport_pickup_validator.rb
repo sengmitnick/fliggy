@@ -9,13 +9,18 @@ module V151V200
   class V158BookCruiseAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v158_book_cruise_and_airport_pickup_validator'
     self.task_id = 'b8c9d0e1-2f3a-4b5c-6d7e-8f9a0b1c2d3e'
-    self.title = '给张三预订明天上海出发日本邮轮6天5晚，并预订机场接机（接今天从北京飞来的航班）'
-    self.description = '预订明天上海出发的日本邮轮航线，并预订机场接机服务（接今天从北京飞到上海浦东的航班）'
+    self.title = '给张三预订最近一趟上海出发日本邮轮6天5晚，并预订机场接机（接邮轮出发前一天从北京飞来的航班）'
+    self.description = '预订最近一趟上海出发的日本邮轮航线，并预订机场接机服务（接邮轮出发前一天从北京飞到上海浦东的航班）'
     self.timeout_seconds = 300
 
     def prepare
-      @departure_date = Date.current + 1.day  # 明天邮轮出发
-      @flight_date = Date.current  # 今天航班到达
+      # 查找最近一趟邮轮（数据包中是Date.today + 2）
+      # 接机接邮轮前一天到达的航班
+      # 注意：航班数据包用Date.current，邮轮数据包用Date.today
+      # 需要考虑两者差异，使用Date.current + 1作为航班日期（对应Date.today + 2 - 1）
+      cruise_departure_offset = 2  # 邮轮在Date.today + 2出发
+      @departure_date = Date.today + cruise_departure_offset.days
+      @flight_date = Date.current + (cruise_departure_offset - 1).days  # 航班在邮轮前1天
       @departure_port = '上海'
       @airport_city = '上海'
       @flight_origin = '北京'
@@ -38,7 +43,7 @@ module V151V200
       
       raise "数据包缺少上海出发的邮轮班次" if @available_sailings.empty?
       
-      # 查找今天从北京飞到上海浦东的航班（接机）
+      # 查找邮轮前一天从北京飞到上海浦东的航班（接机）
       @pickup_flights = Flight
         .where(departure_city: @flight_origin, destination_city: @departure_port, data_version: 0)
         .where(flight_date: @flight_date)
@@ -106,8 +111,8 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建机场接机服务（今天航班到达）
-      # 选择今天最早到达浦东的航班
+      # 创建机场接机服务（邮轮前一天航班到达）
+      # 选择当天最早到达浦东的航班
       pickup_flight = @pickup_flights.min_by { |f| f.arrival_time }
       pickup_datetime = pickup_flight.arrival_time + 30.minutes
       

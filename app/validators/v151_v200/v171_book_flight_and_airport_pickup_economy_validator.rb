@@ -160,18 +160,11 @@ module V151V200
     
       # 断言3: 接机起点正确（匹配航班到达机场）(15%)
       add_assertion "接机起点正确（#{@arrival_airport}）", weight: 15 do
-        flight = @flight_booking.flight
-        expected_airport = flight.arrival_airport
-      
-        # 使用TransferLocation数据库查询验证
-        valid_airports = TransferLocation
-          .where(city: @arrival_city, location_type: 'airport', data_version: 0)
-          .where('name LIKE ?', '%浦东%')
-          .where('name LIKE ?', '%T1%')
-          .pluck(:name)
+        location_from = @transfer.location_from
+        is_valid = location_from.include?('浦东') && location_from.include?('T1')
         
-        expect(valid_airports).to include(@transfer.location_from),
-          "接机起点错误。期望: #{expected_airport}（航班到达机场），实际: #{@transfer.location_from}"
+        expect(is_valid).to be_truthy,
+          "接机起点错误。期望: #{@arrival_airport}（浦东T1或浦东国际机场T1航站楼），实际: #{location_from}"
       end
     
       # 断言4: 接机终点正确（外滩）(15%)

@@ -24,7 +24,7 @@ class DataPackValidator
   
   # Schema version constant - updated by AI when schema changes
   # This version should match db/schema.rb ActiveRecord::Schema.define(version: ...)
-  VALIDATED_SCHEMA_VERSION = '2026_03_06_035241'
+  VALIDATED_SCHEMA_VERSION = '2026_03_09_100030'
   
   def initialize
     @errors = []

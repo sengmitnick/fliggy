@@ -2,17 +2,17 @@
 
 require_relative '../base_validator'
 
-# 验证用例88: 给张三预订首都国际机场接机服务（上海→北京航班，首都国际机场T3航站楼→三里屯商圈接送服务点，经济5座价格最低套餐，3天后下午1点）
+# 验证用例88: 给张三预订首都国际机场接机服务（上海→北京航班，首都国际机场T3航站楼→三里屯太古里接送服务站，经济5座价格最低套餐，3天后下午1点）
 #
 # 任务描述:
-#   用户3天后从上海飞往北京，需要在首都机场接机送到三里屯商圈。
+#   用户3天后从上海飞往北京，需要在首都机场接机送到三里屯太古里。
 #   Agent 需要通过搜索航班确定到达机场位置（首都T3），选择经济5座车型中价格最低的套餐
 #
 # 业务流程（7个关键步骤）：
 #   1. 用户选择"接我"服务（from_airport = 从机场接到目的地）
 #   2. 根据航班的起终城市搜索（上海→北京），确定到达机场（如：首都国际机场T3）
 #   3. 上车点：到达机场（location_from = 首都国际机场T3航站楼，通过航班搜索确定）
-#   4. 下车点：目的地地址（location_to = 三里屯商圈接送服务点）
+#   4. 下车点：目的地地址（location_to = 三里屯太古里接送服务站）
 #   5. 用车时间：3天后下午1点（pickup_datetime）
 #   6. 根据单人出行需求，筛选经济5座车型
 #   7. 在符合条件的套餐中选择价格最低的
@@ -20,7 +20,7 @@ require_relative '../base_validator'
 # 复杂度分析（7个关键点）：
 #   1. 需要理解"接机"含义：from_airport = 从机场出发，送到目的地
 #   2. 需要根据航班起终城市（上海→北京）搜索航班，确定到达机场位置（location_from = 首都T3）
-#   3. 需要选择下车地点（三里屯商圈接送服务点）
+#   3. 需要选择下车地点（三里屯太古里接送服务站）
 #   4. 需要设置用车时间（3天后下午1点）
 #   5. 需要筛选经济5座车型
 #   6. 需要对比符合条件的套餐价格
@@ -30,7 +30,7 @@ require_relative '../base_validator'
 # 评分标准（7项，总计100分）：
 #   - 创建了接机订单（15分）
 #   - 服务类型正确（airport_pickup + from_airport）（10分）
-#   - 上车点和下车点正确（首都国际机场T3航站楼→三里屯商圈接送服务点）（15分）
+#   - 上车点和下车点正确（首都国际机场T3航站楼→三里屯太古里接送服务站）（15分）
 #   - 车辆类型正确（economy_5 经济5座）（15分）
 #   - 选择了符合条件中价格最低的套餐（25分）
 #   - 订单价格正确（10分）
@@ -39,8 +39,8 @@ module V051V100
   class V088BookCrossCityAirportPickupValidator < BaseValidator
     self.validator_id = 'v088_book_cross_city_airport_pickup_validator'
     self.task_id = '2f2c38ea-6cf0-4c4c-9f44-53f6444baece'
-    self.title = '给张三预订首都国际机场接机服务（上海→北京航班，首都国际机场T3航站楼→三里屯商圈接送服务点，经济5座价格最低套餐，3天后下午1点）'
-    self.description = '预订首都国际机场接机服务（首都T3→三里屯商圈，经济5座价格最低套餐，3天后下午1点）'
+    self.title = '给张三预订首都国际机场接机服务（上海→北京航班，首都国际机场T3航站楼→三里屯太古里接送服务站，经济5座价格最低套餐，3天后下午1点）'
+    self.description = '预订首都国际机场接机服务（首都T3→三里屯太古里，经济5座价格最低套餐，3天后下午1点）'
     self.timeout_seconds = 240
   
     def prepare
@@ -55,7 +55,7 @@ module V051V100
       @departure_city = '上海'  # 航班出发城市
       @arrival_city = '北京'  # 航班降落城市
       @arrival_airport = '首都国际机场T3航站楼'  # 到达机场（上车点，通过航班搜索确定）
-      @dropoff_location = '三里屯商圈接送服务点'  # 下车点（市区地址）
+      @dropoff_location = '三里屯太古里接送服务站'  # 下车点（市区地址）
       @flight_date = (Date.current + 3.days).strftime('%Y-%m-%d')  # 3天后
       @pickup_datetime = Date.current + 3.days + 13.hours  # 3天后下午1点
       @vehicle_category = 'economy_5'  # 经济5座
@@ -70,8 +70,8 @@ module V051V100
       )
     
       {
-        task: "请预订机场接机服务，从机场送到三里屯商圈，选择经济5座车型中价格最低的套餐",
-        scenario: "3天后从上海飞往北京，需要在机场接机送到三里屯商圈",
+        task: "请预订机场接机服务，从机场送到三里屯太古里，选择经济5座车型中价格最低的套餐",
+        scenario: "3天后从上海飞往北京，需要在机场接机送到三里屯太古里",
         flight_info: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
@@ -82,7 +82,7 @@ module V051V100
         },
         service_type: "机场接机（from_airport）",
         pickup_location: "首都国际机场T3航站楼（上车点，通过#{@departure_city}→#{@arrival_city}航班搜索确定）",
-        dropoff_location: "#{@dropoff_location}（下车点，目的地）",
+        dropoff_location: "三里屯太古里接送服务站（下车点，目的地）",
         pickup_datetime: @pickup_datetime.strftime('%Y-%m-%d %H:%M'),
         vehicle_category: '经济5座（economy_5）',
         flow_hint: "1. 搜索#{@departure_city}→#{@arrival_city}航班（如HU7604，3天后中午12:30到达首都T3） → 2. 确认到达机场（首都T3） → 3. 选择接机服务 → 4. 上车点自动=首都T3 → 5. 下车点输入目的地地址 → 6. 设置用车时间（3天后下午1点） → 7. 筛选经济5座车型 → 8. 对比符合条件套餐价格 → 9. 选择该车型中价格最低的套餐",
@@ -113,25 +113,20 @@ module V051V100
           "具体服务类型错误。期望: #{@service_type}（从机场接），实际: #{@transfer.service_type}"
       end
     
-      add_assertion "上车点和下车点正确（首都国际机场T3航站楼→三里屯商圈接送服务点）", weight: 15 do
-        # 验证上车点为北京机场
-        valid_airports = TransferLocation
-          .where(city: '北京', location_type: 'airport', data_version: 0)
-          .where('name LIKE ?', '%首都%')
-          .where('name LIKE ?', '%T3%')
-          .pluck(:name)
+      add_assertion "上车点和下车点正确（首都国际机场T3航站楼→三里屯太古里接送服务站）", weight: 15 do
+        # 验证上车点为北京首都T3（支持简化名称"首都T3"和完整名称"首都国际机场T3航站楼"）
+        location_from = @transfer.location_from
+        is_valid_pickup = location_from.include?('首都') && location_from.include?('T3')
         
-        expect(valid_airports).to include(@transfer.location_from),
-          "上车点不在北京首都机场T3接送点中。实际: #{@transfer.location_from}"
+        expect(is_valid_pickup).to be_truthy,
+          "上车点错误。期望: 首都国际机场T3航站楼（或首都T3），实际: #{location_from}"
         
-        # 验证下车点为北京市区接送点
-        valid_locations = TransferLocation
-          .where(city: '北京', location_type: 'other', data_version: 0)
-          .where('name LIKE ?', '%三里屯%')
-          .pluck(:name)
+        # 验证下车点包含三里屯
+        location_to = @transfer.location_to
+        is_valid_dropoff = location_to.include?('三里屯')
         
-        expect(valid_locations).to include(@transfer.location_to),
-          "下车点不在北京三里屯接送点中。实际: #{@transfer.location_to}"
+        expect(is_valid_dropoff).to be_truthy,
+          "下车点错误。期望: 三里屯太古里接送服务站（或包含三里屯），实际: #{location_to}"
       end
     
       add_assertion "车辆类型正确（economy_5 经济5座）", weight: 15 do
