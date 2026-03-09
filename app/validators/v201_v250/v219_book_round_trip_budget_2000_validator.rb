@@ -57,9 +57,11 @@ module V201V250
       
       # 使用实际存在的航班日期
       @outbound_date = @outbound_flights.first.flight_date
-      @return_date = (@return_flights.where('flight_date > ?', @outbound_date).first || @return_flights.first).flight_date
       @check_in_date = @outbound_date
       @check_out_date = @check_in_date + @nights.days
+      
+      # 返程日期应该是退房日期或之后（住3晚后）
+      @return_date = (@return_flights.where('flight_date >= ?', @check_out_date).first || @return_flights.where('flight_date > ?', @outbound_date).first || @return_flights.first).flight_date
       
       {
         task: "请预订#{@outbound_date.strftime('%Y年%m月%d日')}（后天）从#{@origin_city}到#{@destination_city}的往返航班（#{@return_date.strftime('%m月%d日')}返回），并预订#{@destination_city}酒店#{@nights}晚。总预算不超过#{@max_budget}元。",
@@ -164,8 +166,12 @@ module V201V250
       best_combo = nil
       best_value = 0
       
-      @outbound_flights.first(5).each do |outbound|
-        @return_flights.first(5).each do |return_flight|
+      # 筛选符合日期要求的航班
+      valid_outbound = @outbound_flights.where(flight_date: @outbound_date).order(price: :asc)
+      valid_return = @return_flights.where(flight_date: @return_date).order(price: :asc)
+      
+      valid_outbound.first(5).each do |outbound|
+        valid_return.first(5).each do |return_flight|
           @available_hotels.first(5).each do |hotel|
             room = hotel.hotel_rooms.where(data_version: 0).first
             next unless room

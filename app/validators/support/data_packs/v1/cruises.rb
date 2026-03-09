@@ -722,6 +722,31 @@ cruise_sailings_data = [
     created_at: Time.current,
     updated_at: Time.current
   },
+  # 地中海辉煌号 - 日韩航线（3月15日）
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: japan_korea_route.id,
+    departure_date: Date.parse('2026-03-15'),
+    return_date: Date.parse('2026-03-21'),
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '香港登船',
+    arrival_port: '香港离船',
+    status: 'on_sale',
+    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '香港', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '冲绳', description: '热带风情' },
+      { day: 4, port: '福冈', description: '购物天堂' },
+      { day: 5, port: '济州岛', description: '探索韩国文化' },
+      { day: 6, port: '海上巡航', description: '甲板活动' },
+      { day: 7, port: '香港', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
   # 地中海辉煌号 - 地中海航线
   {
     cruise_ship_id: bellissima.id,
