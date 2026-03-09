@@ -77,6 +77,11 @@ module V151V200
       @hotel_checkin_date = @selected_combo[:first].arrival_time.to_date
       @hotel_checkout_date = @selected_combo[:second].departure_time.to_date
       
+      # 酒店业务规则：退房日期必须在入住日期之后（至少+1天）
+      if @hotel_checkout_date == @hotel_checkin_date
+        @hotel_checkout_date = @hotel_checkin_date + 1.day
+      end
+      
       {
         task: "请为#{@passenger.name}预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）从#{@departure_city}经#{@transit_city}中转到#{@final_city}的航班，" \
               "要求中转时间超过6小时，并在#{@transit_city}预订酒店休息",
@@ -137,7 +142,7 @@ module V151V200
         hotel_id: hotel.id,
         hotel_room_id: room.id,
         check_in_date: @hotel_checkin_date,
-        check_out_date: @hotel_checkout_date == @hotel_checkin_date ? @hotel_checkout_date + 1.day : @hotel_checkout_date,
+        check_out_date: @hotel_checkout_date,
         guest_name: @passenger.name,
         guest_phone: passenger.phone,
         payment_method: '花呗',

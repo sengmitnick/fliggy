@@ -120,9 +120,16 @@ if demo_user.persisted?
         id_number: '110101198904158901',  # 1989年出生 - 成人（35岁）
         phone: '13300133001',
         data_version: 0
+      },
+      {
+        name: '吴勇',
+        id_type: '身份证',
+        id_number: '110101199205107890',  # 1992年出生 - 成人（32岁）
+        phone: '13100131001',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加默认乘机人: 张三, 张建国(爷爷), 李四, 王芳, 刘强, 小明, 小红, 陈静"
+    puts "     ✓ 添加默认乘机人: 张三, 张建国(爷爷), 李四, 王芳, 刘强, 小明, 小红, 陈静, 吴勇"
   end
   
   # 添加联系人（与出行人数据对应）
@@ -178,13 +185,19 @@ if demo_user.persisted?
         data_version: 0
       },
       {
+        name: '吴勇',
+        phone: '13100131001',
+        email: 'wuyong@example.com',
+        data_version: 0
+      },
+      {
         name: '王五',
         phone: '13700137000',
         email: 'wangwu@example.com',
         data_version: 0
       }
     ])
-    puts "     ✓ 添加联系人: 张三, 张建国, 李四, 王芳, 刘强, 小明, 小红, 陈静, 王五"
+    puts "     ✓ 添加联系人: 张三, 张建国, 李四, 王芳, 刘强, 小明, 小红, 陈静, 吴勇, 王五"
   end
   
   # 添加收货地址
@@ -240,9 +253,29 @@ if demo_user.persisted?
         detail: '天府大道中段天府软件园',
         address_type: 'delivery',
         data_version: 0
+      },
+      {
+        name: '陈静',
+        phone: '13300133001',
+        province: '浙江省',
+        city: '杭州',
+        district: '西湖区',
+        detail: '文三路123号西湖国际科技大厦',
+        address_type: 'delivery',
+        data_version: 0
+      },
+      {
+        name: '吴勇',
+        phone: '13100131001',
+        province: '山东省',
+        city: '青岛',
+        district: '市南区',
+        detail: '香港中路68号五四广场',
+        address_type: 'delivery',
+        data_version: 0
       }
     ])
-    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴, 广州天河, 深圳南山, 成都高新"
+    puts "     ✓ 添加收货地址: 北京SOHO, 上海陆家嘴, 广州天河, 深圳南山, 成都高新, 杭州西湖, 青岛市南"
   end
   
   puts "     ✓ Demo用户: demo@travel01.com (密码: password123, 支付密码: 222222, 余额: ¥10,000, 里程: 60000)"
