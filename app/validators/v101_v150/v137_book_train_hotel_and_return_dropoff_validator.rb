@@ -2,11 +2,11 @@
 
 require_relative '../base_validator'
 
-# 验证用例137: 帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）
+# 验证用例137: 帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从西湖风景区到杭州东站）
 #
 # 任务描述:
-#   张三后天需要从上海到杭州出差，需要预订火车票（二等座）、杭州酒店住1晚，以及返程时大后天上午10:00从杭州东站广场接送中心到杭州东站的送站服务。
-#   Agent 需要创建3个订单（火车票+酒店+送站服务），确保酒店入住日期与火车日期一致，送站服务在退房日上午10:00从接送中心出发到火车站。
+#   张三后天需要从上海到杭州出差，需要预订火车票（二等座）、杭州酒店住1晚，以及返程时大后天上午10:00从西湖风景区（酒店所在区域）到杭州东站的送站服务。
+#   Agent 需要创建3个订单（火车票+酒店+送站服务），确保酒店入住日期与火车日期一致，送站服务在退房日上午10:00从西湖风景区出发到杭州东站。
 #
 # 业务流程（11个关键步骤）：
 #   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘客、入住人和送站乘客信息）
@@ -17,8 +17,8 @@ require_relative '../base_validator'
 #   6. 筛选酒店房间（room_category='overnight'，排除钟点房）
 #   7. 按房间价格升序排序，选择酒店房间
 #   8. 创建酒店订单（入住日期=火车日期，入住1晚，退房日期=大后天）
-#   9. 创建送站服务订单（transfer_type='train_dropoff', service_type='to_station'）
-#   10. 设置送站起点为杭州的接送点（TransferLocation中的地点，如"杭州东站广场接送中心"或"杭州站南广场"），终点为对应火车站
+#   9. 从TransferLocation查询杭州的接送点（西湖风景区或武林广场等酒店区域）
+#   10. 创建送站服务订单（transfer_type='train_dropoff', service_type='to_station'，从酒店区域到杭州东站）
 #   11. 设置送站时间为退房日期当天上午10:00（pickup_datetime = 大后天 10:00）
 #
 # 复杂度分析（10个关键点）：
@@ -28,11 +28,11 @@ require_relative '../base_validator'
 #   4. 需要协调酒店入住日期与火车到达日期一致（check_in_date = train_date）
 #   5. 需要计算退房日期（check_out_date = check_in_date + 1.day = 大后天）
 #   6. 需要理解送站服务类型（transfer_type='train_dropoff' 送到火车站，service_type='to_station' 到站服务）
-#   7. 需要设置送站起点为TransferLocation中的接送点（location_from，如"杭州东站广场接送中心"或"杭州站南广场"）
-#   8. 需要设置送站终点为对应的火车站（location_to，如"杭州东站"或"杭州站"）
+#   7. 需要从TransferLocation查询杭州的酒店区域接送点（使用city='杭州'和location_type='other'过滤，如西湖风景区、武林广场、钱江新城CBD）
+#   8. 需要使用TransferLocation查询结果的name字段作为location_from（不能硬编码，应选择合理的酒店区域而非火车站广场）
 #   9. 需要明确送站时间（pickup_datetime = 大后天 10:00）
 #   10. 需要使用受益人信息作为乘客、入住人和送站乘客信息
-#   ❌ 不能一次性提供所有信息：需要分别查询火车、酒店数据，协调时间和地点逻辑，分步骤创建3个订单。
+#   ❌ 不能一次性提供所有信息：需要分别查询火车、酒店、TransferLocation数据，协调时间和地点逻辑，分步骤创建3个订单。
 #
 # 评分标准（10项，总计100分）：
 #   1. 创建了火车票+酒店+送站3个订单（25分）
@@ -42,7 +42,7 @@ require_relative '../base_validator'
 #   5. 酒店城市正确（杭州）（10分）
 #   6. 入住日期=火车日期（10分）
 #   7. 送站终点=火车站（10分）
-#   8. 送站起点为杭州的接送点（TransferLocation中的地点，如"杭州东站广场接送中心"）（5分）
+#   8. 送站起点为TransferLocation中的杭州酒店区域接送点（验证location_from是否在TransferLocation.where(city: '杭州', location_type: 'other')中，如西湖风景区、武林广场、钱江新城CBD）（5分）
 #   9. 送站时间为10:00（5分）
 #   10. 入住人信息正确（张三的姓名和联系电话）（5分）
 #
@@ -54,8 +54,8 @@ module V101V150
   class V137BookTrainHotelAndReturnDropoffValidator < BaseValidator
     self.validator_id = 'v137_book_train_hotel_and_return_dropoff_validator'
     self.task_id = 'd7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f3a'
-    self.title = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）'
-    self.description = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从杭州东站广场接送中心到杭州东站）'
+    self.title = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从西湖风景区到杭州东站）'
+    self.description = '帮张三预订后天上海→杭州火车票（二等座）+杭州酒店（后天入住1晚）+返程送站服务（大后天10:00从西湖风景区到杭州东站）'
     self.timeout_seconds = 300
 
     def task_description
@@ -92,6 +92,47 @@ module V101V150
       ).order(price: :asc)
 
       raise "未找到符合条件的酒店" if @available_hotels.empty?
+
+      # 预查询杭州酒店区域接送点（TransferLocation - 西湖风景区）
+      @departure_loc = TransferLocation.find_by(
+        city: @hotel_city,
+        name: '西湖风景区',
+        location_type: 'other',
+        data_version: 0
+      )
+
+      raise "未找到杭州接送点: 西湖风景区" unless @departure_loc
+
+      @station_name = "杭州东站"
+
+      {
+        task: "帮张三订后天上海到杭州的火车票（二等座），预订杭州酒店1晚，并预订返程送站服务（大后天10:00从#{@departure_loc.name}到#{@station_name}）",
+        requirements: {
+          beneficiary: '张三',
+          train_route: "#{@departure_city}→#{@arrival_city}",
+          train_date: @train_date.to_s,
+          seat_type: '二等座',
+          hotel_city: @hotel_city,
+          check_in_date: @check_in_date.to_s,
+          check_out_date: @check_out_date.to_s,
+          dropoff_location_from: @departure_loc.name,
+          dropoff_location_to: @station_name,
+          dropoff_time: '10:00'
+        },
+        hint: "需要协调火车、酒店和送站服务的时间和地点",
+        statistics: {
+          available_trains: @available_trains.count,
+          available_hotels: @available_hotels.count,
+          train_price_range: {
+            min: @available_trains.minimum(:price_second_class),
+            max: @available_trains.maximum(:price_second_class)
+          },
+          hotel_price_range: {
+            min: @available_hotels.minimum(:price),
+            max: @available_hotels.maximum(:price)
+          }
+        }
+      }
     end
 
     def verify
@@ -160,14 +201,14 @@ module V101V150
           "送站终点不是火车站。实际: #{destination}"
       end
 
-      # 断言8: 送站起点为杭州的接送点 (5分)
-      add_assertion "送站起点为杭州的接送点", weight: 5 do
-        origin = @transfer.location_from.to_s
-        # 验证起点包含"杭州"和"站"关键词（如"杭州东站广场接送中心"或"杭州站南广场"）
-        has_hangzhou = origin.include?("杭州")
-        has_station = origin.include?("站")
-        expect(has_hangzhou && has_station).to be(true),
-          "送站起点不是杭州的接送点。实际: #{origin}"
+      # 断言8: 送站起点为杭州的酒店区域接送点（TransferLocation中location_type='other'的地点） (5分)
+      add_assertion "送站起点为杭州的酒店区域接送点", weight: 5 do
+        valid_locations = TransferLocation
+          .where(city: '杭州', location_type: 'other', data_version: 0)
+          .pluck(:name)
+        
+        expect(valid_locations).to include(@transfer.location_from),
+          "送站起点不在TransferLocation酒店区域中。实际: #{@transfer.location_from}, 可选: #{valid_locations.join(', ')}"
       end
 
       # 断言9: 送站时间为10:00 (5分)
@@ -223,13 +264,13 @@ module V101V150
         data_version: @data_version
       )
 
-      # 送站服务：从杭州东站东广场接送中心到杭州东站（不是从酒店）
+      # 送站服务：使用TransferLocation查询的酒店区域接送点（西湖风景区）到杭州东站
       Transfer.create!(
         user: user,
         transfer_type: 'train_dropoff',  # 送到火车站
         service_type: 'to_station',      # 到站服务
-        location_from: "杭州东站东广场接送中心",  # 使用TransferLocation中的精确名称
-        location_to: "杭州东站",
+        location_from: @departure_loc.name,  # 使用TransferLocation查询结果（西湖风景区）
+        location_to: @station_name,
         pickup_datetime: @dropoff_date.in_time_zone + 10.hours,  # 10:00送站，使用in_time_zone确保时区正确
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
@@ -253,7 +294,9 @@ module V101V150
         dropoff_date: @dropoff_date.to_s,
         expected_passenger_name: @expected_passenger_name,
         expected_passenger_id: @expected_passenger_id,
-        expected_phone: @expected_phone
+        expected_phone: @expected_phone,
+        departure_location_name: @departure_loc&.name,
+        station_name: @station_name
       }
     end
 
@@ -268,6 +311,7 @@ module V101V150
       @expected_passenger_name = data['expected_passenger_name']
       @expected_passenger_id = data['expected_passenger_id']
       @expected_phone = data['expected_phone']
+      @station_name = data['station_name']
 
       @available_trains = Train.where(
         departure_city: @departure_city,
@@ -279,6 +323,13 @@ module V101V150
         city: @hotel_city,
         data_version: 0
       ).order(price: :asc)
+
+      # 重新查询TransferLocation
+      @departure_loc = TransferLocation.find_by(
+        city: @hotel_city,
+        name: data['departure_location_name'],
+        data_version: 0
+      ) if data['departure_location_name']
     end
   end
 end
