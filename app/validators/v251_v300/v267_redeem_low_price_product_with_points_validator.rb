@@ -13,11 +13,18 @@ module V251V300
     self.timeout_seconds = 300
     
     def prepare
-      @product_name = '瑞幸咖啡券 9.9元'
+      # 查找低价热门商品（积分商城咖啡券类产品）
+      @product = MembershipProduct
+        .where(data_version: 0)
+        .where('price_cash < ?', 15)  # 低价商品 < 15元
+        .where('price_mileage > 0')   # 需要积分
+        .where('name LIKE ?', '%咖啡%')  # 咖啡券类
+        .order(price_cash: :asc)
+        .first
       
-      # 查找商品
-      @product = MembershipProduct.find_by(name: @product_name, data_version: 0)
-      raise "未找到商品: #{@product_name}" if @product.nil?
+      raise "未找到符合条件的低价咖啡券商品" if @product.nil?
+      
+      @product_name = @product.name
       
       # 检查商品价格
       raise "商品价格设置错误" if @product.price_cash <= 0 && @product.price_mileage <= 0

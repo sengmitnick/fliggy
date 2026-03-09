@@ -67,8 +67,26 @@ module V101V150
       @pickup_date = Date.current + 1.day
       @rental_days = 3
       @return_date = @pickup_date + @rental_days.days
-      @airport_location = "宝安国际机场T3航站楼"  # 深圳机场，与数据包中的精确名称保持一致
-      @city_destination = "福田中心区会展中心接送服务点"  # 市区接送服务点，非酒店
+
+      # 预查询深圳机场接送点（TransferLocation - 宝安国际机场T3航站楼）
+      @airport_loc = TransferLocation.find_by(
+        city: @location,
+        name: '宝安国际机场T3航站楼',
+        location_type: 'airport',
+        data_version: 0
+      )
+
+      raise "未找到深圳机场接送点: 宝安国际机场T3航站楼" unless @airport_loc
+
+      # 预查询深圳市区接送点（TransferLocation - 福田中心区会展中心接送服务点）
+      @city_loc = TransferLocation.find_by(
+        city: @location,
+        name: '福田中心区会展中心接送服务点',
+        location_type: 'other',
+        data_version: 0
+      )
+
+      raise "未找到深圳市区接送点: 福田中心区会展中心接送服务点" unless @city_loc
 
       # 预查询驾驶员信息（张三）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -102,24 +120,30 @@ module V101V150
 
       return if @transfer.nil?
 
-      # 断言2: 接机地点=深圳机场 (10分)
-      add_assertion "接机地点=深圳机场", weight: 10 do
-        location = @transfer.location_from.to_s
-        has_airport = location.include?("机场") || location.include?("Airport") || location.include?("深圳")
-        expect(has_airport).to be(true),
-          "接机地点不是深圳机场。实际: #{location}"
+      # 断言2: 接机地点=宝安国际机场T3航站楼（TransferLocation中location_type='airport'的地点） (10分)
+      add_assertion "接机地点=宝安国际机场T3航站楼", weight: 10 do
+        valid_locations = TransferLocation
+          .where(city: '深圳', location_type: 'airport', data_version: 0)
+          .pluck(:name)
+        
+        expect(valid_locations).to include(@transfer.location_from),
+          "接机地点不在TransferLocation深圳机场中。实际: #{@transfer.location_from}, 可选: #{valid_locations.join(', ')}"
       end
 
-      # 断言3: 接机目的地=福田会展中心服务点 (10分)
-      add_assertion "接机目的地=福田会展中心服务点", weight: 10 do
-        destination = @transfer.location_to.to_s
-        # 验证目的地是福田中心区会展中心接送服务点（数据包中的精确名称）
-        is_futian = destination.include?("福田中心区会展中心接送服务点")
-        is_airport = destination.include?("机场") || destination.include?("Airport")
-        expect(is_futian).to be(true),
-          "接机目的地应该是'福田中心区会展中心接送服务点'。实际: #{destination}"
+      # 断言3: 接机目的地=福田中心区会展中心接送服务点（TransferLocation中location_type='other'的地点） (10分)
+      add_assertion "接机目的地=福田中心区会展中心接送服务点", weight: 10 do
+        valid_locations = TransferLocation
+          .where(city: '深圳', location_type: 'other', data_version: 0)
+          .pluck(:name)
+        
+        expect(valid_locations).to include(@transfer.location_to),
+          "接机目的地不在TransferLocation深圳市区接送点中。实际: #{@transfer.location_to}, 可选: #{valid_locations.join(', ')}"
+        
+        # 确保不是机场
+        airport_keywords = ['机场', 'Airport']
+        is_airport = airport_keywords.any? { |keyword| @transfer.location_to.include?(keyword) }
         expect(is_airport).to be(false),
-          "接机目的地不应该是机场。实际: #{destination}"
+          "接机目的地不应该是机场。实际: #{@transfer.location_to}"
       end
 
       # 断言4: 接机时间和乘客信息正确（时间=11:45，乘客=张三） (10分)
@@ -209,8 +233,8 @@ module V101V150
         user: user,
         transfer_type: 'airport_pickup',
         service_type: 'from_airport',
-        location_from: @airport_location,
-        location_to: @city_destination,
+        location_from: @airport_loc.name,  # 使用TransferLocation查询结果（宝安国际机场T3航站楼）
+        location_to: @city_loc.name,  # 使用TransferLocation查询结果（福田中心区会展中心接送服务点）
         pickup_datetime: @pickup_date.in_time_zone + 11.hours + 45.minutes,  # 11:45接机（CA1302到达时间）
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
@@ -247,8 +271,8 @@ module V101V150
         pickup_date: @pickup_date.to_s,
         rental_days: @rental_days,
         return_date: @return_date.to_s,
-        airport_location: @airport_location,
-        city_destination: @city_destination,
+        airport_location_name: @airport_loc&.name,
+        city_destination_name: @city_loc&.name,
         expected_driver_name: @expected_driver_name,
         expected_driver_id: @expected_driver_id,
         expected_phone: @expected_phone,
@@ -262,18 +286,33 @@ module V101V150
       @pickup_date = Date.parse(data['pickup_date'])
       @rental_days = data['rental_days']
       @return_date = Date.parse(data['return_date'])
-      @airport_location = data['airport_location']
-      @city_destination = data['city_destination']
       @expected_driver_name = data['expected_driver_name']
       @expected_driver_id = data['expected_driver_id']
       @expected_phone = data['expected_phone']
       @expected_pickup_location = data['expected_pickup_location']
+
+      # 重新查询TransferLocation
+      @airport_loc = TransferLocation.find_by(
+        city: @location,
+        name: data['airport_location_name'],
+        location_type: 'airport',
+        data_version: 0
+      ) if data['airport_location_name']
+
+      @city_loc = TransferLocation.find_by(
+        city: @location,
+        name: data['city_destination_name'],
+        location_type: 'other',
+        data_version: 0
+      ) if data['city_destination_name']
 
       @available_cars = Car.where(
         location: @location,
         category: @category,
         data_version: 0
       ).where.not("pickup_location LIKE ?", "%机场%").order(price_per_day: :asc)
+
+      @passenger = Passenger.find_by(name: @expected_driver_name, data_version: 0)
     end
   end
 end

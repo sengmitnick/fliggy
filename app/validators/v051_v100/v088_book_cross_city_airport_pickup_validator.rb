@@ -114,13 +114,24 @@ module V051V100
       end
     
       add_assertion "上车点和下车点正确（首都国际机场T3航站楼→三里屯商圈接送服务点）", weight: 15 do
-        # 验证上车点包含首都
-        expect(@transfer.location_from).to include('首都'),
-          "上车点错误（缺少首都）。期望包含: 首都国际机场T3航站楼, 实际: #{@transfer.location_from}"
+        # 验证上车点为北京机场
+        valid_airports = TransferLocation
+          .where(city: '北京', location_type: 'airport', data_version: 0)
+          .where('name LIKE ?', '%首都%')
+          .where('name LIKE ?', '%T3%')
+          .pluck(:name)
         
-        # 验证下车点包含三里屯
-        expect(@transfer.location_to).to include('三里屯'),
-          "下车点错误（缺少三里屯）。期望包含: 三里屯商圈接送服务点, 实际: #{@transfer.location_to}"
+        expect(valid_airports).to include(@transfer.location_from),
+          "上车点不在北京首都机场T3接送点中。实际: #{@transfer.location_from}"
+        
+        # 验证下车点为北京市区接送点
+        valid_locations = TransferLocation
+          .where(city: '北京', location_type: 'other', data_version: 0)
+          .where('name LIKE ?', '%三里屯%')
+          .pluck(:name)
+        
+        expect(valid_locations).to include(@transfer.location_to),
+          "下车点不在北京三里屯接送点中。实际: #{@transfer.location_to}"
       end
     
       add_assertion "车辆类型正确（economy_5 经济5座）", weight: 15 do

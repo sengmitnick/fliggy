@@ -163,12 +163,15 @@ module V151V200
         flight = @flight_booking.flight
         expected_airport = flight.arrival_airport
       
-        # 检查接机起点是否包含到达机场信息（去除航站楼编号后匹配）
-        airport_base_name = expected_airport.gsub(/[T\d]/, '').strip
-        location_matches = @transfer.location_from.include?(airport_base_name) || @transfer.location_from == @arrival_airport
+        # 使用TransferLocation数据库查询验证
+        valid_airports = TransferLocation
+          .where(city: @arrival_city, location_type: 'airport', data_version: 0)
+          .where('name LIKE ?', '%浦东%')
+          .where('name LIKE ?', '%T1%')
+          .pluck(:name)
         
-        expect(location_matches).to be_truthy,
-          "接机起点错误。期望包含: #{expected_airport}（航班到达机场），实际: #{@transfer.location_from}"
+        expect(valid_airports).to include(@transfer.location_from),
+          "接机起点错误。期望: #{expected_airport}（航班到达机场），实际: #{@transfer.location_from}"
       end
     
       # 断言4: 接机终点正确（外滩）(15%)

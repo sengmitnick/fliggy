@@ -151,9 +151,13 @@ module V151V200
       end
     
       add_assertion "接机起点正确（#{@arrival_airport}）", weight: 15 do
-        location_matches = @transfer.location_from.include?('萧山') || @transfer.location_from == @arrival_airport
+        # 使用TransferLocation数据库查询验证
+        valid_airports = TransferLocation
+          .where(city: @arrival_city, location_type: 'airport', data_version: 0)
+          .where('name LIKE ?', '%萧山%')
+          .pluck(:name)
         
-        expect(location_matches).to be_truthy,
+        expect(valid_airports).to include(@transfer.location_from),
           "接机起点错误。期望: #{@arrival_airport}, 实际: #{@transfer.location_from}"
       end
     

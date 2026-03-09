@@ -17,7 +17,7 @@ module V151V200
       @departure_date = Date.current + 1.day  # 明天邮轮出发
       @flight_date = Date.current  # 今天航班到达
       @departure_port = '上海'
-      @airport_location = '上海浦东国际机场'
+      @airport_city = '上海'
       @flight_origin = '北京'
       @duration_days = 6
       @duration_nights = 5
@@ -46,6 +46,24 @@ module V151V200
         .to_a
       
       raise "数据包缺少#{@flight_origin}到#{@departure_port}浦东的航班" if @pickup_flights.empty?
+      
+      # 查找机场接送点
+      @airport_location = TransferLocation.find_by(
+        city: @airport_city,
+        location_type: 'airport',
+        data_version: 0
+      )
+      
+      raise "未找到#{@airport_city}机场位置" unless @airport_location
+      
+      # 查找邮轮码头接送点
+      @cruise_terminal = TransferLocation.find_by(
+        city: @departure_port,
+        location_type: 'other',
+        data_version: 0
+      )
+      
+      raise "未找到#{@departure_port}邮轮码头位置" unless @cruise_terminal
     end
 
     def simulate
@@ -97,8 +115,8 @@ module V151V200
         user: user,
         transfer_type: 'airport_pickup',
         service_type: 'from_airport',
-        location_from: @airport_location,
-        location_to: "#{@departure_port}邮轮码头",
+        location_from: @airport_location.name,
+        location_to: @cruise_terminal.name,
         pickup_datetime: pickup_datetime,
         flight_number: pickup_flight.flight_number,
         vehicle_type: 'business_5',
@@ -116,7 +134,7 @@ module V151V200
         departure_date: @departure_date.to_s,
         flight_date: @flight_date.to_s,
         departure_port: @departure_port,
-        airport_location: @airport_location,
+        airport_city: @airport_city,
         flight_origin: @flight_origin,
         duration_days: @duration_days,
         duration_nights: @duration_nights,
@@ -129,11 +147,37 @@ module V151V200
       @departure_date = Date.parse(data['departure_date']) if data['departure_date']
       @flight_date = Date.parse(data['flight_date']) if data['flight_date']
       @departure_port = data['departure_port']
-      @airport_location = data['airport_location']
+      @airport_city = data['airport_city']
       @flight_origin = data['flight_origin']
       @duration_days = data['duration_days']
       @duration_nights = data['duration_nights']
       @adult_count = data['adult_count']
+      
+      # 重新查询乘客信息
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_contact_name = @passenger.name
+      @expected_contact_phone = @passenger.phone
+      
+      # 重新查询航班
+      @pickup_flights = Flight
+        .where(departure_city: @flight_origin, destination_city: @departure_port, data_version: 0)
+        .where(flight_date: @flight_date)
+        .where("arrival_airport LIKE ?", "%浦东%")
+        .to_a
+      
+      # 重新查找TransferLocation
+      @airport_location = TransferLocation.find_by(
+        city: @airport_city,
+        location_type: 'airport',
+        data_version: 0
+      )
+      
+      @cruise_terminal = TransferLocation.find_by(
+        city: @departure_port,
+        location_type: 'other',
+        data_version: 0
+      )
     end
 
     def verify

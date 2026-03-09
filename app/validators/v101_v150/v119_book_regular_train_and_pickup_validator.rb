@@ -181,8 +181,12 @@ module V101V150
       end
     
       add_assertion "接站起点正确（#{@arrival_station}）", weight: 20 do
-        expect(@transfer.location_from).to include("杭州东站"),
-          "接站起点错误。期望: 包含'杭州东站'（火车到达站），实际: #{@transfer.location_from}"
+        valid_stations = TransferLocation
+          .where(city: @arrival_city, location_type: 'train_station', data_version: 0)
+          .pluck(:name)
+        
+        expect(valid_stations).to include(@transfer.location_from),
+          "接站起点错误。期望: #{@arrival_station}（火车到达站），实际: #{@transfer.location_from}"
       end
     
       add_assertion "接站终点正确（#{@destination_location}）", weight: 10 do

@@ -21,7 +21,7 @@ module V101V150
       @pickup_date = Date.current + 1.day
       @rental_days = 1
       @return_date = @pickup_date + @rental_days.days
-      @airport = "北京首都国际机场"
+      @airport_name = "北京首都国际机场"
 
       # 预查询驾驶员信息（张三）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -37,6 +37,16 @@ module V101V150
       ).order(price_per_day: :asc)
 
       raise "未找到符合条件的豪华轿车" if @available_cars.empty?
+      
+      # 查找北京机场位置
+      @airport_loc = TransferLocation.find_by(
+        city: @location,
+        location_type: 'airport',
+        data_version: 0
+      )
+      
+      raise "未找到#{@location}机场位置" unless @airport_loc
+      @airport = @airport_loc.name
     end
 
     def verify
@@ -89,10 +99,12 @@ module V101V150
       return if @transfer.nil?
 
       add_assertion "送机目的地=机场", weight: 5 do
-        destination = @transfer.location_to.to_s
-        has_airport = destination.include?("机场") || destination.include?("Airport") || destination.include?("北京")
-        expect(has_airport).to be(true),
-          "送机目的地不是机场。实际: #{destination}"
+        valid_airports = TransferLocation
+          .where(city: @location, location_type: 'airport', data_version: 0)
+          .pluck(:name)
+        
+        expect(valid_airports).to include(@transfer.location_to),
+          "送机目的地不在TransferLocation机场中。实际: #{@transfer.location_to}"
       end
 
       add_assertion "送机乘客信息正确（张三）", weight: 5 do
@@ -148,6 +160,7 @@ module V101V150
         pickup_date: @pickup_date.to_s,
         rental_days: @rental_days,
         return_date: @return_date.to_s,
+        airport_name: @airport_name,
         airport: @airport,
         expected_driver_name: @expected_driver_name,
         expected_driver_id: @expected_driver_id,
@@ -161,6 +174,7 @@ module V101V150
       @pickup_date = Date.parse(data['pickup_date'])
       @rental_days = data['rental_days']
       @return_date = Date.parse(data['return_date'])
+      @airport_name = data['airport_name']
       @airport = data['airport']
       @expected_driver_name = data['expected_driver_name']
       @expected_driver_id = data['expected_driver_id']
@@ -171,6 +185,12 @@ module V101V150
         category: @category,
         data_version: 0
       ).order(price_per_day: :asc)
+      
+      @airport_loc = TransferLocation.find_by(
+        city: @location,
+        name: @airport,
+        data_version: 0
+      ) if @airport
     end
   end
 end

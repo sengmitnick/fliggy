@@ -140,16 +140,26 @@ module V151V200
     
       add_assertion "航班到达机场正确（浦东T2）", weight: 15 do
         flight = @flight_booking.flight
-        airport_matches = flight.arrival_airport.include?('浦东') && flight.arrival_airport.include?('T2')
+        # 使用TransferLocation数据库查询验证
+        valid_airports = TransferLocation
+          .where(city: @arrival_city, location_type: 'airport', data_version: 0)
+          .where('name LIKE ?', '%浦东%')
+          .where('name LIKE ?', '%T2%')
+          .pluck(:name)
         
-        expect(airport_matches).to be_truthy,
+        expect(valid_airports).to include(flight.arrival_airport),
           "航班到达机场错误。期望: 浦东T2, 实际: #{flight.arrival_airport}"
       end
     
       add_assertion "接机起点正确（浦东T2，不是T1）", weight: 15 do
-        location_matches = @transfer.location_from.include?('浦东') && @transfer.location_from.include?('T2')
+        # 使用TransferLocation数据库查询验证
+        valid_airports = TransferLocation
+          .where(city: @arrival_city, location_type: 'airport', data_version: 0)
+          .where('name LIKE ?', '%浦东%')
+          .where('name LIKE ?', '%T2%')
+          .pluck(:name)
         
-        expect(location_matches).to be_truthy,
+        expect(valid_airports).to include(@transfer.location_from),
           "接机起点错误。期望: #{@arrival_airport}（浦东T2，不是T1），实际: #{@transfer.location_from}"
       end
     
