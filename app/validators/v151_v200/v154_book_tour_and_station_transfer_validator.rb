@@ -2,15 +2,48 @@
 
 require_relative '../base_validator'
 
-# V154: 预订北京跟团游 + 火车站接站服务（关联具体火车）
-# 验证用户能够完成跟团游预订+火车站接站服务的组合下单，接站需关联具体火车班次
-
+# 验证用例154: 给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海来的朋友，G102次中午12点到北京南站，送到国贸CBD）
+#
+# 任务描述:
+#   张三计划明天参加北京2日跟团游，并预订火车站接站服务送到国贸CBD，接今天从上海来的朋友（G102次列车，中午12:00到达北京南站）。
+#   1. 北京2日跟团游（明天出发）
+#   2. 北京南站接站服务（从北京南站接站，送至国贸CBD，接今天从上海来的朋友G102次，列车12:00到达）
+#
+# 任务分解步骤:
+#   1. 查询北京2日跟团游产品
+#   2. 创建跟团游订单（travel_date=明天，乘客=张三）
+#   3. 查询Train获取今天从上海到北京的列车，确定列车号、到达时间、到达车站
+#   4. 查询TransferLocation获取北京国贸CBD服务点（location_type='other'，名称包含'国贸'）（送达地点）
+#   5. 创建接站服务订单（transfer_type=train_pickup，train_number=列车号，location_from=Train.arrival_station，location_to=国贸CBD服务点，pickup_datetime=列车到达后30分钟）
+#
+# 复杂度分析（5个复杂点）：
+#   1. 多模块组合：需要同时创建跟团游订单+接站服务订单（2个不同类型的订单）
+#   2. 列车信息查询：需要从 Train 模型查询朋友从上海来的列车信息（train_number、arrival_time、arrival_station）
+#   3. 接站地点查询：需要从 Train.arrival_station 动态获取接站地点（列车在哪下就在哪接）
+#   4. 送达地点查询：需要从 TransferLocation 查询具体的送达地点（国贸CBD，不使用笼统的"市区"）
+#   5. 时间计算：接站时间=列车到达后10-30分钟
+#
+# 评分标准（总分100）：
+#   1. 创建了跟团游订单（20分）
+#   2. 城市正确=北京（10分）
+#   3. 出发日期正确=明天（10分）
+#   4. 行程天数正确=2天（5分）
+#   5. 创建了火车站接站服务（15分）
+#   6. 接站地点正确=列车到达车站（从 Train.arrival_station 动态获取）（8分）
+#   7. 送达地点正确=国贸CBD服务点（从 TransferLocation 动态获取）（10分）
+#   8. 接站服务关联了具体列车号（从上海来的列车）（10分）
+#   9. 接站时间合理（列车到达后10-30分钟）（7分）
+#   10. 联系人信息正确（张三）（5分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v154_book_tour_and_station_transfer_validator]
+#
 module V151V200
   class V154BookTourAndStationTransferValidator < BaseValidator
     self.validator_id = 'v154_book_tour_and_station_transfer_validator'
     self.task_id = 'd9e0f1a2-3b4c-5d6e-7f8a-9b0c1d2e3f5a'
-    self.title = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海到北京的火车）'
-    self.description = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海到北京的火车）'
+    self.title = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海来的朋友，G102次中午12点到北京南站，送到国贸CBD）'
+    self.description = '给张三订明天北京2日跟团游，并订火车站接站服务（接今天从上海来的朋友，G102次列车，中午12:00到达北京南站，送到国贸CBD）'
     self.timeout_seconds = 300
 
     def prepare
@@ -18,7 +51,31 @@ module V151V200
       @train_date = Date.current  # 今天火车到达
       @city = '北京'
       @train_origin = '上海'
-      @station_location = '北京南站'  # 数据包中有北京南站
+      
+      # 查询今天从上海到北京的列车（获取列车号、到达时间、到达车站）
+      @train = Train.where(
+        departure_city: @train_origin,
+        arrival_city: @city,
+        data_version: 0
+      ).by_date(@train_date).find { |t| t.arrival_station.include?('北京南站') }
+      
+      raise "数据包缺少今天从#{@train_origin}到#{@city}南站的列车" unless @train
+      
+      # 从列车获取关键信息
+      @train_number = @train.train_number  # 列车号
+      @train_arrival_time = @train.arrival_time  # 到达时间
+      @train_arrival_station = @train.arrival_station  # 到达车站（接站点=高铁在哪下就在哪接）
+      
+      # 查询TransferLocation获取北京国贸CBD服务点（送达地点）
+      @dropoff_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'other',
+        data_version: 0
+      ).find { |loc| loc.name.include?('国贸') }
+      
+      raise "数据包缺少北京国贸CBDTransferLocation" unless @dropoff_loc
+      
+      @dropoff_location = @dropoff_loc.name  # 送达地点=国贸CBD（从TransferLocation动态获取）
       
       # 预查询乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -32,15 +89,6 @@ module V151V200
         .to_a
       
       expect(@available_tours).not_to be_empty, "数据包缺少北京2日跟团游产品"
-      
-      # 查找今天从上海到北京南站的火车
-      @available_trains = Train
-        .where(departure_city: @train_origin, arrival_city: @city, data_version: 0)
-        .by_date(@train_date)
-        .where("arrival_station LIKE ?", "%南站%")
-        .to_a
-      
-      expect(@available_trains).not_to be_empty, "数据包缺少上海到北京南站的火车"
       
       # 查找舒适型5座套餐
       @available_packages = TransferPackage.where(
@@ -75,23 +123,19 @@ module V151V200
         data_version: @data_version
       )
       
-      # 选择今天到达的火车
-      target_train = @available_trains.min_by { |t| t.arrival_time }
-      raise "未找到可用火车" unless target_train
+      # 计算接站时间（列车到达后30分钟）
+      pickup_datetime = @train_arrival_time + 30.minutes
       
-      # 计算接站时间（火车到达后15分钟）
-      pickup_datetime = target_train.arrival_time + 15.minutes
-      
-      # 创建火车站接站服务（关联火车号）
+      # 创建火车站接站服务（关联列车号）
       Transfer.create!(
         user: user,
         transfer_package_id: @best_package.id,
         transfer_type: 'train_pickup',
         service_type: 'from_station',
-        location_from: @station_location,
-        location_to: "#{@city}市区",
-        pickup_datetime: pickup_datetime,
-        train_number: target_train.train_number,  # 关键：关联火车号
+        location_from: @train_arrival_station,  # 接站地点=列车到达车站（从Train.arrival_station动态获取）
+        location_to: @dropoff_location,  # 送达地点=国贸CBD服务点（从TransferLocation动态获取）
+        pickup_datetime: pickup_datetime,  # 列车到达后30分钟
+        train_number: @train_number,  # 关联列车号（从Train动态获取）
         passenger_name: @passenger.name,
         passenger_phone: @passenger.phone,
         passenger_count: 1,
@@ -111,7 +155,11 @@ module V151V200
         train_date: @train_date.to_s,
         city: @city,
         train_origin: @train_origin,
-        station_location: @station_location
+        train_number: @train_number,
+        train_arrival_station: @train_arrival_station,
+        dropoff_location: @dropoff_location,
+        expected_contact_name: @expected_contact_name,
+        expected_contact_phone: @expected_contact_phone
       }
     end
 
@@ -121,33 +169,11 @@ module V151V200
       @train_date = Date.parse(data['train_date']) if data['train_date']
       @city = data['city']
       @train_origin = data['train_origin']
-      @station_location = data['station_location']
-      
-      # 重新查询乘客信息
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
-      @expected_contact_name = @passenger.name
-      @expected_contact_phone = @passenger.phone
-      
-      # 重新查询跟团游
-      @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 2, data_version: 0)
-        .to_a
-      
-      # 重新查询火车
-      @available_trains = Train
-        .where(departure_city: @train_origin, arrival_city: @city, data_version: 0)
-        .by_date(@train_date)
-        .where("arrival_station LIKE ?", "%南站%")
-        .to_a
-      
-      # 重新查询套餐
-      @available_packages = TransferPackage.where(
-        vehicle_category: 'comfort_5',
-        data_version: 0
-      ).order(:price)
-      
-      @best_package = @available_packages.first if @available_packages.any?
+      @train_number = data['train_number']
+      @train_arrival_station = data['train_arrival_station']
+      @dropoff_location = data['dropoff_location']
+      @expected_contact_name = data['expected_contact_name']
+      @expected_contact_phone = data['expected_contact_phone']
     end
 
     def verify
@@ -197,40 +223,29 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言6: 接站地点正确（车站→市区）
-      add_assertion "接站地点正确（车站→市区）", weight: 5 do
-        expect(@transfer.location_from).to include(@city),
-          "接站出发地错误。期望包含: #{@city}, 实际: #{@transfer.location_from}"
-        expect(@transfer.location_to).to include("#{@city}市区"),
-          "接站目的地错误。期望: #{@city}市区, 实际: #{@transfer.location_to}"
+      # 断言6: 接站地点正确=列车到达车站（从 Train.arrival_station 动态获取）
+      add_assertion "接站地点正确（#{@train_arrival_station}，从Train.arrival_station动态获取）", weight: 8 do
+        expect(@transfer.location_from).to eq(@train_arrival_station),
+          "接站地点错误。期望: #{@train_arrival_station}（从Train.arrival_station动态获取）, 实际: #{@transfer.location_from}"
       end
       
-      # 断言7: 接站服务关联了具体火车号
-      add_assertion "接站服务关联了具体火车号（#{@train_origin}→#{@city}）", weight: 20 do
-        expect(@transfer.train_number).not_to be_nil, "接站服务未关联火车号"
-        
-        # 验证火车号对应的火车确实是上海到北京站
-        train = Train.find_by(
-          train_number: @transfer.train_number,
-          departure_city: @train_origin,
-          arrival_city: @city,
-          data_version: 0
-        )
-        
-        expect(train).not_to be_nil,
-          "火车号#{@transfer.train_number}不是#{@train_origin}到#{@city}的火车"
-        
-        # 验证到达站是北京南站
-        if train
-          expect(train.arrival_station).to include('南站'),
-            "火车到达站错误。期望: 北京南站, 实际: #{train.arrival_station}"
-        end
+      # 断言7: 送达地点正确=国贸CBD服务点（从 TransferLocation 动态获取）
+      add_assertion "送达地点正确（#{@dropoff_location}，从TransferLocation动态获取）", weight: 10 do
+        expect(@transfer.location_to).to eq(@dropoff_location),
+          "送达地点错误。期望: #{@dropoff_location}（从TransferLocation动态获取）, 实际: #{@transfer.location_to}"
       end
       
-      # 断言8: 接站时间合理（火车到达后10-30分钟）
-      add_assertion "接站时间合理（火车到达后10-30分钟）", weight: 10 do
+      # 断言8: 接站服务关联了具体列车号（从上海来的列车）
+      add_assertion "接站服务关联了具体列车号（#{@train_origin}→#{@city}的列车）", weight: 10 do
+        expect(@transfer.train_number).not_to be_nil, "接站服务未关联列车号"
+        expect(@transfer.train_number).to eq(@train_number),
+          "列车号错误。期望: #{@train_number}, 实际: #{@transfer.train_number}"
+      end
+      
+      # 断言9: 接站时间合理（列车到达后10-30分钟）
+      add_assertion "接站时间合理（列车到达后10-30分钟）", weight: 7 do
         if @transfer.train_number.present?
-          # 查询对应的火车（必须指定日期）
+          # 查询对应的列车（必须指定日期）
           train = Train
             .where(train_number: @transfer.train_number, data_version: 0)
             .where(departure_city: @train_origin, arrival_city: @city)
@@ -242,7 +257,7 @@ module V151V200
             is_reasonable = time_after_arrival >= 10 && time_after_arrival <= 30
             
             expect(is_reasonable).to be(true),
-              "接站时间不合理。火车#{train.arrival_time.strftime('%H:%M')}到达，" \
+              "接站时间不合理。列车#{train.arrival_time.strftime('%H:%M')}到达，" \
               "接站时间#{@transfer.pickup_datetime.strftime('%H:%M')}，" \
               "间隔#{time_after_arrival}分钟（应为10-30分钟）"
           end

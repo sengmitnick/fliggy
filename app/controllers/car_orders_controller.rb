@@ -12,12 +12,25 @@ class CarOrdersController < ApplicationController
     @search_return_date = params[:return_date]
     @search_pickup_time = params[:pickup_time]
     @search_return_time = params[:return_time]
+    @search_return_city = params[:return_city]
     
     # 计算总价
     pickup_date = @search_pickup_date.present? ? Date.parse(@search_pickup_date) : Time.zone.today
     return_date = @search_return_date.present? ? Date.parse(@search_return_date) : (Time.zone.today + 2.days)
     days_count = (return_date - pickup_date).to_i
-    @total_price = (@car.price_per_day * days_count).round
+    
+    # 计算基础租金
+    base_price = (@car.price_per_day * days_count).round
+    
+    # 计算异地还车费用（如果取车城市和还车城市不同）
+    @cross_city_fee = 0
+    if @search_return_city.present? && @search_city != @search_return_city
+      @cross_city_fee = 200  # 异地还车费固定200元
+    end
+    
+    Rails.logger.info "[CarOrder] city=#{@search_city}, return_city=#{@search_return_city}, cross_city_fee=#{@cross_city_fee}, total_price=#{base_price + @cross_city_fee}"
+    
+    @total_price = base_price + @cross_city_fee
   end
 
   def create

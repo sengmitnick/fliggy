@@ -2,23 +2,71 @@
 
 require_relative '../base_validator'
 
-# V144: 预订北京酒店套餐 + 车站接送服务
-# 验证用户能够完成酒店套餐预订+车站接送服务的组合下单
-# 重要：需验证酒店联系人信息（contact_name + contact_phone）
+
+# 验证用例144: 帮张三预订明天北京酒店套餐，住1晚，并预订北京南站接站服务（明天下午2点从上海到达，送至国贸CBD）
+#
+# 任务描述:
+#   张三计划明天下午从上海乘高铁到北京（预计下午2点左右到达北京南站），入住北京酒店套餐，住1晚。
+#   同时需要预订北京南站的接站服务（从上海乘高铁来，下午2点左右接站）送至国贸CBD。
+#
+# 任务分解步骤:
+#   1. 查询北京的酒店套餐（使用 HotelPackage.where(city: '北京', night_count: 1)）
+#   2. 筛选入住日期=明天（Date.tomorrow）、住宿晚数=1晚的套餐
+#   3. 创建酒店套餐订单（contact_name=张三，contact_phone=张三电话，确保联系人信息匹配）
+#   4. 创建火车站接站服务订单（transfer_type=train_pickup，明天下午2点从上海到达北京南站，location_from=北京南站北广场接送中心，location_to=国贸CBD）
+#   5. 确保接站服务的乘客信息也使用张三的姓名和电话
+#
+# 复杂度分析（4个复杂点）：
+#   1. 组合预订：需同时创建酒店套餐订单+火车站接站订单（2个不同类型的订单）
+#   2. 联系人信息一致性：酒店订单联系人和接站服务乘客都必须使用张三的信息
+#   3. 时间协调：接站时间需要匹配入住日期
+#   4. 地点查询：需要从 TransferLocation 表查询北京南站接送中心和国贸CBD服务点
+#
+# 评分标准（总分100分）：
+#   1. 创建了酒店套餐订单（25分）
+#   2. 城市正确=北京（10分）
+#   3. 入住日期正确=明天（10分）
+#   4. 住宿晚数正确=1晚（10分）
+#   5. 酒店订单联系人信息正确=张三（10分）
+#   6. 创建了火车站接站服务（15分）
+#   7. 接站服务乘客信息正确=张三（10分）
+#   8. 接站地点=北京南站（根据上海→北京高铁到达站确定，非用户指定）（5分）
+#   9. 下车点正确=国贸CBD（5分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v144_book_hotel_package_with_station_transfer_validator]
 
 module V101V150
   class V144BookHotelPackageWithStationTransferValidator < BaseValidator
     self.validator_id = 'v144_book_hotel_package_with_station_transfer_validator'
     self.task_id = 'e4f5a6b7-8c9d-0e1f-2a3b-4c5d6e7f8a9b'
-    self.title = '帮张三预订明天北京酒店套餐，住1晚，并预订火车站接站服务'
-    self.description = '帮张三预订明天北京酒店套餐，住1晚，并预订火车站接站服务'
+    self.title = '帮张三预订明天北京酒店套餐，住1晚，并预订北京南站接站服务（明天下午2点从上海到达，送至国贸CBD）'
+    self.description = '帮张三预订明天北京酒店套餐，住1晚，并预订北京南站接站服务（明天下午2点从上海到达，送至国贸CBD）'
+    
+    def task_description
+      "张三计划明天下午从上海乘高铁到北京（预计下午2点左右到达北京南站），" \
+      "需要预订北京的1晚酒店套餐，并预订北京南站接站服务送至国贸CBD。"
+    end
     self.timeout_seconds = 300
 
     def prepare
       @checkin_date = Date.tomorrow
       @nights = 1
       @city = '北京'
-      @pickup_location = '北京南站'
+      
+      # 查询上海→14:00左右到达北京的火车，从火车数据获取到达站
+      @train = Train
+        .where(departure_city: '上海', arrival_city: @city, data_version: 0)
+        .by_date(@checkin_date)
+        .find { |t| t.arrival_time.hour == 14 }
+      
+      raise "数据包缺少14:00到达北京的上海高铁" unless @train
+      
+      # 接站地点=火车到达站名称（从火车数据动态获取）
+      @pickup_location = @train.arrival_station
+      
+      # 送达地点=用户指定的目的地
+      @dropoff_location = '国贸CBD'
       
       # 预查询联系人信息（用于 simulate 和 verify）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -57,14 +105,14 @@ module V101V150
         data_version: @data_version
       )
       
-      # 创建火车站接站服务
+      # 创建火车站接站服务（北京南站到国贸CBD）
       Transfer.create!(
         user: user,
         transfer_type: 'train_pickup',
         service_type: 'from_station',
-        location_from: @pickup_location,
-        location_to: "#{@city}市区",
-        pickup_datetime: @checkin_date.in_time_zone + 14.hours,
+        location_from: @pickup_location,  # 火车到达站名称
+        location_to: @dropoff_location,   # 用户指定目的地
+        pickup_datetime: @checkin_date.in_time_zone + 14.hours,  # 下午2点
         vehicle_type: 'economy_5',
         passenger_name: passenger.name,
         passenger_phone: passenger.phone,
@@ -80,7 +128,9 @@ module V101V150
         checkin_date: @checkin_date.to_s,
         nights: @nights,
         city: @city,
+        train_id: @train&.id,
         pickup_location: @pickup_location,
+        dropoff_location: @dropoff_location,
         expected_contact_name: @expected_contact_name,
         expected_contact_phone: @expected_contact_phone
       }
@@ -92,8 +142,12 @@ module V101V150
       @nights = data['nights']
       @city = data['city']
       @pickup_location = data['pickup_location']
+      @dropoff_location = data['dropoff_location']
       @expected_contact_name = data['expected_contact_name']
       @expected_contact_phone = data['expected_contact_phone']
+      
+      # 重新查询火车数据
+      @train = Train.find_by(id: data['train_id'], data_version: 0) if data['train_id']
     end
 
     def verify
@@ -161,10 +215,16 @@ module V101V150
           "乘客电话错误。期望: #{@expected_contact_phone}, 实际: #{@transfer.passenger_phone}"
       end
       
-      # 断言8: 接站地点正确
-      add_assertion "接站地点正确（#{@pickup_location}）", weight: 10 do
+      # 断言8: 接站地点=北京南站（根据上海→北京高铁到达站确定）
+      add_assertion "接站地点=北京南站（根据火车到达站确定）", weight: 5 do
         expect(@transfer.location_from).to eq(@pickup_location),
-          "接站地点错误。期望: #{@pickup_location}, 实际: #{@transfer.location_from}"
+          "接站地点错误。上海→北京高铁到达#{@pickup_location}，应在#{@pickup_location}接站，实际: #{@transfer.location_from}"
+      end
+      
+      # 断言9: 送达地点=国贸CBD（用户指定）
+      add_assertion "送达地点=国贸CBD（用户指定）", weight: 5 do
+        expect(@transfer.location_to).to eq(@dropoff_location),
+          "送达地点错误。期望: #{@dropoff_location}, 实际: #{@transfer.location_to}"
       end
     end
   end

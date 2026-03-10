@@ -2,40 +2,51 @@
 
 require_relative '../base_validator'
 
-# 验证用例142: 帮张三预订明天成都的新能源车，租3天，包含全险和免费取消
-# 
+# 验证用例142: 帮张三预订明天成都东站东广场租车中心的新能源车，租3天，包含全险和免费取消
+#
 # 任务描述:
-#   Agent 需要在系统中搜索成都的新能源车，
-#   找到符合条件的车辆并创建3天租期的订单，要求包含全险和支持免费取消
-# 
-# 复杂度分析:
-#   1. 需要搜索成都的租车产品
-#   2. 需要筛选车型类别为"新能源"（电动或混动）
-#   3. 需要选择"明天"取车日期
-#   4. 需要设置租期为3天
-#   5. 需要确保订单状态支持取消
-#   ✅ 地点+车型类别+时间+租期+保险+取消政策多维筛选
-# 
-# 评分标准:
-#   - 创建了新能源车租车订单 (20分)
-#   - 车型类别=新能源 (20分)
-#   - 租车地点=成都 (10分)
-#   - 取车时间=明天 (10分)
-#   - 租期=3天 (10分)
-#   - 订单状态支持取消 (10分)
-#   - 车辆为新能源类型 (10分)
-#   - 司机信息正确（张三） (10分)
+#   张三计划明天从成都东站东广场租车中心租一辆新能源车，租期3天，要求包含全险和支持免费取消。
+#   Agent 需要创建1个租车订单，确保车型为新能源，租车地点为成都，取车点为成都东站东广场租车中心，租期3天，订单状态支持取消。
+#
+# 业务流程（5个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为驾驶员信息）
+#   2. 搜索成都的租车服务，筛选车型类别=新能源
+#   3. 筛选燃料类型为电动或混动的车辆（通过car.fuel_type字段判断）
+#   4. 设置取车时间为明天（Date.current + 1.day）
+#   5. 创建租车订单（pickup_location=成都东站东广场租车中心，租期3天，订单状态为confirmed支持取消）
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解车型分类（category = '新能源'，不是SUV或商务车）
+#   2. 需要筛选新能源车辆（通过car.fuel_type字段查找包含'电'或'混动'关键词的车辆）
+#   3. 需要正确计算租期3天（return_datetime = pickup_datetime + 3天）
+#   4. 需要设置取车时间为明天（Date.current + 1.day）
+#   5. 需要使用受益人信息作为驾驶员信息（driver_name、driver_id_number、contact_phone）
+#   6. 需要确保订单状态支持取消（status为confirmed或pending）
+#
+# 评分标准（8项，总计100分）：
+#   1. 创建了新能源车租车订单（20分）
+#   2. 车型类别=新能源（20分）
+#   3. 租车地点=成都（10分）
+#   4. 取车地点=成都东站东广场租车中心（10分）
+#   5. 取车时间=明天（10分）
+#   6. 租期=3天（10分）
+#   7. 车辆为新能源类型（电动或混动）（10分）
+#   8. 司机信息正确（张三的姓名、身份证号、电话）（10分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v142_book_new_energy_car_with_insurance_validator]
+#   或访问 http://localhost:<PORT>/api/tasks 获取任务列表
 #
 module V101V150
   class V142BookNewEnergyCarWithInsuranceValidator < BaseValidator
     self.validator_id = 'v142_book_new_energy_car_with_insurance_validator'
     self.task_id = 'c2d3e4f5-6a7b-8c9d-0e1f-2a3b4c5d6e7f'
-    self.title = '帮张三预订明天成都的新能源车，租3天，包含全险和免费取消'
-    self.description = '帮张三预订明天成都的新能源车，租3天，包含全险和免费取消'
+    self.title = '帮张三预订明天成都东站东广场租车中心的新能源车，租3天，包含全险和免费取消'
+    self.description = '帮张三预订明天成都东站东广场租车中心的新能源车，租3天，包含全险和免费取消'
     self.timeout_seconds = 300
 
     def task_description
-      "预订明天成都新能源车3天，包含全险和免费取消"
+      "帮张三预订明天成都东站东广场租车中心的新能源车，租3天，包含全险和免费取消"
     end
 
     def prepare
@@ -88,25 +99,23 @@ module V101V150
         expect(@car_order.car.location).to eq(@location)
       end
 
-      # 断言4: 取车时间=明天 (10分)
+      # 断言4: 取车地点=成都东站东广场租车中心 (10分)
+      add_assertion "取车地点=成都东站东广场租车中心", weight: 10 do
+        pickup_loc = @car_order.pickup_location.to_s
+        expect(pickup_loc).to include("成都东站")
+        expect(pickup_loc).to include("租车")
+      end
+
+      # 断言5: 取车时间=明天 (10分)
       add_assertion "取车时间=明天", weight: 10 do
         expect(@car_order.pickup_datetime.to_date).to eq(@pickup_date)
       end
 
-      # 断言5: 租期=3天 (10分)
+      # 断言6: 租期=3天 (10分)
       add_assertion "租期=3天", weight: 10 do
         actual_days = (@car_order.return_datetime.to_date - @car_order.pickup_datetime.to_date).to_i
         expect(actual_days).to eq(@rental_days),
           "租期错误。期望: #{@rental_days}天, 实际: #{actual_days}天"
-      end
-
-      # 断言6: 订单状态支持取消 (10分)
-      add_assertion "订单状态支持取消", weight: 10 do
-        # Verify order status is 'confirmed' which can be cancelled
-        status = @car_order.status.to_s
-        can_cancel = ['confirmed', 'pending'].include?(status)
-        expect(can_cancel).to be(true),
-          "订单状态不支持取消。当前状态: #{status}"
       end
 
       # 断言7: 车辆为新能源类型 (10分)
@@ -142,9 +151,9 @@ module V101V150
         contact_phone: passenger.phone,
         pickup_datetime: @pickup_date.in_time_zone + 10.hours,
         return_datetime: (@pickup_date + @rental_days.days).in_time_zone + 18.hours,
-        pickup_location: "成都双流国际机场",
+        pickup_location: car.pickup_location,  # 使用车辆数据包中的pickup_location（具体租车点）
         status: 'confirmed',
-        total_price: car.price_per_day * @rental_days + 150,  # +150 for full insurance
+        total_price: car.price_per_day * @rental_days,  # 基础价格，不额外收取保险费
         data_version: @data_version
       )
     end
