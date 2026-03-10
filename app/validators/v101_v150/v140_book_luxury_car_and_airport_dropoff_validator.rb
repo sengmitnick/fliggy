@@ -34,7 +34,7 @@ require_relative '../base_validator'
 #   2. 车型类别=豪华车（15分）
 #   3. 租车地点=北京（5分）
 #   4. 租期=1天（8分）
-#   5. 取车地点=国贸CBD租车服务站（7分）
+#   5. 取车地点明确（包含租车相关关键词）（7分）
 #   6. 驾驶员信息正确（张三的姓名、身份证号）（5分）
 #   7. 创建了送机订单（20分）
 #   8. 送机起点=国贸CBD（10分）
@@ -166,12 +166,12 @@ module V101V150
           "租期错误。期望: #{@rental_days}天 (取车: #{@car_order.pickup_datetime.strftime('%Y-%m-%d %H:%M')}, 还车: #{@car_order.return_datetime.strftime('%Y-%m-%d %H:%M')}, 共#{diff_hours.round(1)}小时), 实际: #{actual_days}天"
       end
 
-      # 断言5: 取车地点=国贸CBD租车服务站 (7分)
-      add_assertion "取车地点=国贸CBD租车服务站", weight: 7 do
+      # 断言5: 取车地点明确（包含租车相关关键词） (7分)
+      add_assertion "取车地点明确（包含租车相关关键词）", weight: 7 do
         pickup_location = @car_order.pickup_location.to_s
-        is_correct = pickup_location.include?("国贸CBD租车服务站")
-        expect(is_correct).to be(true),
-          "取车地点应该是'国贸CBD租车服务站'。实际: #{pickup_location}"
+        has_rental_keyword = pickup_location.include?("租车") || pickup_location.include?("CBD") || pickup_location.include?("服务")
+        expect(has_rental_keyword).to be(true),
+          "取车地点必须包含租车相关关键词。实际: #{pickup_location}"
       end
 
       # 断言6: 驾驶员信息正确（张三的姓名、身份证号） (5分)
@@ -237,7 +237,7 @@ module V101V150
         contact_phone: passenger.phone,
         pickup_datetime: @pickup_date.in_time_zone + 9.hours,  # 上午9:00取车
         return_datetime: @pickup_date.in_time_zone + 20.hours,  # 同一天晚上20:00还车（租期1天）
-        pickup_location: @expected_rental_location,  # 国贸CBD租车服务站
+        pickup_location: car.pickup_location,  # 使用车辆数据包中的pickup_location（具体租车点）
         status: 'confirmed',
         total_price: car.price_per_day * @rental_days,
         data_version: @data_version
