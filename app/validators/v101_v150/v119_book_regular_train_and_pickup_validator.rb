@@ -181,8 +181,12 @@ module V101V150
       end
     
       add_assertion "接站起点正确（#{@arrival_station}）", weight: 20 do
-        expect(@transfer.location_from).to include("杭州东站"),
-          "接站起点错误。期望: 包含'杭州东站'（火车到达站），实际: #{@transfer.location_from}"
+        # 使用模糊匹配：支持简化站名（如"杭州东站"）和完整名称（如"杭州东站东广场接送中心"）
+        location_from = @transfer.location_from
+        is_valid = location_from.include?('杭州东站') || location_from.include?('杭州东')
+        
+        expect(is_valid).to be_truthy,
+          "接站起点错误。期望: #{@arrival_station}（杭州东站或包含杭州东），实际: #{location_from}"
       end
     
       add_assertion "接站终点正确（#{@destination_location}）", weight: 10 do

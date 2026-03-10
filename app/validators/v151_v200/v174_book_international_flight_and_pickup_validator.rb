@@ -140,17 +140,19 @@ module V151V200
     
       add_assertion "航班到达机场正确（浦东T2）", weight: 15 do
         flight = @flight_booking.flight
-        airport_matches = flight.arrival_airport.include?('浦东') && flight.arrival_airport.include?('T2')
+        arrival_airport = flight.arrival_airport
+        is_valid = arrival_airport.include?('浦东') && arrival_airport.include?('T2')
         
-        expect(airport_matches).to be_truthy,
-          "航班到达机场错误。期望: 浦东T2, 实际: #{flight.arrival_airport}"
+        expect(is_valid).to be_truthy,
+          "航班到达机场错误。期望: 浦东T2（或浦东国际机场T2航站楼）, 实际: #{arrival_airport}"
       end
     
       add_assertion "接机起点正确（浦东T2，不是T1）", weight: 15 do
-        location_matches = @transfer.location_from.include?('浦东') && @transfer.location_from.include?('T2')
+        location_from = @transfer.location_from
+        is_valid = location_from.include?('浦东') && location_from.include?('T2')
         
-        expect(location_matches).to be_truthy,
-          "接机起点错误。期望: #{@arrival_airport}（浦东T2，不是T1），实际: #{@transfer.location_from}"
+        expect(is_valid).to be_truthy,
+          "接机起点错误。期望: #{@arrival_airport}（浦东T2或浦东国际机场T2航站楼，不是T1），实际: #{location_from}"
       end
     
       add_assertion "接机终点正确（#{@destination_location}）", weight: 10 do

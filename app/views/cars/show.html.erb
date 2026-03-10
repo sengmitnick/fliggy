@@ -64,7 +64,15 @@
     return_date = @search_params[:return_date].present? ? Date.parse(@search_params[:return_date]) : (Date.today + 2.days)
     pickup_time = @search_params[:pickup_time].presence || '10:00'
     return_time = @search_params[:return_time].presence || '10:00'
-    days_count = (return_date - pickup_date).to_i
+    
+    # Calculate rental days using same logic as CarOrder model (rounds up)
+    # Formula: ceil((return_datetime - pickup_datetime) / 24 hours)
+    # Example: Same day 13:55 to 23:00 (9 hours) = 1 day
+    pickup_datetime = Time.zone.parse("#{pickup_date} #{pickup_time}")
+    return_datetime = Time.zone.parse("#{return_date} #{return_time}")
+    diff_hours = (return_datetime - pickup_datetime) / 3600.0
+    days_count = (diff_hours / 24.0).ceil
+    
     pickup_location = @search_params[:pickup_location].presence || '天河国际机场T3'
     weekday_names = ['日', '一', '二', '三', '四', '五', '六']
   %>

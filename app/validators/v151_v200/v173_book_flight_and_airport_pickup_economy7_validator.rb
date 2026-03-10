@@ -151,10 +151,11 @@ module V151V200
       end
     
       add_assertion "接机起点正确（#{@arrival_airport}）", weight: 15 do
-        location_matches = @transfer.location_from.include?('萧山') || @transfer.location_from == @arrival_airport
+        location_from = @transfer.location_from
+        is_valid = location_from.include?('萧山')
         
-        expect(location_matches).to be_truthy,
-          "接机起点错误。期望: #{@arrival_airport}, 实际: #{@transfer.location_from}"
+        expect(is_valid).to be_truthy,
+          "接机起点错误。期望: #{@arrival_airport}（包含萧山），实际: #{location_from}"
       end
     
       add_assertion "接机终点正确（#{@destination_location}）", weight: 15 do
