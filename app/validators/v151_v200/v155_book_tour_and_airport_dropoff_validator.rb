@@ -2,15 +2,46 @@
 
 require_relative '../base_validator'
 
-# V155: 预订上海跟团游 + 机场送机服务（关联具体航班）
-# 验证用户能够完成跟团游预订+机场送机服务的组合下单，送机需关联具体航班
+# 验证用例155: 给张三订明天上海1日跟团游，并订机场送机服务（后天早8:30从陆家嘴出发去浦东T2）
+#
+# 任务描述:
+#   张三计划明天参加上海1日跟团游，并预订后天机场送机服务从陆家嘴金融区去浦东T2航站楼，后天早上8:30出发。
+#   1. 上海1日跟团游（明天）
+#   2. 机场送机服务（从陆家嘴金融区服务点接送至浦东T2航站楼，后天早上8:30出发）
+#
+# 任务分解步骤:
+#   1. 查询上海1日跟团游产品（destination=上海，duration=1）
+#   2. 创建跟团游订单（travel_date=明天，乘客=张三）
+#   3. 查询Flight获取后天从上海浦东出发的航班，获取出发机场信息（含航站楼，如浦东T2）（送达地点）
+#   4. 查询TransferLocation获取上海陆家嘴金融区服务点（location_type='other'，名称包含'陆家嘴'）（出发地点）
+#   5. 创建送机服务订单（transfer_type=airport_dropoff，location_from=陆家嘴服务点，location_to=浦东T2，pickup_datetime=后天早上8:30）
+#
+# 复杂度分析（5个复杂点）：
+#   1. 多模块组合：需要同时创建跟团游订单+送机服务订单（2个不同类型的订单）
+#   2. 出发地点查询：需要从 TransferLocation 查询具体的出发地点（陆家嘴金融区，不使用笼统的"市区"）
+#   3. 送达地点查询：需要从 Flight.departure_airport 获取准确的机场航站楼（用户说去浦东T2，就送到浦东T2）
+#   4. 出发时间明确：用户指定后天早上8:30出发（这是送机服务的出发时间，不是航班起飞时间）
+#   5. 航班关联（可选）：可关联具体航班号用于司机参考，但title/description不需要暴露航班信息
+#
+# 评分标准（总分100）：
+#   1. 创建了跟团游订单（20分）
+#   2. 城市正确=上海（10分）
+#   3. 出发日期正确=明天（10分）
+#   4. 创建了送机服务（20分）
+#   5. 出发地点正确=陆家嘴金融区服务点（从 TransferLocation 动态获取）（15分）
+#   6. 送达地点正确=浦东T2航站楼（从 Flight.departure_airport 动态获取）（15分）
+#   7. 出发时间正确=后天早上8:30（10分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v155_book_tour_and_airport_dropoff_validator]
+#
 
 module V151V200
   class V155BookTourAndAirportDropoffValidator < BaseValidator
     self.validator_id = 'v155_book_tour_and_airport_dropoff_validator'
     self.task_id = 'e0f1a2b3-4c5d-6e7f-8a9b-0c1d2e3f4a6b'
-    self.title = '给张三订明天上海1日跟团游，并订机场送机服务（送后天从上海浦东飞北京的航班）'
-    self.description = '给张三订明天上海1日跟团游，并订机场送机服务（送后天从上海浦东飞北京的航班）'
+    self.title = '给张三订明天上海1日跟团游，并订机场送机服务（后天早8:30从陆家嘴出发去浦东T2）'
+    self.description = '给张三订明天上海1日跟团游，并订机场送机服务（后天早上8:30从陆家嘴金融区出发去浦东T2航站楼）'
     self.timeout_seconds = 300
 
     def prepare
@@ -18,7 +49,31 @@ module V151V200
       @flight_date = Date.current + 2.days  # 后天航班出发
       @city = '上海'
       @flight_destination = '北京'
-      @dropoff_location = '上海浦东国际机场'
+      
+      # 查询后天从上海浦东飞北京的航班（获取航班号、起飞时间、出发机场）
+      @flight = Flight
+        .where(departure_city: @city, destination_city: @flight_destination, data_version: 0)
+        .where("departure_airport LIKE ?", "%浦东%")
+        .to_a
+        .find { |f| f.flight_date == @flight_date }
+      
+      raise "数据包缺少后天从#{@city}浦东飞#{@flight_destination}的航班" unless @flight
+      
+      # 从航班获取关键信息
+      @flight_number = @flight.flight_number  # 航班号
+      @flight_departure_time = @flight.departure_time  # 起飞时间
+      @flight_departure_airport = @flight.departure_airport  # 出发机场（送达点=飞机在哪起飞就送到哪）
+      
+      # 查询TransferLocation获取上海陆家嘴金融区服务点（出发地点）
+      @pickup_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'other',
+        data_version: 0
+      ).find { |loc| loc.name.include?('陆家嘴') }
+      
+      raise "数据包缺少上海陆家嘴TransferLocation" unless @pickup_loc
+      
+      @pickup_location = @pickup_loc.name  # 出发地点=陆家嘴金融区（从TransferLocation动态获取）
       
       # 预查询demo_user的乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -32,15 +87,6 @@ module V151V200
         .to_a
       
       expect(@available_tours).not_to be_empty, "数据包缺少上海1日跟团游产品"
-      
-      # 查找后天从上海浦东飞北京的航班
-      @available_flights = Flight
-        .where(departure_city: @city, destination_city: @flight_destination, data_version: 0)
-        .where(flight_date: @flight_date)
-        .where("departure_airport LIKE ?", "%浦东%")
-        .to_a
-      
-      expect(@available_flights).not_to be_empty, "数据包缺少上海浦东飞北京的航班"
       
       # 查找舒适型5座套餐
       @available_packages = TransferPackage.where(
@@ -75,12 +121,8 @@ module V151V200
         data_version: @data_version
       )
       
-      # 选择后天出发的航班
-      target_flight = @available_flights.min_by { |f| f.departure_time }
-      raise "未找到可用航班" unless target_flight
-      
-      # 计算送机时间（航班起飞前2小时）
-      pickup_datetime = target_flight.departure_time - 2.hours
+      # 设置送机时间（后天早上8:30）
+      pickup_datetime = @flight_date.to_time.change(hour: 8, min: 30)
       
       # 创建机场送机服务（关联航班号）
       Transfer.create!(
@@ -88,10 +130,10 @@ module V151V200
         transfer_package_id: @best_package.id,
         transfer_type: 'airport_dropoff',
         service_type: 'to_airport',
-        location_from: "#{@city}市区",
-        location_to: @dropoff_location,
-        pickup_datetime: pickup_datetime,
-        flight_number: target_flight.flight_number,  # 关键：关联航班号
+        location_from: @pickup_location,  # 出发地点=陆家嘴服务点（从TransferLocation动态获取）
+        location_to: @flight_departure_airport,  # 送达地点=浦东T2（从Flight.departure_airport动态获取）
+        pickup_datetime: pickup_datetime,  # 航班起飞前2小时
+        flight_number: @flight_number,  # 关联航班号（从Flight动态获取）
         passenger_name: @passenger.name,
         passenger_phone: @passenger.phone,
         passenger_count: 1,
@@ -107,11 +149,11 @@ module V151V200
     def execution_state_data
       {
         data_version: @data_version,
-        tour_date: @tour_date.to_s,
-        flight_date: @flight_date.to_s,
+        tour_date: @tour_date&.iso8601,
+        flight_date: @flight_date&.iso8601,
         city: @city,
-        flight_destination: @flight_destination,
-        dropoff_location: @dropoff_location
+        pickup_location: @pickup_location,
+        flight_departure_airport: @flight_departure_airport
       }
     end
 
@@ -120,34 +162,8 @@ module V151V200
       @tour_date = Date.parse(data['tour_date']) if data['tour_date']
       @flight_date = Date.parse(data['flight_date']) if data['flight_date']
       @city = data['city']
-      @flight_destination = data['flight_destination']
-      @dropoff_location = data['dropoff_location']
-      
-      # 重新查询乘客信息
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
-      @expected_contact_name = @passenger.name
-      @expected_contact_phone = @passenger.phone
-      
-      # 重新查询跟团游
-      @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 1, data_version: 0)
-        .to_a
-      
-      # 重新查询航班
-      @available_flights = Flight
-        .where(departure_city: @city, destination_city: @flight_destination, data_version: 0)
-        .where(flight_date: @flight_date)
-        .where("departure_airport LIKE ?", "%浦东%")
-        .to_a
-      
-      # 重新查询套餐
-      @available_packages = TransferPackage.where(
-        vehicle_category: 'comfort_5',
-        data_version: 0
-      ).order(:price)
-      
-      @best_package = @available_packages.first if @available_packages.any?
+      @pickup_location = data['pickup_location']
+      @flight_departure_airport = data['flight_departure_airport']
     end
 
     def verify
@@ -180,7 +196,7 @@ module V151V200
       end
       
       # 断言4: 创建了机场送机服务
-      add_assertion "创建了机场送机服务", weight: 15 do
+      add_assertion "创建了机场送机服务", weight: 20 do
         @transfer = Transfer
           .where(transfer_type: 'airport_dropoff', data_version: @data_version)
           .order(created_at: :desc)
@@ -191,64 +207,23 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言5: 送机地点正确
-      add_assertion "送机地点正确（#{@dropoff_location}）", weight: 5 do
-        location_matches = (@transfer.location_to.include?('上海') && @transfer.location_to.include?('机场')) ||
-                          (@transfer.location_to.include?('浦东') && @transfer.location_to.include?('机场'))
-        expect(location_matches).to be(true),
-          "送机地点错误。期望: #{@dropoff_location}, 实际: #{@transfer.location_to}"
+      # 断言5: 出发地点正确=陆家嘴金融区服务点（从 TransferLocation 动态获取）
+      add_assertion "出发地点正确（#{@pickup_location}，从TransferLocation动态获取）", weight: 15 do
+        expect(@transfer.location_from).to eq(@pickup_location),
+          "出发地点错误。期望: #{@pickup_location}（从TransferLocation动态获取）, 实际: #{@transfer.location_from}"
       end
       
-      # 断言6: 送机服务关联了具体航班号
-      add_assertion "送机服务关联了具体航班号（#{@city}→#{@flight_destination}）", weight: 20 do
-        expect(@transfer.flight_number).not_to be_nil, "送机服务未关联航班号"
-        
-        # 验证航班号对应的航班确实是上海浦东飞北京
-        flight = Flight.find_by(
-          flight_number: @transfer.flight_number,
-          departure_city: @city,
-          destination_city: @flight_destination,
-          data_version: 0
-        )
-        
-        expect(flight).not_to be_nil,
-          "航班号#{@transfer.flight_number}不是#{@city}到#{@flight_destination}的航班"
-        
-        # 验证出发机场是浦东机场
-        if flight
-          expect(flight.departure_airport).to include('浦东'),
-            "航班出发机场错误。期望: 浦东机场, 实际: #{flight.departure_airport}"
-        end
+      # 断言6: 送达地点正确=浦东T2航站楼（从 Flight.departure_airport 动态获取）
+      add_assertion "送达地点正确（#{@flight_departure_airport}，从Flight.departure_airport动态获取）", weight: 15 do
+        expect(@transfer.location_to).to eq(@flight_departure_airport),
+          "送达地点错误。期望: #{@flight_departure_airport}（从Flight.departure_airport动态获取，应含航站楼如T2）, 实际: #{@transfer.location_to}"
       end
       
-      # 断言7: 送机时间合理（航班起飞前1.5-2.5小时）
-      add_assertion "送机时间合理（航班起飞前1.5-2.5小时）", weight: 15 do
-        if @transfer.flight_number.present?
-          # 查询对应的航班（必须指定日期）
-          flight = Flight
-            .where(flight_number: @transfer.flight_number, data_version: 0)
-            .where(departure_city: @city, destination_city: @flight_destination)
-            .where(flight_date: @flight_date)
-            .first
-          
-          if flight && flight.departure_time.present?
-            time_before_flight = ((flight.departure_time - @transfer.pickup_datetime) / 3600.0).round(1)
-            is_reasonable = time_before_flight >= 1.5 && time_before_flight <= 2.5
-            
-            expect(is_reasonable).to be(true),
-              "送机时间不合理。航班#{flight.departure_time.strftime('%H:%M')}起飞，" \
-              "送机时间#{@transfer.pickup_datetime.strftime('%H:%M')}，" \
-              "提前#{time_before_flight}小时（应为1.5-2.5小时）"
-          end
-        end
-      end
-      
-      # 断言8: 联系人信息正确（#{@expected_contact_name}）
-      add_assertion "联系人信息正确（#{@expected_contact_name}）", weight: 5 do
-        expect(@tour_booking.contact_name).to eq(@expected_contact_name),
-          "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"
-        expect(@tour_booking.contact_phone).to eq(@expected_contact_phone),
-          "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@tour_booking.contact_phone}"
+      # 断言7: 出发时间正确=后天早上8:30
+      expected_pickup_time = @flight_date.to_time.change(hour: 8, min: 30)
+      add_assertion "出发时间正确（后天早上8:30）", weight: 10 do
+        expect(@transfer.pickup_datetime).to eq(expected_pickup_time),
+          "出发时间错误。期望: #{expected_pickup_time.strftime('%Y-%m-%d %H:%M')}（后天早上8:30）, 实际: #{@transfer.pickup_datetime.strftime('%Y-%m-%d %H:%M')}"
       end
     end
   end
