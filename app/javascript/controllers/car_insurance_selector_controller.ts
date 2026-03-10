@@ -9,7 +9,8 @@ export default class extends Controller<HTMLElement> {
   ]
   static values = {
     basePrice: Number,
-    daysCount: Number
+    daysCount: Number,
+    crossCityFee: Number
   }
 
   // stimulus-validator: disable-next-line - 在保障选项卡片中，跨controller实例共享
@@ -22,11 +23,13 @@ export default class extends Controller<HTMLElement> {
   declare readonly originalPriceTargets: HTMLElement[]
   declare basePriceValue: number
   declare daysCountValue: number
+  declare crossCityFeeValue: number
 
   connect(): void {
     console.log('CarInsuranceSelector connected', {
       basePrice: this.basePriceValue,
       daysCount: this.daysCountValue,
+      crossCityFee: this.crossCityFeeValue,
       optionsCount: this.optionTargets.length
     })
     
@@ -159,20 +162,21 @@ export default class extends Controller<HTMLElement> {
 
   // 更新价格显示
   private updatePrice(): void {
-    // 获取基础价格和天数
+    // 获取基础价格、天数和异地还车费
     const basePrice = this.basePriceValue
     const daysCount = this.daysCountValue
+    const crossCityFee = this.crossCityFeeValue || 0
     
-    console.log('updatePrice called', { basePrice, daysCount })
+    console.log('updatePrice called', { basePrice, daysCount, crossCityFee })
     
     if (!basePrice || !daysCount) {
       console.warn('Price calculation skipped: missing basePrice or daysCount')
       return
     }
 
-    // 计算基础租金
-    let totalPrice = basePrice * daysCount
-    console.log(`Base price: ${basePrice} × ${daysCount} = ${totalPrice}`)
+    // 计算基础租金 + 异地还车费
+    let totalPrice = basePrice * daysCount + crossCityFee
+    console.log(`Base price: ${basePrice} × ${daysCount} + ${crossCityFee} (cross-city fee) = ${totalPrice}`)
 
     // 全局查找所有保障和保险选项（跨控制器实例）
     const allOptions = document.querySelectorAll<HTMLElement>(

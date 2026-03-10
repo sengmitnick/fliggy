@@ -258,7 +258,8 @@
       <h3 class="font-bold text-lg mb-3">升级商家保障，租车达人必备</h3>
       <div data-controller="car-insurance-selector"
            data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
-           data-car-insurance-selector-days-count-value="<%= days_count %>">
+           data-car-insurance-selector-days-count-value="<%= days_count %>"
+           data-car-insurance-selector-cross-city-fee-value="<%= @cross_city_fee || 0 %>">
       <div class="flex space-x-3 overflow-x-auto no-scrollbar snap-x px-1 pb-4">
         
         <!-- 基础保障卡片 -->
@@ -339,7 +340,8 @@
     <!-- 平台保险 -->
     <div class="bg-white rounded-xl overflow-hidden" data-controller="car-insurance-selector"
          data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
-         data-car-insurance-selector-days-count-value="<%= days_count %>">
+         data-car-insurance-selector-days-count-value="<%= days_count %>"
+         data-car-insurance-selector-cross-city-fee-value="<%= @cross_city_fee || 0 %>">
       <div class="bg-sky-100 px-4 py-1.5 text-xs text-sky-700 inline-block rounded-br-xl">平台保险</div>
       <div class="p-4 space-y-6">
         <!-- 三者险 -->
@@ -510,12 +512,13 @@
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex items-center justify-between z-50"
        data-controller="car-insurance-selector"
        data-car-insurance-selector-base-price-value="<%= @car.price_per_day %>"
-       data-car-insurance-selector-days-count-value="<%= days_count %>">
+       data-car-insurance-selector-days-count-value="<%= days_count %>"
+       data-car-insurance-selector-cross-city-fee-value="<%= @cross_city_fee || 0 %>">
     <div class="flex flex-col">
       <div class="flex items-baseline">
-        <span class="text-xs text-gray-400 line-through mr-1" data-car-insurance-selector-target="originalPrice">￥<%= (@car.price_per_day * days_count * 1.45).round %></span>
+        <span class="text-xs text-gray-400 line-through mr-1" data-car-insurance-selector-target="originalPrice">￥<%= (@total_price * 1.45).round %></span>
         <span class="text-xs text-[#FF5000] font-bold italic font-serif">￥</span>
-        <span class="text-2xl text-[#FF5000] font-bold" data-car-insurance-selector-target="totalPrice"><%= (@car.price_per_day * days_count).round %></span>
+        <span class="text-2xl text-[#FF5000] font-bold" data-car-insurance-selector-target="totalPrice"><%= @total_price %></span>
         <div class="ml-2 flex items-center text-xs text-gray-500">
           明细 <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
         </div>
