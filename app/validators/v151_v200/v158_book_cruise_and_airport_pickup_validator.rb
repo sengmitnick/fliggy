@@ -2,79 +2,99 @@
 
 require_relative '../base_validator'
 
-# V158: 预订上海邮轮 + 机场接机服务
-# 验证用户能够完成邮轮预订+机场接机服务的组合下单
+# V158BookCruiseAndAirportPickupValidator
+# 验证用例158: 给张三和李四2成人预订上海日本邮轮6天5晚（当月最近日期班次），并预订机场接机服务（从北京飞来，邮轮出发前1天下午2:30到T1航站楼，下午3点接机到外滩）
+#
+# 任务描述:
+#   张三和李四从北京飞来上海，计划预订上海出发日本邮轮6天5晚，需要机场接机服务：邮轮出发前1天下午2:30到T1航站楼，下午3点从上海浦东国际机场T1航站楼接机，送到外滩。
+#   1. 上海出发日本邮轮6天5晚（当月班次，2成人：张三和李四）
+#   2. 机场接机服务（从北京飞来，邮轮出发前1天下午2:30到T1航站楼，下午3点接机，送到外滩）
+#
+# 任务分解步骤:
+#   1. 查询上海出发日本邮轮班次（departure_port=上海，duration_days=6，duration_nights=5，当月）
+#   2. 选择当月最近日期的班次（按departure_date升序排序后取第一个）
+#   3. 创建邮轮订单（2成人：张三和李四，联系人=张三）
+#   4. 从TransferLocation获取上海浦东国际机场接机点（机场出发地）
+#   5. 从TransferLocation获取上海外滩（送达地）
+#   6. 创建机场接机服务（乘客从北京飞来，邮轮出发前1天下午2:30到T1航站楼，下午3点接机，送至外滩，不关联航班号）
+#
+# 评分标准（总分100分）:
+#   1. 创建了邮轮订单 (20分)
+#   2. 出发港正确（上海） (10分)
+#   3. 行程天数正确（6天5晚） (10分)
+#   4. 创建了机场接机服务 (15分)
+#   5. 接机服务地点正确（上海浦东国际机场→外滩） (25分)
+#   6. 接机时间正确（邮轮出发前1天下午3点） (10分)
+#   7. 联系人信息正确（张三） (5分)
+#   8. 出行人员信息正确（2成人） (5分)
 
 module V151V200
   class V158BookCruiseAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v158_book_cruise_and_airport_pickup_validator'
     self.task_id = 'b8c9d0e1-2f3a-4b5c-6d7e-8f9a0b1c2d3e'
-    self.title = '给张三预订最近一趟上海出发日本邮轮6天5晚，并预订机场接机（接邮轮出发前一天从北京飞来的航班）'
-    self.description = '预订最近一趟上海出发的日本邮轮航线，并预订机场接机服务（接邮轮出发前一天从北京飞到上海浦东的航班）'
+    self.title = '给张三和李四2成人预订上海日本邮轮6天5晚，并预订机场接机服务（从北京飞来，邮轮出发前1天下午2:30到T1航站楼，下午3点接机到外滩）'
+    self.description = '给张三和李四2成人从北京飞来上海，预订上海出发日本邮轮6天5晚，并预订机场接机服务（邮轮出发前1天下午2:30到T1航站楼，下午3点接机到外滩）'
     self.timeout_seconds = 300
 
     def prepare
-      # 查找最近一趟邮轮（数据包中是Date.today + 2）
-      # 接机接邮轮前一天到达的航班
-      # 注意：航班数据包用Date.current，邮轮数据包用Date.today
-      # 需要考虑两者差异，使用Date.current + 1作为航班日期（对应Date.today + 2 - 1）
-      cruise_departure_offset = 2  # 邮轮在Date.today + 2出发
-      @departure_date = Date.today + cruise_departure_offset.days
-      @flight_date = Date.current + (cruise_departure_offset - 1).days  # 航班在邮轮前1天
+      # 邮轮出发月份：当前月份
+      @expected_month = Date.current.month
       @departure_port = '上海'
       @airport_city = '上海'
-      @flight_origin = '北京'
+      @flight_departure_city = '北京'  # 乘客航班出发城市
       @duration_days = 6
       @duration_nights = 5
       @adult_count = 2
       
-      # 预查询demo_user的乘客信息
+      # 预查询demo_user的乘客信息（张三作为联系人和第一位出行人员）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_contact_name = @passenger.name
       @expected_contact_phone = @passenger.phone
       
-      # 查找可用的上海邮轮班次
+      # 查找可用的上海出发日本邮轮班次（按月份查询）
       @available_sailings = CruiseSailing
         .where("departure_port LIKE ?", "%#{@departure_port}%")
         .where(duration_days: @duration_days, duration_nights: @duration_nights, data_version: 0)
-        .where("departure_date >= ?", @departure_date)
+        .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+        .order(departure_date: :asc)
         .to_a
       
-      raise "数据包缺少上海出发的邮轮班次" if @available_sailings.empty?
+      raise "数据包缺少上海出发日本6天5晚邮轮班次（#{@expected_month}月份）" if @available_sailings.empty?
       
-      # 查找邮轮前一天从北京飞到上海浦东的航班（接机）
-      @pickup_flights = Flight
-        .where(departure_city: @flight_origin, destination_city: @departure_port, data_version: 0)
-        .where(flight_date: @flight_date)
-        .where("arrival_airport LIKE ?", "%浦东%")
-        .to_a
-      
-      raise "数据包缺少#{@flight_origin}到#{@departure_port}浦东的航班" if @pickup_flights.empty?
-      
-      # 查找机场接送点
-      @airport_location = TransferLocation.find_by(
+      # 查询TransferLocation获取上海浦东国际机场接送点（出发地）
+      @airport_loc = TransferLocation.where(
         city: @airport_city,
         location_type: 'airport',
         data_version: 0
-      )
+      ).find { |loc| loc.name.include?('浦东') }
       
-      raise "未找到#{@airport_city}机场位置" unless @airport_location
+      raise "数据包缺少上海浦东机场接送服务点TransferLocation" unless @airport_loc
       
-      # 查找邮轮码头接送点
-      @cruise_terminal = TransferLocation.find_by(
+      @airport_location = @airport_loc.name  # 上海浦东国际机场T1航站楼（从TransferLocation动态获取）
+      
+      # 查询TransferLocation获取上海外滩接送点（送达地）
+      @terminal_loc = TransferLocation.where(
         city: @departure_port,
         location_type: 'other',
         data_version: 0
-      )
+      ).find { |loc| loc.name.include?('外滩') }
       
-      raise "未找到#{@departure_port}邮轮码头位置" unless @cruise_terminal
+      raise "数据包缺少上海外滩接送服务点TransferLocation" unless @terminal_loc
+      
+      @terminal_location = @terminal_loc.name  # 外滩（从TransferLocation动态获取）
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      
+      # 选择最近日期的班次
       sailing = @available_sailings.first
       ship = sailing.cruise_ship
+      
+      # 计算接机日期和时间（邮轮出发前1天下午3点）
+      pickup_date = sailing.departure_date - 1.day
+      pickup_datetime = pickup_date.in_time_zone.change(hour: 15, min: 0)
       
       # 查找舱房类型（选择经济舱）
       cabin_type = CabinType.where(data_version: 0, cruise_ship_id: ship.id, category: 'interior').first
@@ -98,11 +118,28 @@ module V151V200
       
       total_price = cruise_product.price_per_person * @adult_count
       
-      # 创建邮轮订单
+      # 准备出行人员信息（2成人：张三和李四）
+      passenger_info = [
+        {
+          name: @passenger.name,
+          id_number: @passenger.id_number,
+          phone: @passenger.phone,
+          passenger_type: 'adult'
+        },
+        {
+          name: '李四',
+          id_number: '110101199001012346',
+          phone: '13900000002',
+          passenger_type: 'adult'
+        }
+      ]
+      
+      # 创建邮轮订单（明确出行人员：张三和李四）
       CruiseOrder.create!(
         user_id: user.id,
         cruise_product_id: cruise_product.id,
         quantity: @adult_count,
+        passenger_info: passenger_info,
         contact_name: @passenger.name,
         contact_phone: @passenger.phone,
         total_price: total_price,
@@ -111,24 +148,24 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建机场接机服务（邮轮前一天航班到达）
-      # 选择当天最早到达浦东的航班
-      pickup_flight = @pickup_flights.min_by { |f| f.arrival_time }
-      pickup_datetime = pickup_flight.arrival_time + 30.minutes
-      
+      # 创建机场接机服务（乘客从北京飞来，从上海浦东机场接到外滩，不关联航班号）
       Transfer.create!(
         user: user,
         transfer_type: 'airport_pickup',
         service_type: 'from_airport',
-        location_from: @airport_location.name,
-        location_to: @cruise_terminal.name,
+        location_from: @airport_location,  # 上海浦东国际机场T1航站楼（从TransferLocation动态获取）
+        location_to: @terminal_location,   # 外滩（从TransferLocation动态获取）
         pickup_datetime: pickup_datetime,
-        flight_number: pickup_flight.flight_number,
+        flight_number: nil,  # 接机服务不关联航班号（但乘客从#{@flight_departure_city}飞来）
         vehicle_type: 'business_5',
         passenger_name: @passenger.name,
         passenger_phone: @passenger.phone,
+        passenger_count: @adult_count,
+        luggage_count: @adult_count,
         total_price: 150.0,
-        status: 'pending',
+        discount_amount: 0,
+        status: 'paid',
+        driver_status: 'pending',
         data_version: @data_version
       )
     end
@@ -136,58 +173,65 @@ module V151V200
     def execution_state_data
       {
         data_version: @data_version,
-        departure_date: @departure_date.to_s,
-        flight_date: @flight_date.to_s,
+        expected_month: @expected_month,
         departure_port: @departure_port,
         airport_city: @airport_city,
-        flight_origin: @flight_origin,
+        flight_departure_city: @flight_departure_city,
         duration_days: @duration_days,
         duration_nights: @duration_nights,
-        adult_count: @adult_count
+        adult_count: @adult_count,
+        airport_location: @airport_location,
+        terminal_location: @terminal_location
       }
     end
 
     def restore_from_state(data)
       @data_version = data['data_version']
-      @departure_date = Date.parse(data['departure_date']) if data['departure_date']
-      @flight_date = Date.parse(data['flight_date']) if data['flight_date']
+      @expected_month = data['expected_month']
       @departure_port = data['departure_port']
       @airport_city = data['airport_city']
-      @flight_origin = data['flight_origin']
+      @flight_departure_city = data['flight_departure_city']
       @duration_days = data['duration_days']
       @duration_nights = data['duration_nights']
       @adult_count = data['adult_count']
+      @airport_location = data['airport_location']
+      @terminal_location = data['terminal_location']
       
-      # 重新查询乘客信息
+      # 重新查询乘客信息（张三作为联系人和第一位出行人员）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_contact_name = @passenger.name
       @expected_contact_phone = @passenger.phone
       
-      # 重新查询航班
-      @pickup_flights = Flight
-        .where(departure_city: @flight_origin, destination_city: @departure_port, data_version: 0)
-        .where(flight_date: @flight_date)
-        .where("arrival_airport LIKE ?", "%浦东%")
+      # 重新查询邮轮班次
+      @available_sailings = CruiseSailing
+        .where("departure_port LIKE ?", "%#{@departure_port}%")
+        .where(duration_days: @duration_days, duration_nights: @duration_nights, data_version: 0)
+        .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
+        .order(departure_date: :asc)
         .to_a
       
       # 重新查找TransferLocation
-      @airport_location = TransferLocation.find_by(
+      @airport_loc = TransferLocation.where(
         city: @airport_city,
         location_type: 'airport',
         data_version: 0
-      )
+      ).find { |loc| loc.name.include?('浦东') }
       
-      @cruise_terminal = TransferLocation.find_by(
+      @airport_location = @airport_loc.name if @airport_loc
+      
+      @terminal_loc = TransferLocation.where(
         city: @departure_port,
         location_type: 'other',
         data_version: 0
-      )
+      ).find { |loc| loc.name.include?('外滩') }
+      
+      @terminal_location = @terminal_loc.name if @terminal_loc
     end
 
     def verify
       # 断言1: 创建了邮轮订单
-      add_assertion "创建了邮轮订单", weight: 25 do
+      add_assertion "创建了邮轮订单", weight: 20 do
         @cruise_order = CruiseOrder
           .where(data_version: @data_version)
           .order(created_at: :desc)
@@ -198,28 +242,22 @@ module V151V200
       
       return if @cruise_order.nil?
       
-      # 断言2: 出发港正确
-      add_assertion "出发港正确（#{@departure_port}）", weight: 15 do
+      # 断言2: 出发港正确（上海）
+      add_assertion "出发港正确（#{@departure_port}）", weight: 10 do
         sailing = @cruise_order.cruise_product.cruise_sailing
         expect(sailing.departure_port).to include(@departure_port),
           "出发港错误。期望包含: #{@departure_port}, 实际: #{sailing.departure_port}"
       end
       
-      # 断言3: 行程天数正确
-      add_assertion "行程天数正确（#{@duration_days}天#{@duration_nights}晚）", weight: 15 do
+      # 断言3: 行程天数正确（6天5晚）
+      add_assertion "行程天数正确（#{@duration_days}天#{@duration_nights}晚）", weight: 10 do
         sailing = @cruise_order.cruise_product.cruise_sailing
         expect(sailing.duration_days).to eq(@duration_days),
-          "行程天数错误。期望: #{@duration_days}天, 实际: #{sailing.duration_days}天"
+          "行程天数错误。期望: #{@duration_days}天#{@duration_nights}晚, 实际: #{sailing.duration_days}天#{sailing.duration_nights}晚"
       end
       
-      # 断言4: 成人数量=2
-      add_assertion "成人数量=2", weight: 10 do
-        expect(@cruise_order.quantity).to eq(@adult_count),
-          "成人数量错误。期望: #{@adult_count}, 实际: #{@cruise_order.quantity}"
-      end
-      
-      # 断言5: 创建了机场接机服务
-      add_assertion "创建了机场接机服务", weight: 10 do
+      # 断言4: 创建了机场接机服务
+      add_assertion "创建了机场接机服务", weight: 15 do
         @transfer = Transfer
           .where(transfer_type: 'airport_pickup', data_version: @data_version)
           .order(created_at: :desc)
@@ -230,45 +268,46 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言6: 接机服务关联了具体航班号
-      add_assertion "接机服务关联了具体航班号（#{@flight_origin}→#{@departure_port}）", weight: 15 do
-        expect(@transfer.flight_number).not_to be_nil,
-          "接机服务未关联航班号"
+      # 断言5: 接机服务地点正确（上海浦东国际机场→外滩）
+      add_assertion "接机服务地点正确（#{@airport_location}→#{@terminal_location}）", weight: 25 do
+        expect(@transfer.location_from).to eq(@airport_location),
+          "接机出发地错误。期望: #{@airport_location}, 实际: #{@transfer.location_from}"
         
-        flight = Flight.find_by(
-          flight_number: @transfer.flight_number,
-          departure_city: @flight_origin,
-          destination_city: @departure_port,
-          data_version: 0
-        )
-        
-        expect(flight).not_to be_nil,
-          "未找到关联的航班: #{@transfer.flight_number}"
-        expect(flight.arrival_airport).to include('浦东'),
-          "航班到达机场错误。期望: 浦东, 实际: #{flight.arrival_airport}"
+        expect(@transfer.location_to).to eq(@terminal_location),
+          "接机目的地错误。期望: #{@terminal_location}, 实际: #{@transfer.location_to}"
       end
       
-      # 断言7: 接机时间合理（航班到达后20-40分钟）
-      add_assertion "接机时间合理（航班到达后20-40分钟）", weight: 5 do
-        flight = Flight
-          .where(flight_number: @transfer.flight_number, data_version: 0)
-          .where(departure_city: @flight_origin, destination_city: @departure_port)
-          .where(flight_date: @flight_date)
-          .first
+      # 断言6: 接机时间正确（邮轮出发前1天下午3点）
+      add_assertion "接机时间正确（邮轮出发前1天下午3点）", weight: 10 do
+        sailing = @cruise_order.cruise_product.cruise_sailing
+        expected_pickup_date = sailing.departure_date - 1.day
+        expected_time = expected_pickup_date.in_time_zone.change(hour: 15, min: 0)
+        actual_time = @transfer.pickup_datetime.in_time_zone
         
-        expect(flight).not_to be_nil, "未找到关联的航班"
-        
-        time_after_arrival = ((@transfer.pickup_datetime - flight.arrival_time) / 60.0).round
-        expect(time_after_arrival >= 20 && time_after_arrival <= 40).to be(true),
-          "接机时间不合理。航班到达: #{flight.arrival_time.strftime('%H:%M')}, 接机时间: #{@transfer.pickup_datetime.strftime('%H:%M')}, 间隔: #{time_after_arrival}分钟（期望20-40分钟）"
+        # 比较Unix时间戳忽略时区差异
+        expect(actual_time.to_i).to eq(expected_time.to_i),
+          "接机时间错误。期望: #{expected_time.strftime('%Y-%m-%d %H:%M %Z')}（邮轮#{sailing.departure_date.strftime('%m月%d日')}出发前1天下午3点）, 实际: #{actual_time.strftime('%Y-%m-%d %H:%M %Z')}"
       end
       
-      # 断言8: 联系人信息正确（张三）
+      # 断言7: 联系人信息正确（张三）
       add_assertion "联系人信息正确（#{@expected_contact_name}）", weight: 5 do
         expect(@cruise_order.contact_name).to eq(@expected_contact_name),
           "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@cruise_order.contact_name}"
         expect(@cruise_order.contact_phone).to eq(@expected_contact_phone),
           "联系人电话错误。期望: #{@expected_contact_phone}, 实际: #{@cruise_order.contact_phone}"
+      end
+      
+      # 断言8: 出行人员信息正确（2成人）
+      add_assertion "出行人员信息正确（2成人）", weight: 5 do
+        passengers = @cruise_order.passenger_list
+        expect(passengers.size).to eq(2), "出行人员数量错误。期望: 2人, 实际: #{passengers.size}人"
+        
+        adult_passengers = passengers.select { |p| p['passenger_type'] == 'adult' }
+        expect(adult_passengers.size).to eq(2), "成人数量错误。期望: 2人, 实际: #{adult_passengers.size}人"
+        
+        passenger_names = passengers.map { |p| p['name'] }
+        expect(passenger_names).to include(@passenger.name), "出行人员中未找到#{@passenger.name}"
+        expect(passenger_names).to include('李四'), "出行人员中未找到李四"
       end
     end
   end

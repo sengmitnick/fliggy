@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_09_100030) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_11_023752) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1947,9 +1947,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_09_100030) do
     t.datetime "updated_at", null: false
     t.boolean "is_active", default: false
     t.bigint "user_id"
+    t.string "validator_id"
+    t.integer "score"
+    t.string "status"
+    t.jsonb "verify_result"
     t.index ["execution_id"], name: "index_validator_executions_on_execution_id", unique: true
     t.index ["is_active"], name: "index_validator_executions_on_is_active"
     t.index ["user_id", "is_active"], name: "index_validator_executions_on_user_id_and_is_active"
+    t.index ["validator_id", "created_at"], name: "index_validator_executions_on_validator_id_and_created_at"
+    t.index ["validator_id"], name: "index_validator_executions_on_validator_id"
   end
 
   create_table "vehicle_types", force: :cascade do |t|
