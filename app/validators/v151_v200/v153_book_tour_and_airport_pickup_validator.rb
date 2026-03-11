@@ -3,15 +3,15 @@
 require_relative '../base_validator'
 
 # V153BookTourAndAirportPickupValidator
-# 验证用例153: 给张三订明天广州市内1日跟团游,并订机场接机服务(接今天从北京飞来的航班,CZ3100早上10:45到白云T2,送到珠江新城CBD)
+# 验证用例153: 给张三订明天广州市内2日跟团游,并订机场接机服务(接今天从北京飞来的航班,CZ3100早上10:45到白云T2,送到珠江新城CBD)
 #
 # 任务描述:
-#   张三计划明天参加广州市内1日跟团游,并预订机场接机服务接今天从北京飞来的航班(CZ3100,早上10:45到达白云T2,送到珠江新城CBD)。
-#   1. 广州市内1日跟团游(明天出发)
+#   张三计划明天参加广州市内2日跟团游,并预订机场接机服务接今天从北京飞来的航班(CZ3100,早上10:45到达白云T2,送到珠江新城CBD)。
+#   1. 广州市内2日跟团游(明天出发)
 #   2. 机场接机服务(从白云T2接机,送至珠江新城CBD,接今天从北京飞来的CZ3100,航班10:45到达)
 #
 # 任务分解步骤:
-#   1. 查询广州1日跟团游产品(destination=广州,duration=1)
+#   1. 查询广州2日跟团游产品(destination=广州,duration=2,travel_type=跟团游)
 #   2. 创建跟团游订单(出发日期=明天,成人1人,联系人=张三)
 #   3. 查询Flight获取今天从北京到广州白云机场的航班,确定航班号、到达时间、到达机场
 #   4. 查询TransferPackage获取舒适型5座套餐(vehicle_category='comfort_5')
@@ -44,8 +44,8 @@ module V151V200
   class V153BookTourAndAirportPickupValidator < BaseValidator
     self.validator_id = 'v153_book_tour_and_airport_pickup_validator'
     self.task_id = 'c8d9e0f1-2a3b-4c5d-6e7f-8a9b0c1d2e4f'
-    self.title = '给张三订明天广州市内1日跟团游,并订机场接机服务(接今天从北京飞来的航班,CZ3100早上10:45到白云T2,送到珠江新城CBD)'
-    self.description = '给张三订明天广州市内1日跟团游,并订机场接机服务(接今天从北京飞来的CZ3100航班,早上10:45到达白云T2,送到珠江新城CBD)'
+    self.title = '给张三订明天广州市内2日跟团游,并订机场接机服务(接今天从北京飞来的航班,CZ3100早上10:45到白云T2,送到珠江新城CBD)'
+    self.description = '给张三订明天广州市内2日跟团游,并订机场接机服务(接今天从北京飞来的CZ3100航班,早上10:45到达白云T2,送到珠江新城CBD)'
     self.timeout_seconds = 300
 
     def prepare
@@ -86,12 +86,12 @@ module V151V200
       @expected_contact_name = @passenger.name
       @expected_contact_phone = @passenger.phone
       
-      # 查找可用的广州1日跟团游
+      # 查找可用的广州2日跟团游
       @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 1, data_version: 0)
+        .where(destination: @city, duration: 2, travel_type: '跟团游', data_version: 0)
         .to_a
       
-      expect(@available_tours).not_to be_empty, "数据包缺少广州1日跟团游产品"
+      expect(@available_tours).not_to be_empty, "数据包缺少广州2日跟团游产品"
       
       # 查找舒适型5座套餐
       @available_packages = TransferPackage.where(
@@ -194,7 +194,7 @@ module V151V200
       
       # 重新查询跟团游
       @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 1, data_version: 0)
+        .where(destination: @city, duration: 2, travel_type: '跟团游', data_version: 0)
         .to_a
       
       # 重新查询航班

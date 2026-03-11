@@ -319,6 +319,17 @@ class BaseValidator
       result[:assertions] = @assertions
       result[:errors] = @errors
       
+      # 保存验证结果到数据库 (新增字段: validator_id, score, status, verify_result)
+      ActiveRecord::Base.connection.execute(
+        "UPDATE validator_executions SET " \
+        "validator_id = #{ActiveRecord::Base.connection.quote(self.class.validator_id)}, " \
+        "score = #{@score}, " \
+        "status = #{ActiveRecord::Base.connection.quote(result[:status])}, " \
+        "verify_result = #{ActiveRecord::Base.connection.quote(result.to_json)}, " \
+        "updated_at = NOW() " \
+        "WHERE execution_id = #{ActiveRecord::Base.connection.quote(@execution_id)}"
+      )
+      
     rescue StandardError => e
       result[:status] = 'error'
       result[:errors] << "验证执行出错: #{e.message}"

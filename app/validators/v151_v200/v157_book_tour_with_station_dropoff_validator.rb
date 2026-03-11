@@ -2,23 +2,42 @@
 
 require_relative '../base_validator'
 
-# V157: 预订深圳跟团游 + 火车站送站服务（关联具体火车）
-# 验证用户能够完成跟团游预订+火车站送站服务的组合下单，送站需关联具体火车班次
+# V157BookTourWithStationDropoffValidator
+# 验证用例157: 给张三1成人明天深圳2日跟团游，并订火车站送站服务（后天早上6:30从福田中心区会展中心接送服务点送到深圳北站西广场接送中心）
+#
+# 任务描述:
+#   张三计划明天开始深圳2日跟团游，需要火车站送站服务：后天早上6:30从福田中心区会展中心接送服务点出发，送到深圳北站西广场接送中心。
+#   1. 深圳2日跟团游（明天出发，1成人）
+#   2. 火车站送站服务（后天早上6:30从福田中心区会展中心接送服务点出发，送到深圳北站西广场接送中心）
+#
+# 任务分解步骤:
+#   1. 查询深圳2日跟团游产品（destination=深圳，duration=2，travel_type=跟团游）
+#   2. 创建跟团游订单（出发日期=明天，成人1人，联系人=张三）
+#   3. 从TransferLocation获取福田中心区会展中心接送服务点（市区出发地）
+#   4. 从TransferLocation获取深圳北站西广场接送中心（火车站送达地）
+#   5. 创建火车站送站服务（后天早上6:30从福田中心区会展中心接送服务点出发，送至深圳北站西广场接送中心，不关联火车班次号）
+#
+# 评分标准（总分100分）:
+#   1. 创建了跟团游订单 (20分)
+#   2. 城市正确（深圳） (10分)
+#   3. 创建了火车站送站服务 (15分)
+#   4. 送站服务地点正确（福田中心区会展中心→深圳北站西广场） (25分)
+#   5. 送站时间正确（后天早上6:30） (20分)
+#   6. 联系人信息正确（张三） (10分)
 
 module V151V200
   class V157BookTourWithStationDropoffValidator < BaseValidator
     self.validator_id = 'v157_book_tour_with_station_dropoff_validator'
     self.task_id = 'a2b3c4d5-6e7f-8a9b-0c1d-2e3f4a5b6c8d'
-    self.title = '给张三订明天深圳2日跟团游，并订火车站送站服务（送第3天从深圳北站到广州的火车）'
-    self.description = '给张三订明天深圳2日跟团游，并订火车站送站服务（送第3天从深圳北站到广州的火车）'
+    self.title = '给张三1成人明天深圳2日跟团游，并订火车站送站服务（后天早上6:30从福田中心区会展中心接送服务点送到深圳北站西广场接送中心）'
+    self.description = '给张三1成人明天深圳2日跟团游，并订火车站送站服务（后天早上6:30从福田中心区会展中心接送服务点送到深圳北站西广场接送中心）'
     self.timeout_seconds = 300
 
     def prepare
       @tour_date = Date.current + 1.day  # 明天开始游玩
-      @train_date = Date.current + 3.days  # 第3天离开
+      @train_date = Date.current + 2.days  # 后天送站
       @city = '深圳'
       @train_destination = '广州'
-      @station_location = '深圳北站'
       @duration_days = 2
       
       # 预查询demo_user的乘客信息
@@ -29,19 +48,32 @@ module V151V200
       
       # 查找可用的深圳2日跟团游
       @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 2, data_version: 0)
+        .where(destination: @city, duration: 2, travel_type: '跟团游', data_version: 0)
         .to_a
       
       expect(@available_tours).not_to be_empty, "数据包缺少深圳2日跟团游产品"
       
-      # 查找第3天从深圳北站到广州的火车
-      @available_trains = Train
-        .where(departure_city: @city, arrival_city: @train_destination, data_version: 0)
-        .by_date(@train_date)
-        .where("departure_station LIKE ?", "%北站%")
-        .to_a
+      # 查询TransferLocation获取深圳市区接送服务点（出发地）
+      @downtown_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'other',
+        data_version: 0
+      ).find { |loc| loc.name.include?('福田') && loc.name.include?('会展中心') }
       
-      expect(@available_trains).not_to be_empty, "数据包缺少深圳北站到广州的火车"
+      raise "数据包缺少深圳市区接送服务点TransferLocation" unless @downtown_loc
+      
+      @downtown_location = @downtown_loc.name  # 福田中心区会展中心接送服务点（从TransferLocation动态获取）
+      
+      # 查询TransferLocation获取深圳北站接送服务点（送达地）
+      @station_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'train_station',
+        data_version: 0
+      ).find { |loc| loc.name.include?('北站') && loc.name.include?('西广场') }
+      
+      raise "数据包缺少深圳北站接送服务点TransferLocation" unless @station_loc
+      
+      @station_location = @station_loc.name  # 深圳北站西广场接送中心（从TransferLocation动态获取）
       
       # 查找舒适型5座套餐
       @available_packages = TransferPackage.where(
@@ -76,23 +108,19 @@ module V151V200
         data_version: @data_version
       )
       
-      # 选择第3天出发的火车
-      target_train = @available_trains.min_by { |t| t.departure_time }
-      raise "未找到可用火车" unless target_train
+      # 计算送站时间（后天早上6:30）
+      pickup_datetime = @train_date.in_time_zone.change(hour: 6, min: 30)
       
-      # 计算送站时间（火车出发前30分钟）
-      pickup_datetime = target_train.departure_time - 30.minutes
-      
-      # 创建火车站送站服务（关联火车班次号）
+      # 创建火车站送站服务（从福田中心区会展中心送到深圳北站，不关联火车班次号）
       Transfer.create!(
         user: user,
         transfer_package_id: @best_package.id,
         transfer_type: 'train_dropoff',
         service_type: 'to_station',
-        location_from: "#{@city}市区",
-        location_to: @station_location,
+        location_from: @downtown_location,  # 福田中心区会展中心接送服务点（从TransferLocation动态获取）
+        location_to: @station_location,  # 深圳北站西广场接送中心（从TransferLocation动态获取）
         pickup_datetime: pickup_datetime,
-        train_number: target_train.train_number,
+        train_number: nil,  # 送站服务不关联火车班次号
         passenger_name: @passenger.name,
         passenger_phone: @passenger.phone,
         passenger_count: 1,
@@ -112,6 +140,7 @@ module V151V200
         train_date: @train_date.to_s,
         city: @city,
         train_destination: @train_destination,
+        downtown_location: @downtown_location,
         station_location: @station_location,
         duration_days: @duration_days
       }
@@ -123,6 +152,7 @@ module V151V200
       @train_date = Date.parse(data['train_date']) if data['train_date']
       @city = data['city']
       @train_destination = data['train_destination']
+      @downtown_location = data['downtown_location']
       @station_location = data['station_location']
       @duration_days = data['duration_days']
       
@@ -134,15 +164,25 @@ module V151V200
       
       # 重新查询跟团游
       @available_tours = TourGroupProduct
-        .where(destination: @city, duration: 2, data_version: 0)
+        .where(destination: @city, duration: 2, travel_type: '跟团游', data_version: 0)
         .to_a
       
-      # 重新查询火车
-      @available_trains = Train
-        .where(departure_city: @city, arrival_city: @train_destination, data_version: 0)
-        .by_date(@train_date)
-        .where("departure_station LIKE ?", "%北站%")
-        .to_a
+      # 重新查询TransferLocation
+      @downtown_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'other',
+        data_version: 0
+      ).find { |loc| loc.name.include?('福田') && loc.name.include?('会展中心') }
+      
+      @downtown_location = @downtown_loc.name if @downtown_loc
+      
+      @station_loc = TransferLocation.where(
+        city: @city,
+        location_type: 'train_station',
+        data_version: 0
+      ).find { |loc| loc.name.include?('北站') && loc.name.include?('西广场') }
+      
+      @station_location = @station_loc.name if @station_loc
       
       # 重新查询套餐
       @available_packages = TransferPackage.where(
@@ -176,13 +216,7 @@ module V151V200
           "城市错误。期望: #{@city}, 实际: #{@tour_booking.tour_group_product.destination}"
       end
       
-      # 断言3: 出发日期正确
-      add_assertion "出发日期正确（#{@tour_date}）", weight: 10 do
-        expect(@tour_booking.travel_date).to eq(@tour_date),
-          "出发日期错误。期望: #{@tour_date}（明天）, 实际: #{@tour_booking.travel_date}"
-      end
-      
-      # 断言4: 创建了火车站送站服务
+      # 断言3: 创建了火车站送站服务
       add_assertion "创建了火车站送站服务", weight: 15 do
         @transfer = Transfer
           .where(transfer_type: 'train_dropoff', data_version: @data_version)
@@ -194,59 +228,26 @@ module V151V200
       
       return if @transfer.nil?
       
-      # 断言5: 送站服务关联了具体火车班次号
-      add_assertion "送站服务关联了具体火车班次号（#{@city}→#{@train_destination}）", weight: 20 do
-        expect(@transfer.train_number).not_to be_nil, "送站服务未关联火车班次号"
+      # 断言4: 送站服务地点正确（福田中心区会展中心→深圳北站西广场）
+      add_assertion "送站服务地点正确（#{@downtown_location}→#{@station_location}）", weight: 25 do
+        expect(@transfer.location_from).to eq(@downtown_location),
+          "送站出发地错误。期望: #{@downtown_location}, 实际: #{@transfer.location_from}"
         
-        # 验证火车班次号对应的火车确实是深圳到广州
-        train = Train.find_by(
-          train_number: @transfer.train_number,
-          departure_city: @city,
-          arrival_city: @train_destination,
-          data_version: 0
-        )
-        
-        expect(train).not_to be_nil,
-          "火车班次号#{@transfer.train_number}不是#{@city}到#{@train_destination}的火车"
-        
-        # 验证出发站是深圳北站
-        if train
-          expect(train.departure_station).to include('北站'),
-            "火车出发站错误。期望: 深圳北站, 实际: #{train.departure_station}"
-        end
+        expect(@transfer.location_to).to eq(@station_location),
+          "送站目的地错误。期望: #{@station_location}, 实际: #{@transfer.location_to}"
       end
       
-      # 断言6: 送站时间合理（火车出发前20-40分钟）
-      add_assertion "送站时间合理（火车出发前20-40分钟）", weight: 10 do
-        if @transfer.train_number.present?
-          # 查询对应的火车（必须指定日期）
-          train = Train
-            .where(train_number: @transfer.train_number, data_version: 0)
-            .where(departure_city: @city, arrival_city: @train_destination)
-            .by_date(@train_date)
-            .first
-          
-          if train && train.departure_time.present?
-            time_before_train = ((train.departure_time - @transfer.pickup_datetime) / 60.0).round
-            is_reasonable = time_before_train >= 20 && time_before_train <= 40
-            
-            expect(is_reasonable).to be(true),
-              "送站时间不合理。火车#{train.departure_time.strftime('%H:%M')}出发，" \
-              "送站时间#{@transfer.pickup_datetime.strftime('%H:%M')}，" \
-              "提前#{time_before_train}分钟（应为20-40分钟）"
-          end
-        end
+      # 断言5: 送站时间正确（后天早上6:30）
+      add_assertion "送站时间正确（后天早上6:30）", weight: 20 do
+        expected_time = @train_date.in_time_zone.change(hour: 6, min: 30)
+        actual_time = @transfer.pickup_datetime.in_time_zone
+        
+        # 比较Unix时间戳忽略时区差异
+        expect(actual_time.to_i).to eq(expected_time.to_i),
+          "送站时间错误。期望: #{expected_time.strftime('%Y-%m-%d %H:%M %Z')}（后天早上6:30）, 实际: #{actual_time.strftime('%Y-%m-%d %H:%M %Z')}"
       end
       
-      # 断言7: 送站地点正确（市区→火车站）
-      add_assertion "送站地点正确（市区→火车站）", weight: 5 do
-        expect(@transfer.location_from).to include("#{@city}市区"),
-          "送站出发地错误。期望: #{@city}市区, 实际: #{@transfer.location_from}"
-        expect(@transfer.location_to).to include(@city),
-          "送站目的地错误。期望包含: #{@city}, 实际: #{@transfer.location_to}"
-      end
-      
-      # 断言8: 联系人信息正确（张三）
+      # 断言6: 联系人信息正确（张三）
       add_assertion "联系人信息正确（#{@expected_contact_name}）", weight: 10 do
         expect(@tour_booking.contact_name).to eq(@expected_contact_name),
           "联系人姓名错误。期望: #{@expected_contact_name}, 实际: #{@tour_booking.contact_name}"

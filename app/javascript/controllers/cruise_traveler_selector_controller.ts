@@ -237,7 +237,8 @@ export default class extends Controller<HTMLElement> {
         passengers.push({
           name: name,
           id_number: idNumber,
-          phone: phone
+          phone: phone,
+          passenger_type: 'adult'  // Default to adult for all UI-created passengers
         })
       }
     }
