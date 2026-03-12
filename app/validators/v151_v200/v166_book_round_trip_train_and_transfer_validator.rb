@@ -2,8 +2,33 @@
 
 require_relative '../base_validator'
 
-# V166: 预订往返火车+往返火车站接送
-# 验证用户能够完成往返火车预订+往返火车站接送服务的组合下单
+# V166BookRoundTripTrainAndTransferValidator
+# 验证用例166: 给张三预订明天上海到杭州的往返火车（去程明天，返程第4天），并预订两次火车站接送服务（去程接站：从实际到达站→西湖风景区，返程送站：从西湖风景区→实际出发站）
+#
+# 任务描述:
+#   张三计划预订上海到杭州的往返火车和火车站接送服务：明天出发去杭州，3天后返回上海，两次均需要火车站接送服务。
+#   1. 去程火车（明天上海→杭州）
+#   2. 返程火车（3天后杭州→上海）
+#   3. 去程接站服务（去程火车到达后接站，从实际到达火车站→西湖风景区）
+#   4. 返程送站服务（返程火车发车前30分钟从西湖风景区→实际出发火车站）
+#
+# 任务分解步骤:
+#   1. 查询去程火车（明天上海→杭州）
+#   2. 查询返程火车（3天后杭州→上海）
+#   3. 创建去程火车订单（乘客=张三，联系人=张三）
+#   4. 创建返程火车订单（乘客=张三，联系人=张三）
+#   5. 创建去程接站服务（从实际预订的去程火车到达站→西湖风景区，基于实际预订的去程火车到达时间安排接站，联系人=张三）
+#   6. 创建返程送站服务（从西湖风景区→实际预订的返程火车出发站，基于实际预订的返程火车发车时间安排送站，联系人=张三）
+#
+# 评分标准（总分100分）:
+#   1. 创建了去程火车订单 (18分)
+#   2. 创建了返程火车订单 (18分)
+#   3. 创建了往返火车站接送服务（接站+送站） (22分)
+#   4. 接送火车站与目的地城市一致 (6分)
+#   5. 乘客信息正确（张三） (5分)
+#   6. 接站时间合理（火车到达后10-30分钟） (10分)
+#   7. 送站时间合理（火车发车前20-40分钟） (10分)
+#   8. 接送站联系人信息正确 (11分)
 
 module V151V200
   class V166BookRoundTripTrainAndTransferValidator < BaseValidator
@@ -18,8 +43,7 @@ module V151V200
       @arrival_city = '杭州'
       @outbound_date = Date.current + 1.day  # 明天
       @return_date = @outbound_date + 2.days
-      @arrival_station = '杭州东站'
-      @departure_station = '上海虹桥站'
+      @hotel_location = '西湖风景区'  # 接送目的地
       
       # 预查询demo_user的乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -81,7 +105,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建去程火车站接站服务
+      # 创建去程火车站接站服务（从实际到达站→酒店）
       arrival_time = outbound_train.arrival_time
       pickup_datetime = arrival_time + 15.minutes
       
@@ -89,8 +113,8 @@ module V151V200
         user: user,
         transfer_type: 'train_pickup',
         service_type: 'from_station',
-        location_from: @arrival_station,
-        location_to: "#{@arrival_city}市区",
+        location_from: outbound_train.arrival_station,  # 动态获取去程火车的到达站
+        location_to: @hotel_location,
         pickup_datetime: pickup_datetime,
         vehicle_type: 'business_5',
         passenger_name: @passenger.name,
@@ -100,7 +124,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建返程火车站送站服务
+      # 创建返程火车站送站服务（从酒店→实际出发站）
       departure_time = return_train.departure_time
       dropoff_datetime = departure_time - 30.minutes
       
@@ -108,8 +132,8 @@ module V151V200
         user: user,
         transfer_type: 'train_dropoff',
         service_type: 'to_station',
-        location_from: "#{@arrival_city}市区",
-        location_to: @arrival_station,
+        location_from: @hotel_location,
+        location_to: return_train.departure_station,  # 动态获取返程火车的出发站
         pickup_datetime: dropoff_datetime,
         vehicle_type: 'business_5',
         passenger_name: @passenger.name,
@@ -127,8 +151,7 @@ module V151V200
         arrival_city: @arrival_city,
         outbound_date: @outbound_date.to_s,
         return_date: @return_date.to_s,
-        arrival_station: @arrival_station,
-        departure_station: @departure_station,
+        hotel_location: @hotel_location,
         expected_name: @expected_name,
         expected_phone: @expected_phone,
         expected_id_number: @expected_id_number
@@ -141,8 +164,7 @@ module V151V200
       @arrival_city = data['arrival_city']
       @outbound_date = Date.parse(data['outbound_date']) if data['outbound_date']
       @return_date = Date.parse(data['return_date']) if data['return_date']
-      @arrival_station = data['arrival_station']
-      @departure_station = data['departure_station']
+      @hotel_location = data['hotel_location']
       @expected_name = data['expected_name']
       @expected_phone = data['expected_phone']
       @expected_id_number = data['expected_id_number']
@@ -195,12 +217,14 @@ module V151V200
       
       return if @pickup_transfer.nil? || @dropoff_transfer.nil?
       
-      # 断言4: 接送地点都在杭州
-      add_assertion "接送地点都在杭州", weight: 6 do
+      # 断言4: 接送火车站与目的地城市一致
+      add_assertion "接送火车站与目的地城市一致", weight: 6 do
+        # 验证接站服务：接站地点包含目的地城市
         pickup_in_city = @pickup_transfer.location_from.include?(@arrival_city) || @pickup_transfer.location_to.include?(@arrival_city)
-        dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
-        
         expect(pickup_in_city).to be(true), "接站地点错误，期望包含: #{@arrival_city}"
+        
+        # 验证送站服务：送站地点包含目的地城市
+        dropoff_in_city = @dropoff_transfer.location_from.include?(@arrival_city) || @dropoff_transfer.location_to.include?(@arrival_city)
         expect(dropoff_in_city).to be(true), "送站地点错误，期望包含: #{@arrival_city}"
       end
       

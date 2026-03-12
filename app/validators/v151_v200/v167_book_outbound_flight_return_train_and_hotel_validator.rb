@@ -3,24 +3,50 @@
 require_relative '../base_validator'
 
 # V167: 预订去程航班+返程火车+酒店
-# 验证用户能够完成去程航班、返程火车、酒店住宿的组合下单
+# 验证用例167: 给张三预订明天北京到上海的去程航班，第4天上海到北京的返程火车，并预订上海酒店2晚（入住时间：明天，退房时间：第4天）
+#
+# 任务描述:
+#   张三计划预订北京到上海的去程航班、返程火车和上海酒店住宿：明天坐飞机去上海，第4天坐火车返回北京，在上海住2晚。
+#   1. 去程航班（明天北京→上海）
+#   2. 返程火车（第4天上海→北京）
+#   3. 上海酒店住宿（入住：明天，退房：第4天，共2晚）
+#
+# 任务分解步骤:
+#   1. 查询去程航班（明天北京→上海）
+#   2. 创建去程航班订单（乘客=张三，联系人电话=张三手机号）
+#   3. 查询返程火车（第4天上海→北京）
+#   4. 创建返程火车订单（乘客=张三，联系人电话=张三手机号）
+#   5. 查询上海酒店
+#   6. 创建酒店订单（入住人=张三，入住日期=明天，退房日期=第4天，共2晚）
+#
+# 评分标准（总分100分）:
+#   1. 创建了去程航班订单（北京→上海） (15分)
+#   2. 创建了返程火车订单（上海→北京） (15分)
+#   3. 去程是航班 (10分)
+#   4. 返程是火车 (10分)
+#   5. 创建了酒店订单 (10分)
+#   6. 酒店入住日期正确（明天） (10分)
+#   7. 酒店退房日期正确（第4天） (10分)
+#   8. 酒店住宿天数正确（2晚） (10分)
+#   9. 乘客信息正确（张三） (5分)
+#   10. 酒店入住人信息正确 (5分)
 
 module V151V200
   class V167BookOutboundFlightReturnTrainAndHotelValidator < BaseValidator
     self.validator_id = 'v167_book_outbound_flight_return_train_and_hotel_validator'
     self.task_id = 'e7f8a9b0-1c2d-3e4f-5a6b-7c8d9e0f1a2b'
-    self.title = '给张三预订明天去程航班+返程火车+北京→上海→北京酒店2晚'
-    self.description = '预订明天北京到上海的航班，预订第4天上海回北京的火车，并预订上海酒店2晚'
+    self.title = '给张三预订明天北京到上海的去程航班，第4天上海到北京的返程火车，并预订上海酒店2晚（入住时间：明天，退房时间：第4天）'
+    self.description = '张三计划预订北京到上海的去程航班、返程火车和上海酒店住宿：明天坐飞机去上海，第4天坐火车返回北京，在上海住2晚'
     self.timeout_seconds = 300
 
     def prepare
       @departure_city = '北京'
       @arrival_city = '上海'
-      @outbound_date = Date.current + 1.day  # 明天
-      @return_date = @outbound_date + 3.days
-      @hotel_checkin_date = @outbound_date
-      @hotel_checkout_date = @hotel_checkin_date + 2.days
-      @nights = 2
+      @outbound_date = Date.current + 1.day  # 明天（第2天）
+      @return_date = Date.current + 3.days  # 第4天（今天+3天）
+      @hotel_checkin_date = @outbound_date  # 去程航班当天入住（第2天）
+      @hotel_checkout_date = @return_date  # 第4天退房（返程火车当天）
+      @nights = 2  # 住2晚（第2天晚上+第3天晚上）
       
       # 预查询demo_user的乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -36,6 +62,7 @@ module V151V200
         .to_a
       
       expect(@available_outbound_flights).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}的航班"
+      return if @available_outbound_flights.empty?  # Guard clause
       
       # 查找返程火车
       @available_return_trains = Train
@@ -45,6 +72,7 @@ module V151V200
         .to_a
       
       expect(@available_return_trains).not_to be_empty, "数据包缺少#{@arrival_city}→#{@departure_city}的返程火车"
+      return if @available_return_trains.empty?  # Guard clause
       
       # 查找酒店
       @available_hotels = Hotel
@@ -53,13 +81,14 @@ module V151V200
         .to_a
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
+      return if @available_hotels.empty?  # Guard clause
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = Passenger.find_by!(phone: @passenger.phone, data_version: 0)
       
-      # 创建去程航班订单
+      # 创建去程航班订单（明天北京→上海）
       outbound_flight = @available_outbound_flights.first
       Booking.create!(
         user: user,
@@ -73,7 +102,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建返程火车订单
+      # 创建返程火车订单（第4天上海→北京）
       return_train = @available_return_trains.first
       TrainBooking.create!(
         user_id: user.id,
@@ -88,7 +117,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建酒店订单
+      # 创建酒店订单（入住：去程航班当天第2天，退房：第4天，共2晚）
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
       room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
@@ -139,7 +168,7 @@ module V151V200
 
     def verify
       # 断言1: 创建了去程航班订单
-      add_assertion "创建了去程航班订单（#{@departure_city}→#{@arrival_city}）", weight: 18 do
+      add_assertion "创建了去程航班订单（#{@departure_city}→#{@arrival_city}）", weight: 15 do
         @outbound_booking = Booking
           .joins(:flight)
           .includes(:flight)
@@ -151,10 +180,10 @@ module V151V200
         expect(@outbound_booking).not_to be_nil, "未找到去程航班订单"
       end
       
-      return if @outbound_booking.nil?
+      return if @outbound_booking.nil?  # Guard clause after assertion 1
       
       # 断言2: 创建了返程火车订单
-      add_assertion "创建了返程火车订单（#{@arrival_city}→#{@departure_city}）", weight: 18 do
+      add_assertion "创建了返程火车订单（#{@arrival_city}→#{@departure_city}）", weight: 15 do
         @return_ticket = TrainBooking
           .joins(:train)
           .includes(:train)
@@ -166,20 +195,24 @@ module V151V200
         expect(@return_ticket).not_to be_nil, "未找到返程火车订单"
       end
       
-      return if @return_ticket.nil?
+      return if @return_ticket.nil?  # Guard clause after assertion 2
       
       # 断言3: 去程是航班
-      add_assertion "去程是航班", weight: 13 do
+      add_assertion "去程是航班", weight: 10 do
         expect(@outbound_booking.flight).not_to be_nil, "去程应该是航班"
       end
       
+      return if @outbound_booking.flight.nil?  # Guard clause after assertion 3
+      
       # 断言4: 返程是火车
-      add_assertion "返程是火车", weight: 13 do
+      add_assertion "返程是火车", weight: 10 do
         expect(@return_ticket.train).not_to be_nil, "返程应该是火车"
       end
       
+      return if @return_ticket.train.nil?  # Guard clause after assertion 4
+      
       # 断言5: 创建了酒店订单
-      add_assertion "创建了酒店订单", weight: 13 do
+      add_assertion "创建了酒店订单", weight: 10 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -191,15 +224,28 @@ module V151V200
         expect(@hotel_booking).not_to be_nil, "未找到酒店订单"
       end
       
-      return if @hotel_booking.nil?
+      return if @hotel_booking.nil?  # Guard clause after assertion 5
       
       # 断言6: 酒店入住日期正确
-      add_assertion "酒店入住日期正确（航班当天）", weight: 10 do
+      add_assertion "酒店入住日期正确（明天）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@hotel_checkin_date),
-          "入住日期错误。期望: #{@hotel_checkin_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
+          "入住日期错误。期望: #{@hotel_checkin_date}（明天）, 实际: #{@hotel_booking.check_in_date}"
       end
       
-      # 断言7: 乘客信息正确（张三）
+      # 断言7: 酒店退房日期正确
+      add_assertion "酒店退房日期正确（第4天）", weight: 10 do
+        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
+          "退房日期错误。期望: #{@hotel_checkout_date}（第4天）, 实际: #{@hotel_booking.check_out_date}"
+      end
+      
+      # 断言8: 酒店住宿天数正确
+      add_assertion "酒店住宿天数正确（#{@nights}晚）", weight: 10 do
+        actual_nights = (@hotel_booking.check_out_date - @hotel_booking.check_in_date).to_i
+        expect(actual_nights).to eq(@nights),
+          "住宿天数错误。期望: #{@nights}晚, 实际: #{actual_nights}晚"
+      end
+      
+      # 断言9: 乘客信息正确（张三）
       add_assertion "乘客信息正确（#{@expected_name}）", weight: 5 do
         expect(@outbound_booking.passenger_name).to eq(@expected_name),
           "乘客姓名错误。期望: #{@expected_name}, 实际: #{@outbound_booking.passenger_name}"
@@ -207,8 +253,8 @@ module V151V200
           "乘客身份证号错误。期望: #{@expected_id_number}, 实际: #{@outbound_booking.passenger_id_number}"
       end
 
-      # 断言8: 酒店入住人信息正确
-      add_assertion "酒店入住人信息正确", weight: 10 do
+      # 断言10: 酒店入住人信息正确
+      add_assertion "酒店入住人信息正确", weight: 5 do
         expect(@hotel_booking.guest_name).to eq(@expected_name),
           "酒店入住人姓名错误。期望: #{@expected_name}, 实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq(@expected_phone),

@@ -3,14 +3,33 @@
 require_relative '../base_validator'
 
 # V170: 预订多段联程火车
-# 验证用户能够完成多城市联程火车预订（北京→天津→上海）
+# 验证用例170: 给张三预订多城市联程火车（明天北京→天津，后天天津→上海）
+#
+# 任务描述:
+#   张三计划预订多城市联程火车：明天从北京坐火车到天津，后天从天津坐火车到上海。
+#   1. 第一段火车（明天北京→天津）
+#   2. 第二段火车（后天天津→上海）
+#
+# 任务分解步骤:
+#   1. 查询第一段火车（明天北京→天津）
+#   2. 创建第一段火车订单（乘客=张三，联系人电话=张三手机号）
+#   3. 查询第二段火车（后天天津→上海）
+#   4. 创建第二段火车订单（乘客=张三，联系人电话=张三手机号）
+#
+# 评分标准（总分100分）:
+#   1. 创建了第一段火车订单（北京→天津） (25分)
+#   2. 创建了第二段火车订单（天津→上海） (25分)
+#   3. 第一段火车日期正确（明天） (15分)
+#   4. 第二段火车日期正确（后天） (15分)
+#   5. 形成联程路线（北京→天津→上海） (15分)
+#   6. 两段火车乘客信息一致（张三） (5分)
 
 module V151V200
   class V170BookMultiSegmentTrainValidator < BaseValidator
     self.validator_id = 'v170_book_multi_segment_train_validator'
     self.task_id = 'b0c1d2e3-4f5a-6b7c-8d9e-0f1a2b3c4d5e'
-    self.title = '给张三预订明天多段联程火车（北京→天津→上海）'
-    self.description = '预订明天北京到天津的火车，以及后天天津到上海的火车，完成多城市联程'
+    self.title = '给张三预订多城市联程火车（明天北京→天津，后天天津→上海）'
+    self.description = '张三计划预订多城市联程火车：明天从北京坐火车到天津，后天从天津坐火车到上海'
     self.timeout_seconds = 300
 
     def prepare
@@ -18,7 +37,7 @@ module V151V200
       @city2 = '天津'
       @city3 = '上海'
       @train1_date = Date.current + 1.day  # 明天
-      @train2_date = @train1_date + 1.day
+      @train2_date = Date.current + 2.days  # 后天（今天+2天）
       
       # 预查询demo_user的乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -35,6 +54,7 @@ module V151V200
         .to_a
       
       expect(@available_train1).not_to be_empty, "数据包缺少#{@city1}→#{@city2}的火车"
+      return if @available_train1.empty?  # Guard clause
       
       # 查找第二段火车
       @available_train2 = Train
@@ -44,13 +64,14 @@ module V151V200
         .to_a
       
       expect(@available_train2).not_to be_empty, "数据包缺少#{@city2}→#{@city3}的火车"
+      return if @available_train2.empty?  # Guard clause
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = Passenger.find_by!(phone: @passenger.phone, data_version: 0)
       
-      # 创建第一段火车订单
+      # 创建第一段火车订单（明天北京→天津）
       train1 = @available_train1.first
       TrainBooking.create!(
         user_id: user.id,
@@ -65,7 +86,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建第二段火车订单
+      # 创建第二段火车订单（后天天津→上海）
       train2 = @available_train2.first
       TrainBooking.create!(
         user_id: user.id,
@@ -121,7 +142,7 @@ module V151V200
         expect(@ticket1).not_to be_nil, "未找到#{@city1}→#{@city2}的火车订单"
       end
       
-      return if @ticket1.nil?
+      return if @ticket1.nil?  # Guard clause after assertion 1
       
       # 断言2: 创建了第二段火车订单
       add_assertion "创建了第二段火车订单（#{@city2}→#{@city3}）", weight: 25 do
@@ -136,7 +157,7 @@ module V151V200
         expect(@ticket2).not_to be_nil, "未找到#{@city2}→#{@city3}的火车订单"
       end
       
-      return if @ticket2.nil?
+      return if @ticket2.nil?  # Guard clause after assertion 2
       
       # 断言3: 第一段火车日期正确
       add_assertion "第一段火车日期正确（#{@train1_date}）", weight: 15 do

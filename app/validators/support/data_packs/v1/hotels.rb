@@ -502,8 +502,8 @@ end
 puts "\n[步骤3] 创建酒店房间..."
 
 # 获取所有酒店
-all_hotels = Hotel.where(data_version: 0).pluck(:id, :hotel_type, :price, :star_level).map do |id, type, price, star|
-  { id: id, type: type, price: price, star: star }
+all_hotels = Hotel.where(data_version: 0).pluck(:id, :hotel_type, :price, :star_level, :city).map do |id, type, price, star, city|
+  { id: id, type: type, price: price, star: star, city: city }
 end
 
 room_types = [
@@ -676,6 +676,10 @@ all_hotels.each_with_index do |hotel_info, index|
   end
   
   # 政策
+  # 上海的4-5星酒店有50%概率支持提前入住
+  city_name = hotel_info[:city]
+  supports_early_checkin = (city_name == '上海' && star_level >= 4 && rand < 0.5)
+  
   policies_data << {
     hotel_id: hotel_id,
     check_in_time: "14:00后",
@@ -685,6 +689,7 @@ all_hotels.each_with_index do |hotel_info, index|
     breakfast_hours: "每天07:00-10:00",
     breakfast_price: (star_level >= 4 && !is_homestay) ? 0 : rand(20..50),
     payment_methods: ["银联", "支付宝", "微信支付"],
+    early_checkin_available: supports_early_checkin,
     created_at: timestamp,
     updated_at: timestamp
   }
