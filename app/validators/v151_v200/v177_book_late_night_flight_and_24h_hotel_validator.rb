@@ -2,29 +2,55 @@
 
 require_relative '../base_validator'
 
-# 验证用例177: 预订红眼航班和24小时前台酒店
+# 验证用例177: 给张三预订明天深夜北京到上海的红眼航班，并在上海预订24小时酒店（航班23:00起飞→次日01:30到达，当晚入住）
 #
 # 任务描述:
-#   用户需要预订深夜23点到凌晨2点之间的红眼航班，并预订有24小时前台服务的酒店
+#   张三明天深夜从北京坐红眼航班到上海，航班23:00起飞（例如MU5901 23:00→次日01:30）。
+#   因为深夜到达，需要在上海预订有24小时前台服务的酒店，方便凌晨办理入住。
+#   重要：酒店入住日期是航班起飞当天（例如3月14日23:00起飞⚒3月14日入住），
+#   虽然实际到达是3月15日凌斀01:30，但酒店按自然日计算，凌晨仍算前一天的夜晚。
+#   需要创建2个订单：
+#   1. 航班订单（明天北京→上海，深夜23:00-次日02:00起飞）
+#   2. 酒店订单（航班起飞当天入住上海酒店，次日退房）
+#
+# 业务流程:
+#   1. 搜索并预订明天深夜23:00-次日02:00起飞的红眼航班（北京到上海）
+#   2. 记录航班到达时间（次日凌晨）
+#   3. 预订上海的酒店（24小时前台服务）
+#   4. 入住日期：航班起飞当天（今晚入住，虽然次日凌晨到达但仍算当天的夜晚）
+#   5. 退房日期：入住后的第二天
+#   6. 乘客和入住人均为张三
 #
 # 复杂度分析:
-#   1. 需要筛选23:00-02:00时段的航班
-#   2. 需要预订24小时前台服务的酒店
-#   3. 需要处理跨日期的时间计算
-#   4. 验证酒店入住时间与航班时间的匹配
+#   1. 需要搜索并预订深夜23:00-次日02:00的红眼航班（跨日期时间）
+#   2. 需要处理跨日期的时间计算（23:00是今天，01:00是明天）
+#   3. 需要理解酒店日期逻辑（航班起飞当天入住，虽然次日凌晨到但算当天夜晚）
+#   4. 需要选择有24小时前台服务的酒店（支持凌晨入住）
+#   ❌ 不能一次性提供：需要先查询红眼航班时间→确定到达日期→计算酒店入住日期→查找24小时前台酒店→预订航班→预订酒店
 #
-# 评分标准:
-#   - 创建了航班订单 (20分)
-#   - 航班起飞时间正确（23:00-02:00） (20分)
-#   - 创建了酒店订单 (20分)
-#   - 酒店在到达城市 (20分)
-#   - 酒店入住日期为航班到达当天 (20分)
+# 评分标准（总分100分）:
+#   1. 创建了航班订单（明天北京→上海） (20分)
+#   2. 航班起飞时间正确（23:00-02:00） (18分)
+#   3. 创建了酒店订单 (15分)
+#   4. 酒店位置正确（上海） (15分)
+#   5. 酒店入住日期正确（航班起飞当天） (17分)
+#   6. 航班乘客信息正确（张三） (7分)
+#   7. 酒店入住人信息正确（张三） (8分)
+#
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v177_book_late_night_flight_and_24h_hotel_validator/start
+#   
+#   # Agent 通过界面操作完成任务...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V151V200
   class V177BookLateNightFlightAnd24hHotelValidator < BaseValidator
     self.validator_id = 'v177_book_late_night_flight_and_24h_hotel_validator'
     self.task_id = '5d7b3426-da2e-4269-acb8-185afdd1fc1a'
-    self.title = '给张三预订明天深夜北京到上海的红眼航班，并在上海预订24小时酒店'
-    self.description = '帮张三订明天深夜23:00-次日02:00的红眼航班从北京到上海，到了上海后找个有24小时前台的酒店'
+    self.title = '给张三预订明天深夜23:00-次日02:00北京到上海的红眼航班（如MU5901 23:00→01:30），并在上海预订24小时前台酒店'
+    self.description = '帮张三订明天深夜23:00-次日02:00的红眼航班从北京到上海（例如MU5901 23:00起飞次日01:30到达），到了上海后找个有24小时前台的酒店，方便凌晨办理入住'
     self.timeout_seconds = 300
   
     def prepare
@@ -58,9 +84,8 @@ module V151V200
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
       
-      # 酒店入住日期为航班到达当天（深夜航班可能次日到达）
-      sample_flight = @available_flights.first
-      @hotel_checkin_date = sample_flight.arrival_time.to_date
+      # 酒店入住日期为航班起飞当天（虽然深夜起飞次日凌晨到达，但酒店按自然日计算，凌晨仍算当天夜晚）
+      @hotel_checkin_date = @flight_date
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
@@ -166,11 +191,11 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为航班到达当天 (17%)
-      add_assertion "酒店入住日期正确（航班到达当天）", weight: 17 do
-        arrival_date = @flight_booking.flight.arrival_time.to_date
-        expect(@hotel_booking.check_in_date).to eq(arrival_date),
-          "入住日期错误。期望: #{arrival_date}（航班到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      # 断言5: 酒店入住日期为航班起飞当天 (17%)
+      add_assertion "酒店入住日期正确（航班起飞当天）", weight: 17 do
+        flight_date = @flight_booking.flight.flight_date
+        expect(@hotel_booking.check_in_date).to eq(flight_date),
+          "入住日期错误。期望: #{flight_date}（航班起飞当天，虽然次日凌晨到达但仍算当天夜晚）, 实际: #{@hotel_booking.check_in_date}"
         
         # 验证退房日期
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),

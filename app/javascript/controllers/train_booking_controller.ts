@@ -92,6 +92,7 @@ export default class extends Controller<HTMLElement> {
     }
     
     this.updatePassengerCountDisplay()
+    this.updateContactPhone() // Update contact phone when passenger selection changes
   }
 
   private updatePassengerUI(element: HTMLElement, selected: boolean): void {
@@ -117,6 +118,47 @@ export default class extends Controller<HTMLElement> {
     this.updateSelectedSeatCount()
     // Update total price based on passenger count
     this.updateTotalPrice()
+  }
+
+  /**
+   * Update contact phone based on passenger selection
+   * Logic:
+   * - If passengers selected → auto-fill with first selected passenger's phone
+   * - If no passengers → keep field empty
+   */
+  private updateContactPhone(): void {
+    const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
+    if (!contactPhoneField) return
+    
+    if (this.selectedPassengers.size === 0) {
+      // No passengers selected → clear contact phone if it was auto-filled
+      // (Don't clear if user manually entered a number)
+      return
+    }
+    
+    // Get first selected passenger's phone (preferably adult, fallback to any)
+    let firstPhone = ''
+    
+    // First try to find adult passenger's phone
+    for (const [id, passenger] of this.selectedPassengers) {
+      if (passenger.type === 'adult' && passenger.phone) {
+        firstPhone = passenger.phone
+        break
+      }
+    }
+    
+    // If no adult found, use first passenger's phone
+    if (!firstPhone) {
+      const firstPassenger = this.selectedPassengers.values().next().value
+      if (firstPassenger && firstPassenger.phone) {
+        firstPhone = firstPassenger.phone
+      }
+    }
+    
+    // Auto-fill contact phone with first passenger's phone
+    if (firstPhone) {
+      contactPhoneField.value = firstPhone
+    }
   }
 
   private filterPassengersByType(): void {
@@ -175,8 +217,6 @@ export default class extends Controller<HTMLElement> {
       // Only apply if passenger names mode was used (not count mode)
       if (passengerIds.length === 0) return
       
-      let firstAdultPhone = ''
-      
       // Find and select passengers by their IDs
       passengerIds.forEach((passengerId: number) => {
         const passengerElement = document.querySelector(`[data-passenger-id="${passengerId}"]`) as HTMLElement
@@ -196,24 +236,14 @@ export default class extends Controller<HTMLElement> {
           
           // Update UI to show selected state
           this.updatePassengerUI(passengerElement, true)
-          
-          // Store first adult passenger's phone
-          if (!firstAdultPhone && passengerType === 'adult' && passengerPhone) {
-            firstAdultPhone = passengerPhone
-          }
         }
       })
       
-      // Auto-fill contact phone with first adult passenger's phone
-      if (firstAdultPhone) {
-        const contactPhoneField = document.getElementById('booking_contact_phone') as HTMLInputElement
-        if (contactPhoneField && !contactPhoneField.value) {
-          contactPhoneField.value = firstAdultPhone
-        }
-      }
-      
       // Update displays after loading all passengers
       this.updatePassengerCountDisplay()
+      
+      // Auto-fill contact phone if passengers were preselected from homepage
+      this.updateContactPhone()
     } catch (e) {
       console.error('Failed to load passengers from localStorage:', e)
     }

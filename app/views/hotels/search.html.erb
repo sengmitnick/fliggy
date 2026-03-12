@@ -421,6 +421,16 @@
             <% end %>
             <div class="text-xs text-gray-500 mt-0.5 truncate"><%= hotel.address %></div>
             
+            <!-- 酒店标签（星级/品牌/类型/政策） -->
+            <% tags = hotel_tags(hotel) %>
+            <% if tags.any? %>
+              <div class="flex flex-wrap gap-1 mt-1.5">
+                <% tags.each do |tag| %>
+                  <span class="px-2 py-0.5 text-[10px] bg-<%= tag[:color] %>-100 text-<%= tag[:color] %>-800 rounded"><%= tag[:text] %></span>
+                <% end %>
+              </div>
+            <% end %>
+            
             <!-- 设施标签 -->
             <% if hotel.features.present? && hotel.features.is_a?(Array) %>
               <div class="flex flex-wrap gap-1 mt-1.5">

@@ -2,28 +2,55 @@
 
 require_relative '../base_validator'
 
-# 验证用例178: 预订中午前到达火车和提前入住酒店
+# 验证用例178: 给张三预订明天中午前到达的北京到上海火车，并预订支持提前入住的酒店（火车12:00前到达，如G90 06:30→11:00）
 #
 # 任务描述:
-#   用户需要预订上午到达（12点前）的火车，并预订支持提前入住的酒店
+#   张三明天从北京坐火车到上海，需要中午前到达（12:00前，例如G90 06:30→11:00、G92 06:50→11:20）。
+#   因为上午到达，需要预订支持提前入住的酒店，可以到了直接办理入住不用在大堂等待。
+#   需要创建2个订单：
+#   1. 火车订单（明天北京→上海，12:00前到达）
+#   2. 酒店订单（明天入住上海酒店，支持提前入住）
+#
+# 业务流程:
+#   1. 搜索并预订明天中午前到达的北京到上海火车（12:00前，例如G90 06:30出发11:00到达）
+#   2. 记录火车到达日期（明天）
+#   3. 预订上海的酒店（支持提前入住服务）
+#   4. 入住日期：明天（火车到达当天，上午到达可以直接入住）
+#   5. 退房日期：后天（入住后的第二天）
+#   6. 乘客和入住人均为张三
 #
 # 复杂度分析:
-#   1. 需要筛选12点前到达的火车
-#   2. 需要预订支持提前入住的酒店
-#   3. 验证酒店入住日期与火车到达日期匹配
+#   1. 需要搜索并预订中午前到达的火车（12:00前，排除跨夜火车）
+#   2. 需要理解"提前入住"的场景（上午到达即可办理入住，不用等下午2点）
+#   3. 需要选择支持提前入住服务的酒店
+#   4. 需要协调两个订单的日期关系（酒店入住日=火车到达日=明天）
+#   ❌ 不能一次性提供：需要先查询上午到达的火车→确定火车到达日期（明天）→查找支持提前入住的酒店→预订火车→预订酒店
 #
-# 评分标准:
-#   - 创建了火车订单 (20分)
-#   - 火车到达时间正确（12点前） (20分)
-#   - 创建了酒店订单 (20分)
-#   - 酒店在到达城市 (20分)
-#   - 酒店入住日期为火车到达当天 (20分)
+# 评分标准（总分100分）:
+#   1. 创建了火车订单（明天北京→上海） (20分)
+#   2. 火车到达时间正确（12:00前） (18分)
+#   3. 创建了酒店订单 (15分)
+#   4. 酒店位置正确（上海） (15分)
+#   5. 酒店入住日期正确（火车到达当天） (12分)
+#   6. 火车乘客信息正确（张三） (6分)
+#   7. 酒店入住人信息正确（张三） (6分)
+#   8. 酒店支持提前入住 (5分)
+#   9. 预订的是整晚房间（非钟点房） (3分)
+#
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v178_book_noon_train_and_early_checkin_hotel_validator/start
+#   
+#   # Agent 通过界面操作完成任务...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V151V200
   class V178BookNoonTrainAndEarlyCheckinHotelValidator < BaseValidator
     self.validator_id = 'v178_book_noon_train_and_early_checkin_hotel_validator'
     self.task_id = '86a07e7f-aa31-4d1d-a9c7-4d13777246bb'
-    self.title = '帮张三订明天从北京到上海的火车（12点前到达），并预订支持提前入住的酒店'
-    self.description = '帮张三订明天从北京到上海的火车（12点前到达），并预订支持提前入住的酒店'
+    self.title = '给张三预订明天中午前12:00到达的北京到上海火车（如G90 06:30→11:00），并预订支持提前入住的酒店'
+    self.description = '帮张三订明天从北京到上海的火车（中午前12点到达，例如G90早上06:30起飞11:00到达），因为上午就到了，需要预订上海支持提前入住的酒店，可以到了直接办理入住不用在大堂等待'
     self.timeout_seconds = 300
   
     def prepare
@@ -44,14 +71,16 @@ module V151V200
       
       expect(@available_trains).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}中午前到达的火车"
       
-      # 查找上海的酒店
+      # 查找上海支持提前入住的酒店
       @available_hotels = Hotel
+        .joins(:hotel_policy)
         .where("city LIKE ?", "%#{@arrival_city}%")
+        .where(hotel_policies: { early_checkin_available: true })
         .where(data_version: 0)
         .limit(20)
         .to_a
       
-      expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
+      expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}支持提前入住的酒店"
       
       @hotel_checkin_date = @train_date
       @hotel_checkout_date = @train_date + 1.day
@@ -158,8 +187,8 @@ module V151V200
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为火车到达当天 (17%)
-      add_assertion "酒店入住日期正确（火车到达当天）", weight: 17 do
+      # 断言5: 酒店入住日期为火车到达当天 (12%)
+      add_assertion "酒店入住日期正确（火车到达当天）", weight: 12 do
         expect(@hotel_booking.check_in_date).to eq(@train_date),
           "入住日期错误。期望: #{@train_date}（火车到达当天）, 实际: #{@hotel_booking.check_in_date}"
         
@@ -168,20 +197,37 @@ module V151V200
           "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
     
-      # 断言6: 火车乘客信息正确（张三） (7%)
-      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+      # 断言6: 火车乘客信息正确（张三） (6%)
+      add_assertion "火车乘客信息正确（#{@expected_passenger_name}）", weight: 6 do
         expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
           "火车乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
         expect(@train_booking.contact_phone).to eq(@expected_phone),
           "火车联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
       end
     
-      # 断言7: 酒店入住人信息正确（张三） (8%)
-      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+      # 断言7: 酒店入住人信息正确（张三） (6%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 6 do
         expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
           "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq(@expected_phone),
           "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
+      end
+      
+      # 断言8: 酒店支持提前入住 (5%)
+      add_assertion "酒店支持提前入住", weight: 5 do
+        hotel = @hotel_booking.hotel
+        hotel_policy = hotel.hotel_policy
+        expect(hotel_policy).not_to be_nil, "酒店缺少政策信息"
+        expect(hotel_policy.early_checkin_available).to eq(true),
+          "酒店不支持提前入住。酒店: #{hotel.name}, early_checkin_available: #{hotel_policy.early_checkin_available}"
+      end
+      
+      # 断言9: 预订的是整晚房间（非钟点房） (3%)
+      add_assertion "预订的是整晚房间（非钟点房）", weight: 3 do
+        room = @hotel_booking.hotel_room
+        expect(room).not_to be_nil, "未找到酒店房间信息"
+        expect(room.room_category).to eq('overnight'),
+          "房间类型错误。期望: 整晚房(overnight), 实际: #{room.room_category}"
       end
     end
     
@@ -219,7 +265,9 @@ module V151V200
         .select { |t| t.arrival_time.hour < 12 }
       
       @available_hotels = Hotel
+        .joins(:hotel_policy)
         .where("city LIKE ?", "%#{@arrival_city}%")
+        .where(hotel_policies: { early_checkin_available: true })
         .where(data_version: 0)
         .limit(20)
         .to_a

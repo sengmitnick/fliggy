@@ -3,14 +3,33 @@
 require_relative '../base_validator'
 
 # V169: 预订多段联程航班
-# 验证用户能够完成多城市联程航班预订（北京→上海→广州）
+# 验证用例169: 给张三预订多城市联程航班（明天北京→上海，后天上海→广州）
+#
+# 任务描述:
+#   张三计划预订多城市联程航班：明天从北京飞到上海，后天从上海飞到广州。
+#   1. 第一段航班（明天北京→上海）
+#   2. 第二段航班（后天上海→广州）
+#
+# 任务分解步骤:
+#   1. 查询第一段航班（明天北京→上海）
+#   2. 创建第一段航班订单（乘客=张三，联系人电话=张三手机号）
+#   3. 查询第二段航班（后天上海→广州）
+#   4. 创建第二段航班订单（乘客=张三，联系人电话=张三手机号）
+#
+# 评分标准（总分100分）:
+#   1. 创建了第一段航班订单（北京→上海） (25分)
+#   2. 创建了第二段航班订单（上海→广州） (25分)
+#   3. 第一段航班日期正确（明天） (15分)
+#   4. 第二段航班日期正确（后天） (15分)
+#   5. 形成联程路线（北京→上海→广州） (15分)
+#   6. 两段航班乘客信息一致（张三） (5分)
 
 module V151V200
   class V169BookMultiCityFlightValidator < BaseValidator
     self.validator_id = 'v169_book_multi_city_flight_validator'
     self.task_id = 'a9b0c1d2-3e4f-5a6b-7c8d-9e0f1a2b3c4d'
-    self.title = '给张三预订明天多城市联程航班（北京→上海→广州）'
-    self.description = '预订明天北京到上海的航班，以及后天上海到广州的航班，完成多城市联程'
+    self.title = '给张三预订多城市联程航班（明天北京→上海，后天上海→广州）'
+    self.description = '张三计划预订多城市联程航班：明天从北京飞到上海，后天从上海飞到广州'
     self.timeout_seconds = 300
 
     def prepare
@@ -18,7 +37,7 @@ module V151V200
       @city2 = '上海'
       @city3 = '广州'
       @flight1_date = Date.current + 1.day  # 明天
-      @flight2_date = @flight1_date + 1.day
+      @flight2_date = Date.current + 2.days  # 后天（今天+2天）
       
       # 预查询demo_user的乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -34,6 +53,7 @@ module V151V200
         .to_a
       
       expect(@available_flight1).not_to be_empty, "数据包缺少#{@city1}→#{@city2}的航班"
+      return if @available_flight1.empty?  # Guard clause
       
       # 查找第二段航班
       @available_flight2 = Flight
@@ -42,12 +62,13 @@ module V151V200
         .to_a
       
       expect(@available_flight2).not_to be_empty, "数据包缺少#{@city2}→#{@city3}的航班"
+      return if @available_flight2.empty?  # Guard clause
     end
 
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 创建第一段航班订单
+      # 创建第一段航班订单（明天北京→上海）
       flight1 = @available_flight1.first
       Booking.create!(
         user: user,
@@ -61,7 +82,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建第二段航班订单
+      # 创建第二段航班订单（后天上海→广州）
       flight2 = @available_flight2.first
       Booking.create!(
         user: user,
@@ -116,7 +137,7 @@ module V151V200
         expect(@booking1).not_to be_nil, "未找到#{@city1}→#{@city2}的航班订单"
       end
       
-      return if @booking1.nil?
+      return if @booking1.nil?  # Guard clause after assertion 1
       
       # 断言2: 创建了第二段航班订单
       add_assertion "创建了第二段航班订单（#{@city2}→#{@city3}）", weight: 25 do
@@ -131,7 +152,7 @@ module V151V200
         expect(@booking2).not_to be_nil, "未找到#{@city2}→#{@city3}的航班订单"
       end
       
-      return if @booking2.nil?
+      return if @booking2.nil?  # Guard clause after assertion 2
       
       # 断言3: 第一段航班日期正确
       add_assertion "第一段航班日期正确（#{@flight1_date}）", weight: 15 do

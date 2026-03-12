@@ -2,22 +2,47 @@
 
 require_relative '../base_validator'
 
-# 验证用例179: 预订晚班大巴和深夜入住酒店
+# 验证用例179: 给李四预订明天晚上18:00后的北京到天津长途大巴，并预订酒店深夜入住（入住日期选明天，住1晚）
 #
 # 任务描述:
-#   用户需要预订晚上出发的长途大巴，并预订支持深夜入住的酒店
+#   李四明天需要从北京坐长途大巴到天津，选择晚上出发的班次（18:00后，例如19:00出发23:00到达）。
+#   因为晚班大巴深夜到达（23:00左右甚至凌晨01:00），办理酒店入住时入住日期应选择大巴出发日（明天），不管到几点都按当晚计费。
+#   需要创建2个订单：
+#   1. 大巴订单（明天北京→天津，18:00后出发）
+#   2. 酒店订单（入住日期=明天，即大巴出发日，住1晚）
+#
+# 业务流程:
+#   1. 搜索并预订明天晚上18:00后出发的北京到天津长途大巴（例如19:00出发23:00到达，或19:00出发01:00到达）
+#   2. 预订天津的酒店
+#   3. 入住日期：明天（大巴出发日）—— 酒店深夜入住规则：不管多晚到达（23:00或凌晨01:00），入住日期都选前一天
+#   4. 退房日期：后天（入住日期+1天，住1晚）
+#   5. 乘客和入住人均为李四
 #
 # 复杂度分析:
-#   1. 需要筛选晚上出发的大巴（18:00后）
-#   2. 需要预订支持深夜入住的酒店
-#   3. 验证酒店入住日期与大巴到达日期匹配
+#   1. 需要搜索并预订晚上18:00后出发的长途大巴（排除白天班次）
+#   2. 需要理解酒店"深夜入住"的日期规则：不管多晚到达（23:00或凌晨01:00），入住日期都应该选择大巴出发日（前一天），而不是到达的日历日期
+#   3. 需要协调两个订单的日期关系（酒店入住日=大巴出发日=明天）
+#   ❌ 不能一次性提供：需要先查询晚班大巴→确定大巴出发日期→预订大巴→预订酒店（入住日期=大巴出发日）
 #
-# 评分标准:
-#   - 创建了大巴订单 (20分)
-#   - 大巴出发时间正确（18:00后） (20分)
-#   - 创建了酒店订单 (20分)
-#   - 酒店在到达城市 (20分)
-#   - 酒店入住日期为大巴到达当天 (20分)
+# 评分标准（总分100分）:
+#   1. 创建了大巴订单（明天北京→天津） (20分)
+#   2. 大巴出发时间正确（18:00后） (15分)
+#   3. 大巴出发日期正确（明天） (10分)
+#   4. 创建了酒店订单 (18分)
+#   5. 酒店位置正确（天津） (12分)
+#   6. 酒店入住日期正确（大巴出发日=明天） (18分)
+#   7. 预订的是整晚房间（非钟点房） (2分)
+#   8. 大巴乘客信息正确（李四） (3分)
+#   9. 酒店入住人信息正确（李四） (2分)
+#
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v179_book_night_bus_and_late_checkin_hotel_validator/start
+#   
+#   # Agent 通过界面操作完成任务...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V151V200
   class V179BookNightBusAndLateCheckinHotelValidator < BaseValidator
     self.validator_id = 'v179_book_night_bus_and_late_checkin_hotel_validator'
@@ -61,31 +86,22 @@ module V151V200
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
       
-      # 计算到达日期（可能是当天或次日）
-      sample_bus = @available_buses.first
-      # departure_time 和 arrival_time 是字符串，需要解析
-      dep_hour = Time.parse(sample_bus.departure_time).hour
-      arr_hour = Time.parse(sample_bus.arrival_time).hour
-      # 如果到达时间晚于出发时间，则当天到达；否则次日到达
-      @hotel_checkin_date = if arr_hour >= dep_hour
-        @bus_date
-      else
-        @bus_date + 1.day
-      end
+      # 深夜入住规则：入住日期=大巴出发日期（不管到达时间是23:00还是凌晨01:00）
+      @hotel_checkin_date = @bus_date
       @hotel_checkout_date = @hotel_checkin_date + 1.day
       
       {
         task: "请为#{@passenger.name}预订#{@bus_date.strftime('%Y年%m月%d日')}（#{(@bus_date - Date.current).to_i}天后）从#{@departure_city}到#{@arrival_city}的晚班大巴（18:00后出发），" \
-              "并在#{@arrival_city}预订支持深夜入住的酒店",
+              "并在#{@arrival_city}预订酒店，入住日期选#{@bus_date.strftime('%Y年%m月%d日')}（大巴出发日）",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           bus_date: @bus_date.to_s,
           departure_time: "18:00后",
           hotel_location: @arrival_city,
-          hotel_checkin: "支持深夜入住"
+          hotel_checkin_date: @hotel_checkin_date.to_s
         },
-        hint: "晚班大巴到达时间较晚，需要酒店支持深夜入住",
+        hint: "晚班大巴深夜到达，酒店入住日期应选择大巴出发日（不管到几点都按当晚计费）",
         statistics: {
           available_night_buses: @available_buses.count,
           available_hotels: @available_hotels.count
@@ -144,16 +160,22 @@ module V151V200
       
       return if @bus_order.nil?
       
-      # 断言2: 大巴出发时间正确（18:00后） (18%)
-      add_assertion "大巴出发时间正确（18:00后）", weight: 18 do
+      # 断言2: 大巴出发时间正确（18:00后） (15%)
+      add_assertion "大巴出发时间正确（18:00后）", weight: 15 do
         dep_time = Time.parse(@bus_order.bus_ticket.departure_time)
         departure_hour = dep_time.hour
         expect(departure_hour).to be >= 18, 
           "出发时间过早。期望: 18:00后, 实际: #{@bus_order.bus_ticket.departure_time}"
       end
       
-      # 断言3: 创建了酒店订单 (15%)
-      add_assertion "创建了酒店订单", weight: 15 do
+      # 断言3: 大巴出发日期正确（明天） (10%)
+      add_assertion "大巴出发日期正确（明天 #{@bus_date}）", weight: 10 do
+        expect(@bus_order.bus_ticket.departure_date).to eq(@bus_date),
+          "出发日期错误。期望: #{@bus_date}（明天）, 实际: #{@bus_order.bus_ticket.departure_date}"
+      end
+      
+      # 断言4: 创建了酒店订单 (18%)
+      add_assertion "创建了酒店订单", weight: 18 do
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -167,35 +189,33 @@ module V151V200
       
       return if @hotel_booking.nil?
       
-      # 断言4: 酒店在到达城市 (15%)
-      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 15 do
+      # 断言5: 酒店在到达城市 (12%)
+      add_assertion "酒店位置正确（#{@arrival_city}）", weight: 12 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@arrival_city),
           "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
       end
       
-      # 断言5: 酒店入住日期为大巴到达当天 (17%)
-      add_assertion "酒店入住日期正确（大巴到达当天）", weight: 17 do
-        bus = @bus_order.bus_ticket
-        # departure_time 和 arrival_time 是字符串，需要解析
-        dep_hour = Time.parse(bus.departure_time).hour
-        arr_hour = Time.parse(bus.arrival_time).hour
-        # 计算到达日期：如果到达时间晚于出发时间，则当天；否则次日
-        arrival_date = if arr_hour >= dep_hour
-          bus.departure_date
-        else
-          bus.departure_date + 1.day
-        end
-        expect(@hotel_booking.check_in_date).to eq(arrival_date),
-          "入住日期错误。期望: #{arrival_date}（大巴到达当天）, 实际: #{@hotel_booking.check_in_date}"
+      # 断言6: 酒店入住日期为大巴出发日（深夜入住规则） (18%)
+      add_assertion "酒店入住日期正确（大巴出发日=#{@bus_date}）", weight: 18 do
+        expect(@hotel_booking.check_in_date).to eq(@bus_date),
+          "入住日期错误。期望: #{@bus_date}（大巴出发日，深夜入住按当晚计费）, 实际: #{@hotel_booking.check_in_date}"
         
         # 验证退房日期
         expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
           "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
       end
+      
+      # 断言7: 预订的是整晚房间（非钟点房） (2%)
+      add_assertion "预订的是整晚房间（非钟点房）", weight: 2 do
+        room = @hotel_booking.hotel_room
+        expect(room).not_to be_nil, "未找到酒店房间信息"
+        expect(room.room_category).to eq('overnight'),
+          "房间类型错误。期望: 整晚房(overnight), 实际: #{room.room_category}"
+      end
     
-      # 断言6: 大巴乘客信息正确（李四） (7%)
-      add_assertion "大巴乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
+      # 断言8: 大巴乘客信息正确（李四） (3%)
+      add_assertion "大巴乘客信息正确（#{@expected_passenger_name}）", weight: 3 do
         # BusTicketOrder 没有 passenger_name 字段，只能验证通过关联数据
         # 这里我们假设大巴订单是给正确的用户创建的
         expect(@bus_order.user).not_to be_nil,
@@ -204,8 +224,8 @@ module V151V200
           "大巴乘客数量错误。期望: 至少1人, 实际: #{@bus_order.passenger_count}"
       end
     
-      # 断言7: 酒店入住人信息正确（李四） (8%)
-      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
+      # 断言9: 酒店入住人信息正确（李四） (2%)
+      add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 2 do
         expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
           "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
         expect(@hotel_booking.guest_phone).to eq(@expected_phone),

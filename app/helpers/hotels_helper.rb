@@ -62,6 +62,11 @@ module HotelsHelper
       tags << { text: '民宿', color: 'pink' }
     end
     
+    # 根据酒店政策添加提前入住标签
+    if hotel.hotel_policy&.early_checkin_available
+      tags << { text: '支持提前入住', color: 'green' }
+    end
+    
     tags
   end
 
