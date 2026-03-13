@@ -2,10 +2,28 @@
 
 require_relative '../base_validator'
 
-# 验证用例198: 预订景区附近酒店+景区门票
+# 验证用例198: 给张三预订明天北京欢乐谷附近的酒店+景区门票
 #
 # 任务描述:
-#   预订景区附近酒店+景区门票
+#   帮张三订明天北京欢乐谷的门票，并预订景区附近的酒店（入住游玩前一天）
+#
+# 核心要求:
+#   - 景区门票：北京欢乐谷
+#   - 酒店位置：北京市内（景区所在城市）
+#   - 时间安排：游玩日期为明天，酒店入住游玩前一天（今晚）
+#   - 价格策略：选择最便宜的酒店（整晚房）
+#
+# 业务流程:
+#   1. 查找北京欢乐谷景点和门票
+#   2. 查找北京市内的酒店
+#   3. 创建门票订单（游玩日期：明天）
+#   4. 创建酒店订单（入住：今晚，退房：明天晚上）
+#
+# 复杂度分析:
+#   - 数据查询：景点、门票、酒店（3个模型）
+#   - 业务逻辑：门票订单 + 酒店订单（2个订单）
+#   - 时间计算：游玩日期（明天），入住日期（游玩前一天）
+#   - 房型过滤：必须过滤钟点房，选择整晚房
 #
 # 评分标准:
 #   - 创建了酒店订单 (30%)
@@ -44,8 +62,17 @@ module V151V200
       expect(@available_tickets).not_to be_empty,
         "数据包缺少#{@attraction_name}的门票"
       
-      # 查找景区附近酒店
-      @available_hotels = Hotel.where(city: @city, data_version: 0).to_a
+      # 查找景区附近酒店（优先选择features包含“欢乐谷”的酒店）
+      @available_hotels = Hotel
+        .where(city: @city, data_version: 0)
+        .select { |h| is_near_attraction?(h, @attraction_name) }
+        .to_a
+      
+      if @available_hotels.empty?
+        # 如果没有明确标记的景区附近酒店，则选择城市内所有酒店
+        @available_hotels = Hotel.where(city: @city, data_version: 0).to_a
+      end
+      
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@city}的酒店"
       
       {
@@ -141,9 +168,10 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建酒店订单
+      # 创建酒店订单（选择最便宜的酒店）
       hotel = @available_hotels.min_by(&:price)
-      room = hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
+      # CRITICAL: 必须过滤room_category='overnight'，排除钟点房
+      room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       # 入住前一天
       HotelBooking.create!(
@@ -161,6 +189,17 @@ module V151V200
     end
     
     private
+    
+    def is_near_attraction?(hotel, attraction_name)
+      # 检查酒店的features或name是否包含景点关键词
+      attraction_keyword = attraction_name.gsub(/北京|上海|广州|深圳/, '').strip
+      
+      return true if hotel.features&.any? { |f| f.include?(attraction_keyword) }
+      return true if hotel.name&.include?(attraction_keyword)
+      return true if hotel.address&.include?(attraction_keyword)
+      return true if hotel.brand&.include?(attraction_keyword)
+      false
+    end
     
     def execution_state_data
       {

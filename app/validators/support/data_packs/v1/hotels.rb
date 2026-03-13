@@ -378,7 +378,53 @@ hotels_data << {
   updated_at: timestamp
 }
 
-puts "   ✓ 添加了 3 家验证器特定酒店到主数组"
+# V198: 北京欢乐谷主题酒店
+hotels_data << {
+  name: "北京欢乐谷主题酒店",
+  brand: "欢乐谷",
+  city: "北京",
+  address: "北京市朝阳区东四环小武基北路欢乐谷景区1号",
+  rating: 4.6,
+  price: 380,
+  original_price: 480,
+  distance: "0.2km",
+  features: ["免费WiFi", "主题房间", "欢乐谷门票优惠", "景区直达", "餐厅", "儿童乐园"],
+  star_level: 4,
+  is_featured: true,
+  display_order: 20004,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V198: 如家酒店·北京欢乐谷店
+hotels_data << {
+  name: "如家酒店·北京欢乐谷店",
+  brand: "如家",
+  city: "北京",
+  address: "北京市朝阳区东四环小武基北路88号",
+  rating: 4.3,
+  price: 220,
+  original_price: 280,
+  distance: "0.5km",
+  features: ["免费WiFi", "24小时前台", "欢乐谷门票代订", "免费早餐", "行李寄存"],
+  star_level: 3,
+  is_featured: false,
+  display_order: 20005,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+puts "   ✓ 添加了 5 家验证器特定酒店到主数组"
 
 Hotel.insert_all(hotels_data)
 
