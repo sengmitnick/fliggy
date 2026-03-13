@@ -2,28 +2,51 @@
 
 require_relative '../base_validator'
 
-# 验证用例187: 预订火车+中档酒店，总预算800-1200元
+# 验证用例187: 给张三预订明天北京到上海的火车和上海中档酒店（总预算800-1200元）
 #
 # 任务描述:
-#   预订火车+中档酒店，总预算800-1200元
+#   张三需要预订明天从北京到上海的火车和中档酒店，总预算800-1200元。
+#   Agent需要搜索火车班次和中档酒店，计算总价保证在预算范围内，
+#   帮助用户实现舒适且性价比高的出行组合。
 #
-# 评分标准:
-#   - TODO: 定义评分标准
+# 业务流程（6个关键步骤）：
+#   1. 搜索北京→上海的火车班次（明天出发）
+#   2. 搜索上海的中档酒店（价格适中，舒适型住宿）
+#   3. 计算火车（二等座）+酒店总价，确保800-1200元范围内
+#   4. 预订符合预算的火车票（二等座）
+#   5. 预订符合预算的中档酒店（入住=火车到达当天，退房=入住+1天）
+#   6. 确保火车和酒店的乘客/入住人信息一致（张三）
 #
-# 使用方法:
-#   # 准备阶段
-#   POST /api/tasks/v187_book_mid_range_train_and_hotel_800_1200_validator/start
-#   
-#   # Agent 通过界面操作完成任务...
-#   
-#   # 验证结果
-#   POST /api/verify/:execution_id/result
+# 复杂度分析（6个关键点）：
+#   1. 需要查找火车班次并获取二等座价格
+#   2. 需要搜索中档酒店（价格适中，不是极端低价也不是高端豪华）
+#   3. 需要计算火车+酒店总价并满足预算约束（800-1200元）
+#   4. 需要在符合预算的组合中优选性价比高的方案
+#   5. 需要确保酒店入住日期在火车到达当天或次日
+#   6. 需要确保火车和酒店的乘客/入住人信息一致
+#   ❌ 不能一次性提供：需要先搜索火车→搜索酒店→计算总价→验证预算→预订
+#
+# 评分标准（9项，总计100分）：
+#   - 创建了火车订单和酒店订单（20分）
+#   - 火车到达上海（13分）
+#   - 酒店位于上海（13分）
+#   - 酒店入住日期合理（火车到达当天或次日）（13分）
+#   - 总价在预算范围内（800-1200元）（20分）
+#   - 火车乘客信息正确（张三）（3分）
+#   - 火车联系电话正确（7分）
+#   - 酒店入住人信息正确（张三）（8分）
+#   - 火车出发日期正确（明天）（3分）
+#
+# API使用方法:
+#   GET /api/tasks - 获取任务列表（包含本任务）
+#   POST /api/tasks/:id/start - 创建训练会话（获取任务详情和data_version）
+#   POST /api/verify/run - 提交验证结果（验证订单创建情况）
 module V151V200
   class V187BookMidRangeTrainAndHotel8001200Validator < BaseValidator
     self.validator_id = 'v187_book_mid_range_train_and_hotel_800_1200_validator'
     self.task_id = '9551dc4b-e494-48e9-8ee2-6be8838706cb'
-    self.title = '预订火车+中档酒店，总预算800-1200元'
-    self.description = '预订火车+中档酒店，总预算800-1200元'
+    self.title = '给张三预订明天北京到上海的火车和上海中档酒店（总预算800-1200元）'
+    self.description = '帮张三预订明天从北京到上海的火车和中档酒店，总预算800-1200元'
     self.timeout_seconds = 300
     
     # 准备阶段：设置任务参数
@@ -43,18 +66,20 @@ module V151V200
     #     }
     #   end
     def prepare
+      # 查找乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
+      # 定义出行信息和预算约束
       @departure_city = '北京'
       @arrival_city = '上海'
-      @travel_date = Date.current + 1.day  # 明天 + 1.day
-      @min_budget = 800
-      @max_budget = 1200
+      @travel_date = Date.current + 1.day  # 明天
+      @min_budget = 800   # 预算下限
+      @max_budget = 1200  # 预算上限
       
-      # 查找火车票
+      # 查找火车班次（明天出发）
       @available_trains = Train
         .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
         .select { |t| t.departure_time.to_date == @travel_date }
@@ -62,7 +87,7 @@ module V151V200
       
       expect(@available_trains).not_to be_empty, "数据包缺少#{@departure_city}→#{@arrival_city}的火车"
       
-      # 查找酒店
+      # 查找上海的酒店（中档价位）
       @available_hotels = Hotel
         .where("city LIKE ?", "%#{@arrival_city}%")
         .where(data_version: 0)
@@ -70,7 +95,7 @@ module V151V200
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
       
-      # 查找符合预算的组合（火车二等座+酒店）
+      # 查找符合预算的组合（火车二等座+酒店，总价800-1200元）
       @valid_combinations = []
       @available_trains.each do |train|
         @available_hotels.each do |hotel|
@@ -94,20 +119,21 @@ module V151V200
       expect(@valid_combinations).not_to be_empty, 
         "数据包缺少符合预算的火车+酒店组合（#{@min_budget}-#{@max_budget}元）"
       
-      # 选择最优组合（价格最接近预算上限的）
+      # 选择最优组合（价格最接近预算上限的，性价比高）
       @selected_combo = @valid_combinations.max_by { |c| c[:total_price] }
       @check_in_date = @selected_combo[:train].arrival_time.to_date
       @check_out_date = @check_in_date + 1.day
       
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）" \
-              "从#{@departure_city}到#{@arrival_city}的火车票，并预订当地酒店，总预算#{@min_budget}-#{@max_budget}元",
+        task: "请为#{@passenger.name}预订#{@travel_date.strftime('%Y年%m月%d日')}（#{(@travel_date - Date.current).to_i}天后）" \
+              "从#{@departure_city}到#{@arrival_city}的火车票，并在#{@arrival_city}预订中档酒店，总预算#{@min_budget}-#{@max_budget}元",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           travel_date: @travel_date.to_s,
           budget_min: @min_budget,
-          budget_max: @max_budget
+          budget_max: @max_budget,
+          accommodation_type: "中档酒店"
         },
         hint: "选择二等座火车票+中档酒店，控制总价在预算内，优先选择性价比高的组合",
         statistics: {
@@ -124,10 +150,11 @@ module V151V200
     def verify
       # 断言1: 创建了火车订单和酒店订单 (20%)
       add_assertion "创建了火车订单和酒店订单", weight: 20 do
+        # 查询火车订单（使用LIKE模糊匹配城市名称）
         all_train_bookings = TrainBooking
           .joins(:train)
           .includes(:train)
-          .where(trains: { departure_city: @departure_city, arrival_city: @arrival_city })
+          .where("trains.departure_city LIKE ? AND trains.arrival_city LIKE ?", "%#{@departure_city}%", "%#{@arrival_city}%")
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .to_a
@@ -135,6 +162,7 @@ module V151V200
         @train_booking = all_train_bookings.first
         expect(@train_booking).not_to be_nil, "未找到火车订单（#{@departure_city}→#{@arrival_city}）"
         
+        # 查询酒店订单（使用LIKE模糊匹配城市名称）
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -172,14 +200,14 @@ module V151V200
           "入住日期过晚。火车到达: #{arrival_date}, 入住日期: #{@hotel_booking.check_in_date}"
       end
       
-      # 断言5: 总价在预算范围内（800-1200元） (20%)
+      # 断言5: 总价在预算范围内（800-1200元，中档价位） (20%)
       add_assertion "总价在预算范围内（#{@min_budget}-#{@max_budget}元）", weight: 20 do
         train_price = @train_booking.total_price
         hotel_price = @hotel_booking.total_price
         total_price = train_price + hotel_price
         
         expect(total_price).to be >= @min_budget,
-          "总价低于预算下限。期望: ≥#{@min_budget}元, 实际: #{total_price}元（火车#{train_price}元+酒店#{hotel_price}元）"
+          "总价低于预算下限，未达到中档标准。期望: ≥#{@min_budget}元, 实际: #{total_price}元（火车#{train_price}元+酒店#{hotel_price}元）"
         expect(total_price).to be <= @max_budget,
           "总价超出预算上限。期望: ≤#{@max_budget}元, 实际: #{total_price}元（火车#{train_price}元+酒店#{hotel_price}元）"
       end
@@ -233,9 +261,10 @@ module V151V200
     #     )
     #   end
     def simulate
+      # 查找用户信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 创建火车订单（二等座）
+      # 创建火车订单（二等座，符合预算约束）
       train = @selected_combo[:train]
       TrainBooking.create!(
         user: user,
@@ -249,7 +278,7 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建酒店订单
+      # 创建酒店订单（中档住宿，符合预算约束）
       hotel = @selected_combo[:hotel]
       room = @selected_combo[:room]
       
@@ -304,17 +333,19 @@ module V151V200
       @check_in_date = Date.parse(data['check_in_date']) if data['check_in_date']
       @check_out_date = Date.parse(data['check_out_date']) if data['check_out_date']
       
-      # 重建 available 数据
+      # 重建可用火车列表（明天出发）
       @available_trains = Train
         .where(departure_city: @departure_city, arrival_city: @arrival_city, data_version: 0)
         .select { |t| t.departure_time.to_date == @travel_date }
         .to_a
       
+      # 重建可用酒店列表（中档价位）
       @available_hotels = Hotel
-        .where("city LIKE ?", "%#{@arrival_city}%")
+        .where("hotels.city LIKE ?", "%#{@arrival_city}%")
         .where(data_version: 0)
         .to_a
       
+      # 重建符合预算的组合（800-1200元）
       @valid_combinations = []
       @available_trains.each do |train|
         @available_hotels.each do |hotel|

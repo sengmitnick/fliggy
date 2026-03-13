@@ -369,7 +369,7 @@ class FlightsController < ApplicationController
         weekday: I18n.l(date, format: '%A'),
         day: date.day,
         price: min_price.to_i,
-        is_today: date == center_date
+        is_today: date == today  # 判断是否为真正的今天，而不是选中的日期
       }
     end
     prices

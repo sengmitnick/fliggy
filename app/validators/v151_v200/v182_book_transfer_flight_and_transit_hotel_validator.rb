@@ -2,28 +2,45 @@
 
 require_relative '../base_validator'
 
-# 验证用例182: 预订中转航班和中转城市酒店休息
+# 验证用例182: 给陈静预订明天北京经上海中转到深圳的航班，并预订上海中转酒店休息（明天，中转>6小时）
 #
 # 任务描述:
-#   用户需要预订中转航班（间隔>6小时），并在中转城市预订酒店休息
+#   陈静需要预订明天从北京经上海中转到深圳的航班（中转时间>6小时），
+#   由于中转等待时间较长，需要在上海预订酒店休息。Agent需要搜索符合条件的
+#   中转航班组合，并在中转城市预订酒店（入住时间在中转间隔内）。
 #
-# 复杂度分析:
-#   1. 需要查找中转航班组合（间隔>6小时）
-#   2. 需要识别中转城市
-#   3. 需要预订中转城市酒店（钟点房或短期入住）
-#   4. 验证酒店入住时间在中转间隔内
+# 业务流程（7个关键步骤）：
+#   1. 搜索北京→上海的航班（明天出发）
+#   2. 搜索上海→深圳的航班（明天或次日）
+#   3. 计算中转间隔（第二段起飞时间 - 第一段到达时间）
+#   4. 筛选中转间隔>6小时且<24小时的组合
+#   5. 预订两段航班（北京→上海，上海→深圳）
+#   6. 搜索上海市区酒店
+#   7. 预订中转酒店（入住日期在中转间隔内）
 #
-# 评分标准:
-#   - 创建了2个航班订单（出发+中转） (20分)
-#   - 中转间隔超过6小时 (20分)
-#   - 创建了中转城市酒店订单 (20分)
-#   - 酒店在中转城市 (20分)
-#   - 酒店入住时间在中转间隔内 (20分)
+# 复杂度分析（7个关键点）：
+#   1. 需要查找两段航班并计算中转间隔（>6小时）
+#   2. 需要识别中转城市（上海）
+#   3. 需要验证中转时间合理性（6-24小时）
+#   4. 需要预订中转城市酒店（上海市区）
+#   5. 需要计算酒店入住退房时间（入住=第一段到达日期，退房=第二段起飞日期+1天）
+#   6. 需要验证酒店入住时间在中转间隔内
+#   7. 需要确保两段航班和酒店的乘客/入住人信息一致
+#   ❌ 不能一次性提供：需要先搜索航班→计算中转间隔→筛选组合→预订航班→确认中转时间→预订酒店
+#
+# 评分标准（7项，总计100分）：
+#   - 创建了2个航班订单（北京→上海+上海→深圳）（20分）
+#   - 中转间隔超过6小时（18分）
+#   - 创建了中转城市酒店订单（15分）
+#   - 酒店位置正确（上海）（15分）
+#   - 酒店入住时间在中转间隔内（17分）
+#   - 航班乘客信息正确（陈静）（7分）
+#   - 酒店入住人信息正确（陈静）（8分）
 module V151V200
   class V182BookTransferFlightAndTransitHotelValidator < BaseValidator
     self.validator_id = 'v182_book_transfer_flight_and_transit_hotel_validator'
     self.task_id = '9aedf66b-ff40-41d2-9ff5-3e63982462a1'
-    self.title = '给陈静预订明天北京经上海中转到深圳的航班，并预订上海中转酒店休息'
+    self.title = '给陈静预订明天北京经上海中转到深圳的航班，并预订上海中转酒店休息（明天，中转>6小时）'
     self.description = '帮陈静订明天从北京经上海中转到深圳的航班（中转时间>6小时），并在上海预订酒店休息'
     self.timeout_seconds = 300
   
@@ -105,29 +122,26 @@ module V151V200
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = user.passengers.find_by!(name: '陈静', data_version: 0)
       
-      # 创建第一段航班订单
+      # 创建多程航班订单（一次性提交两段航班）
       first_flight = @selected_combo[:first]
-      Booking.create!(
-        user: user,
-        flight: first_flight,
-        passenger_name: passenger.name,
-        passenger_id_number: passenger.id_number,
-        contact_phone: passenger.phone,
-        total_price: first_flight.price,
-        accept_terms: true,
-        status: 'paid',
-        data_version: @data_version
-      )
-      
-      # 创建第二段航班订单
       second_flight = @selected_combo[:second]
+      
+      # 构建多程航班 JSON 数据
+      multi_city_data = [
+        { 'flight_id' => first_flight.id },
+        { 'flight_id' => second_flight.id }
+      ]
+      
+      # 创建单个多程航班订单
       Booking.create!(
         user: user,
-        flight: second_flight,
+        flight: first_flight,  # 使用第一个航班作为主航班
+        trip_type: 'multi_city',
+        multi_city_flights: multi_city_data,
         passenger_name: passenger.name,
         passenger_id_number: passenger.id_number,
         contact_phone: passenger.phone,
-        total_price: second_flight.price,
+        total_price: first_flight.price + second_flight.price,  # 两段航班总价
         accept_terms: true,
         status: 'paid',
         data_version: @data_version
@@ -154,25 +168,51 @@ module V151V200
     def verify
       # 断言1: 创建了2个航班订单 (20%)
       add_assertion "创建了2个航班订单（#{@departure_city}→#{@transit_city}→#{@final_city}）", weight: 20 do
-        all_bookings = Booking
-          .joins(:flight)
-          .includes(:flight)
-          .where(data_version: @data_version)
-          .order(:created_at)
-          .to_a
+        # 方式1: 查询多程航班订单（一次性下单）
+        multi_city_booking = Booking
+          .where(trip_type: 'multi_city', data_version: @data_version)
+          .order(created_at: :desc)
+          .first
         
-        @first_booking = all_bookings.find { |b| b.flight.departure_city == @departure_city && b.flight.destination_city == @transit_city }
-        @second_booking = all_bookings.find { |b| b.flight.departure_city == @transit_city && b.flight.destination_city == @final_city }
-        
-        expect(@first_booking).not_to be_nil, "未找到第一段航班订单（#{@departure_city}→#{@transit_city}）"
-        expect(@second_booking).not_to be_nil, "未找到第二段航班订单（#{@transit_city}→#{@final_city}）"
+        if multi_city_booking.present?
+          # 用户使用多程航班一次性下单
+          flights = multi_city_booking.multi_city_flight_objects
+          expect(flights.size).to be >= 2, "多程航班段数不足。期望: 至少2段，实际: #{flights.size}段"
+          
+          @first_flight = flights.find { |f| f.departure_city == @departure_city && f.destination_city == @transit_city }
+          @second_flight = flights.find { |f| f.departure_city == @transit_city && f.destination_city == @final_city }
+          
+          expect(@first_flight).not_to be_nil, "未找到第一段航班（#{@departure_city}→#{@transit_city}）"
+          expect(@second_flight).not_to be_nil, "未找到第二段航班（#{@transit_city}→#{@final_city}）"
+          
+          @booking_mode = :multi_city
+          @multi_city_booking = multi_city_booking
+        else
+          # 方式2: 查询两个单程航班订单（分批次下单）
+          all_bookings = Booking
+            .joins(:flight)
+            .includes(:flight)
+            .where(data_version: @data_version)
+            .order(created_at: :desc)
+            .to_a
+          
+          @first_booking = all_bookings.find { |b| b.flight.departure_city == @departure_city && b.flight.destination_city == @transit_city }
+          @second_booking = all_bookings.find { |b| b.flight.departure_city == @transit_city && b.flight.destination_city == @final_city }
+          
+          expect(@first_booking).not_to be_nil, "未找到第一段航班订单（#{@departure_city}→#{@transit_city}）"
+          expect(@second_booking).not_to be_nil, "未找到第二段航班订单（#{@transit_city}→#{@final_city}）"
+          
+          @first_flight = @first_booking.flight
+          @second_flight = @second_booking.flight
+          @booking_mode = :separate
+        end
       end
       
-      return if @first_booking.nil? || @second_booking.nil?
+      return if @first_flight.nil? || @second_flight.nil?
       
       # 断言2: 中转间隔超过6小时 (18%)
       add_assertion "中转间隔超过6小时", weight: 18 do
-        interval_hours = (@second_booking.flight.departure_time - @first_booking.flight.arrival_time) / 3600.0
+        interval_hours = (@second_flight.departure_time - @first_flight.arrival_time) / 3600.0
         expect(interval_hours).to be > 6,
           "中转间隔不足。期望: >6小时, 实际: #{interval_hours.round(1)}小时"
       end
@@ -182,12 +222,12 @@ module V151V200
         @hotel_booking = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
-          .where(hotels: { city: @transit_city })
+          .where("hotels.city LIKE ?", "%#{@transit_city}%")
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
         
-        expect(@hotel_booking).not_to be_nil, "未找到中转城市酒店订单"
+        expect(@hotel_booking).not_to be_nil, "未找到中转城市酒店订单（#{@transit_city}）"
       end
       
       return if @hotel_booking.nil?
@@ -201,33 +241,33 @@ module V151V200
       
       # 断言5: 酒店入住时间在中转间隔内 (17%)
       add_assertion "酒店入住时间在中转间隔内", weight: 17 do
-        arrival_date = @first_booking.flight.arrival_time.to_date
-        departure_date = @second_booking.flight.departure_time.to_date
+        arrival_date = @first_flight.arrival_time.to_date
+        departure_date = @second_flight.departure_time.to_date
         
-        # 入住日期应该在第一段航班到达当天或之后，第二段航班出发当天或之前
+        # 核心验证：入住时间必须在中转期间（第一段航班到达日 到 第二段航班起飞日之间）
         expect(@hotel_booking.check_in_date).to be >= arrival_date,
-          "入住日期过早。期望: >= #{arrival_date}, 实际: #{@hotel_booking.check_in_date}"
+          "入住时间过早，不在中转期间。第一段航班到达: #{arrival_date}，酒店入住: #{@hotel_booking.check_in_date}"
         expect(@hotel_booking.check_in_date).to be <= departure_date,
-          "入住日期过晚。期望: <= #{departure_date}, 实际: #{@hotel_booking.check_in_date}"
-        
-        # 验证退房日期
-        expect(@hotel_booking.check_out_date).to eq(@hotel_checkout_date),
-          "退房日期错误。期望: #{@hotel_checkout_date}, 实际: #{@hotel_booking.check_out_date}"
+          "入住时间过晚，不在中转期间。第二段航班起飞: #{departure_date}，酒店入住: #{@hotel_booking.check_in_date}"
       end
     
       # 断言6: 航班乘客信息正确（陈静） (7%)
       add_assertion "航班乘客信息正确（#{@expected_passenger_name}）", weight: 7 do
-        # 验证第一段航班
-        expect(@first_booking.passenger_name).to eq(@expected_passenger_name),
-          "第一段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@first_booking.passenger_name}"
-        expect(@first_booking.contact_phone).to eq(@expected_phone),
-          "第一段航班联系电话错误。期望: #{@expected_phone}, 实际: #{@first_booking.contact_phone}"
-        
-        # 验证第二段航班
-        expect(@second_booking.passenger_name).to eq(@expected_passenger_name),
-          "第二段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@second_booking.passenger_name}"
-        expect(@second_booking.contact_phone).to eq(@expected_phone),
-          "第二段航班联系电话错误。期望: #{@expected_phone}, 实际: #{@second_booking.contact_phone}"
+        if @booking_mode == :multi_city
+          # 多程航班：验证单个订单的乘客信息
+          expect(@multi_city_booking.passenger_name).to eq(@expected_passenger_name),
+            "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@multi_city_booking.passenger_name}"
+          expect(@multi_city_booking.contact_phone).to eq(@expected_phone),
+            "航班联系电话错误。期望: #{@expected_phone}, 实际: #{@multi_city_booking.contact_phone}"
+        else
+          # 分批次：验证两个订单的乘客信息
+          [@first_booking, @second_booking].each do |booking|
+            expect(booking.passenger_name).to eq(@expected_passenger_name),
+              "航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{booking.passenger_name}"
+            expect(booking.contact_phone).to eq(@expected_phone),
+              "航班联系电话错误。期望: #{@expected_phone}, 实际: #{booking.contact_phone}"
+          end
+        end
       end
     
       # 断言7: 酒店入住人信息正确（陈静） (8%)

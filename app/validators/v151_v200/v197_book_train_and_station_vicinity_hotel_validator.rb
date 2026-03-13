@@ -2,18 +2,39 @@
 
 require_relative '../base_validator'
 
-# 验证用例197: 预订火车+火车站1公里内酒店
+# 验证用例197: 给吴勇预订明天北京到上海的火车+火车站1公里内酒店
 #
-# 任务描述:
-#   预订火车+火车站1公里内酒店（步行可达）
+# 任务描述：
+#   为吴勇预订明天从北京到上海的火车+火车站附近酒店（步行可达，便于赶车或到达后休息）
 #
-# 评分标准:
-#   - 创建了火车订单 (25%)
-#   - 创建了酒店订单 (25%)
-#   - 酒店在火车站附近（≤1公里） (15%)
-#   - 出发/到达城市正确 (10%)
-#   - 乘客和入住人信息正确（吴勇） (15%)
-#   - 日期合理 (10%)
+# 核心要求：
+#   - 乘客：吴勇（1人）
+#   - 出发日期：明天（Date.current + 1.day）
+#   - 路线：北京 → 上海
+#   - 住宿：1晚（入住日期=火车到达日期）
+#   - 酒店位置：距离上海火车站 ≤ 1公里（步行可达）
+#   - 价格策略：选择火车站附近的酒店和火车
+#
+# 业务流程：
+#   1. 查询明天北京→上海的所有火车
+#   2. 查询上海火车站附近的酒店（距离 ≤ 1公里）
+#   3. 选择火车
+#   4. 选择火车站酒店房间（整晚房）
+#   5. 创建火车订单
+#   6. 创建酒店订单（入住日期=火车到达日期，住1晚）
+#
+# 复杂度分析：
+#   - 位置筛选：需要过滤出火车站附近的酒店（distance ≤ 1km）
+#   - 距离判断：优先文本匹配（酒店名称/地址包含“火车站”/“车站”），备用distance字段
+#   - 价格优化：选择火车站附近的酒店（重点是位置，不是价格）
+#   - 注意事项：必须过滤room_category='overnight'，排除钟点房
+#
+# 验证要点：
+#   - 火车/酒店订单已创建
+#   - 酒店距离火车站 ≤ 1公里
+#   - 出发/到达城市正确（北京 → 上海）
+#   - 乘客和入住人信息正确（吴勇）
+#   - 入住日期为火车到达日期或次日
 module V151V200
   class V197BookTrainAndStationVicinityHotelValidator < BaseValidator
     self.validator_id = 'v197_book_train_and_station_vicinity_hotel_validator'
@@ -42,17 +63,18 @@ module V151V200
       expect(@available_trains).not_to be_empty,
         "数据包缺少#{@departure_city}→#{@arrival_city}的火车（#{@travel_date}）"
       
-      # 查找火车站附近酒店
+      # 查找火车站附近酒店（优先距离验证）
+      # CRITICAL: 必须先用距离≤1km过滤，不能仅依赖名称
       @station_hotels = Hotel
         .where(city: @arrival_city, data_version: 0)
-        .select { |h| is_near_station?(h) }
+        .select { |h| h.distance.present? && h.distance.to_s.gsub(/[^0-9.]/, '').to_f <= @max_distance }
         .to_a
       
       if @station_hotels.empty?
-        # 如果没有明确标记的车站酒店，选择距离最近的
+        # 如果没有明确标记距离的酒店，才使用名称匹配作为备用
         @station_hotels = Hotel
           .where(city: @arrival_city, data_version: 0)
-          .select { |h| h.distance && h.distance <= @max_distance }
+          .select { |h| is_near_station?(h) }
           .to_a
       end
       
@@ -103,11 +125,18 @@ module V151V200
       # 断言3: 酒店在火车站附近（≤1公里） (15%)
       add_assertion "酒店在火车站附近（≤#{@max_distance}公里）", weight: 15 do
         hotel = @hotel_booking.hotel
-        is_station_hotel = is_near_station?(hotel) ||
-                          (hotel.distance && hotel.distance <= @max_distance)
         
-        expect(is_station_hotel).to be(true),
-          "酒店不在火车站附近。酒店: #{hotel.name}（距离#{hotel.distance}公里），要求: ≤#{@max_distance}公里"
+        # CRITICAL: 必须验证distance字段 ≤ 1.0km
+        if hotel.distance.present?
+          distance_km = hotel.distance.to_s.gsub(/[^0-9.]/, '').to_f
+          expect(distance_km).to be <= @max_distance,
+            "酒店不在火车站附近。酒店: #{hotel.name}（距离#{distance_km}公里），要求: ≤#{@max_distance}公里"
+        else
+          # 如果没有distance字段，则检查是否为车站酒店（备用逻辑）
+          is_station_hotel = is_near_station?(hotel)
+          expect(is_station_hotel).to be(true),
+            "酒店不在火车站附近。酒店: #{hotel.name}，未找到距离信息，且名称不包含'火车站'或'车站'"
+        end
       end
       
       # 断言4: 出发/到达城市正确 (10%)
@@ -164,7 +193,8 @@ module V151V200
       
       # 选择车站酒店
       station_hotel = @station_hotels.min_by(&:price)
-      room = station_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
+      # CRITICAL: 必须过滤room_category='overnight'，排除钟点房
+      room = station_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = train.arrival_time.to_date
       HotelBooking.create!(
@@ -200,7 +230,8 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @travel_date&.to_s,
-        max_distance: @max_distance
+        max_distance: @max_distance,
+        station_hotel_ids: @station_hotels&.map(&:id)
       }
     end
     
@@ -214,6 +245,11 @@ module V151V200
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @max_distance = data['max_distance']
+      
+      # 恢复station_hotels
+      if data['station_hotel_ids']
+        @station_hotels = Hotel.where(id: data['station_hotel_ids'], data_version: 0).to_a
+      end
     end
   end
 end

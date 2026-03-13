@@ -2,24 +2,44 @@
 
 require_relative '../base_validator'
 
-# 验证用例194: 预订明天出发的特价组合
+# 验证用例194: 给刘强预订明天从北京到上海的特价组合（最便宜的航班+酒店）
 #
-# 任务描述:
-#   预订明天出发的特价组合（航班+酒店）
+# 任务描述：
+#   为刘强预订明天从北京到上海的特价组合，选择最便宜的航班+最便宜的酒店
 #
-# 评分标准:
-#   - 创建了航班订单 (25%)
-#   - 创建了酒店订单 (25%)
-#   - 出发日期为明天 (10%)
-#   - 乘客和入住人信息正确（刘强） (15%)
-#   - 价格较低（属于特价） (15%)
-#   - 城市正确 (10%)
+# 核心要求：
+#   - 乘客：刘强（1人）
+#   - 出发日期：明天（Date.current + 1.day）
+#   - 路线：北京 → 上海
+#   - 住宿：1晚（入住日期=航班到达日期）
+#   - 价格策略：选择最便宜的航班+最便宜的酒店（总价 ≤ 平均价格 × 0.9）
+#
+# 业务流程：
+#   1. 查询明天北京→上海的所有航班
+#   2. 查询上海的所有酒店（按价格升序排序，取前20家）
+#   3. 计算特价阈值（平均航班价格的80%）
+#   4. 选择最便宜的航班（特价航班）
+#   5. 选择最便宜的酒店房间
+#   6. 创建航班订单
+#   7. 创建酒店订单（入住日期=航班到达日期，住1晚）
+#
+# 复杂度分析：
+#   - 特价标准：总价 ≤ (平均航班价格 × 0.8 + 平均酒店价格) × 0.9
+#   - 价格优化：贪婪选择（最便宜航班 + 最便宜酒店）
+#   - 时间约束：必须是明天出发的航班
+#
+# 验证要点：
+#   - 航班/酒店订单已创建
+#   - 出发日期为明天
+#   - 乘客和入住人信息正确（刘强）
+#   - 价格符合特价标准（≤ 平均价格 × 0.9）
+#   - 城市正确（北京 → 上海）
 module V151V200
   class V194BookLastMinuteDealDiscountComboValidator < BaseValidator
     self.validator_id = 'v194_book_last_minute_deal_discount_combo_validator'
     self.task_id = 'e5dc7f50-cb89-4ef1-baa8-81e296f08452'
-    self.title = '给刘强预订明天从北京到上海的特价组合（明天出发）'
-    self.description = '帮刘强订明天从北京到上海的特价组合（航班+酒店）'
+    self.title = '给刘强预订明天从北京到上海的特价组合（最便宜的航班+酒店）'
+    self.description = '帮刘强订明天从北京到上海的特价组合（最便宜的航班+酒店）'
     self.timeout_seconds = 300
     
     def prepare
@@ -181,7 +201,8 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         tomorrow: @tomorrow&.to_s,
-        discount_threshold: @discount_threshold
+        discount_threshold: @discount_threshold,
+        available_hotel_ids: @available_hotels&.map(&:id)
       }
     end
     
@@ -195,6 +216,11 @@ module V151V200
       @arrival_city = data['arrival_city']
       @tomorrow = Date.parse(data['tomorrow']) if data['tomorrow']
       @discount_threshold = data['discount_threshold']
+      
+      # 恢复available_hotels
+      if data['available_hotel_ids']
+        @available_hotels = Hotel.where(id: data['available_hotel_ids'], data_version: 0).order(price: :asc).to_a
+      end
     end
   end
 end
