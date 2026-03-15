@@ -8,7 +8,7 @@ class TrainsController < ApplicationController
   end
 
   def show
-    @train = Train.find(params[:id])
+    @train = Train.includes(:train_seats, :booking_options).find(params[:id])
     # NOTE: City selector data is loaded via CitySelectorDataConcern
   end
 
@@ -43,7 +43,7 @@ class TrainsController < ApplicationController
       departure_time_end: @departure_time_end,
       arrival_time_start: @arrival_time_start,
       arrival_time_end: @arrival_time_end
-    )
+    ).includes(:train_seats)
   end
 
   private

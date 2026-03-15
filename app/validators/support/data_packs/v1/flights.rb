@@ -1187,7 +1187,7 @@ end
 
 Flight.insert_all(all_flights)
 
-# ==================== 北京 -> 上海浦东T1（V114专用）====================
+# ==================== 北京 -> 上海浦东T1（V114/V199专用）====================
 all_flights = []
 
 (start_date..end_date).each do |date|
@@ -1198,12 +1198,30 @@ all_flights = []
     {
       departure_city: "北京",
       destination_city: "上海",
+      departure_time: base_datetime.change(hour: 7, min: 30),
+      arrival_time: base_datetime.change(hour: 10, min: 0),
+      departure_airport: "首都T3",
+      arrival_airport: "浦东T1",
+      airline: "中国国航",
+      flight_number: "CA1831",  # V199专用：明天上午10:00到达浦东T1
+      aircraft_type: "波音737(中)",
+      price: 780.0,
+      discount_price: 0.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "北京",
+      destination_city: "上海",
       departure_time: base_datetime.change(hour: 12, min: 0),
       arrival_time: base_datetime.change(hour: 14, min: 30),
       departure_airport: "首都T3",
       arrival_airport: "浦东国际机场T1航站楼",
       airline: "东方航空",
-      flight_number: "MU#{5301 + day_suffix}",
+      flight_number: "MU#{5301 + day_suffix}",  # V114专用
       aircraft_type: "空客320(中)",
       price: 750.0,
       discount_price: 0.0,

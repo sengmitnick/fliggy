@@ -25,9 +25,17 @@ require_relative '../base_validator'
 #
 # 复杂度分析：
 #   - 位置筛选：需要过滤出机场附近的酒店（distance ≤ 3km）
-#   - 距离判断：优先使用distance字段，备用文本匹配（酒店名称/地址包含“机场”）
+#   - 距离判断：优先使用distance字段，备用文本匹配（酒店名称/地址包含"机场"）
 #   - 价格优化：选择机场附近的酒店（重点是位置，不是价格）
 #   - 注意事项：必须过滤room_category='overnight'，排除钟点房
+#
+# 评分标准（总分100分）：
+#   1. 创建了航班订单(25分)
+#   2. 创建了酒店订单(25分)
+#   3. 酒店在机场附近（≤3公里）(15分)
+#   4. 出发/到达城市正确(10分)
+#   5. 乘客和入住人信息正确（王芳）(15分)
+#   6. 日期合理(10分)
 #
 # 验证要点：
 #   - 航班/酒店订单已创建
@@ -131,7 +139,7 @@ module V151V200
         expect(hotel.city).to eq(@arrival_city)
       end
       
-      # 断言5: 乘客和入住人信息正确（周敏） (15%)
+      # 断言5: 乘客和入住人信息正确（王芳） (15%)
       add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
         # 检查航班乘客姓名
         expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),

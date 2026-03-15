@@ -65,7 +65,7 @@
       <div class="flex items-center space-x-3 text-xs text-text-muted mb-3">
         <span>乘车人: <%= booking.passenger_name %></span>
         <span>|</span>
-        <span><%= booking.seat_type == 'second_class' ? '二等座' : booking.seat_type == 'first_class' ? '一等座' : '商务座' %></span>
+        <span><%= booking.seat_type_label %></span>
       </div>
 
       <!-- Services/Tags -->

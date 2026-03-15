@@ -260,7 +260,7 @@ if cities.include?("上海")
   end
 end
 
-# 火车站附近酒店（支持 V131/V134 等验证器）
+# 火车站附近酒店（支持 V131/V134/V197 等验证器）
 ["上海", "天津"].each do |city|
   next unless cities.include?(city)
   
@@ -280,6 +280,13 @@ end
       "#{brand[:name]}酒店·#{city}店"
     end
     
+    # V197要求距离≤1.0km，所以第一家酒店设置为0.8km
+    distance_value = if idx == 0
+      "0.8km"
+    else
+      "#{rand(1..3)}.#{rand(0..9)}km"
+    end
+    
     hotels_data << {
       name: hotel_name,
       brand: brand[:name],
@@ -288,7 +295,7 @@ end
       rating: (4.0 + rand * 0.8).round(1),
       price: base_price,
       original_price: (base_price * rand(1.1..1.25)).round(0),
-      distance: "#{rand(1..3)}.#{rand(0..9)}km",
+      distance: distance_value,
       features: features_pool.sample,
       star_level: star_level,
       is_featured: false,

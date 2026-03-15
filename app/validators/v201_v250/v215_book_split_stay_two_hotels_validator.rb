@@ -2,24 +2,42 @@
 
 require_relative '../base_validator'
 
-# V215: 预订分住两家酒店（5天分段）
+# 验证用例215: 张三需要预订明天入住北京5天的行程，分住2家不同酒店（前2晚+后3晚）
 #
 # 任务描述:
-#   用户需要预订北京5天行程，分住2家酒店（前2晚A酒店+后3晚B酒店）
+#   张三明天需要入住北京5天行程，希望分住2家不同酒店体验不同风格（前2晚住一家，后3晚住另一家）。
+#   Agent需要预订两家酒店，确保时间衔接正确（第一家退房日=第二家入住日）。
+#
+# 业务流程:
+#   1. 张三向Agent提出需求：明天入住北京5天，分住2家不同酒店（前2晚+后3晚）
+#   2. Agent查询北京的酒店
+#   3. Agent选择第一家酒店（价格合理）
+#   4. Agent预订第一家酒店，入住明天，住2晚
+#   5. Agent选择第二家酒店（与第一家不同）
+#   6. Agent预订第二家酒店，入住日期为第一家退房日，住3晚
+#   7. Agent确认两家酒店时间衔接正确
+#
+# 复杂度分析:
+#   1. 需要理解分段住宿概念（2家酒店，前2晚+后3晚）
+#   2. 需要计算两家酒店的入住和退房日期
+#   3. 需要确保时间衔接（第一家退房日=第二家入住日）
+#   4. 需要选择2家不同的酒店
 #
 # 评分标准:
-#   - 创建了2个酒店订单 (25%)
-#   - 两家酒店均位于北京 (10%)
-#   - 第一家酒店住2晚 (15%)
-#   - 第二家酒店住3晚 (15%)
-#   - 两家酒店时间衔接正确（第一家退房日=第二家入住日） (15%)
-#   - 订单状态有效 (20%)
+#   - 创建了2个酒店订单 (20分)
+#   - 两家酒店均位于北京 (10分)
+#   - 第一家酒店入住日期正确（明天） (10分)
+#   - 第一家酒店住2晚 (15分)
+#   - 第二家酒店住3晚 (15分)
+#   - 两家酒店时间衔接正确（第一家退房日=第二家入住日） (15分)
+#   - 入住人信息正确（张三） (10分)
+#   - 订单状态有效 (5分)
 module V201V250
   class V215BookSplitStayTwoHotelsValidator < BaseValidator
     self.validator_id = 'v215_book_split_stay_two_hotels_validator'
     self.task_id = '4ff576f9-5f5f-4f8f-ff8f-9f1a2b3c4d5f'
-    self.title = '帮张三订明天入住的北京5天行程，分住2家不同酒店：前2晚住一家，后3晚住另一家'
-    self.description = '帮张三订明天入住的北京5天行程，分住2家不同酒店：前2晚住一家，后3晚住另一家'
+    self.title = '张三需要预订明天入住北京5天的行程，分住2家不同酒店（前2晚+后3晚）'
+    self.description = '张三需要预订明天入住北京5天的行程，分住2家不同酒店（前2晚+后3晚）'
     self.timeout_seconds = 300
     
     def prepare
@@ -46,22 +64,27 @@ module V201V250
       raise "酒店数量不足（需要至少2家）" if @available_hotels.size < 2
       
       {
-        task: "请预订#{@city}5天行程，#{@start_date.strftime('%Y年%m月%d日')}（明天）入住，分住2家不同酒店：前2晚住一家，后3晚住另一家。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订明天入住北京5天的行程，分住2家不同酒店（前2晚+后3晚）",
+        description: "张三需要预订明天入住北京5天的行程，分住2家不同酒店（前2晚+后3晚）",
+        scenario: "张三明天需要入住北京5天，希望体验不同酒店风格",
         requirements: {
           city: @city,
-          start_date: @start_date,
+          start_date: @start_date.strftime('%Y-%m-%d'),
           first_hotel_nights: @first_hotel_nights,
           second_hotel_nights: @second_hotel_nights,
-          switch_date: @switch_date,
-          end_date: @end_date,
-          purpose: '分段住宿体验不同酒店'
+          switch_date: @switch_date.strftime('%Y-%m-%d'),
+          end_date: @end_date.strftime('%Y-%m-%d'),
+          passenger: '张三'
         },
-        hint: "预订两家不同酒店，第一家住2晚，第二家住3晚，时间要衔接好。"
+        available_hotels_sample: {
+          count: @available_hotels.size,
+          example: @available_hotels.first(2).map { |h| "#{h.name}（#{h.city}）" }.join('、')
+        }
       }
     end
     
     def verify
-      add_assertion "创建了2个酒店订单", weight: 25 do
+      add_assertion "创建了2个酒店订单", weight: 20 do
         all_bookings = HotelBooking
           .joins(:hotel)
           .where(hotels: { city: @city })
@@ -82,6 +105,11 @@ module V201V250
           "第一家酒店城市错误。期望: #{@city}, 实际: #{@first_booking.hotel.city}"
         expect(@second_booking.hotel.city).to eq(@city),
           "第二家酒店城市错误。期望: #{@city}, 实际: #{@second_booking.hotel.city}"
+      end
+      
+      add_assertion "第一家酒店入住日期正确（明天#{@start_date}）", weight: 10 do
+        expect(@first_booking.check_in_date).to eq(@start_date),
+          "第一家酒店入住日期错误。期望: #{@start_date}（明天）, 实际: #{@first_booking.check_in_date}"
       end
       
       add_assertion "第一家酒店住#{@first_hotel_nights}晚", weight: 15 do
@@ -108,7 +136,7 @@ module V201V250
           "第二家酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@second_booking.guest_name}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@first_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@second_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -131,7 +159,7 @@ module V201V250
       raise "未找到第一家酒店房间" unless first_room
       raise "未找到第二家酒店房间" unless second_room
       
-      # 创建第一家酒店订单（2晚）
+      # 创建第一家酒店订单（2晚，1间）
       HotelBooking.create!(
         user: user,
         hotel: first_hotel,
@@ -147,7 +175,7 @@ module V201V250
         data_version: @data_version
       )
       
-      # 创建第二家酒店订单（3晚）
+      # 创建第二家酒店订单（3晚，1间）
       HotelBooking.create!(
         user: user,
         hotel: second_hotel,

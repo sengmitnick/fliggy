@@ -2,19 +2,33 @@
 
 require_relative '../base_validator'
 
-# V210: 预订快速中转（航班转火车，中转时间≤3小时）
+# 验证用例210: 张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时
 #
 # 任务描述:
-#   用户需要预订明天深圳→北京→天津，航班转火车，中转时间≤3小时
+#   张三明天需要从深圳到天津，选择先乘航班到北京再转火车，要求中转时间≤3小时以快速抵达目的地。
+#   Agent需要理解多段行程规划，筛选符合中转时间要求的航班+火车组合并完成预订。
+#
+# 业务流程:
+#   1. 查找深圳→北京航班（明天）
+#   2. 查找北京→天津火车（同日）
+#   3. 计算中转时间，筛选中转时间在1-3小时之间的组合
+#   4. 创建航班订单
+#   5. 创建火车票订单
+#
+# 复杂度分析:
+#   1. 需要理解多段行程规划（航班 + 火车跨交通工具组合）
+#   2. 需要计算航班落地时间与火车出发时间的间隔（中转时间≤3小时）
+#   3. 需要理解时间衔接算法（预留1小时最低中转时间）
+#   4. 需要理解快速中转的业务场景（避免过长等待）
 #
 # 评分标准:
-#   - 创建了航班和火车票订单 (20%)
-#   - 第一段航班路线正确（深圳→北京） (10%)
-#   - 第二段火车路线正确（北京→天津） (10%)
-#   - 出发日期正确（明天） (10%)
-#   - 中转时间≤3小时且衔接合理 (30%)
-#   - 乘客信息正确 (10%)
-#   - 订单状态有效 (10%)
+#   - 创建了航班和火车票订单 (20分)
+#   - 第一段航班路线正确（深圳→北京） (10分)
+#   - 第二段火车路线正确（北京→天津） (10分)
+#   - 出发日期正确（明天） (10分)
+#   - 中转时间≤3小时且衔接合理 (30分)
+#   - 乘客信息正确 (10分)
+#   - 订单状态有效 (10分)
 module V201V250
   class V210BookQuickConnectionTransferValidator < BaseValidator
     self.validator_id = 'v210_book_quick_connection_transfer_validator'
@@ -64,17 +78,26 @@ module V201V250
       
       raise "未找到符合中转时间要求的组合" if @valid_combinations.empty?
       
+      # 选择一个优选组合作为示例
+      sample_combo = @valid_combinations.min_by { |c| c[:transfer_hours] }
+      
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（明天）从#{@origin_city}经#{@transfer_city}到#{@destination_city}的行程，要求航班转火车中转时间≤3小时，紧凑衔接。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时",
+        description: "张三需要预订明天从深圳经北京到天津的行程，航班转火车，中转时间≤3小时",
+        scenario: "张三明天需要从#{@origin_city}到#{@destination_city}，选择先乘航班到#{@transfer_city}再转火车，要求中转时间紧凑（≤#{@max_transfer_hours}小时）以快速抵达目的地",
         requirements: {
           origin_city: @origin_city,
           transfer_city: @transfer_city,
           destination_city: @destination_city,
           travel_date: @travel_date,
           max_transfer_hours: "≤#{@max_transfer_hours}小时",
+          passenger: @expected_passenger_name,
           purpose: '快速中转'
         },
-        hint: "先订航班到#{@transfer_city}，再订火车到#{@destination_city}，确保中转时间在1-3小时之间。"
+        available_combinations_sample: {
+          count: @valid_combinations.size,
+          example: "#{sample_combo[:flight].flight_number}（#{sample_combo[:flight].departure_time.strftime('%H:%M')}起飞，#{sample_combo[:flight].arrival_time.strftime('%H:%M')}落地）+ #{sample_combo[:train].train_number}（#{sample_combo[:train].departure_time.strftime('%H:%M')}出发），中转时间#{sample_combo[:transfer_hours].round(1)}小时"
+        }
       }
     end
     

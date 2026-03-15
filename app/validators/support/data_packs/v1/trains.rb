@@ -1445,6 +1445,234 @@ end
 Train.insert_all(beijing_xian_night_trains) if beijing_xian_night_trains.any?
 puts "  ✓ 创建了 #{beijing_xian_night_trains.size} 条北京→西安夜间火车记录（覆盖#{(end_date - start_date + 1).to_i}天）"
 
+# ==================== 北京→西安高铁/动车数据 ====================
+puts "\n生成北京→西安高铁/动车数据..."
+beijing_xian_highspeed_trains = []
+
+highspeed_train_routes = [
+  { train_number: 'G87', departure_time: '07:00', duration: 290, price: 515.5 },  # 7:00发车，11:50到达，4小时50分
+  { train_number: 'G89', departure_time: '09:15', duration: 305, price: 515.5 },  # 9:15发车，14:20到达，5小时5分
+  { train_number: 'D55', departure_time: '08:30', duration: 345, price: 410.5 },  # 8:30发车，14:15到达，5小时45分
+  { train_number: 'G91', departure_time: '13:00', duration: 295, price: 515.5 },  # 13:00发车，17:55到达，4小时55分
+  { train_number: 'D57', departure_time: '15:30', duration: 360, price: 410.5 },  # 15:30发车，21:30到达，6小时
+  { train_number: 'G93', departure_time: '17:45', duration: 300, price: 515.5 }   # 17:45发车，22:45到达，5小时
+]
+
+(start_date..end_date).each do |travel_date|
+  highspeed_train_routes.each do |route|
+    dep_hour, dep_min = route[:departure_time].split(':').map(&:to_i)
+    departure_datetime = Time.zone.parse("#{travel_date} #{route[:departure_time]}")
+    arrival_datetime = departure_datetime + route[:duration].minutes
+    
+    beijing_xian_highspeed_trains << {
+      train_number: route[:train_number],
+      departure_city: '北京',
+      arrival_city: '西安',
+      departure_station: '北京西站',
+      arrival_station: '西安北站',
+      departure_time: departure_datetime,
+      arrival_time: arrival_datetime,
+      duration: route[:duration],
+      price_second_class: route[:price],
+      price_first_class: (route[:price] * 1.6).round(1),
+      price_business_class: (route[:price] * 3.0).round(1),
+      available_seats: 200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Train.insert_all(beijing_xian_highspeed_trains) if beijing_xian_highspeed_trains.any?
+puts "  ✓ 创建了 #{beijing_xian_highspeed_trains.size} 条北京→西安高铁/动车记录（覆盖#{(end_date - start_date + 1).to_i}天）"
+
+# ==================== 北京→成都高铁/动车数据 ====================
+puts "\n生成北京→成都高铁/动车数据..."
+beijing_chengdu_highspeed_trains = []
+
+beijing_chengdu_routes = [
+  { train_number: 'G89', departure_time: '08:00', duration: 450, price: 650.5 },  # 8:00发车，15:30到达，7小时30分
+  { train_number: 'G307', departure_time: '10:30', duration: 465, price: 650.5 }, # 10:30发车，18:15到达，7小时45分
+  { train_number: 'D55', departure_time: '09:00', duration: 540, price: 520.5 },  # 9:00发车，18:00到达，9小时
+  { train_number: 'G309', departure_time: '14:15', duration: 470, price: 650.5 }  # 14:15发车，22:05到达，7小时50分
+]
+
+(start_date..end_date).each do |travel_date|
+  beijing_chengdu_routes.each do |route|
+    dep_hour, dep_min = route[:departure_time].split(':').map(&:to_i)
+    departure_datetime = Time.zone.parse("#{travel_date} #{route[:departure_time]}")
+    arrival_datetime = departure_datetime + route[:duration].minutes
+    
+    beijing_chengdu_highspeed_trains << {
+      train_number: route[:train_number],
+      departure_city: '北京',
+      arrival_city: '成都',
+      departure_station: '北京西站',
+      arrival_station: '成都东站',
+      departure_time: departure_datetime,
+      arrival_time: arrival_datetime,
+      duration: route[:duration],
+      price_second_class: route[:price],
+      price_first_class: (route[:price] * 1.6).round(1),
+      price_business_class: (route[:price] * 3.0).round(1),
+      available_seats: 200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Train.insert_all(beijing_chengdu_highspeed_trains) if beijing_chengdu_highspeed_trains.any?
+puts "  ✓ 创建了 #{beijing_chengdu_highspeed_trains.size} 条北京→成都高铁/动车记录（覆盖#{(end_date - start_date + 1).to_i}天）"
+
+# ==================== 为额外火车创建座位和订票套餐 ====================
+# 为early_trains、chengdu_chongqing_trains、budget_trains、beijing_xian_night_trains、beijing_xian_highspeed_trains、beijing_chengdu_highspeed_trains创建座位和套餐
+puts "\n为额外火车（早班车、成都重庆、预算型、北京西安、北京成都）创建座位和订票套餐..."
+
+# 收集所有额外火车的train_number
+additional_train_numbers = []
+additional_train_numbers.concat(early_trains.map { |t| t[:train_number] }) if early_trains.any?
+additional_train_numbers.concat(chengdu_chongqing_trains.map { |t| t[:train_number] }) if chengdu_chongqing_trains.any?
+additional_train_numbers.concat(budget_trains.map { |t| t[:train_number] }) if budget_trains.any?
+additional_train_numbers.concat(beijing_xian_night_trains.map { |t| t[:train_number] }) if beijing_xian_night_trains.any?
+additional_train_numbers.concat(beijing_xian_highspeed_trains.map { |t| t[:train_number] }) if beijing_xian_highspeed_trains.any?
+additional_train_numbers.concat(beijing_chengdu_highspeed_trains.map { |t| t[:train_number] }) if beijing_chengdu_highspeed_trains.any?
+
+# 查询这些火车
+additional_trains = Train.where(data_version: 0, train_number: additional_train_numbers)
+puts "  ✓ 找到 #{additional_trains.count} 趟额外火车，开始创建座位和套餐数据..."
+
+# 创建座位类型数据
+additional_seats = []
+
+# 识别夜间火车（北京→西安的Z、K字头）
+night_train_numbers = beijing_xian_night_trains.map { |t| t[:train_number] }
+
+additional_trains.find_each do |train|
+  # 判断是否是夜间卧铺火车
+  is_night_train = night_train_numbers.include?(train.train_number)
+  
+  if is_night_train
+    # 夜间火车：硬卧、软卧、无座
+    seat_types = [
+      { 
+        seat_type: 'hard_sleeper',
+        price: train.price_second_class,
+        total: rand(150..250),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'soft_sleeper',
+        price: train.price_first_class,
+        total: rand(50..100),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'no_seat', 
+        price: (train.price_second_class * 0.5).round(1), 
+        total: 999,
+        available_ratio: 0.99
+      }
+    ]
+  else
+    # 普通火车：二等座、一等座、商务座、无座
+    seat_types = [
+      { 
+        seat_type: 'second_class', 
+        price: train.price_second_class, 
+        total: rand(300..500),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'first_class', 
+        price: train.price_first_class, 
+        total: rand(100..200),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'business_class', 
+        price: train.price_business_class, 
+        total: rand(20..50),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'no_seat', 
+        price: (train.price_second_class * 0.5).round(1), 
+        total: 999,
+        available_ratio: 0.99
+      }
+    ]
+  end
+  
+  seat_types.each do |seat_data|
+    available = (seat_data[:total] * seat_data[:available_ratio]).to_i
+    additional_seats << {
+      train_id: train.id,
+      seat_type: seat_data[:seat_type],
+      price: seat_data[:price],
+      total_count: seat_data[:total],
+      available_count: available,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+TrainSeat.insert_all(additional_seats) if additional_seats.any?
+puts "  ✓ 已为 #{additional_trains.count} 趟额外火车创建 #{additional_seats.size} 个座位类型记录"
+
+# 创建订票套餐
+additional_options = []
+
+additional_trains.find_each do |train|
+  booking_options = [
+    {
+      train_id: train.id,
+      title: '超值7大权益',
+      description: '含送站、预约座位、延误退改、分享红包等',
+      extra_fee: 59,
+      benefits: ['送站服务', '预约座位', '延误退改', '退票无忧', '分享红包', '出行保障', '优先客服'],
+      priority: 1,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      train_id: train.id,
+      title: '登录12306购票',
+      description: '使用12306账号直接购买，享受官方价格',
+      extra_fee: 0,
+      benefits: ['官方价格', '无额外费用', '账号直购'],
+      priority: 2,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      train_id: train.id,
+      title: '免登12306购票',
+      description: '无需12306账号，快速下单',
+      extra_fee: 25,
+      benefits: ['无需12306', '快速下单', '支付便捷'],
+      priority: 3,
+      is_active: true,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  additional_options.concat(booking_options)
+end
+
+BookingOption.insert_all(additional_options) if additional_options.any?
+puts "  ✓ 已为 #{additional_trains.count} 趟额外火车创建 #{additional_options.size} 个订票套餐记录"
+
 # ==================== 扩展火车票数据到未来15天 ====================
 # 为v192-v200验证器提供更长周期的火车票数据，支持7天以上的往返行程规划
 

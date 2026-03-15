@@ -2,24 +2,43 @@
 
 require_relative '../base_validator'
 
-# V216: 预订连续多段行程（4城4天）
+# 验证用例216: 张三需要预订明天开始的连续多段行程：北京→上海→杭州→深圳（4天，使用飞机或火车）
 #
 # 任务描述:
-#   用户需要预订连续多段行程：北京→上海→杭州→深圳（4天）
+#   张三需要预订明天开始的连续多段行程，依次游览北京→上海→杭州→深圳（4天），只能使用飞机或火车。
+#   Agent需要预订3段交通（飞机或火车），确保各段时间衔接合理（同一天或次日）。
+#
+# 业务流程:
+#   1. 张三向Agent提出需求：明天开始连续多段行程，北京→上海→杭州→深圳（4天）
+#   2. Agent查询第一段交通（北京→上海），选择合适的航班或火车
+#   3. Agent预订第一段交通
+#   4. Agent查询第二段交通（上海→杭州），选择与第一段衔接合理的航班或火车
+#   5. Agent预订第二段交通
+#   6. Agent查询第三段交通（杭州→深圳），选择与第二段衔接合理的航班或火车
+#   7. Agent预订第三段交通
+#   8. Agent确认各段时间衔接合理（间隔1-48小时）
+#
+# 复杂度分析:
+#   1. 需要理解连续多段行程概念（3段交通，4个城市）
+#   2. 需要同时支持飞机和火车两种交通方式
+#   3. 需要计算各段交通的时间衔接（确保间隔合理）
+#   4. 需要协调多段行程的路线顺序
 #
 # 评分标准:
-#   - 创建了3段交通订单 (25%)
-#   - 第一段路线正确（北京→上海） (10%)
-#   - 第二段路线正确（上海→杭州） (10%)
-#   - 第三段路线正确（杭州→深圳） (10%)
-#   - 各段时间衔接合理（同一天或次日） (25%)
-#   - 订单状态有效 (20%)
+#   - 创建了3段交通订单 (20分)
+#   - 第一段路线正确（北京→上海） (10分)
+#   - 第二段路线正确（上海→杭州） (10分)
+#   - 第三段路线正确（杭州→深圳） (10分)
+#   - 第一段出发日期正确（明天） (10分)
+#   - 各段时间衔接合理（间隔1-48小时） (20分)
+#   - 乘客信息正确（张三） (15分)
+#   - 订单状态有效 (5分)
 module V201V250
   class V216BookConsecutiveTripsMultiDestinationValidator < BaseValidator
     self.validator_id = 'v216_book_consecutive_trips_multi_destination_validator'
     self.task_id = '5ff687f0-6f6f-4f9f-ff9f-0f2a3b4c5d6f'
-    self.title = '帮张三订明天开始的连续多段行程：北京→上海→杭州→深圳（4天），只能使用飞机或火车，各段时间要衔接好'
-    self.description = '帮张三订明天开始的连续多段行程：北京→上海→杭州→深圳（4天），只能使用飞机或火车，各段时间要衔接好'
+    self.title = '张三需要预订明天开始的连续多段行程：北京→上海→杭州→深圳（4天，使用飞机或火车）'
+    self.description = '张三需要预订明天开始的连续多段行程：北京→上海→杭州→深圳（4天，使用飞机或火车）'
     self.timeout_seconds = 300
     
     def prepare
@@ -46,20 +65,26 @@ module V201V250
       raise "未找到#{@city3}→#{@city4}的交通" if @leg3_options.empty?
       
       {
-        task: "请预订#{@start_date.strftime('%Y年%m月%d日')}（明天）开始的连续多段行程：#{@city1}→#{@city2}→#{@city3}→#{@city4}（4天），只能使用飞机或火车，各段时间要衔接好。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订明天开始的连续多段行程：北京→上海→杭州→深圳（4天，使用飞机或火车）",
+        description: "张三需要预订明天开始的连续多段行程：北京→上海→杭州→深圳（4天，使用飞机或火车）",
+        scenario: "张三需要连续游览4个城市，使用飞机或火车",
         requirements: {
           cities: "#{@city1}→#{@city2}→#{@city3}→#{@city4}",
-          start_date: @start_date,
+          start_date: @start_date.strftime('%Y-%m-%d'),
           days: 4,
-          transport_types: '只能使用飞机或火车',
-          purpose: '多城市连续游览'
+          transport_types: '飞机或火车',
+          passenger: '张三'
         },
-        hint: "依次预订三段交通（飞机或火车），确保时间衔接合理（同一天或次日）。"
+        available_transports_sample: {
+          leg1: "#{@city1}→#{@city2}: #{@leg1_options.size}个选项",
+          leg2: "#{@city2}→#{@city3}: #{@leg2_options.size}个选项",
+          leg3: "#{@city3}→#{@city4}: #{@leg3_options.size}个选项"
+        }
       }
     end
     
     def verify
-      add_assertion "创建了3段交通订单", weight: 25 do
+      add_assertion "创建了3段交通订单（飞机或火车）", weight: 20 do
         # 收集所有交通订单（航班+火车）
         flight_bookings = Booking
           .joins(:flight)
@@ -106,7 +131,14 @@ module V201V250
         expect(arr).to eq(@city4), "第三段到达城市错误。期望: #{@city4}, 实际: #{arr}"
       end
       
-      add_assertion "各段时间衔接合理", weight: 25 do
+      add_assertion "第一段出发日期正确（明天#{@start_date}）", weight: 10 do
+        dep_time = get_departure_time(@leg1)
+        dep_date = dep_time.to_date
+        expect(dep_date).to eq(@start_date),
+          "第一段出发日期错误。期望: #{@start_date}（明天）, 实际: #{dep_date}"
+      end
+      
+      add_assertion "各段时间衔接合理（间隔1-48小时）", weight: 20 do
         time1_arr = get_arrival_time(@leg1)
         time2_dep = get_departure_time(@leg2)
         time2_arr = get_arrival_time(@leg2)
@@ -140,15 +172,20 @@ module V201V250
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 预订第一段（明天晚上）
-      leg1 = @leg1_options.select { |t| get_time(t) > (@start_date.to_time + 18.hours) }.min_by { |t| t[:price] } || @leg1_options.min_by { |t| t[:price] }
+      # 预订第一段（明天，飞机或火车，优先选择晚上出发）
+      leg1_on_start_date = @leg1_options.select { |t| get_time(t).to_date == @start_date }
+      leg1 = if leg1_on_start_date.any?
+               leg1_on_start_date.select { |t| get_time(t).hour >= 18 }.min_by { |t| t[:price] } || leg1_on_start_date.min_by { |t| t[:price] }
+             else
+               @leg1_options.min_by { |t| t[:price] }
+             end
       create_transport_booking(user, leg1)
       
-      # 预订第二段（后天早上或中午）
+      # 预订第二段（飞机或火车，与第一段衔接）
       leg2 = @leg2_options.select { |t| get_time(t) > leg1_arrival_time(leg1) + 12.hours }.min_by { |t| t[:price] } || @leg2_options.min_by { |t| t[:price] }
       create_transport_booking(user, leg2)
       
-      # 预订第三段（大后天或再后一天）
+      # 预订第三段（飞机或火车，与第二段衔接）
       leg3 = @leg3_options.select { |t| get_time(t) > leg2_arrival_time(leg2) + 12.hours }.min_by { |t| t[:price] } || @leg3_options.min_by { |t| t[:price] }
       create_transport_booking(user, leg3)
     end

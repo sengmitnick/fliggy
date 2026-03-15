@@ -2,24 +2,42 @@
 
 require_relative '../base_validator'
 
-# V213: 预订航班+酒店早入住（12:00前）
+# 验证用例213: 张三需要预订明天早上到杭州的航班（12:00前到达）并当天入住酒店
 #
 # 任务描述:
-#   用户需要预订明天早上航班到杭州+酒店12:00前提前入住
+#   张三明天需要早上到杭州办事，需要12:00前到达。Agent需要预订合适的早班航班，
+#   并预订杭州酒店当天入住（提前入住场景）。
+#
+# 业务流程:
+#   1. 张三向Agent提出需求：明天早上到杭州，12:00前到达，当天入住酒店
+#   2. Agent查询明天到杭州的航班，筛选12:00前到达的航班
+#   3. Agent选择合适的早班航班（优先最早到达）
+#   4. Agent预订该航班，填写张三的乘客信息
+#   5. Agent查询杭州的酒店
+#   6. Agent选择合适的酒店（支持提前入住）
+#   7. Agent预订酒店，入住日期为航班到达当天
+#
+# 复杂度分析:
+#   1. 需要理解时间约束（12:00前到达）并筛选合适的早班航班
+#   2. 需要计算航班到达时间对应的日期
+#   3. 需要理解提前入住场景（早上到达，当天即入住）
+#   4. 需要协调航班时间与酒店入住日期
 #
 # 评分标准:
-#   - 创建了航班和酒店订单 (20%)
-#   - 航班到达城市正确（杭州） (10%)
-#   - 航班到达时间≤12:00 (15%)
-#   - 酒店位于杭州 (10%)
-#   - 酒店入住日期为到达当天 (25%)
-#   - 订单状态有效 (20%)
+#   - 创建了航班和酒店订单 (15分)
+#   - 航班到达城市正确（杭州） (10分)
+#   - 航班出发日期正确（明天） (10分)
+#   - 航班到达时间≤12:00（满足早到要求） (20分)
+#   - 酒店位于杭州 (10分)
+#   - 酒店入住日期为到达当天（提前入住逻辑） (20分)
+#   - 乘客/入住人信息正确（张三） (10分)
+#   - 订单状态有效 (5分)
 module V201V250
   class V213BookEarlyCheckInHotelBeforeNoonValidator < BaseValidator
     self.validator_id = 'v213_book_early_check_in_hotel_before_noon_validator'
     self.task_id = '2fd354f7-3f3f-4f6f-ff6f-7f9a0b1c2d3f'
-    self.title = '帮张三订明天早上到杭州的航班（12:00前到达），并预订杭州酒店当天入住，支持提前入住'
-    self.description = '帮张三订明天早上到杭州的航班（12:00前到达），并预订杭州酒店当天入住，支持提前入住'
+    self.title = '张三需要预订明天早上到杭州的航班（12:00前到达）并当天入住酒店'
+    self.description = '张三需要预订明天早上到杭州的航班（12:00前到达）并当天入住酒店'
     self.timeout_seconds = 300
     
     def prepare
@@ -53,20 +71,30 @@ module V201V250
       @check_in_date = @flight_date
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（明天）早上到#{@destination_city}的航班（12:00前到达），并预订#{@destination_city}酒店当天入住，支持提前入住。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订明天早上到杭州的航班（12:00前到达）并当天入住酒店",
+        description: "张三需要预订明天早上到杭州的航班（12:00前到达）并当天入住酒店",
+        scenario: "张三明天需要到杭州办事，要求12:00前到达，航班到达后直接入住酒店",
         requirements: {
           destination_city: @destination_city,
-          flight_date: @flight_date,
-          max_arrival_hour: "≤12:00到达",
-          check_in_date: @check_in_date,
-          purpose: '早到提前入住'
+          flight_date: @flight_date.strftime('%Y-%m-%d'),
+          max_arrival_time: "≤12:00",
+          check_in_date: @check_in_date.strftime('%Y-%m-%d'),
+          passenger: '张三',
+          purpose: '早班航班提前入住'
         },
-        hint: "选择12:00前到达的航班，然后预订酒店入住日期为到达当天。"
+        available_flights_sample: {
+          count: @available_flights.size,
+          example: @available_flights.first ? "#{@available_flights.first.flight_number}（#{@available_flights.first.departure_time.strftime('%H:%M')}起飞，#{@available_flights.first.arrival_time.strftime('%H:%M')}到达）" : nil
+        },
+        available_hotels_sample: {
+          count: @available_hotels.size,
+          example: @available_hotels.first ? "#{@available_hotels.first.name}（#{@available_hotels.first.city}）" : nil
+        }
       }
     end
     
     def verify
-      add_assertion "创建了航班和酒店订单", weight: 20 do
+      add_assertion "创建了航班和酒店订单", weight: 15 do
         @flight_booking = Booking
           .joins(:flight)
           .where(flights: { destination_city: @destination_city })
@@ -90,7 +118,12 @@ module V201V250
           "到达城市错误。期望: #{@destination_city}, 实际: #{@flight_booking.flight.destination_city}"
       end
       
-      add_assertion "航班到达时间≤12:00", weight: 15 do
+      add_assertion "航班出发日期正确（明天#{@flight_date}）", weight: 10 do
+        expect(@flight_booking.flight.flight_date).to eq(@flight_date),
+          "出发日期错误。期望: #{@flight_date}（明天）, 实际: #{@flight_booking.flight.flight_date}"
+      end
+      
+      add_assertion "航班到达时间≤12:00（满足早到要求）", weight: 20 do
         hour = @flight_booking.flight.arrival_time.hour
         expect(hour).to be < @max_arrival_hour,
           "到达时间过晚。期望: <#{@max_arrival_hour}:00, 实际: #{@flight_booking.flight.arrival_time.strftime('%H:%M')}"
@@ -101,7 +134,7 @@ module V201V250
           "酒店城市错误。期望: #{@destination_city}, 实际: #{@hotel_booking.hotel.city}"
       end
       
-      add_assertion "酒店入住日期为到达当天", weight: 25 do
+      add_assertion "酒店入住日期为到达当天（提前入住逻辑）", weight: 20 do
         arrival_date = @flight_booking.flight.arrival_time.to_date
         expect(@hotel_booking.check_in_date).to eq(arrival_date),
           "入住日期错误。期望: #{arrival_date}（到达日期）, 实际: #{@hotel_booking.check_in_date}"
@@ -114,7 +147,7 @@ module V201V250
           "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end

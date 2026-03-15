@@ -2,7 +2,7 @@ class TrainSeat < ApplicationRecord
   include DataVersionable
   belongs_to :train
   
-  validates :seat_type, presence: true, inclusion: { in: %w[second_class first_class business_class no_seat] }
+  validates :seat_type, presence: true, inclusion: { in: %w[second_class first_class business_class no_seat hard_sleeper soft_sleeper] }
   validates :price, numericality: { greater_than_or_equal_to: 0 }
   validates :available_count, :total_count, numericality: { greater_than_or_equal_to: 0 }
   
@@ -16,6 +16,8 @@ class TrainSeat < ApplicationRecord
     when 'first_class' then '一等座'
     when 'business_class' then '商务座'
     when 'no_seat' then '无座'
+    when 'hard_sleeper' then '硬卧'
+    when 'soft_sleeper' then '软卧'
     else seat_type
     end
   end
