@@ -60,16 +60,20 @@
         # Check if we need to start a new month section
         month_year = "#{current_date.year}年#{current_date.month.to_s.rjust(2, '0')}月"
         if month_year != current_month_year
-          # Save previous week if exists
+          # Save previous week if exists (pad remaining cells if incomplete)
           if current_week.any?
+            # Pad remaining cells to complete the week (7 days total)
+            while current_week.length < 7
+              current_week << nil
+            end
             calendar_weeks << { month_year: current_month_year, week: current_week } if current_month_year
             current_week = []
           end
           
           current_month_year = month_year
           
-          # Add empty cells for the first week of new month (if not already done)
-          if current_date.day == 1 && current_date != start_date
+          # Add empty cells for the first week of new month
+          if current_date.day == 1
             (0...current_date.wday).each do
               current_week << nil
             end
@@ -79,8 +83,8 @@
         # Add current date to week
         current_week << current_date
         
-        # If week is complete (7 days) or it's the last day of month, save it
-        if current_week.length == 7 || current_date == current_date.end_of_month
+        # If week is complete (7 days), save it
+        if current_week.length == 7
           calendar_weeks << { month_year: current_month_year, week: current_week.dup }
           current_week = []
         end

@@ -2,26 +2,52 @@
 
 require_relative '../base_validator'
 
-# V227: 预订综合性价比最高组合（航班+酒店）
+# 验证用例227: 帮张三预订明天深圳→上海性价比最高航班+上海酒店（明天入住2晚），综合考虑航班时长、价格、酒店评分
 #
 # 任务描述:
-#   用户需要预订航班+酒店，综合考虑价格、时长、评分等因素，选择综合性价比最高的组合
+#   张三明天需要从深圳去上海出差，需要预订航班和酒店住2晚。
+#   希望综合考虑航班时长、价格、酒店评分等因素，选择性价比最高的组合。
 #
-# 评分标准:
-#   - 创建了航班订单 (15%)
-#   - 创建了酒店订单 (15%)
-#   - 航班日期正确 (10%)
-#   - 酒店入住日期正确 (10%)
-#   - 乘客信息正确 (5%)
-#   - 入住人信息正确 (5%)
-#   - 航班性价比较优 (20%)
-#   - 酒店性价比较优 (15%)
-#   - 订单状态有效 (5%)
+# 业务流程（9个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘客和入住人信息）
+#   2. 搜索深圳→上海航班（明天出发）
+#   3. 搜索上海酒店（明天入住，2天后退房，住2晚）
+#   4. 计算航班综合性价比分数（考虑飞行时长和价格，时长越短、价格越低越好）
+#   5. 计算酒店综合性价比分数（考虑评分和价格，评分越高、价格越合理越好）
+#   6. 选择综合性价比最高的航班
+#   7. 选择综合性价比最高的酒店
+#   8. 创建航班订单（Booking，乘客信息填写张三）
+#   9. 创建酒店订单（HotelBooking，入住人信息填写张三）
+#
+# 复杂度分析（9个关键点）：
+#   1. 多维度优化问题：需要同时考虑航班时长、航班价格、酒店评分、酒店价格等多个因素
+#   2. 性价比评分算法：需要设计合理的评分公式，平衡不同维度的权重
+#   3. 航班时长计算：需要根据起降时间计算飞行时长，并转换为评分
+#   4. 价格归一化处理：不同价格区间的商品需要统一转换为评分进行比较
+#   5. 多类型订单创建：航班订单+酒店订单，需要理解两种订单的字段和关系
+#   6. 日期推算：明天出发+入住，2天后退房，需要正确处理相对日期
+#   7. 乘客信息映射：需要将张三的姓名、身份证号、电话正确填写到两个订单中
+#   8. 性价比验证：需要验证选择的航班和酒店的综合得分处于较优水平
+#   9. 订单状态管理：两个订单都需要设置合理的支付状态
+#
+# 评分标准（9项，总计100分）：
+#   1. 创建了航班订单（深圳→上海，明天出发） - 15分
+#   2. 创建了酒店订单（上海，明天入住2晚） - 15分
+#   3. 航班日期正确（明天） - 10分
+#   4. 酒店入住日期正确（明天入住，2天后退房） - 10分
+#   5. 乘客信息正确（张三，含姓名、身份证、手机号） - 5分
+#   6. 入住人信息正确（张三，含姓名、手机号） - 5分
+#   7. 航班性价比较优（综合考虑时长和价格） - 20分
+#   8. 酒店性价比较优（综合考虑评分和价格） - 15分
+#   9. 订单状态有效（两个订单都为pending/paid/completed） - 5分
+#
+# 使用方法:
+#   rake validator:simulate_single[v227_book_best_value_flight_hotel_combo_validator]
 module V201V250
   class V227BookBestValueFlightHotelComboValidator < BaseValidator
     self.validator_id = 'v227_book_best_value_flight_hotel_combo_validator'
     self.task_id = '5ff576ff-6f6f-6f8f-8f9f-7f0a1b2c3d4f'
-    self.title = '张三明天要从深圳去上海出差，需要预订航班和酒店住2晚，希望综合考虑航班时长、价格、酒店评分等因素，选择性价比最高的组合'
+    self.title = '帮张三预订明天深圳→上海性价比最高航班+上海酒店（明天入住2晚），综合考虑航班时长、价格、酒店评分'
     self.description = '张三明天要从深圳去上海出差，需要预订航班和酒店住2晚，希望综合考虑航班时长、价格、酒店评分等因素，选择性价比最高的组合'
     self.timeout_seconds = 300
     
@@ -32,14 +58,12 @@ module V201V250
       @check_in_date = @flight_date
       @check_out_date = @check_in_date + 2.days
       
-      # 查询demo_user乘客信息
-      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_passenger.name,
-        id_number: demo_passenger.id_number,
-        phone: demo_passenger.phone
-      )
+      # 预查询乘客信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       @available_flights = Flight.where(
         departure_city: @departure_city,
@@ -120,21 +144,20 @@ module V201V250
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "乘客信息正确（姓名、身份证、手机号）", weight: 5 do
-        expect(@flight_booking.passenger_name).to eq(@passenger.name),
-          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@flight_booking.passenger_name}"
-        expect(@flight_booking.passenger_id_number).to eq(@passenger.id_number),
-          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@flight_booking.passenger_id_number}"
-        expect(@flight_booking.contact_phone).to eq(@passenger.phone),
-          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@flight_booking.contact_phone}"
+      add_assertion "乘客信息正确（张三）", weight: 5 do
+        expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
+        expect(@flight_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "身份证号错误。期望: #{@expected_passenger_id}, 实际: #{@flight_booking.passenger_id_number}"
+        expect(@flight_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@flight_booking.contact_phone}"
       end
       
-      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
-        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-        expect(@hotel_booking.guest_name).to eq(demo_user.name),
-          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
-        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
-          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      add_assertion "入住人信息正确（张三）", weight: 5 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
       
       add_assertion "航班性价比较优", weight: 20 do
@@ -192,9 +215,9 @@ module V201V250
       Booking.create!(
         user: user,
         flight: best_flight,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        contact_phone: @passenger.phone,
+        passenger_name: @expected_passenger_name,
+        passenger_id_number: @expected_passenger_id,
+        contact_phone: @expected_phone,
         total_price: best_flight.price,
         accept_terms: true,
         status: 'paid',
@@ -207,8 +230,8 @@ module V201V250
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_name: @expected_passenger_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: best_hotel.price * 2,
         status: 'paid',
@@ -228,9 +251,9 @@ module V201V250
         check_out_date: @check_out_date.to_s,
         reference_flight_score: @reference_flight_score,
         reference_hotel_score: @reference_hotel_score,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        passenger_phone: @passenger.phone
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_phone: @expected_phone
       }
     end
     
@@ -242,12 +265,9 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @reference_flight_score = data['reference_flight_score'].to_f
       @reference_hotel_score = data['reference_hotel_score'].to_f
-      
-      @passenger = OpenStruct.new(
-        name: data['passenger_name'],
-        id_number: data['passenger_id_number'],
-        phone: data['passenger_phone']
-      )
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_phone = data['expected_phone']
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

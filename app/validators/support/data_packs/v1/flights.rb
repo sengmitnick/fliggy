@@ -1913,31 +1913,40 @@ puts "  ✓ 创建了 #{shanghai_hangzhou_flights.size} 个上海→杭州深夜
 # ========== 国际商务舱航班 (V223：价格≥2000元) ==========
 international_business_flights = []
 
-[
+# 国际航班路线配置
+international_routes = [
   { number: 'MU587', airline: '东航', dep_city: '上海', dep_airport: '浦东T2', dest_city: '纽约', dest_airport: 'JFK', dep_time: '12:30', arr_time: '14:00', price: 8500 },
   { number: 'CA981', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 8800 }
-].each do |route|
-  flight_date = Date.today + 7.days
-  international_business_flights << {
-    flight_number: route[:number],
-    airline: route[:airline],
-    departure_city: route[:dep_city],
-    destination_city: route[:dest_city],
-    departure_airport: route[:dep_airport],
-    arrival_airport: route[:dest_airport],
-    departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
-    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
-    price: route[:price],
-    is_direct: true,
-    stops: 0,
-    baggage_allowance: '托运行李3件(每件32kg)',
-    flight_date: flight_date,
-    meal_service: '含高级飞机餐+酒水',
-    mileage_accrual: '可累积里程（150%）',
-    data_version: 0,
-    created_at: timestamp,
-    updated_at: timestamp
-  }
+]
+
+# 生成覆盖足够日期范围的国际航班（Date.current-1 到 Date.current+10）
+international_start_date = Date.today - 1.day
+international_end_date = Date.today + 10.days
+
+(international_start_date..international_end_date).each do |flight_date|
+  international_routes.each do |route|
+    international_business_flights << {
+      flight_number: route[:number],
+      airline: route[:airline],
+      departure_city: route[:dep_city],
+      destination_city: route[:dest_city],
+      departure_airport: route[:dep_airport],
+      arrival_airport: route[:dest_airport],
+      departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
+      arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+      price: route[:price],
+      seat_class: 'business_class',  # V223要求：商务舱
+      is_direct: true,
+      stops: 0,
+      baggage_allowance: '托运行李3件(每件32kg)',
+      flight_date: flight_date,
+      meal_service: '含高级飞机餐+酒水',
+      mileage_accrual: '可累积里程（150%）',
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
 end
 
 Flight.insert_all(international_business_flights) if international_business_flights.any?

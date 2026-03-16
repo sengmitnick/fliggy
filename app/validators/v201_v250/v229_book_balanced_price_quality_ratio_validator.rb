@@ -2,25 +2,53 @@
 
 require_relative '../base_validator'
 
-# V229: 预订价格质量平衡最佳组合
+# 验证用例229: 帮张三预订后天上海→杭州火车票+杭州酒店（住1晚），性价比平衡最佳组合
 #
 # 任务描述:
-#   用户需要预订火车票+酒店，价格/质量平衡最佳（性价比）
+#   张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，
+#   希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合。
 #
-# 评分标准:
-#   - 创建了火车票订单 (15%)
-#   - 创建了酒店订单 (15%)
-#   - 出行日期正确 (10%)
-#   - 酒店入住日期正确 (10%)
-#   - 乘车人信息正确 (5%)
-#   - 入住人信息正确 (5%)
-#   - 组合性价比较优 (35%)
-#   - 订单状态有效 (5%)
+# 业务流程（10个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘车人和入住人信息）
+#   2. 查询火车选项（上海→杭州，后天出发，二等座）
+#   3. 查询酒店选项（杭州，入住后天，退房第3天）
+#   4. 计算每趟火车的性价比分数（时长分数 + 价格分数）/ 2
+#   5. 计算每家酒店的性价比分数（评分分数 + 价格分数）/ 2
+#   6. 识别火车性价比最佳选项（时长短 + 价格低）
+#   7. 识别酒店性价比最佳选项（评分高 + 价格低）
+#   8. 创建火车票订单（选择性价比最佳的火车）
+#   9. 创建酒店订单（选择性价比最佳的酒店）
+#   10. 确认订单状态有效（pending/paid/completed）
+#
+# 复杂度分析（10个关键点）：
+#   1. 多维度评估：需要同时考虑价格、时长、评分等多个因素
+#   2. 性价比算法：需要设计合理的评分公式平衡不同维度的权重
+#   3. 时长归一化：火车时长需要转换为分数，时长越短分数越高
+#   4. 价格归一化：价格需要转换为分数，价格越低分数越高
+#   5. 评分归一化：酒店星级评分需要转换为百分制分数
+#   6. 独立优化：火车和酒店分别优化，不需要考虑组合总价
+#   7. 数据源一致性：所有查询必须过滤data_version=0确保数据隔离
+#   8. 日期管理：火车出发日期与酒店入住日期一致（后天）
+#   9. 乘客信息复用：火车票和酒店订单都需要使用同一受益人的信息
+#   10. 状态恢复复杂度：需要恢复日期、乘客信息、并重新查询2类数据源（火车、酒店）
+#
+# 评分标准（8项，总计100分）：
+#   - 断言1: 创建了火车票订单 (15分)
+#   - 断言2: 创建了酒店订单 (15分)
+#   - 断言3: 出行日期正确（后天） (10分)
+#   - 断言4: 酒店入住日期正确（入住后天，退房第3天） (10分)
+#   - 断言5: 乘车人信息正确（张三的姓名、身份证号、手机号） (5分)
+#   - 断言6: 入住人信息正确（张三的姓名、手机号） (5分)
+#   - 断言7: 组合性价比较优（火车和酒店性价比分数均≥参考最佳×0.8，允许20%偏差） (35分)
+#   - 断言8: 订单状态有效（火车票、酒店订单状态均为pending/paid/completed） (5分)
+#
+# 使用方法:
+#   rake validator:simulate_single[v229_book_balanced_price_quality_ratio_validator]
 module V201V250
   class V229BookBalancedPriceQualityRatioValidator < BaseValidator
     self.validator_id = 'v229_book_balanced_price_quality_ratio_validator'
     self.task_id = '4ff465ff-5f5f-5f7f-7f8f-6f9a0b1c2d3f'
-    self.title = '张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合'
+    self.title = '帮张三预订后天上海→杭州火车票+杭州酒店（住1晚），性价比平衡最佳组合'
     self.description = '张三后天要从上海去杭州出差，需要预订火车票和酒店住1晚，希望综合考虑价格、时长、酒店评分等因素，选择性价比平衡最佳的组合'
     self.timeout_seconds = 300
     
@@ -31,14 +59,13 @@ module V201V250
       @check_in_date = @travel_date
       @check_out_date = @check_in_date + 1.day
       
-      # 查询demo_user乘客信息
+      # 预查询乘客信息（张三）
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_passenger.name,
-        id_number: demo_passenger.id_number,
-        phone: demo_passenger.phone
-      )
+      @expected_passenger_name = demo_passenger.name  # 张三
+      @expected_passenger_id = demo_passenger.id_number
+      @expected_phone = demo_passenger.phone
+      @expected_guest_name = demo_passenger.name  # 统一使用张三作为入住人
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)
@@ -116,24 +143,23 @@ module V201V250
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "乘车人信息正确（姓名、身份证、手机号）", weight: 5 do
-        expect(@train_booking.passenger_name).to eq(@passenger.name),
-          "乘客姓名错误。期望: #{@passenger.name}, 实际: #{@train_booking.passenger_name}"
-        expect(@train_booking.passenger_id_number).to eq(@passenger.id_number),
-          "身份证号错误。期望: #{@passenger.id_number}, 实际: #{@train_booking.passenger_id_number}"
-        expect(@train_booking.contact_phone).to eq(@passenger.phone),
-          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@train_booking.contact_phone}"
+      add_assertion "乘车人信息正确（张三的姓名、身份证号、手机号）", weight: 5 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "身份证号错误。期望: #{@expected_passenger_id}, 实际: #{@train_booking.passenger_id_number}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
       end
       
-      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
-        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-        expect(@hotel_booking.guest_name).to eq(demo_user.name),
-          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
-        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
-          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      add_assertion "入住人信息正确（张三的姓名、手机号）", weight: 5 do
+        expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
+          "入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
       
-      add_assertion "组合性价比较优", weight: 35 do
+      add_assertion "组合性价比较优（火车和酒店性价比分数均≥参考最佳×0.8，允许20%偏差）", weight: 35 do
         train = @train_booking.train
         hotel = @hotel_booking.hotel
         
@@ -153,7 +179,7 @@ module V201V250
           "酒店性价比不佳。参考最佳: #{@reference_hotel_score.round(1)}, 实际: #{actual_hotel_score.round(1)}"
       end
       
-      add_assertion "订单状态有效", weight: 5 do
+      add_assertion "订单状态有效（火车票、酒店订单状态均为pending/paid/completed）", weight: 5 do
         expect(@train_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed'])
       end
@@ -184,9 +210,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: best_train,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        contact_phone: @passenger.phone,
+        passenger_name: @expected_passenger_name,
+        passenger_id_number: @expected_passenger_id,
+        contact_phone: @expected_phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: best_train.price_second_class,
@@ -201,8 +227,8 @@ module V201V250
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_name: @expected_guest_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: best_hotel.price,
         status: 'paid',
@@ -222,9 +248,10 @@ module V201V250
         check_out_date: @check_out_date.to_s,
         reference_train_score: @reference_train_score,
         reference_hotel_score: @reference_hotel_score,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        passenger_phone: @passenger.phone
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_phone: @expected_phone,
+        expected_guest_name: @expected_guest_name
       }
     end
     
@@ -237,11 +264,10 @@ module V201V250
       @reference_train_score = data['reference_train_score'].to_f
       @reference_hotel_score = data['reference_hotel_score'].to_f
       
-      @passenger = OpenStruct.new(
-        name: data['passenger_name'],
-        id_number: data['passenger_id_number'],
-        phone: data['passenger_phone']
-      )
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_phone = data['expected_phone']
+      @expected_guest_name = data['expected_guest_name']
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)

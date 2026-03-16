@@ -2,26 +2,54 @@
 
 require_relative '../base_validator'
 
-# V224: 预订经济型组合（火车票+经济型酒店，单项≤300元）
+# 验证用例224: 帮张三预订后天杭州→上海火车票（二等座）+上海经济型酒店（后天入住1晚），每项≤300元
 #
 # 任务描述:
-#   用户需要预订火车票+经济型酒店，单项≤300元
+#   张三后天需要从杭州到上海办事，预算比较紧。
+#   需要预订火车票（二等座）和上海经济型酒店住1晚，每项都不超过300元。
+#   Agent 需要创建1个火车票订单和1个酒店订单，确保火车票价格≤300元，酒店单晚价格≤300元。
 #
-# 评分标准:
-#   - 创建了火车票订单 (15%)
-#   - 创建了酒店订单 (15%)
-#   - 火车票价格≤300元 (15%)
-#   - 酒店单晚价格≤300元 (15%)
-#   - 出行日期正确（后天） (10%)
-#   - 入住日期正确 (10%)
-#   - 乘车人信息正确（姓名、身份证、手机号） (10%)
-#   - 入住人信息正确（姓名、手机号） (5%)
-#   - 订单状态有效 (5%)
+# 业务流程（8个关键步骤）：
+#   1. 明确受益人信息（张三，使用其姓名、身份证号、电话作为乘客和入住人信息）
+#   2. 搜索杭州→上海火车票（后天出发）
+#   3. 筛选符合预算的火车票（二等座价格≤300元）
+#   4. 创建火车票订单（座位类型=二等座，出行日期=后天）
+#   5. 搜索上海经济型酒店（price≤300元）
+#   6. 筛选酒店房间（room_category='overnight'，排除钟点房）
+#   7. 创建酒店订单（入住日期=火车日期，入住1晚）
+#   8. 验证两个订单均符合预算要求（单项≤300元）
+#
+# 复杂度分析（8个关键点）：
+#   1. 需要理解火车票+酒店组合预订场景
+#   2. 需要明确火车路线（杭州→上海，后天出发）
+#   3. 需要筛选经济型酒店（hotel.price≤300元）
+#   4. 需要理解"每项不超过300元"预算约束（火车票≤300元 AND 酒店≤300元，两个独立约束）
+#   5. 需要选择二等座座位类型（seat_type = 'second_class'）
+#   6. 需要筛选符合预算的火车票（price_second_class≤300元）
+#   7. 需要筛选符合预算的酒店房间（room.price≤300元，room_category='overnight'）
+#   8. 需要使用受益人信息作为乘客和入住人信息
+#   ❌ 不能一次性提供所有信息：需要分别查询火车和酒店数据，筛选符合预算的选项，分步骤创建订单。
+#
+# 评分标准（9项，总计100分）：
+#   1. 创建了火车票订单（15分）
+#   2. 创建了酒店订单（15分）
+#   3. 火车票价格≤300元（15分）
+#   4. 酒店单晚价格≤300元（15分）
+#   5. 出行日期正确（后天）（10分）
+#   6. 入住日期正确（入住=火车日期，退房=火车日期+1天）（10分）
+#   7. 乘车人信息正确（张三的姓名、身份证号、手机号）（10分）
+#   8. 入住人信息正确（张三的姓名、手机号）（5分）
+#   9. 订单状态有效（pending/paid/completed）（5分）
+#
+# 使用方法:
+#   rake validator:simulate_single[v224_book_budget_combo_under_500_validator]
+#   或访问 http://localhost:<PORT>/api/tasks 获取任务列表
+#
 module V201V250
   class V224BookBudgetComboUnder500Validator < BaseValidator
     self.validator_id = 'v224_book_budget_combo_under_500_validator'
     self.task_id = '1ff132ff-2f2f-2f4f-4f5f-3f6a7b8c9d0f'
-    self.title = '张三想后天从杭州去上海办事，预算比较紧，需要预订火车票和经济型酒店，每项都不超过300元'
+    self.title = '帮张三预订后天杭州→上海火车票（二等座）+上海经济型酒店（后天入住1晚），每项≤300元'
     self.description = '张三想后天从杭州去上海办事，预算比较紧，需要预订火车票和经济型酒店，每项都不超过300元'
     self.timeout_seconds = 300
     
@@ -33,14 +61,12 @@ module V201V250
       @check_out_date = @check_in_date + 1.day
       @max_item_price = 300
       
-      # 查询demo_user和乘客信息
-      demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
-      @passenger = OpenStruct.new(
-        name: demo_passenger.name,
-        id_number: demo_passenger.id_number,
-        phone: demo_passenger.phone
-      )
+      # 预查询乘客信息（张三）
+      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @expected_passenger_name = @passenger.name
+      @expected_passenger_id = @passenger.id_number
+      @expected_phone = @passenger.phone
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)
@@ -116,21 +142,20 @@ module V201V250
           "退房日期错误。期望: #{@check_out_date}, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      add_assertion "乘车人信息正确（姓名、身份证、手机号）", weight: 10 do
-        expect(@train_booking.passenger_name).to eq(@passenger.name),
-          "乘车人姓名错误。期望: #{@passenger.name}, 实际: #{@train_booking.passenger_name}"
-        expect(@train_booking.passenger_id_number).to eq(@passenger.id_number),
-          "乘车人身份证错误。期望: #{@passenger.id_number}, 实际: #{@train_booking.passenger_id_number}"
-        expect(@train_booking.contact_phone).to eq(@passenger.phone),
-          "联系电话错误。期望: #{@passenger.phone}, 实际: #{@train_booking.contact_phone}"
+      add_assertion "乘车人信息正确（张三）", weight: 10 do
+        expect(@train_booking.passenger_name).to eq(@expected_passenger_name),
+          "乘车人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@train_booking.passenger_name}"
+        expect(@train_booking.passenger_id_number).to eq(@expected_passenger_id),
+          "乘车人身份证错误。期望: #{@expected_passenger_id}, 实际: #{@train_booking.passenger_id_number}"
+        expect(@train_booking.contact_phone).to eq(@expected_phone),
+          "联系电话错误。期望: #{@expected_phone}, 实际: #{@train_booking.contact_phone}"
       end
       
-      add_assertion "入住人信息正确（姓名、手机号）", weight: 5 do
-        demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-        expect(@hotel_booking.guest_name).to eq(demo_user.name),
-          "入住人姓名错误。期望: #{demo_user.name}, 实际: #{@hotel_booking.guest_name}"
-        expect(@hotel_booking.guest_phone).to eq(@passenger.phone),
-          "入住人电话错误。期望: #{@passenger.phone}, 实际: #{@hotel_booking.guest_phone}"
+      add_assertion "入住人信息正确（张三）", weight: 5 do
+        expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
+          "入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
+        expect(@hotel_booking.guest_phone).to eq(@expected_phone),
+          "入住人电话错误。期望: #{@expected_phone}, 实际: #{@hotel_booking.guest_phone}"
       end
       
       add_assertion "订单状态有效", weight: 5 do
@@ -152,9 +177,9 @@ module V201V250
       TrainBooking.create!(
         user: user,
         train: train,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        contact_phone: @passenger.phone,
+        passenger_name: @expected_passenger_name,
+        passenger_id_number: @expected_passenger_id,
+        contact_phone: @expected_phone,
         seat_type: 'second_class',
         ticket_count: 1,
         total_price: train.price_second_class,
@@ -169,8 +194,8 @@ module V201V250
         hotel_room: room,
         check_in_date: @check_in_date,
         check_out_date: @check_out_date,
-        guest_name: user.name,
-        guest_phone: @passenger.phone,
+        guest_name: @expected_passenger_name,
+        guest_phone: @expected_phone,
         room_count: 1,
         total_price: hotel.price,
         status: 'paid',
@@ -189,9 +214,9 @@ module V201V250
         check_in_date: @check_in_date.to_s,
         check_out_date: @check_out_date.to_s,
         max_item_price: @max_item_price,
-        passenger_name: @passenger.name,
-        passenger_id_number: @passenger.id_number,
-        passenger_phone: @passenger.phone
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_phone: @expected_phone
       }
     end
     
@@ -203,12 +228,10 @@ module V201V250
       @check_out_date = Date.parse(data['check_out_date'])
       @max_item_price = data['max_item_price']
       
-      # Restore passenger data from flattened fields
-      @passenger = OpenStruct.new(
-        name: data['passenger_name'],
-        id_number: data['passenger_id_number'],
-        phone: data['passenger_phone']
-      )
+      # Restore expected values from state
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_phone = data['expected_phone']
       
       @available_trains = Train.by_route(@departure_city, @arrival_city)
         .by_date(@travel_date)
