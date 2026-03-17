@@ -63,7 +63,7 @@
           </div>
           
           <div class="text-[11px] text-gray-500 space-x-1 mb-1">
-            <span><%= (room.respond_to?(:breakfast_included) && room.breakfast_included) ? '含早餐' : '无早餐' %></span>
+            <span><%= room.room_type.include?('（含早）') || room.room_type.include?('含早') ? '含早餐' : '无早餐' %></span>
             <span class="text-gray-300">|</span>
             <span><%= room.bed_type %></span>
             <span class="text-gray-300">|</span>

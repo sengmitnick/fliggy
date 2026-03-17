@@ -124,6 +124,7 @@ class HotelsController < ApplicationController
     @location_type = params[:location_type] || 'domestic' # domestic, international
     @room_category = params[:room_category] # hourly - 用于显示钟点房
     @brand = params[:brand] # 品牌筛选
+    @facility = params[:facility] # 设施筛选
     @query = params[:q]
     
     # 存储到简短变量用于表单传递
@@ -167,6 +168,11 @@ class HotelsController < ApplicationController
     # Brand filtering
     if @brand.present?
       @hotels = @hotels.where(brand: @brand)
+    end
+    
+    # Facility filtering
+    if @facility.present?
+      @hotels = @hotels.where('facilities LIKE ?', "%#{@facility}%")
     end
     
     # District filtering (same as special_hotels)
@@ -245,6 +251,9 @@ class HotelsController < ApplicationController
     
     # Extract brands available in current city
     @brands = extract_brands_from_hotels(@city)
+    
+    # Extract facilities for filter
+    @facilities = extract_facilities_from_hotels(@city)
     
     # Render the dedicated search results view
     render :search
@@ -488,5 +497,25 @@ class HotelsController < ApplicationController
       end
     end.compact.uniq.sort
     districts
+  end
+  
+  # Extract brands from hotels in current city
+  def extract_brands_from_hotels(city)
+    Hotel.by_city(city).where.not(brand: [nil, '']).distinct.pluck(:brand).sort
+  end
+  
+  # Extract facilities from hotels in current city
+  def extract_facilities_from_hotels(city)
+    # Get all facilities from hotels in the city
+    facilities_text = Hotel.by_city(city).where.not(facilities: [nil, '']).pluck(:facilities).join(',')
+    
+    # Split by comma and clean up
+    all_facilities = facilities_text.split(',').map(&:strip).uniq.reject(&:blank?)
+    
+    # Define common facility categories
+    common_facilities = ['游泳池', '健身房', '停车场', '餐厅', '会议室', '洗衣房', 'WiFi', '接机服务']
+    
+    # Return facilities that exist in the city's hotels
+    common_facilities.select { |facility| all_facilities.any? { |f| f.include?(facility) } }
   end
 end

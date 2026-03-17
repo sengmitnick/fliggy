@@ -2,24 +2,53 @@
 
 require_relative '../base_validator'
 
-# 验证用例195: 预订15天后出发的最优价格组合
+# 验证用例195: 给陈静预订15天后从北京到上海的最优价格组合（最便宜的航班+酒店）
 #
-# 任务描述:
-#   预订15天后出发的最优价格组合
+# 任务描述：
+#   为陈静预订15天后从北京到上海的最优价格组合，选择最便宜的航班+最便宜的酒店（提前预订价格更优）
 #
-# 评分标准:
-#   - 创建了航班订单 (25%)
-#   - 创建了酒店订单 (25%)
-#   - 出发日期为15天后 (10%)
-#   - 乘客和入住人信息正确（陈静） (15%)
-#   - 价格最优（最低价或接近） (15%)
-#   - 城市正确 (10%)
+# 核心要求：
+#   - 乘客：陈静（1人）
+#   - 出发日期：15天后（Date.current + 15.days）
+#   - 路线：北京 → 上海
+#   - 住宿：1晚（入住日期=航班到达日期）
+#   - 价格策略：选择最便宜的航班+最便宜的酒店（总价最低）
+#   - 预订优势：提前预订通常能获得更优惠的价格
+#
+# 业务流程：
+#   1. 查询15天后北京→上海的所有航班
+#   2. 查询上海的所有酒店（按价格升序排序）
+#   3. 计算最低组合价格（最便宜航班 + 最便宜酒店）
+#   4. 选择最便宜的航班
+#   5. 选择最便宜的酒店房间
+#   6. 创建航班订单
+#   7. 创建酒店订单（入住日期=航班到达日期，住1晚）
+#
+# 复杂度分析：
+#   - 价格优化：贪婪选择（最便宜航班 + 最便宜酒店）
+#   - 时间约束：必须是15天后出发的航班
+#   - 价格验证：允许5%误差范围（总价 ≤ 最低价 × 1.05）
+#
+# 评分标准（总分100分）：
+#   1. 创建了航班订单(25分)
+#   2. 创建了酒店订单(25分)
+#   3. 出发日期为15天后(10分)
+#   4. 乘客和入住人信息正确（陈静）(15分)
+#   5. 价格最优（最低价或接近，允许5%误差）(15分)
+#   6. 城市正确(10分)
+#
+# 验证要点：
+#   - 航班/酒店订单已创建
+#   - 出发日期为15天后
+#   - 乘客和入住人信息正确（陈静）
+#   - 价格最优（≤ 最低价 × 1.05）
+#   - 城市正确（北京 → 上海）
 module V151V200
   class V195BookAdvanceBookingBestPriceValidator < BaseValidator
     self.validator_id = 'v195_book_advance_booking_best_price_validator'
     self.task_id = '6f3a5eb6-ae1b-45cc-ae14-ecec290c6cba'
-    self.title = '给陈静预订15天后从北京到上海的最优价格组合'
-    self.description = '帮陈静预订15天后从北京到上海的最优价格组合（提前预订价格更优）'
+    self.title = '给陈静预订15天后从北京到上海的最优价格组合（最便宜的航班+酒店）'
+    self.description = '帮陈静预订15天后从北京到上海的最优价格组合（最便宜的航班+酒店，提前预订价格更优）'
     self.timeout_seconds = 300
     
     def prepare
@@ -45,8 +74,12 @@ module V151V200
       @available_hotels = Hotel.where(city: @arrival_city, data_version: 0).order(price: :asc).to_a
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@arrival_city}的酒店"
       
-      # 计算最低组合价格
-      @min_price = @available_flights.min_by(&:price).price.to_f + @available_hotels.first.price.to_f
+      # 计算最低组合价格（最便宜航班 + 最便宜酒店整晚房）
+      cheapest_flight_price = @available_flights.min_by(&:price).price.to_f
+      cheapest_overnight_room_price = @available_hotels.first.hotel_rooms
+        .where(data_version: 0, room_category: 'overnight')
+        .minimum(:price).to_f
+      @min_price = cheapest_flight_price + cheapest_overnight_room_price
       
       {
         task: "请为#{@passenger.name}预订15天后（#{@future_date.strftime('%m月%d日')}）从#{@departure_city}到#{@arrival_city}的最优价格组合（航班+酒店）",
@@ -153,7 +186,8 @@ module V151V200
       
       # 选择最便宜的酒店
       cheapest_hotel = @available_hotels.first
-      room = cheapest_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
+      # CRITICAL: 必须过滤room_category='overnight'，排除钟点房
+      room = cheapest_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = cheapest_flight.arrival_time.to_date
       HotelBooking.create!(
@@ -177,7 +211,8 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         future_date: @future_date&.to_s,
-        min_price: @min_price
+        min_price: @min_price,
+        available_hotel_ids: @available_hotels&.map(&:id)
       }
     end
     
@@ -191,6 +226,11 @@ module V151V200
       @arrival_city = data['arrival_city']
       @future_date = Date.parse(data['future_date']) if data['future_date']
       @min_price = data['min_price']
+      
+      # 恢复available_hotels
+      if data['available_hotel_ids']
+        @available_hotels = Hotel.where(id: data['available_hotel_ids'], data_version: 0).order(price: :asc).to_a
+      end
     end
   end
 end

@@ -40,6 +40,8 @@ class TrainBookingsController < ApplicationController
     when 'first_class' then '一等座'
     when 'business_class' then '商务座'
     when 'no_seat' then '无座'
+    when 'hard_sleeper' then '硬卧'
+    when 'soft_sleeper' then '软卧'
     else '二等座'
     end
 
@@ -291,6 +293,14 @@ class TrainBookingsController < ApplicationController
       train.price_business_class
     when 'no_seat'
       train.price_second_class * 0.5
+    when 'hard_sleeper'
+      # 查找硬卧座位价格
+      seat = train.train_seats.find_by(seat_type: 'hard_sleeper')
+      seat&.price || train.price_second_class
+    when 'soft_sleeper'
+      # 查找软卧座位价格
+      seat = train.train_seats.find_by(seat_type: 'soft_sleeper')
+      seat&.price || train.price_first_class
     else
       train.price_second_class
     end
@@ -322,6 +332,16 @@ class TrainBookingsController < ApplicationController
     when 'no_seat'
       # 无座：不分配座位号
       '无座'
+    when 'hard_sleeper'
+      # 硬卧：上中下铺 (如：001上、002中、003下)
+      berth_number = rand(1..60)
+      berth_position = ['上', '中', '下'].sample
+      format('%03d%s', berth_number, berth_position)
+    when 'soft_sleeper'
+      # 软卧：上下铺 (如：001上、002下)
+      berth_number = rand(1..40)
+      berth_position = ['上', '下'].sample
+      format('%03d%s', berth_number, berth_position)
     else
       '01A'
     end

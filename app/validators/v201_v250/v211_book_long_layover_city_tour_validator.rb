@@ -2,17 +2,34 @@
 
 require_relative '../base_validator'
 
-# V211: 预订长中转城市游览（中转时间5-8小时）
+# 验证用例211: 张三需要预订后天从广州经上海到杭州的航班，中转时间5-8小时，足够市内游览
 #
 # 任务描述:
-#   用户需要预订后天广州→上海→杭州航班，中转时间5-8小时可市内游览
+#   张三后天需要从广州到杭州，选择在上海中转，要求中转时间5-8小时以便在上海市内游览。
+#   Agent需要理解长中转时间的业务场景，筛选符合中转时间要求的航班组合并完成预订。
+#
+# 业务流程:
+#   1. 查找广州→上海航班（后天）
+#   2. 查找上海→杭州航班（同日）
+#   3. 计算中转时间，筛选中转时间在5-8小时之间的组合
+#   4. 创建第一段航班订单（广州→上海）
+#   5. 创建第二段航班订单（上海→杭州）
+#
+# 复杂度分析:
+#   1. 需要理解长中转时间的业务场景（5-8小时足够市内游览）
+#   2. 需要计算第一段航班落地时间与第二段航班起飞时间的间隔
+#   3. 需要理解中转时间范围约束（既要足够长也不能过长）
+#   4. 需要预订两段独立航班并确保时间衔接
 #
 # 评分标准:
-#   - 创建了两段航班订单 (20%)
-#   - 第一段航班路线正确（广州→上海） (10%)
-#   - 第二段航班路线正确（上海→杭州） (10%)
-#   - 中转时间在5-8小时区间内 (40%)
-#   - 订单状态有效 (20%)
+#   - 创建了两段航班订单 (15分)
+#   - 第一段航班路线正确（广州→上海） (10分)
+#   - 第二段航班路线正确（上海→杭州） (10分)
+#   - 出发日期正确（后天） (10分)
+#   - 中转时间在5-8小时区间内 (30分)
+#   - 中转时间接近最优值（6-7小时） (10分)
+#   - 乘客信息正确 (10分)
+#   - 订单状态有效 (5分)
 module V201V250
   class V211BookLongLayoverCityTourValidator < BaseValidator
     self.validator_id = 'v211_book_long_layover_city_tour_validator'
@@ -64,22 +81,31 @@ module V201V250
       
       @travel_date = @valid_combinations.first[:first_flight].flight_date
       
+      # 选择一个优选组合作为示例
+      sample_combo = @valid_combinations.min_by { |c| (c[:layover_hours] - 6.5).abs }
+      
       {
-        task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（后天）从#{@origin_city}经#{@transfer_city}到#{@destination_city}的航班，要求在#{@transfer_city}中转时间5-8小时，可以市内游览。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订后天从广州经上海到杭州的航班，中转时间5-8小时，足够市内游览",
+        description: "张三需要预订后天从广州经上海到杭州的航班，中转时间5-8小时，足够市内游览",
+        scenario: "张三后天需要从#{@origin_city}到#{@destination_city}，选择在#{@transfer_city}中转，要求中转时间较长（#{@min_layover_hours}-#{@max_layover_hours}小时）以便在#{@transfer_city}市内游览",
         requirements: {
           origin_city: @origin_city,
           transfer_city: @transfer_city,
           destination_city: @destination_city,
           travel_date: @travel_date,
-          layover_hours: '5-8小时',
+          layover_hours: "#{@min_layover_hours}-#{@max_layover_hours}小时",
+          passenger: @expected_passenger_name,
           purpose: '中转游览'
         },
-        hint: "选择第一段航班到#{@transfer_city}，再选第二段航班到#{@destination_city}，确保中转时间5-8小时可以市内游览。"
+        available_combinations_sample: {
+          count: @valid_combinations.size,
+          example: "#{sample_combo[:first_flight].flight_number}（#{sample_combo[:first_flight].departure_time.strftime('%H:%M')}起飞，#{sample_combo[:first_flight].arrival_time.strftime('%H:%M')}落地）+ #{sample_combo[:second_flight].flight_number}（#{sample_combo[:second_flight].departure_time.strftime('%H:%M')}起飞），中转时间#{sample_combo[:layover_hours].round(1)}小时"
+        }
       }
     end
     
     def verify
-      add_assertion "创建了两段航班订单", weight: 20 do
+      add_assertion "创建了两段航班订单", weight: 15 do
         first_bookings = Booking
           .joins(:flight)
           .where(flights: { departure_city: @origin_city, destination_city: @transfer_city })
@@ -111,9 +137,12 @@ module V201V250
         expect(@second_booking.flight.destination_city).to eq(@destination_city)
       end
       
-      # 移除日期验证（数据包中日期固定）
+      add_assertion "出发日期正确（后天#{@travel_date}）", weight: 10 do
+        expect(@first_booking.flight.flight_date).to eq(@travel_date),
+          "出发日期错误。期望: #{@travel_date}（后天）, 实际: #{@first_booking.flight.flight_date}"
+      end
       
-      add_assertion "中转时间在5-8小时区间内", weight: 40 do
+      add_assertion "中转时间在5-8小时区间内", weight: 30 do
         arrival_time = @first_booking.flight.arrival_time
         departure_time = @second_booking.flight.departure_time
         layover_hours = (departure_time - arrival_time) / 3600.0
@@ -124,6 +153,18 @@ module V201V250
           "中转时间过长。期望: ≤#{@max_layover_hours}小时, 实际: #{layover_hours.round(1)}小时"
       end
       
+      add_assertion "中转时间接近最优值（6-7小时）", weight: 10 do
+        arrival_time = @first_booking.flight.arrival_time
+        departure_time = @second_booking.flight.departure_time
+        layover_hours = (departure_time - arrival_time) / 3600.0
+        
+        # 最优中转时间应该在6-7小时之间（足够游览但不会太长）
+        expect(layover_hours).to be >= 5.5,
+          "中转时间偏短，不够充分游览。期望: ≥5.5小时, 实际: #{layover_hours.round(1)}小时"
+        expect(layover_hours).to be <= 7.5,
+          "中转时间偏长，等待时间过长。期望: ≤7.5小时, 实际: #{layover_hours.round(1)}小时"
+      end
+      
       add_assertion "乘客信息正确（张三）", weight: 10 do
         expect(@first_booking.passenger_name).to eq(@expected_passenger_name),
           "第一段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@first_booking.passenger_name}"
@@ -131,7 +172,7 @@ module V201V250
           "第二段航班乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@second_booking.passenger_name}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@first_booking.status).to be_in(['pending', 'paid', 'completed'])
         expect(@second_booking.status).to be_in(['pending', 'paid', 'completed'])
       end

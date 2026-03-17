@@ -2,47 +2,45 @@
 
 require_relative '../base_validator'
 
-# 验证用例117: 给张三、李四预订日韩邮轮（地中海辉煌号，香港出发，7天6晚，内舱房，3月份最近的班次）
+# 验证用例117: 给张三、李四预订日韩邮轮（地中海辉煌号，香港出发，7天6晚，内舱房，最近的未来班次）
 #
 # 任务描述:
 #   用户想预订日韩邮轮，为2位成人（张三、李四）。
-#   要求地中海辉煌号，行程7天6晚，从香港出发，选择3月份最近的一个班次，预订内舱房（性价比之选）。
-#   Agent 需要在符合条件的班次中，选择3月份departure_date（出发日期）最早的班次。
+#   要求地中海辉煌号，行程7天6晚，从香港出发，选择最近的未来班次，预订内舱房（性价比之选）。
+#   Agent 需要在符合条件的班次中，选择departure_date（出发日期）最早的未来班次。
 #
-# 业务流程（6个关键步骤）：
+# 业务流程（5个关键步骤）：
 #   1. 搜索地中海辉煌号的邮轮班次
 #   2. 筛选船只名包含"辉煌"的班次
 #   3. 筛选出发港包含"香港"、行程7天6晚的班次
-#   4. 筛选出发月份为3月的班次
-#   5. 在3月班次中，选择departure_date最早的班次
-#   6. 预订内舱房（category='interior'），为2位成人，填写2位成人的出行信息，联系人从出行人中选择
+#   4. 筛选未来日期的班次（departure_date >= 今天）
+#   5. 选择departure_date最早的班次，预订内舱房（category='interior'），为2位成人，填写2位成人的出行信息，联系人从出行人中选择
 #
-# 复杂度分析（6个关键点）：
+# 复杂度分析（5个关键点）：
 #   1. 需要理解邮轮筛选：船只名包含"地中海辉煌号"（关键词"辉煌"）
 #   2. 需要理解出发港筛选：departure_port包含"香港"
 #   3. 需要理解行程天数：duration_days=7且duration_nights=6
-#   4. 需要理解"3月份"条件：筛选departure_date的月份=3
-#   5. 需要选择3月份最早的班次：对比多个班次的departure_date，选择最早的
-#   6. 需要填写2位成人的出行信息，联系人从出行人中选择
-#   ❌ 不能随机选择：必须精确筛选3月份班次并选择最早日期的
+#   4. 需要选择未来最早的班次：对比多个班次的departure_date，选择最早的未来日期
+#   5. 需要填写2位成人的出行信息，联系人从出行人中选择
+#   ❌ 不能随机选择：必须精确筛选未来班次并选择最早日期的
 #
-# 评分标准（10项，总计100分）：
+# 评分标准（9项，总计100分）：
 #   - 订单已创建（15分）
 #   - 船只正确（地中海辉煌号）（10分）
 #   - 出发港正确（香港）（10分）
 #   - 行程天数正确（7天6晚）（10分）
-#   - 出发月份正确（3月份）（10分）
+#   - 出发日期在未来（15分）
 #   - 舱房类型正确（内舱房）（15分）
 #   - 预订数量正确（2位成人）（10分）
-#   - 联系人信息正确（张三或李四）（10分）
-#   - 选择了3月份最近日期的班次（5分）
+#   - 联系人信息正确（张三或李四）（5分）
+#   - 选择了最近日期的未来班次（5分）
 #   - 乘客信息正确（张三、李四）（5分）
 module V101V150
   class V117BookHongkongJapanKoreaBellissimaCruiseInteriorValidator < BaseValidator
     self.validator_id = 'v117_book_hongkong_japan_korea_bellissima_cruise_interior_validator'
     self.task_id = 'eb47869c-0c0f-4f08-b97a-49fa29721261'
-    self.title = '给张三、李四预订日韩邮轮（地中海辉煌号，香港出发，7天6晚，内舱房，3月份最近的班次）'
-    self.description = '预订日韩邮轮（地中海辉煌号，7天6晚，香港出发，3月出发）'
+    self.title = '给张三、李四预订日韩邮轮（地中海辉煌号，香港出发，7天6晚，内舱房，最近的未来班次）'
+    self.description = '预订日韩邮轮（地中海辉煌号，7天6晚，香港出发，最近的未来班次）'
     self.timeout_seconds = 240
 
     def prepare
@@ -51,8 +49,22 @@ module V101V150
       @expected_days = 7
       @expected_nights = 6
       @expected_cabin_category = 'interior'
-      @expected_month = 3
       @adult_count = 2
+      
+      # 查询最近的未来班次的出发月份
+      nearest_sailing = CruiseSailing
+        .joins(:cruise_ship)
+        .where('cruise_ships.name LIKE ?', "%#{@ship_keyword}%")
+        .where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
+        .where(duration_days: @expected_days, duration_nights: @expected_nights)
+        .where('departure_date >= ?', Date.current)
+        .where(data_version: 0)
+        .order(:departure_date)
+        .first
+      
+      raise "未找到符合条件的未来航次（#{@ship_keyword}，#{@departure_port_keyword}，#{@expected_days}天#{@expected_nights}晚）" unless nearest_sailing
+      
+      @expected_departure_date = nearest_sailing.departure_date
 
       # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -67,14 +79,14 @@ module V101V150
       }
 
       {
-        task: "请预订日韩邮轮，要求地中海辉煌号，行程#{@expected_days}天#{@expected_nights}晚，从#{@departure_port_keyword}出发，选择#{@expected_month}月份最近的一个班次，预订内舱房（性价比之选），为#{@adult_count}位成人",
+        task: "请预订日韩邮轮，要求地中海辉煌号，行程#{@expected_days}天#{@expected_nights}晚，从#{@departure_port_keyword}出发，选择最近的未来班次，预订内舱房（性价比之选），为#{@adult_count}位成人",
         ship_keyword: @ship_keyword,
         departure_port_keyword: @departure_port_keyword,
         duration: "#{@expected_days}天#{@expected_nights}晚",
         cabin_category: '内舱房（interior）',
-        month: "#{@expected_month}月",
+        nearest_departure_date: @expected_departure_date.strftime('%Y-%m-%d'),
         adult_count: @adult_count,
-        hint: "筛选船只名包含'辉煌'、出发港包含'香港'、duration_days=7且duration_nights=6的班次，选择#{@expected_month}月份最近日期的班次，预订内舱房（category='interior'）",
+        hint: "筛选船只名包含'辉煌'、出发港包含'香港'、duration_days=7且duration_nights=6的班次，选择最近日期的未来班次，预订内舱房（category='interior'）",
         expected_passengers: @expected_passenger_names.join('、')
       }
     end
@@ -90,13 +102,12 @@ module V101V150
         .where('cruise_ships.name LIKE ?', "%#{@ship_keyword}%")
         .where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
         .where(duration_days: @expected_days, duration_nights: @expected_nights)
-        .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
         .where('departure_date >= ?', Date.current)
         .where(data_version: '0')
         .order(:departure_date)
         .first
 
-      raise "未找到符合条件的航次（#{@ship_keyword}，#{@departure_port_keyword}，#{@expected_days}天#{@expected_nights}晚，#{@expected_month}月）" unless sailing
+      raise "未找到符合条件的航次（#{@ship_keyword}，#{@departure_port_keyword}，#{@expected_days}天#{@expected_nights}晚）" unless sailing
 
       cabin_type = CabinType.where(data_version: '0', cruise_ship_id: sailing.cruise_ship_id, category: @expected_cabin_category).first
       raise "未找到符合条件的舱房类型（#{@expected_cabin_category}）" unless cabin_type
@@ -185,13 +196,12 @@ module V101V150
           "行程晚数错误。期望: #{@expected_nights}晚，实际: #{actual_nights}晚"
       end
       
-      # 断言5: 出发月份正确（权重10%）
-      add_assertion "出发月份正确（3月份）", weight: 10 do
+      # 断言5: 出发日期在未来（权重15%）
+      add_assertion "出发日期在未来", weight: 15 do
         sailing = @order.cruise_product.cruise_sailing
-        actual_month = sailing.departure_date.month
         
-        expect(actual_month).to eq(@expected_month),
-          "出发月份错误。期望: #{@expected_month}月, 实际: #{actual_month}月（#{sailing.departure_date}）"
+        expect(sailing.departure_date).to be >= Date.current,
+          "出发日期必须在未来。实际: #{sailing.departure_date}（今天是#{Date.current}）"
       end
       
       # 断言6: 舱房类型正确（权重15%）
@@ -207,8 +217,8 @@ module V101V150
           "预订数量错误。期望: #{@adult_count}位成人，实际: #{@order.quantity}位"
       end
       
-      # 断言8: 联系人信息正确（权重10%）
-      add_assertion "联系人信息正确（张三或李四）", weight: 10 do
+      # 断言8: 联系人信息正确（权重5%）
+      add_assertion "联系人信息正确（张三或李四）", weight: 5 do
         valid_contacts = ['张三', '李四']
         expect(valid_contacts).to include(@order.contact_name),
           "联系人姓名错误。期望: 张三或李四，实际: #{@order.contact_name}"
@@ -218,25 +228,24 @@ module V101V150
           "联系人电话与姓名不匹配。联系人: #{@order.contact_name}，期望电话: #{expected_phone}，实际电话: #{@order.contact_phone}"
       end
       
-      # 断言9: 选择了3月份最近日期的班次（权重5%）
-      add_assertion "选择了3月份最近日期的班次", weight: 5 do
+      # 断言9: 选择了最近日期的未来班次（权重5%）
+      add_assertion "选择了最近日期的未来班次", weight: 5 do
         ship = CruiseShip.where(data_version: 0).where('name LIKE ?', "%#{@ship_keyword}%").first
         
-        # 筛选符合条件的班次：正确的出发港、行程天数、出发月份
+        # 筛选符合条件的班次：正确的出发港、行程天数、未来日期
         available_sailings = CruiseSailing.where(
           data_version: 0,
           cruise_ship_id: ship.id,
           duration_days: @expected_days,
           duration_nights: @expected_nights
         ).where('departure_port LIKE ?', "%#{@departure_port_keyword}%")
-         .where('EXTRACT(MONTH FROM departure_date) = ?', @expected_month)
          .where('departure_date >= ?', Date.current)
         
         nearest = available_sailings.order(departure_date: :asc).first
         actual_sailing = @order.cruise_product.cruise_sailing
         
         expect(actual_sailing.id).to eq(nearest.id),
-          "未选择3月份最近日期的班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%m月%d日')}）"
+          "未选择最近日期的未来班次。应选: #{nearest.departure_date}（#{nearest.departure_date.strftime('%Y年%m月%d日')}），实际: #{actual_sailing.departure_date}（#{actual_sailing.departure_date.strftime('%Y年%m月%d日')}）"
       end
       
       # 断言10: 乘客信息正确（权重5%）
@@ -263,7 +272,6 @@ module V101V150
         expected_days: @expected_days,
         expected_nights: @expected_nights,
         expected_cabin_category: @expected_cabin_category,
-        expected_month: @expected_month,
         adult_count: @adult_count,
         expected_passenger_names: @expected_passenger_names,
         valid_contact_phones: @valid_contact_phones
@@ -276,7 +284,6 @@ module V101V150
       @expected_days = data['expected_days'] || 7
       @expected_nights = data['expected_nights'] || 6
       @expected_cabin_category = data['expected_cabin_category'] || 'interior'
-      @expected_month = data['expected_month'] || 3
       @adult_count = data['adult_count'] || 2
       @expected_passenger_names = data['expected_passenger_names'] || ['张三', '李四']
       @valid_contact_phones = data['valid_contact_phones'] || { '张三' => '13800138000', '李四' => '13900139000' }

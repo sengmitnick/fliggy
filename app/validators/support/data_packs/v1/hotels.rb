@@ -229,6 +229,73 @@ cities.each do |city|
   end
 end
 
+# 上海低价青旅和经济型酒店（支持 v186 验证器 - 预算≤500元，酒店≤200元）
+if cities.include?("上海")
+  # 青年旅舍（多床位房间，价格80-150元）
+  [
+    { name: "上海外滩国际青年旅舍", price: 120 },
+    { name: "上海人民广场青旅", price: 100 },
+    { name: "上海虹桥机场青旅", price: 90 },
+    { name: "上海浦东青年旅社", price: 110 },
+    { name: "上海南京路背包客栈", price: 85 }
+  ].each do |hostel|
+    hotel_index += 1
+    hotels_data << {
+      name: hostel[:name],
+      brand: "青旅",
+      city: "上海",
+      address: "上海#{address_suffixes.sample}#{rand(1..999)}号",
+      rating: (3.8 + rand * 0.6).round(1),
+      price: hostel[:price],
+      original_price: (hostel[:price] * 1.2).round(0),
+      distance: "#{rand(1..8)}.#{rand(0..9)}km",
+      features: ["免费WiFi", "公共厨房", "洗衣房", "行李寄存", "24小时前台"],
+      star_level: 2,
+      is_featured: false,
+      display_order: hotel_index,
+      hotel_type: 'hotel',
+      is_domestic: true,
+      region: '国内',
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 经济型连锁酒店（单人间，价格150-200元）
+  [
+    { name: "速8酒店·上海火车站店", price: 180 },
+    { name: "宜必思酒店·上海南站店", price: 190 },
+    { name: "布丁酒店·上海徐家汇店", price: 160 },
+    { name: "格林豪泰·上海虹桥店", price: 175 },
+    { name: "莫泰168·上海人民广场店", price: 170 }
+  ].each do |budget_hotel|
+    hotel_index += 1
+    hotels_data << {
+      name: budget_hotel[:name],
+      brand: budget_hotel[:name].split('·').first,
+      city: "上海",
+      address: "上海#{address_suffixes.sample}#{rand(1..999)}号",
+      rating: (3.9 + rand * 0.5).round(1),
+      price: budget_hotel[:price],
+      original_price: (budget_hotel[:price] * 1.15).round(0),
+      distance: "#{rand(1..10)}.#{rand(0..9)}km",
+      features: ["免费WiFi", "24小时前台", "空调", "独立卫浴"],
+      star_level: 2,
+      is_featured: false,
+      display_order: hotel_index,
+      hotel_type: 'hotel',
+      is_domestic: true,
+      region: '国内',
+      image_url: ImageSeedHelper.random_image_from_category(:hotels),
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
 # 上海CBD核心区的民宿（支持 v099/v111 验证器）
 if cities.include?("上海")
   ["山海居", "云溪小筑", "半山客栈", "水云间", "竹林雅居"].each_with_index do |homestay_name, idx|
@@ -260,7 +327,7 @@ if cities.include?("上海")
   end
 end
 
-# 火车站附近酒店（支持 V131/V134 等验证器）
+# 火车站附近酒店（支持 V131/V134/V197 等验证器）
 ["上海", "天津"].each do |city|
   next unless cities.include?(city)
   
@@ -280,6 +347,13 @@ end
       "#{brand[:name]}酒店·#{city}店"
     end
     
+    # V197要求距离≤1.0km，所以第一家酒店设置为0.8km
+    distance_value = if idx == 0
+      "0.8km"
+    else
+      "#{rand(1..3)}.#{rand(0..9)}km"
+    end
+    
     hotels_data << {
       name: hotel_name,
       brand: brand[:name],
@@ -288,7 +362,7 @@ end
       rating: (4.0 + rand * 0.8).round(1),
       price: base_price,
       original_price: (base_price * rand(1.1..1.25)).round(0),
-      distance: "#{rand(1..3)}.#{rand(0..9)}km",
+      distance: distance_value,
       features: features_pool.sample,
       star_level: star_level,
       is_featured: false,
@@ -378,7 +452,53 @@ hotels_data << {
   updated_at: timestamp
 }
 
-puts "   ✓ 添加了 3 家验证器特定酒店到主数组"
+# V198: 北京欢乐谷主题酒店
+hotels_data << {
+  name: "北京欢乐谷主题酒店",
+  brand: "欢乐谷",
+  city: "北京",
+  address: "北京市朝阳区东四环小武基北路欢乐谷景区1号",
+  rating: 4.6,
+  price: 380,
+  original_price: 480,
+  distance: "0.2km",
+  features: ["免费WiFi", "主题房间", "欢乐谷门票优惠", "景区直达", "餐厅", "儿童乐园"],
+  star_level: 4,
+  is_featured: true,
+  display_order: 20004,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+# V198: 如家酒店·北京欢乐谷店
+hotels_data << {
+  name: "如家酒店·北京欢乐谷店",
+  brand: "如家",
+  city: "北京",
+  address: "北京市朝阳区东四环小武基北路88号",
+  rating: 4.3,
+  price: 220,
+  original_price: 280,
+  distance: "0.5km",
+  features: ["免费WiFi", "24小时前台", "欢乐谷门票代订", "免费早餐", "行李寄存"],
+  star_level: 3,
+  is_featured: false,
+  display_order: 20005,
+  hotel_type: 'hotel',
+  is_domestic: true,
+  region: '国内',
+  image_url: ImageSeedHelper.random_image_from_category(:hotels),
+  data_version: 0,
+  created_at: timestamp,
+  updated_at: timestamp
+}
+
+puts "   ✓ 添加了 5 家验证器特定酒店到主数组"
 
 Hotel.insert_all(hotels_data)
 

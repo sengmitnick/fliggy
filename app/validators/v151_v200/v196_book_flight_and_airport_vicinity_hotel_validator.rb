@@ -2,22 +2,47 @@
 
 require_relative '../base_validator'
 
-# V196: 给王芳预订明天北京到上海的航班+机场3公里内酒店（住一晚）
+# 验证用例196: 给王芳预订明天北京到上海的航班+机场3公里内酒店（住一晚）
 #
-# 任务描述:
-#   用户需要为王芳预订出行服务，包含：
-#   1) 航班订单（Booking，北京到上海，明天出发）
-#   2) 机场附近酒店（HotelBooking，上海机场≤3公里范围，住一晚，便于转机）
-#   3) 乘客和入住人（王芳）
-#   确保航班出发/到达城市、酒店距离机场范围、住宿天数、乘客信息、入住日期与航班衔接正确
+# 任务描述：
+#   为王芳预订明天从北京到上海的航班+机场附近酒店（住一晚，便于转机或早班航班）
 #
-# 评分标准:
-#   - 创建了航班订单（北京→上海） (25%)
-#   - 创建了酒店订单（上海） (25%)
-#   - 酒店在机场附近（≤3公里） (15%)
-#   - 出发/到达城市正确（北京→上海） (10%)
-#   - 乘客和入住人信息正确（王芳） (15%)
-#   - 日期合理（入住日期为航班到达日或次日） (10%)
+# 核心要求：
+#   - 乘客：王芳（1人）
+#   - 出发日期：明天（Date.current + 1.day）
+#   - 路线：北京 → 上海
+#   - 住宿：1晚（入住日期=航班到达日期）
+#   - 酒店位置：距离上海机场 ≤ 3公里
+#   - 价格策略：选择机场附近的酒店和航班
+#
+# 业务流程：
+#   1. 查询明天北京→上海的所有航班
+#   2. 查询上海机场附近的酒店（距离 ≤ 3公里）
+#   3. 选择航班
+#   4. 选择机场酒店房间（整晚房）
+#   5. 创建航班订单
+#   6. 创建酒店订单（入住日期=航班到达日期，住1晚）
+#
+# 复杂度分析：
+#   - 位置筛选：需要过滤出机场附近的酒店（distance ≤ 3km）
+#   - 距离判断：优先使用distance字段，备用文本匹配（酒店名称/地址包含"机场"）
+#   - 价格优化：选择机场附近的酒店（重点是位置，不是价格）
+#   - 注意事项：必须过滤room_category='overnight'，排除钟点房
+#
+# 评分标准（总分100分）：
+#   1. 创建了航班订单(25分)
+#   2. 创建了酒店订单(25分)
+#   3. 酒店在机场附近（≤3公里）(15分)
+#   4. 出发/到达城市正确(10分)
+#   5. 乘客和入住人信息正确（王芳）(15分)
+#   6. 日期合理(10分)
+#
+# 验证要点：
+#   - 航班/酒店订单已创建
+#   - 酒店距离机场 ≤ 3公里
+#   - 出发/到达城市正确（北京 → 上海）
+#   - 乘客和入住人信息正确（王芳）
+#   - 入住日期为航班到达日期或次日
 module V151V200
   class V196BookFlightAndAirportVicinityHotelValidator < BaseValidator
     self.validator_id = 'v196_book_flight_and_airport_vicinity_hotel_validator'
@@ -114,7 +139,7 @@ module V151V200
         expect(hotel.city).to eq(@arrival_city)
       end
       
-      # 断言5: 乘客和入住人信息正确（周敏） (15%)
+      # 断言5: 乘客和入住人信息正确（王芳） (15%)
       add_assertion "乘客和入住人信息正确（#{@expected_passenger_name}）", weight: 15 do
         # 检查航班乘客姓名
         expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
@@ -159,7 +184,8 @@ module V151V200
       
       # 选择机场酒店
       airport_hotel = @airport_hotels.min_by(&:price)
-      room = airport_hotel.hotel_rooms.where(data_version: 0).order(price: :asc).first!
+      # CRITICAL: 必须过滤room_category='overnight'，排除钟点房
+      room = airport_hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
       
       arrival_date = flight.arrival_time.to_date
       HotelBooking.create!(
@@ -198,7 +224,8 @@ module V151V200
         departure_city: @departure_city,
         arrival_city: @arrival_city,
         travel_date: @travel_date&.to_s,
-        max_distance: @max_distance
+        max_distance: @max_distance,
+        airport_hotel_ids: @airport_hotels&.map(&:id)
       }
     end
     
@@ -212,6 +239,11 @@ module V151V200
       @arrival_city = data['arrival_city']
       @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @max_distance = data['max_distance']
+      
+      # 恢复airport_hotels
+      if data['airport_hotel_ids']
+        @airport_hotels = Hotel.where(id: data['airport_hotel_ids'], data_version: 0).to_a
+      end
     end
   end
 end

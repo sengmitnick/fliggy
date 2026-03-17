@@ -35,7 +35,9 @@ class TrainBooking < ApplicationRecord
     second_class: 'second_class',      # 二等座
     first_class: 'first_class',        # 一等座
     business_class: 'business_class',  # 商务座
-    no_seat: 'no_seat'                 # 无座
+    no_seat: 'no_seat',                # 无座
+    hard_sleeper: 'hard_sleeper',      # 硬卧
+    soft_sleeper: 'soft_sleeper'       # 软卧
   }, suffix: true
 
   # 获取座位类型中文名
@@ -49,6 +51,10 @@ class TrainBooking < ApplicationRecord
       '商务座'
     when 'no_seat'
       '无座'
+    when 'hard_sleeper'
+      '硬卧'
+    when 'soft_sleeper'
+      '软卧'
     else
       '未知'
     end

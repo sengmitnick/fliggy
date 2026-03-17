@@ -280,9 +280,10 @@
       <!-- Date Selector -->
       <div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar">
         <% @date_prices.each do |date_info| %>
+          <% is_selected = date_info[:date] == @date %>
           <%= link_to search_flights_path(departure_city: @departure_city, destination_city: @destination_city, date: date_info[:date], trip_type: @trip_type, return_date: @return_date, cabin_class: @cabin_class, source: params[:source]), 
               data: { turbo: false },
-              class: "flex-shrink-0 px-4 py-2 rounded-lg text-center #{date_info[:is_today] ? 'bg-yellow-400' : 'bg-gray-100'}" do %>
+              class: "flex-shrink-0 px-4 py-2 rounded-lg text-center #{date_info[:is_today] ? 'bg-yellow-400' : 'bg-gray-100'} #{is_selected ? 'ring-2 ring-blue-500' : ''}" do %>
             <div class="text-xs <%= date_info[:is_today] ? 'text-gray-800' : 'text-gray-600' %>"><%= date_info[:weekday] %></div>
             <div class="text-lg font-bold <%= date_info[:is_today] ? 'text-gray-900' : 'text-gray-800' %>">
               <%= I18n.l(date_info[:date], format: "%m-%d") %>

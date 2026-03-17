@@ -197,6 +197,36 @@ export default class extends Controller<HTMLElement> {
     this.updateAddButtonState()
   }
 
+  // 交换出发地和目的地
+  swapCities(event: Event): void {
+    const button = event.currentTarget as HTMLElement
+    const segmentId = button.dataset.segmentId
+
+    console.log(`Multi-city: Swapping cities for segment ${segmentId}`)
+
+    const segmentIndex = this.segmentsValue.findIndex(seg => seg.id === segmentId)
+    
+    if (segmentIndex !== -1) {
+      const segment = this.segmentsValue[segmentIndex]
+      
+      // Swap departure and destination cities
+      this.segmentsValue = this.segmentsValue.map((seg, index) => {
+        if (index === segmentIndex) {
+          return {
+            ...seg,
+            departureCity: segment.destinationCity,
+            destinationCity: segment.departureCity
+          }
+        }
+        return seg
+      })
+      
+      console.log(`Multi-city: Cities swapped for segment ${segmentId}`, this.segmentsValue[segmentIndex])
+    } else {
+      console.warn('Multi-city: Segment not found:', segmentId)
+    }
+  }
+
   // 删除行程段
   removeSegment(event: Event): void {
     const button = event.currentTarget as HTMLElement
@@ -340,9 +370,13 @@ export default class extends Controller<HTMLElement> {
           <div class="text-[32px] font-bold leading-tight">${segment.departureCity}</div>
         </button>
         
-        <div class="mx-4 flex items-center justify-center">
+        <button
+          type="button"
+          data-action="click->multi-city#swapCities"
+          data-segment-id="${segment.id}"
+          class="mx-4 flex items-center justify-center hover:scale-110 transition-transform">
           <img src="${this.switchIconUrlValue}" class="w-12 h-12" alt="切换" />
-        </div>
+        </button>
         
         <button 
           type="button"

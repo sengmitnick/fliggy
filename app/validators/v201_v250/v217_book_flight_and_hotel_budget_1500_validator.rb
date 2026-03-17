@@ -2,22 +2,43 @@
 
 require_relative '../base_validator'
 
-# V217: 预订航班+酒店（总预算≤1500元）
+# 验证用例217: 张三需要预订后天从深圳到北京的航班+酒店（当晚入住1晚，总预算≤1500元）
 #
 # 任务描述:
-#   用户需要预订航班+酒店，总预算≤1500元
+#   张三需要预订后天从深圳到北京的航班，并预订北京酒店当晚入住1晚，总预算不超过1500元。
+#   Agent需要综合考虑航班和酒店的价格，确保总价不超过预算。
+#
+# 业务流程:
+#   1. 张三向Agent提出需求：后天从深圳到北京，预订航班+酒店（1晚），总预算≤1500元
+#   2. Agent查询后天从深圳到北京的航班
+#   3. Agent查询北京的酒店
+#   4. Agent计算航班+酒店的组合价格，找到预算内的最佳组合
+#   5. Agent预订选定的航班
+#   6. Agent预订选定的酒店，入住日期为航班当天，住1晚
+#   7. Agent确认总价格≤1500元
+#
+# 复杂度分析:
+#   1. 需要理解预算约束概念（航班+酒店总价≤1500元）
+#   2. 需要同时查询航班和酒店，计算组合价格
+#   3. 需要找到预算内的最佳组合（性价比最高）
+#   4. 需要协调航班日期与酒店入住日期（当天入住）
 #
 # 评分标准:
-#   - 创建了航班订单 (20%)
-#   - 创建了酒店订单 (20%)
-#   - 总价格≤1500元 (40%)
-#   - 订单状态有效 (20%)
+#   - 创建了航班订单 (15分)
+#   - 创建了酒店订单 (15分)
+#   - 航班路线正确（深圳→北京） (10分)
+#   - 航班日期正确（后天） (10分)
+#   - 酒店位于北京 (10分)
+#   - 酒店入住日期正确（航班当天） (10分)
+#   - 总价格≤1500元 (20分)
+#   - 乘客/入住人信息正确（张三） (5分)
+#   - 订单状态有效 (5分)
 module V201V250
   class V217BookFlightAndHotelBudget1500Validator < BaseValidator
     self.validator_id = 'v217_book_flight_and_hotel_budget_1500_validator'
     self.task_id = 'a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d'
-    self.title = '帮张三订后天从深圳到北京的航班+酒店（当晚入住1晚），总预算不超过1500元'
-    self.description = '帮张三订后天从深圳到北京的航班+酒店（当晚入住1晚），总预算不超过1500元'
+    self.title = '张三需要预订后天从深圳到北京的航班+酒店（当晚入住1晚，总预算≤1500元）'
+    self.description = '张三需要预订后天从深圳到北京的航班+酒店（当晚入住1晚，总预算≤1500元）'
     self.timeout_seconds = 300
     
     def prepare
@@ -56,22 +77,30 @@ module V201V250
       raise "最便宜的组合(#{cheapest_combo}元)超出预算#{@max_budget}元" if cheapest_combo > @max_budget
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@arrival_city}的航班，并预订#{@arrival_city}的酒店（当晚入住1晚）。总预算不超过#{@max_budget}元。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。张三需要预订后天从深圳到北京的航班+酒店（当晚入住1晚，总预算≤1500元）",
+        description: "张三需要预订后天从深圳到北京的航班+酒店（当晚入住1晚，总预算≤1500元）",
+        scenario: "张三后天需要去北京，需要预订航班和酒店，总预算有限",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
-          flight_date: @flight_date,
+          flight_date: @flight_date.strftime('%Y-%m-%d'),
           hotel_city: @arrival_city,
-          check_in_date: @check_in_date,
+          check_in_date: @check_in_date.strftime('%Y-%m-%d'),
           nights: 1,
-          max_budget: @max_budget
+          max_budget: @max_budget,
+          passenger: '张三'
         },
-        hint: "需要综合考虑航班和酒店的价格，确保总价不超过#{@max_budget}元。优先选择性价比高的组合。"
+        available_options_sample: {
+          flights_count: @available_flights.size,
+          hotels_count: @available_hotels.size,
+          cheapest_flight: @available_flights.first ? "#{@available_flights.first.flight_number}(#{@available_flights.first.price}元)" : nil,
+          cheapest_hotel: @available_hotels.first ? "#{@available_hotels.first.name}(#{@available_hotels.first.price}元)" : nil
+        }
       }
     end
     
     def verify
-      add_assertion "创建了航班订单", weight: 20 do
+      add_assertion "创建了航班订单", weight: 15 do
         all_flight_bookings = Booking
           .joins(:flight)
           .includes(:flight)
@@ -86,7 +115,7 @@ module V201V250
       
       return if @flight_booking.nil?
       
-      add_assertion "创建了酒店订单", weight: 20 do
+      add_assertion "创建了酒店订单", weight: 15 do
         all_hotel_bookings = HotelBooking
           .joins(:hotel)
           .includes(:hotel)
@@ -101,12 +130,24 @@ module V201V250
       
       return if @hotel_booking.nil?
       
-      add_assertion "航班日期正确（#{@flight_date.strftime('%m月%d日')}）", weight: 10 do
+      add_assertion "航班路线正确（#{@departure_city}→#{@arrival_city}）", weight: 10 do
+        expect(@flight_booking.flight.departure_city).to eq(@departure_city),
+          "出发城市错误。期望: #{@departure_city}, 实际: #{@flight_booking.flight.departure_city}"
+        expect(@flight_booking.flight.destination_city).to eq(@arrival_city),
+          "到达城市错误。期望: #{@arrival_city}, 实际: #{@flight_booking.flight.destination_city}"
+      end
+      
+      add_assertion "航班日期正确（后天#{@flight_date}）", weight: 10 do
         expect(@flight_booking.flight.flight_date).to eq(@flight_date),
           "航班日期错误。期望: #{@flight_date}, 实际: #{@flight_booking.flight.flight_date}"
       end
       
-      add_assertion "酒店入住日期正确（#{@check_in_date.strftime('%m月%d日')}）", weight: 10 do
+      add_assertion "酒店位于#{@arrival_city}", weight: 10 do
+        expect(@hotel_booking.hotel.city).to eq(@arrival_city),
+          "酒店城市错误。期望: #{@arrival_city}, 实际: #{@hotel_booking.hotel.city}"
+      end
+      
+      add_assertion "酒店入住日期正确（航班当天#{@check_in_date}）", weight: 10 do
         expect(@hotel_booking.check_in_date).to eq(@check_in_date),
           "入住日期错误。期望: #{@check_in_date}（航班当天）, 实际: #{@hotel_booking.check_in_date}"
       end
@@ -120,14 +161,14 @@ module V201V250
           "总价格超出预算。航班: #{flight_price}元, 酒店: #{hotel_price}元, 总计: #{total_price}元, 预算上限: #{@max_budget}元"
       end
       
-      add_assertion "乘客/入住人信息正确（张三）", weight: 10 do
+      add_assertion "乘客/入住人信息正确（张三）", weight: 5 do
         expect(@flight_booking.passenger_name).to eq(@expected_guest_name),
           "航班乘客姓名错误。期望: #{@expected_guest_name}, 实际: #{@flight_booking.passenger_name}"
         expect(@hotel_booking.guest_name).to eq(@expected_guest_name),
           "酒店入住人姓名错误。期望: #{@expected_guest_name}, 实际: #{@hotel_booking.guest_name}"
       end
       
-      add_assertion "订单状态有效", weight: 10 do
+      add_assertion "订单状态有效", weight: 5 do
         expect(@flight_booking.status).to be_in(['pending', 'paid', 'completed']),
           "航班订单状态异常。实际状态: #{@flight_booking.status}"
         expect(@hotel_booking.status).to be_in(['pending', 'paid', 'completed']),
@@ -162,7 +203,7 @@ module V201V250
       
       raise "未找到符合预算的组合" if best_combo.nil?
       
-      # 创建航班订单
+      # 创建航班订单（深圳→北京）
       Booking.create!(
         user: user,
         flight: best_combo[:flight],
@@ -175,7 +216,7 @@ module V201V250
         data_version: @data_version
       )
       
-      # 创建酒店订单
+      # 创建酒店订单（北京，1晚）
       HotelBooking.create!(
         user: user,
         hotel: best_combo[:hotel],

@@ -48,6 +48,7 @@ locations_data = [
   { city: '上海', name: '徐家汇商圈接送服务点', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '人民广场接送服务站', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   { city: '上海', name: '浦东新区张江酒店', location_type: 'other', created_at: timestamp, updated_at: timestamp },
+  { city: '上海', name: 'CBD商圈酒店', location_type: 'other', created_at: timestamp, updated_at: timestamp },
   
   # 广州
   { city: '广州', name: '白云国际机场T1航站楼', location_type: 'airport', created_at: timestamp, updated_at: timestamp },

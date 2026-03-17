@@ -2,17 +2,31 @@
 
 require_relative '../base_validator'
 
-# V209: 预订夜间卧铺火车
+# 验证用例209: 张三需要预订后天从北京到西安的夜间卧铺火车，出发时间在22:00-次日08:00之间
 #
 # 任务描述:
-#   用户需要预订后天北京→西安，夜间卧铺（22:00-次日08:00）
+#   张三后天需要从北京到西安，要求预订夜间卧铺火车（出发时间在22:00-次日08:00）以边睡觉边赶路。
+#   Agent需要理解夜间时段的定义，筛选符合时间窗口的火车并完成预订。
+#
+# 业务流程:
+#   1. 搜索北京→西安火车（后天）
+#   2. 筛选出发时间在22:00-次日08:00的夜间火车
+#   3. 从符合时间窗口的火车中选择一个
+#   4. 填写乘客信息（张三）
+#   5. 确认订单
+#
+# 复杂度分析:
+#   1. 需要理解夜间时段定义（22:00-次日08:00跨日时间窗口）
+#   2. 需要根据departure_time.hour筛选（hour >= 22 或 hour < 8）
+#   3. 需要理解"后天"的时间概念
+#   4. 需要理解卧铺火车适合夜间赶路的业务场景
 #
 # 评分标准:
-#   - 创建了火车票订单 (20%)
-#   - 火车路线正确（北京→西安） (15%)
-#   - 出发时间在22:00-次日08:00夜间时段 (45%)
-#   - 乘客信息正确 (10%)
-#   - 订单状态有效 (10%)
+#   - 创建了火车票订单 (20分)
+#   - 火车路线正确（北京→西安） (15分)
+#   - 出发时间在22:00-次日08:00夜间时段 (45分)
+#   - 乘客信息正确 (10分)
+#   - 订单状态有效 (10分)
 module V201V250
   class V209BookOvernightTrainSleeperValidator < BaseValidator
     self.validator_id = 'v209_book_overnight_train_sleeper_validator'
@@ -46,20 +60,31 @@ module V201V250
       
       @travel_date = @available_trains.first.departure_time.to_date
       
+      # 找一个示例火车（优先选择22:00-24:00的）
+      @sample_train = @available_trains.select { |t| t.departure_time.hour >= 22 }.first || @available_trains.first
+      
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}（后天）晚上22:00-次日早上08:00从#{@departure_city}到#{@arrival_city}的夜间卧铺火车，适合省时间边睡觉边赶路。",
+        scenario: "#{@expected_passenger_name}后天需要从#{@departure_city}到#{@arrival_city}，选择夜间卧铺火车（22:00-次日08:00）以边睡觉边赶路",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           travel_date: @travel_date,
           time_window: '22:00-次日08:00',
+          passenger: @expected_passenger_name,
           purpose: '夜间卧铺'
+        },
+        available_trains_sample: {
+          count: @available_trains.count,
+          time_window: '22:00-次日08:00',
+          example: "#{@sample_train.train_number}（#{@sample_train.departure_time.strftime('%H:%M')}出发，二等座#{@sample_train.price_second_class}元）"
         },
         hint: "选择夜间时段出发的火车，出发时间在22:00-次日08:00之间。"
       }
     end
     
     def verify
+      # 断言1: 创建了火车票订单 (20%)
       add_assertion "创建了火车票订单", weight: 20 do
         all_bookings = TrainBooking
           .joins(:train)
@@ -69,12 +94,13 @@ module V201V250
           .order(created_at: :desc)
           .to_a
         
+        expect(all_bookings).not_to be_empty, "未找到从#{@departure_city}到#{@arrival_city}的火车票订单"
         @booking = all_bookings.first
-        expect(@booking).not_to be_nil, "未找到从#{@departure_city}到#{@arrival_city}的火车票订单"
       end
       
       return if @booking.nil?
       
+      # 断言2: 火车路线正确（北京→西安） (15%)
       add_assertion "火车路线正确（#{@departure_city}→#{@arrival_city}）", weight: 15 do
         expect(@booking.train.departure_city).to eq(@departure_city),
           "出发城市错误。期望: #{@departure_city}, 实际: #{@booking.train.departure_city}"
@@ -82,8 +108,7 @@ module V201V250
           "到达城市错误。期望: #{@arrival_city}, 实际: #{@booking.train.arrival_city}"
       end
       
-      # 移除日期验证（数据包中日期固定）
-      
+      # 断言3: 出发时间在22:00-次日08:00夜间时段 (45%)
       add_assertion "出发时间在22:00-次日08:00夜间时段", weight: 45 do
         hour = @booking.train.departure_time.hour
         is_overnight = (hour >= 22) || (hour < 8)
@@ -91,13 +116,17 @@ module V201V250
           "非夜间时段。期望: 22:00-次日08:00, 实际: #{@booking.train.departure_time.strftime('%H:%M')}"
       end
       
+      # 断言4: 乘客信息正确（张三） (10%)
       add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
+        expect(@booking.passenger_name).to eq(@expected_passenger_name),
+          "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@booking.passenger_name}"
         expect(@booking.passenger_id_number).to eq(@expected_passenger_id),
-          "乘客身份证错误。期望: #{@expected_passenger_id}（#{@expected_passenger_name}）, 实际: #{@booking.passenger_id_number}"
+          "乘客身份证错误。期望: #{@expected_passenger_id}, 实际: #{@booking.passenger_id_number}"
         expect(@booking.contact_phone).to eq(@expected_contact_phone),
           "联系电话错误。期望: #{@expected_contact_phone}, 实际: #{@booking.contact_phone}"
       end
       
+      # 断言5: 订单状态有效 (10%)
       add_assertion "订单状态有效", weight: 10 do
         expect(@booking.status).to be_in(['pending', 'paid', 'completed']),
           "订单状态异常。实际状态: #{@booking.status}"
@@ -159,6 +188,8 @@ module V201V250
         hour = t.departure_time.hour
         (hour >= 22) || (hour < 8)
       end
+      
+      @sample_train = @available_trains.select { |t| t.departure_time.hour >= 22 }.first || @available_trains.first if @available_trains.any?
     end
   end
 end

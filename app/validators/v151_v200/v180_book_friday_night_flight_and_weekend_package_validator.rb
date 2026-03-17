@@ -2,27 +2,54 @@
 
 require_relative '../base_validator'
 
-# 验证用例180: 预订周五晚航班和周末度假酒店套餐
+# 验证用例180: 给王芳预订本周五晚北京到三亚的航班，并预订周末度假酒店套餐（周五晚航班18:00后起飞→周五入住→周日退房，2晚）
 #
 # 任务描述:
-#   用户需要预订周五晚上的航班，并预订周末度假酒店套餐
+#   王芳周五晚上从北京坐飞机到三亚度周末，航班18:00后起飞（例如CA1234 20:00→次日23:30）。
+#   到达三亚后，入住度假酒店套餐，周五入住，周日退房，连住2晚。
+#   需要创建2个订单：
+#   1. 航班订单（周五晚北京→三亚，18:00后起飞）
+#   2. 酒店套餐订单（三亚度假酒店，周五入住，周日退房，连住2晚）
+#
+# 业务流程:
+#   1. 搜索并预订本周五晚18:00后起飞的北京到三亚航班
+#   2. 记录航班起飞日期（本周五）
+#   3. 搜索三亚的度假酒店套餐（HotelPackage）
+#   4. 入住日期：周五（航班当天）
+#   5. 退房日期：周日（入住2晚后）
+#   6. 乘客和入住人均为王芳
 #
 # 复杂度分析:
-#   1. 需要识别周五日期
-#   2. 需要筛选晚上的航班（18:00后）
-#   3. 需要预订周末酒店套餐（周五到周日）
+#   1. 需要搜索并预订周五晚18:00后起飞的航班
+#   2. 需要计算本周五的日期（Date.today.next_occurring(:friday)）
+#   3. 需要理解周末套餐逻辑：周五入住→周日退房（连住2晚）
+#   4. 需要使用HotelPackage而非普通HotelRoom
+#   5. 需要确保酒店在航班到达城市（三亚）
+#   6. 需要分别完成航班预订和酒店套餐预订两个流程
+#   ❌ 不能一次性提供：需要先查询周五晚航班→确认航班日期→根据航班日期确定酒店入住日期→预订三亚度假酒店套餐
 #
-# 评分标准:
-#   - 创建了航班订单 (20分)
-#   - 航班是周五晚上出发 (20分)
-#   - 创建了酒店套餐订单 (20分)
-#   - 酒店在到达城市 (20分)
-#   - 酒店入住周期为周末（至少2晚） (20分)
+# 评分标准（总分100分）:
+#   1. 创建了航班订单（北京→三亚） (20分)
+#   2. 航班是周五晚上出发（18:00后） (18分)
+#   3. 创建了酒店订单 (15分)
+#   4. 酒店位置正确（三亚） (15分)
+#   5. 酒店入住周期为周末（至少2晚） (17分)
+#   6. 航班乘客信息正确（王芳） (7分)
+#   7. 酒店入住人信息正确（王芳） (8分)
+#
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v180_book_friday_night_flight_and_weekend_package_validator/start
+#   
+#   # Agent 通过界面操作完成任务...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V151V200
   class V180BookFridayNightFlightAndWeekendPackageValidator < BaseValidator
     self.validator_id = 'v180_book_friday_night_flight_and_weekend_package_validator'
     self.task_id = '9331db0e-0f5f-43ca-85b4-8f2d4b62380b'
-    self.title = '给王芳预订周五晚北京到三亚的航班，并预订周末度假酒店套餐（2晚）'
+    self.title = '给王芳预订本周五晚北京到三亚的航班，并预订周末度假酒店套餐（2晚）'
     self.description = '帮王芳订周五晚上从北京到三亚的航班（18:00后），并预订周末度假酒店套餐（周五到周日，2晚）'
     self.timeout_seconds = 300
   
@@ -35,10 +62,14 @@ module V151V200
       @departure_city = '北京'
       @arrival_city = '三亚'
       
-      # 查找最近的周五
-      @friday_date = Date.current + 1.day  # 明天
-      until @friday_date.friday?
-        @friday_date += 1.day
+      # 查找最近的周五（如果今天是周五就用今天，否则找下一个周五）
+      if Date.current.friday?
+        @friday_date = Date.current  # 今天就是周五，预订今晚
+      else
+        @friday_date = Date.current + 1.day  # 从明天开始找
+        until @friday_date.friday?
+          @friday_date += 1.day
+        end
       end
       
       # 查找周五晚上的航班（18:00后）
@@ -50,9 +81,7 @@ module V151V200
       
       # 查找三亚的酒店套餐（优先）或酒店
       @available_packages = HotelPackage
-        .joins(:hotel)
-        .where(hotels: { city: @arrival_city })
-        .where(data_version: 0)
+        .where(city: @arrival_city, data_version: 0)
         .limit(10)
         .to_a
       
@@ -68,7 +97,7 @@ module V151V200
       @hotel_checkout_date = @friday_date + 2.days  # 周日退房
       
       {
-        task: "请为#{@passenger.name}预订#{@friday_date.strftime('%Y年%m月%d日')}（#{(@friday_date - Date.current).to_i}天后，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
+        task: "请为#{@passenger.name}预订#{@friday_date.strftime('%Y年%m月%d日')}（#{@friday_date == Date.current ? '今天' : "#{(@friday_date - Date.current).to_i}天后"}，周五）从#{@departure_city}到#{@arrival_city}的晚上航班（18:00后），" \
               "并预订周末度假酒店套餐（周五到周日，2晚）",
         requirements: {
           departure_city: @departure_city,
@@ -111,15 +140,22 @@ module V151V200
       # 创建酒店套餐订单（如果有）或普通酒店订单
       if @available_packages.any?
         package = @available_packages.first
+        # 获取该套餐的第一个选项（2晚套餐）
+        package_option = package.package_options.where(night_count: 2, data_version: 0).order(price: :asc).first
+        
         HotelPackageOrder.create!(
           user: user,
           hotel_package: package,
-          guest_name: @passenger.name,
-          guest_phone: passenger.phone,
+          package_option: package_option,
+          passenger: passenger,
+          contact_name: @passenger.name,
+          contact_phone: passenger.phone,
           check_in_date: @hotel_checkin_date,
           check_out_date: @hotel_checkout_date,
-          guest_count: 2,
-          total_price: package.price * 2,  # 2晚
+          quantity: 1,
+          booking_type: 'instant',
+          status: 'paid',
+          total_price: package_option ? package_option.price : (package.price * 2),  # 2晚
           data_version: @data_version
         )
       else
@@ -175,8 +211,8 @@ module V151V200
       # 断言3: 创建了酒店套餐或酒店订单 (15%)
       add_assertion "创建了酒店订单", weight: 15 do
         @package_order = HotelPackageOrder
-          .joins(hotel_package: :hotel)
-          .where(hotels: { city: @arrival_city })
+          .joins(:hotel_package)
+          .where(hotel_packages: { city: @arrival_city })
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
@@ -196,9 +232,10 @@ module V151V200
       # 断言4: 酒店在到达城市 (15%)
       add_assertion "酒店位置正确（#{@arrival_city}）", weight: 15 do
         if @package_order
-          hotel = @package_order.hotel_package.hotel
-          expect(hotel.city).to include(@arrival_city),
-            "酒店城市错误。期望: #{@arrival_city}, 实际: #{hotel.city}"
+          # HotelPackage的city字段直接存储城市信息
+          package_city = @package_order.hotel_package.city
+          expect(package_city).to include(@arrival_city),
+            "酒店城市错误。期望: #{@arrival_city}, 实际: #{package_city}"
         else
           hotel = @hotel_booking.hotel
           expect(hotel.city).to include(@arrival_city),
@@ -229,10 +266,10 @@ module V151V200
       # 断言7: 酒店入住人信息正确（王芳） (8%)
       add_assertion "酒店入住人信息正确（#{@expected_passenger_name}）", weight: 8 do
         if @package_order
-          expect(@package_order.guest_name).to eq(@expected_passenger_name),
-            "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@package_order.guest_name}"
-          expect(@package_order.guest_phone).to eq(@expected_phone),
-            "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@package_order.guest_phone}"
+          expect(@package_order.contact_name).to eq(@expected_passenger_name),
+            "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@package_order.contact_name}"
+          expect(@package_order.contact_phone).to eq(@expected_phone),
+            "酒店联系电话错误。期望: #{@expected_phone}, 实际: #{@package_order.contact_phone}"
         else
           expect(@hotel_booking.guest_name).to eq(@expected_passenger_name),
             "酒店入住人姓名错误。期望: #{@expected_passenger_name}, 实际: #{@hotel_booking.guest_name}"
@@ -275,9 +312,7 @@ module V151V200
         .select { |f| f.departure_time.hour >= 18 }
       
       @available_packages = HotelPackage
-        .joins(:hotel)
-        .where(hotels: { city: @arrival_city })
-        .where(data_version: 0)
+        .where(city: @arrival_city, data_version: 0)
         .limit(10)
         .to_a
       

@@ -203,12 +203,72 @@ cruise_sailings_data = [
     created_at: Time.current,
     updated_at: Time.current
   },
-  # 海洋光谱号 - 日韩航线
+  # 海洋光谱号 - 日韩航线 (香港出发, 6天5晚, 最近班次)
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-01-23'),
-    return_date: Date.parse('2026-01-28'),
+    departure_date: Date.today + 2.days,
+    return_date: Date.today + 7.days,
+    duration_days: 6,
+    duration_nights: 5,
+    departure_port: '香港登船',
+    arrival_port: '香港离船',
+    status: 'on_sale',
+    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { 
+        day: 1, 
+        port: '香港', 
+        title: '登船',
+        description: "登船地点 香港启德邮轮码头 香港九龙承丰道33号\n\n登船截止时间 14:30\n\n行程描述 欢迎来到香港启德邮轮码头，开启您此次的游轮之旅。您可以到达港口后办理行李托运及登船手续，通过安检与海关后，便可凭房卡登船。祝您与您的家人共同享受这无与伦比的游轮假期！\n\n码头地址：香港启德邮轮码头 香港九龙承丰道33号",
+        images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)]
+      },
+      { 
+        day: 2, 
+        port: '冲绳', 
+        title: '岸上观光',
+        description: "行程描述 今天我们将抵达日本冲绳那霸港。冲绳被誉为日本的夏威夷，拥有迷人的海滩、独特的琉球文化和美丽的水下世界。\n\n推荐活动 您可以参加岸上游览项目：首里城探访（琉球王国的宫殿遗址，世界文化遗产）、美丽海水族馆参观（世界级的水族馆，拥有巨大的黑潮之海水槽）、国际通商店街购物（冲绳最繁华的商业街，可以购买当地特产）。\n\n美食推荐 不要错过冲绳特色美食：冲绳荞麦面、塔可饭、海葡萄、苦瓜炒蛋、紫薯塔等。国际通沿街有许多餐厅和小吃店可以品尝。\n\n温馨提示 冲绳气候温暖，请携带防晒用品。岸上游览时间约为8小时，请在16:00前返回船上。",
+        images: ImageSeedHelper.random_images_from_category(:cruise_destinations, count: 2)
+      },
+      { 
+        day: 3, 
+        port: '福冈', 
+        title: '岸上观光',
+        description: "行程描述 今天我们将停靠福冈博多港。福冈是日本九州地区最大的城市，以美食、购物和温泉而闻名。\n\n推荐活动 您可以前往太宰府天满宫参拜（日本著名的学问之神神社）、福冈塔观景（高234米，可俯瞰整个城市和博多湾）、栉田神社游览（福冈最古老的神社之一）、天神地下街购物（九州最大的地下商业街）。\n\n美食推荐 福冈拉面是必尝美食，尤其是博多豚骨拉面。一兰拉面、一风堂、博多だるま等都是知名店铺。此外还有明太子、牛杂锅、鸡肉水炊等当地特色。\n\n购物天堂 天神地区是福冈的购物中心，拥有三越、大丸、PARCO等百货商场。博多运河城是大型综合购物娱乐设施。\n\n温馨提示 岸上游览时间约为9小时，请在17:00前返回船上。",
+        images: ImageSeedHelper.random_images_from_category(:cruise_destinations, count: 2)
+      },
+      { 
+        day: 4, 
+        port: '济州岛', 
+        title: '岸上观光',
+        description: "行程描述 今天我们将抵达韩国济州岛。济州岛是韩国最大的岛屿，以火山地貌、海岸风光和独特的海女文化而闻名。\n\n推荐活动 您可以参观城山日出峰（UNESCO世界自然遗产，壮观的火山口）、万丈窟（世界最长的熔岩洞之一）、泰迪熊博物馆、涉地可支海岸（热门韩剧拍摄地）。\n\n美食推荐 济州岛特色美食包括黑猪肉烤肉、鲍鱼粥、海鲜火锅、济州橘子等。您还可以品尝当地的马格利米酒。\n\n购物建议 济州岛有乐天免税店、新罗免税店等大型免税商场，可以购买化妆品、服装、韩国特产等。\n\n温馨提示 岸上游览时间约为8小时，请在17:00前返回船上。",
+        images: ImageSeedHelper.random_images_from_category(:cruise_destinations, count: 2)
+      },
+      { 
+        day: 5, 
+        port: '海上巡航', 
+        title: '海上巡航',
+        description: "行程描述 今天是海上巡航日，您可以尽情享受游轮上的各种设施和娱乐活动。\n\n甲板活动 在露天甲板上享受日光浴，参加游泳池派对，或在热水按摩池中放松身心。14楼的北极星观景台将在上午10:00-12:00、下午15:00-17:00开放，登上距海平面90米的观景臂，360度俯瞰壮丽海景。\n\n娱乐表演 晚上20:00在皇家剧院将上演精彩的百老汇风格歌舞表演《音乐之声》。在270度观景厅，您还可以欣赏结合了科技与艺术的多媒体表演。\n\n特色体验 南极球模拟跳伞体验（需预约）、甲板跳伞、海上碰碰车、攀岩墙等刺激项目等您挑战。喜欢安静的游客可以前往图书馆阅读，或参加摄影、绘画等艺术工作坊。",
+        images: ImageSeedHelper.random_images_from_category(:cruise_destinations, count: 2)
+      },
+      { 
+        day: 6, 
+        port: '香港', 
+        title: '离船',
+        description: "行程描述 今天早晨我们将返回香港启德邮轮码头，结束这次精彩的游轮之旅。\n\n离船安排 游轮预计早上07:00抵达，办理离船手续后您可以在08:00-10:00之间离船。请在昨晚将大件行李放在房间门口，我们会帮您送至码头。随身贵重物品请自行携带。\n\n结账事宜 如果您的房卡绑定了信用卡，所有船上消费将自动结算。如需查看账单明细，可在离船前一天到服务台索取。\n\n码头交通 码头交通便利，可选择地铁、巴士、出租车等多种交通方式前往市区。\n\n感谢致辞 感谢您选择海洋光谱号，期待再次为您服务！祝您旅途愉快！",
+        images: [ImageSeedHelper.random_image_from_category(:cruise_destinations)]
+      }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  # 海洋光谱号 - 日韩航线 (支持西时区用户的过去班次)
+  {
+    cruise_ship_id: spectrum.id,
+    cruise_route_id: japan_korea_route.id,
+    departure_date: Date.today - 1.day,
+    return_date: Date.today + 4.days,
     duration_days: 6,
     duration_nights: 5,
     departure_port: '香港登船',
@@ -266,8 +326,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-01-28'),
-    return_date: Date.parse('2026-02-01'),
+    departure_date: Date.today + 12.days,
+    return_date: Date.today + 16.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '上海登船',
@@ -318,8 +378,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-05'),
-    return_date: Date.parse('2026-02-10'),
+    departure_date: Date.today + 15.days,
+    return_date: Date.today + 20.days,
     duration_days: 6,
     duration_nights: 5,
     departure_port: '上海登船',
@@ -341,8 +401,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-15'),
-    return_date: Date.parse('2026-02-19'),
+    departure_date: Date.today + 20.days,
+    return_date: Date.today + 24.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '香港登船',
@@ -393,8 +453,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-22'),
-    return_date: Date.parse('2026-02-27'),
+    departure_date: Date.today + 25.days,
+    return_date: Date.today + 30.days,
     duration_days: 6,
     duration_nights: 5,
     departure_port: '上海登船',
@@ -453,8 +513,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-10'),
-    return_date: Date.parse('2026-02-17'),
+    departure_date: Date.today + 18.days,
+    return_date: Date.today + 25.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '上海登船',
@@ -478,8 +538,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-20'),
-    return_date: Date.parse('2026-02-26'),
+    departure_date: Date.today + 22.days,
+    return_date: Date.today + 28.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '香港登船',
@@ -502,8 +562,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-03-05'),
-    return_date: Date.parse('2026-03-10'),
+    departure_date: Date.today + 30.days,
+    return_date: Date.today + 35.days,
     duration_days: 6,
     duration_nights: 5,
     departure_port: '上海登船',
@@ -523,11 +583,90 @@ cruise_sailings_data = [
     updated_at: Time.current
   },
   # 爱达新星号 - 东南亚航线
+  # v116需要：9天8晚，上海出发
   {
     cruise_ship_id: aida_nova.id,
     cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-02-08'),
-    return_date: Date.parse('2026-02-15'),
+    departure_date: Date.today + 2.days,
+    return_date: Date.today + 10.days,
+    duration_days: 9,
+    duration_nights: 8,
+    departure_port: '上海登船',
+    arrival_port: '上海离船',
+    status: 'on_sale',
+    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '上海', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '海上巡航', description: '甲板活动' },
+      { day: 4, port: '岘港', description: '越南海滨城市' },
+      { day: 5, port: '芽庄', description: '海岛风光' },
+      { day: 6, port: '新加坡', description: '狮城一日游' },
+      { day: 7, port: '海上巡航', description: '船上娱乐' },
+      { day: 8, port: '海上巡航', description: '晚宴之夜' },
+      { day: 9, port: '上海', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: aida_nova.id,
+    cruise_route_id: southeast_asia_route.id,
+    departure_date: Date.today + 5.days,
+    return_date: Date.today + 13.days,
+    duration_days: 9,
+    duration_nights: 8,
+    departure_port: '上海登船',
+    arrival_port: '上海离船',
+    status: 'on_sale',
+    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '上海', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '海上巡航', description: '甲板活动' },
+      { day: 4, port: '岘港', description: '越南海滨城市' },
+      { day: 5, port: '芽庄', description: '海岛风光' },
+      { day: 6, port: '新加坡', description: '狮城一日游' },
+      { day: 7, port: '海上巡航', description: '船上娱乐' },
+      { day: 8, port: '海上巡航', description: '晚宴之夜' },
+      { day: 9, port: '上海', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: aida_nova.id,
+    cruise_route_id: southeast_asia_route.id,
+    departure_date: Date.today + 8.days,
+    return_date: Date.today + 16.days,
+    duration_days: 9,
+    duration_nights: 8,
+    departure_port: '上海登船',
+    arrival_port: '上海离船',
+    status: 'on_sale',
+    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '上海', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '海上巡航', description: '甲板活动' },
+      { day: 4, port: '岘港', description: '越南海滨城市' },
+      { day: 5, port: '芽庄', description: '海岛风光' },
+      { day: 6, port: '新加坡', description: '狮城一日游' },
+      { day: 7, port: '海上巡航', description: '船上娱乐' },
+      { day: 8, port: '海上巡航', description: '晚宴之夜' },
+      { day: 9, port: '上海', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: aida_nova.id,
+    cruise_route_id: southeast_asia_route.id,
+    departure_date: Date.today + 3.days,
+    return_date: Date.today + 10.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '上海登船',
@@ -551,84 +690,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: aida_nova.id,
     cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-02-18'),
-    return_date: Date.parse('2026-02-24'),
-    duration_days: 7,
-    duration_nights: 6,
-    departure_port: '香港登船',
-    arrival_port: '香港离船',
-    status: 'on_sale',
-    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
-    boarding_deadline: '14:30',
-    itinerary: [
-      { day: 1, port: '香港', description: '下午登船，晚上启航' },
-      { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '海防', description: '越南北部港口城市' },
-      { day: 4, port: '岘港', description: '越南海滨城市' },
-      { day: 5, port: '海上巡航', description: '甲板活动' },
-      { day: 6, port: '海上巡航', description: '船上娱乐' },
-      { day: 7, port: '香港', description: '早晨抵达' }
-    ],
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  {
-    cruise_ship_id: aida_nova.id,
-    cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-03-01'),
-    return_date: Date.parse('2026-03-09'),
-    duration_days: 9,
-    duration_nights: 8,
-    departure_port: '上海登船',
-    arrival_port: '上海离船',
-    status: 'on_sale',
-    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
-    boarding_deadline: '14:30',
-    itinerary: [
-      { day: 1, port: '上海', description: '下午登船，晚上启航' },
-      { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '海上巡航', description: '甲板活动' },
-      { day: 4, port: '岘港', description: '越南海滨城市' },
-      { day: 5, port: '芽庄', description: '海岛风光' },
-      { day: 6, port: '新加坡', description: '狮城一日游' },
-      { day: 7, port: '海上巡航', description: '船上娱乐' },
-      { day: 8, port: '海上巡航', description: '晚宴之夜' },
-      { day: 9, port: '上海', description: '早晨抵达' }
-    ],
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  {
-    cruise_ship_id: aida_nova.id,
-    cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-03-05'),
-    return_date: Date.parse('2026-03-13'),
-    duration_days: 9,
-    duration_nights: 8,
-    departure_port: '上海登船',
-    arrival_port: '上海离船',
-    status: 'on_sale',
-    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
-    boarding_deadline: '14:30',
-    itinerary: [
-      { day: 1, port: '上海', description: '下午登船，晚上启航' },
-      { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '海上巡航', description: '甲板活动' },
-      { day: 4, port: '岘港', description: '越南海滨城市' },
-      { day: 5, port: '芽庄', description: '海岛风光' },
-      { day: 6, port: '新加坡', description: '狮城一日游' },
-      { day: 7, port: '海上巡航', description: '船上娱乐' },
-      { day: 8, port: '海上巡航', description: '晚宴之夜' },
-      { day: 9, port: '上海', description: '早晨抵达' }
-    ],
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  {
-    cruise_ship_id: aida_nova.id,
-    cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-03-12'),
-    return_date: Date.parse('2026-03-18'),
+    departure_date: Date.today + 6.days,
+    return_date: Date.today + 12.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '香港登船',
@@ -651,83 +714,34 @@ cruise_sailings_data = [
   {
     cruise_ship_id: aida_nova.id,
     cruise_route_id: southeast_asia_route.id,
-    departure_date: Date.parse('2026-03-15'),
-    return_date: Date.parse('2026-03-23'),
-    duration_days: 9,
-    duration_nights: 8,
-    departure_port: '上海登船',
-    arrival_port: '上海离船',
+    departure_date: Date.today + 9.days,
+    return_date: Date.today + 15.days,
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '香港登船',
+    arrival_port: '香港离船',
     status: 'on_sale',
-    boarding_address: '上海吴淞口国际邮轮码头 上海市宝山区吴淞口宝杨路1号',
+    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
     boarding_deadline: '14:30',
     itinerary: [
-      { day: 1, port: '上海', description: '下午登船，晚上启航' },
+      { day: 1, port: '香港', description: '下午登船，晚上启航' },
       { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '海上巡航', description: '甲板活动' },
+      { day: 3, port: '海防', description: '越南北部港口城市' },
       { day: 4, port: '岘港', description: '越南海滨城市' },
-      { day: 5, port: '芽庄', description: '海岛风光' },
-      { day: 6, port: '新加坡', description: '狮城一日游' },
-      { day: 7, port: '海上巡航', description: '船上娱乐' },
-      { day: 8, port: '海上巡航', description: '晚宴之夜' },
-      { day: 9, port: '上海', description: '早晨抵达' }
-    ],
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  {
-    cruise_ship_id: bellissima.id,
-    cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-02-22'),
-    return_date: Date.parse('2026-02-28'),
-    duration_days: 7,
-    duration_nights: 6,
-    departure_port: '香港登船',
-    arrival_port: '香港离船',
-    status: 'on_sale',
-    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
-    boarding_deadline: '14:30',
-    itinerary: [
-      { day: 1, port: '香港', description: '下午登船，晚上启航' },
-      { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '福冈', description: '日本九州' },
-      { day: 4, port: '鹿儿岛', description: '樱岛火山' },
-      { day: 5, port: '济州', description: '韩国济州岛' },
+      { day: 5, port: '海上巡航', description: '甲板活动' },
       { day: 6, port: '海上巡航', description: '船上娱乐' },
       { day: 7, port: '香港', description: '早晨抵达' }
     ],
     created_at: Time.current,
     updated_at: Time.current
   },
+  # 地中海辉煌号 - 日韩航线
+  # v117需要：7天6晚，香港出发
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-03-08'),
-    return_date: Date.parse('2026-03-14'),
-    duration_days: 7,
-    duration_nights: 6,
-    departure_port: '香港登船',
-    arrival_port: '香港离船',
-    status: 'on_sale',
-    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
-    boarding_deadline: '14:30',
-    itinerary: [
-      { day: 1, port: '香港', description: '下午登船，晚上启航' },
-      { day: 2, port: '海上巡航', description: '享受船上设施' },
-      { day: 3, port: '福冈', description: '日本九州' },
-      { day: 4, port: '鹿儿岛', description: '樱岛火山' },
-      { day: 5, port: '济州', description: '韩国济州岛' },
-      { day: 6, port: '海上巡航', description: '船上娱乐' },
-      { day: 7, port: '香港', description: '早晨抵达' }
-    ],
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  # 地中海辉煌号 - 日韩航线（3月15日）
-  {
-    cruise_ship_id: bellissima.id,
-    cruise_route_id: japan_korea_route.id,
-    departure_date: Date.parse('2026-03-15'),
-    return_date: Date.parse('2026-03-21'),
+    departure_date: Date.today + 1.day,
+    return_date: Date.today + 7.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '香港登船',
@@ -747,12 +761,60 @@ cruise_sailings_data = [
     created_at: Time.current,
     updated_at: Time.current
   },
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: japan_korea_route.id,
+    departure_date: Date.today + 4.days,
+    return_date: Date.today + 10.days,
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '香港登船',
+    arrival_port: '香港离船',
+    status: 'on_sale',
+    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '香港', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '福冈', description: '日本九州' },
+      { day: 4, port: '鹿儿岛', description: '樱岛火山' },
+      { day: 5, port: '济州', description: '韩国济州岛' },
+      { day: 6, port: '海上巡航', description: '船上娱乐' },
+      { day: 7, port: '香港', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
+  {
+    cruise_ship_id: bellissima.id,
+    cruise_route_id: japan_korea_route.id,
+    departure_date: Date.today + 7.days,
+    return_date: Date.today + 13.days,
+    duration_days: 7,
+    duration_nights: 6,
+    departure_port: '香港登船',
+    arrival_port: '香港离船',
+    status: 'on_sale',
+    boarding_address: '香港启德邮轮码头 香港九龙承丰道33号',
+    boarding_deadline: '14:30',
+    itinerary: [
+      { day: 1, port: '香港', description: '下午登船，晚上启航' },
+      { day: 2, port: '海上巡航', description: '享受船上设施' },
+      { day: 3, port: '福冈', description: '日本九州' },
+      { day: 4, port: '鹿儿岛', description: '樱岛火山' },
+      { day: 5, port: '济州', description: '韩国济州岛' },
+      { day: 6, port: '海上巡航', description: '船上娱乐' },
+      { day: 7, port: '香港', description: '早晨抵达' }
+    ],
+    created_at: Time.current,
+    updated_at: Time.current
+  },
   # 地中海辉煌号 - 地中海航线
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: mediterranean_route.id,
-    departure_date: Date.parse('2026-04-10'),
-    return_date: Date.parse('2026-04-16'),
+    departure_date: Date.today + 35.days,
+    return_date: Date.today + 41.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '巴塞罗那登船',
@@ -776,8 +838,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: grandiosa.id,
     cruise_route_id: mediterranean_route.id,
-    departure_date: Date.parse('2026-04-25'),
-    return_date: Date.parse('2026-05-01'),
+    departure_date: Date.today + 40.days,
+    return_date: Date.today + 46.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '巴塞罗那登船',
@@ -801,8 +863,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: fantasia.id,
     cruise_route_id: mediterranean_route.id,
-    departure_date: Date.parse('2026-05-05'),
-    return_date: Date.parse('2026-05-11'),
+    departure_date: Date.today + 45.days,
+    return_date: Date.today + 51.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '巴塞罗那登船',
@@ -826,8 +888,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: harmony.id,
     cruise_route_id: mediterranean_route.id,
-    departure_date: Date.parse('2026-06-15'),
-    return_date: Date.parse('2026-06-21'),
+    departure_date: Date.today + 50.days,
+    return_date: Date.today + 56.days,
     duration_days: 7,
     duration_nights: 6,
     departure_port: '巴塞罗那登船',
@@ -851,8 +913,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: caribbean_route&.id,
-    departure_date: Date.parse('2026-05-01'),
-    return_date: Date.parse('2026-05-10'),
+    departure_date: Date.today + 42.days,
+    return_date: Date.today + 51.days,
     duration_days: 10,
     duration_nights: 9,
     departure_port: '迈阿密登船',
@@ -880,8 +942,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-03-15'),
-    return_date: Date.parse('2026-03-19'),
+    departure_date: Date.today + 32.days,
+    return_date: Date.today + 36.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -903,8 +965,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-04-10'),
-    return_date: Date.parse('2026-04-14'),
+    departure_date: Date.today + 37.days,
+    return_date: Date.today + 41.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -926,8 +988,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: grandiosa.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-03-25'),
-    return_date: Date.parse('2026-03-29'),
+    departure_date: Date.today + 34.days,
+    return_date: Date.today + 38.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -949,8 +1011,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: fantasia.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-05-05'),
-    return_date: Date.parse('2026-05-09'),
+    departure_date: Date.today + 44.days,
+    return_date: Date.today + 48.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -972,8 +1034,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: aida_nova.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-04-20'),
-    return_date: Date.parse('2026-04-24'),
+    departure_date: Date.today + 38.days,
+    return_date: Date.today + 42.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -995,8 +1057,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: aida_nova.id,
     cruise_route_id: yangtze_river_route&.id,
-    departure_date: Date.parse('2026-05-15'),
-    return_date: Date.parse('2026-05-19'),
+    departure_date: Date.today + 48.days,
+    return_date: Date.today + 52.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '重庆登船',
@@ -1018,8 +1080,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: harmony.id,
     cruise_route_id: alaska_route&.id,
-    departure_date: Date.parse('2026-05-10'),
-    return_date: Date.parse('2026-05-17'),
+    departure_date: Date.today + 46.days,
+    return_date: Date.today + 53.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '西雅图登船',
@@ -1044,8 +1106,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: harmony.id,
     cruise_route_id: alaska_route&.id,
-    departure_date: Date.parse('2026-06-05'),
-    return_date: Date.parse('2026-06-12'),
+    departure_date: Date.today + 49.days,
+    return_date: Date.today + 56.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '温哥华登船',
@@ -1070,8 +1132,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: harmony.id,
     cruise_route_id: alaska_route&.id,
-    departure_date: Date.parse('2026-07-01'),
-    return_date: Date.parse('2026-07-08'),
+    departure_date: Date.today + 55.days,
+    return_date: Date.today + 62.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '西雅图登船',
@@ -1096,8 +1158,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: grandiosa.id,
     cruise_route_id: north_pole_route&.id,
-    departure_date: Date.parse('2026-12-15'),
-    return_date: Date.parse('2026-12-29'),
+    departure_date: Date.today + 60.days,
+    return_date: Date.today + 74.days,
     duration_days: 15,
     duration_nights: 14,
     departure_port: '布宜诺斯艾利斯登船',
@@ -1129,8 +1191,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: grandiosa.id,
     cruise_route_id: north_pole_route&.id,
-    departure_date: Date.parse('2027-01-10'),
-    return_date: Date.parse('2027-01-24'),
+    departure_date: Date.today + 65.days,
+    return_date: Date.today + 79.days,
     duration_days: 15,
     duration_nights: 14,
     departure_port: '布宜诺斯艾利斯登船',
@@ -1162,8 +1224,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: fantasia.id,
     cruise_route_id: europe_river_route&.id,
-    departure_date: Date.parse('2026-04-15'),
-    return_date: Date.parse('2026-04-22'),
+    departure_date: Date.today + 36.days,
+    return_date: Date.today + 43.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '阿姆斯特丹登船',
@@ -1188,8 +1250,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: fantasia.id,
     cruise_route_id: europe_river_route&.id,
-    departure_date: Date.parse('2026-05-20'),
-    return_date: Date.parse('2026-05-27'),
+    departure_date: Date.today + 47.days,
+    return_date: Date.today + 54.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '布达佩斯登船',
@@ -1214,8 +1276,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: fantasia.id,
     cruise_route_id: europe_river_route&.id,
-    departure_date: Date.parse('2026-06-15'),
-    return_date: Date.parse('2026-06-22'),
+    departure_date: Date.today + 51.days,
+    return_date: Date.today + 58.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '阿姆斯特丹登船',
@@ -1240,8 +1302,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: middle_east_route&.id,
-    departure_date: Date.parse('2026-03-10'),
-    return_date: Date.parse('2026-03-17'),
+    departure_date: Date.today + 31.days,
+    return_date: Date.today + 38.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '迪拜登船',
@@ -1266,8 +1328,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: bellissima.id,
     cruise_route_id: middle_east_route&.id,
-    departure_date: Date.parse('2026-04-05'),
-    return_date: Date.parse('2026-04-12'),
+    departure_date: Date.today + 33.days,
+    return_date: Date.today + 40.days,
     duration_days: 8,
     duration_nights: 7,
     departure_port: '迪拜登船',
@@ -1292,8 +1354,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: xisha_islands_route&.id,
-    departure_date: Date.parse('2026-03-08'),
-    return_date: Date.parse('2026-03-12'),
+    departure_date: Date.today + 29.days,
+    return_date: Date.today + 33.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '三亚凤凰岛登船',
@@ -1315,8 +1377,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: xisha_islands_route&.id,
-    departure_date: Date.parse('2026-04-10'),
-    return_date: Date.parse('2026-04-14'),
+    departure_date: Date.today + 39.days,
+    return_date: Date.today + 43.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '三亚凤凰岛登船',
@@ -1338,8 +1400,8 @@ cruise_sailings_data = [
   {
     cruise_ship_id: spectrum.id,
     cruise_route_id: xisha_islands_route&.id,
-    departure_date: Date.parse('2026-05-05'),
-    return_date: Date.parse('2026-05-09'),
+    departure_date: Date.today + 43.days,
+    return_date: Date.today + 47.days,
     duration_days: 5,
     duration_nights: 4,
     departure_port: '三亚凤凰岛登船',
@@ -1686,36 +1748,18 @@ cabin_types_data = [
 CabinType.insert_all(cabin_types_data)
 puts "    ✓ 已加载 #{cabin_types_data.size} 种舱房类型"
 
-# ==================== 商家数据 ====================
-puts "  → 正在加载商家数据..."
-
-travel_agencies_data = [
-  {
-    name: '皇家加勒比国际游轮旗舰店',
-    rating: 4.9,
-    is_verified: true,
-    description: '皇家加勒比国际游轮官方旗舰店',
-    created_at: Time.current,
-    updated_at: Time.current
-  },
-  {
-    name: 'msc邮轮旗舰店',
-    rating: 4.8,
-    is_verified: true,
-    description: '地中海邮轮官方旗舰店',
-    created_at: Time.current,
-    updated_at: Time.current
-  }
-]
-
-TravelAgency.insert_all(travel_agencies_data)
-puts "    ✓ 已加载 #{travel_agencies_data.size} 家商家"
-
 # ==================== 商家产品数据 ====================
 puts "  → 正在加载商家产品数据..."
 
+# 商家列表（模拟不同旅行社/OTA平台）
+merchants = [
+  { name: '飞猪旅行', badge: '近期热销', discount: 0 },
+  { name: '携程旅行', badge: nil, discount: 100 },
+  { name: '途牛旅游', badge: '低价之选', discount: 150 }
+]
+
 # 获取所有航班
-all_sailings = CruiseSailing.all.to_a
+all_sailings = CruiseSailing.where(data_version: '0').includes(:cruise_ship)
 
 # 为每个航班的每种舱房类型创建产品
 cruise_products_data = []
@@ -1725,7 +1769,7 @@ all_sailings.each do |sailing|
   cabin_types = ship.cabin_types
   
   cabin_types.each do |cabin_type|
-    # 根据舱房类型设置价格（基础价格 + 航线调整 + 舱只调整）
+    # 根据舱房类型设置价格（基础价格 + 航线调整 + 船只调整）
     base_price = case cabin_type.category
     when 'interior' then 1200
     when 'ocean_view' then 1600
@@ -1752,30 +1796,34 @@ all_sailings.each do |sailing|
     # 天数调整
     duration_multiplier = sailing.duration_days / 6.0
     
-    final_price = (base_price * route_multiplier * ship_multiplier * duration_multiplier).round(1)
+    # 计算基础价格
+    price_per_person = (base_price * route_multiplier * ship_multiplier * duration_multiplier).round(1)
     
-    # 随机选择商家
-    merchant = ['msc邮轮旗舰店', '皇家加勒比国际游轮旗舰店'].sample
-    
-    cruise_products_data << {
-      cruise_sailing_id: sailing.id,
-      cabin_type_id: cabin_type.id,
-      merchant_name: merchant,
-      price_per_person: final_price,
-      occupancy_requirement: 2,
-      stock: rand(50..150),
-      sales_count: rand(100..5000),
-      is_refundable: [true, false].sample,
-      requires_confirmation: false,
-      status: 'on_sale',
-      badge: ['品牌官方', '限时特价', '热销爆款', nil].sample,
-      created_at: Time.current,
-      updated_at: Time.current
-    }
+    # 为每个舱房类型创建2-3个商家产品（不同价格）
+    merchants.sample(rand(2..3)).each do |merchant|
+      final_price = price_per_person - merchant[:discount]
+      
+      cruise_products_data << {
+        cruise_sailing_id: sailing.id,
+        cabin_type_id: cabin_type.id,
+        merchant_name: merchant[:name],
+        badge: merchant[:badge],
+        price_per_person: final_price,
+        occupancy_requirement: 2,
+        stock: rand(5..20),
+        sales_count: rand(0..50),
+        is_refundable: [true, false].sample,
+        requires_confirmation: false,
+        status: 'on_sale',
+        data_version: '0',
+        created_at: Time.current,
+        updated_at: Time.current
+      }
+    end
   end
 end
 
-CruiseProduct.insert_all(cruise_products_data)
+CruiseProduct.insert_all(cruise_products_data) if cruise_products_data.any?
 puts "    ✓ 已加载 #{cruise_products_data.size} 个商家产品"
 
 puts "✓ cruises_v1 数据包加载完成"

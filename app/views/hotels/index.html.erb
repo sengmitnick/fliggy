@@ -230,7 +230,7 @@
                 <div class="text-sm text-gray-600 space-y-2">
                   <p>• 全天候在线：7天24小时客服在线，随时解答您的疑问</p>
                   <p>• 多渠道支持：支持在线客服、电话、邮件等多种联系方式</p>
-                  <p>• 快速响应：平均响应时间<30秒，问题解决及时高效</p>
+                  <p>• 快速响应：平均响应时间&lt;30秒，问题解决及时高效</p>
                   <p>• 专业团队：经验丰富的客服团队，为您提供专业建议</p>
                   <p>• 紧急协助：如遇紧急情况（如入住问题、订单异常等），提供即时协助</p>
                 </div>
@@ -347,6 +347,12 @@
 
                     <!-- Features -->
                     <div class="flex gap-2 text-xs mb-1">
+                      <% if hotel.hotel_rooms.any? { |r| r.room_type.include?('（含早）') || r.room_type.include?('含早') } %>
+                        <span class="px-2 py-0.5 rounded" style="background-color: #FF4444; color: white;">含早</span>
+                      <% end %>
+                      <% if hotel.cancellation_policy&.include?('免费') || hotel.cancellation_policy&.downcase&.include?('free') %>
+                        <span class="px-2 py-0.5 rounded" style="background-color: #10B981; color: white;">免费取消</span>
+                      <% end %>
                       <span class="px-2 py-0.5 rounded" style="background-color: #8B4513; color: white;">F2直通希尔顿银会员</span>
                       <span class="px-2 py-0.5 rounded" style="background-color: #FF4444; color: white;">奖励积分</span>
                       <span class="px-2 py-0.5 rounded" style="background-color: #FF4444; color: white;">延迟退房</span>
@@ -404,6 +410,16 @@
                     希尔顿旗下
                   </div>
                 <% end %>
+                
+                <!-- Badges -->
+                <div class="absolute bottom-2 left-2 flex gap-1">
+                  <% if hotel.hotel_rooms.any? { |r| r.room_type.include?('（含早）') || r.room_type.include?('含早') } %>
+                    <span class="text-white text-xs px-2 py-1 rounded" style="background-color: #FF4444;">含早</span>
+                  <% end %>
+                  <% if hotel.cancellation_policy&.include?('免费') || hotel.cancellation_policy&.downcase&.include?('free') %>
+                    <span class="text-white text-xs px-2 py-1 rounded" style="background-color: #10B981;">免费取消</span>
+                  <% end %>
+                </div>
               </div>
 
               <!-- Hotel Info -->

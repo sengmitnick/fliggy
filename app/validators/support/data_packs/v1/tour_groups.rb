@@ -512,6 +512,199 @@ chengdu_3day_tour_products = [
 TourGroupProduct.insert_all(chengdu_3day_tour_products)
 puts "✓ 添加了 #{chengdu_3day_tour_products.count} 个成都3日跟团游产品"
 
+# 广州2日跟团游产品（支持 v153 验证器）
+puts "\n🎯 添加广州2日跟团游产品..."
+
+guangzhou_2day_tour_products = [
+  {
+    title: "【精品小团】广州市内深度游 2天1晚 6人团 含酒店·含餐食·含门票·纯玩团",
+    subtitle: "广州塔·长隆·纯玩团",
+    destination: "广州",
+    departure_city: "广州",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 2,
+    badge: '多日游·6人团',
+    price: 688,
+    original_price: 888,
+    rating: 4.8,
+    rating_desc: "156条评价",
+    sales_count: 189,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    tags: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物', '广州塔', '长隆'],
+    departure_label: "广州出发",
+    is_featured: true,
+    display_order: all_products_data.count,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['广州青旅国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】广州珠江新城+广州塔+长隆 2天1晚 8人团 含酒店·含门票",
+    subtitle: "珠江新城·含酒店·8人团",
+    destination: "广州",
+    departure_city: "深圳",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 2,
+    badge: '多日游·8人团',
+    price: 788,
+    original_price: 988,
+    rating: 4.7,
+    rating_desc: "142条评价",
+    sales_count: 156,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团'],
+    tags: ['含酒店', '含门票', '纯玩团', '珠江新城', '广州塔'],
+    departure_label: "深圳出发",
+    is_featured: false,
+    display_order: all_products_data.count + 1,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['深圳康辉旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】广州市内精华游 2天1晚 6人团 含酒店·含餐食·纯玩无购物",
+    subtitle: "市内精华·纯玩无购物",
+    destination: "广州",
+    departure_city: "珠海",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 2,
+    badge: '多日游·6人团',
+    price: 688,
+    original_price: 888,
+    rating: 4.9,
+    rating_desc: "178条评价",
+    sales_count: 203,
+    highlights: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'],
+    tags: ['含酒店', '含餐食', '纯玩团', '无购物', '市内游'],
+    departure_label: "珠海出发",
+    is_featured: false,
+    display_order: all_products_data.count + 2,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['广州青旅国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【精品小团】广州长隆+珠江夜游 2天1晚 10人团 含酒店·含门票·纯玩团",
+    subtitle: "长隆·珠江夜游·10人团",
+    destination: "广州",
+    departure_city: "佛山",
+    tour_category: 'group_tour',
+    travel_type: '跟团游',
+    duration: 2,
+    badge: '多日游·10人团',
+    price: 788,
+    original_price: 988,
+    rating: 4.8,
+    rating_desc: "198条评价",
+    sales_count: 234,
+    highlights: ['含酒店', '含门票', '纯玩团', '无购物'],
+    tags: ['含酒店', '含门票', '纯玩团', '长隆', '珠江夜游'],
+    departure_label: "佛山出发",
+    is_featured: true,
+    display_order: all_products_data.count + 3,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['广州青旅国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+TourGroupProduct.insert_all(guangzhou_2day_tour_products)
+puts "✓ 添加了 #{guangzhou_2day_tour_products.count} 个广州2日跟团游产品"
+
+# 云南7天长线游产品（支持 v285 验证器）
+puts "\n🎯 添加云南7天长线游产品..."
+
+yunnan_7day_tour_products = [
+  {
+    title: "【多日游】云南昆明+大理+丽江+香格里拉 7天6晚 深度游·独立成团·含酒店",
+    subtitle: "昆明·大理·丽江·香格里拉·深度游",
+    destination: "云南",
+    departure_city: "昆明",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 7,
+    badge: '多日游·独立成团',
+    price: 4388,
+    original_price: 5688,
+    rating: 4.9,
+    rating_desc: "268条评价",
+    sales_count: 345,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    tags: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览', '昆明', '大理', '丽江', '香格里拉'],
+    departure_label: "昆明出发",
+    is_featured: true,
+    display_order: all_products_data.count,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['云南假日国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】云南昆明+大理+丽江+泸沽湖 7天6晚 深度游·独立成团·纯玩团",
+    subtitle: "泸沽湖·丽江·大理·纯玩团",
+    destination: "云南",
+    departure_city: "昆明",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 7,
+    badge: '多日游·独立成团',
+    price: 4588,
+    original_price: 5888,
+    rating: 4.8,
+    rating_desc: "312条评价",
+    sales_count: 412,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    tags: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览', '泸沽湖', '丽江', '大理'],
+    departure_label: "昆明出发",
+    is_featured: true,
+    display_order: all_products_data.count + 1,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['云南假日国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  },
+  {
+    title: "【多日游】云南昆明+石林+大理+丽江+玉龙雪山 8天7晚 豪华游·独立成团",
+    subtitle: "玉龙雪山·石林·豪华游",
+    destination: "云南",
+    departure_city: "昆明",
+    tour_category: 'private_group',
+    travel_type: '独立成团',
+    duration: 8,
+    badge: '多日游·独立成团',
+    price: 5288,
+    original_price: 6888,
+    rating: 4.9,
+    rating_desc: "198条评价",
+    sales_count: 289,
+    highlights: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'],
+    tags: ['豪华酒店', '全程用餐', '包含门票', '独立成团', '深度游览', '玉龙雪山', '石林', '大理'],
+    departure_label: "昆明出发",
+    is_featured: false,
+    display_order: all_products_data.count + 2,
+    image_url: ImageSeedHelper.random_image_from_category(:tours),
+    travel_agency_id: agencies_map['云南假日国际旅行社'],
+    data_version: 0,
+    created_at: timestamp,
+    updated_at: timestamp
+  }
+]
+
+TourGroupProduct.insert_all(yunnan_7day_tour_products)
+puts "✓ 添加了 #{yunnan_7day_tour_products.count} 个云南7天以上长线游产品"
+
 # ==================== 批量生成套餐数据 ====================
 puts "\n🎟️ 批量生成套餐数据..."
 

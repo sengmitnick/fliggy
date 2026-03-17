@@ -2,37 +2,62 @@
 
 require_relative '../base_validator'
 
-# 验证用例184: 预订延迟退房酒店和晚班航班
+# 验证用例184: 给张建国预订今晚上海酒店，并预订明天晚上到北京的航班
 #
 # 任务描述:
-#   用户需要预订支持延迟退房（下午2点后）的酒店，并预订晚上的航班
+#   张建国需要明天晚上从上海坐飞机到北京（18:00后出发），
+#   为了保证出行顺利，需要今晚入住上海酒店。Agent需要搜索晚班航班并预订，
+#   然后预订今晚的上海酒店（明天航班当天退房）。
 #
-# 复杂度分析:
-#   1. 需要预订支持延迟退房的酒店
-#   2. 需要筛选晚上的航班（18:00后）
-#   3. 验证退房时间与航班时间的合理性
+# 业务流程（6个关键步骤）：
+#   1. 搜索上海→北京的航班（明天18:00后出发）
+#   2. 筛选晚班航班（出发时间在 18:00 之后）
+#   3. 预订航班票（乘客张建国）
+#   4. 搜索上海的酒店
+#   5. 选择适合的酒店
+#   6. 预订今晚的上海酒店（入住日期=今天，退房日期=明天航班当天）
 #
-# 评分标准:
-#   - 创建了酒店订单 (20分)
-#   - 酒店在出发城市 (20分)
-#   - 酒店退房日期与航班日期匹配 (15分)
-#   - 支持延迟退房（下午2点后） (5分)
-#   - 创建了航班订单 (20分)
-#   - 航班是晚上出发（18:00后） (20分)
+# 复杂度分析（5个关键点）：
+#   1. 需要筛选晚班航班（出发时间在 18:00 之后）
+#   2. 需要理解时间逻辑：明天晚班航班 → 今晚入住酒店
+#   3. 需要识别出发城市（上海）作为酒店位置
+#   4. 需要验证酒店退房日期与航班日期匹配
+#   5. 需要确保航班和酒店的乘客/入住人信息一致
+#   ❌ 不能一次性提供：需要先搜索航班→筛选晚班→预订航班→理解时间→搜索今晚上海酒店→预订
+#
+# 评分标准（7项，总计100分）：
+#   - 创建了上海酒店订单（20分）
+#   - 酒店位置正确（必须在上海）（18分）
+#   - 酒店退房日期与航班日期匹配（明天）（17分）
+#   - 创建了航班订单（上海→北京）（15分）
+#   - 航班是晚上出发（明天18:00后）（15分）
+#   - 航班乘客信息正确（张建国）（7分）
+#   - 酒店入住人信息正确（张建国）（8分）
+#
+# 使用方法:
+#   # 准备阶段
+#   POST /api/tasks/v184_book_late_checkout_hotel_and_evening_flight_validator/start
+#   
+#   # Agent 通过界面操作完成任务...
+#   
+#   # 验证结果
+#   POST /api/verify/:execution_id/result
 module V151V200
   class V184BookLateCheckoutHotelAndEveningFlightValidator < BaseValidator
     self.validator_id = 'v184_book_late_checkout_hotel_and_evening_flight_validator'
     self.task_id = '2fc00235-eef6-4b3e-ab69-d838b5038fd8'
-    self.title = '给张建国预订今晚上海延迟退房酒店，并预订明天晚上到北京的航班'
-    self.description = '帮张建国在上海预订支持延迟退房（下午2点后）的酒店，入住今晚，明天退房，并订明天晚上从上海到北京的航班'
+    self.title = '给张建国预订今晚上海酒店，并预订明天晚上到北京的航班'
+    self.description = '帮张建国在上海预订酒店，入住今晚，明天退房，并订明天晚上从上海到北京的航班'
     self.timeout_seconds = 300
   
     def prepare
+      # 查询用户和乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       @passenger = user.passengers.find_by!(name: '张建国', data_version: 0)
       @expected_passenger_name = @passenger.name
       @expected_phone = @passenger.phone
       
+      # 设置基本参数
       @departure_city = '上海'
       @arrival_city = '北京'
       @flight_date = Date.current + 1.day  # 明天
@@ -53,23 +78,23 @@ module V151V200
       
       expect(@available_hotels).not_to be_empty, "数据包缺少#{@departure_city}的酒店"
       
-      @hotel_checkin_date = @flight_date - 1.day  # 前一天入住
-      @hotel_checkout_date = @flight_date  # 航班当天退房
+      # 计算酒店入住退房日期
+      @hotel_checkin_date = @flight_date - 1.day  # 今晚入住（航班前一晚）
+      @hotel_checkout_date = @flight_date  # 明天退房（航班当天）
       
       {
-        task: "请为#{@passenger.name}在#{@departure_city}预订支持延迟退房（下午2点后）的酒店，入住#{@hotel_checkin_date.strftime('%Y年%m月%d日')}，" \
-              "退房#{@hotel_checkout_date.strftime('%Y年%m月%d日')}，并预订#{@flight_date.strftime('%Y年%m月%d日')}（#{(@flight_date - Date.current).to_i}天后）晚上从#{@departure_city}到#{@arrival_city}的航班",
+        task: "请为#{@passenger.name}在#{@departure_city}预订酒店，入住#{@hotel_checkin_date.strftime('%Y年%m月%d日')}（今晚），" \
+              "退房#{@hotel_checkout_date.strftime('%Y年%m月%d日')}（明天），并预订#{@flight_date.strftime('%Y年%m月%d日')}（明天）晚上从#{@departure_city}到#{@arrival_city}的航班",
         requirements: {
           departure_city: @departure_city,
           arrival_city: @arrival_city,
           hotel_location: @departure_city,
           hotel_checkin: @hotel_checkin_date.to_s,
           hotel_checkout: @hotel_checkout_date.to_s,
-          checkout_time: "下午2点后",
           flight_date: @flight_date.to_s,
           departure_time: "18:00后"
         },
-        hint: "延迟退房可以充分利用白天时间，晚上再出发去机场",
+        hint: "晚上航班需要前一晚入住酒店，航班当天退房",
         statistics: {
           available_evening_flights: @available_flights.count,
           available_hotels: @available_hotels.count
@@ -78,10 +103,11 @@ module V151V200
     end
   
     def simulate
+      # 查询用户和乘客信息
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       passenger = user.passengers.find_by!(name: '张建国', data_version: 0)
       
-      # 创建酒店订单
+      # 创建酒店订单（选择适合的酒店）
       hotel = @available_hotels.first
       # CRITICAL: 必须过滤掉钟点房，只考虑整晚房价
       room = hotel.hotel_rooms.where(data_version: 0, room_category: 'overnight').order(price: :asc).first!
@@ -99,8 +125,8 @@ module V151V200
         data_version: @data_version
       )
       
-      # 创建航班订单
-      flight = @available_flights.first
+      # 创建航班订单（选择晚班航班）
+      flight = @available_flights.sort_by(&:departure_time).first
       Booking.create!(
         user: user,
         flight: flight,
@@ -115,38 +141,41 @@ module V151V200
     end
   
     def verify
-      # 断言1: 创建了酒店订单 (20%)
-      add_assertion "创建了酒店订单", weight: 20 do
+      # 断言1: 创建了上海酒店订单 (20%)
+      add_assertion "创建了上海酒店订单", weight: 20 do
+        # 查询上海的酒店订单（使用LIKE模糊匹配城市名）
         @hotel_booking = HotelBooking
           .joins(:hotel)
-          .includes(:hotel)
-          .where(hotels: { city: @departure_city })
+          .includes(:hotel, :hotel_room)
+          .where("hotels.city LIKE ?", "%#{@departure_city}%")
           .where(data_version: @data_version)
           .order(created_at: :desc)
           .first
         
-        expect(@hotel_booking).not_to be_nil, "未找到酒店订单"
+        expect(@hotel_booking).not_to be_nil, "未找到上海酒店订单"
       end
       
       return if @hotel_booking.nil?
       
-      # 断言2: 酒店在出发城市 (18%)
-      add_assertion "酒店位置正确（#{@departure_city}）", weight: 18 do
+      # 断言2: 酒店位置在上海（出发城市） (18%)
+      add_assertion "酒店位置正确（必须在#{@departure_city}）", weight: 18 do
         hotel = @hotel_booking.hotel
         expect(hotel.city).to include(@departure_city),
           "酒店城市错误。期望: #{@departure_city}, 实际: #{hotel.city}"
       end
       
-      # 断言3: 酒店退房日期与航班日期匹配 (17%)
-      add_assertion "酒店退房日期与航班日期匹配", weight: 17 do
+      # 断言3: 酒店退房日期与航班日期匹配（明天） (17%)
+      add_assertion "酒店退房日期与航班日期匹配（明天）", weight: 17 do
+        # 验证退房日期 = 明天（航班当天）
         expect(@hotel_booking.check_out_date).to eq(@flight_date),
-          "退房日期错误。期望: #{@flight_date}（航班当天）, 实际: #{@hotel_booking.check_out_date}"
+          "退房日期错误。期望: #{@flight_date}（明天，航班当天）, 实际: #{@hotel_booking.check_out_date}"
       end
       
-      # 注: 支持延迟退房验证已合并到断言3中（数据包无checkout_time字段）
+      # 注: 原任务描述提到“延迟退房”，但数据包中无checkout_time字段，前端也无此标签，因此不验证
       
-      # 断言4: 创建了航班订单 (15%)
+      # 断言4: 创建了航班订单（上海→北京） (15%)
       add_assertion "创建了航班订单（#{@departure_city}→#{@arrival_city}）", weight: 15 do
+        # 查询上海→北京的航班订单（过滤出出发城市和目的地）
         all_bookings = Booking
           .joins(:flight)
           .includes(:flight)
@@ -161,8 +190,9 @@ module V151V200
       
       return if @flight_booking.nil?
       
-      # 断言5: 航班是晚上出发（18:00后） (15%)
-      add_assertion "航班是晚上出发（18:00后）", weight: 15 do
+      # 断言5: 航班是晚上出发（明天18:00后） (15%)
+      add_assertion "航班是晚上出发（明天18:00后）", weight: 15 do
+        # 验证出发时间 >= 18:00
         departure_hour = @flight_booking.flight.departure_time.hour
         expect(departure_hour).to be >= 18, 
           "出发时间过早。期望: 18:00后, 实际: #{@flight_booking.flight.departure_time.strftime('%H:%M')}"

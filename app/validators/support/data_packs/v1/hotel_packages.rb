@@ -516,6 +516,122 @@ hotel_packages << {
   updated_at: current_time
 }
 
+# ============================================================
+# 三亚地区套餐（用于 v180 验证器）
+# ============================================================
+
+# 1. 三亚希尔顿度假酒店 - 2晚周末度假套餐
+brand_name = "希尔顿"
+city = "三亚"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: nil,  # Will be updated after insertion
+  star_level: 5,
+  title: "三亚希尔顿度假酒店周末套餐 海景房2晚连住",
+  description: "含双早+海滩权益，无边泳池，周末度假首选，客房2晚连住",
+  price: 1599,
+  original_price: 2399,
+  sales_count: 3420,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在三亚希尔顿门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华南地区",
+  package_type: "vip",
+  city: city,
+  night_count: 2,
+  refundable: true,
+  instant_booking: true,
+  luxury: true,
+  brand_logo_url: brands[2][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 2. 三亚亚龙湾度假酒店 - 2晚蜜月套餐
+brand_name = "香格里拉"
+city = "三亚"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: nil,  # Will be updated after insertion
+  star_level: 5,
+  title: "三亚亚龙湾香格里拉度假酒店蜜月套餐 2晚连住",
+  description: "蜜月布置+双早+SPA体验，私人沙滩，浪漫度假，客房2晚连住",
+  price: 1899,
+  original_price: 2899,
+  sales_count: 2156,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在三亚亚龙湾门店使用\n3. 需提前7天预约\n4. 可退款，需扣除15%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华南地区",
+  package_type: "vip",
+  city: city,
+  night_count: 2,
+  refundable: true,
+  instant_booking: false,
+  luxury: true,
+  brand_logo_url: brands[5][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 3. 三亚海棠湾度假酒店 - 2晚亲子套餐
+brand_name = "万豪"
+city = "三亚"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: nil,  # Will be updated after insertion
+  star_level: 5,
+  title: "三亚海棠湾万豪度假酒店亲子套餐 2晚连住",
+  description: "儿童免费+双早+儿童乐园，家庭出游首选，客房2晚连住",
+  price: 1399,
+  original_price: 2099,
+  sales_count: 4567,
+  is_featured: true,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在三亚海棠湾门店使用\n3. 需提前3天预约\n4. 可退款，需扣除10%手续费\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华南地区",
+  package_type: "standard",
+  city: city,
+  night_count: 2,
+  refundable: true,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[1][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
+# 4. 三亚湾度假酒店 - 2晚经济套餐
+brand_name = "华住"
+city = "三亚"
+hotel_packages << {
+  brand_name: brand_name,
+  hotel_id: nil,  # Will be updated after insertion
+  star_level: 4,
+  title: "三亚湾华住美仑度假酒店经济套餐 2晚连住",
+  description: "性价比之选，含早餐，海景房，周末轻松游，客房2晚连住",
+  price: 899,
+  original_price: 1299,
+  sales_count: 6789,
+  is_featured: false,
+  valid_days: 365,
+  terms: "1. 套餐有效期365天\n2. 可在三亚湾门店使用\n3. 需提前2天预约\n4. 不可退款，可转让\n5. 节假日可能需要补差价\n6. 客房必须连住2晚，不可拆分",
+  region: "华南地区",
+  package_type: "standard",
+  city: city,
+  night_count: 2,
+  refundable: false,
+  instant_booking: true,
+  luxury: false,
+  brand_logo_url: brands[0][:logo],
+  data_version: 0,
+  created_at: current_time,
+  updated_at: current_time
+}
+
 # 批量插入套餐数据
 HotelPackage.insert_all!(hotel_packages)
 
