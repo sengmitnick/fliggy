@@ -64,7 +64,6 @@ module V101V150
     
     raise "未找到符合条件的未来航次（#{@ship_keyword}，#{@departure_port_keyword}，#{@expected_days}天#{@expected_nights}晚）" unless nearest_sailing
     
-    @expected_month = nearest_sailing.departure_date.month
     @expected_departure_date = nearest_sailing.departure_date
 
     # 预查询乘客信息（避免 simulate 中查询 data_version: 0）
@@ -273,7 +272,6 @@ module V101V150
       expected_days: @expected_days,
       expected_nights: @expected_nights,
       expected_cabin_category: @expected_cabin_category,
-      expected_month: @expected_month,
       adult_count: @adult_count,
       expected_passenger_names: @expected_passenger_names,
       valid_contact_phones: @valid_contact_phones
@@ -286,7 +284,6 @@ module V101V150
     @expected_days = data['expected_days'] || 9
     @expected_nights = data['expected_nights'] || 8
     @expected_cabin_category = data['expected_cabin_category'] || 'ocean_view'
-    @expected_month = data['expected_month'] || 3
     @adult_count = data['adult_count'] || 2
     @expected_passenger_names = data['expected_passenger_names'] || ['陈静', '刘强']
     @valid_contact_phones = data['valid_contact_phones'] || { '陈静' => '13300133001', '刘强' => '13600136001' }

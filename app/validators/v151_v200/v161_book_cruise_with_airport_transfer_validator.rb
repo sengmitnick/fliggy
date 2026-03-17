@@ -99,7 +99,8 @@ module V151V200
       pickup_date = sailing.departure_date - 1.day  # 邮轮出发前1天
       pickup_datetime = pickup_date.in_time_zone.change(hour: 15, min: 0)  # 下午3点
       
-      dropoff_date = sailing.departure_date + @duration_days.days  # 邮轮返回后1天（第7天）
+      # 6天5晚邮轮：第1天出发，第6天返回，送机在返回当天
+      dropoff_date = sailing.departure_date + (@duration_days - 1).days  # 邮轮返回当天（第6天）
       dropoff_datetime = dropoff_date.in_time_zone.change(hour: 9, min: 0)  # 早上9点
       
       # 查找舱房类型（选择经济舱）
@@ -322,16 +323,17 @@ module V151V200
           "送机目的地错误。期望: #{@airport_location}, 实际: #{@dropoff_transfer.location_to}"
       end
       
-      # 断言8: 送机时间正确（邮轮返回后第7天09:00）
-      add_assertion "送机时间正确（邮轮返回后第7天09:00）", weight: 5 do
+      # 断言8: 送机时间正确（邮轮返回当天09:00）
+      add_assertion "送机时间正确（邮轮返回当天09:00）", weight: 5 do
         sailing = @cruise_order.cruise_product.cruise_sailing
-        expected_dropoff_date = sailing.departure_date + @duration_days.days
+        # 6天5晚邮轮：第1天出发，第6天返回
+        expected_dropoff_date = sailing.departure_date + (@duration_days - 1).days
         expected_time = expected_dropoff_date.in_time_zone.change(hour: 9, min: 0)
         actual_time = @dropoff_transfer.pickup_datetime.in_time_zone
         
         # 比较Unix时间戳忽略时区差异
         expect(actual_time.to_i).to eq(expected_time.to_i),
-          "送机时间错误。期望: #{expected_time.strftime('%Y-%m-%d %H:%M %Z')}（邮轮返回后第7天09:00）, 实际: #{actual_time.strftime('%Y-%m-%d %H:%M %Z')}"
+          "送机时间错误。期望: #{expected_time.strftime('%Y-%m-%d %H:%M %Z')}（邮轮#{sailing.departure_date.strftime('%m月%d日')}出发，第#{@duration_days}天#{expected_dropoff_date.strftime('%m月%d日')}返回当天09:00）, 实际: #{actual_time.strftime('%Y-%m-%d %H:%M %Z')}"
       end
       
       # 断言9: 联系人信息正确（张三）
