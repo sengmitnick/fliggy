@@ -1946,4 +1946,89 @@ end
 BookingOption.insert_all(all_extended_options) if all_extended_options.any?
 puts "  ✓ 已为扩展的 #{extended_trains.count} 趟火车创建 #{all_extended_options.size} 个订票套餐"
 
+# 路线: 广州→杭州（用于V230预算优化验证）
+puts "\n🎯 添加广州→杭州火车路线..."
+all_trains_gz_to_hz = []
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  day_suffix = (date - Date.today).to_i
+  trains_gz_to_hz = [
+    # 早班高铁（价格中等）
+    {
+      departure_city: "广州",
+      arrival_city: "杭州",
+      departure_station: "广州南站",
+      arrival_station: "杭州东站",
+      departure_time: base_datetime.change(hour: 7, min: 30),
+      arrival_time: base_datetime.change(hour: 13, min: 45),
+      train_number: "G#{1301 + day_suffix}",
+      duration: 375,
+      price_second_class: 538.0,
+      price_first_class: 908.0,
+      price_business_class: 1703.0,
+      available_seats: 150,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    # 中午高铁（价格稍高）
+    {
+      departure_city: "广州",
+      arrival_city: "杭州",
+      departure_station: "广州南站",
+      arrival_station: "杭州东站",
+      departure_time: base_datetime.change(hour: 10, min: 15),
+      arrival_time: base_datetime.change(hour: 16, min: 30),
+      train_number: "G#{1303 + day_suffix}",
+      duration: 375,
+      price_second_class: 558.0,
+      price_first_class: 938.0,
+      price_business_class: 1758.0,
+      available_seats: 160,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    # 下午动车（价格便宜）
+    {
+      departure_city: "广州",
+      arrival_city: "杭州",
+      departure_station: "广州南站",
+      arrival_station: "杭州东站",
+      departure_time: base_datetime.change(hour: 13, min: 0),
+      arrival_time: base_datetime.change(hour: 19, min: 45),
+      train_number: "D#{901 + day_suffix}",
+      duration: 405,
+      price_second_class: 448.0,
+      price_first_class: 738.0,
+      price_business_class: 1383.0,
+      available_seats: 180,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    # 傍晚高铁（价格中等）
+    {
+      departure_city: "广州",
+      arrival_city: "杭州",
+      departure_station: "广州南站",
+      arrival_station: "杭州东站",
+      departure_time: base_datetime.change(hour: 15, min: 30),
+      arrival_time: base_datetime.change(hour: 21, min: 45),
+      train_number: "G#{1305 + day_suffix}",
+      duration: 375,
+      price_second_class: 538.0,
+      price_first_class: 908.0,
+      price_business_class: 1703.0,
+      available_seats: 170,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  all_trains_gz_to_hz.concat(trains_gz_to_hz)
+end
+Train.insert_all(all_trains_gz_to_hz)
+puts "  ✓ 添加了 #{all_trains_gz_to_hz.size} 趟广州→杭州火车票"
+
 puts "\n✅ trains_v1 数据包加载完成！"
