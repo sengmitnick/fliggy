@@ -8,18 +8,19 @@ export default class extends Controller<HTMLElement> {
     "sortModal",
     "districtModal", 
     "priceModal",
-    "filterModal",
     "brandModal",
+    "facilityModal",
     "sortButton",
     "districtButton",
     "priceButton",
-    "filterButton",
     "brandButton",
+    "facilityButton",
     "sortOption",
     "districtOption",
     "priceOption",
     "starOption",
-    "brandOption"
+    "brandOption",
+    "facilityOption"
   ]
   
   static values = {
@@ -35,6 +36,7 @@ export default class extends Controller<HTMLElement> {
     priceRange: { type: String, default: "" },
     stars: { type: String, default: "" },
     brand: { type: String, default: "" },
+    facility: { type: String, default: "" },
     type: { type: String, default: "" },
     roomCategory: { type: String, default: "" }
   }
@@ -42,24 +44,25 @@ export default class extends Controller<HTMLElement> {
   declare readonly sortModalTarget: HTMLElement
   declare readonly districtModalTarget: HTMLElement
   declare readonly priceModalTarget: HTMLElement
-  declare readonly filterModalTarget: HTMLElement
   declare readonly brandModalTarget: HTMLElement
+  declare readonly facilityModalTarget: HTMLElement
   declare readonly sortButtonTarget: HTMLElement
   declare readonly districtButtonTarget: HTMLElement
   declare readonly priceButtonTarget: HTMLElement
-  declare readonly filterButtonTarget: HTMLElement
   declare readonly brandButtonTarget: HTMLElement
+  declare readonly facilityButtonTarget: HTMLElement
   declare readonly sortOptionTargets: HTMLElement[]
   declare readonly districtOptionTargets: HTMLElement[]
   declare readonly priceOptionTargets: HTMLElement[]
   declare readonly starOptionTargets: HTMLElement[]
   declare readonly brandOptionTargets: HTMLElement[]
+  declare readonly facilityOptionTargets: HTMLElement[]
   
   declare readonly hasSortModalTarget: boolean
   declare readonly hasDistrictModalTarget: boolean
   declare readonly hasPriceModalTarget: boolean
-  declare readonly hasFilterModalTarget: boolean
   declare readonly hasBrandModalTarget: boolean
+  declare readonly hasFacilityModalTarget: boolean
   
   declare cityValue: string
   declare checkInValue: string
@@ -73,6 +76,7 @@ export default class extends Controller<HTMLElement> {
   declare priceRangeValue: string
   declare starsValue: string
   declare brandValue: string
+  declare facilityValue: string
   declare typeValue: string
   declare roomCategoryValue: string
 
@@ -99,15 +103,12 @@ export default class extends Controller<HTMLElement> {
     if (this.hasPriceModalTarget) {
       this.closeAllModals()
       this.priceModalTarget.classList.remove('hidden')
+      // Initialize visual states based on current filter values
+      this.updatePriceRangeStates()
+      this.updateStarStates()
     }
   }
 
-  openFilterModal(): void {
-    if (this.hasFilterModalTarget) {
-      this.closeAllModals()
-      this.filterModalTarget.classList.remove('hidden')
-    }
-  }
 
   openBrandModal(): void {
     if (this.hasBrandModalTarget) {
@@ -116,13 +117,20 @@ export default class extends Controller<HTMLElement> {
     }
   }
 
+  openFacilityModal(): void {
+    if (this.hasFacilityModalTarget) {
+      this.closeAllModals()
+      this.facilityModalTarget.classList.remove('hidden')
+    }
+  }
+
   // Close all modals
   closeAllModals(): void {
     if (this.hasSortModalTarget) this.sortModalTarget.classList.add('hidden')
     if (this.hasDistrictModalTarget) this.districtModalTarget.classList.add('hidden')
     if (this.hasPriceModalTarget) this.priceModalTarget.classList.add('hidden')
-    if (this.hasFilterModalTarget) this.filterModalTarget.classList.add('hidden')
     if (this.hasBrandModalTarget) this.brandModalTarget.classList.add('hidden')
+    if (this.hasFacilityModalTarget) this.facilityModalTarget.classList.add('hidden')
   }
 
   // Select sort option
@@ -143,13 +151,28 @@ export default class extends Controller<HTMLElement> {
     this.applyFilters()
   }
 
-  // Select price range option
+  // Select price range option (don't auto-apply, wait for confirm)
   selectPriceRange(event: Event): void {
     const target = event.currentTarget as HTMLElement
     const priceValue = target.dataset.value || ''
     this.priceRangeValue = priceValue
-    this.closeAllModals()
-    this.applyFilters()
+    // Update visual states immediately
+    this.updatePriceRangeStates()
+    // Don't close modal or apply filters - let user click confirm button
+  }
+
+  // Update price range visual states
+  private updatePriceRangeStates(): void {
+    this.priceOptionTargets.forEach(target => {
+      const value = target.dataset.value || ''
+      if (value === this.priceRangeValue) {
+        target.classList.add('bg-primary', 'text-white')
+        target.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200')
+      } else {
+        target.classList.remove('bg-primary', 'text-white')
+        target.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200')
+      }
+    })
   }
 
   // Select brand option
@@ -157,6 +180,15 @@ export default class extends Controller<HTMLElement> {
     const target = event.currentTarget as HTMLElement
     const brandValue = target.dataset.value || ''
     this.brandValue = brandValue
+    this.closeAllModals()
+    this.applyFilters()
+  }
+
+  // Select facility option
+  selectFacility(event: Event): void {
+    const target = event.currentTarget as HTMLElement
+    const facilityValue = target.dataset.value || ''
+    this.facilityValue = facilityValue
     this.closeAllModals()
     this.applyFilters()
   }
@@ -223,6 +255,10 @@ export default class extends Controller<HTMLElement> {
       url.searchParams.set('brand', this.brandValue)
     }
     
+    if (this.facilityValue) {
+      url.searchParams.set('facility', this.facilityValue)
+    }
+    
     this.closeAllModals()
     Turbo.visit(url.toString())
   }
@@ -234,6 +270,7 @@ export default class extends Controller<HTMLElement> {
     this.priceRangeValue = ''
     this.starsValue = ''
     this.brandValue = ''
+    this.facilityValue = ''
     this.applyFilters()
   }
 
@@ -249,19 +286,19 @@ export default class extends Controller<HTMLElement> {
       this.districtButtonTarget.classList.add('text-primary')
     }
     
-    // Update price button
-    if (this.priceRangeValue) {
+    // Update price button (highlight if price or star is selected)
+    if (this.priceRangeValue || this.starsValue) {
       this.priceButtonTarget.classList.add('text-primary')
-    }
-    
-    // Update filter button
-    if (this.starsValue) {
-      this.filterButtonTarget.classList.add('text-primary')
     }
     
     // Update brand button
     if (this.brandValue) {
       this.brandButtonTarget.classList.add('text-primary')
+    }
+    
+    // Update facility button
+    if (this.facilityValue) {
+      this.facilityButtonTarget.classList.add('text-primary')
     }
   }
 
@@ -271,10 +308,10 @@ export default class extends Controller<HTMLElement> {
       const value = target.dataset.value || ''
       if (value === this.starsValue) {
         target.classList.add('bg-primary', 'text-white')
-        target.classList.remove('bg-gray-100', 'text-gray-700')
+        target.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200')
       } else {
         target.classList.remove('bg-primary', 'text-white')
-        target.classList.add('bg-gray-100', 'text-gray-700')
+        target.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200')
       }
     })
   }
