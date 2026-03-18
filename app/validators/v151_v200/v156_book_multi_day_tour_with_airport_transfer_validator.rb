@@ -3,18 +3,18 @@
 require_relative '../base_validator'
 
 # V156BookMultiDayTourWithAirportTransferValidator
-# 验证用例156: 给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5421航班10:20到双流T2，送到春熙路太古里）和送机（第4天早上6:00从春熙路太古里出发去双流T2）
+# 验证用例156: 给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5424航班10:20到双流T2，送到春熙路太古里）和送机（第4天早上6:00从春熙路太古里出发去双流T2）
 #
 # 任务描述:
-#   张三计划明天开始成都3日跟团游，需要机场往返接送服务：接机服务接今天从上海飞来的MU5421航班（10:20到达双流T2，送到春熙路太古里接送服务站），送机服务第4天早上6:00从春熙路太古里接送服务站出发去双流T2。
+#   张三计划明天开始成都3日跟团游，需要机场往返接送服务：接机服务接今天从上海飞来的MU5424航班（10:20到达双流T2，送到春熙路太古里接送服务站），送机服务第4天早上6:00从春熙路太古里接送服务站出发去双流T2。
 #   1. 成都3日跟团游（明天出发，2成人）
-#   2. 机场接机服务（接今天上海MU5421航班，10:20到达双流T2，送至春熙路太古里接送服务站）
+#   2. 机场接机服务（接今天上海MU5424航班，10:20到达双流T2，送至春熙路太古里接送服务站）
 #   3. 机场送机服务（第4天早上6:00从春熙路太古里接送服务站出发，送至双流T2，不关联航班号）
 #
 # 任务分解步骤:
 #   1. 查询成都3日跟团游产品（destination=成都，duration=3，travel_type=跟团游）
 #   2. 创建跟团游订单（出发日期=明天，成人2人，联系人=张三）
-#   3. 查询今天上海到成都的MU5421航班（到达双流T2，10:20到达）
+#   3. 查询今天上海到成都的MU5424航班（到达双流T2，10:20到达）
 #   4. 从TransferLocation获取双流国际机场T2航站楼（接机地点）
 #   5. 从TransferLocation获取春熙路太古里接送服务站（接机送达地点、送机出发地点）
 #   6. 创建机场接机服务（从双流T2接机，送至春熙路太古里，关联MU5421航班，接机时间=航班到达后30分钟）
@@ -27,7 +27,7 @@ require_relative '../base_validator'
 #   3. 出发日期正确（明天） (10分)
 #   4. 成人数量=2 (5分)
 #   5. 创建了机场往返接送服务（接机+送机） (15分)
-#   6. 接机服务关联了具体航班号（上海→成都MU5421） (15分)
+#   6. 接机服务关联了具体航班号（上海→成都MU5424） (15分)
 #   7. 接机时间合理（航班到达后20-40分钟） (3分)
 #   8. 送机服务地点正确（春熙路太古里→双流T2） (15分)
 #   9. 送机时间正确（第4天早上6:00） (7分)
@@ -37,8 +37,8 @@ module V151V200
   class V156BookMultiDayTourWithAirportTransferValidator < BaseValidator
     self.validator_id = 'v156_book_multi_day_tour_with_airport_transfer_validator'
     self.task_id = 'f1a2b3c4-5d6e-7f8a-9b0c-1d2e3f4a5b7c'
-    self.title = '给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5421航班10:20到双流T2，送到春熙路太古里）和送机（第4天早上6:00从春熙路太古里出发去双流T2）'
-    self.description = '给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5421航班10:20到达双流T2，送到春熙路太古里接送服务站）和送机（第4天早上6:00从春熙路太古里接送服务站出发去双流T2）'
+    self.title = '给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5424航班10:20到双流T2，送到春熙路太古里）和送机（第4天早上6:00从春熙路太古里出发去双流T2）'
+    self.description = '给张三和李四2成人明天成都3日跟团游，并订机场接机（接今天上海飞来的MU5424航班10:20到达双流T2，送到春熙路太古里接送服务站）和送机（第4天早上6:00从春熙路太古里接送服务站出发去双流T2）'
     self.timeout_seconds = 300
 
     def prepare
@@ -49,17 +49,17 @@ module V151V200
       @flight_origin = '上海'
       @duration_days = 3
       
-      # 查询今天从上海飞成都的MU5421航班（接机）
+      # 查询今天从上海飞成都的MU5424航班（接机）
       @pickup_flight = Flight
         .where(departure_city: @flight_origin, destination_city: @city, data_version: 0)
         .where(flight_date: @pickup_flight_date)
         .where("arrival_airport LIKE ?", "%双流T2%")
-        .where(flight_number: 'MU5421')
+        .where(flight_number: 'MU5424')
         .first
       
-      raise "数据包缺少今天上海到成都的MU5421航班" unless @pickup_flight
+      raise "数据包缺少今天上海到成都的MU5424航班" unless @pickup_flight
       
-      @pickup_flight_number = @pickup_flight.flight_number  # MU5421
+      @pickup_flight_number = @pickup_flight.flight_number  # MU5424
       @pickup_arrival_time = @pickup_flight.arrival_time  # 10:20
       
       # 查询第4天从成都飞上海的MU5434航班（送机）
@@ -143,10 +143,10 @@ module V151V200
         data_version: @data_version
       )
       
-      # 计算接机时间（MU5421航班到达后30分钟）
+      # 计算接机时间（MU5424航班到达后30分钟）
       pickup_datetime = @pickup_arrival_time + 30.minutes
       
-      # 创建机场接机服务（从双流T2接机，送至春熙路太古里，关联MU5421航班）
+      # 创建机场接机服务（从双流T2接机，送至春熙路太古里，关联MU5424航班）
       Transfer.create!(
         user: user,
         transfer_package_id: @best_package.id,
@@ -154,8 +154,8 @@ module V151V200
         service_type: 'from_airport',
         location_from: @airport_location,  # 双流国际机场T2航站楼（从TransferLocation动态获取）
         location_to: @downtown_location,  # 春熙路太古里接送服务站（从TransferLocation动态获取）
-        pickup_datetime: pickup_datetime,  # MU5421到达后30分钟
-        flight_number: @pickup_flight_number,  # 关联MU5421航班
+        pickup_datetime: pickup_datetime,  # MU5424到达后30分钟
+        flight_number: @pickup_flight_number,  # 关联MU5424航班
         passenger_name: @passenger.name,
         passenger_phone: @passenger.phone,
         passenger_count: 2,

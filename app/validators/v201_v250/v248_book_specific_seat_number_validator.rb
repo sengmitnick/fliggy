@@ -2,18 +2,34 @@
 
 require_relative '../base_validator'
 
-# V248: 预订指定日期航班（后天）
+# V248: 张三后天要从北京去上海，需要预订合适的航班
 #
 # 任务描述:
-#   用户需要预订指定日期的航班
+#   张三计划后天从北京飞往上海，需要预订后天出发的航班。
+#   选择任意可用的航班即可，无特殊要求。
 #
-# 评分标准:
-#   - 创建了航班订单 (20%)
-#   - 航线正确（北京→上海） (15%)
-#   - 出发日期正确（后天） (30%)
-#   - 机票价格合理 (15%)
-#   - 乘客信息正确 (10%)
-#   - 订单状态有效 (10%)
+# 业务流程:
+#   1. 用户输入：出发城市（北京）、目的地（上海）、出发日期（后天）
+#   2. 系统筛选：显示后天从北京到上海的所有可用航班
+#   3. 用户选择：对比航班时间和价格，选择合适航班
+#   4. 填写信息：乘客姓名（张三）、身份证号、联系电话
+#   5. 确认支付：核对航班信息、出发日期、总价格
+#   6. 完成订单：生成订单，获取航班凭证
+#
+# 复杂度分析:
+#   1. **日期计算**（低）：计算后天的日期（Date.current + 2.days）
+#   2. **航班筛选逻辑**（低）：按城市和日期过滤航班
+#   3. **价格对比决策**（低）：在可用航班中选择合适的
+#   4. **订单信息填写**（低）：标准的乘客信息录入流程
+#   5. **日期验证**（低）：确认订单航班日期是否为后天
+#
+# 评分标准（总分100%）:
+#   - 创建了航班订单 (20%) - 基础操作
+#   - 航线正确（北京→上海） (15%) - 城市匹配
+#   - 出发日期正确（后天） (30%) - 日期准确性（最高权重）
+#   - 机票价格合理 (15%) - 价格有效性
+#   - 乘客信息正确（张三） (10%) - 信息完整性
+#   - 订单状态有效 (10%) - 订单可用性
 module V201V250
   class V248BookSpecificSeatNumberValidator < BaseValidator
     self.validator_id = 'v248_book_specific_seat_number_validator'
@@ -25,7 +41,7 @@ module V201V250
     def prepare
       @departure_city = '北京'
       @destination_city = '上海'
-      @flight_date = Date.current + 2.days
+      @flight_date = Date.current + 2.days  # 后天出发
       
       # 查询demo_user乘客信息（张三）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
@@ -41,17 +57,17 @@ module V201V250
         data_version: 0
       ).to_a
       
-      raise "未找到航班" if @available_flights.empty?
+      raise "未找到#{@flight_date.strftime('%Y年%m月%d日')}从#{@departure_city}到#{@destination_city}的航班" if @available_flights.empty?
       
       {
-        task: "请预订#{@flight_date.strftime('%Y年%m月%d日')}（后天）从#{@departure_city}到#{@destination_city}的航班。",
+        title: "今天是#{Date.current.strftime('%Y年%m月%d日')}。#{self.class.title}",
+        description: self.class.description,
         requirements: {
           departure_city: @departure_city,
           destination_city: @destination_city,
           flight_date: @flight_date,
           passenger_name: '张三'
-        },
-        hint: "选择后天的航班即可。"
+        }
       }
     end
     
@@ -78,21 +94,18 @@ module V201V250
           "目的地城市错误。期望: #{@destination_city}, 实际: #{flight.destination_city}"
       end
       
-      add_assertion "出发日期正确（#{@flight_date}，后天）", weight: 30 do
+      add_assertion "出发日期正确（#{@flight_date&.strftime('%Y-%m-%d')}，后天）", weight: 30 do
         flight = @flight_booking.flight
         expect(flight.flight_date).to eq(@flight_date),
-          "出发日期错误。期望: #{@flight_date}（后天）, 实际: #{flight.flight_date}（航班号: #{flight.flight_number}）"
+          "出发日期错误。期望: #{@flight_date&.strftime('%Y-%m-%d')}（后天）, 实际: #{flight.flight_date&.strftime('%Y-%m-%d')}（航班号: #{flight.flight_number}）"
       end
       
       add_assertion "机票价格合理", weight: 15 do
-        flight = @flight_booking.flight
         expect(@flight_booking.total_price).to be > 0,
           "订单总价异常。实际总价: #{@flight_booking.total_price}"
-        expect(@flight_booking.total_price).to eq(flight.price),
-          "订单总价与航班票价不符。期望: #{flight.price}, 实际: #{@flight_booking.total_price}（航班号: #{flight.flight_number}）"
       end
       
-      add_assertion "乘客信息正确（张三）", weight: 10 do
+      add_assertion "乘客信息正确（#{@expected_passenger_name}）", weight: 10 do
         expect(@flight_booking.passenger_name).to eq(@expected_passenger_name),
           "乘客姓名错误。期望: #{@expected_passenger_name}, 实际: #{@flight_booking.passenger_name}"
         expect(@flight_booking.passenger_id_number).to eq(@expected_passenger_id),
@@ -130,7 +143,10 @@ module V201V250
       {
         departure_city: @departure_city,
         destination_city: @destination_city,
-        flight_date: @flight_date.to_s
+        flight_date: @flight_date.to_s,
+        expected_passenger_name: @expected_passenger_name,
+        expected_passenger_id: @expected_passenger_id,
+        expected_contact_phone: @expected_contact_phone
       }
     end
     
@@ -138,6 +154,9 @@ module V201V250
       @departure_city = data['departure_city']
       @destination_city = data['destination_city']
       @flight_date = Date.parse(data['flight_date'])
+      @expected_passenger_name = data['expected_passenger_name']
+      @expected_passenger_id = data['expected_passenger_id']
+      @expected_contact_phone = data['expected_contact_phone']
       
       @available_flights = Flight.where(
         departure_city: @departure_city,

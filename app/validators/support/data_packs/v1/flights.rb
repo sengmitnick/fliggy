@@ -1111,9 +1111,9 @@ all_flights = []
       departure_airport: "浦东T2",
       arrival_airport: "双流T2",
       airline: "东方航空",
-      flight_number: "MU#{5421 + day_suffix}",
+      flight_number: "MU#{5424 + day_suffix}",
       aircraft_type: "空客320(中)",
-      price: 780.0,
+      price: 780.0,  # V246: 低价经济舱（Phase 2会设置为无行李）
       discount_price: 55.0,
       seat_class: "economy",
       available_seats: 125,
@@ -1129,9 +1129,9 @@ all_flights = []
       departure_airport: "虹桥T2",
       arrival_airport: "天府T1",
       airline: "四川航空",
-      flight_number: "3U#{8921 + day_suffix}",
+      flight_number: "3U#{8924 + day_suffix}",
       aircraft_type: "空客321(中)",
-      price: 820.0,
+      price: 820.0,  # V246: 标准经济舱（Phase 2会设置含行李）
       discount_price: 60.0,
       seat_class: "economy",
       available_seats: 130,
@@ -1809,10 +1809,11 @@ flights.each_slice(100) do |batch|
   updates = batch.map do |flight|
     is_major_airline = ['国航', '东航', '南航', '海航'].any? { |name| flight.airline&.include?(name) }
     is_premium = flight.price.to_f >= 1500
+    is_low_price = flight.price.to_f < 800  # V246: 低价票（<800元）无行李
     
     {
       id: flight.id,
-      baggage_allowance: is_premium ? '托运行李2件(每件23kg)' : '托运行李1件(23kg)',
+      baggage_allowance: is_low_price ? '' : (is_premium ? '托运行李2件(每件23kg)' : '托运行李1件(23kg)'),
       refund_policy: is_premium ? '可免费改签，退票收5%手续费' : '改签收50元，退票收10%手续费',
       meal_service: is_premium ? '含飞机餐+饮料' : '含简餐',
       mileage_accrual: is_major_airline ? '可累积里程' : '不可累积',
@@ -1843,6 +1844,15 @@ short_flights = []
   { number: 'CA1401', airline: '国航', dep_city: '北京', dest_city: '天津', dep_airport: '首都T3', arr_airport: '滨海T2', dep_time: '07:30', arr_time: '08:30', price: 380, date_offset: 2 }
 ].each do |route|
   flight_date = Date.today + route[:date_offset].days
+  
+  # 处理跨日到达时间（如果时间包含+1后缀）
+  arr_time = route[:arr_time]
+  arr_date = flight_date
+  if arr_time.include?('+1')
+    arr_time = arr_time.gsub('+1', '')
+    arr_date = flight_date + 1.day
+  end
+  
   short_flights << {
     flight_number: route[:number],
     airline: route[:airline],
@@ -1851,7 +1861,7 @@ short_flights = []
     departure_airport: route[:dep_airport],
     arrival_airport: route[:arr_airport],
     departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
-    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    arrival_time: Time.zone.parse("#{arr_date} #{arr_time}"),
     price: route[:price],
     is_direct: true,
     stops: 0,
@@ -1925,6 +1935,14 @@ international_end_date = Date.today + 10.days
 
 (international_start_date..international_end_date).each do |flight_date|
   international_routes.each do |route|
+    # 处理跨日到达时间（如果时间包含+1后缀）
+    arr_time = route[:arr_time]
+    arr_date = flight_date
+    if arr_time.include?('+1')
+      arr_time = arr_time.gsub('+1', '')
+      arr_date = flight_date + 1.day
+    end
+    
     international_business_flights << {
       flight_number: route[:number],
       airline: route[:airline],
@@ -1933,7 +1951,7 @@ international_end_date = Date.today + 10.days
       departure_airport: route[:dep_airport],
       arrival_airport: route[:dest_airport],
       departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
-      arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+      arrival_time: Time.zone.parse("#{arr_date} #{arr_time}"),
       price: route[:price],
       seat_class: 'business_class',  # V223要求：商务舱
       is_direct: true,
@@ -1962,6 +1980,15 @@ rebookable_flights = []
   { number: 'MU5301', airline: '东航', dep_city: '广州', dep_airport: '白云T2', dest_city: '杭州', dest_airport: '萧山T3', dep_time: '14:30', arr_time: '16:30', price: 850, refund: '改签免手续费', date_offset: 5 }
 ].each do |route|
   flight_date = Date.today + route[:date_offset].days
+  
+  # 处理跨日到达时间（如果时间包含+1后缀）
+  arr_time = route[:arr_time]
+  arr_date = flight_date
+  if arr_time.include?('+1')
+    arr_time = arr_time.gsub('+1', '')
+    arr_date = flight_date + 1.day
+  end
+  
   rebookable_flights << {
     flight_number: route[:number],
     airline: route[:airline],
@@ -1970,7 +1997,7 @@ rebookable_flights = []
     departure_airport: route[:dep_airport],
     arrival_airport: route[:dest_airport],
     departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
-    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    arrival_time: Time.zone.parse("#{arr_date} #{arr_time}"),
     price: route[:price],
     is_direct: true,
     stops: 0,
@@ -1992,11 +2019,20 @@ puts "  ✓ 创建了 #{rebookable_flights.size} 个支持改签的航班"
 widebody_flights = []
 
 [
-  { number: 'CA987', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '洛杉矶', dest_airport: 'LAX', dep_time: '12:00', arr_time: '08:00', price: 7800, aircraft: '波音787', date_offset: 7 },
+  { number: 'CA987', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '洛杉矶', dest_airport: 'LAX', dep_time: '12:00', arr_time: '09:00+1', price: 7800, aircraft: '波音787', date_offset: 7 },
   { number: 'CA8801', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '15:00', arr_time: '17:30', price: 1680, aircraft: '宽体机', date_offset: 1 },
   { number: 'CZ8801', airline: '南航', dep_city: '广州', dep_airport: '白云T2', dest_city: '上海', dest_airport: '虹桥T2', dep_time: '16:00', arr_time: '18:30', price: 1580, aircraft: '宽体机', date_offset: 2 }
 ].each do |route|
   flight_date = Date.today + route[:date_offset].days
+  
+  # 处理跨日到达时间（如果时间包含+1后缀）
+  arr_time = route[:arr_time]
+  arr_date = flight_date
+  if arr_time.include?('+1')
+    arr_time = arr_time.gsub('+1', '')
+    arr_date = flight_date + 1.day
+  end
+  
   widebody_flights << {
     flight_number: route[:number],
     airline: route[:airline],
@@ -2005,7 +2041,7 @@ widebody_flights = []
     departure_airport: route[:dep_airport],
     arrival_airport: route[:dest_airport],
     departure_time: Time.zone.parse("#{flight_date} #{route[:dep_time]}"),
-    arrival_time: Time.zone.parse("#{flight_date} #{route[:arr_time]}"),
+    arrival_time: Time.zone.parse("#{arr_date} #{arr_time}"),
     price: route[:price],
     is_direct: true,
     stops: 0,
@@ -2393,6 +2429,13 @@ puts "  ✓ 创建了 #{flight_packages_data.size} 个航班套餐产品"
 
 puts "\n=== 生成航班套餐 ==="
 
+# 强制删除所有旧的FlightOffer以确保使用新的行李额度逻辑
+old_offers_count = FlightOffer.where(data_version: 0).count
+if old_offers_count > 0
+  FlightOffer.where(data_version: 0).delete_all
+  puts "   ✓ 已删除 #{old_offers_count} 个旧套餐，准备重新生成"
+end
+
 # 查找所有没有FlightOffer的航班
 flights_without_offers = Flight.where(data_version: 0)
   .left_joins(:flight_offers)
@@ -2408,18 +2451,22 @@ if flights_without_offers.any?
   flights_without_offers.each do |flight|
     base_price = flight.price.to_f
     
-    # Package 1: 超值精选 (Best Value)
+    # Package 1: 超值精选 (Best Value) - 最低价,无行李托运
+    offer1_price = base_price
+    offer1_baggage = offer1_price < 800 ? '仅手提行李7KG' : '托运行李1件(23kg)'
+    offer1_discount_items = offer1_price < 800 ? ['无免费托运行李'] : []
+    
     all_offers << {
       flight_id: flight.id,
       provider_name: '超值精选',
       offer_type: 'featured',
-      price: base_price,
-      original_price: base_price + 42,
+      price: offer1_price,
+      original_price: offer1_price + 42,
       cashback_amount: 0,
-      discount_items: ['无免费托运行李'],
+      discount_items: offer1_discount_items,
       services: ['退改¥92起', '经济舱', '仅全额电子发票'],
-      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
-      baggage_info: '手提行李7KG/尺寸20',
+      tags: ['含合餐权益', offer1_baggage],
+      baggage_info: offer1_baggage,
       meal_included: false,
       refund_policy: '退改¥92起',
       is_featured: true,
@@ -2429,20 +2476,24 @@ if flights_without_offers.any?
       updated_at: timestamp
     }
     
-    # Package 2: 选座无忧 (Seat Selection)
+    # Package 2: 选座无忧 (Seat Selection) - 标准价,含1件行李
+    offer2_price = base_price + 8
+    offer2_baggage = offer2_price < 800 ? '仅手提行李7KG' : (offer2_price > 900 ? '托运行李2件(每件23kg)' : '托运行李1件(23kg)')
+    offer2_discount_items = offer2_price < 800 ? ['无免费托运行李'] : []
+    
     all_offers << {
       flight_id: flight.id,
       provider_name: '选座无忧',
       offer_type: 'standard',
-      price: base_price + 8,
-      original_price: base_price + 50,
+      price: offer2_price,
+      original_price: offer2_price + 42,
       cashback_amount: 24,
-      discount_items: ['无免费托运行李'],
+      discount_items: offer2_discount_items,
       services: ['退改¥92起', '经济舱', '仅全额电子发票'],
-      tags: ['含合餐权益', '手提行李7KG/尺寸20'],
-      baggage_info: '含合餐权益',
+      tags: ['含合餐权益', offer2_baggage],
+      baggage_info: offer2_baggage,
       meal_included: false,
-      refund_policy: '手提行李7KG/尺寸20',
+      refund_policy: '退改¥92起',
       is_featured: false,
       display_order: 1,
       data_version: 0,
@@ -2450,25 +2501,28 @@ if flights_without_offers.any?
       updated_at: timestamp
     }
     
-    # Package 3: 返现礼遇 (Cashback Package)
+    # Package 3: 返现礼遇 (Cashback Package) - 高价,含行李+返现
+    offer3_price = base_price + 120
+    offer3_baggage = offer3_price > 900 ? '托运行李2件(每件23kg)' : '托运行李1件(23kg)'
+    
     all_offers << {
       flight_id: flight.id,
       provider_name: '返现礼遇',
       offer_type: 'cashback',
-      price: base_price + 120,
-      original_price: base_price + 220,
+      price: offer3_price,
+      original_price: offer3_price + 100,
       cashback_amount: 90,
-      discount_items: ['无免费托运行李'],
-      services: ['经济舱', '全额电子发票'],
+      discount_items: [],
+      services: ['经济舱', '全额电子发票', offer3_baggage],
       tags: [
-        '返¥520里程礼包',
-        '手提行李7KG/尺寸20',
+        '返¥90返现',
+        offer3_baggage,
         '成人可订返现',
         '仅限预定电子票'
       ],
-      baggage_info: '返¥520里程礼包',
+      baggage_info: offer3_baggage,
       meal_included: false,
-      refund_policy: '手提行李7KG/尺寸20',
+      refund_policy: '退改签免手续费',
       is_featured: false,
       display_order: 2,
       data_version: 0,
@@ -2476,23 +2530,27 @@ if flights_without_offers.any?
       updated_at: timestamp
     }
     
-    # Package 4: 家庭好选 (Family Choice)
+    # Package 4: 家庭好选 (Family Choice) - 中高价,含行李
+    offer4_price = base_price + 5
+    offer4_baggage = offer4_price < 800 ? '仅手提行李7KG' : '托运行李1件(23kg)'
+    offer4_discount_items = offer4_price < 800 ? ['无免费托运行李'] : []
+    
     all_offers << {
       flight_id: flight.id,
       provider_name: '家庭好选',
       offer_type: 'family',
-      price: base_price + 5,
-      original_price: base_price + 40,
+      price: offer4_price,
+      original_price: offer4_price + 35,
       cashback_amount: 20,
-      discount_items: ['结果送出票'],
-      services: ['经济舱', '1.7折'],
+      discount_items: offer4_discount_items,
+      services: ['经济舱', '家庭优惠', offer4_baggage],
       tags: [
-        '结果送出票',
-        '结果提交'
+        '家庭优惠',
+        offer4_baggage
       ],
-      baggage_info: '结果送出票',
+      baggage_info: offer4_baggage,
       meal_included: false,
-      refund_policy: '结果提交',
+      refund_policy: '退改¥50起',
       is_featured: false,
       display_order: 3,
       data_version: 0,
