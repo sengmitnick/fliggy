@@ -391,6 +391,7 @@ class BookingsController < ApplicationController
       
       # 计算去程价格
       offer = @flight.flight_offers.find_by(id: params[:booking][:offer_id])
+      booking.flight_offer = offer if offer.present?
       price = offer&.price || @flight.final_price
       booking.total_price = passenger.child_ticket? ? (price * 0.5) : price
       
@@ -402,6 +403,7 @@ class BookingsController < ApplicationController
       return_flight = Flight.find_by(id: params[:booking][:return_flight_id])
       if return_flight
         return_offer = return_flight.flight_offers.find_by(id: params[:booking][:return_offer_id])
+        booking.return_offer = return_offer if return_offer.present?
         booking.return_offer_id = return_offer&.id
         return_price = return_offer&.price || return_flight.final_price
         booking.total_price += passenger.child_ticket? ? (return_price * 0.5) : return_price
@@ -422,6 +424,7 @@ class BookingsController < ApplicationController
       
       # 计算去程价格
       offer = @flight.flight_offers.find_by(id: params[:booking][:offer_id])
+      booking.flight_offer = offer if offer.present?
       price = offer&.price || @flight.final_price
       booking.total_price = passenger.child_ticket? ? (price * 0.5) : price
       

@@ -2,21 +2,43 @@
 
 require_relative '../base_validator'
 
-# 验证用例251: 给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）
+# V251: 给张三和李四预订5天后北京文化深度游包车（豪华5座，6小时）
 #
-# 核心验证点:
-# 1. 路线选择: 北京文化深度游
-# 2. 车型选择: 豪华5座
-# 3. 包车时长: 6小时（半日游标准时长）
-# 4. 出发日期: 5天后（Date.current + 5.days）
-# 5. 联系人信息: 张三、李四任选其一
-# 6. 订单信息完整性
+# 任务描述:
+#   张三和李四计划5天后在北京进行文化深度游，需要预订包车服务。
+#   要求选择豪华5座车型，包车时长6小时（半日游标准服务时长）。
+#   Agent 需要在符合条件的路线和车型中，选择合适的包车产品，并填写联系人信息完成预订。
+#
+# 业务流程（6个关键步骤）：
+#   1. 搜索北京城市的包车路线
+#   2. 筛选路线名包含"文化深度游"的路线
+#   3. 选择豪华5座车型
+#   4. 设置服务时长为6小时（半日游标准时长）
+#   5. 填写出发日期（5天后）、联系人信息（张三或李四任选其一）
+#   6. 提交订单并验证价格计算正确性
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解路线筛选：路线名包含"文化深度游"
+#   2. 需要理解车型选择：豪华5座车型
+#   3. 需要理解服务时长：6小时（半日游标准服务时长）
+#   4. 需要理解出发日期计算：5天后（Date.current + 5.days）
+#   5. 需要理解联系人选择：张三和李四任选其一，电话号码需匹配
+#   ❌ 不能随机选择：必须精确匹配路线关键词、车型名称、服务时长
+#
+# 评分标准（7项，总计100分）：
+#   - 创建了包车订单（25分）
+#   - 路线正确（北京文化深度游）（15分）
+#   - 车型正确（豪华5座）（20分）
+#   - 服务时长正确（6小时）（15分）
+#   - 出发日期正确（5天后）（10分）
+#   - 联系人信息正确（张三或李四）（10分）
+#   - 价格计算正确（5分）
 module V251V300
   class V251BookBeijingCultureDeepCharteredTourValidator < BaseValidator
     self.validator_id = 'v251_book_beijing_culture_deep_chartered_tour_validator'
     self.task_id = '61645ce7-e573-42d2-b80e-c5bfe1d863db'
-    self.title = '给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）'
-    self.description = '给张三和李四预订北京文化深度游包车（5天后出发，豪华5座，6小时）'
+    self.title = '给张三和李四预订5天后北京文化深度游包车（豪华5座，6小时）'
+    self.description = '给张三和李四预订5天后北京文化深度游包车（豪华5座，6小时）'
     self.timeout_seconds = 240
   
     def prepare
@@ -35,13 +57,13 @@ module V251V300
       @expected_contact_phones = { '张三' => @zhangsan.phone, '李四' => @lisi.phone }
     
       # 查询可用路线
-      @available_routes = CharterRoute.where(data_version: @data_version)
+      @available_routes = CharterRoute.where(data_version: 0)
                                       .joins(:city)
                                       .where('cities.name = ?', @city_name)
                                       .where('charter_routes.name LIKE ?', "%#{@route_keyword}%")
     
       # 查询可用车型
-      @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: @data_version)
+      @available_vehicle = VehicleType.find_by(name: @vehicle_type_name, data_version: 0)
     
       {
         task: "请预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@city_name}#{@route_keyword}包车路线，选择#{@vehicle_type_name}车型，#{@duration_hours}小时服务（半日游）",
@@ -121,13 +143,13 @@ module V251V300
       end
       
       # 断言5: 出发日期正确（权重10%）
-      add_assertion "出发日期正确（5天后#{@travel_date}）", weight: 10 do
+      add_assertion "出发日期正确（5天后#{@travel_date.strftime('%Y-%m-%d')}）", weight: 10 do
         @charter_bookings.each do |booking|
           expect(booking.departure_date).to be_present,
             "缺少出发日期"
           
           expect(booking.departure_date).to eq(@travel_date),
-            "出发日期错误。期望: #{@travel_date}（5天后），实际: #{booking.departure_date}"
+            "出发日期错误。期望: #{@travel_date.strftime('%Y-%m-%d')}（5天后），实际: #{booking.departure_date}"
         end
       end
       
