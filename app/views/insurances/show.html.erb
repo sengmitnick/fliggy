@@ -61,7 +61,11 @@
                 <span class="text-3xl font-bold text-orange-600"><%= @calculated_price.to_i %></span>
               </div>
             </div>
+            <!-- 显示基础每日价格（与列表页一致） -->
             <div class="text-xs text-gray-500">¥<%= @product.price_per_day.to_i %>/天</div>
+            <% if @city && (city_price = @product.price_for_city(@city.id)) && city_price != @product.price_per_day %>
+              <div class="text-xs text-blue-600 mt-1">该地区专享价：¥<%= city_price.to_i %>/天</div>
+            <% end %>
           <% else %>
             <div class="flex items-center justify-between">
               <span class="text-sm text-gray-600">保障价格</span>

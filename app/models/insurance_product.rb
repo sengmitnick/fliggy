@@ -42,7 +42,7 @@ class InsuranceProduct < ApplicationRecord
       price_per_day
     end
     
-    (price * days).round(2)
+    price * days  # Return integer (no need for .round since price is already integer)
   end
   
   # Get price per day for specific city

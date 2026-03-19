@@ -213,7 +213,7 @@
       
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">
-          <span class="text-gray-600">保费单价</span>
+          <span class="text-gray-600">保费单价（<%= @order.days %>天）</span>
           <span class="text-gray-900">¥<%= @order.unit_price.to_i %></span>
         </div>
         <div class="flex justify-between">

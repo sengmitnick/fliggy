@@ -1,20 +1,45 @@
 # frozen_string_literal: true
 
 module V251V300
-  # V271: 兑换多个不同商品
+  # V271: 帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）
   #
   # 场景: 用户兑换3个不同的低价商品（咖啡券、奶茶券、代金券）
   # 考点: 订单创建、积分余额扣除、多商品兑换
+  #
+  # 业务流程:
+  #   1. 用户输入：需要兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）
+  #   2. 系统查询：查找这3个商品的积分和现金价格
+  #     - 瑞幸咖啡券 9.9元: 50积分 + 9.9元
+  #     - 蜜雪冰城 5元代金券: 10积分 + 4元
+  #     - 肯德基早餐券: 50积分 + 15元
+  #   3. 提交订单：为每个商品创建一个订单，共3个订单，总计110积分 + 28.9元
+  #
+  # 复杂度分析:
+  #   1. **多商品查询**（中）：需要查找3个不同商品并验证库存
+  #   2. **批量订单创建**（中）：需要为3个商品分别创建订单
+  #   3. **积分和余额验证**（低）：需要确保用户有足够的积分和现金余额
+  #
+  # 评分标准（总分100%）:
+  #   - 创建3个订单（20分）
+  #   - 3个不同商品（25分）
+  #   - 包含瑞幸咖啡券（15分）
+  #   - 包含蜜雪冰城代金券（15分）
+  #   - 包含肯德基早餐券（15分）
+  #   - 收货地址正确（10分）
   class V271RedeemMultipleQuantityValidator < BaseValidator
     self.validator_id = 'v271_redeem_multiple_quantity_validator'
     self.task_id = '6d2fd384-9e74-4e8b-a0fc-cb3fcf871fdd'
     self.title = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）'
-    self.description = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元、蜜雪冰城 5元代金券、肯德基早餐券）'
+    self.description = '帮张三兑换3个不同的低价商品（瑞幸咖啡券 9.9元 50积分+9.9元、蜜雪冰城 5元代金券 10积分+4元、肯德基早餐券 50积分+15元），总计110积分+28.9元'
     self.timeout_seconds = 300
     
     def prepare
       @product_names = ['瑞幸咖啡券 9.9元', '蜜雪冰城 5元代金券', '肯德基早餐券']
-      @expected_shipping_address = '杭州市西湖区文三路90号'
+      
+      # 查找张三的收货地址
+      zhangsan = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_address = zhangsan.addresses.where(data_version: 0).first!
+      @expected_shipping_address = [@zhangsan_address.province, @zhangsan_address.city, @zhangsan_address.district, @zhangsan_address.detail].compact.join
       
       # 查找3个商品
       @products = @product_names.map do |name|
@@ -42,9 +67,11 @@ module V251V300
         task: "请在积分商城兑换3个不同的商品：#{@product_names.join('、')}",
         requirements: {
           product_names: @product_names,
-          count: 3
+          count: 3,
+          total_points: required_points,
+          total_cash: required_cash
         },
-        hint: "需要兑换3个不同商品，总计#{required_points}积分 + #{required_cash}元。"
+        hint: "需要兑换3个不同商品（瑞幸咖啡券 9.9元 50积分+9.9元、蜜雪冰城 5元代金券 10积分+4元、肯德基早餐券 50积分+15元），总计#{required_points}积分 + #{required_cash}元。"
       }
     end
     
@@ -111,7 +138,7 @@ module V251V300
           total_mileage: product.price_mileage * 1,
           contact_name: user.name,
           contact_phone: user.phone || '13800138000',
-          shipping_address: '杭州市西湖区文三路90号',
+          shipping_address: @expected_shipping_address,
           status: 'paid',
           data_version: @data_version
         )
@@ -123,12 +150,18 @@ module V251V300
     def execution_state_data
       { 
         product_names: @product_names, 
-        product_ids: @products&.map(&:id)
+        product_ids: @products&.map(&:id),
+        zhangsan_address_id: @zhangsan_address&.id,
+        expected_shipping_address: @expected_shipping_address
       }
     end
     
     def restore_from_state(data)
       @product_names = data['product_names']
+      @expected_shipping_address = data['expected_shipping_address']
+      if data['zhangsan_address_id']
+        @zhangsan_address = Address.find(data['zhangsan_address_id'])
+      end
       if data['product_ids']
         @products = data['product_ids'].map { |id| MembershipProduct.find(id) }
       end

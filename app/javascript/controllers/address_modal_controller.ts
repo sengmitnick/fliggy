@@ -74,12 +74,6 @@ export default class extends Controller<HTMLElement> {
       shippingAddressInput.value = addressFull
     }
 
-    // Store selected address ID for booking (for other forms like sim card)
-    const bookingForm = document.querySelector('[data-address-id-input]') as HTMLInputElement
-    if (bookingForm) {
-      bookingForm.value = addressId || ''
-    }
-
     this.close()
   }
 

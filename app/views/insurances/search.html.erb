@@ -170,6 +170,17 @@
                   <%= product.company %>
                 </div>
 
+                <!-- 适用场景标签 -->
+                <% if product.scenes.present? %>
+                  <div class="flex flex-wrap gap-1 mb-2">
+                    <% product.scenes.first(3).each do |scene| %>
+                      <span class="inline-block bg-purple-50 text-purple-700 text-[10px] px-2 py-0.5 rounded border border-purple-100">
+                        <%= scene %>
+                      </span>
+                    <% end %>
+                  </div>
+                <% end %>
+
                 <!-- 保障亮点 -->
                 <div class="flex flex-wrap gap-1 mb-3">
                   <% product.highlights.first(3).each do |highlight| %>
@@ -182,17 +193,21 @@
                 <!-- 价格和操作 -->
                 <div class="flex items-end justify-between">
                   <div>
-                    <% if @days.present? && (calculated_price = product.calculate_price(@days)) %>
+                    <% if @days.present? %>
+                      <!-- 直接显示每日价格（已是整数） -->
+                      <% price_per_day = @city_id ? product.price_for_city(@city_id) : product.price_per_day %>
+                      <% total_price = product.calculate_price(@days, city_id: @city_id) %>
                       <div class="flex items-baseline">
                         <span class="text-xs text-gray-500">¥</span>
-                        <span class="text-xl font-bold text-orange-600"><%= calculated_price.to_i %></span>
-                        <span class="text-xs text-gray-500 ml-1">共<%= @days %>天</span>
+                        <span class="text-xl font-bold text-orange-600"><%= price_per_day %></span>
+                        <span class="text-xs text-gray-500 ml-1">/天</span>
                       </div>
-                      <div class="text-[10px] text-gray-400">¥<%= product.price_per_day.to_i %>/天</div>
+                      <!-- 显示总天数和总价 -->
+                      <div class="text-[10px] text-gray-400">共<%= @days %>天 · 总计¥<%= total_price %></div>
                     <% else %>
                       <div class="flex items-baseline">
                         <span class="text-xs text-gray-500">¥</span>
-                        <span class="text-xl font-bold text-orange-600"><%= product.price_per_day.to_i %></span>
+                        <span class="text-xl font-bold text-orange-600"><%= product.price_per_day %></span>
                         <span class="text-xs text-gray-500 ml-1">/天起</span>
                       </div>
                     <% end %>

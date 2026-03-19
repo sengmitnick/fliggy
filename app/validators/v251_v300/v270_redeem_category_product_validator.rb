@@ -1,15 +1,34 @@
 # frozen_string_literal: true
 
 module V251V300
-  # V270: 给刘强按分类兑换商品（年货精选）
+  # V270: 给刘强按分类兑换商品（年货精选 - 三只松鼠零食大礼包）
   #
-  # 场景: 用户在年货精选分类中选择商品兑换
+  # 场景: 用户在年货精选分类中选择商品兑换（三只松鼠零食大礼包，销量最高的年货商品）
   # 考点: 分类筛选功能、特定品类商品兑换
+  #
+  # 业务流程:
+  #   1. 用户输入：商品分类（年货精选）、收货人（刘强）
+  #   2. 系统筛选：查找年货精选分类商品，按销量排序，选择销量最高的商品（三只松鼠零食大礼包，销量678）
+  #   3. 用户选择：选择三只松鼠零食大礼包（800积分+68元），确认积分和现金金额
+  #   4. 提交订单：使用刘强的收货地址
+  #
+  # 复杂度分析:
+  #   1. **分类筛选逻辑**（中）：需按category='spring_festival'筛选并按销量排序
+  #   2. **年货商品特征**（低）：需验证商品属于年货精选分类
+  #
+  # 评分标准（总分100%）:
+  #   - 创建了兑换订单 (25%)
+  #   - 商品属于年货精选分类 (25%)
+  #   - 商品是三只松鼠零食大礼包（销量最高） (额外验证)
+  #   - 商品信息完整 (10%)
+  #   - 订单金额正确（800积分+68元） (10%)
+  #   - 收货人信息正确（刘强） (15%)
+  #   - 订单状态有效 (15%)
   class V270RedeemCategoryProductValidator < BaseValidator
     self.validator_id = 'v270_redeem_category_product_validator'
     self.task_id = 'c479d048-ba73-4eb7-b867-53a0abd4cdb3'
-    self.title = '帮刘强在年货精选分类中选择商品兑换'
-    self.description = '帮刘强在年货精选分类中选择商品兑换'
+    self.title = '帮刘强在年货精选分类中兑换三只松鼠零食大礼包'
+    self.description = '帮刘强在积分商城年货精选分类中兑换商品（三只松鼠零食大礼包，销量最高的年货商品，需要800积分+68元）'
     self.timeout_seconds = 300
     
     def prepare
@@ -49,13 +68,15 @@ module V251V300
       end
       
       {
-        task: "请帮刘强在积分商城的「#{@category_name}」分类中选择一个商品进行兑换",
+        task: "请帮刘强在积分商城的「#{@category_name}」分类中选择销量最高的商品进行兑换（三只松鼠零食大礼包）",
         requirements: {
           category: @category_name,
+          product_name: '三只松鼠零食大礼包',
+          highest_sales: true,
           available_products: @category_products.map(&:name),
           recipient: '刘强'
         },
-        hint: "#{@category_name}分类包含传统节日礼品、特色食品等商品，收货地址使用刘强的地址。"
+        hint: "#{@category_name}分类包含传统节日礼品、特色食品等商品，请按销量排序选择销量最高的三只松鼠零食大礼包（800积分+68元），收货地址使用刘强的地址。"
       }
     end
     
