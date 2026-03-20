@@ -50,7 +50,8 @@ class MembershipProduct < ApplicationRecord
     when 'mileage_desc'
       order(price_mileage: :desc)
     else
-      order(created_at: :desc)
+      # 默认排序：精选商品优先，然后按销量和评分排序
+      order(featured: :desc, sales_count: :desc, rating: :desc)
     end
   }
   

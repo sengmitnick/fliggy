@@ -104,6 +104,12 @@ class InsuranceOrdersController < ApplicationController
     @order.quantity = insured_persons.size
     @order.status = 'pending'
     
+    # Handle related booking (polymorphic association)
+    if params[:insurance_order][:related_booking_type].present? && params[:insurance_order][:related_booking_id].present?
+      @order.related_booking_type = params[:insurance_order][:related_booking_type]
+      @order.related_booking_id = params[:insurance_order][:related_booking_id]
+    end
+    
     # Save contact information at order level
     if contact
       @order.contact_name = contact.name
@@ -224,6 +230,8 @@ class InsuranceOrdersController < ApplicationController
       :destination_type,
       :unit_price,
       :quantity,
+      :related_booking_type,
+      :related_booking_id,
       insured_persons: {}
     )
   end

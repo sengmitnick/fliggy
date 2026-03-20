@@ -1,10 +1,28 @@
 # frozen_string_literal: true
 
 module V251V300
-  # V274: 按评分排序选择高评分商品
+  # V274: 帮张三在积分商城按评分排序，选择评分最高的商品兑换（≥ 4.8分）
   #
   # 场景: 用户按评分降序排序，选择评分最高的商品兑换
   # 考点: 评分排序、质量保证
+  #
+  # 业务流程:
+  #   1. 用户输入：需要在积分商城按评分降序排序，选择评分最高的商品兑换
+  #   2. 系统排序：按评分降序排列商品，同评分按销量降序
+  #   3. 商品筛选：选择评分≥4.8分的高评分商品
+  #   4. 提交订单：创建订单
+  #
+  # 复杂度分析:
+  #   1. **评分排序**（低）：需要按评分降序排列
+  #   2. **高评分识别**（低）：选择排序后的第一个高评分商品
+  #   3. **订单创建**（低）：创建单个订单
+  #
+  # 评分标准（总分100%）:
+  #   - 创建兑换订单 (20%)
+  #   - 兑换的是高评分商品（≥4.8分） (35%)
+  #   - 订单金额正确 (20%)
+  #   - 订单已支付 (15%)
+  #   - 收货地址正确 (10%)
   class V274RedeemHighRatingProductValidator < BaseValidator
     self.validator_id = 'v274_redeem_high_rating_product_validator'
     self.task_id = 'fdc187fc-0997-427d-9d9f-7a3241a8e088'
@@ -13,7 +31,10 @@ module V251V300
     self.timeout_seconds = 300
     
     def prepare
-      @expected_shipping_address = '西安市雁塔区高新路88号'
+      # 查找张三的收货地址
+      zhangsan = User.find_by!(email: 'demo@travel01.com', data_version: 0)
+      @zhangsan_address = zhangsan.addresses.where(data_version: 0).first!
+      @expected_shipping_address = [@zhangsan_address.province, @zhangsan_address.city, @zhangsan_address.district, @zhangsan_address.detail].compact.join
       
       # 查找评分最高的商品
       @high_rating_products = MembershipProduct
@@ -30,15 +51,14 @@ module V251V300
       @min_rating = 4.8
       
       # 确保用户有足够的积分和余额
-      user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      membership = user.membership
+      membership = zhangsan.membership
       
       if membership.points < @product.price_mileage
         raise "用户积分不足。需要: #{@product.price_mileage}积分，当前: #{membership.points}积分"
       end
       
-      if user.balance < @product.price_cash
-        raise "用户余额不足。需要: ¥#{@product.price_cash}，当前: ¥#{user.balance}"
+      if zhangsan.balance < @product.price_cash
+        raise "用户余额不足。需要: ¥#{@product.price_cash}，当前: ¥#{zhangsan.balance}"
       end
       
       {
@@ -105,7 +125,7 @@ module V251V300
         total_mileage: @product.price_mileage,
         contact_name: user.name,
         contact_phone: user.phone || '13800138000',
-        shipping_address: '西安市雁塔区高新路88号',
+        shipping_address: @expected_shipping_address,
         status: 'paid',
         data_version: @data_version
       )
@@ -114,11 +134,20 @@ module V251V300
     private
     
     def execution_state_data
-      { product_id: @product&.id, min_rating: @min_rating }
+      { 
+        product_id: @product&.id, 
+        min_rating: @min_rating,
+        zhangsan_address_id: @zhangsan_address&.id,
+        expected_shipping_address: @expected_shipping_address
+      }
     end
     
     def restore_from_state(data)
       @min_rating = data['min_rating']
+      @expected_shipping_address = data['expected_shipping_address']
+      if data['zhangsan_address_id']
+        @zhangsan_address = Address.find(data['zhangsan_address_id'])
+      end
       @product = MembershipProduct.find(data['product_id']) if data['product_id']
       @product_name = @product&.name
       

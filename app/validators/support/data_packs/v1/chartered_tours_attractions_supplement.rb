@@ -2357,6 +2357,128 @@ if huashan_tickets_data.any?
   puts "✓ 创建了 #{huashan_tickets_data.size} 张华山门票"
 end
 
+# 为华山门票添加供应商关联
+huashan_ticket_suppliers_data = []
+
+if (huashan = Attraction.find_by(name: '华山', data_version: 0))
+  huashan_adult_ticket = Ticket.find_by(attraction_id: huashan.id, ticket_type: 'adult', data_version: 0)
+  huashan_child_ticket = Ticket.find_by(attraction_id: huashan.id, ticket_type: 'child', data_version: 0)
+  
+  # 获取供应商
+  official_supplier = Supplier.find_by(name: '景区官方', data_version: 0)
+  ctrip_supplier = Supplier.find_by(name: '携程旅行', data_version: 0)
+  fliggy_supplier = Supplier.find_by(name: '飞猪旅行', data_version: 0)
+  meituan_supplier = Supplier.find_by(name: '美团门票', data_version: 0)
+  
+  # 成人票供应商
+  if huashan_adult_ticket && official_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_adult_ticket.id,
+      supplier_id: official_supplier.id,
+      original_price: 180,
+      current_price: 160,
+      discount_info: "官方直售，服务保障",
+      sales_count: 5600,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if huashan_adult_ticket && ctrip_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_adult_ticket.id,
+      supplier_id: ctrip_supplier.id,
+      original_price: 180,
+      current_price: 155,
+      discount_info: "携程会员优惠价",
+      sales_count: 4200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if huashan_adult_ticket && fliggy_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_adult_ticket.id,
+      supplier_id: fliggy_supplier.id,
+      original_price: 180,
+      current_price: 158,
+      discount_info: "飞猪特价，支付宝优惠",
+      sales_count: 3800,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if huashan_adult_ticket && meituan_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_adult_ticket.id,
+      supplier_id: meituan_supplier.id,
+      original_price: 180,
+      current_price: 152,
+      discount_info: "美团最低价，限时抢购",
+      sales_count: 6200,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  # 儿童票供应商
+  if huashan_child_ticket && official_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_child_ticket.id,
+      supplier_id: official_supplier.id,
+      original_price: 90,
+      current_price: 80,
+      discount_info: "官方直售，服务保障",
+      sales_count: 1800,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if huashan_child_ticket && ctrip_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_child_ticket.id,
+      supplier_id: ctrip_supplier.id,
+      original_price: 90,
+      current_price: 75,
+      discount_info: "儿童优惠特价",
+      sales_count: 1500,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if huashan_child_ticket && meituan_supplier
+    huashan_ticket_suppliers_data << {
+      ticket_id: huashan_child_ticket.id,
+      supplier_id: meituan_supplier.id,
+      original_price: 90,
+      current_price: 72,
+      discount_info: "美团儿童票最低价",
+      sales_count: 2100,
+      data_version: 0,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  puts "     ✓ 为华山门票添加#{huashan_ticket_suppliers_data.size}个供应商关联"
+end
+
+# 批量插入华山门票供应商数据
+if huashan_ticket_suppliers_data.any?
+  TicketSupplier.insert_all(huashan_ticket_suppliers_data)
+  puts "✓ 创建了 #{huashan_ticket_suppliers_data.size} 个华山门票供应商关联"
+end
+
 # 批量插入华山活动数据
 if huashan_activities_data.any?
   AttractionActivity.insert_all(huashan_activities_data)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_12_105726) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_19_063135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -1201,7 +1201,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_12_105726) do
   create_table "insurance_product_cities", force: :cascade do |t|
     t.integer "insurance_product_id", null: false
     t.integer "city_id", null: false
-    t.decimal "price_per_day", precision: 10, scale: 2
+    t.integer "price_per_day"
     t.boolean "available", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1219,7 +1219,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_12_105726) do
     t.string "product_type", null: false
     t.string "code", null: false
     t.jsonb "coverage_details", default: {}
-    t.decimal "price_per_day", precision: 10, scale: 2
+    t.integer "price_per_day", default: 0, null: false
     t.integer "min_days", default: 1
     t.integer "max_days", default: 365
     t.string "scenes", default: [], array: true

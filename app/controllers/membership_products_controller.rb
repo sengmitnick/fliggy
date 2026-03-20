@@ -2,7 +2,7 @@ class MembershipProductsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @products = MembershipProduct.available
+    @products = MembershipProduct.where(data_version: 0).available
     
     # Filter by category
     if params[:category].present?
@@ -26,7 +26,7 @@ class MembershipProductsController < ApplicationController
   end
 
   def show
-    @product = MembershipProduct.friendly.find(params[:id])
+    @product = MembershipProduct.where(data_version: 0).friendly.find(params[:id])
     @user_mileage = current_user.available_mileage
   end
 

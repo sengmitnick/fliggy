@@ -47,14 +47,14 @@
                   </div>
                 </div>
               </div>
-              <%= f.hidden_field :contact_name, value: @address.name, data: { 'address-id-input': true } %>
+              <%= f.hidden_field :contact_name, value: @address.name %>
               <%= f.hidden_field :contact_phone, value: @address.phone %>
               <%= f.hidden_field :shipping_address, value: @address.full_address %>
             <% else %>
               <div data-address-display class="text-secondary text-sm">
                 请选择收货地址
               </div>
-              <%= f.hidden_field :contact_name, value: "", data: { 'address-id-input': true } %>
+              <%= f.hidden_field :contact_name, value: "" %>
               <%= f.hidden_field :contact_phone, value: "" %>
               <%= f.hidden_field :shipping_address, value: "" %>
             <% end %>
