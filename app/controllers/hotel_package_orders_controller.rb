@@ -127,7 +127,10 @@ class HotelPackageOrdersController < ApplicationController
       :contact_name,
       :contact_phone,
       :check_in_date,
-      :check_out_date
+      :check_out_date,
+      :room_count,
+      :adult_count,
+      :child_count
     )
   end
   

@@ -549,7 +549,12 @@ brand_city_configs = [
   { brand: "希尔顿", city: "成都", region: "西南地区", star: 5, suffix: "酒店", base_price: 850 },
   { brand: "洲际", city: "成都", region: "西南地区", star: 5, suffix: "酒店", base_price: 900 },
   { brand: "凯悦", city: "成都", region: "西南地区", star: 5, suffix: "酒店", base_price: 850 },
-  { brand: "香格里拉", city: "成都", region: "西南地区", star: 5, suffix: "大酒店", base_price: 1000 }
+  { brand: "香格里拉", city: "成都", region: "西南地区", star: 5, suffix: "大酒店", base_price: 1000 },
+  
+  # 三亚地区 - 华南地区 (支持 v282 验证器)
+  { brand: "希尔顿", city: "三亚", region: "华南地区", star: 5, suffix: "度假酒店", base_price: 1200 },
+  { brand: "香格里拉", city: "三亚", region: "华南地区", star: 5, suffix: "大酒店", base_price: 1400 },
+  { brand: "万豪", city: "三亚", region: "华南地区", star: 5, suffix: "度假酒店", base_price: 1100 }
 ]
 
 location_markers = {
@@ -558,7 +563,8 @@ location_markers = {
   "北京" => ["朝阳", "海淀", "东城", "西城", "CBD"],
   "深圳" => ["福田", "南山", "罗湖", "宝安", "龙岗"],
   "广州" => ["天河", "越秀", "海珠", "番禺", "荔湾"],
-  "成都" => ["锦江", "青羊", "武侯", "成华", "高新"]
+  "成都" => ["锦江", "青羊", "武侯", "成华", "高新"],
+  "三亚" => ["亚龙湾", "海棠湾", "三亚湾", "大东海", "海棠区"]
 }
 
 package_hotels_data = []

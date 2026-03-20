@@ -223,6 +223,9 @@
     <%= form.hidden_field :check_in_date, value: check_in_value if check_in_value.present? %>
     <% check_out_value = params[:check_out_date].presence || @order.check_out_date %>
     <%= form.hidden_field :check_out_date, value: check_out_value if check_out_value.present? %>
+    <%= form.hidden_field :room_count, value: (params[:room_count].presence || @order.room_count || 1), data: { hotel_package_order_target: 'roomCountInput' } %>
+    <%= form.hidden_field :adult_count, value: (params[:adult_count].presence || @order.adult_count || 1), data: { hotel_package_order_target: 'adultCountInput' } %>
+    <%= form.hidden_field :child_count, value: (params[:child_count].presence || @order.child_count || 0), data: { hotel_package_order_target: 'childCountInput' } %>
 
     <!-- 商品卡片 -->
     <div class="bg-white rounded-b-xl rounded-tr-xl p-4 shadow-sm">
@@ -335,7 +338,7 @@
         <% end %>
         
         <!-- 入住日期 -->
-        <div>
+        <div class="mb-3 pb-3 border-b border-gray-100">
           <div class="text-sm text-gray-600 mb-1">入住日期</div>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -352,6 +355,43 @@
                 <span class="text-gray-900 font-medium"><%= check_out.strftime('%m月%d日') %></span>
                 <span class="text-gray-500 ml-1">（共<%= (check_out - check_in).to_i %>晚）</span>
               </div>
+            </div>
+            <button type="button"
+                    class="text-xs text-[#0066FF]"
+                    data-action="click->hotel-package-order#openInstantBookingDateSelection">
+              修改
+            </button>
+          </div>
+        </div>
+        
+        <!-- 房间数量 -->
+        <div class="mb-3 pb-3 border-b border-gray-100">
+          <div class="text-sm text-gray-600 mb-1">房间数量</div>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-900">
+              <% 
+                display_room_count = params[:room_count].presence || @order.room_count || 1
+              %>
+              <%= display_room_count %>间
+            </div>
+            <button type="button"
+                    class="text-xs text-[#0066FF]"
+                    data-action="click->hotel-package-order#openInstantBookingDateSelection">
+              修改
+            </button>
+          </div>
+        </div>
+        
+        <!-- 入住人数 -->
+        <div>
+          <div class="text-sm text-gray-600 mb-1">入住人数</div>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-900">
+              <% 
+                display_adult_count = params[:adult_count].presence || @order.adult_count || 1
+                display_child_count = params[:child_count].presence || @order.child_count || 0
+              %>
+              成人<%= display_adult_count %>人<% if display_child_count.to_i > 0 %>，儿童<%= display_child_count %>人<% end %>
             </div>
             <button type="button"
                     class="text-xs text-[#0066FF]"
@@ -522,17 +562,14 @@
           <div>
             <div class="font-bold text-lg"><%= @package.title %></div>
             <div class="text-gray-600"><%= @package_option.name %></div>
-            <div class="text-green-600 flex items-center mt-1">
-              <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-            </div>
           </div>
         </div>
         
         <div class="flex items-center justify-between">
           <div>
             <div class="text-gray-600">购买数量: <span class="font-bold" data-hotel-package-order-target="confirmQuantity">1</span> 份</div>
+            <div class="text-gray-600 mt-1">房间数量: <span class="font-bold" data-hotel-package-order-target="confirmRoomCount">1</span> 间</div>
+            <div class="text-gray-600 mt-1">入住人数: 成人 <span class="font-bold" data-hotel-package-order-target="confirmAdultCount">1</span> 人<span data-hotel-package-order-target="confirmChildCount"></span></div>
             <div class="text-green-600 flex items-center mt-1">
               <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -632,6 +669,21 @@
             <p class="text-xs text-gray-500 mt-1">根据入住日期和套餐天数自动计算</p>
           </div>
           
+          <!-- 客房和入住人数选择 -->
+          <div class="mb-4">
+            <label class="text-sm font-medium text-gray-900 mb-2 block">客房和入住人数</label>
+            <button type="button"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg text-base text-left flex items-center justify-between hover:border-[#FFD700] focus:outline-none focus:border-[#FFD700] transition-colors"
+                    data-action="click->hotel-package-order#openGuestSelector">
+              <span data-hotel-package-order-target="guestSelectorDisplay" class="text-gray-900">
+                1间 · 1成人 · 0儿童
+              </span>
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+          
           <!-- 可预约时间范围提示 -->
           <div class="bg-blue-50 rounded-lg p-3 text-xs text-gray-600">
             <div class="flex items-start">
@@ -655,6 +707,108 @@
                 class="w-full py-3 bg-[#FFD700] text-black font-medium rounded-lg hover:bg-[#FFD700]/90 transition-colors"
                 data-action="click->hotel-package-order#confirmDateSelection">
           确认预约
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 客房和入住人数选择器 Modal -->
+  <div class="hidden fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end" data-hotel-package-order-target="guestSelectorModal">
+    <div class="bg-white w-full mx-auto rounded-t-3xl pb-8 animate-slide-up">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 class="text-xl font-bold text-gray-900">选择客房和入住人数</h2>
+        <button 
+          data-action="click->hotel-package-order#closeGuestSelector"
+          class="text-gray-400 hover:text-gray-600 text-3xl leading-none p-2">
+          ×
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="px-6 py-6 space-y-6">
+        <!-- Rooms -->
+        <div class="flex items-center justify-between py-4">
+          <span class="text-lg text-gray-900">间数</span>
+          <div class="flex items-center gap-6">
+            <button type="button"
+              data-action="click->hotel-package-order#decrementRooms"
+              class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+              </svg>
+            </button>
+            <span class="text-2xl font-medium w-12 text-center" data-hotel-package-order-target="roomsCount">1</span>
+            <button type="button"
+              data-action="click->hotel-package-order#incrementRooms"
+              class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Adults -->
+        <div class="flex items-center justify-between py-4">
+          <span class="text-lg text-gray-900">成人</span>
+          <div class="flex items-center gap-6">
+            <button type="button"
+              data-action="click->hotel-package-order#decrementAdults"
+              class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+              </svg>
+            </button>
+            <span class="text-2xl font-medium w-12 text-center" data-hotel-package-order-target="adultsCount">1</span>
+            <button type="button"
+              data-action="click->hotel-package-order#incrementAdults"
+              class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Children -->
+        <div class="flex items-center justify-between py-4">
+          <div>
+            <div class="text-lg text-gray-900">儿童</div>
+            <div class="text-sm text-gray-500">0-17岁</div>
+          </div>
+          <div class="flex items-center gap-6">
+            <button type="button"
+              data-action="click->hotel-package-order#decrementChildren"
+              class="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+              </svg>
+            </button>
+            <span class="text-2xl font-medium w-12 text-center" data-hotel-package-order-target="childrenCount">0</span>
+            <button type="button"
+              data-action="click->hotel-package-order#incrementChildren"
+              class="w-10 h-10 rounded-full border-2 border-blue-500 flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="px-6 flex gap-3">
+        <button type="button"
+          data-action="click->hotel-package-order#resetGuestCounts"
+          class="flex-1 py-4 rounded-full text-lg font-medium text-gray-700 bg-white border-2 border-gray-300 hover:border-gray-400 transition-colors">
+          重置
+        </button>
+        <button type="button"
+          data-action="click->hotel-package-order#confirmGuestSelection"
+          class="flex-1 py-4 rounded-full text-lg font-bold text-black transition-colors"
+          style="background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);">
+          完成
         </button>
       </div>
     </div>

@@ -96,7 +96,7 @@ destinations_config = [
 
 # ==================== 旅游类型配置 ====================
 tour_types = [
-  { category: 'free_travel', label: '一日游', travel_type: '自由出行', durations: [1], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'] },
+  { category: 'free_travel', label: '一日游', travel_type: '自由出行', durations: [1, 2, 3], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'] },
   { category: 'group_tour', label: '精品小团', travel_type: '跟团游', durations: [2, 3, 4, 5], weight: 40, group_sizes: [4, 6, 8, 10], features: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'] },
   { category: 'private_group', label: '多日游', travel_type: '独立成团', durations: [4, 5, 6, 7, 8], weight: 30, features: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'] }
 ]
@@ -166,7 +166,7 @@ destinations_config.each do |dest_config|
         
         # Badge
         badge = if tour_type[:category] == 'free_travel'
-          '一日游'
+          duration == 1 ? '一日游' : "自由行·#{duration}天#{nights}晚"
         elsif tour_type[:category] == 'group_tour'
           "多日游·#{tour_type[:group_sizes].sample}人团"
         else
