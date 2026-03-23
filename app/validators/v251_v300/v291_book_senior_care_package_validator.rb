@@ -2,7 +2,7 @@
 
 require_relative '../base_validator'
 
-# 验证用例291: 给张建国（65岁老人）预订九寨沟跟团游（2天1晚，10天后出发，含境内旅游保险）
+# 验证用例291: 给张建国（65岁老人）预订九寨沟跟团游（2天1晚，10天后出发，含旅游保险）
 # 
 # 任务描述:
 #   张建国（65岁老人）计刢10天后出发前往九寨沟旅游。
@@ -51,7 +51,7 @@ module V251V300
   class V291BookSeniorCarePackageValidator < BaseValidator
     self.validator_id = 'v291_book_senior_care_package_validator'
     self.task_id = '09a76fc5-3c70-446f-a35e-e52d8ed218f9'
-    self.title = '给张建国（65岁老人）预订九寨沟跟团游（2天1晚，10天后出发，含境内旅游保险）'
+    self.title = '给张建国（65岁老人）预订九寨沟跟团游（2天1晚，10天后出发，含旅游保险）'
     self.description = '给张建国（65岁老人）预订九寨沟跟团游（2天1晚，10天后出发，含旅游保险）'
     self.timeout_seconds = 300
     

@@ -1169,38 +1169,71 @@ end
 Train.insert_all(all_trains)
 puts "   ✓ 已添加 #{all_trains.size} 条北京→成都火车票记录（未来65天，含春节返乡Z50）"
 
-# ==================== 为所有火车创建座位类型数据 ====================
+# ====================  为所有火车创建座位类型数据 ====================
 puts "\n为所有车次创建座位类型数据..."
 all_seats = []
 
 Train.where(data_version: 0).find_each do |train|
-  # 为每趟车创建4种座位类型
-  seat_types = [
-    { 
-      seat_type: 'second_class', 
-      price: train.price_second_class, 
-      total: rand(300..500),
-      available_ratio: rand(0.3..0.9)
-    },
-    { 
-      seat_type: 'first_class', 
-      price: train.price_first_class, 
-      total: rand(100..200),
-      available_ratio: rand(0.3..0.9)
-    },
-    { 
-      seat_type: 'business_class', 
-      price: train.price_business_class, 
-      total: rand(20..50),
-      available_ratio: rand(0.3..0.9)
-    },
-    { 
-      seat_type: 'no_seat', 
-      price: (train.price_second_class * 0.5).round(1), 
-      total: 999,
-      available_ratio: 0.99
-    }
-  ]
+  # 根据列车类型（G/D=高铁，Z/T/K=普通列车）创建不同的座位类型
+  is_high_speed = train.train_number.start_with?('G', 'D', 'C')
+  
+  if is_high_speed
+    # 高铁/动车：二等座、一等座、商务座、无座
+    seat_types = [
+      { 
+        seat_type: 'second_class', 
+        price: train.price_second_class, 
+        total: rand(300..500),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'first_class', 
+        price: train.price_first_class, 
+        total: rand(100..200),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'business_class', 
+        price: train.price_business_class, 
+        total: rand(20..50),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'no_seat', 
+        price: train.price_second_class,  # 无座价格 = 二等座价格
+        total: 999,
+        available_ratio: 0.99
+      }
+    ]
+  else
+    # 普通列车（Z/T/K）：硬座、硬卧、软卧、无座
+    seat_types = [
+      { 
+        seat_type: 'hard_seat', 
+        price: train.price_second_class,  # 硬座价格 = price_second_class
+        total: rand(300..500),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'hard_sleeper', 
+        price: train.price_first_class,  # 硬卧价格 = price_first_class
+        total: rand(100..200),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'soft_sleeper', 
+        price: train.price_business_class,  # 软卧价格 = price_business_class
+        total: rand(20..50),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
+        seat_type: 'no_seat', 
+        price: train.price_second_class,  # 无座价格 = 硬座价格
+        total: 999,
+        available_ratio: 0.99
+      }
+    ]
+  end
   
   seat_types.each do |seat_data|
     available = (seat_data[:total] * seat_data[:available_ratio]).to_i
@@ -1555,23 +1588,29 @@ additional_trains.find_each do |train|
   is_night_train = night_train_numbers.include?(train.train_number)
   
   if is_night_train
-    # 夜间火车：硬卧、软卧、无座
+    # 夜间火车：硬座、硬卧、软卧、无座
     seat_types = [
       { 
+        seat_type: 'hard_seat', 
+        price: train.price_second_class,  # 硬座价格 = price_second_class
+        total: rand(300..500),
+        available_ratio: rand(0.3..0.9)
+      },
+      { 
         seat_type: 'hard_sleeper',
-        price: train.price_second_class,
+        price: train.price_first_class,  # 硬卧价格 = price_first_class（比硬座贵）
         total: rand(150..250),
         available_ratio: rand(0.3..0.9)
       },
       { 
         seat_type: 'soft_sleeper',
-        price: train.price_first_class,
+        price: train.price_business_class,  # 软卧价格 = price_business_class（最贵）
         total: rand(50..100),
         available_ratio: rand(0.3..0.9)
       },
       { 
         seat_type: 'no_seat', 
-        price: (train.price_second_class * 0.5).round(1), 
+        price: train.price_second_class,  # 无座价格 = 硬座价格
         total: 999,
         available_ratio: 0.99
       }
@@ -1599,7 +1638,7 @@ additional_trains.find_each do |train|
       },
       { 
         seat_type: 'no_seat', 
-        price: (train.price_second_class * 0.5).round(1), 
+        price: train.price_second_class,  # 无座价格 = 二等座价格
         total: 999,
         available_ratio: 0.99
       }
@@ -1873,7 +1912,7 @@ extended_trains.find_each do |train|
     },
     { 
       seat_type: 'no_seat', 
-      price: (train.price_second_class * 0.5).round(1), 
+      price: train.price_second_class,  # 无座价格 = 二等座价格
       total: 999,
       available_ratio: 0.99
     }

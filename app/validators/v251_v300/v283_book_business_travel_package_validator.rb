@@ -180,9 +180,9 @@ module V251V300
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       zhangsan = user.passengers.find_by!(name: '张三', data_version: 0)
       
-      # 预订航班（选择指定日期的航班）
+      # 预订航班（选择指定航班号 MU5304）
       flight = Flight
-        .where(departure_city: @departure_city, destination_city: @destination_city, data_version: 0)
+        .where(departure_city: @departure_city, destination_city: @destination_city, flight_number: 'MU5304', data_version: 0)
         .by_date(@departure_date)
         .first!
       booking = Booking.create!(
