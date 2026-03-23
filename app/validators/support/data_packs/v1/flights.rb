@@ -2065,8 +2065,8 @@ puts "  ✓ 创建了 #{widebody_flights.size} 个宽体机航班"
 puts "\n=== 添加商务舱/头等舱航班 ==="
 
 premium_flights_data = []
-premium_start_date = Date.today
-premium_end_date = premium_start_date + 15.days
+premium_start_date = Date.current
+premium_end_date = premium_start_date + 16.days
 
 puts "  商务舱/头等舱航班日期范围: #{premium_start_date} 至 #{premium_end_date} (共16天)"
 

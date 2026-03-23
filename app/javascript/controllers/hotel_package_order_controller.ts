@@ -28,7 +28,18 @@ export default class extends Controller<HTMLElement> {
     "checkOutDateInput",
     "selectedHotelName",
     "selectedPackageName",
-    "selectedNightCount"
+    "selectedNightCount",
+    "guestSelectorModal",
+    "guestSelectorDisplay",
+    "roomsCount",
+    "adultsCount",
+    "childrenCount",
+    "roomCountInput",
+    "adultCountInput",
+    "childCountInput",
+    "confirmRoomCount",
+    "confirmAdultCount",
+    "confirmChildCount"
   ]
 
   declare readonly hasQuantityInputTarget: boolean
@@ -74,6 +85,28 @@ export default class extends Controller<HTMLElement> {
   declare readonly selectedPackageNameTarget?: HTMLElement
   declare readonly hasSelectedNightCountTarget: boolean
   declare readonly selectedNightCountTarget?: HTMLElement
+  declare readonly hasGuestSelectorModalTarget: boolean
+  declare readonly guestSelectorModalTarget?: HTMLElement
+  declare readonly hasGuestSelectorDisplayTarget: boolean
+  declare readonly guestSelectorDisplayTarget?: HTMLElement
+  declare readonly hasRoomsCountTarget: boolean
+  declare readonly roomsCountTarget?: HTMLElement
+  declare readonly hasAdultsCountTarget: boolean
+  declare readonly adultsCountTarget?: HTMLElement
+  declare readonly hasChildrenCountTarget: boolean
+  declare readonly childrenCountTarget?: HTMLElement
+  declare readonly hasRoomCountInputTarget: boolean
+  declare readonly roomCountInputTarget?: HTMLInputElement
+  declare readonly hasAdultCountInputTarget: boolean
+  declare readonly adultCountInputTarget?: HTMLInputElement
+  declare readonly hasChildCountInputTarget: boolean
+  declare readonly childCountInputTarget?: HTMLInputElement
+  declare readonly hasConfirmRoomCountTarget: boolean
+  declare readonly confirmRoomCountTarget?: HTMLElement
+  declare readonly hasConfirmAdultCountTarget: boolean
+  declare readonly confirmAdultCountTarget?: HTMLElement
+  declare readonly hasConfirmChildCountTarget: boolean
+  declare readonly confirmChildCountTarget?: HTMLElement
 
   private selectedHotelId: string | null = null
   private selectedHotelName: string | null = null
@@ -635,6 +668,115 @@ export default class extends Controller<HTMLElement> {
       console.warn('No passenger_id found, will use default on next page')
     }
     
+    // Add room and guest counts to redirect URL
+    const roomCount = this.hasRoomCountInputTarget ? (this.roomCountInputTarget!.value || '1') : '1'
+    const adultCount = this.hasAdultCountInputTarget ? (this.adultCountInputTarget!.value || '1') : '1'
+    const childCount = this.hasChildCountInputTarget ? (this.childCountInputTarget!.value || '0') : '0'
+    
+    redirectUrl += `&room_count=${roomCount}&adult_count=${adultCount}&child_count=${childCount}`
+    
     window.location.href = redirectUrl
+  }
+
+  // Guest selector methods
+  openGuestSelector(): void {
+    if (this.hasGuestSelectorModalTarget) {
+      this.guestSelectorModalTarget!.classList.remove('hidden')
+    }
+  }
+
+  closeGuestSelector(): void {
+    if (this.hasGuestSelectorModalTarget) {
+      this.guestSelectorModalTarget!.classList.add('hidden')
+    }
+  }
+
+  incrementRooms(): void {
+    if (this.hasRoomsCountTarget && this.hasRoomCountInputTarget) {
+      const current = parseInt(this.roomsCountTarget!.textContent || '1')
+      const newValue = current + 1
+      this.roomsCountTarget!.textContent = newValue.toString()
+      this.roomCountInputTarget!.value = newValue.toString()
+    }
+  }
+
+  decrementRooms(): void {
+    if (this.hasRoomsCountTarget && this.hasRoomCountInputTarget) {
+      const current = parseInt(this.roomsCountTarget!.textContent || '1')
+      if (current > 1) {
+        const newValue = current - 1
+        this.roomsCountTarget!.textContent = newValue.toString()
+        this.roomCountInputTarget!.value = newValue.toString()
+      }
+    }
+  }
+
+  incrementAdults(): void {
+    if (this.hasAdultsCountTarget && this.hasAdultCountInputTarget) {
+      const current = parseInt(this.adultsCountTarget!.textContent || '1')
+      const newValue = current + 1
+      this.adultsCountTarget!.textContent = newValue.toString()
+      this.adultCountInputTarget!.value = newValue.toString()
+    }
+  }
+
+  decrementAdults(): void {
+    if (this.hasAdultsCountTarget && this.hasAdultCountInputTarget) {
+      const current = parseInt(this.adultsCountTarget!.textContent || '1')
+      if (current > 1) {
+        const newValue = current - 1
+        this.adultsCountTarget!.textContent = newValue.toString()
+        this.adultCountInputTarget!.value = newValue.toString()
+      }
+    }
+  }
+
+  incrementChildren(): void {
+    if (this.hasChildrenCountTarget && this.hasChildCountInputTarget) {
+      const current = parseInt(this.childrenCountTarget!.textContent || '0')
+      const newValue = current + 1
+      this.childrenCountTarget!.textContent = newValue.toString()
+      this.childCountInputTarget!.value = newValue.toString()
+    }
+  }
+
+  decrementChildren(): void {
+    if (this.hasChildrenCountTarget && this.hasChildCountInputTarget) {
+      const current = parseInt(this.childrenCountTarget!.textContent || '0')
+      if (current > 0) {
+        const newValue = current - 1
+        this.childrenCountTarget!.textContent = newValue.toString()
+        this.childCountInputTarget!.value = newValue.toString()
+      }
+    }
+  }
+
+  resetGuestCounts(): void {
+    // Reset to defaults: 1 room, 1 adult, 0 children
+    if (this.hasRoomsCountTarget && this.hasRoomCountInputTarget) {
+      this.roomsCountTarget!.textContent = '1'
+      this.roomCountInputTarget!.value = '1'
+    }
+    if (this.hasAdultsCountTarget && this.hasAdultCountInputTarget) {
+      this.adultsCountTarget!.textContent = '1'
+      this.adultCountInputTarget!.value = '1'
+    }
+    if (this.hasChildrenCountTarget && this.hasChildCountInputTarget) {
+      this.childrenCountTarget!.textContent = '0'
+      this.childCountInputTarget!.value = '0'
+    }
+  }
+
+  confirmGuestSelection(): void {
+    // Update display text
+    if (this.hasGuestSelectorDisplayTarget && this.hasRoomsCountTarget && this.hasAdultsCountTarget && this.hasChildrenCountTarget) {
+      const rooms = this.roomsCountTarget!.textContent || '1'
+      const adults = this.adultsCountTarget!.textContent || '1'
+      const children = this.childrenCountTarget!.textContent || '0'
+      this.guestSelectorDisplayTarget!.textContent = `${rooms}间 · ${adults}成人 · ${children}儿童`
+    }
+    
+    // Close modal
+    this.closeGuestSelector()
   }
 }

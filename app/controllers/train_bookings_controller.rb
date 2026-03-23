@@ -18,7 +18,8 @@ class TrainBookingsController < ApplicationController
     when 'second_class' then @train.price_second_class
     when 'first_class' then @train.price_first_class
     when 'business_class' then @train.price_business_class
-    when 'no_seat' then @train.price_second_class * 0.5
+    when 'hard_seat' then @train.price_second_class  # 硬座价格 = 二等座价格（普通列车）
+    when 'no_seat' then @train.price_second_class  # 无座价格 = 二等座价格（或硬座价格）
     else @train.price_second_class
     end
     
@@ -40,6 +41,7 @@ class TrainBookingsController < ApplicationController
     when 'first_class' then '一等座'
     when 'business_class' then '商务座'
     when 'no_seat' then '无座'
+    when 'hard_seat' then '硬座'
     when 'hard_sleeper' then '硬卧'
     when 'soft_sleeper' then '软卧'
     else '二等座'
@@ -170,6 +172,9 @@ class TrainBookingsController < ApplicationController
     when 'first_class' then '一等座'
     when 'business_class' then '商务座'
     when 'no_seat' then '无座'
+    when 'hard_seat' then '硬座'
+    when 'hard_sleeper' then '硬卧'
+    when 'soft_sleeper' then '软卧'
     else '二等座'
     end
     
@@ -292,7 +297,9 @@ class TrainBookingsController < ApplicationController
     when 'business_class'
       train.price_business_class
     when 'no_seat'
-      train.price_second_class * 0.5
+      train.price_second_class  # 无座价格 = 二等座价格（或硬座价格）
+    when 'hard_seat'
+      train.price_second_class  # 硬座价格 = 二等座价格（普通列车）
     when 'hard_sleeper'
       # 查找硬卧座位价格
       seat = train.train_seats.find_by(seat_type: 'hard_sleeper')

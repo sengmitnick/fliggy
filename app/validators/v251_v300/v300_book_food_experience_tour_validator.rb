@@ -2,24 +2,46 @@
 
 require_relative '../base_validator'
 
-# 验证用例300: 给李四预订成都美食体验游
+# 验证用例300: 给李四预订8天后成都跟团游（至少3天行程，1人）
 #
 # 任务描述:
-#   李四想预订成都的美食体验游，品尝地道美食、参观特色餐厅和市场
+#   李四想8天后去成都旅游。
+#   Agent需要预订一个至少3天的成都跟团游产品。
 #
-# 评分标准:
-#   - 创建跟团游预订(美食主题) (35%)
-#   - 选择美食目的地(成都/广州等) (25%)
-#   - 游客信息正确（李四） (15%)
-#   - 出行日期正确 (10%)
-#   - 联系人信息正确 (10%)
-#   - 行程时长≥3天 (5%)
+# 业务流程（6个关键步骤）：
+#   1. 明确出行人信息（李四，1成人）
+#   2. 搜索成都的跟团游产品
+#   3. 筛选至少3天行程的跟团游（duration >= 3）
+#   4. 创建跟团游预订（8天后出发）
+#   5. 添加游客信息（李四，包含身份证号）
+#   6. 设置联系人信息（李四）
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解成都作为旅游目的地
+#   2. 需要筛选至少3天行程的跟团游产品（duration >= 3）
+#   3. 需要创建跟团游预订并关联游客信息
+#   4. 需要验证游客信息完整性（姓名、身份证号匹配）
+#   5. 需要验证出行日期正确性（8天后）
+#   6. 需要使用真实存在的跟团游产品（data_version: 0）
+#   ❌ 不能选择行程过短的产品（必须≥3天）
+#
+# 评分标准（6项，总计100分）：
+#   1. 创建了跟团游预订 (35分)
+#   2. 目的地正确（成都） (25分) - 核心业务逻辑
+#   3. 游客信息正确（李四） (15分)
+#   4. 出行日期正确（8天后） (10分)
+#   5. 联系人信息正确（李四） (10分)
+#   6. 行程时长≥3天 (5分)
+#
+# 使用方法:
+#   rake validator:simulate_single[v300]
+#   或访问 http://localhost:<PORT>/api/tasks 获取任务列表
 module V251V300
   class V300BookFoodExperienceTourValidator < BaseValidator
     self.validator_id = 'v300_book_food_experience_tour_validator'
     self.task_id = 'a780cbb3-8b82-49be-bbea-18baaa72e179'
-    self.title = '给李四预订成都美食体验游（8天后，3天）'
-    self.description = '李四想订成都的美食体验游，品尝地道美食、参观特色餐厅和市场'
+    self.title = '给李四预订8天后成都跟团游（至少3天行程，1人）'
+    self.description = '李四想8天后去成都旅游，需要至少3天行程'
     self.timeout_seconds = 300
     
     def prepare
@@ -38,15 +60,15 @@ module V251V300
       @expected_contact_phone = @lisi.phone
       
       {
-        task: "请预订#{@destination}的美食体验游，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，需要品尝地道美食、参观特色餐厅和市场，行程至少3天",
+        task: "请预订#{@destination}的跟团游，#{@travel_date.strftime('%Y年%-m月%-d日')}出发，行程至少3天",
         destination: @destination,
         travel_date: @travel_date.to_s,
-        hint: "选择美食主题的旅游产品，行程至少3天"
+        hint: "选择#{@destination}的跟团游产品，行程至少3天"
       }
     end
     
     def verify
-      add_assertion "创建了跟团游预订(美食主题)", weight: 35 do
+      add_assertion "创建了跟团游预订", weight: 35 do
         @tour_booking = TourGroupBooking
           .joins(:tour_group_product)
           .where(tour_group_products: { destination: @destination })
@@ -58,13 +80,10 @@ module V251V300
       
       return unless @tour_booking
       
-      add_assertion "选择美食目的地", weight: 25 do
+      add_assertion "目的地正确（成都）", weight: 25 do
         tour = @tour_booking.tour_group_product
-        # 美食之都：成都、广州、重庆等
-        food_cities = ['成都', '广州', '重庆', '西安', '长沙']
-        is_food_destination = food_cities.include?(@destination)
-        expect(is_food_destination).to be(true),
-          "未选择美食目的地。当前: #{@destination}"
+        expect(tour.destination).to eq(@destination),
+          "目的地错误。期望: #{@destination}, 实际: #{tour.destination}"
       end
       
       add_assertion "游客信息正确（李四）", weight: 15 do
@@ -101,7 +120,7 @@ module V251V300
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
       
-      # 选择美食主题跟团游(至少3天)
+      # 选择成都跟团游(至少3天)
       tour_product = TourGroupProduct
         .where(destination: @destination, data_version: 0)
         .where("duration >= ?", 3)
@@ -144,7 +163,8 @@ module V251V300
         travel_date: @travel_date&.to_s,
         visit_date: @visit_date&.to_s,
         expected_contact_name: @expected_contact_name,
-        expected_contact_phone: @expected_contact_phone
+        expected_contact_phone: @expected_contact_phone,
+        lisi_id_number: @lisi&.id_number
       }
     end
     
@@ -154,6 +174,15 @@ module V251V300
       @visit_date = Date.parse(data['visit_date']) if data['visit_date']
       @expected_contact_name = data['expected_contact_name']
       @expected_contact_phone = data['expected_contact_phone']
+      
+      # Restore @lisi as a simple object with id_number
+      if data['lisi_id_number']
+        @lisi = OpenStruct.new(
+          name: @expected_contact_name,
+          phone: @expected_contact_phone,
+          id_number: data['lisi_id_number']
+        )
+      end
     end
   end
 end

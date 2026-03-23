@@ -11,6 +11,9 @@ class HotelPackageOrder < ApplicationRecord
   validates :contact_name, presence: true
   validates :contact_phone, presence: true
   validates :check_in_date, presence: true, if: -> { booking_type == 'instant' }
+  validates :room_count, presence: true, numericality: { greater_than: 0, only_integer: true }
+  validates :adult_count, presence: true, numericality: { greater_than: 0, only_integer: true }
+  validates :child_count, numericality: { greater_than_or_equal_to: 0, only_integer: true }
 
   before_create :generate_order_number
   before_create :set_purchased_at

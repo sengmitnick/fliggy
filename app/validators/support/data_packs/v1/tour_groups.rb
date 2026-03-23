@@ -53,26 +53,26 @@ destinations_config = [
   { name: '海南', cities: ['三亚', '海口'], attractions: ['蜈支洲岛', '亚龙湾', '天涯海角', '南山寺'], departure_cities: ['三亚', '海口'] },
   { name: '广西', cities: ['桂林', '阳朔', '北海'], attractions: ['漓江', '象鼻山', '西街', '银子岩'], departure_cities: ['桂林', '南宁'] },
   { name: '浙江', cities: ['杭州', '千岛湖', '舟山'], attractions: ['西湖', '千岛湖', '普陀山', '乌镇'], departure_cities: ['杭州', '上海', '宁波'] },
-  { name: '上海', departure_cities: ['上海', '杭州', '南京', '苏州'] },
-  { name: '北京', departure_cities: ['北京', '天津', '石家庄', '太原'] },
-  { name: '杭州', departure_cities: ['杭州', '上海', '宁波', '温州'] },
-  { name: '广州', departure_cities: ['广州', '深圳', '珠海', '佛山'] },
-  { name: '成都', departure_cities: ['成都', '重庆', '绵阳', '乐山'] },
-  { name: '深圳', departure_cities: ['深圳', '广州', '珠海', '香港'] },
-  { name: '西安', departure_cities: ['西安', '咸阳', '宝鸡', '渭南'] },
-  { name: '三亚', departure_cities: ['三亚', '海口', '广州', '深圳'] },
-  { name: '南京', departure_cities: ['南京', '上海', '杭州', '苏州'] },
-  { name: '苏州', departure_cities: ['苏州', '上海', '杭州', '南京'] },
-  { name: '厦门', departure_cities: ['厦门', '福州', '泉州', '广州'] },
-  { name: '重庆', departure_cities: ['重庆', '成都', '贵阳', '西安'] },
-  { name: '昆明', departure_cities: ['昆明', '成都', '重庆', '贵阳'] },
-  { name: '青岛', departure_cities: ['青岛', '济南', '烟台', '威海'] },
-  { name: '长沙', departure_cities: ['长沙', '武汉', '广州', '南昌'] },
-  { name: '武汉', departure_cities: ['武汉', '长沙', '郑州', '南昌'] },
-  { name: '南昌', departure_cities: ['南昌', '长沙', '武汉', '福州'] },
-  { name: '贵阳', departure_cities: ['贵阳', '昆明', '成都', '重庆'] },
-  { name: '兰州', departure_cities: ['兰州', '西安', '西宁', '银川'] },
-  { name: '西宁', departure_cities: ['西宁', '兰州', '西安', '银川'] },
+  { name: '上海', attractions: ['外滩', '东方明珠', '迪士尼', '南京路'], departure_cities: ['上海', '杭州', '南京', '苏州'] },
+  { name: '北京', attractions: ['故宫', '长城', '颐和园', '天坛'], departure_cities: ['北京', '天津', '石家庄', '太原'] },
+  { name: '杭州', attractions: ['西湖', '灵隐寺', '千岛湖', '西溪湿地'], departure_cities: ['杭州', '上海', '宁波', '温州'] },
+  { name: '广州', attractions: ['广州塔', '长隆', '陈家祠', '白云山'], departure_cities: ['广州', '深圳', '珠海', '佛山'] },
+  { name: '成都', attractions: ['大熊猫基地', '宽窄巷子', '锦里', '都江堰'], departure_cities: ['成都', '重庆', '绵阳', '乐山'] },
+  { name: '深圳', attractions: ['世界之窗', '欢乐谷', '东部华侨城', '大梅沙'], departure_cities: ['深圳', '广州', '珠海', '香港'] },
+  { name: '西安', attractions: ['兵马俑', '大雁塔', '华清池', '钟鼓楼'], departure_cities: ['西安', '咸阳', '宝鸡', '渭南'] },
+  { name: '三亚', attractions: ['亚龙湾', '蜈支洲岛', '天涯海角', '南山寺'], departure_cities: ['三亚', '海口', '广州', '深圳'] },
+  { name: '南京', attractions: ['中山陵', '夫子庙', '总统府', '玄武湖'], departure_cities: ['南京', '上海', '杭州', '苏州'] },
+  { name: '苏州', attractions: ['拙政园', '虎丘', '周庄', '寒山寺'], departure_cities: ['苏州', '上海', '杭州', '南京'] },
+  { name: '厦门', attractions: ['鼓浪屿', '环岛路', '南普陀寺', '曾厝垵'], departure_cities: ['厦门', '福州', '泉州', '广州'] },
+  { name: '重庆', attractions: ['洪崖洞', '磁器口', '解放碑', '武隆'], departure_cities: ['重庆', '成都', '贵阳', '西安'] },
+  { name: '昆明', attractions: ['石林', '滇池', '翠湖', '西山'], departure_cities: ['昆明', '成都', '重庆', '贵阳'] },
+  { name: '青岛', attractions: ['栈桥', '崂山', '八大关', '啤酒博物馆'], departure_cities: ['青岛', '济南', '烟台', '威海'] },
+  { name: '长沙', attractions: ['橘子洲', '岳麓山', '马王堆', '湖南博物馆'], departure_cities: ['长沙', '武汉', '广州', '南昌'] },
+  { name: '武汉', attractions: ['黄鹤楼', '东湖', '武汉长江大桥', '户部巷'], departure_cities: ['武汉', '长沙', '郑州', '南昌'] },
+  { name: '南昌', attractions: ['滕王阁', '秋水广场', '八一广场', '梅岭'], departure_cities: ['南昌', '长沙', '武汉', '福州'] },
+  { name: '贵阳', attractions: ['黄果树瀑布', '青岩古镇', '花溪', '甲秀楼'], departure_cities: ['贵阳', '昆明', '成都', '重庆'] },
+  { name: '兰州', attractions: ['中山桥', '白塔山', '黄河母亲', '五泉山'], departure_cities: ['兰州', '西安', '西宁', '银川'] },
+  { name: '西宁', attractions: ['塔尔寺', '青海湖', '茶卡盐湖', '日月山'], departure_cities: ['西宁', '兰州', '西安', '银川'] },
   
   # 新增热门目的地
   { name: '张家界', cities: ['张家界', '武陵源', '天门山'], attractions: ['张家界国家森林公园', '天门山', '黄龙洞', '凤凰古城'], departure_cities: ['长沙', '张家界', '武汉', '广州'] },
@@ -96,7 +96,7 @@ destinations_config = [
 
 # ==================== 旅游类型配置 ====================
 tour_types = [
-  { category: 'free_travel', label: '一日游', travel_type: '自由出行', durations: [1], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'] },
+  { category: 'free_travel', label: '一日游', travel_type: '自由出行', durations: [1, 2, 3], weight: 30, features: ['上门接送', '含午餐', '含门票', '纯玩无购物', '当天往返'] },
   { category: 'group_tour', label: '精品小团', travel_type: '跟团游', durations: [2, 3, 4, 5], weight: 40, group_sizes: [4, 6, 8, 10], features: ['含酒店', '含餐食', '含门票', '纯玩团', '无购物'] },
   { category: 'private_group', label: '多日游', travel_type: '独立成团', durations: [4, 5, 6, 7, 8], weight: 30, features: ['舒适酒店', '全程用餐', '包含门票', '独立成团', '深度游览'] }
 ]
@@ -158,7 +158,16 @@ destinations_config.each do |dest_config|
           "#{duration}天#{nights}晚 #{group_text}#{tour_type[:features].sample(2).join('·')}"
         end
         
-        title = "【#{tour_type[:label]}】#{destination}#{selected_attractions.join('+')} #{title_suffix}"
+        # 当departure_city和destination相同时，标题中只显示一次城市名
+        # 例如：成都出发去成都 → 只显示"成都"
+        title_prefix = if departure_city == destination
+          puts "⚠️  DEBUG: Same city detected: #{departure_city} == #{destination}" if destination == '三亚' || destination == '成都'
+          destination  # 只显示一次
+        else
+          "#{departure_city}#{destination}"  # 显示"北京上海"这样的格式
+        end
+        
+        title = "【#{tour_type[:label]}】#{title_prefix}#{selected_attractions.join('+')} #{title_suffix}"
         title = title[0..80] if title.length > 80
         
         # 生成副标题
@@ -166,7 +175,7 @@ destinations_config.each do |dest_config|
         
         # Badge
         badge = if tour_type[:category] == 'free_travel'
-          '一日游'
+          duration == 1 ? '一日游' : "自由行·#{duration}天#{nights}晚"
         elsif tour_type[:category] == 'group_tour'
           "多日游·#{tour_type[:group_sizes].sample}人团"
         else
@@ -1050,18 +1059,18 @@ family_tour_products_data = []
   
   selected_departure = departure_cities.sample
   
-  # 亲子主题景点
+  # 亲子主题景点（已去除城市名前缀，避免标题重复）
   attractions = case destination
-  when '三亚' then ['亚龙湾', '蜜月湾', '蒸号湾', '三亚亚龙湾热带天堂森林公园', '三亚海洋馆']
-  when '杭州' then ['杭州动物园', '杭州植物园', '西溪湿地', '千岛湖', '乌镇']
-  when '北京' then ['北京动物园', '北京欢乐谷', '科技馆', '颐和园', '故宫']
-  when '上海' then ['上海迪士尼', '上海海洋水族馆', '上海科技馆', '东方明珠', '世纪公园']
-  when '成都' then ['成都大熊猫繁育基地', '成都海昌极地海洋公园', '成都动物园', '锦里', '宽窄巷']
-  when '广州' then ['长隆欢乐世界', '广州长隆野生动物世界', '广州海洋馆', '广州科学中心', '广州塔']
-  when '深圳' then ['深圳欢乐谷', '世界之窗', '深圳野生动物园', '小梅沙海滨公园', '海上世界']
-  when '厦门' then ['厦门科技馆', '厦门海底世界', '胡里山炮台', '曾厝垵', '鼓浪屿']
-  when '大连' then ['大连老虎滩海洋公园', '大连森林动物园', '星海广场', '金石滩', '大连发现王国']
-  when '青岛' then ['青岛海洋公园', '青岛野生动物世界', '崂木老人村', '金沙滩', '青岛啤酒博物馆']
+  when '三亚' then ['亚龙湾', '蜜月湾', '蒸号湾', '亚龙湾热带天堂森林公园', '海洋馆']
+  when '杭州' then ['动物园', '植物园', '西溪湿地', '千岛湖', '乌镇']
+  when '北京' then ['动物园', '欢乐谷', '科技馆', '颐和园', '故宫']
+  when '上海' then ['迪士尼', '海洋水族馆', '科技馆', '东方明珠', '世纪公园']
+  when '成都' then ['大熊猫繁育基地', '海昌极地海洋公园', '动物园', '锦里', '宽窄巷']
+  when '广州' then ['长隆欢乐世界', '长隆野生动物世界', '海洋馆', '科学中心', '广州塔']
+  when '深圳' then ['欢乐谷', '世界之窗', '野生动物园', '小梅沙海滨公园', '海上世界']
+  when '厦门' then ['科技馆', '海底世界', '胡里山炮台', '曾厝垵', '鼓浪屿']
+  when '大连' then ['老虎滩海洋公园', '森林动物园', '星海广场', '金石滩', '发现王国']
+  when '青岛' then ['海洋公园', '野生动物世界', '崂木老人村', '金沙滩', '啤酒博物馆']
   else [destination]
   end
   
@@ -1080,7 +1089,21 @@ family_tour_products_data = []
   original_price = (base_price * rand(1.2..1.4)).to_i
   group_size = [4, 6, 8].sample
   
-  title = "【精品小团】#{destination}#{selected_attractions.first(2).join('+')} #{duration}天#{nights}晚 #{group_size}人团 亲子游·家庭游·含酒店·含餐食"
+  # DEBUG: Print variables before comparison
+  if destination == '三亚' || destination == '成都'
+    puts "⚠️  DEBUG (Family PRE-CHECK): destination=#{destination.inspect}, selected_departure=#{selected_departure.inspect}, equal?=#{selected_departure == destination}"
+  end
+  
+  # 当departure_city和destination相同时，标题中只显示一次城市名
+  title_prefix = if selected_departure == destination
+    puts "⚠️  DEBUG (Family): Same city detected: #{selected_departure} == #{destination}, title_prefix=#{destination}" if destination == '三亚' || destination == '成都'
+    destination  # 只显示一次
+  else
+    puts "⚠️  DEBUG (Family): Different cities: #{selected_departure} != #{destination}, title_prefix=#{selected_departure}#{destination}" if destination == '三亚' || destination == '成都'
+    "#{selected_departure}#{destination}"  # 显示"北京上海"这样的格式
+  end
+  
+  title = "【精品小团】#{title_prefix}#{selected_attractions.first(2).join('+')} #{duration}天#{nights}晚 #{group_size}人团 亲子游·家庭游·含酒店·含餐食"
   subtitle = "亲子游·#{selected_attractions.first}·适合儿童"
   
   family_tour_products_data << {

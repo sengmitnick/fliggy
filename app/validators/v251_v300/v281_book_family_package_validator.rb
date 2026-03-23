@@ -2,35 +2,54 @@
 
 require_relative '../base_validator'
 
-# V281: 给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）
+# V281: 给张三、王芳和小明（9岁）预订7天后三亚亲子跟团游套餐（2大1小）
 #
 # 任务描述:
-#   用户需要为张三一家预订三亚亲子旅游服务，包含：
-#   1) 跟团游订单（TourGroupBooking，三亚目的地，包含亲子标签的产品）
-#   2) 人数配置（2大1小：张三、王芳、小明）
-#   3) 游客信息（3人：张三、王芳、小明，含年龄、身份证号）
-#   4) 联系人信息（成人之一：张三或王芳）
-#   确保目的地为三亚、产品包含亲子元素、人数配置正确、游客信息完整、联系人为成人
+#   张三一家（张三、王芳和9岁小明）计划7天后去三亚旅游，需要预订亲子跟团游套餐。
+#   要求选择三亚目的地的跟团游产品，产品需包含亲子元素（标题或标签含"亲子"关键词）。
+#   人数配置为2大1小（张三、王芳为成人，小明为儿童），联系人选择成人之一。
+#   Agent 需要在符合条件的产品中，选择合适的亲子跟团游套餐，并填写完整的游客信息和联系人信息完成预订。
 #
-# 评分标准:
-#   - 创建了跟团游预订（三亚） (20%)
-#   - 人数配置正确（2大1小：张三、王芳、小明） (15%)
-#   - 游客信息正确（张三、王芳、小明） (15%)
-#   - 联系人信息正确（张三或王芳，成人） (15%)
-#   - 行程适合亲子家庭（标题或标签包含"亲子"关键词） (20%)
-#   - 订单状态正确（pending或confirmed） (15%)
+# 业务流程（7个关键步骤）：
+#   1. 搜索三亚目的地的跟团游产品
+#   2. 筛选产品标题或标签包含"亲子"关键词的产品
+#   3. 选择合适的套餐（包含成人价格和儿童价格）
+#   4. 配置人数（2成人+1儿童：张三、王芳、小明）
+#   5. 填写出行日期（7天后）
+#   6. 填写游客信息（3人：张三、王芳、小明，含姓名、身份证号、年龄等）
+#   7. 填写联系人信息（成人之一：张三或王芳）并提交订单
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解产品筛选：三亚目的地，产品标题或标签包含"亲子"关键词
+#   2. 需要理解人数配置：2大1小配置（成人和儿童价格不同）
+#   3. 需要理解出行日期计算：7天后（Date.current + 7.days）
+#   4. 需要理解游客信息：创建3条 BookingTraveler 记录（张三、王芳为成人，小明为儿童）
+#   5. 需要理解联系人选择：必须从成人中选择（张三或王芳），电话号码需匹配
+#   6. 需要理解订单关联：订单需正确关联产品、套餐、游客信息
+#   ❌ 不能随机选择：必须精确匹配目的地、亲子关键词、人数配置、出行日期
+#
+# 评分标准（7项，总计100分）：
+#   - 创建了跟团游预订（三亚目的地）（20分）
+#   - 人数配置正确（2大1小：张三、王芳、小明）（15分）
+#   - 出行日期正确（7天后）（10分）
+#   - 游客信息正确（张三、王芳、小明）（15分）
+#   - 联系人信息正确（张三或王芳，成人）（10分）
+#   - 行程适合亲子家庭（标题或标签包含"亲子"关键词）（15分）
+#   - 订单状态正确（pending或confirmed）（15分）
 module V251V300
   class V281BookFamilyPackageValidator < BaseValidator
     self.validator_id = 'v281_book_family_package_validator'
     self.task_id = '97f3e67d-07f1-4e31-b1bc-0f6b87f0d09f'
-    self.title = '给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）'
-    self.description = '给张三、王芳和小明（9岁）预订三亚亲子跟团游套餐（2大1小）'
+    self.title = '给张三、王芳和小明（9岁）预订7天后三亚亲子跟团游套餐（2大1小）'
+    self.description = '给张三、王芳和小明（9岁）预订7天后三亚亲子跟团游套餐（2大1小）'
     self.timeout_seconds = 300
     
     def prepare
       @adult_count = 2
       @child_count = 1
       @keyword = '亲子'
+      @destination_name = '三亚'
+      @travel_date = Date.current + 7.days
       
       # 查找包含亲子元素的跟团游产品（必须存在）
       @product = TourGroupProduct.where('tags LIKE ?', "%#{@keyword}%")
@@ -61,11 +80,15 @@ module V251V300
       end
       
       {
-        task: "请给张三、王芳和小明（9岁）预订适合亲子游的跟团游套餐「#{@product.title}」，包含适合儿童的活动和设施",
+        task: "请给张三、王芳和小明（9岁）预订#{@travel_date.strftime('%Y年%m月%d日')}的#{@destination_name}适合亲子游的跟团游套餐「#{@product.title}」，包含适合儿童的活动和设施",
         adult_count: @adult_count,
         child_count: @child_count,
+        destination: @destination_name,
+        travel_date: @travel_date.strftime('%Y-%m-%d'),
         product_title: @product.title,
-        hint: "选择适合家庭出游的跟团游产品，2大1小"
+        hint: "1. 在跟团游搜索页选择三亚目的地\n2. 浏览并选择包含'亲子'关键词的产品\n3. 选择合适的套餐\n4. 配置人数（2成人+1儿童）\n5. 填写出行日期（7天后）\n6. 填写游客信息（张三、王芳、小明）并提交订单",
+        product_available: @product.present?,
+        package_available: @package.present?
       }
     end
     
@@ -87,6 +110,14 @@ module V251V300
           "儿童数量错误。期望: #{@child_count}（小明）, 实际: #{@booking.child_count}"
       end
       
+      add_assertion "出行日期正确（7天后#{@travel_date.strftime('%Y-%m-%d')}）", weight: 10 do
+        expect(@booking.travel_date).to be_present,
+          "缺少出行日期"
+        
+        expect(@booking.travel_date).to eq(@travel_date),
+          "出行日期错误。期望: #{@travel_date.strftime('%Y-%m-%d')}（7天后），实际: #{@booking.travel_date}"
+      end
+      
       add_assertion "游客信息正确（张三、王芳、小明）", weight: 15 do
         travelers = @booking.booking_travelers
         expect(travelers).not_to be_empty,
@@ -97,7 +128,7 @@ module V251V300
           "游客信息错误。期望: #{@expected_traveler_names.sort.join('、')}, 实际: #{actual_names.join('、')}"
       end
       
-      add_assertion "联系人信息正确（张三或王芳）", weight: 15 do
+      add_assertion "联系人信息正确（张三或王芳）", weight: 10 do
         valid_contacts = ['张三', '王芳']
         expect(valid_contacts).to include(@booking.contact_name),
           "联系人姓名错误。期望: 张三或王芳（成人），实际: #{@booking.contact_name}"
@@ -107,7 +138,7 @@ module V251V300
           "联系人电话与姓名不匹配。联系人: #{@booking.contact_name}, 期望电话: #{expected_phone}, 实际电话: #{@booking.contact_phone}"
       end
       
-      add_assertion "行程适合亲子家庭", weight: 20 do
+      add_assertion "行程适合亲子家庭", weight: 15 do
         product = @booking.tour_group_product
         expect(product).not_to be_nil, "订单没有关联产品"
         has_family_tag = product.tags.to_s.include?(@keyword) || product.title.to_s.include?(@keyword)
@@ -142,7 +173,7 @@ module V251V300
         child_count: @child_count,
         contact_name: contact_passenger.name,
         contact_phone: contact_passenger.phone,
-        travel_date: Date.current + 7.days,
+        travel_date: @travel_date,
         total_price: @package.price * @adult_count + @package.child_price * @child_count,
         status: 'confirmed',
         data_version: @data_version
@@ -181,6 +212,8 @@ module V251V300
         adult_count: @adult_count,
         child_count: @child_count,
         keyword: @keyword,
+        destination_name: @destination_name,
+        travel_date: @travel_date&.to_s,
         product_id: @product&.id,
         package_id: @package&.id,
         valid_contact_phones: @valid_contact_phones,
@@ -192,6 +225,8 @@ module V251V300
       @adult_count = data['adult_count']
       @child_count = data['child_count']
       @keyword = data['keyword']
+      @destination_name = data['destination_name']
+      @travel_date = Date.parse(data['travel_date']) if data['travel_date']
       @product = TourGroupProduct.find(data['product_id']) if data['product_id']
       @package = TourPackage.find(data['package_id']) if data['package_id']
       @valid_contact_phones = data['valid_contact_phones']
