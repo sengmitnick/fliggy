@@ -338,11 +338,13 @@
                       距您直线3.4公里 · 近南山(地铁站)
                     </div>
 
-                    <!-- Tags -->
+                    <!-- Hotel Features -->
                     <div class="flex gap-1 flex-wrap mb-2">
-                      <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">每次住宿▁2500积分</span>
-                      <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">健身房</span>
-                      <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;">英语服务</span>
+                      <% if hotel.features.is_a?(Array) && hotel.features.any? %>
+                        <% hotel.features.first(4).each do |feature| %>
+                          <span class="px-2 py-0.5 text-xs rounded" style="background-color: #F5F5F5; color: #666;"><%= feature %></span>
+                        <% end %>
+                      <% end %>
                     </div>
 
                     <!-- Features -->

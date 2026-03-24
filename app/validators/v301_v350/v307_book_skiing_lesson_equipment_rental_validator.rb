@@ -2,15 +2,32 @@
 
 require_relative '../base_validator'
 
-# V307: 刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁
+# 验证用例307: 预订张家口崇礼万龙滑雪场全天票+装备租赁（刘强、陈静，3天后，2人）
 #
 # 任务描述:
-#   用户需要在3天后为2人预订张家口崇礼万龙滑雪场的滑雪服务，包含：
-#   1) 滑雪场全天票订单（TicketOrder，明确要求全天票）
+#   刘强和陈静预订张家口崇礼万龙滑雪场的滑雪服务。
+#   要求：3天后，2人，包含全天票和滑雪装备租赁。
+#   Agent 需要创建两个订单：
+#   1) 滑雪场全天票订单（TicketOrder）
 #   2) 滑雪装备租赁活动订单（ActivityOrder）
-#   确保景点、票型、日期和人数正确
+#   联系人使用刘强或陈静的信息。
 #
-# 评分标准:
+# 业务流程（6个关键步骤）：
+#   1. 搜索张家口崇礼万龙滑雪场
+#   2. 查找全天票产品
+#   3. 查找滑雪装备租赁活动
+#   4. 确定游玩日期（3天后）和人数（2人）
+#   5. 创建全天票订单
+#   6. 创建装备租赁活动订单
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解滑雪场服务组合：门票+装备租赁
+#   2. 需要创建两种不同类型的订单（TicketOrder + ActivityOrder）
+#   3. 需要计算正确的游玩日期（3天后）
+#   4. 需要选择demo用户的乘客（刘强或陈静）作为联系人
+#   5. 需要确保两个订单的日期、人数一致
+#
+# 评分标准（7项，总计100分）：
 #   - 创建了全天票订单 (20%)
 #   - 景点正确（崇礼万龙滑雪场） (10%)
 #   - 票型正确（全天票） (10%)
@@ -22,8 +39,8 @@ module V301V350
   class V307BookSkiingLessonEquipmentRentalValidator < BaseValidator
     self.validator_id = 'v307_book_skiing_lesson_equipment_rental_validator'
     self.task_id = '72e6f61b-18de-4434-a053-2297fd7be1b9'
-    self.title = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁'
-    self.description = '刘强和陈静想3天后去张家口崇礼万龙滑雪场滑雪，需2人，要全天票和装备租赁'
+    self.title = '预订张家口崇礼万龙滑雪场全天票+装备租赁（刘强、陈静，3天后，2人）'
+    self.description = '预订张家口崇礼万龙滑雪场的滑雪服务，刘强和陈静，3天后，2人，要全天票和装备租赁'
     self.timeout_seconds = 300
     
     def prepare
@@ -64,7 +81,7 @@ module V301V350
       raise "未找到#{@attraction_name}的滑雪装备租赁活动" unless @equipment_activity
       
       {
-        task: "请预订#{@city}#{@attraction_name}的滑雪服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含滑雪场全天票和滑雪装备租赁。",
+        task: "请预订#{@city}#{@attraction_name}的滑雪服务（3天后的#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含滑雪场全天票和滑雪装备租赁。",
         requirements: {
           attraction: @attraction_name,
           city: @city,

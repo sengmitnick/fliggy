@@ -2,16 +2,35 @@
 
 require_relative '../base_validator'
 
-# V308: 刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务
+# 验证用例308: 预订三亚蜈支洲岛门票+潜水教学+水下摄影（刘强、陈静，4天后，2人）
 #
 # 任务描述:
-#   用户需要在4天后为2人预订蜈支洲岛的潜水服务，包含：
+#   刘强和陈静预订三亚蜈支洲岛的潜水体验。
+#   要求：4天后，2人，包含景区门票、潜水教学+体验、水下摄影服务。
+#   Agent 需要创建三个订单：
 #   1) 景区门票订单（TicketOrder）
 #   2) 潜水教学+体验活动订单（ActivityOrder）
 #   3) 水下摄影服务订单（ActivityOrder）
-#   确保景点、服务项目、日期和人数正确
+#   联系人使用刘强或陈静的信息。
 #
-# 评分标准:
+# 业务流程（7个关键步骤）：
+#   1. 搜索三亚蜈支洲岛景点
+#   2. 查找成人门票产品
+#   3. 查找潜水教学+体验活动
+#   4. 查找水下摄影服务活动
+#   5. 确定游玩日期（4天后）和人数（2人）
+#   6. 创建三个订单（门票、潜水、摄影）
+#   7. 确保所有订单使用相同的联系人、日期和人数
+#
+# 复杂度分析（6个关键点）：
+#   1. 需要理解潜水体验的服务组合：门票+教学+摄影
+#   2. 需要创建三种不同类型的订单（1个TicketOrder + 2个ActivityOrder）
+#   3. 需要计算正确的游玩日期（4天后）
+#   4. 需要选择demo用户的乘客（刘强或陈静）作为联系人
+#   5. 需要确保三个订单的日期、人数、联系人一致
+#   6. 需要验证每个订单的状态和价格有效性
+#
+# 评分标准（7项，总计100分）：
 #   - 购买了景区门票 (20%)
 #   - 景点正确（蜈支洲岛） (10%)
 #   - 预订了潜水活动（潜水教学+体验） (25%)
@@ -23,8 +42,8 @@ module V301V350
   class V308BookDivingLessonPhotographyValidator < BaseValidator
     self.validator_id = 'v308_book_diving_lesson_photography_validator'
     self.task_id = '9a83baa7-a2f8-4e7d-bb5c-86a23bf7507a'
-    self.title = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
-    self.description = '刘强和陈静想4天后去蜈支洲岛潜水，需2人，要门票、潜水教学+体验和水下摄影服务'
+    self.title = '预订三亚蜈支洲岛门票+潜水教学+水下摄影（刘强、陈静，4天后，2人）'
+    self.description = '预订三亚蜈支洲岛的潜水体验，刘强和陈静，4天后，2人，要景区门票、潜水教学+体验和水下摄影服务'
     self.timeout_seconds = 300
     
     def prepare
@@ -44,19 +63,27 @@ module V301V350
       @visit_date = Date.current + 4.days
       @participant_count = 2
       
+      @city = '三亚'
+      @attraction_name = '蜈支洲岛'
+      
       # 查找蜈支洲岛景点（著名潜水胜地）
-      # 注意：DataVersionable concern 的 default_scope 会自动过滤 data_version
-      @attraction = Attraction.find_by!(name: '蜈支洲岛')
+      @attraction = Attraction.find_by!(name: @attraction_name, city: @city, data_version: 0)
       
       # 查找门票和潜水相关活动
-      @adult_ticket = @attraction.tickets.find_by(ticket_type: 'adult')
-      @diving_activity = @attraction.attraction_activities.find_by(name: '潜水教学+体验')
-      @photography_activity = @attraction.attraction_activities.find_by(name: '水下摄影服务')
+      @adult_ticket = @attraction.tickets.find_by(ticket_type: 'adult', data_version: 0)
+      raise "未找到#{@attraction_name}的成人门票" unless @adult_ticket
+      
+      @diving_activity = @attraction.attraction_activities.find_by(name: '潜水教学+体验', data_version: 0)
+      raise "未找到#{@attraction_name}的潜水教学+体验活动" unless @diving_activity
+      
+      @photography_activity = @attraction.attraction_activities.find_by(name: '水下摄影服务', data_version: 0)
+      raise "未找到#{@attraction_name}的水下摄影服务" unless @photography_activity
       
       {
-        task: "请预订蜈支洲岛的潜水服务（#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含景区门票、潜水教学+体验和水下摄影服务。",
+        task: "请预订#{@city}#{@attraction_name}的潜水体验（4天后的#{@visit_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含景区门票、潜水教学+体验和水下摄影服务。",
         requirements: {
-          attraction: '蜈支洲岛',
+          attraction: @attraction_name,
+          city: @city,
           visit_date: @visit_date,
           participant_count: @participant_count,
           services: ['景区门票', '潜水教学+体验', '水下摄影服务']
@@ -84,9 +111,9 @@ module V301V350
       
       return if @ticket_order.nil?
       
-      add_assertion "景点正确（#{@attraction.name}）", weight: 10 do
-        expect(@ticket_order.ticket.attraction.name).to eq(@attraction.name),
-          "景点错误。期望: #{@attraction.name}，实际: #{@ticket_order.ticket.attraction.name}"
+      add_assertion "景点正确（#{@attraction_name}）", weight: 10 do
+        expect(@ticket_order.ticket.attraction.name).to eq(@attraction_name),
+          "景点错误。期望: #{@attraction_name}，实际: #{@ticket_order.ticket.attraction.name}"
       end
       
       # 断言2: 预订了潜水活动
@@ -99,7 +126,7 @@ module V301V350
           .order(created_at: :asc)
           .to_a
         
-        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction.name}的活动订单"
+        expect(all_activity_orders).not_to be_empty, "未找到#{@attraction_name}的活动订单"
         @diving_order = all_activity_orders.find { |o| o.attraction_activity.name.include?('潜水') }
         expect(@diving_order).not_to be_nil, "未预订潜水活动"
       end
@@ -171,46 +198,40 @@ module V301V350
       contact_person = [@liuqiang, @chenjing].sample
       
       # 1. 创建门票订单（TicketOrder）
-      adult_ticket = @adult_ticket || @attraction.tickets.find_by!(ticket_type: 'adult')
-      
       TicketOrder.create!(
         user: user,
-        ticket: adult_ticket,
+        ticket: @adult_ticket,
         visit_date: @visit_date,
         quantity: @participant_count,
         contact_phone: contact_person.phone,
-        total_price: adult_ticket.current_price * @participant_count,
+        total_price: @adult_ticket.current_price * @participant_count,
         status: 'paid',
         data_version: @data_version
       )
       
       # 2. 创建潜水活动订单（ActivityOrder）
-      diving_activity = @diving_activity
-      
       ActivityOrder.create!(
         user: user,
-        attraction_activity: diving_activity,
+        attraction_activity: @diving_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
         passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
-        total_price: diving_activity.current_price * @participant_count,
+        total_price: @diving_activity.current_price * @participant_count,
         insurance_type: 'premium',
         status: 'paid',
         data_version: @data_version
       )
       
       # 3. 创建摄影服务订单（ActivityOrder）
-      photography_activity = @photography_activity
-      
       ActivityOrder.create!(
         user: user,
-        attraction_activity: photography_activity,
+        attraction_activity: @photography_activity,
         visit_date: @visit_date,
         quantity: @participant_count,
         passenger_name: contact_person.name,
         contact_phone: contact_person.phone,
-        total_price: photography_activity.current_price * @participant_count,
+        total_price: @photography_activity.current_price * @participant_count,
         insurance_type: 'none',
         status: 'paid',
         data_version: @data_version
@@ -223,6 +244,8 @@ module V301V350
       {
         visit_date: @visit_date.to_s,
         participant_count: @participant_count,
+        city: @city,
+        attraction_name: @attraction_name,
         attraction_id: @attraction&.id,
         adult_ticket_id: @adult_ticket&.id,
         diving_activity_id: @diving_activity&.id,
@@ -235,6 +258,8 @@ module V301V350
     def restore_from_state(data)
       @visit_date = Date.parse(data['visit_date'])
       @participant_count = data['participant_count']
+      @city = data['city']
+      @attraction_name = data['attraction_name']
       @expected_contact_names = data['expected_contact_names']
       @expected_contact_phones = data['expected_contact_phones']
       
