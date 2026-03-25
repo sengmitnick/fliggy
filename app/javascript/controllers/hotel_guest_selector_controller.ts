@@ -13,13 +13,21 @@ export default class extends Controller<HTMLElement> {
     "roomsInput",
     "adultsInput",
     "childrenInput",
-    "displayText"
+    "displayText",
+    "roomsDisplay",
+    "adultsDisplay",
+    "childrenDisplay",
+    "childrenBadge"
   ]
 
   declare readonly hasRoomsInputTarget: boolean
   declare readonly hasAdultsInputTarget: boolean
   declare readonly hasChildrenInputTarget: boolean
   declare readonly hasDisplayTextTarget: boolean
+  declare readonly hasRoomsDisplayTarget: boolean
+  declare readonly hasAdultsDisplayTarget: boolean
+  declare readonly hasChildrenDisplayTarget: boolean
+  declare readonly hasChildrenBadgeTarget: boolean
 
   static values = {
     // stimulus-validator: disable-next-line
@@ -42,6 +50,10 @@ export default class extends Controller<HTMLElement> {
   declare readonly adultsInputTarget: HTMLInputElement
   declare readonly childrenInputTarget: HTMLInputElement
   declare readonly displayTextTarget: HTMLElement
+  declare readonly roomsDisplayTarget: HTMLElement
+  declare readonly adultsDisplayTarget: HTMLElement
+  declare readonly childrenDisplayTarget: HTMLElement
+  declare readonly childrenBadgeTarget: HTMLElement
 
   declare roomsValue: number
   declare adultsValue: number
@@ -83,6 +95,18 @@ export default class extends Controller<HTMLElement> {
   closeModal(): void {
     this.modalTarget.classList.add('hidden')
     document.body.style.overflow = ''
+  }
+
+  // Close modal when clicking on backdrop (not content)
+  closeOnBackdrop(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closeModal()
+    }
+  }
+
+  // Stop event propagation to prevent closing when clicking inside content
+  stopPropagation(event: Event): void {
+    event.stopPropagation()
   }
 
   // Increment rooms
@@ -144,6 +168,7 @@ export default class extends Controller<HTMLElement> {
   // Confirm and close
   confirm(): void {
     this.updateDisplay()
+    this.updateFormFields()
     // Dispatch event to notify hotel-search controller
     this.dispatchGuestUpdateEvent()
     this.closeModal()
@@ -165,6 +190,25 @@ export default class extends Controller<HTMLElement> {
     if (this.hasDisplayTextTarget) {
       this.displayTextTarget.textContent = `${this.roomsValue}间房 ${this.adultsValue}成人 ${this.childrenValue}儿童`
     }
+    
+    // Update badge displays if they exist (for booking form)
+    if (this.hasRoomsDisplayTarget) {
+      this.roomsDisplayTarget.textContent = this.roomsValue.toString()
+    }
+    if (this.hasAdultsDisplayTarget) {
+      this.adultsDisplayTarget.textContent = this.adultsValue.toString()
+    }
+    if (this.hasChildrenDisplayTarget) {
+      this.childrenDisplayTarget.textContent = this.childrenValue.toString()
+    }
+    if (this.hasChildrenBadgeTarget) {
+      // Show/hide children badge based on count
+      if (this.childrenValue > 0) {
+        this.childrenBadgeTarget.style.display = ''
+      } else {
+        this.childrenBadgeTarget.style.display = 'none'
+      }
+    }
   }
 
   // Dispatch event to notify hotel-search controller
@@ -183,5 +227,17 @@ export default class extends Controller<HTMLElement> {
       adults: this.adultsValue,
       children: this.childrenValue
     })
+  }
+
+  // Update form hidden fields (for booking form)
+  private updateFormFields(): void {
+    // Update the main form hidden fields if they exist
+    const roomsField = document.querySelector('#hotel_booking_rooms_count') as HTMLInputElement
+    const adultsField = document.querySelector('#hotel_booking_adults_count') as HTMLInputElement
+    const childrenField = document.querySelector('#hotel_booking_children_count') as HTMLInputElement
+    
+    if (roomsField) roomsField.value = this.roomsValue.toString()
+    if (adultsField) adultsField.value = this.adultsValue.toString()
+    if (childrenField) childrenField.value = this.childrenValue.toString()
   }
 }
