@@ -2,15 +2,32 @@
 
 require_relative '../base_validator'
 
-# V312: 刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供
+# 验证用例312: 预订深圳大梅沙海滨公园冲浪体验（刘强、陈静，4天后，2人，冲浪教学+海滩娱乐）
 #
 # 任务描述:
-#   用户需要在4天后为2人预订深圳大梅沙海滨公园的冲浪服务，包含：
+#   刘强和陈静预订深圳大梅沙海滨公园的冲浪体验。
+#   要求：4天后，2人，包含冲浪教学和海滩娱乐活动。
+#   Agent 需要创建两个订单：
 #   1) 冲浪教学活动订单（ActivityOrder）
 #   2) 海滩娱乐活动订单（ActivityOrder）
-#   确保景点、活动项目、日期和人数正确
+#   联系人使用刘强或陈静的信息。
 #
-# 评分标准:
+# 业务流程（6个关键步骤）：
+#   1. 搜索深圳大梅沙海滨公园景点
+#   2. 查找冲浪教学活动（名称包含"冲浪"）
+#   3. 查找海滩娱乐活动（名称不包含"冲浪"）
+#   4. 确定活动日期（4天后）和人数（2人）
+#   5. 创建两个活动订单（冲浪教学、海滩娱乐）
+#   6. 确保两个订单使用相同的联系人、日期和人数
+#
+# 复杂度分析（5个关键点）：
+#   1. 需要理解冲浪体验的服务组合：教学+娱乐+装备提供
+#   2. 需要创建两个不同的ActivityOrder（冲浪活动和娱乐活动）
+#   3. 需要计算正确的活动日期（4天后）
+#   4. 需要选择demo用户的乘客（刘强或陈静）作为联系人
+#   5. 需要确保两个订单的日期、人数、联系人、游客信息一致
+#
+# 评分标准（13项，总计100%）：
 #   - 创建了冲浪活动订单 (15%)
 #   - 景点正确（深圳大梅沙海滨公园） (10%)
 #   - 冲浪活动名称正确（包含"冲浪"） (5%)
@@ -28,8 +45,8 @@ module V301V350
   class V312BookSurfingLessonBeachEquipmentValidator < BaseValidator
     self.validator_id = 'v312_book_surfing_lesson_beach_equipment_validator'
     self.task_id = 'c132957d-cbea-4e0b-8190-acd5d2d2ce30'
-    self.title = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
-    self.description = '刘强和陈静想4天后去深圳大梅沙海滨公园冲浪，需2人，要冲浪教学、海滩娱乐和装备提供'
+    self.title = '预订深圳大梅沙海滨公园冲浪体验（刘强、陈静，4天后，2人，冲浪教学+海滩娱乐）'
+    self.description = '预订深圳大梅沙海滨公园的冲浪体验，刘强和陈静，4天后，2人，要冲浪教学和海滩娱乐活动'
     self.timeout_seconds = 300
     
     def prepare
@@ -74,14 +91,14 @@ module V301V350
       raise "未找到娱乐活动" unless @entertainment_activity
       
       {
-        task: "请预订深圳大梅沙海滨公园的冲浪服务（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含冲浪教学、海滩娱乐和装备提供。",
+        task: "请预订深圳大梅沙海滨公园的冲浪体验（#{@activity_date.strftime('%Y年%m月%d日')}，#{@participant_count}人），包含冲浪教学和海滩娱乐活动。",
         requirements: {
           attraction: @attraction.name,
           activity_date: @activity_date,
           participant_count: @participant_count,
-          services: ['冲浪教学', '海滩娱乐', '装备提供']
+          services: ['冲浪教学', '海滩娱乐']
         },
-        hint: "需要预订深圳大梅沙海滨公园的多个活动：冲浪教学和海滩娱乐。"
+        hint: "需要预订深圳大梅沙海滨公园的两个活动：冲浪教学和海滩娱乐。"
       }
     end
     
