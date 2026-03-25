@@ -2,12 +2,37 @@
 
 require_relative '../base_validator'
 
-# V319: 给刘强家庭预订15天后北京到三亚的往返机票（去程15天后、返程20天后），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，刘强+陈静两成人+小明儿童，酒店入住日期与航班衔接）
+# 验证用例319: 预订北京到三亚往返机票+三亚亚龙湾亲子度假酒店（刘强、陈静、小明，15天后出发，5晚，2成人+1儿童，亲子家庭房）
 #
 # 任务描述:
-#   给刘强家庭预订15天后北京到三亚的往返机票（去程15天后、返程20天后），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，刘强+陈静两成人+小明儿童，酒店入住日期与航班衔接）
+#   刘强家庭（刘强+陈静+小明，2大1小）预订15天后北京到三亚的暑期家庭旅游。
+#   要求：北京→三亚往返机票（去程15天后、返程20天后）+ 三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，酒店入住日期与航班衔接）。
+#   Agent 需要创建两个订单：
+#   1) 往返机票订单（Booking）- 北京→三亚往返，去程15天后，返程20天后，3人（2成人+1儿童）
+#   2) 亲子酒店订单（HotelBooking）- 三亚亚龙湾亲子度假酒店亲子家庭房，5晚，2成人+1儿童
+#   联系人使用刘强、陈静或小明的信息。
 #
-# 评分标准:
+# 业务流程（8个关键步骤）：
+#   1. 搜索15天后北京→三亚的去程航班
+#   2. 搜索20天后三亚→北京的返程航班
+#   3. 创建往返机票订单（支持round_trip或两个one_way）
+#   4. 搜索三亚亚龙湾亲子度假酒店
+#   5. 查找亲子家庭房房型
+#   6. 确定酒店入住日期（与航班日期衔接：15天后入住，20天后退房，5晚）
+#   7. 创建酒店订单（1间亲子家庭房，2成人+1儿童）
+#   8. 确保所有订单的联系人信息正确（刘强、陈静或小明）
+#
+# 复杂度分析（8个关键点）：
+#   1. 需要创建两个订单：Booking（往返机票）+ HotelBooking（亲子酒店）
+#   2. 机票订单支持两种模式：1个round_trip订单 或 2个one_way订单（去程+返程）
+#   3. 需要准确匹配航线（北京↔三亚）和日期（去程15天后、返程20天后）
+#   4. 需要准确匹配酒店名称（三亚亚龙湾亲子度假酒店）和房型（亲子家庭房）
+#   5. 需要验证酒店入住日期与航班衔接（入住=去程日期，退房=返程日期，5晚）
+#   6. 需要验证家庭成员信息（3人：刘强+陈静+小明，2成人+1儿童）
+#   7. 需要处理儿童相关字段（children_count=1，亲子房型）
+#   8. 需要验证机票乘客身份证号与联系人信息匹配
+#
+# 评分标准（11项，总计100%）:
 #   - 创建了往返机票订单 (12%)
 #   - 航线正确（#{@departure_city}→#{@destination_city}往返） (8%)
 #   - 去程日期正确（#{@departure_date.strftime('%Y-%m-%d')}） (8%)
@@ -23,8 +48,8 @@ module V301V350
   class V319BookSummerVacationFamilyTourValidator < BaseValidator
     self.validator_id = 'v319_book_summer_vacation_family_tour_validator'
     self.task_id = "41296cec-e182-44c9-ac20-c2180e92c487"
-    self.title = '给刘强家庭预订15天后北京到三亚的往返机票（去程15天后、返程20天后），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，刘强+陈静两成人+小明儿童，酒店入住日期与航班衔接）'
-    self.description = "给刘强家庭预订15天后北京到三亚的往返机票（去程15天后、返程20天后），以及三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，刘强+陈静两成人+小明儿童，酒店入住日期与航班衔接）"
+    self.title = '预订北京到三亚往返机票+三亚亚龙湾亲子度假酒店（刘强、陈静、小明，15天后出发，5晚，2成人+1儿童，亲子家庭房）'
+    self.description = '预订刘强家庭（刘强+陈静+小明，2大1小）15天后北京到三亚的往返机票（去程15天后、返程20天后）和三亚亚龙湾亲子度假酒店亲子家庭房（入住5晚，酒店入住日期与航班衔接）'
     self.timeout_seconds = 180
 
     def prepare
@@ -271,13 +296,14 @@ module V301V350
           .includes(:hotel, :hotel_room)
           .where(hotels: { city: @destination_city })
           .where(data_version: @data_version)
+          .where(status: 'paid')  # 只验证已支付的订单
           .order(created_at: :desc)
           .to_a
         
-        expect(all_hotel_bookings).not_to be_empty, "未找到酒店订单"
+        expect(all_hotel_bookings).not_to be_empty, "未找到已支付的酒店订单"
         
         @hotel_bookings = all_hotel_bookings
-        expect(@hotel_bookings.size).to be >= 1, "未找到酒店订单"
+        expect(@hotel_bookings.size).to be >= 1, "未找到已支付的酒店订单"
       end
 
       return if @hotel_bookings.nil? || @hotel_bookings.empty?
@@ -380,7 +406,7 @@ module V301V350
         contact_phone: contact_passenger.phone,
         accept_terms: true,
         total_price: @outbound_flight.price + @return_flight.price,
-        status: 'pending',
+        status: 'paid',  # 模拟已支付状态
         data_version: @data_version  # ✅ Session-scoped
       )
       
@@ -400,7 +426,7 @@ module V301V350
         children_count: 1,
         payment_method: '花呗',
         total_price: base_price,
-        status: 'pending',
+        status: 'paid',  # 模拟已支付状态
         data_version: @data_version  # ✅ Session-scoped
       )
       

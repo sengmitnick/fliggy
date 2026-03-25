@@ -60,10 +60,17 @@ insurance_products_data = []
     data_version: 0
   }
   
-  # 额外生成3个变种产品
+  # 额外生成3个变种产品（使用不同后缀避免重名）
   if i < 3
+    # 对于基础款/尊享款/海岛度假保险，生成对应的高级变种
+    variant_name = case i
+    when 0 then '境内旅游险-进阶款'  # 基础款(5元) -> 进阶款(7.5元)
+    when 1 then '境内旅游险-豪华款'  # 尊享款(10元) -> 豪华款(15元)
+    when 2 then '海岛度假保险-升级款'  # 海岛度假保险(12元) -> 升级款(18元)
+    end
+    
     insurance_products_data << {
-      name: "#{config[:name].split('-')[0]}-进阶款",
+      name: variant_name,
       company: companies[(i + 3) % companies.size],
       product_type: 'domestic',
       code: "#{config[:code].split('-')[0]}-DOM-00#{i+6}",
