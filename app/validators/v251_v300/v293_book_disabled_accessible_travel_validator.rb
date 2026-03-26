@@ -142,11 +142,11 @@ module V251V300
       wangfang = user.passengers.find_by!(name: '王芳', data_version: 0)
       
       # 1. 预订航班
-      flight = Flight.where(
-        departure_city: @departure_city,
-        destination_city: @destination_city,
-        data_version: 0
-      ).by_date(@departure_date).order(price: :asc).first!
+      flight = Flight.unscoped
+        .where(data_version: 0)
+        .where(departure_city: @departure_city, destination_city: @destination_city, flight_date: @departure_date)
+        .order(price: :asc)
+        .first!
       
       Booking.create!(
         user_id: user.id,

@@ -1090,6 +1090,48 @@ all_flights = []
   
   all_flights.concat(flights_bj_to_gz)
   all_flights.concat(flights_gz_to_bj)
+  
+  # 广州 -> 上海
+  flights_gz_to_sh = [
+    {
+      departure_city: "广州",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 9, min: 0),
+      arrival_time: base_datetime.change(hour: 11, min: 30),
+      departure_airport: "白云T2",
+      arrival_airport: "虹桥T2",
+      airline: "东方航空",
+      flight_number: "MU#{5401 + day_suffix}",
+      aircraft_type: "空客320(中)",
+      price: 720.0,
+      discount_price: 50.0,
+      seat_class: "economy",
+      available_seats: 150,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      departure_city: "广州",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 16, min: 0),
+      arrival_time: base_datetime.change(hour: 18, min: 30),
+      departure_airport: "白云T2",
+      arrival_airport: "虹桥T2",
+      airline: "南方航空",
+      flight_number: "CZ#{8801 + day_suffix}",
+      aircraft_type: "空客321(中)",
+      price: 780.0,
+      discount_price: 60.0,
+      seat_class: "economy",
+      available_seats: 140,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  ]
+  
+  all_flights.concat(flights_gz_to_sh)
 end
 
 Flight.insert_all(all_flights)

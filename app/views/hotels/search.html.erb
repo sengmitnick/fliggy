@@ -347,8 +347,7 @@
     </div>
   </div>
 
-  <!-- 快捷标签 (横向滚动) -->
-  
+
 
   <!-- 地图模块 -->
   <div class="relative w-full h-32 overflow-hidden transition-all duration-300" 
@@ -457,13 +456,39 @@
             <% end %>
             
             <!-- 设施标签 -->
-            <% if hotel.features.present? && hotel.features.is_a?(Array) %>
-              <div class="flex flex-wrap gap-1 mt-1.5">
-                <% hotel.features.first(4).each do |feature| %>
-                  <span class="text-[10px] text-gray-600 border border-gray-200 px-1 rounded bg-gray-50"><%= feature %></span>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <% if hotel.hotel_facilities.any? %>
+                <% hotel.hotel_facilities.limit(3).each do |facility| %>
+                  <span class="text-[10px] text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded bg-gray-50 flex items-center gap-0.5">
+                    <% if facility.icon.present? %>
+                      <svg class="w-2.5 h-2.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <% case facility.icon %>
+                        <% when 'wifi' %>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                        <% when 'parking' %>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6a3 3 0 00-3 3v8a3 3 0 003 3h6a3 3 0 003-3V9a3 3 0 00-3-3H9z"></path>
+                        <% when 'swimmer' %>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <% when 'utensils' %>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        <% else %>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <% end %>
+                      </svg>
+                    <% end %>
+                    <%= facility.name %>
+                  </span>
                 <% end %>
-              </div>
-            <% end %>
+              <% end %>
+              <% if hotel.features.present? && hotel.features.is_a?(Array) %>
+                <% remaining_slots = 4 - (hotel.hotel_facilities.count > 3 ? 3 : hotel.hotel_facilities.count) %>
+                <% if remaining_slots > 0 %>
+                  <% hotel.features.first(remaining_slots).each do |feature| %>
+                    <span class="text-[10px] text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded bg-gray-50"><%= feature %></span>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
           </div>
 
           <div class="flex justify-between items-end mt-1">
