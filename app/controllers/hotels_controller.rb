@@ -36,7 +36,7 @@ class HotelsController < ApplicationController
     @type = @hotel_type
     @category = @room_category
 
-    @hotels = Hotel.all
+    @hotels = Hotel.includes(:hotel_facilities)
     
     # 位置筛选：国内/国际
     if @location_type == 'international'
@@ -87,6 +87,9 @@ class HotelsController < ApplicationController
 
     @featured_hotels = Hotel.featured.limit(3)
     
+    # 获取当前城市的地标列表
+    @city_landmarks = Hotel.landmarks_for_city(@city)
+    
     # 获取搜索模态框的动态数据
     @search_modal_data = get_search_modal_data(@city)
   end
@@ -133,7 +136,7 @@ class HotelsController < ApplicationController
     
     # NOTE: City selector data is loaded via CitySelectorDataConcern
 
-    @hotels = Hotel.all
+    @hotels = Hotel.includes(:hotel_facilities)
     
     # 位置筛选：国内/国际
     if @location_type == 'international'
@@ -242,6 +245,9 @@ class HotelsController < ApplicationController
     @hotels = @hotels.page(params[:page]).per(10)
 
     @featured_hotels = Hotel.featured.limit(3)
+    
+    # 获取当前城市的地标列表
+    @city_landmarks = Hotel.landmarks_for_city(@city)
     
     # 获取搜索模态框的动态数据
     @search_modal_data = get_search_modal_data(@city)
@@ -484,19 +490,71 @@ class HotelsController < ApplicationController
     }
   end
   
-  # Extract districts from hotel addresses for filter bar
+  # 定义常见地标关键词模式（会从酒店地址中提取）
+  LANDMARK_PATTERNS = [
+    # 商务区域
+    'CBD', '中心商务区', '金融街', '商务区', '商圈',
+    # 交通枢纽
+    '机场', '火车站', '地铁站', '车站', '高铁站',
+    # 区域类型
+    '核心区', '新城区', '老城区', '滨海', '滨江', '河西',
+    # 会展旅游
+    '会展中心', '科技园', '工业园', '大学城',
+    # 景点商圈（具体城市）
+    '西湖', '外滩', '天安门', '故宫', '三里屯', '中关村', '国贸',
+    '陆家嘴', '蜂虹桥', '徐家汇', '静安', '浦东',
+    '天河', '珠江新城', '上下九', '北京路',
+    '罗湖', '福田', '南山', '宝安', '龙岗', '蛇口',
+    '拱墅', '余杭', '萍山', '西溪',
+    '武侯祠', '春熙路', '天府', '青羊',
+    '钟楼', '高新', '曲江', '小寨', '雁塔',
+    '光谷', '江汉', '武昌', '汉口', '黄鹤楼',
+    '解放碑', '观音桥', '江北', '渝北',
+    '夫子庙', '新街口', '鼓楼', '江宁',
+    # 区名（主要一线城市）
+    '朝阳', '海淀', '东城', '西城', '丰台', '石景山', '通州',
+    '长宁', '杨浦', '闵行', '松江',
+    '海珠', '番禺', '荔湾', '花都', '白云',
+    '龙华', '盐田',
+    '下城', '上城',
+    '龙泉', '都江堰', '温江', '双流',
+    '未央', '长安', '灯塔',
+    '东西湖', '街道口', '中南', '汉阳',
+    '沙坪坝', '南山', '北碚', '巴南',
+    '雨花台', '中山陵', '仙林'
+  ].freeze
+  
   def extract_districts_from_hotels(city)
-    addresses = Hotel.by_city(city).pluck(:address).compact
-    districts = addresses.map do |address|
-      if address.match?(/（\w+区）/)
-        address.match(/（\w+区）/)[1]
-      elsif address.match?(/（\w+新区）/)
-        address.match(/（\w+新区）/)[1]
-      else
-        address.split(/[路街道号]/).first
+    return [] if city.blank?
+    
+    # 获取该城市所有酒店地址
+    addresses = Hotel.by_city(city).where(data_version: 0).pluck(:address).compact
+    return [] if addresses.empty?
+    
+    # 按模式长度降序排序，优先匹配长模式（避免"商务区"匹配"中心商务区"导致重复）
+    sorted_patterns = LANDMARK_PATTERNS.sort_by { |p| -p.length }
+    
+    # 从地址中提取匹配的地标关键词
+    matched_landmarks = addresses.flat_map do |address|
+      matched = []
+      remaining_address = address.dup
+      
+      # 使用长匹配优先，匹配后从地址中移除，避免重复
+      sorted_patterns.each do |pattern|
+        if remaining_address.include?(pattern)
+          matched << pattern
+          remaining_address.gsub!(pattern, '') # 移除已匹配的部分
+        end
       end
-    end.compact.uniq.sort
-    districts
+      
+      matched
+    end
+    
+    # 统计频率
+    landmark_counts = matched_landmarks.tally
+    
+    # 按频率排序，返回前 15 个（不设最低频率限制，让用户看到更多选择）
+    landmark_counts.sort_by { |k, v| -v }.map(&:first).first(15)
   end
   
   # Extract brands from hotels in current city

@@ -15,6 +15,8 @@ declare global {
     stimulusValidator: any;
     copyToClipboard: (text: string) => Promise<boolean>;
     showToast: (message: string) => void;
+    showAlert: (message: string) => void;
+    alert: (message: string) => void;
     sdkUtils: any;
     sendToSDK: (message: string) => boolean;
     sendErrorToSDK: (errorInfo: any) => boolean;

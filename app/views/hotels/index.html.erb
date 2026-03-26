@@ -102,20 +102,17 @@
 
     <!-- Quick Filters -->
     <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '亲子'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '亲子' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'} font-medium" do %>
-        亲子出游
-      <% end %>
-      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '福田站'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '福田站' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
-        福田站
-      <% end %>
-      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '宝安机场'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '宝安机场' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
-        宝安机场
-      <% end %>
-      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '欢乐港湾'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '欢乐港湾' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
-        欢乐港湾
-      <% end %>
-      <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '罗湖口岸'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '罗湖口岸' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'}" do %>
-        罗湖口岸
+      <% if @city_landmarks.present? %>
+        <% @city_landmarks.each do |landmark| %>
+          <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: landmark), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == landmark ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'} font-medium" do %>
+            <%= landmark %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <!-- 默认显示，如果没有地标配置 -->
+        <%= link_to search_hotels_path(city: @city, check_in: @check_in, check_out: @check_out, rooms: @rooms, adults: @adults, children: @children, q: '亲子'), class: "px-4 py-1.5 text-sm whitespace-nowrap rounded-full border #{params[:q] == '亲子' ? 'border-red-500 text-red-500' : 'border-gray-300 text-gray-700'} font-medium" do %>
+          亲子出游
+        <% end %>
       <% end %>
     </div>
 
