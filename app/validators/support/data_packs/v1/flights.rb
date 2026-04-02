@@ -26,11 +26,12 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 puts "正在加载 flights_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来21天的航班数据（从今天开始，支持20天后的返程航班）
-start_date = Date.current
-end_date = start_date + 20.days
+# 生成90天的航班数据（从昨天开始，配合frozen_time.rb时间冻结机制）
+# 使用 Date.today 作为静态锚点（系统时间，timezone-unaware）
+start_date = Date.today - 1.day
+end_date = start_date + 89.days
 
-puts "  航班日期范围: #{start_date} 至 #{end_date} (共21天)"
+puts "  航班日期范围: #{start_date} 至 #{end_date} (共90天)"
 
 # ==================== 航班数据 ====================
 # 深圳 -> 北京 航班（每天4个航班，最低价 550元）
@@ -39,7 +40,7 @@ timestamp = Time.current
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i  # 用于生成唯一航班号
+  day_suffix = (date - Date.today).to_i  # 用于生成唯一航班号
   
   flights_sz_to_bj = [
     {
@@ -127,7 +128,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 三亚
   flights_bj_to_sy = [
@@ -238,7 +239,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_sh_to_sz = [
     {
@@ -308,7 +309,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 深圳
   flights_bj_to_sz = [
@@ -361,7 +362,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 上海
   flights_bj_to_sh = [
@@ -634,7 +635,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 广州 -> 成都
   flights_gz_to_cd = [
@@ -727,7 +728,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 杭州 -> 三亚
   flights_hz_to_sy = [
@@ -820,7 +821,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 西安 -> 南京
   flights_xa_to_nj = [
@@ -913,7 +914,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 杭州
   flights_bj_to_hz = [
@@ -1006,7 +1007,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 广州
   flights_bj_to_gz = [
@@ -1141,7 +1142,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 上海 -> 成都
   flights_sh_to_cd = [
@@ -1234,7 +1235,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_bj_to_sh_t1 = [
     {
@@ -1285,7 +1286,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_cd_to_hz = [
     {
@@ -1336,7 +1337,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_international_to_sh = [
     {
@@ -1387,7 +1388,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 上海 -> 杭州
   flights_sh_to_hz = [
@@ -1480,7 +1481,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 上海 -> 广州
   flights_sh_to_gz = [
@@ -1552,7 +1553,7 @@ budget_flights_bj_to_sh = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 → 上海 低价航班
   budget_flights = [
@@ -1642,7 +1643,7 @@ layover_flights_sh_to_hz = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flight = {
     flight_number: "MU#{5588 + day_suffix}",
@@ -1680,7 +1681,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_sz_to_hz = [
     {
@@ -1754,7 +1755,7 @@ all_flights = []
 
 (start_date..end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - Date.current).to_i
+  day_suffix = (date - Date.today).to_i
   
   flights_hz_to_sz = [
     {
@@ -1971,9 +1972,9 @@ international_routes = [
   { number: 'CA981', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 8800 }
 ]
 
-# 生成覆盖足够日期范围的国际航班（Date.current-1 到 Date.current+10）
+# 生成90天的国际航班（从昨天开始，配合frozen_time.rb）
 international_start_date = Date.today - 1.day
-international_end_date = Date.today + 10.days
+international_end_date = international_start_date + 89.days
 
 (international_start_date..international_end_date).each do |flight_date|
   international_routes.each do |route|
@@ -2107,14 +2108,14 @@ puts "  ✓ 创建了 #{widebody_flights.size} 个宽体机航班"
 puts "\n=== 添加商务舱/头等舱航班 ==="
 
 premium_flights_data = []
-premium_start_date = Date.current
-premium_end_date = premium_start_date + 16.days
+premium_start_date = Date.today - 1.day
+premium_end_date = premium_start_date + 89.days
 
-puts "  商务舱/头等舱航班日期范围: #{premium_start_date} 至 #{premium_end_date} (共16天)"
+puts "  商务舱/头等舱航班日期范围: #{premium_start_date} 至 #{premium_end_date} (共90天)"
 
 (premium_start_date..premium_end_date).each do |date|
   base_datetime = date.to_time.in_time_zone
-  day_suffix = (date - premium_start_date).to_i
+  day_suffix = (date - Date.today).to_i
   
   # 北京 -> 上海商务舱/头等舱
   premium_flights_data << {

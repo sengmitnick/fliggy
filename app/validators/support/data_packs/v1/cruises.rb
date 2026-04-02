@@ -177,6 +177,12 @@ middle_east_route = CruiseRoute.find_by(region: 'middle_east')
 xisha_islands_route = CruiseRoute.find_by(region: 'xisha_islands')
 
 cruise_sailings_data = [
+  # ==================== 动态日期设置 ====================
+  # 游轮班次覆盖范围：Date.today - 1.day 至 Date.today + 65.days (共65天)
+  # 配合frozen_time.rb时间冻结机制，65天范围足够覆盖所有验证器查询
+  # 使用 Date.today 作为静态锚点（系统时间，timezone-unaware）
+  # 注意：Date.current 可能比 Date.today 晚1天（时区差异）
+  
   # 海洋光谱号 - 明天出发的上海日韩航线（为v158验证器准备）
   # 注意：使用 Date.today + 2.days 确保覆盖 Date.current + 1.day
   # 原因：Date.current 可能比 Date.today 晚1天（时区差异）

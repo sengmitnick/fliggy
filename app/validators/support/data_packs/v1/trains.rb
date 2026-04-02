@@ -12,11 +12,11 @@
 puts "正在加载 trains_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来14天的火车票数据（从昨天开始，支持西时区用户）
+# 生成90天的火车票数据（从昨天开始，配合frozen_time.rb时间冻结机制）
 start_date = Date.today - 1.day
-end_date = start_date + 14.days
+end_date = start_date + 89.days
 
-puts "  火车票日期范围: #{start_date} 至 #{end_date} (共16天)"
+puts "  火车票日期范围: #{start_date} 至 #{end_date} (共90天)"
 
 # ==================== 火车票数据 ====================
 all_trains = []
