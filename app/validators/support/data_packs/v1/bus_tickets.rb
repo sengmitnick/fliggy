@@ -95,12 +95,8 @@ routes.each do |route|
   route_key = "#{route[:origin]}-#{route[:destination]}"
   price_range = price_ranges[route_key] || (30..60)
   
-  # ==================== 动态日期设置 ====================
-  # 生成90天的大巴班次数据（配合frozen_time.rb时间冻结机制）
-  # 使用 Date.today 作为静态锚点（系统时间，timezone-unaware）
-  
-  # 为未来90天生成班次
-  (0..89).each do |day_offset|
+  # 为未来7天生成班次
+  (0..6).each do |day_offset|
     date = Date.today + day_offset.days
     
     route[:stations].each_with_index do |station, idx|
@@ -153,8 +149,8 @@ end
 # ==================== 专门为验证器添加晚班大巴（18:00后） ====================
 night_buses_data = []
 
-# 为未来90天生成北京→天津晚班大巴
-(0..89).each do |day_offset|
+# 为未来7天生成北京→天津晚班大巴
+(0..6).each do |day_offset|
   date = Date.today + day_offset.days
   
   night_times = [
@@ -191,8 +187,8 @@ BusTicket.insert_all(night_buses_data) if night_buses_data.any?
 # ==================== 专门为验证器添加杭州→深圳快速班次 ====================
 fast_buses_hz_sz_data = []
 
-# 为未来90天生成杭州→深圳快速班次（2.0小时）
-(0..89).each do |day_offset|
+# 为未来77天生成杭州→深圳快速班次（2.0小时）
+(0..6).each do |day_offset|
   date = Date.today + day_offset.days
   
   # 固定2.0小时的快速班次
@@ -249,8 +245,8 @@ evening_seat_types = ["普通座", "商务座", "豪华座"]
 # 批量准备晚班车数据
 evening_tickets_data = []
 
-# 为未来90天生成晚班车
-(0..89).each do |day_offset|
+# 为未来7天生成晚班车
+(0..6).each do |day_offset|
   date = Date.today + day_offset.days
   
   stations_hz_sh.each do |station|
