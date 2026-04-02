@@ -44,7 +44,7 @@ module V201V250
       
       # 查询demo_user乘客信息（张三）
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      @passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      @passenger = user.passengers.find_by!(name: '张三')
       @expected_passenger_name = @passenger.name
       @expected_passenger_id = @passenger.id_number
       @expected_contact_phone = @passenger.phone
@@ -145,7 +145,7 @@ module V201V250
     
     def simulate
       user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      passenger = user.passengers.find_by!(name: '张三', data_version: 0)
+      passenger = user.passengers.find_by!(name: '张三')
       
       # 选择第一个可用的国际航班（北京→洛杉矶）
       flight = @available_flights.first
