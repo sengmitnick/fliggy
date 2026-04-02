@@ -30,7 +30,7 @@ puts "正在加载 flights_v1 数据包..."
 start_date = Date.current
 end_date = start_date + 40.days
 
-puts "  航班日期范围: #{start_date} 至 #{end_date} (共41天)"
+puts "  航班日期范围: #{start_date} 至 #{end_date} (共#{(end_date - start_date).to_i + 1}天)"
 
 # ==================== 航班数据 ====================
 # 深圳 -> 北京 航班（每天4个航班，最低价 550元）
