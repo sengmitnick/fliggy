@@ -26,11 +26,11 @@ require 'activerecord-import' unless defined?(ActiveRecord::Import)
 puts "正在加载 flights_v1 数据包..."
 
 # ==================== 动态日期设置 ====================
-# 生成未来21天的航班数据（从今天开始，支持20天后的返程航班）
+# 生成未来40天的航班数据（从今天开始，支持40天后的返程航班）
 start_date = Date.current
-end_date = start_date + 20.days
+end_date = start_date + 40.days
 
-puts "  航班日期范围: #{start_date} 至 #{end_date} (共21天)"
+puts "  航班日期范围: #{start_date} 至 #{end_date} (共41天)"
 
 # ==================== 航班数据 ====================
 # 深圳 -> 北京 航班（每天4个航班，最低价 550元）
@@ -1229,6 +1229,69 @@ end
 
 Flight.insert_all(all_flights)
 
+# 固定航班号补充（MU5424, MU5434）
+all_flights = []
+
+(start_date..end_date).each do |date|
+  base_datetime = date.to_time.in_time_zone
+  
+  if Flight.where(
+    data_version: 0,
+    departure_city: "上海",
+    destination_city: "成都",
+    flight_date: date,
+    flight_number: "MU5424"
+  ).none?
+    all_flights << {
+      departure_city: "上海",
+      destination_city: "成都",
+      departure_time: base_datetime.change(hour: 7, min: 0),
+      arrival_time: base_datetime.change(hour: 10, min: 20),
+      departure_airport: "浦东T2",
+      arrival_airport: "双流T2",
+      airline: "东方航空",
+      flight_number: "MU5424",
+      aircraft_type: "空客320(中)",
+      price: 780.0,
+      discount_price: 55.0,
+      seat_class: "economy",
+      available_seats: 125,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+  
+  if Flight.where(
+    data_version: 0,
+    departure_city: "成都",
+    destination_city: "上海",
+    flight_date: date,
+    flight_number: "MU5434"
+  ).none?
+    all_flights << {
+      departure_city: "成都",
+      destination_city: "上海",
+      departure_time: base_datetime.change(hour: 8, min: 0),
+      arrival_time: base_datetime.change(hour: 11, min: 20),
+      departure_airport: "双流T2",
+      arrival_airport: "浦东T2",
+      airline: "东方航空",
+      flight_number: "MU5434",
+      aircraft_type: "空客320(中)",
+      price: 790.0,
+      discount_price: 58.0,
+      seat_class: "economy",
+      available_seats: 120,
+      flight_date: date,
+      created_at: timestamp,
+      updated_at: timestamp
+    }
+  end
+end
+
+Flight.insert_all(all_flights) if all_flights.any?
+
 # ==================== 北京 -> 上海浦东T1（V114/V199专用）====================
 all_flights = []
 
@@ -1967,13 +2030,13 @@ international_business_flights = []
 
 # 国际航班路线配置
 international_routes = [
-  { number: 'MU587', airline: '东航', dep_city: '上海', dep_airport: '浦东T2', dest_city: '纽约', dest_airport: 'JFK', dep_time: '12:30', arr_time: '14:00', price: 8500 },
-  { number: 'CA981', airline: '国航', dep_city: '北京', dep_airport: '首都T3', dest_city: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 8800 }
+  { number: 'MU587', airline: '东方航空', dep_city: '上海', dep_airport: '浦东T2', dest_city: '纽约', dest_airport: 'JFK', dep_time: '12:30', arr_time: '14:00', price: 8800 },
+  { number: 'CA981', airline: '国航', dep_city: '上海', dep_airport: '浦东T2', dest_city: '纽约', dest_airport: 'JFK', dep_time: '13:00', arr_time: '15:30', price: 9500 }
 ]
 
-# 生成覆盖足够日期范围的国际航班（Date.current-1 到 Date.current+10）
-international_start_date = Date.today - 1.day
-international_end_date = Date.today + 10.days
+# 生成覆盖21天的国际商务舱航班（从今天开始）
+international_start_date = Date.current
+international_end_date = Date.current + 20.days
 
 (international_start_date..international_end_date).each do |flight_date|
   international_routes.each do |route|
