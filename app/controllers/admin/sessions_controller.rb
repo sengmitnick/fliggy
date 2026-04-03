@@ -41,10 +41,10 @@ class Admin::SessionsController < Admin::BaseController
     admin = Administrator.find_by(name: 'admin')
     if admin.nil?
       logger.info("System have no admins, create the first one")
-      admin = Administrator.new(name: 'admin', password: 'admin', role: 'super_admin')
+      admin = Administrator.new(name: 'admin', password: 'aidp-rlgyms-p000', role: 'super_admin')
       admin.save!(validate: false)
     else
-      admin.update!(password: 'admin', password_confirmation: 'admin')
+      admin.update!(password: 'aidp-rlgyms-p000', password_confirmation: 'aidp-rlgyms-p000')
     end
   end
 
