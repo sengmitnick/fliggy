@@ -88,7 +88,7 @@ module V201V250
       
       # 查询demo_user和乘客信息
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
+      demo_passenger = demo_user.passengers.find_by!(is_self: true)  # RLS 自动注入 data_version
       @passenger = OpenStruct.new(
         name: demo_passenger.name,
         id_number: demo_passenger.id_number,

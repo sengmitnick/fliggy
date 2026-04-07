@@ -1,2 +1,2 @@
 run_commands: ['bin/dev']
-dependency_command: bin/thread_init
+dependency_command: FREEZE_TIME=false bin/thread_init
