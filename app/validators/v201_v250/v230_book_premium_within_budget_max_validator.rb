@@ -60,7 +60,7 @@ module V201V250
       
       # 预查询乘客信息（张三）
       demo_user = User.find_by!(email: 'demo@travel01.com', data_version: 0)
-      demo_passenger = Passenger.find_by!(user_id: demo_user.id, is_self: true, data_version: 0)
+      demo_passenger = demo_user.passengers.find_by!(is_self: true)  # RLS 自动注入 data_version
       @expected_passenger_name = demo_passenger.name  # 张三
       @expected_passenger_id = demo_passenger.id_number
       @expected_phone = demo_passenger.phone
