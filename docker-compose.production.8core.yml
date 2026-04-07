@@ -107,6 +107,8 @@ services:
       GITHUB_OAUTH_ENABLED: ${GITHUB_OAUTH_ENABLED:-false}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      # 时间冻结配置（验证系统）
+      FREEZE_TIME: ${FREEZE_TIME:-true}
     volumes:
       - ./app:/app/app
       - ./config:/app/config
@@ -150,6 +152,8 @@ services:
       DATABASE_URL: postgresql://app_user:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      # 时间冻结配置（验证系统）
+      FREEZE_TIME: ${FREEZE_TIME:-true}
       # 8核32G优化配置
       GOOD_JOB_MAX_THREADS: ${GOOD_JOB_MAX_THREADS:-10}
       GOOD_JOB_POLL_INTERVAL: ${GOOD_JOB_POLL_INTERVAL:-5}

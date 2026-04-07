@@ -228,9 +228,11 @@ EOF_SQL
     print_info "运行数据库迁移和数据初始化..."
     ADMIN_DB_URL_VALUE="postgresql://${DB_USER:-travel01}:${DB_PASSWORD}@db:5432/${DB_NAME:-travel01_production}"
 
+    print_warning "数据初始化阶段临时关闭时间冻结（FREEZE_TIME=false）"
     docker-compose -f $COMPOSE_FILE run --rm \
       -e ADMIN_DB_URL="${ADMIN_DB_URL_VALUE}" \
       -e TEMP_DATABASE_URL="${ADMIN_DB_URL_VALUE}" \
+      -e FREEZE_TIME="false" \
       web bash -c "
         echo '开始数据库迁移...' && \
         bundle exec rake db:prepare && \
